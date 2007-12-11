@@ -1,7 +1,35 @@
-SIMULATE:
+LANGMUIR:
 ---------
 
-We need a catchy code name.
-
-This is the source code for the "simulate" engine for charge transfer
+This is the source code for the "Langmuir" engine for charge transfer
 simulations in molecular transistors.
+
+
+METHODOLOGY
+-----------
+
+The engine is coded using MPI using an object oriented approach. The build
+system in use is CMake. The CXX compiler must be set to mpicxx in order to
+produce valid executables that are correctly linked. There is only one
+executable that figures out which node it should be based upon its rank.
+The rank runs sequentially from 0 through to n-1 where n is the number of
+processes.
+
+The master node is always rank 0, followed by the agents and the final nodes
+are the special electrode nodes.
+
+
+BUILD INSTRUCTIONS
+------------------
+
+In order to build the Langmuir engine the following dependencies are required,
+
+OpenMPI
+CMake
+
+To build the engine go to the source directory and run the following commands,
+
+mkdir build; cd build
+cmake -DCMAKE_CXX_COMPILER=`which mpicxx` ../
+make -j5
+
