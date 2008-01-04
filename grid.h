@@ -1,10 +1,10 @@
 /*
- *  GridBase - pure virtual base class to inherited by all grid classes
+ *  Grid - pure virtual base class to inherited by all grid classes
  *
  */
 
-#ifndef __BASE_H
-#define __BASE_H
+#ifndef __GRID_H
+#define __GRID_H
 
 #include <vector>
 
@@ -13,9 +13,8 @@ namespace Langmuir{
   class Grid {
 
   public:
+    virtual ~Grid() { }
 
-    virtual ~Grid() = 0;
-    
     /**
      * Get the nearest neighbours for the specified site.
      */
@@ -54,4 +53,5 @@ namespace Langmuir{
   };
 
 } // End namespace Langmuir
+
 #endif

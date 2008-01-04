@@ -7,7 +7,7 @@ using namespace std;
 
 namespace Langmuir{
 
-  CubicGrid::CubicGrid()
+  CubicGrid::CubicGrid() : m_width(0), m_height(0)
   {
   }
 

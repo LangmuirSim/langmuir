@@ -1,5 +1,5 @@
 /*
- *  CubicGrid - pure virtual base class to inherited by all grid classes
+ *  CubicGrid - cubic grid implementation of the Grid base class.
  *
  */
 
