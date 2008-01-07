@@ -6,12 +6,19 @@
 #ifndef __AGENT_H
 #define __AGENT_H
 
+#include <vector>
+
 namespace Langmuir{
   
   class Agent {
 
   public:
     virtual ~Agent() { }
+    
+    /**
+     * Set the nearest neighbours of the agent.
+     */
+    virtual void setNeighbors(std::vector<Agent *> neighbors) = 0;
     
     /**
      * Get the potential of this agent...
@@ -37,5 +44,7 @@ namespace Langmuir{
     virtual bool transport() = 0;
 
   };
+
+} // End namespace Langmuir
 
 #endif

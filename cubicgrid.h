@@ -12,57 +12,58 @@
 
 namespace Langmuir{
 
-  class CubicGrid {
+  class CubicGrid : public Grid
+  {
 
   public:
 
     CubicGrid();
 
-    CubicGrid(int width, int height);
+    CubicGrid(unsigned int width, unsigned int height);
 
     ~CubicGrid();
   
     /**
      * Get the nearest neighbours for the specified site.
      */
-    std::vector<int> getNeighbors(int site);
+    std::vector<unsigned int> getNeighbors(unsigned int site);
   
     /**
      * Sets the size of the grid.
      */
-    void setSize(int width, int height);
+    void setSize(unsigned int width, unsigned int height);
   
     /**
      * Gets the width of the grid.
      */
-    int getWidth();
+    unsigned int getWidth();
   
     /**
      * Gets the height fo the grid.
      */
-    int getHeight();
+    unsigned int getHeight();
   
     /**
      * Get the total distance between the two sites.
      */
-    double getTotalDistance(int site1, int site2);
+    double getTotalDistance(unsigned int site1, unsigned int site2);
   
     /**
      * Get the x component of the distance between the two sites.
      */
-    double getXDistance(int site1, int site2);
+    double getXDistance(unsigned int site1, unsigned int site2);
   
     /**
      * Get the x component of the distance between the two sites.
      */
-    double getYDistance(int site1, int site2);
+    double getYDistance(unsigned int site1, unsigned int site2);
 
   private:
-    int getRow(int site);
-    int getColumn(int site);
-    int getIndex(int column, int row);
-    int m_width;
-    int m_height;
+    unsigned int getRow(unsigned int site);
+    unsigned int getColumn(unsigned int site);
+    unsigned int getIndex(unsigned int column, unsigned int row);
+    unsigned int m_width;
+    unsigned int m_height;
   
 };
   

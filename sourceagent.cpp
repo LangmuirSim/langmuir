@@ -1,40 +1,39 @@
-#include "hoppingagent.h"
+#include "sourceagent.h"
 
 using namespace std;
 
 namespace Langmuir{
-
-  HoppingAgent::HoppingAgent()
+  
+  SourceAgent::SourceAgent() : m_potential(0.)
   {
-    m_neighbors = new vector<Agent *>;
   }
-
-  HoppingAgent::~HoppingAgent()
+  
+  SourceAgent::~SourceAgent()
   {
-    delete m_neighbors;
-    m_neighbors = 0;
   }
-
+  
   void HoppingAgent::setNeighbors(std::vector<Agent *> neighbors)
   {
-    *m_neighbors = neighbors;
+    m_neighbors = neighbors;
   }
-
+  
   double HoppingAgent::potential()
   {
-    return 0.;
+    return m_potential;
   }
-
+  
   bool HoppingAgent::acceptCharge(int charge)
   {
-    return true;
+    // The source never accepts charges
+    return false;
   }
-
+  
   int HoppingAgent::charge()
   {
-    return 0;
+    // Always has a charge of 1
+    return 1;
   }
-
+  
   bool HoppingAgent::transport()
   {
     return true;

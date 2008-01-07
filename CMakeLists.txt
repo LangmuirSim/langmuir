@@ -13,6 +13,8 @@ include_directories(
 # Set our SRCS (.cpp files)
 SET( SRCS
   ./cubicgrid.cpp
+  ./hoppingagent.cpp
+  ./simulation.cpp
   ./mpitest.cpp
 )
 

@@ -2,6 +2,7 @@
 #include <mpi.h>
 
 #include "cubicgrid.h"
+#include "simulation.h"
 
 using namespace std;
 using namespace MPI;
@@ -54,5 +55,5 @@ int main(int argc, char *argv[]) {
        << ", " << test.getYDistance(site1, site2)
        << "\n";
   
-  
+  Simulation sim(16, 16);
 }

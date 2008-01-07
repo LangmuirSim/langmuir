@@ -18,37 +18,37 @@ namespace Langmuir{
     /**
      * Get the nearest neighbours for the specified site.
      */
-    virtual std::vector<int> getNeighbors(int site) = 0;
+    virtual std::vector<unsigned int> getNeighbors(unsigned int site) = 0;
 
     /**
      * Sets the size of the grid.
      */
-    virtual void setSize(int width, int height) = 0;
+    virtual void setSize(unsigned int width, unsigned int height) = 0;
     
     /**
      * Gets the width of the grid.
      */
-    virtual int getWidth() = 0;
+    virtual unsigned int getWidth() = 0;
 
     /**
      * Gets the height fo the grid.
      */
-    virtual int getHeight() = 0;
+    virtual unsigned int getHeight() = 0;
     
     /**
      * Get the total distance between the two sites.
      */
-    virtual double getTotalDistance(int site1, int site2) = 0;
+    virtual double getTotalDistance(unsigned int site1, unsigned int site2) = 0;
 
     /**
      * Get the x component of the distance between the two sites.
      */
-    virtual double getXDistance(int site1, int site2) = 0;
+    virtual double getXDistance(unsigned int site1, unsigned int site2) = 0;
 
     /**
      * Get the x component of the distance between the two sites.
      */
-    virtual double getYDistance(int site1, int site2) = 0;
+    virtual double getYDistance(unsigned int site1, unsigned int site2) = 0;
 
   };
 
