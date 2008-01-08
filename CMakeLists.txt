@@ -5,19 +5,20 @@ PROJECT( langmuir )
 find_package(MPI REQUIRED)
 
 include_directories(
-  ${CMAKE_SOURCE_DIR}
-  ${CMAKE_CURRENT_BINARY_DIR}
-  ${MPI_INCLUDE_PATH}
+	${CMAKE_SOURCE_DIR}
+	${CMAKE_CURRENT_BINARY_DIR}
+	${MPI_INCLUDE_PATH}
 )
 
 # Set our SRCS (.cpp files)
 SET( SRCS
-  ./cubicgrid.cpp
-  ./hoppingagent.cpp
-  ./sourceagent.cpp
-  ./drainagent.cpp
-  ./simulation.cpp
-  ./mpitest.cpp
+	./rand.cpp
+	./cubicgrid.cpp
+	./hoppingagent.cpp
+	./sourceagent.cpp
+	./drainagent.cpp
+	./simulation.cpp
+	./mpitest.cpp
 )
 
 # Enable warnings
