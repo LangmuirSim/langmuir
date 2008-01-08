@@ -6,18 +6,15 @@ namespace Langmuir{
 
   HoppingAgent::HoppingAgent()
   {
-    m_neighbors = new vector<Agent *>;
   }
 
   HoppingAgent::~HoppingAgent()
   {
-    delete m_neighbors;
-    m_neighbors = 0;
   }
 
   void HoppingAgent::setNeighbors(std::vector<Agent *> neighbors)
   {
-    *m_neighbors = neighbors;
+    m_neighbors = neighbors;
   }
 
   double HoppingAgent::potential()

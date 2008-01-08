@@ -12,29 +12,29 @@ namespace Langmuir{
   {
   }
   
-  void HoppingAgent::setNeighbors(std::vector<Agent *> neighbors)
+  void SourceAgent::setNeighbors(std::vector<Agent *> neighbors)
   {
     m_neighbors = neighbors;
   }
   
-  double HoppingAgent::potential()
+  double SourceAgent::potential()
   {
     return m_potential;
   }
   
-  bool HoppingAgent::acceptCharge(int charge)
+  bool SourceAgent::acceptCharge(int charge)
   {
     // The source never accepts charges
     return false;
   }
   
-  int HoppingAgent::charge()
+  int SourceAgent::charge()
   {
     // Always has a charge of 1
     return 1;
   }
   
-  bool HoppingAgent::transport()
+  bool SourceAgent::transport()
   {
     return true;
   }

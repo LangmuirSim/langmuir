@@ -1,5 +1,10 @@
 #include "simulation.h"
 
+#include "cubicgrid.h"
+#include "hoppingagent.h"
+#include "sourceagent.h"
+#include "drainagent.h"
+
 using namespace std;
 
 namespace Langmuir {
@@ -27,8 +32,8 @@ namespace Langmuir {
       m_agents[i] = new HoppingAgent;
     }
     // Add the source and the drain
-    m_agents[i+1] = new SourceAgent;
-    m_agents[i+2] = new DrainAgent;
+    m_agents[num_agents] = new SourceAgent;
+    m_agents[num_agents+1] = new DrainAgent;
     
     for (unsigned int i = 0; i < num_agents; i++)
     {

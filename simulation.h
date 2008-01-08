@@ -7,9 +7,7 @@
 #define __SIMULATION_H
 
 #include "grid.h"
-#include "cubicgrid.h"
 #include "agent.h"
-#include "hoppingagent.h"
 
 #include <vector>
 

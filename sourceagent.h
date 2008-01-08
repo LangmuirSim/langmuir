@@ -2,8 +2,8 @@
  *  SourceAgent - agent to act as a source of charges
  */
 
-#ifndef __HOPPINGAGENT_H
-#define __HOPPINGAGENT_H
+#ifndef __SOURCEAGENT_H
+#define __SOURCEAGENT_H
 
 #include "agent.h"
 

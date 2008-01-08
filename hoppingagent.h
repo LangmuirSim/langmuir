@@ -48,7 +48,7 @@ namespace Langmuir{
     virtual bool transport();
 
   private:
-    std::vector<Agent *> *m_neighbors;
+    std::vector<Agent *> m_neighbors;
     int m_charge;
     
   };

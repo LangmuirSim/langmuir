@@ -14,6 +14,8 @@ include_directories(
 SET( SRCS
   ./cubicgrid.cpp
   ./hoppingagent.cpp
+  ./sourceagent.cpp
+  ./drainagent.cpp
   ./simulation.cpp
   ./mpitest.cpp
 )
