@@ -1,17 +1,28 @@
 #include "sourceagent.h"
 
+#include "rand.h"
+
+#include <iostream>
+
 using namespace std;
 
 namespace Langmuir
 {
 
-SourceAgent::SourceAgent() :
-	m_potential(0.)
+SourceAgent::SourceAgent(unsigned int site) :
+	m_site(site), m_potential(0.), m_rand(new Rand(0., 1.0)), m_pBarrier(0.5)
+{
+}
+
+SourceAgent::SourceAgent(unsigned int site, double potential) :
+	m_site(site), m_potential(potential), m_rand(new Rand(0., 1.0)), m_pBarrier(0.5)
 {
 }
 
 SourceAgent::~SourceAgent()
 {
+	delete m_rand;
+	m_rand = 0;
 }
 
 void SourceAgent::setNeighbors(std::vector<Agent *> neighbors)
@@ -36,9 +47,16 @@ int SourceAgent::charge()
 	return 1;
 }
 
-bool SourceAgent::transport()
+unsigned int SourceAgent::transport()
 {
-	return true;
+	// Determine whether a transport event will be attempted this tick
+	double rn = m_rand->number();
+	if (rn <= m_pBarrier) return m_site;
+	
+	// Select a random neighbor and attempt transport.
+    int irn = int(m_rand->number() * double(m_neighbors.size()));
+    if (m_neighbors[irn]->acceptCharge(-1)) return irn;
+    else return m_site;
 }
 
 } // End Langmuir namespace

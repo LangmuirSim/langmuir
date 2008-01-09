@@ -7,8 +7,6 @@
 
 #include "agent.h"
 
-#include <vector>
-
 namespace Langmuir
 {
 
@@ -16,11 +14,14 @@ class Rand
 {
 public:
 	Rand();
-	double number(double min = 0, double max = 1.0);
+	Rand(double min, double max);
+	double number();
+	double number(double min, double max);
 	
 private:
 	void seed();
-	
+	double m_min;
+	double m_range;
 };
 
 } // End namespace Langmuir

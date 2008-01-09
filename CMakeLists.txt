@@ -21,11 +21,22 @@ SET( SRCS
 	./mpitest.cpp
 )
 
+SET( TSRCS
+	./rand.cpp
+	./cubicgrid.cpp
+	./hoppingagent.cpp
+	./sourceagent.cpp
+	./drainagent.cpp
+	./simulation.cpp
+	./test.cpp
+)
+
 # Enable warnings
 ADD_DEFINITIONS ( -Wall )
 
 # Add the executables
 ADD_EXECUTABLE( langmuir ${SRCS} )
+ADD_EXECUTABLE( test ${TSRCS} )
 
 # Libraries the executable needs to link to
 TARGET_LINK_LIBRARIES( langmuir ${MPI_LIBRARY} )

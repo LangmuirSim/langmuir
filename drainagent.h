@@ -16,11 +16,8 @@ class DrainAgent : public Agent
 {
 
 public:
-	DrainAgent();
-	DrainAgent(double potential)
-	{
-		m_potential = potential;
-	}
+	DrainAgent(unsigned int site);
+	DrainAgent(unsigned int site, double potential);
 	~DrainAgent();
 
 	/**
@@ -49,7 +46,12 @@ public:
 	/**
 	 * Perform a transport attempt
 	 */
-	virtual bool transport();
+	virtual unsigned int transport();
+    
+    /**
+     * Move on to the next time step.
+     */
+    virtual void completeTick() { }
 
 	/**
 	 * Set the potential of the source.
@@ -60,6 +62,7 @@ public:
 	}
 
 private:
+	unsigned int m_site;
 	std::vector<Agent *> m_neighbors;
 	double m_potential;
 };

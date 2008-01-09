@@ -59,4 +59,5 @@ int main(int argc, char *argv[])
 
 	// Create a 16x16 grid with a source potential of -5 and a drain potential of 0
 	Simulation sim(16, 16, -5, 0);
+	sim.performIterations(100);
 }

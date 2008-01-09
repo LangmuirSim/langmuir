@@ -41,7 +41,12 @@ namespace Langmuir{
     /**
      * Perform a transport attempt
      */
-    virtual bool transport() = 0;
+    virtual unsigned int transport() = 0;
+    
+    /**
+     * Move on to the next time step.
+     */
+    virtual void completeTick() = 0;
 
   };
 

@@ -12,15 +12,14 @@
 namespace Langmuir
 {
 
+class Rand;
+
 class SourceAgent : public Agent
 {
 
 public:
-	SourceAgent();
-	SourceAgent(double potential)
-	{
-		m_potential = potential;
-	}
+	SourceAgent(unsigned int site);
+	SourceAgent(unsigned int site, double potential);
 	~SourceAgent();
 
 	/**
@@ -49,7 +48,12 @@ public:
 	/**
 	 * Perform a transport attempt.
 	 */
-	virtual bool transport();
+	virtual unsigned int transport();
+
+    /**
+     * Move on to the next time step.
+     */
+    virtual void completeTick() { }
 
 	/**
 	 * Set the potential of the source.
@@ -60,8 +64,11 @@ public:
 	}
 
 private:
+	unsigned int m_site;
 	std::vector<Agent *> m_neighbors;
 	double m_potential;
+	Rand *m_rand;
+	double m_pBarrier;
 };
 
 } // End namespace Langmuir

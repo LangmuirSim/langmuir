@@ -5,8 +5,13 @@ using namespace std;
 namespace Langmuir
 {
 
-DrainAgent::DrainAgent() :
-	m_potential(0.)
+DrainAgent::DrainAgent(unsigned int site) :
+	m_site(site), m_potential(0.)
+{
+}
+
+DrainAgent::DrainAgent(unsigned int site, double potential) :
+	m_site(site), m_potential(potential)
 {
 }
 
@@ -36,9 +41,9 @@ int DrainAgent::charge()
 	return 1;
 }
 
-bool DrainAgent::transport()
+unsigned int DrainAgent::transport()
 {
-	return true;
+	return m_site;
 }
 
 } // End Langmuir namespace

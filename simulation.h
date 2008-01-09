@@ -22,6 +22,8 @@ public:
 	Simulation(unsigned int width, unsigned int height, double sourcePotential,
 			double drainPotential);
 	~Simulation();
+	
+	void performIterations(int nIterations);
 
 private:
 	/**
