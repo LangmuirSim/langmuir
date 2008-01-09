@@ -13,6 +13,8 @@
 namespace Langmuir
 {
 
+class Rand;
+
 class HoppingAgent : public Agent
 {
 
@@ -46,18 +48,24 @@ public:
 	/**
 	 * Perform a transport attempt
 	 */
-	virtual unsigned int transport();
+	virtual Agent* transport();
 
-    /**
-     * Move on to the next time step.
-     */
-    virtual void completeTick();
+	/**
+	 * Move on to the next time step.
+	 */
+	virtual void completeTick();
+
+	/**
+	 * Return the site number - mainly for debugging purposes...
+	 */
+	virtual unsigned int site() { return m_site; }
 
 private:
 	unsigned int m_site;
 	std::vector<Agent *> m_neighbors;
-	int m_charge, m_futureCharge;
-
+	int m_charge, m_fCharge;
+	Rand *m_rand;
+	double m_pBarrier;
 };
 
 } // End namespace Langmuir

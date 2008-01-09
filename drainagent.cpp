@@ -41,9 +41,9 @@ int DrainAgent::charge()
 	return 1;
 }
 
-unsigned int DrainAgent::transport()
+Agent* DrainAgent::transport()
 {
-	return m_site;
+	return 0;
 }
 
 } // End Langmuir namespace

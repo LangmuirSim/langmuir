@@ -47,16 +47,16 @@ int SourceAgent::charge()
 	return 1;
 }
 
-unsigned int SourceAgent::transport()
+Agent* SourceAgent::transport()
 {
 	// Determine whether a transport event will be attempted this tick
 	double rn = m_rand->number();
-	if (rn <= m_pBarrier) return m_site;
+	if (rn <= m_pBarrier) return 0;
 	
 	// Select a random neighbor and attempt transport.
     int irn = int(m_rand->number() * double(m_neighbors.size()));
-    if (m_neighbors[irn]->acceptCharge(-1)) return irn;
-    else return m_site;
+    if (m_neighbors[irn]->acceptCharge(-1)) return m_neighbors[irn];
+    else return 0;
 }
 
 } // End Langmuir namespace

@@ -43,9 +43,9 @@ vector<unsigned int> CubicGrid::getNeighbors(unsigned int site)
 
 	// Now for the source and the drain....
 	if (column == 0)
-		neighbors.push_back(getIndex(m_width, m_height) + 1);
+		neighbors.push_back(getIndex(m_width-1, m_height-1) + 1);
 	if (column == m_width - 1)
-		neighbors.push_back(getIndex(m_width, m_height) + 2);
+		neighbors.push_back(getIndex(m_width-1, m_height-1) + 2);
 
 	// Now we have all the nearest neighbours - between 2 and 4 in this case
 	return neighbors;

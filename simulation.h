@@ -40,7 +40,8 @@ private:
 	/**
 	 * Vector containing a list of the index of each site with a charge on it.
 	 */
-	std::vector<int> m_charges;
+	std::vector<Agent *> m_charges;
+	std::vector<Agent *> m_fCharges;
 
 	/**
 	 * Pointer to the source.
@@ -54,6 +55,8 @@ private:
 
 	void createAgents(unsigned int num_agents, double sourcePotential, double drainPotential);
 	void destroyAgents();
+	
+	void nextTick(); // Move to the next time tick - change to fStates...
 
 };
 

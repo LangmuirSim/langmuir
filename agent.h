@@ -41,12 +41,17 @@ namespace Langmuir{
     /**
      * Perform a transport attempt
      */
-    virtual unsigned int transport() = 0;
+    virtual Agent* transport() = 0;
     
     /**
      * Move on to the next time step.
      */
     virtual void completeTick() = 0;
+    
+    /**
+     * Return the site number - mainly for debugging purposes...
+     */
+    virtual unsigned int site() = 0;
 
   };
 

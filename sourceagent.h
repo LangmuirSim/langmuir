@@ -48,12 +48,17 @@ public:
 	/**
 	 * Perform a transport attempt.
 	 */
-	virtual unsigned int transport();
+	virtual Agent* transport();
 
     /**
      * Move on to the next time step.
      */
     virtual void completeTick() { }
+
+	/**
+	 * Return the site number - mainly for debugging purposes...
+	 */
+	virtual unsigned int site()	{ return m_site; }
 
 	/**
 	 * Set the potential of the source.
