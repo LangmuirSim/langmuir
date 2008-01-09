@@ -40,7 +40,7 @@ ADD_DEFINITIONS ( -Wall )
 
 # Add the executables
 ADD_EXECUTABLE( langmuir ./mpitest.cpp ${SRCS} )
-ADD_EXECUTABLE( test ./test.cpp ${SRCS} )
+ADD_EXECUTABLE( test ./test.cpp ./griddisplay.cpp ${SRCS} )
 
 # Libraries the executable needs to link to
 TARGET_LINK_LIBRARIES( langmuir ${MPI_LIBRARY} )

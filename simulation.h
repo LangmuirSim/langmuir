@@ -24,6 +24,8 @@ public:
 	~Simulation();
 	
 	void performIterations(int nIterations);
+	
+	void printGrid();
 
 private:
 	/**

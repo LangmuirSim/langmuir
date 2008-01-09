@@ -74,6 +74,7 @@ private:
 	double m_potential;
 	Rand *m_rand;
 	double m_pBarrier;
+	int m_charges; // Number of charges injected
 };
 
 } // End namespace Langmuir

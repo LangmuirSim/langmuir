@@ -30,42 +30,42 @@ Simulation::~Simulation()
 
 void Simulation::performIterations(int nIterations)
 {
-	cout << "Entered performIterations function.\n";
+//	cout << "Entered performIterations function.\n";
 	Agent* t = 0;
 	for (int i = 0; i < nIterations; i++)
 	{
-		cout << i << endl;
+//		cout << i << endl;
 		t = m_source->transport();
 		if (t != 0)
 		{
 			// Successful current injection event
 			m_fCharges.push_back(t);
-			cout << "Charge injected into site " << t->site() << "...\n";
+//			cout << "Charge injected into site " << t->site() << "...\n";
 		}
 		for (unsigned int j = 0; j < m_charges.size(); j++)
 		{
 			t = m_charges[j]->transport();
 			if (t == m_drain)
 			{
-				cout << "Erased a charge that was accepted by the drain.\n";
+//				cout << "Erased a charge that was accepted by the drain.\n";
 				vector<Agent *>::iterator it = m_fCharges.begin() + j;
 				m_fCharges.erase(it);
 			}
 			if (t != 0)
 			{
-				cout << "Move: " << m_charges[j]->site() << " -> " << t->site() << endl;
+//				cout << "Move: " << m_charges[j]->site() << " -> " << t->site() << endl;
 				m_fCharges[j] = t;
 			}
 		}
 		// Now we have finished this time tick
-		cout << "Time tick " << i << " completed, finalising state and moving on.\n";
+//		cout << "Time tick " << i << " completed, finalising state and moving on.\n";
 		m_charges = m_fCharges;
 		nextTick();
-		cout << "Charges at sites: ";
-		for (vector<Agent *>::iterator it = m_charges.begin();
-			it != m_charges.end(); it++)
-			cout << (*it)->site() << " ";
-		cout << endl;
+//		cout << "Charges at sites: ";
+//		for (vector<Agent *>::iterator it = m_charges.begin();
+//			it != m_charges.end(); it++)
+//			cout << (*it)->site() << " ";
+//		cout << endl;
 		t = 0;
 	}
 }
@@ -76,6 +76,23 @@ void Simulation::nextTick()
 	for (vector<Agent *>::iterator it = m_agents.begin();
 		it != m_agents.end(); it++)
 		(*it)->completeTick();
+}
+
+void Simulation::printGrid()
+{
+	system("clear");
+	unsigned int width = m_grid->getWidth();
+	for (unsigned int i = 0; i < m_agents.size()-2; i++)
+	{
+		if (i % width == 0)
+			cout << "||";
+		if (m_agents[i]->charge() == -1)
+			cout << "*";
+		else
+			cout << " ";
+		if (i % width == width-1)
+			cout << "||\n";
+	}
 }
 
 void Simulation::createAgents(unsigned int num_agents, double sourcePotential,

@@ -16,24 +16,25 @@ Rand::Rand(double min, double max)
 {
 	m_min = min;
 	m_range = max - min;
+	seed();
 }
 
 double Rand::number()
 {
 	// Generate a random number between min and max...
-	return m_range * (double(rand()) / double(RAND_MAX)) + m_min;
+	return m_range * (double(random()) / double(LONG_MAX)) + m_min;
 }
 
 double Rand::number(double min, double max)
 {
 	// Generate a random number between min and max...
 	double range = max - min;
-	return range * (double(rand()) / double(RAND_MAX)) + min;
+	return range * (double(random()) / double(LONG_MAX)) + min;
 }
 
 void Rand::seed()
 {
-	sranddev();
+	srandomdev();
 }
 
 } // End namespace Langmuir
