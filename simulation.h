@@ -55,10 +55,34 @@ private:
 	 */
 	DrainAgent *m_drain;
 
-	void createAgents(unsigned int num_agents, double sourcePotential, double drainPotential);
+	/**
+	 * Create all the agents in the simulation and set up their initial state.
+	 */
+	void createAgents(unsigned int num_agents, double sourcePotential,
+			double drainPotential);
+
+	/**
+	 * Destroy the agents once we are done with them.
+	 */
 	void destroyAgents();
-	
-	void nextTick(); // Move to the next time tick - change to fStates...
+
+	/**
+	 * Helper function - update the potential at each site. This only needs to 
+	 * be done when initialising the system or when the source and/or drain
+	 * potential is modified.
+	 *
+	 * NOTE: Right now we are assuming that there is one source, one drain and
+	 * that they are parallel. This is a good assumption as it simplifies many
+	 * things in the simulation and also applies to many different real world
+	 * devices. Making a more generic implementation would be more difficult and
+	 * slower.
+	 */
+	void updatePotentials();
+
+	/**
+	 * Move on to the next time tick - change to the future states, clean up.
+	 */
+	void nextTick();
 
 };
 

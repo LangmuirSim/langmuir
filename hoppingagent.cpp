@@ -9,9 +9,9 @@ using namespace std;
 namespace Langmuir
 {
 
-HoppingAgent::HoppingAgent(unsigned int site) :
-	m_site(site), m_charge(0), m_fCharge(0), m_rand(new Rand(0., 1.)),
-	m_pBarrier(0.5)
+HoppingAgent::HoppingAgent(unsigned int site, const Grid* grid) :
+	m_site(site), m_grid(grid), m_charge(0), m_fCharge(0),
+	m_rand(new Rand(0., 1.)), m_pBarrier(0.5)
 {
 }
 

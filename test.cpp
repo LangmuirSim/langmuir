@@ -23,10 +23,10 @@ int main(int argc, char *argv[])
 	cout << "Testing the simulation class.\n";
 	Simulation sim(50, 25, -5, 0);
 	
-	for (int i = 0; i < 10000; i++)
+/*	for (int i = 0; i < 10000; i++)
 	{
 		sim.printGrid();
 		sim.performIterations(1);
 		usleep(100);
-	}
+	} */
 }

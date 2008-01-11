@@ -102,7 +102,7 @@ void Simulation::createAgents(unsigned int num_agents, double sourcePotential,
 	// Add the normal agents
 	for (unsigned int i = 0; i < num_agents; i++)
 	{
-		m_agents[i] = new HoppingAgent(i);
+		m_agents[i] = new HoppingAgent(i, m_grid);
 	}
 	// Add the source and the drain
 	m_source = new SourceAgent(num_agents, sourcePotential);
@@ -143,6 +143,7 @@ void Simulation::createAgents(unsigned int num_agents, double sourcePotential,
 		neighbors.clear();
 		pNeighbors.clear();
 	}
+	updatePotentials();
 }
 
 void Simulation::destroyAgents()
@@ -151,6 +152,31 @@ void Simulation::destroyAgents()
 	{
 		delete m_agents[i];
 		m_agents[i] = 0;
+	}
+}
+
+void Simulation::updatePotentials()
+{
+	// We are assuming one source, one drain that are parallel.
+	// The most efficient way to calculate this is to work out the potential
+	// for each column in our system and then assign it to each agent.
+	int width = m_grid->getWidth();
+	
+	double m = (m_drain->potential() - m_source->potential()) /
+		(double(width) + 1.0);
+	double c = m_source->potential();
+
+	// The source to drain distance is simply the width of the device.
+	for (int i = 0; i < width; i++)
+	{
+		double tPotential = m * (double(i)+0.5) + c;
+		vector<unsigned int> neighbors = m_grid->col(i);
+		for (vector<unsigned int>::iterator j = neighbors.begin(); 
+			j != neighbors.end(); j++)
+		{
+			m_agents[*j]->setPotential(tPotential);
+		}
+		cout << "Row " << i << ", potential = " << tPotential << endl;
 	}
 }
 

@@ -19,9 +19,14 @@ namespace Langmuir{
      * Set the nearest neighbours of the agent.
      */
     virtual void setNeighbors(std::vector<Agent *> neighbors) = 0;
+
+    /**
+     * Set the potential of this agent.
+     */
+    virtual void setPotential(double potential) = 0;
     
     /**
-     * Get the potential of this agent...
+     * Get the potential of this agent.
      */
     virtual double potential() = 0;
     

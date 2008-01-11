@@ -26,6 +26,11 @@ public:
 	virtual void setNeighbors(std::vector<Agent *> neighbors);
 
 	/**
+	 * Set the potential of the source.
+	 */
+	virtual void setPotential(double potential) { m_potential = potential; }
+
+	/**
 	 * Get the potential of this agent...
 	 */
 	virtual double potential();
@@ -57,14 +62,6 @@ public:
 	 * Return the site number - mainly for debugging purposes...
 	 */
 	virtual unsigned int site()	{ return m_site; }
-
-	/**
-	 * Set the potential of the source.
-	 */
-	virtual void setPotential(double potential)
-	{
-		m_potential = potential;
-	}
 
 private:
 	unsigned int m_site;

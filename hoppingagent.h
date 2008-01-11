@@ -13,19 +13,25 @@
 namespace Langmuir
 {
 
+class Grid;
 class Rand;
 
 class HoppingAgent : public Agent
 {
 
 public:
-	HoppingAgent(unsigned int site);
+	HoppingAgent(unsigned int site, const Grid* grid);
 	~HoppingAgent();
 
 	/**
 	 * Set the nearest neighbours of the agent.
 	 */
 	virtual void setNeighbors(std::vector<Agent *> neighbors);
+
+    /**
+     * Set the potential of this agent.
+     */
+    virtual void setPotential(double potential) { m_potential = potential; }
 
 	/**
 	 * Get the potential of this agent...
@@ -62,7 +68,9 @@ public:
 
 private:
 	unsigned int m_site;
+	const Grid* m_grid;
 	std::vector<Agent *> m_neighbors;
+	double m_potential;
 	int m_charge, m_fCharge;
 	Rand *m_rand;
 	double m_pBarrier;
