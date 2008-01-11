@@ -162,8 +162,7 @@ void Simulation::updatePotentials()
 	// for each column in our system and then assign it to each agent.
 	int width = m_grid->getWidth();
 	
-	double m = (m_drain->potential() - m_source->potential()) /
-		(double(width) + 1.0);
+	double m = (m_drain->potential() - m_source->potential()) / double(width);
 	double c = m_source->potential();
 
 	// The source to drain distance is simply the width of the device.

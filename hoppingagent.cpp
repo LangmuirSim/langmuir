@@ -2,6 +2,7 @@
 
 #include "rand.h"
 
+#include <cmath>
 #include <iostream>
 
 using namespace std;
@@ -28,7 +29,7 @@ void HoppingAgent::setNeighbors(std::vector<Agent *> neighbors)
 
 double HoppingAgent::potential()
 {
-	return 0.;
+	return m_potential;
 }
 
 bool HoppingAgent::acceptCharge(int charge)
@@ -50,23 +51,73 @@ int HoppingAgent::charge()
 
 Agent* HoppingAgent::transport()
 {
-	// Determine whether a transport event will be attempted this tick
+	// Determine whether a transport event will be attempted this tick.
 	if (m_charge == 0)
 		return 0;
 
+	// If the pBarrier is not overcome then no transport is attempted.
 	double rn = m_rand->number();
 	if (rn <= m_pBarrier) return 0;
 	
-	// Select a random neighbor and attempt transport.
-    int irn = int(m_rand->number() * double(m_neighbors.size()));
-    if (m_neighbors[irn]->acceptCharge(-1)) 
-    {
-    	m_fCharge = 0;
-    	return m_neighbors[irn];
-    }
-    else return 0;
-	
-	cout << "HoppingAgent " << m_site << " neighbours: " << m_neighbors.size() << endl;
+	// Get the potential of each neighbour, then work out its Boltzmann factor
+	vector<double> pNeighbors;
+	double pTotal = 0.0;
+	for (vector<Agent *>::iterator i = m_neighbors.begin(); 
+		i != m_neighbors.end(); i++)
+	{
+		double tmp = exp(((*i)->potential() - m_potential) * m_charge);
+		cout << "Calculating the probs: " << tmp << " S->T: " <<
+			m_potential << "->" << (*i)->potential() << endl;
+		pNeighbors.push_back(tmp);
+		pTotal += tmp;
+	}
+	// Now normalise and fit into the remaining probability
+	double n = 1.0 - m_pBarrier;
+	double previous = m_pBarrier;
+	for (vector<double>::iterator i = pNeighbors.begin(); 
+		i != pNeighbors.end(); i++)
+	{
+		*i = (*i / pTotal) * n + previous;
+		previous = *i;
+		cout << *i << endl;
+	}
+	cout << "no of neighbors = " << m_neighbors.size()
+		<< " no of probs = " << pNeighbors.size() << endl;
+
+	// Now to find which agent we should attempt transport to
+	// The first case the lower limit is the m_pBarrier value.
+	if (rn > m_pBarrier && rn <= pNeighbors[0])
+	{
+		if (m_neighbors[0]->acceptCharge(-1))
+		{
+			m_fCharge = 0;
+			return m_neighbors[0];
+		}
+		else
+			return 0;
+	}
+	for (unsigned int i = 1; i < pNeighbors.size(); i++)
+	{
+		if (rn > pNeighbors[i-1] && rn <= pNeighbors[i])
+		{
+			if (m_neighbors[i]->acceptCharge(-1))
+			{
+				m_fCharge = 0;
+				return m_neighbors[i];
+			}
+			else return 0;
+		}
+	}
+	// The last case the upper limit is effectively one.
+	if (rn > pNeighbors[pNeighbors.size()-1])
+	{
+		if (m_neighbors[pNeighbors.size()-1]->acceptCharge(-1))
+		{
+			m_fCharge = 0;
+			return m_neighbors[pNeighbors.size()-1];
+		}
+		else return 0;
+	}
 	return 0;
 }
 
