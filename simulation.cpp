@@ -35,13 +35,6 @@ void Simulation::performIterations(int nIterations)
 	for (int i = 0; i < nIterations; i++)
 	{
 //		cout << i << endl;
-		t = m_source->transport();
-		if (t != 0)
-		{
-			// Successful current injection event
-			m_fCharges.push_back(t);
-//			cout << "Charge injected into site " << t->site() << "...\n";
-		}
 		for (unsigned int j = 0; j < m_charges.size(); j++)
 		{
 			t = m_charges[j]->transport();
@@ -49,16 +42,26 @@ void Simulation::performIterations(int nIterations)
 			{
 //				cout << "Erased a charge that was accepted by the drain.\n";
 				vector<Agent *>::iterator it = m_fCharges.begin() + j;
-				m_fCharges.erase(it);
+				if (*it == m_charges[j])
+					m_fCharges.erase(it);
 			}
-			if (t != 0)
+			else if (t != 0)
 			{
 //				cout << "Move: " << m_charges[j]->site() << " -> " << t->site() << endl;
 				m_fCharges[j] = t;
 			}
+			t = 0;
+		}
+		t = m_source->transport();
+		if (t != 0)
+		{
+			// Successful current injection event
+			m_fCharges.push_back(t);
+//			cout << "Charge injected into site " << t->site() << "...\n";
 		}
 		// Now we have finished this time tick
 //		cout << "Time tick " << i << " completed, finalising state and moving on.\n";
+		m_charges.clear();
 		m_charges = m_fCharges;
 		nextTick();
 //		cout << "Charges at sites: ";

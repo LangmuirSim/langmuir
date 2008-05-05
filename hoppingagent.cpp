@@ -66,8 +66,8 @@ Agent* HoppingAgent::transport()
 		i != m_neighbors.end(); i++)
 	{
 		double tmp = exp(((*i)->potential() - m_potential) * m_charge);
-		cout << "Calculating the probs: " << tmp << " S->T: " <<
-			m_potential << "->" << (*i)->potential() << endl;
+//		cout << "Calculating the probs: " << tmp << " S->T: " <<
+//			m_potential << "->" << (*i)->potential() << endl;
 		pNeighbors.push_back(tmp);
 		pTotal += tmp;
 	}
@@ -79,10 +79,10 @@ Agent* HoppingAgent::transport()
 	{
 		*i = (*i / pTotal) * n + previous;
 		previous = *i;
-		cout << *i << endl;
+//		cout << *i << endl;
 	}
-	cout << "no of neighbors = " << m_neighbors.size()
-		<< " no of probs = " << pNeighbors.size() << endl;
+//	cout << "no of neighbors = " << m_neighbors.size()
+//		<< " no of probs = " << pNeighbors.size() << endl;
 
 	// Now to find which agent we should attempt transport to
 	// The first case the lower limit is the m_pBarrier value.

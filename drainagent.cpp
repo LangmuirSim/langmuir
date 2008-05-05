@@ -32,7 +32,7 @@ double DrainAgent::potential()
 bool DrainAgent::acceptCharge(int charge)
 {
 	// The source never accepts charges
-	return false;
+	return true;
 }
 
 int DrainAgent::charge()
