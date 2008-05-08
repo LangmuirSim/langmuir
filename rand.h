@@ -5,8 +5,6 @@
 #ifndef __RAND_H
 #define __RAND_H
 
-#include "agent.h"
-
 namespace Langmuir
 {
 
@@ -17,7 +15,7 @@ public:
 	Rand(double min, double max);
 	double number();
 	double number(double min, double max);
-	
+
 private:
 	void seed();
 	double m_min;

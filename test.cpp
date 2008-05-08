@@ -27,6 +27,6 @@ int main(int argc, char *argv[])
 	{
 		sim.printGrid();
 		sim.performIterations(1);
-		usleep(10000);
+		//usleep(10);
 	}
 }
