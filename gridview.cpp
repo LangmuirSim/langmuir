@@ -1,17 +1,21 @@
-#include "griddisplay.h"
+#include "gridview.h"
 
 namespace Langmuir
 {
 
-GridView::GridView(QWidget* parent = 0) : QGraphicsView(parent)
-{
-  setWindowFlags(Qt::Dialog | Qt::Tool);
+  GridView::GridView(QWidget* parent) : QGraphicsView(parent)
+  {
+    setWindowFlags(Qt::Dialog | Qt::Tool);
 
-}
+  }
 
-GridView::~GridView()
-{
-}
+  GridView::GridView(QGraphicsScene* scene, QWidget* parent)
+    : QGraphicsView(scene, parent)
+  {
+    setWindowFlags(Qt::Dialog | Qt::Tool);
+  }
+
+
 
 }
 

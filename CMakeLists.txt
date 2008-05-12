@@ -34,7 +34,7 @@ include_directories(
 )
 
 # Set our SRCS (.cpp files)
-SET( SRCS
+SET(SRCS
 	rand.cpp
 	cubicgrid.cpp
 	hoppingagent.cpp
@@ -43,7 +43,7 @@ SET( SRCS
 	simulation.cpp
 )
 
-SET( TSRCS
+SET(TSRCS
 	rand.cpp
 	cubicgrid.cpp
 	hoppingagent.cpp
@@ -53,12 +53,17 @@ SET( TSRCS
 	test.cpp
 )
 
+SET(qt_SRCS
+  gridview.cpp)
+
+qt4_automoc(${qt_SRCS})
+
 # Enable warnings
 ADD_DEFINITIONS ( -Wall )
 
 # Add the executables
-ADD_EXECUTABLE( langmuir ./mpitest.cpp ${SRCS} )
-ADD_EXECUTABLE( test ./test.cpp ./gridview.cpp ${SRCS} )
+ADD_EXECUTABLE( langmuir mpitest.cpp ${SRCS} )
+ADD_EXECUTABLE( test test.cpp ${qt_SRCS} ${SRCS} )
 
 # Libraries the executable needs to link to
 TARGET_LINK_LIBRARIES( langmuir ${MPI_LIBRARIES}
