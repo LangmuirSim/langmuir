@@ -11,6 +11,7 @@
 namespace Langmuir
 {
 
+class Rand;
 class Grid;
 class Agent;
 class SourceAgent;
@@ -28,6 +29,7 @@ public:
 	void printGrid();
 
 private:
+  Rand *m_rand;
 	/**
 	 * Grid instance - used for nearest neighbours, distances etc
 	 */

@@ -1,5 +1,6 @@
 #include "simulation.h"
 
+#include "rand.h";
 #include "cubicgrid.h"
 #include "hoppingagent.h"
 #include "sourceagent.h"
@@ -16,6 +17,7 @@ namespace Langmuir
 Simulation::Simulation(unsigned int width, unsigned int height, double sourcePotential,
 		double drainPotential)
 {
+  m_rand = new Rand(0.0, 1.0);
 	m_grid = new CubicGrid(width, height);
 
 	// Create the agents for the simulation
@@ -24,6 +26,8 @@ Simulation::Simulation(unsigned int width, unsigned int height, double sourcePot
 
 Simulation::~Simulation()
 {
+  delete m_rand;
+  m_rand = 0;
 	delete m_grid;
 	m_grid = 0;
 	destroyAgents();
@@ -42,19 +46,16 @@ void Simulation::performIterations(int nIterations)
       current = m_charges[j];
 			t = current->transport();
 			if (t == m_drain) {
-				cout << "Erased a charge that was accepted by the drain.\n";
+//				cout << "Erased a charge that was accepted by the drain.\n";
         for (vector<Agent *>::iterator it = m_fCharges.begin();
           it != m_fCharges.end(); it++) {
           if ((*it) == current) {
-            cout << "Found the correct point in the vector." << endl;
             m_fCharges.erase(it);
             break;
           }
         }
 			}
 			else if (t != 0) {
-        if (current->fCharge() != 0 || t->fCharge() != -1)
-          cout << "ERROR: Charge: " << current->fCharge() << "->" << t->fCharge() << endl;
 //				cout << "Move: " << current->site() << " -> " << t->site() << endl;
 //        cout << "Charge: " << m_charges[j]->fCharge() << "->" << t->fCharge() << endl;
         for (vector<Agent *>::iterator it = m_fCharges.begin();
@@ -76,7 +77,7 @@ void Simulation::performIterations(int nIterations)
 //		cout << "Time tick " << i << " completed, finalising state and moving on.\n";
 		m_charges.clear();
 		m_charges = m_fCharges;
-
+/*
     int count = 0;
     int fCount = 0;
     for (unsigned int i = 0; i < m_agents.size()-2; i++) {
@@ -88,7 +89,8 @@ void Simulation::performIterations(int nIterations)
 
     if (count != fCount)
       cout << "WARNING: count and fCount do not agree: " << count << ", " << fCount << endl;
-    
+*/
+    // Move on to the next time tick
 		nextTick();
 /*    cout << "Charges at sites: (" << m_charges.size() << ") ";
 		for (vector<Agent *>::iterator it = m_charges.begin();
@@ -96,14 +98,14 @@ void Simulation::performIterations(int nIterations)
 			cout << (*it)->site() << " ";
 		cout << endl;
 */
-    count = 0;
+    int counter = 0;
     for (unsigned int i = 0; i < m_agents.size()-2; i++)
       if (m_agents[i]->fCharge() == -1)
-        ++count;
+        ++counter;
 
-    if (m_charges.size() != count)
+    if (m_charges.size() != counter)
       cout << "Sites with charge: " << m_charges.size() << " Sites reporting a charge: "
-           << count << endl;
+           << counter << endl;
     
 		t = 0;
 	}
@@ -124,10 +126,14 @@ void Simulation::printGrid()
 	for (unsigned int i = 0; i < m_agents.size()-2; i++) {
 		if (i % width == 0)
 			cout << "||";
-		if (m_agents[i]->charge() == -1)
+		if (m_agents[i]->charge() == -1 && m_agents[i]->pBarrier() < 0.6)
 			cout << "*";
-		else
-			cout << " ";
+    else if (m_agents[i]->charge() == -1 && m_agents[i]->pBarrier() > 0.599)
+      cout << "O";
+		else if (m_agents[i]->charge() == 0 && m_agents[i]->pBarrier() > 0.599)
+			cout << "X";
+    else
+      cout << " ";
 		if (i % width == width-1)
 			cout << "||\n";
 	}
@@ -138,9 +144,11 @@ void Simulation::createAgents(unsigned int num_agents, double sourcePotential,
 {
 	m_agents.resize(num_agents+2);
 	// Add the normal agents
-	for (unsigned int i = 0; i < num_agents; i++)
-	{
+	for (unsigned int i = 0; i < num_agents; i++) {
 		m_agents[i] = new HoppingAgent(i, m_grid);
+    // Mix some trap sites in
+    if (m_rand->number() > 0.995)
+      m_agents[i]->setPBarrier(0.999);
 	}
 	// Add the source and the drain
 	m_source = new SourceAgent(num_agents, sourcePotential);

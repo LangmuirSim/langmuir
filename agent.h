@@ -44,6 +44,13 @@ namespace Langmuir{
     virtual int charge() = 0;
 
     virtual int fCharge() { return -1000; }
+
+    /**
+     * The potential barrier to making a move.
+     */
+    virtual double pBarrier() { return 0.0; }
+
+    virtual void setPBarrier(double) { ; }
     
     /**
      * Perform a transport attempt

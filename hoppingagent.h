@@ -53,6 +53,10 @@ public:
 
   virtual int fCharge();
 
+  virtual double pBarrier();
+
+  virtual void setPBarrier(double pBarrier);
+
 	/**
 	 * Perform a transport attempt
 	 */

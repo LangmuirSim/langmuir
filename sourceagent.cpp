@@ -10,13 +10,13 @@ namespace Langmuir
 {
 
 SourceAgent::SourceAgent(unsigned int site) :
-	m_site(site), m_potential(0.), m_rand(new Rand(0., 1.0)), m_pBarrier(0.5),
+	m_site(site), m_potential(0.), m_rand(new Rand(0.0, 1.0)), m_pBarrier(0.9),
 	m_charges(0)
 {
 }
 
 SourceAgent::SourceAgent(unsigned int site, double potential) :
-	m_site(site), m_potential(potential), m_rand(new Rand(0., 1.0)), m_pBarrier(0.5)
+	m_site(site), m_potential(potential), m_rand(new Rand(0., 1.0)), m_pBarrier(0.95)
 {
 }
 
@@ -54,13 +54,12 @@ Agent* SourceAgent::transport()
 	double rn = m_rand->number();
 	if (rn <= m_pBarrier) return 0;
 
-  // This is currently limiting the number of charges
-	if (m_charges > 50) return 0;
+  // This is currently limiting the number of charges that can be injected
+	if (m_charges > 300) return 0;
 	
 	// Select a random neighbor and attempt transport.
     int irn = int(m_rand->number() * double(m_neighbors.size()));
-    if (m_neighbors[irn]->acceptCharge(-1))
-    {
+    if (m_neighbors[irn]->acceptCharge(-1)) {
     	m_charges++;
     	return m_neighbors[irn];
     }

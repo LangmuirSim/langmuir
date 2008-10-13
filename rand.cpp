@@ -2,6 +2,7 @@
 
 #include <cstdlib>
 #include <cmath>
+#include <ctime>
 #include <vector>
 
 #include <boost/random/uniform_int.hpp>
@@ -25,6 +26,7 @@ typedef boost::minstd_rand baseGenerator;
   {
     // Produce a random number distribution between min and max inclusive
     m_gen = new baseGenerator(42u);
+    m_gen->seed(static_cast<unsigned int>(std::time(0)));
     m_dist = new boost::uniform_real<>(min, max);
     m_uni = new boost::variate_generator<baseGenerator&, boost::uniform_real<> >(*m_gen, *m_dist);
   }

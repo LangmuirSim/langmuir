@@ -21,12 +21,12 @@ int main(int argc, char *argv[])
 
 	// Create a 16x16 grid with a source potential of -5 and a drain potential of 0
 	cout << "Testing the simulation class.\n";
-	Simulation sim(50, 10, 0, -5);
+	Simulation sim(100, 50, 0, -6.0);
 
 	for (int i = 0; i < 10000; i++)
 	{
 		sim.printGrid();
-		sim.performIterations(10);
-		usleep(10);
+		sim.performIterations(1);
+		usleep(20000);
 	}
 }

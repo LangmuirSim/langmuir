@@ -54,6 +54,16 @@ int HoppingAgent::fCharge()
   return m_fCharge;
 }
 
+double HoppingAgent::pBarrier()
+{
+  return m_pBarrier;
+}
+
+void HoppingAgent::setPBarrier(double pBarrier)
+{
+  m_pBarrier = pBarrier;
+}
+
 Agent* HoppingAgent::transport()
 {
 	// Determine whether a transport event will be attempted this tick.
