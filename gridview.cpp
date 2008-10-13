@@ -15,7 +15,22 @@ namespace Langmuir
     setWindowFlags(Qt::Dialog | Qt::Tool);
   }
 
+  GridItem::GridItem(int type) : m_type(type)
+  {
+  }
 
+  QRectF GridItem::boundingRect() const
+  {
+  }
+
+  QPainterPath GridItem::shape() const
+  {
+  }
+
+  void GridItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
+                       QWidget *widget)
+  {
+  }
 
 }
 
