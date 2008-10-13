@@ -55,7 +55,7 @@ Agent* SourceAgent::transport()
 	if (rn <= m_pBarrier) return 0;
 
   // This is currently limiting the number of charges that can be injected
-	if (m_charges > 300) return 0;
+//	if (m_charges > 300) return 0;
 	
 	// Select a random neighbor and attempt transport.
     int irn = int(m_rand->number() * double(m_neighbors.size()));

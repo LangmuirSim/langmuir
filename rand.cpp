@@ -13,8 +13,6 @@ using namespace std;
 
 namespace Langmuir{
 
-typedef boost::minstd_rand baseGenerator;
-
   Rand::Rand()
   {
     m_gen = new baseGenerator(42u);

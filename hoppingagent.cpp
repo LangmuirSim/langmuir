@@ -12,7 +12,7 @@ namespace Langmuir
 
 HoppingAgent::HoppingAgent(unsigned int site, const Grid* grid) :
 	m_site(site), m_grid(grid), m_charge(0), m_fCharge(0),
-	m_rand(new Rand(0., 1.)), m_pBarrier(0.5)
+	m_rand(new Rand(0.0, 1.0)), m_pBarrier(0.4)
 {
 }
 
@@ -81,10 +81,11 @@ Agent* HoppingAgent::transport()
 		i != m_neighbors.end(); i++)
 	{
 		double tmp = exp(((*i)->potential() - m_potential) * m_charge);
-//		cout << "Calculating the probs: " << tmp << " S->T: " <<
-//			m_potential << "->" << (*i)->potential() << endl;
+//		cout << "Calculating the probs (" << m_site << "): " << tmp << "\tS->T:\t" <<
+//			m_potential << "->" << (*i)->potential();
 		pNeighbors.push_back(tmp);
 		pTotal += tmp;
+//    cout << "\t Total: " << pTotal << endl;
 	}
 	// Now normalise and fit into the remaining probability
 	double n = 1.0 - m_pBarrier;
@@ -96,12 +97,18 @@ Agent* HoppingAgent::transport()
 		previous = *i;
 //		cout << *i << endl;
 	}
+
+//  cout << "Normalised probs: " << m_pBarrier << "\t";
+//  for (vector<double>::iterator i = pNeighbors.begin();
+//    i != pNeighbors.end(); i++)
+//    cout << *i << "\t";
+//  cout << "rn = " << rn << endl;
 //	cout << "no of neighbors = " << m_neighbors.size()
 //		<< " no of probs = " << pNeighbors.size() << endl;
 
 	// Now to find which agent we should attempt transport to
 	// The first case the lower limit is the m_pBarrier value.
-	if (rn > m_pBarrier && rn <= pNeighbors[0]) {
+	if (rn <= pNeighbors[0]) {
 		if (m_neighbors[0]->acceptCharge(-1)) {
 			m_fCharge = 0;
 			return m_neighbors[0];
@@ -118,14 +125,6 @@ Agent* HoppingAgent::transport()
 			else
         return 0;
 		}
-	}
-	// The last case the upper limit is effectively one.
-	if (rn > pNeighbors[pNeighbors.size()-1]) {
-		if (m_neighbors[pNeighbors.size()-1]->acceptCharge(-1)) {
-			m_fCharge = 0;
-			return m_neighbors[pNeighbors.size()-1];
-		}
-		else return 0;
 	}
 	return 0;
 }

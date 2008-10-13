@@ -6,11 +6,13 @@
 #ifndef __RAND_H
 #define __RAND_H
 
+#include <boost/random/mersenne_twister.hpp>
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/variate_generator.hpp>
 #include <boost/random/uniform_real.hpp>
 
-typedef boost::minstd_rand baseGenerator;
+//typedef boost::minstd_rand baseGenerator;
+typedef boost::mt19937 baseGenerator;
 
 namespace Langmuir
 {
