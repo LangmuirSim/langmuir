@@ -53,6 +53,8 @@ Agent* SourceAgent::transport()
 	// Determine whether a transport event will be attempted this tick
 	double rn = m_rand->number();
 	if (rn <= m_pBarrier) return 0;
+
+  // This is currently limiting the number of charges
 	if (m_charges > 50) return 0;
 	
 	// Select a random neighbor and attempt transport.

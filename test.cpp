@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
 	for (int i = 0; i < 10000; i++)
 	{
 		sim.printGrid();
-		sim.performIterations(1);
-		//usleep(10);
+		sim.performIterations(10);
+		usleep(10);
 	}
 }

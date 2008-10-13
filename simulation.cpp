@@ -6,6 +6,7 @@
 #include "drainagent.h"
 
 #include <iostream>
+#include <cstdlib>
 
 using namespace std;
 
@@ -32,29 +33,41 @@ void Simulation::performIterations(int nIterations)
 {
 //	cout << "Entered performIterations function.\n";
 	Agent* t = 0;
+  Agent* current = 0;
 	for (int i = 0; i < nIterations; i++)
 	{
-//		cout << i << endl;
-		for (unsigned int j = 0; j < m_charges.size(); j++)
-		{
-			t = m_charges[j]->transport();
-			if (t == m_drain)
-			{
-//				cout << "Erased a charge that was accepted by the drain.\n";
-				vector<Agent *>::iterator it = m_fCharges.begin() + j;
-				if (*it == m_charges[j])
-					m_fCharges.erase(it);
+//		cout << "Iteration: " << i << endl;
+    // Examine existing charges
+		for (unsigned int j = 0; j < m_charges.size(); j++) {
+      current = m_charges[j];
+			t = current->transport();
+			if (t == m_drain) {
+				cout << "Erased a charge that was accepted by the drain.\n";
+        for (vector<Agent *>::iterator it = m_fCharges.begin();
+          it != m_fCharges.end(); it++) {
+          if ((*it) == current) {
+            cout << "Found the correct point in the vector." << endl;
+            m_fCharges.erase(it);
+            break;
+          }
+        }
 			}
-			else if (t != 0)
-			{
-//				cout << "Move: " << m_charges[j]->site() << " -> " << t->site() << endl;
-				m_fCharges[j] = t;
+			else if (t != 0) {
+        if (current->fCharge() != 0 || t->fCharge() != -1)
+          cout << "ERROR: Charge: " << current->fCharge() << "->" << t->fCharge() << endl;
+//				cout << "Move: " << current->site() << " -> " << t->site() << endl;
+//        cout << "Charge: " << m_charges[j]->fCharge() << "->" << t->fCharge() << endl;
+        for (vector<Agent *>::iterator it = m_fCharges.begin();
+          it != m_fCharges.end(); ++it) {
+          if (*it == current)
+            (*it) = t;
+        }
 			}
 			t = 0;
 		}
+    // Now inject some new charges
 		t = m_source->transport();
-		if (t != 0)
-		{
+		if (t != 0) {
 			// Successful current injection event
 			m_fCharges.push_back(t);
 //			cout << "Charge injected into site " << t->site() << "...\n";
@@ -63,12 +76,35 @@ void Simulation::performIterations(int nIterations)
 //		cout << "Time tick " << i << " completed, finalising state and moving on.\n";
 		m_charges.clear();
 		m_charges = m_fCharges;
+
+    int count = 0;
+    int fCount = 0;
+    for (unsigned int i = 0; i < m_agents.size()-2; i++) {
+      if (m_agents[i]->charge() == -1)
+        ++count;
+      if (m_agents[i]->fCharge() == -1)
+        ++fCount;
+    }
+
+    if (count != fCount)
+      cout << "WARNING: count and fCount do not agree: " << count << ", " << fCount << endl;
+    
 		nextTick();
-//		cout << "Charges at sites: ";
-//		for (vector<Agent *>::iterator it = m_charges.begin();
-//			it != m_charges.end(); it++)
-//			cout << (*it)->site() << " ";
-//		cout << endl;
+/*    cout << "Charges at sites: (" << m_charges.size() << ") ";
+		for (vector<Agent *>::iterator it = m_charges.begin();
+			it != m_charges.end(); it++)
+			cout << (*it)->site() << " ";
+		cout << endl;
+*/
+    count = 0;
+    for (unsigned int i = 0; i < m_agents.size()-2; i++)
+      if (m_agents[i]->fCharge() == -1)
+        ++count;
+
+    if (m_charges.size() != count)
+      cout << "Sites with charge: " << m_charges.size() << " Sites reporting a charge: "
+           << count << endl;
+    
 		t = 0;
 	}
 }
@@ -85,8 +121,7 @@ void Simulation::printGrid()
 {
 	system("clear");
 	unsigned int width = m_grid->getWidth();
-	for (unsigned int i = 0; i < m_agents.size()-2; i++)
-	{
+	for (unsigned int i = 0; i < m_agents.size()-2; i++) {
 		if (i % width == 0)
 			cout << "||";
 		if (m_agents[i]->charge() == -1)

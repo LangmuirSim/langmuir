@@ -42,6 +42,8 @@ namespace Langmuir{
      * Returns the charge of this node.
      */
     virtual int charge() = 0;
+
+    virtual int fCharge() { return -1000; }
     
     /**
      * Perform a transport attempt

@@ -31,7 +31,7 @@ public:
     /**
      * Set the potential of this agent.
      */
-    virtual void setPotential(double potential) { m_potential = potential; }
+  virtual void setPotential(double potential) { m_potential = potential; }
 
 	/**
 	 * Get the potential of this agent...
@@ -50,6 +50,8 @@ public:
 	 * Returns the charge of this node.
 	 */
 	virtual int charge();
+
+  virtual int fCharge();
 
 	/**
 	 * Perform a transport attempt

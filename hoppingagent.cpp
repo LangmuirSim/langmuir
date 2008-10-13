@@ -36,17 +36,22 @@ bool HoppingAgent::acceptCharge(int charge)
 {
 	// Can only accept a charge if we are currently vacant and have not already
 	// accepted a charge from another neighbour.
-	if (m_charge == 0 && m_fCharge == 0)
-	{
+	if (m_charge == 0 && m_fCharge == 0) {
 		m_fCharge = charge;
 		return true;
 	}
-	else return false;
+	else
+    return false;
 }
 
 int HoppingAgent::charge()
 {
 	return m_charge;
+}
+
+int HoppingAgent::fCharge()
+{
+  return m_fCharge;
 }
 
 Agent* HoppingAgent::transport()
@@ -86,33 +91,27 @@ Agent* HoppingAgent::transport()
 
 	// Now to find which agent we should attempt transport to
 	// The first case the lower limit is the m_pBarrier value.
-	if (rn > m_pBarrier && rn <= pNeighbors[0])
-	{
-		if (m_neighbors[0]->acceptCharge(-1))
-		{
+	if (rn > m_pBarrier && rn <= pNeighbors[0]) {
+		if (m_neighbors[0]->acceptCharge(-1)) {
 			m_fCharge = 0;
 			return m_neighbors[0];
 		}
 		else
 			return 0;
 	}
-	for (unsigned int i = 1; i < pNeighbors.size(); i++)
-	{
-		if (rn > pNeighbors[i-1] && rn <= pNeighbors[i])
-		{
-			if (m_neighbors[i]->acceptCharge(-1))
-			{
+	for (unsigned int i = 1; i < pNeighbors.size(); i++) {
+		if (rn > pNeighbors[i-1] && rn <= pNeighbors[i]) {
+			if (m_neighbors[i]->acceptCharge(-1)) {
 				m_fCharge = 0;
 				return m_neighbors[i];
 			}
-			else return 0;
+			else
+        return 0;
 		}
 	}
 	// The last case the upper limit is effectively one.
-	if (rn > pNeighbors[pNeighbors.size()-1])
-	{
-		if (m_neighbors[pNeighbors.size()-1]->acceptCharge(-1))
-		{
+	if (rn > pNeighbors[pNeighbors.size()-1]) {
+		if (m_neighbors[pNeighbors.size()-1]->acceptCharge(-1)) {
 			m_fCharge = 0;
 			return m_neighbors[pNeighbors.size()-1];
 		}
