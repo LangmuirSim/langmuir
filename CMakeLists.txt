@@ -4,7 +4,7 @@ PROJECT(langmuir)
 cmake_minimum_required(VERSION 2.6)
 
 # Find and set up MPI
-find_package(MPI REQUIRED)
+#find_package(MPI REQUIRED)
 
 # Also need random number facilities from Boost
 find_package(Boost REQUIRED
@@ -62,12 +62,12 @@ qt4_automoc(${qt_SRCS})
 ADD_DEFINITIONS ( -Wall )
 
 # Add the executables
-ADD_EXECUTABLE( langmuir mpitest.cpp ${SRCS} )
+#ADD_EXECUTABLE( langmuir mpitest.cpp ${SRCS} )
 ADD_EXECUTABLE( test test.cpp ${qt_SRCS} ${SRCS} )
 
 # Libraries the executable needs to link to
-TARGET_LINK_LIBRARIES( langmuir ${MPI_LIBRARIES}
-  ${Boost_LIBRARIES})
+#TARGET_LINK_LIBRARIES( langmuir ${MPI_LIBRARIES}
+#  ${Boost_LIBRARIES})
 
 TARGET_LINK_LIBRARIES( test ${QT_LIBRARIES}
   ${Boost_LIBRARIES})
