@@ -43,6 +43,12 @@ SET(SRCS
 	simulation.cpp
 )
 
+SET(VIEWSRCS
+  rand.cpp
+  cubicgrid.cpp
+  gridview.cpp
+)
+
 SET(TSRCS
 	rand.cpp
 	cubicgrid.cpp
@@ -62,12 +68,13 @@ qt4_automoc(${qt_SRCS})
 ADD_DEFINITIONS ( -Wall )
 
 # Add the executables
-#ADD_EXECUTABLE( langmuir mpitest.cpp ${SRCS} )
+ADD_EXECUTABLE( langmuirview langmuirview.cpp ${VIEWSRCS} ${qt_SRCS} )
 ADD_EXECUTABLE( test test.cpp ${qt_SRCS} ${SRCS} )
 
 # Libraries the executable needs to link to
-#TARGET_LINK_LIBRARIES( langmuir ${MPI_LIBRARIES}
-#  ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES( langmuirview #${MPI_LIBRARIES}
+  ${Boost_LIBRARIES}
+  ${QT_LIBRARIES})
 
 TARGET_LINK_LIBRARIES( test ${QT_LIBRARIES}
   ${Boost_LIBRARIES})

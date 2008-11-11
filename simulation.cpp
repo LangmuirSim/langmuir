@@ -1,6 +1,6 @@
 #include "simulation.h"
 
-#include "rand.h";
+#include "rand.h"
 #include "cubicgrid.h"
 #include "hoppingagent.h"
 #include "sourceagent.h"

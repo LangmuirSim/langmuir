@@ -1,14 +1,16 @@
-#ifndef GRIDDISPLAY_H_
-#define GRIDDISPLAY_H_
+#ifndef GRIDDISPLAY_H
+#define GRIDDISPLAY_H
 
 #include <QDialog>
 #include <QGraphicsItem>
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QObject>
+#include <QVector>
 
 namespace Langmuir
 {
+  class Grid;
 
   class GridView : public QGraphicsView
   {
@@ -25,7 +27,10 @@ namespace Langmuir
     Q_OBJECT
 
   public:
-    GridItem(int type = 0);
+    GridItem(int type = 0, unsigned long int site = 0);
+    ~GridItem();
+    void setCharge(int charge);
+    int charge() { return m_charge; }
     QRectF boundingRect() const;
     QPainterPath shape() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
@@ -33,6 +38,8 @@ namespace Langmuir
 
   private:
     int m_type;
+    unsigned long int m_site;
+    int m_charge;
     QColor* m_color;
     int m_width, m_height;
   };
@@ -42,8 +49,14 @@ namespace Langmuir
     Q_OBJECT
 
   public:
-    GridScene(QObject* parent = 0);
+    GridScene(unsigned long width = 0, unsigned long height = 0,
+              QObject* parent = 0);
+    ~GridScene();
+
+  private:
+    Grid *m_grid;
+    QVector<int> *m_sites;
   };
 }
 
-#endif /*GRIDDISPLAY_H_*/
+#endif /*GRIDDISPLAY_H */
