@@ -8,7 +8,7 @@ cmake_minimum_required(VERSION 2.6)
 
 # Also need random number facilities from Boost
 find_package(Boost REQUIRED
-  COMPONENTS random)
+  COMPONENTS random mpi)
 
 message(STATUS "MPI_COMPILE_FLAGS: ${MPI_COMPILE_FLAGS}")
 message(STATUS "MPI_INCLUDE_PATH: ${MPI_INCLUDE_PATH}")
@@ -49,14 +49,14 @@ SET(VIEWSRCS
   gridview.cpp
 )
 
-SET(TSRCS
+SET(MPISRCS
 	rand.cpp
 	cubicgrid.cpp
 	hoppingagent.cpp
 	sourceagent.cpp
 	drainagent.cpp
 	simulation.cpp
-	test.cpp
+	mpitest.cpp
 )
 
 SET(qt_SRCS
@@ -70,6 +70,7 @@ ADD_DEFINITIONS ( -Wall )
 # Add the executables
 ADD_EXECUTABLE( langmuirview langmuirview.cpp ${VIEWSRCS} ${qt_SRCS} )
 ADD_EXECUTABLE( test test.cpp ${qt_SRCS} ${SRCS} )
+ADD_EXECUTABLE( mpitest ${qt_SRCS} ${MPISRCS} )
 
 # Libraries the executable needs to link to
 TARGET_LINK_LIBRARIES( langmuirview #${MPI_LIBRARIES}
@@ -78,3 +79,8 @@ TARGET_LINK_LIBRARIES( langmuirview #${MPI_LIBRARIES}
 
 TARGET_LINK_LIBRARIES( test ${QT_LIBRARIES}
   ${Boost_LIBRARIES})
+
+TARGET_LINK_LIBRARIES( mpitest
+#  ${MPI_LIBRARIES}
+  ${Boost_LIBRARIES}
+  ${QT_LIBRARIES})

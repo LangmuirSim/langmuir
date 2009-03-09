@@ -3,7 +3,10 @@
 #include "cubicgrid.h"
 #include "rand.h"
 
+#include <QWheelEvent>
 #include <QDebug>
+
+#include <cmath>
 
 namespace Langmuir
 {
@@ -24,13 +27,27 @@ namespace Langmuir
     setWindowFlags(Qt::Dialog | Qt::Tool);
   }
 
+  void GridView::wheelEvent(QWheelEvent *event)
+  {
+    scaleView(pow((double)2, event->delta() / 240.0));
+  }
+
+  void GridView::scaleView(qreal scaleFactor)
+  {
+    qreal factor = matrix().scale(scaleFactor, scaleFactor).mapRect(QRectF(0, 0, 1, 1)).width();
+    if (factor < 0.07 || factor > 100)
+      return;
+
+    scale(scaleFactor, scaleFactor);
+  }
+
   /**
    * GridItem - paints the individual grid items
    */
 
   GridItem::GridItem(int type, unsigned long int site) : m_type(type),
     m_site(site), m_charge(0), m_color(new QColor(240, 240, 240)), m_width(1),
-    m_height(1)
+    m_height(1), m_rect(-m_width/2, -m_height/2, m_width, m_height)
   {
   }
 
@@ -53,13 +70,13 @@ namespace Langmuir
 
   QRectF GridItem::boundingRect() const
   {
-    return QRectF(-m_width/2, -m_height/2, m_width, m_height);
+    return m_rect;
   }
 
   QPainterPath GridItem::shape() const
   {
     QPainterPath path;
-    path.addRect(-m_width/2, -m_height/2, m_width, m_height);
+    path.addRect(m_rect);
     return path;
   }
 

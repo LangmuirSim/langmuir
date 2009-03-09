@@ -20,6 +20,10 @@ namespace Langmuir
     GridView(QWidget* parent = 0);
     explicit GridView(QGraphicsScene* scene, QWidget* parent = 0);
 
+  protected:
+    void wheelEvent(QWheelEvent *event);
+    void scaleView(qreal scaleFactor);
+
   };
 
   class GridItem : public QObject, public QGraphicsItem
@@ -30,7 +34,7 @@ namespace Langmuir
     GridItem(int type = 0, unsigned long int site = 0);
     ~GridItem();
     void setCharge(int charge);
-    int charge() { return m_charge; }
+    inline int charge() { return m_charge; }
     QRectF boundingRect() const;
     QPainterPath shape() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
@@ -42,6 +46,7 @@ namespace Langmuir
     int m_charge;
     QColor* m_color;
     int m_width, m_height;
+    QRectF m_rect;
   };
 
   class GridScene : public QGraphicsScene
