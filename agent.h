@@ -3,18 +3,18 @@
  *
  */
 
-#ifndef __AGENT_H
-#define __AGENT_H
+#ifndef AGENT_H
+#define AGENT_H
 
 #include <vector>
 
 namespace Langmuir{
-  
+
   class Agent {
 
   public:
     virtual ~Agent() { }
-    
+
     /**
      * Set the nearest neighbours of the agent.
      */
@@ -24,12 +24,12 @@ namespace Langmuir{
      * Set the potential of this agent.
      */
     virtual void setPotential(double potential) = 0;
-    
+
     /**
      * Get the potential of this agent.
      */
     virtual double potential() = 0;
-    
+
     /**
      * Attempt to move a charge to this agent. If the charge is accepted then
      * this agent will store that charge in its future state, otherwise the
@@ -37,7 +37,7 @@ namespace Langmuir{
      * @return true if accepted, false if not.
      */
     virtual bool acceptCharge(int charge) = 0;
-    
+
     /**
      * Returns the charge of this node.
      */
@@ -51,17 +51,22 @@ namespace Langmuir{
     virtual double pBarrier() { return 0.0; }
 
     virtual void setPBarrier(double) { ; }
-    
+
     /**
      * Perform a transport attempt
      */
     virtual Agent* transport() = 0;
-    
+
     /**
      * Move on to the next time step.
      */
     virtual void completeTick() = 0;
-    
+
+    /**
+     * Set the site number
+     */
+    virtual void setSite(unsigned int site) = 0;
+
     /**
      * Return the site number - mainly for debugging purposes...
      */
