@@ -13,22 +13,13 @@ namespace Langmuir{
   class Agent {
 
   public:
+    Agent (unsigned int site) { m_site = site; }
     virtual ~Agent() { }
 
     /**
      * Set the nearest neighbours of the agent.
      */
     virtual void setNeighbors(std::vector<Agent *> neighbors) = 0;
-
-    /**
-     * Set the potential of this agent.
-     */
-    virtual void setPotential(double potential) = 0;
-
-    /**
-     * Get the potential of this agent.
-     */
-    virtual double potential() = 0;
 
     /**
      * Attempt to move a charge to this agent. If the charge is accepted then
@@ -65,12 +56,24 @@ namespace Langmuir{
     /**
      * Set the site number
      */
-    virtual void setSite(unsigned int site) = 0;
+    virtual void setSite(unsigned int site, bool future = false)
+    {
+      if (future) m_fSite = site;
+      else m_site = site;
+    }
 
     /**
-     * Return the site number - mainly for debugging purposes...
+     * Return the site number
      */
-    virtual unsigned int site() = 0;
+    virtual unsigned int site(bool future)
+    {
+      if (future) return m_fSite;
+      else return m_site;
+    }
+
+  protected:
+    unsigned int m_site;
+    unsigned int m_fSite;
 
   };
 

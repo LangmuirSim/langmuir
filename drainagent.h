@@ -2,8 +2,8 @@
  *  DrainAgent - agent to act as a source of charges
  */
 
-#ifndef __DRAINAGENT_H
-#define __DRAINAGENT_H
+#ifndef DRAINAGENT_H
+#define DRAINAGENT_H
 
 #include "agent.h"
 
@@ -16,57 +16,51 @@ class DrainAgent : public Agent
 {
 
 public:
-	DrainAgent(unsigned int site);
-	DrainAgent(unsigned int site, double potential);
-	~DrainAgent();
+    DrainAgent(unsigned int site);
+    DrainAgent(unsigned int site, double potential);
+    ~DrainAgent();
 
-	/**
-	 * Set the nearest neighbours of the agent.
-	 */
-	virtual void setNeighbors(std::vector<Agent *> neighbors);
+    /**
+     * Set the nearest neighbours of the agent.
+     */
+    virtual void setNeighbors(std::vector<Agent *> neighbors);
 
-	/**
-	 * Set the potential of the source.
-	 */
-	virtual void setPotential(double potential) { m_potential = potential; }
+    /**
+     * Set the potential of the source.
+     */
+    virtual void setPotential(double potential) { m_potential = potential; }
 
-	/**
-	 * Get the potential of this agent...
-	 */
-	virtual double potential();
+    /**
+     * Get the potential of this agent...
+     */
+    virtual double potential();
 
-	/**
-	 * Attempt to move a charge to this agent. If the charge is accepted then
-	 * this agent will store that charge in its future state, otherwise the
-	 * attempted transfer failed and the charge will not be stored.
-	 * @return true if accepted, false if not.
-	 */
-	virtual bool acceptCharge(int charge);
+    /**
+     * Attempt to move a charge to this agent. If the charge is accepted then
+     * this agent will store that charge in its future state, otherwise the
+     * attempted transfer failed and the charge will not be stored.
+     * @return true if accepted, false if not.
+     */
+    virtual bool acceptCharge(int charge);
 
-	/**
-	 * Returns the charge of this node.
-	 */
-	virtual int charge();
+    /**
+     * Returns the charge of this node.
+     */
+    virtual int charge();
 
-	/**
-	 * Perform a transport attempt
-	 */
-	virtual Agent* transport();
+    /**
+     * Perform a transport attempt
+     */
+    virtual Agent* transport();
 
-	/**
-	 * Move on to the next time step.
-	 */
-	virtual void completeTick()	{ }
-
-	/**
-	 * Return the site number - mainly for debugging purposes...
-	 */
-	virtual unsigned int site()	{ return m_site; }
+    /**
+     * Move on to the next time step.
+     */
+    virtual void completeTick()	{ }
 
 private:
-	unsigned int m_site;
-	std::vector<Agent *> m_neighbors;
-	double m_potential;
+    std::vector<Agent *> m_neighbors;
+    double m_potential;
 };
 
 } // End namespace Langmuir

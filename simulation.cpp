@@ -219,7 +219,7 @@ void Simulation::updatePotentials()
         for (vector<unsigned int>::iterator j = neighbors.begin();
             j != neighbors.end(); j++)
         {
-            m_agents[*j]->setPotential(tPotential);
+//            m_agents[*j]->setPotential(tPotential);
         }
         cout << "Row " << i << ", potential = " << tPotential << endl;
     }

@@ -20,7 +20,7 @@ class SourceAgent : public Agent
 public:
     SourceAgent(unsigned int site);
     SourceAgent(unsigned int site, double potential);
-    ~SourceAgent();
+    virtual ~SourceAgent();
 
     /**
      * Set the nearest neighbours of the agent.
@@ -60,13 +60,7 @@ public:
      */
     virtual void completeTick() { }
 
-    /**
-     * Return the site number - mainly for debugging purposes...
-     */
-    virtual unsigned int site()	{ return m_site; }
-
 private:
-    unsigned int m_site;
     std::vector<Agent *> m_neighbors;
     double m_potential;
     Rand *m_rand;

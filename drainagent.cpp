@@ -5,13 +5,13 @@ using namespace std;
 namespace Langmuir
 {
 
-DrainAgent::DrainAgent(unsigned int site) :
-	m_site(site), m_potential(0.)
+DrainAgent::DrainAgent(unsigned int site) : Agent(site),
+    m_potential(0.0)
 {
 }
 
-DrainAgent::DrainAgent(unsigned int site, double potential) :
-	m_site(site), m_potential(potential)
+DrainAgent::DrainAgent(unsigned int site, double potential) : Agent(site),
+    m_potential(potential)
 {
 }
 
@@ -21,29 +21,29 @@ DrainAgent::~DrainAgent()
 
 void DrainAgent::setNeighbors(std::vector<Agent *> neighbors)
 {
-	m_neighbors = neighbors;
+    m_neighbors = neighbors;
 }
 
 double DrainAgent::potential()
 {
-	return m_potential;
+    return m_potential;
 }
 
 bool DrainAgent::acceptCharge(int charge)
 {
-	// The source never accepts charges
-	return true;
+    // The source never accepts charges
+    return true;
 }
 
 int DrainAgent::charge()
 {
-	// Always has a charge of 1
-	return 1;
+    // Always has a charge of 1
+    return 1;
 }
 
 Agent* DrainAgent::transport()
 {
-	return 0;
+    return 0;
 }
 
 } // End Langmuir namespace

@@ -29,18 +29,19 @@ include_directories(
 )
 
 include_directories(
-	${CMAKE_SOURCE_DIR}
-	${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 # Set our SRCS (.cpp files)
 SET(SRCS
-	rand.cpp
-	cubicgrid.cpp
-	hoppingagent.cpp
-	sourceagent.cpp
-	drainagent.cpp
-	simulation.cpp
+    rand.cpp
+    cubicgrid.cpp
+    hoppingagent.cpp
+    sourceagent.cpp
+    drainagent.cpp
+    simulation.cpp
+    world.cpp
 )
 
 SET(VIEWSRCS
@@ -50,13 +51,13 @@ SET(VIEWSRCS
 )
 
 SET(MPISRCS
-	rand.cpp
-	cubicgrid.cpp
-	hoppingagent.cpp
-	sourceagent.cpp
-	drainagent.cpp
-	simulation.cpp
-	mpitest.cpp
+    rand.cpp
+    cubicgrid.cpp
+    hoppingagent.cpp
+    sourceagent.cpp
+    drainagent.cpp
+    simulation.cpp
+    mpitest.cpp
 )
 
 SET(qt_SRCS
