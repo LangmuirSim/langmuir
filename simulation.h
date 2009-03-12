@@ -3,90 +3,90 @@
  *
  */
 
-#ifndef __SIMULATION_H
-#define __SIMULATION_H
+#ifndef SIMULATION_H
+#define SIMULATION_H
 
 #include <vector>
 
 namespace Langmuir
 {
 
-class Rand;
-class Grid;
-class Agent;
-class SourceAgent;
-class DrainAgent;
-class Simulation
-{
+  class World;
+  class Grid;
+  class Agent;
+  class SourceAgent;
+  class DrainAgent;
+  class Simulation
+  {
 
-public:
-	Simulation(unsigned int width, unsigned int height, double sourcePotential,
-			double drainPotential);
-	~Simulation();
-	
-	void performIterations(int nIterations);
-	
-	void printGrid();
+  public:
+    Simulation(unsigned int width, unsigned int height, double sourcePotential,
+               double drainPotential);
+    ~Simulation();
 
-private:
-  Rand *m_rand;
-	/**
-	 * Grid instance - used for nearest neighbours, distances etc
-	 */
-	Grid *m_grid;
+    void performIterations(int nIterations);
 
-	/**
-	 * Vector containing a list of all agents. The source is num_agents and the
-	 * drain is num_agents + 1.
-	 */
-	std::vector<Agent *> m_agents;
+    void printGrid();
 
-	/**
-	 * Vector containing a list of the index of each site with a charge on it.
-	 */
-	std::vector<Agent *> m_charges;
-	std::vector<Agent *> m_fCharges;
+  private:
+    World *m_world;
+    /**
+     * Grid instance - used for nearest neighbours, distances etc
+     */
+    Grid *m_grid;
 
-	/**
-	 * Pointer to the source.
-	 */
-	SourceAgent *m_source;
+    /**
+     * Vector containing a list of all agents. The source is num_agents and the
+     * drain is num_agents + 1.
+     */
+    std::vector<Agent *> m_agents;
 
-	/**
-	 * Pointer to the drain.
-	 */
-	DrainAgent *m_drain;
+    /**
+     * Vector containing a list of the index of each site with a charge on it.
+     */
+    std::vector<Agent *> m_charges;
+    std::vector<Agent *> m_fCharges;
 
-	/**
-	 * Create all the agents in the simulation and set up their initial state.
-	 */
-	void createAgents(unsigned int num_agents, double sourcePotential,
-			double drainPotential);
+    /**
+     * Pointer to the source.
+     */
+    SourceAgent *m_source;
 
-	/**
-	 * Destroy the agents once we are done with them.
-	 */
-	void destroyAgents();
+    /**
+     * Pointer to the drain.
+     */
+    DrainAgent *m_drain;
 
-	/**
-	 * Helper function - update the potential at each site. This only needs to 
-	 * be done when initialising the system or when the source and/or drain
-	 * potential is modified.
-	 *
-	 * NOTE: Right now we are assuming that there is one source, one drain and
-	 * that they are parallel. This is a good assumption as it simplifies many
-	 * things in the simulation and also applies to many different real world
-	 * devices. Making a more generic implementation would be more difficult and
-	 * slower.
-	 */
-	void updatePotentials();
+    /**
+     * Create all the agents in the simulation and set up their initial state.
+     */
+    void createAgents(unsigned int num_agents, double sourcePotential,
+                      double drainPotential);
 
-	/**
-	 * Move on to the next time tick - change to the future states, clean up.
-	 */
-	void nextTick();
+    /**
+     * Destroy the agents once we are done with them.
+     */
+    void destroyAgents();
 
-};
+    /**
+     * Helper function - update the potential at each site. This only needs to
+     * be done when initialising the system or when the source and/or drain
+     * potential is modified.
+     *
+     * NOTE: Right now we are assuming that there is one source, one drain and
+     * that they are parallel. This is a good assumption as it simplifies many
+     * things in the simulation and also applies to many different real world
+     * devices. Making a more generic implementation would be more difficult and
+     * slower.
+     */
+    void updatePotentials();
+
+    /**
+     * Move on to the next time tick - change to the future states, clean up.
+     */
+    void nextTick();
+
+  };
 
 } // End namespace Langmuir
 

@@ -16,8 +16,8 @@ class DrainAgent : public Agent
 {
 
 public:
-    DrainAgent(unsigned int site);
-    DrainAgent(unsigned int site, double potential);
+    DrainAgent(World *world, unsigned int site);
+    DrainAgent(World *world, unsigned int site, double potential);
     ~DrainAgent();
 
     /**

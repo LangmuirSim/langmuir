@@ -1,9 +1,5 @@
-/*
- *  SourceAgent - agent to act as a source of charges
- */
-
-#ifndef SOURCEAGENT_H
-#define SOURCEAGENT_H
+#ifndef CHARGEAGENT_H
+#define CHARGEAGENT_H
 
 #include "agent.h"
 
@@ -12,28 +8,17 @@
 namespace Langmuir
 {
 
-  class SourceAgent : public Agent
+  class ChargeAgent : public Agent
   {
 
   public:
-    SourceAgent(World *world, unsigned int site);
-    SourceAgent(World *world, unsigned int site, double potential);
-    virtual ~SourceAgent();
+    ChargeAgent(World *world, unsigned int site);
+    virtual ~ChargeAgent();
 
     /**
      * Set the nearest neighbours of the agent.
      */
     virtual void setNeighbors(std::vector<Agent *> neighbors);
-
-    /**
-     * Set the potential of the source.
-     */
-    virtual void setPotential(double potential)	{ m_potential = potential; }
-
-    /**
-     * Get the potential of this agent...
-     */
-    virtual double potential();
 
     /**
      * Attempt to move a charge to this agent. If the charge is accepted then
@@ -44,27 +29,32 @@ namespace Langmuir
     virtual bool acceptCharge(int charge);
 
     /**
-     * Returns the charge of this node.
-     */
+   * Returns the charge of this node.
+   */
     virtual int charge();
 
+    virtual int fCharge();
+
+    virtual double pBarrier();
+
+    virtual void setPBarrier(double pBarrier);
+
     /**
-     * Perform a transport attempt.
+     * Perform a transport attempt
      */
     virtual Agent* transport();
 
     /**
      * Move on to the next time step.
      */
-    virtual void completeTick() { }
+    virtual void completeTick();
 
   private:
     std::vector<Agent *> m_neighbors;
-    double m_potential;
+    int m_charge, m_fCharge;
     double m_pBarrier;
-    int m_charges; // Number of charges injected
   };
 
 } // End namespace Langmuir
 
-#endif
+#endif // CHARGEAGENT_H

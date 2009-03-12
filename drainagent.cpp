@@ -5,13 +5,13 @@ using namespace std;
 namespace Langmuir
 {
 
-DrainAgent::DrainAgent(unsigned int site) : Agent(site),
+DrainAgent::DrainAgent(World *world, unsigned int site) : Agent(world, site),
     m_potential(0.0)
 {
 }
 
-DrainAgent::DrainAgent(unsigned int site, double potential) : Agent(site),
-    m_potential(potential)
+DrainAgent::DrainAgent(World *world, unsigned int site, double potential) :
+    Agent(world, site), m_potential(potential)
 {
 }
 

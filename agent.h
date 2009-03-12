@@ -10,10 +10,14 @@
 
 namespace Langmuir{
 
+  class World;
+
   class Agent {
 
   public:
-    Agent (unsigned int site) { m_site = site; }
+    Agent (World *world = 0, unsigned int site = 0) :
+        m_site(site), m_world(world)
+    {}
     virtual ~Agent() { }
 
     /**
@@ -74,6 +78,7 @@ namespace Langmuir{
   protected:
     unsigned int m_site;
     unsigned int m_fSite;
+    World *m_world;
 
   };
 

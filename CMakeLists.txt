@@ -37,7 +37,6 @@ include_directories(
 SET(SRCS
     rand.cpp
     cubicgrid.cpp
-    hoppingagent.cpp
     sourceagent.cpp
     drainagent.cpp
     simulation.cpp
@@ -53,7 +52,6 @@ SET(VIEWSRCS
 SET(MPISRCS
     rand.cpp
     cubicgrid.cpp
-    hoppingagent.cpp
     sourceagent.cpp
     drainagent.cpp
     simulation.cpp
@@ -69,19 +67,19 @@ qt4_automoc(${qt_SRCS})
 ADD_DEFINITIONS ( -Wall )
 
 # Add the executables
-ADD_EXECUTABLE( langmuirview langmuirview.cpp ${VIEWSRCS} ${qt_SRCS} )
+#ADD_EXECUTABLE( langmuirview langmuirview.cpp ${VIEWSRCS} ${qt_SRCS} )
 ADD_EXECUTABLE( test test.cpp ${qt_SRCS} ${SRCS} )
-ADD_EXECUTABLE( mpitest ${qt_SRCS} ${MPISRCS} )
+#ADD_EXECUTABLE( mpitest ${qt_SRCS} ${MPISRCS} )
 
 # Libraries the executable needs to link to
-TARGET_LINK_LIBRARIES( langmuirview #${MPI_LIBRARIES}
-  ${Boost_LIBRARIES}
-  ${QT_LIBRARIES})
+#TARGET_LINK_LIBRARIES( langmuirview #${MPI_LIBRARIES}
+#  ${Boost_LIBRARIES}
+#  ${QT_LIBRARIES})
 
 TARGET_LINK_LIBRARIES( test ${QT_LIBRARIES}
   ${Boost_LIBRARIES})
 
-TARGET_LINK_LIBRARIES( mpitest
+#TARGET_LINK_LIBRARIES( mpitest
 #  ${MPI_LIBRARIES}
-  ${Boost_LIBRARIES}
-  ${QT_LIBRARIES})
+#  ${Boost_LIBRARIES}
+#  ${QT_LIBRARIES})
