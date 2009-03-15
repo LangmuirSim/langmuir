@@ -51,8 +51,7 @@ namespace Langmuir
 
   private:
     std::vector<Agent *> m_neighbors;
-    int m_charge, m_fCharge;
-    double m_pBarrier;
+    int m_charge;
   };
 
 } // End namespace Langmuir

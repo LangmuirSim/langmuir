@@ -33,7 +33,7 @@ namespace Langmuir
     /**
      * Get the potential of this agent...
      */
-    virtual double potential();
+    virtual double potential() { return m_potential; }
 
     /**
      * Attempt to move a charge to this agent. If the charge is accepted then

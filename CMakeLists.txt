@@ -1,8 +1,11 @@
 # Set the project's name
 PROJECT(langmuir)
 
-cmake_minimum_required(VERSION 2.6)
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
 
+cmake_minimum_required(VERSION 2.6.2)
+
+find_package(Eigen2 REQUIRED) # find and setup Eigen2
 # Find and set up MPI
 #find_package(MPI REQUIRED)
 
@@ -29,8 +32,9 @@ include_directories(
 )
 
 include_directories(
-    ${CMAKE_SOURCE_DIR}
-    ${CMAKE_CURRENT_BINARY_DIR}
+  ${CMAKE_SOURCE_DIR}
+  ${CMAKE_CURRENT_BINARY_DIR}
+  ${EIGEN2_INCLUDE_DIR}
 )
 
 # Set our SRCS (.cpp files)
