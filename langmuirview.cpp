@@ -10,8 +10,8 @@ int main(int argc, char **argv)
 {
   QApplication app(argc, argv);
 
-  GridScene scene(100, 600);
-  scene.setSceneRect(0, 0, 100, 600);
+  GridScene scene(60, 10);
+  scene.setSceneRect(0, 0, 60, 10);
   scene.setItemIndexMethod(QGraphicsScene::NoIndex);
 
   GridView view(&scene);

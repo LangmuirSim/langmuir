@@ -5,11 +5,16 @@
 #ifndef WORLD_H
 #define WORLD_H
 
+#include <vector>
+
 namespace Langmuir
 {
 
   class Grid;
   class Rand;
+  class ChargeAgent;
+
+  const unsigned int errorValue = -1;
 
   class World
   {
@@ -28,12 +33,20 @@ namespace Langmuir
      */
     double random();
 
+    std::vector<ChargeAgent *> * charges();
+
   private:
     double m_eField;  // The electric field
     Grid *m_grid;     // The grid in use in the world
     Rand *m_rand;     // Random number generator
+    std::vector<ChargeAgent *> m_charges; // Charge carriers in the system
 
   };
+
+  inline std::vector<ChargeAgent *> * World::charges()
+  {
+    return &m_charges;
+  }
 
 }
 

@@ -8,6 +8,8 @@
 
 #include <vector>
 
+#include <Eigen/Core>
+
 namespace Langmuir
 {
 
@@ -20,6 +22,11 @@ namespace Langmuir
     virtual ~Grid()
     {
     }
+
+    /**
+     * Get the 2D position vector of the specified site.
+     */
+    virtual Eigen::Vector2d position(unsigned int site) = 0;
 
     /**
      * Get the nearest neighbours for the specified site.
@@ -44,12 +51,12 @@ namespace Langmuir
     /**
      * Gets the width of the grid.
      */
-    virtual unsigned int getWidth() = 0;
+    virtual unsigned int width() = 0;
 
     /**
      * Gets the height fo the grid.
      */
-    virtual unsigned int getHeight() = 0;
+    virtual unsigned int height() = 0;
 
     /**
      * Get the total distance between the two sites.
@@ -72,15 +79,56 @@ namespace Langmuir
     virtual unsigned int getIndex(unsigned int column, unsigned int row) = 0;
 
     /**
+     * Set the agent at the current site
+     */
+    virtual void setAgent(unsigned int site, Agent *agent);
+
+    /**
      * Get the Agent at the specified site, or 0 if empty
      */
-    virtual Agent * agent(unsigned int site, bool future = false) = 0;
+    virtual Agent * agent(unsigned int site);
+
+    /**
+     * Set the agent at the current site
+     */
+    virtual void setSiteID(unsigned int site, short id);
+
+    /**
+     * Get the Agent at the specified site, or 0 if empty
+     */
+    virtual short siteID(unsigned int site);
 
     /**
      * Get the neighboring agents for the specified site.
      */
-    virtual std::vector<Agent *> neighborAgents(unsigned int site, bool future = false) = 0;
+    virtual std::vector<Agent *> neighborAgents(unsigned int site) = 0;
+
+  protected:
+    std::vector<Agent *> m_agents;
+    std::vector<short> m_siteID;  // The ID of the site at the index
   };
+
+  inline void Grid::setAgent(unsigned int site, Agent *agent)
+  {
+    m_agents[site] = agent;
+  }
+
+  inline Agent * Grid::agent(unsigned int site)
+  {
+    // No range checking, etc
+    return m_agents[site];
+  }
+
+  inline void Grid::setSiteID(unsigned int site, short id)
+  {
+    m_siteID[site] = id;
+  }
+
+  inline short Grid::siteID(unsigned int site)
+  {
+    // No range checking, etc
+    return m_siteID[site];
+  }
 
 } // End namespace Langmuir
 

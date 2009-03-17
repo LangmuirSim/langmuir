@@ -16,14 +16,8 @@ class DrainAgent : public Agent
 {
 
 public:
-    DrainAgent(World *world, unsigned int site);
-    DrainAgent(World *world, unsigned int site, double potential);
+    DrainAgent(World *world, unsigned int site, double potential = 0.0);
     ~DrainAgent();
-
-    /**
-     * Set the nearest neighbours of the agent.
-     */
-    virtual void setNeighbors(std::vector<Agent *> neighbors);
 
     /**
      * Set the potential of the source.
@@ -33,7 +27,7 @@ public:
     /**
      * Get the potential of this agent...
      */
-    virtual double potential();
+    virtual double potential() { return m_potential; }
 
     /**
      * Attempt to move a charge to this agent. If the charge is accepted then
@@ -51,15 +45,9 @@ public:
     /**
      * Perform a transport attempt
      */
-    virtual Agent* transport();
-
-    /**
-     * Move on to the next time step.
-     */
-    virtual void completeTick()	{ }
+    virtual unsigned int transport();
 
 private:
-    std::vector<Agent *> m_neighbors;
     double m_potential;
 };
 

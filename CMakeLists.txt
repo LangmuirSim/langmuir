@@ -18,7 +18,7 @@ message(STATUS "MPI_INCLUDE_PATH: ${MPI_INCLUDE_PATH}")
 message(STATUS "MPI_LINK_FLAGS: ${MPI_LINK_FLAGS}")
 message(STATUS "MPI_LIBRARIES: ${MPI_LIBRARIES}")
 
-set(QT_MIN_VERSION "4.3.4") # we need at least version 4.3 of Qt
+set(QT_MIN_VERSION "4.4.0") # we need at least version 4.4 of Qt
 find_package(Qt4 REQUIRED) # find and setup Qt4 for this project
 
 include(${QT_USE_FILE})
@@ -43,6 +43,7 @@ SET(SRCS
     cubicgrid.cpp
     sourceagent.cpp
     drainagent.cpp
+    chargeagent.cpp
     simulation.cpp
     world.cpp
 )
@@ -71,14 +72,14 @@ qt4_automoc(${qt_SRCS})
 ADD_DEFINITIONS ( -Wall )
 
 # Add the executables
-#ADD_EXECUTABLE( langmuirview langmuirview.cpp ${VIEWSRCS} ${qt_SRCS} )
+ADD_EXECUTABLE( langmuirview langmuirview.cpp ${VIEWSRCS} ${qt_SRCS} )
 ADD_EXECUTABLE( test test.cpp ${qt_SRCS} ${SRCS} )
 #ADD_EXECUTABLE( mpitest ${qt_SRCS} ${MPISRCS} )
 
 # Libraries the executable needs to link to
-#TARGET_LINK_LIBRARIES( langmuirview #${MPI_LIBRARIES}
-#  ${Boost_LIBRARIES}
-#  ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES( langmuirview #${MPI_LIBRARIES}
+  ${Boost_LIBRARIES}
+  ${QT_LIBRARIES})
 
 TARGET_LINK_LIBRARIES( test ${QT_LIBRARIES}
   ${Boost_LIBRARIES})

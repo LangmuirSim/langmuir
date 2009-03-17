@@ -8,8 +8,6 @@
 
 #include "grid.h"
 
-#include <vector>
-
 namespace Langmuir
 {
 
@@ -18,11 +16,14 @@ namespace Langmuir
 
   public:
 
-    CubicGrid();
-
-    CubicGrid(unsigned int width, unsigned int height);
+    CubicGrid(unsigned int width = 0, unsigned int height = 0);
 
     ~CubicGrid();
+
+    /**
+     * Get the 2D position vector of the specified site.
+     */
+    Eigen::Vector2d position(unsigned int site);
 
     /**
      * Get the nearest neighbours for the specified site.
@@ -47,12 +48,12 @@ namespace Langmuir
     /**
      * Gets the width of the grid.
      */
-    unsigned int getWidth();
+    unsigned int width();
 
     /**
      * Gets the height fo the grid.
      */
-    unsigned int getHeight();
+    unsigned int height();
 
     /**
      * Get the total distance between the two sites.
@@ -75,32 +76,21 @@ namespace Langmuir
     unsigned int getIndex(unsigned int column, unsigned int row);
 
     /**
-     * Get the Agent at the specified site, or 0 if empty
-     */
-    Agent * agent(unsigned int site, bool future = false);
-
-    /**
      * Get the neighboring agents for the specified site.
      */
-    virtual std::vector<Agent *> neighborAgents(unsigned int site, bool future = false);
+    std::vector<Agent *> neighborAgents(unsigned int site);
 
   protected:
     unsigned int getRow(unsigned int site);
     unsigned int getColumn(unsigned int site);
     unsigned int m_width;
     unsigned int m_height;
-    std::vector<Agent *> m_sites;       // Current site occupation
-    std::vector<Agent *> m_futureSites; // Future site occupation (next tick)
 
   };
 
-  inline Agent * CubicGrid::agent(unsigned int site, bool future)
+  inline Eigen::Vector2d CubicGrid::position(unsigned int site)
   {
-    // No range checking, etc
-    if (future)
-      return m_futureSites[site];
-    else
-      return m_sites[site];
+    return Eigen::Vector2d(0.5 + (site % m_width), 0.5 + int(site / m_width));
   }
 
 } // End namespace Langmuir

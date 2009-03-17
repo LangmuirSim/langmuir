@@ -2,20 +2,21 @@
 
 #include "world.h"
 #include "cubicgrid.h"
-#include "hoppingagent.h"
+#include "chargeagent.h"
 #include "sourceagent.h"
 #include "drainagent.h"
 
 #include <iostream>
 #include <cstdlib>
 
-using namespace std;
-
 namespace Langmuir
 {
+  using std::vector;
+  using std::cout;
+  using std::endl;
 
-  Simulation::Simulation(unsigned int width, unsigned int height, double sourcePotential,
-                         double drainPotential)
+  Simulation::Simulation(unsigned int width, unsigned int height,
+                         double sourcePotential, double drainPotential)
   {
     m_world = new World;
     m_grid = new CubicGrid(width, height);
@@ -23,6 +24,8 @@ namespace Langmuir
 
     // Create the agents for the simulation
     createAgents(width * height, sourcePotential, drainPotential);
+    // The e-field is constant between the electrodes - V / d
+    m_world->setEField((drainPotential - sourcePotential) / (width*1.0e-9));
   }
 
   Simulation::~Simulation()
@@ -37,160 +40,93 @@ namespace Langmuir
   void Simulation::performIterations(int nIterations)
   {
     //	cout << "Entered performIterations function.\n";
-    Agent* t = 0;
-    Agent* current = 0;
-    for (int i = 0; i < nIterations; i++)
-    {
-      //		cout << "Iteration: " << i << endl;
-      // Examine existing charges
-      for (unsigned int j = 0; j < m_charges.size(); j++) {
-        current = m_charges[j];
-        t = current->transport();
-        if (t == m_drain) {
-          //				cout << "Erased a charge that was accepted by the drain.\n";
-          for (vector<Agent *>::iterator it = m_fCharges.begin();
-          it != m_fCharges.end(); it++) {
-            if ((*it) == current) {
-              m_fCharges.erase(it);
-              break;
-            }
-          }
-        }
-        else if (t != 0) {
-          //				cout << "Move: " << current->site() << " -> " << t->site() << endl;
-          //        cout << "Charge: " << m_charges[j]->fCharge() << "->" << t->fCharge() << endl;
-          for (vector<Agent *>::iterator it = m_fCharges.begin();
-          it != m_fCharges.end(); ++it) {
-            if (*it == current)
-              (*it) = t;
-          }
-        }
-        t = 0;
+    for (int i = 0; i <  nIterations; ++i) {
+      // Attempt to transport the charges through the film
+      vector<ChargeAgent *> &charges = *m_world->charges();
+      cout << "Charges in system: " << charges.size() << endl;
+      for (vector<ChargeAgent *>::const_iterator it = charges.begin();
+           it != charges.end(); ++it) {
+        (*it)->transport();
       }
-      // Now inject some new charges
-      t = m_source->transport();
-      if (t != 0) {
-        // Successful current injection event
-        m_fCharges.push_back(t);
-        //			cout << "Charge injected into site " << t->site() << "...\n";
-      }
-      // Now we have finished this time tick
-      //		cout << "Time tick " << i << " completed, finalising state and moving on.\n";
-      m_charges.clear();
-      m_charges = m_fCharges;
-      /*
-    int count = 0;
-    int fCount = 0;
-    for (unsigned int i = 0; i < m_agents.size()-2; i++) {
-      if (m_agents[i]->charge() == -1)
-        ++count;
-      if (m_agents[i]->fCharge() == -1)
-        ++fCount;
-    }
 
-    if (count != fCount)
-      cout << "WARNING: count and fCount do not agree: " << count << ", " << fCount << endl;
-*/
-      // Move on to the next time tick
+      // Begin by performing charge injection at the source
+      unsigned int site = m_source->transport();
+      if (site != errorValue) {
+        cout << "New charge injected! " << site << endl;
+        m_world->charges()->push_back(new ChargeAgent(m_world, site));
+      }
+      else
+        cout << "Simulate loop returned " << site << endl;
+
+      if (m_world->grid()->agent(15))
+      cout << m_world->grid()->agent(15) << "->"
+           << m_world->grid()->agent(15)->site();
+
+      // Now we are done with this iteration - move on to the next tick!
       nextTick();
-      /*    cout << "Charges at sites: (" << m_charges.size() << ") ";
-        for (vector<Agent *>::iterator it = m_charges.begin();
-            it != m_charges.end(); it++)
-            cout << (*it)->site() << " ";
-        cout << endl;
-*/
-      unsigned int counter = 0;
-      for (unsigned int i = 0; i < m_agents.size()-2; i++)
-        if (m_agents[i]->fCharge() == -1)
-          ++counter;
-
-      if (m_charges.size() != counter)
-        cout << "Sites with charge: " << m_charges.size() << " Sites reporting a charge: "
-            << counter << endl;
-
-      t = 0;
     }
   }
 
   void Simulation::nextTick()
   {
     // Iterate over all sites to change their state
-    for (vector<Agent *>::iterator it = m_agents.begin();
-    it != m_agents.end(); it++)
+    vector<ChargeAgent *> &charges = *m_world->charges();
+    for (vector<ChargeAgent *>::const_iterator it = charges.begin();
+         it != charges.end(); ++it) {
       (*it)->completeTick();
+    }
   }
 
   void Simulation::printGrid()
   {
     system("clear");
-    unsigned int width = m_grid->getWidth();
-    for (unsigned int i = 0; i < m_agents.size()-2; i++) {
-      if (i % width == 0)
-        cout << "||";
-      if (m_agents[i]->charge() == -1 && m_agents[i]->pBarrier() < 0.6)
-        cout << "*";
-      else if (m_agents[i]->charge() == -1 && m_agents[i]->pBarrier() > 0.599)
-        cout << "O";
-      else if (m_agents[i]->charge() == 0 && m_agents[i]->pBarrier() > 0.599)
-        cout << "X";
-      else
-        cout << " ";
-      if (i % width == width-1)
-        cout << "||\n";
+    unsigned int width = m_world->grid()->width();
+    unsigned int height = m_world->grid()->height();
+    for (unsigned int j = 0; j < height; ++j) {
+      cout << "||";
+      for (unsigned int i = 0; i < width; ++i) {
+        if (m_world->grid()->agent(i+j*width)) // Charge is present
+          cout << "*";
+        else if (m_world->grid()->siteID(i+j*width) == 1)
+          cout << "O";
+//      else if (charges[i]->charge() == 0 && charges[i]->pBarrier() > 0.599)
+//        cout << "X";
+        else
+          cout << " ";
+      }
+      cout << "||\n";
     }
   }
 
-  void Simulation::createAgents(unsigned int num_agents, double sourcePotential,
+  void Simulation::createAgents(unsigned int numAgents, double sourcePotential,
                                 double drainPotential)
   {
-    m_agents.resize(num_agents+2);
+//    m_agents.resize(numAgents+2);
     // Add the normal agents
-    for (unsigned int i = 0; i < num_agents; i++) {
-//      m_agents[i] = new HoppingAgent(m_world, i, m_grid);
+    for (unsigned int i = 0; i < numAgents; ++i) {
       // Mix some trap sites in
-      if (m_world->random() > 0.995)
-        m_agents[i]->setPBarrier(0.999);
+      if (m_world->random() > 0.95)
+        m_world->grid()->setSiteID(i, 1);
     }
     // Add the source and the drain
-    m_source = new SourceAgent(m_world, num_agents, sourcePotential);
-    m_agents[num_agents] = m_source;
-    m_drain = new DrainAgent(m_world, num_agents+1, drainPotential);
-    m_agents[num_agents+1] = m_drain;
+    m_source = new SourceAgent(m_world, numAgents, sourcePotential);
+//    m_agents[num_agents] = m_source;
+    m_world->grid()->setAgent(numAgents, m_source);
+    m_drain = new DrainAgent(m_world, numAgents+1, drainPotential);
+//    m_agents[num_agents+1] = m_drain;
+    m_world->grid()->setAgent(numAgents+1, m_drain);
     // Now to assign nearest neighbours for the electrodes.
     vector<unsigned int> neighbors = m_grid->col(0);
-    vector<Agent *> pNeighbors;
-    for (unsigned int j = 0; j < neighbors.size(); j++)
-    {
-      pNeighbors.push_back(m_agents[neighbors[j]]);
-    }
-    m_source->setNeighbors(pNeighbors);
+    cout << "Source neighbors: ";
+    for (int i = 0; i < neighbors.size(); ++i)
+      cout << neighbors[i] << " ";
+    cout << endl;
+    m_source->setNeighbors(neighbors);
     neighbors.clear();
-    pNeighbors.clear();
 
-    neighbors = m_grid->col(m_grid->getWidth()-1);
-    for (unsigned int j = 0; j < neighbors.size(); j++)
-    {
-      pNeighbors.push_back(m_agents[neighbors[j]]);
-    }
-    m_drain->setNeighbors(pNeighbors);
+    neighbors = m_grid->col(m_grid->width()-1);
+    m_drain->setNeighbors(neighbors);
     neighbors.clear();
-    pNeighbors.clear();
-
-    for (unsigned int i = 0; i < num_agents; i++)
-    {
-      neighbors = m_grid->neighbors(i);
-      cout << "Finding neighbours for site " << i << ": ";
-      for (unsigned int j = 0; j < neighbors.size(); j++)
-      {
-        cout << neighbors[j] << ", ";
-        pNeighbors.push_back(m_agents[neighbors[j]]);
-      }
-      cout << endl;
-      m_agents[i]->setNeighbors(pNeighbors);
-      neighbors.clear();
-      pNeighbors.clear();
-    }
-    updatePotentials();
   }
 
   void Simulation::destroyAgents()
@@ -207,7 +143,7 @@ namespace Langmuir
     // We are assuming one source, one drain that are parallel.
     // The most efficient way to calculate this is to work out the potential
     // for each column in our system and then assign it to each agent.
-    int width = m_grid->getWidth();
+    int width = m_grid->width();
 
     double m = (m_drain->potential() - m_source->potential()) / double(width);
     double c = m_source->potential();

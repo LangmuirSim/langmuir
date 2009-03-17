@@ -16,43 +16,29 @@ namespace Langmuir
     virtual ~ChargeAgent();
 
     /**
-     * Set the nearest neighbours of the agent.
+     * Returns the charge of this node.
      */
-    virtual void setNeighbors(std::vector<Agent *> neighbors);
-
-    /**
-     * Attempt to move a charge to this agent. If the charge is accepted then
-     * this agent will store that charge in its future state, otherwise the
-     * attempted transfer failed and the charge will not be stored.
-     * @return true if accepted, false if not.
-     */
-    virtual bool acceptCharge(int charge);
-
-    /**
-   * Returns the charge of this node.
-   */
     virtual int charge();
-
-    virtual int fCharge();
-
-    virtual double pBarrier();
-
-    virtual void setPBarrier(double pBarrier);
 
     /**
      * Perform a transport attempt
      */
-    virtual Agent* transport();
+    virtual unsigned int transport();
 
     /**
      * Move on to the next time step.
      */
     virtual void completeTick();
 
-  private:
-    std::vector<Agent *> m_neighbors;
+  protected:
     int m_charge;
   };
+
+
+  inline int ChargeAgent::charge()
+  {
+    return m_charge;
+  }
 
 } // End namespace Langmuir
 

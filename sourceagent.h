@@ -16,14 +16,8 @@ namespace Langmuir
   {
 
   public:
-    SourceAgent(World *world, unsigned int site);
-    SourceAgent(World *world, unsigned int site, double potential);
+    SourceAgent(World *world, unsigned int site, double potential = 0.0);
     virtual ~SourceAgent();
-
-    /**
-     * Set the nearest neighbours of the agent.
-     */
-    virtual void setNeighbors(std::vector<Agent *> neighbors);
 
     /**
      * Set the potential of the source.
@@ -36,14 +30,6 @@ namespace Langmuir
     virtual double potential() { return m_potential; }
 
     /**
-     * Attempt to move a charge to this agent. If the charge is accepted then
-     * this agent will store that charge in its future state, otherwise the
-     * attempted transfer failed and the charge will not be stored.
-     * @return true if accepted, false if not.
-     */
-    virtual bool acceptCharge(int charge);
-
-    /**
      * Returns the charge of this node.
      */
     virtual int charge();
@@ -51,15 +37,9 @@ namespace Langmuir
     /**
      * Perform a transport attempt.
      */
-    virtual Agent* transport();
-
-    /**
-     * Move on to the next time step.
-     */
-    virtual void completeTick() { }
+    virtual unsigned int transport();
 
   private:
-    std::vector<Agent *> m_neighbors;
     double m_potential;
     double m_pBarrier;
     int m_charges; // Number of charges injected

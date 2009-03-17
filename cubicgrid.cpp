@@ -7,19 +7,17 @@ using namespace std;
 namespace Langmuir
 {
 
-  CubicGrid::CubicGrid() :
-      m_width(0), m_height(0)
-  {
-  }
+  using Eigen::Vector2d;
 
   CubicGrid::CubicGrid(unsigned int width, unsigned int height) :
       m_width(width), m_height(height)
   {
+    m_agents.resize(width*height+2, 0);
+    m_siteID.resize(width*height, 0);
   }
 
   CubicGrid::~CubicGrid()
   {
-
   }
 
   vector<unsigned int> CubicGrid::neighbors(unsigned int site)
@@ -75,14 +73,16 @@ namespace Langmuir
   {
     m_width = width;
     m_height = height;
+    m_agents.resize(width*height+2, 0);
+    m_siteID.resize(width*height, 0);
   }
 
-  unsigned int CubicGrid::getWidth()
+  unsigned int CubicGrid::width()
   {
     return m_width;
   }
 
-  unsigned int CubicGrid::getHeight()
+  unsigned int CubicGrid::height()
   {
     return m_height;
   }
@@ -90,7 +90,7 @@ namespace Langmuir
   double CubicGrid::getTotalDistance(unsigned int site1, unsigned int site2)
   {
     return sqrt((getRow(site1) - getRow(site2)) * (getRow(site1)
-                                                   - getRow(site2)) + (getColumn(site1) - getColumn(site2))
+                 - getRow(site2)) + (getColumn(site1) - getColumn(site2))
                 * (getColumn(site1) - getColumn(site2)));
   }
 
@@ -119,7 +119,7 @@ namespace Langmuir
     return m_width * row + column;
   }
 
-  std::vector<Agent *> CubicGrid::neighborAgents(unsigned int site, bool future)
+  std::vector<Agent *> CubicGrid::neighborAgents(unsigned int site)
   {
     // Return the indexes of all nearest neighbours
     vector<Agent *> neighbors;
@@ -127,21 +127,21 @@ namespace Langmuir
     unsigned int row = getRow(site);
     // To the left
     if (column > 0)
-      neighbors.push_back(agent(getIndex(column-1, row), future));
+      neighbors.push_back(agent(getIndex(column-1, row)));
     // To the right
     if (column < m_width - 1)
-      neighbors.push_back(agent(getIndex(column+1, row), future));
+      neighbors.push_back(agent(getIndex(column+1, row)));
     // Up
     if (row > 0)
-      neighbors.push_back(agent(getIndex(column, row-1), future));
+      neighbors.push_back(agent(getIndex(column, row-1)));
     // Down
     if (row < m_height - 1)
-      neighbors.push_back(agent(getIndex(column, row+1), future));
+      neighbors.push_back(agent(getIndex(column, row+1)));
 
     // Now for the source and the drain....
-    if (column == 0)
+    if (column == 0) // Add the source agent
       neighbors.push_back(agent(getIndex(m_width-1, m_height-1) + 1));
-    if (column == m_width - 1)
+    if (column == m_width - 1) // Add the drain agent
       neighbors.push_back(agent(getIndex(m_width-1, m_height-1) + 2));
 
     // Now we have all the nearest neighbours - between 2 and 4 in this case
