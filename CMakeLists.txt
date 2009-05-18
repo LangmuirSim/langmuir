@@ -1,5 +1,5 @@
 # Set the project's name
-PROJECT(langmuir)
+project(langmuir)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
 
@@ -18,7 +18,7 @@ message(STATUS "MPI_INCLUDE_PATH: ${MPI_INCLUDE_PATH}")
 message(STATUS "MPI_LINK_FLAGS: ${MPI_LINK_FLAGS}")
 message(STATUS "MPI_LIBRARIES: ${MPI_LIBRARIES}")
 
-set(QT_MIN_VERSION "4.4.0") # we need at least version 4.4 of Qt
+set(QT_MIN_VERSION "4.5.0") # we need at least version 4.4 of Qt
 find_package(Qt4 REQUIRED) # find and setup Qt4 for this project
 
 include(${QT_USE_FILE})
@@ -38,53 +38,56 @@ include_directories(
 )
 
 # Set our SRCS (.cpp files)
-SET(SRCS
-    rand.cpp
-    cubicgrid.cpp
-    sourceagent.cpp
-    drainagent.cpp
-    chargeagent.cpp
-    simulation.cpp
-    world.cpp
-)
-
-SET(VIEWSRCS
+set(SRCS
   rand.cpp
   cubicgrid.cpp
-  gridview.cpp
+  sourceagent.cpp
+  drainagent.cpp
+  chargeagent.cpp
+  simulation.cpp
+  world.cpp
 )
 
-SET(MPISRCS
-    rand.cpp
-    cubicgrid.cpp
-    sourceagent.cpp
-    drainagent.cpp
-    simulation.cpp
-    mpitest.cpp
+set(VIEWSRCS
+  rand.cpp
+  cubicgrid.cpp
 )
 
-SET(qt_SRCS
+set(MPISRCS
+  rand.cpp
+  cubicgrid.cpp
+  sourceagent.cpp
+  drainagent.cpp
+  simulation.cpp
+  mpitest.cpp
+)
+
+set(qt_SRCS
   gridview.cpp)
 
 qt4_automoc(${qt_SRCS})
 
 # Enable warnings
-ADD_DEFINITIONS ( -Wall )
+add_definitions(-Wall)
 
 # Add the executables
-ADD_EXECUTABLE( langmuirview langmuirview.cpp ${VIEWSRCS} ${qt_SRCS} )
-ADD_EXECUTABLE( test test.cpp ${qt_SRCS} ${SRCS} )
-#ADD_EXECUTABLE( mpitest ${qt_SRCS} ${MPISRCS} )
+add_executable(langmuirview langmuirview.cpp ${VIEWSRCS} ${qt_SRCS})
+add_executable(test test.cpp ${qt_SRCS} ${SRCS})
+
+#add_executable(mpitest ${qt_SRCS} ${MPISRCS})
 
 # Libraries the executable needs to link to
-TARGET_LINK_LIBRARIES( langmuirview #${MPI_LIBRARIES}
+target_link_libraries(langmuirview #${MPI_LIBRARIES}
   ${Boost_LIBRARIES}
   ${QT_LIBRARIES})
 
-TARGET_LINK_LIBRARIES( test ${QT_LIBRARIES}
+target_link_libraries(test ${QT_LIBRARIES}
   ${Boost_LIBRARIES})
 
-#TARGET_LINK_LIBRARIES( mpitest
+#target_link_libraries(mpitest
 #  ${MPI_LIBRARIES}
 #  ${Boost_LIBRARIES}
 #  ${QT_LIBRARIES})
+
+add_executable(qtconcurrent qtconcurrent.cpp)
+target_link_libraries(qtconcurrent ${QT_LIBRARIES})

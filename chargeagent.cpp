@@ -35,17 +35,23 @@ namespace Langmuir{
     // Figure out the force on the charge
     vector<ChargeAgent *> &charges = *m_world->charges();
     Vector2d sum(0.0, 0.0);
+    double potential(0.0);
     for (unsigned int i = 0; i < charges.size(); ++i) {
       if (charges[i] == this)
         continue;
       Vector2d diff = pos - grid->position(charges[i]->site());
+      // Force
       sum += (m_charge * q * diff.normalized()) / diff.squaredNorm();
+      // Potential
+      potential += (m_charge * q) / diff.norm();
     }
     sum *= q4pe;
     force += sum;
 
     cout << "E-field: " << m_world->eField() << endl
          << "force on charge; " << force.x() << ", " << force.y() << endl;
+
+    // Change in potential energy is -qEd (d = distance)
 
 /*    cout << "Position: " << pos.x() << ", " << pos.y() << endl;
     for (unsigned int i = 0; i < m_neighbors.size(); ++i) {
@@ -69,7 +75,6 @@ namespace Langmuir{
 //      cout << "Called setAgent in grid..." << m_site << endl;
     }
   }
-
 
 }
 

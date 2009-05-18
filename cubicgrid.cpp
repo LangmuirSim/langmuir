@@ -52,8 +52,7 @@ namespace Langmuir
   vector<unsigned int> CubicGrid::row(unsigned int row)
   {
     vector<unsigned int> vRow;
-    for (unsigned int i = 0; i < m_width; i++)
-    {
+    for (unsigned int i = 0; i < m_width; i++) {
       vRow.push_back(getIndex(i, row));
     }
     return vRow;
@@ -62,8 +61,7 @@ namespace Langmuir
   vector<unsigned int> CubicGrid::col(unsigned int col)
   {
     vector<unsigned int> vCol;
-    for (unsigned int i = 0; i < m_height; i++)
-    {
+    for (unsigned int i = 0; i < m_height; i++) {
       vCol.push_back(getIndex(col, i));
     }
     return vCol;

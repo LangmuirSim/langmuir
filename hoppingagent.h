@@ -24,11 +24,6 @@ namespace Langmuir
     virtual ~HoppingAgent();
 
     /**
-     * Set the nearest neighbours of the agent.
-     */
-    virtual void setNeighbors(std::vector<Agent *> neighbors);
-
-    /**
      * Attempt to move a charge to this agent. If the charge is accepted then
      * this agent will store that charge in its future state, otherwise the
      * attempted transfer failed and the charge will not be stored.
@@ -50,12 +45,7 @@ namespace Langmuir
     /**
      * Perform a transport attempt
      */
-    virtual Agent* transport();
-
-    /**
-     * Move on to the next time step.
-     */
-    virtual void completeTick();
+    virtual unsigned transport();
 
   private:
     const Grid* m_grid;

@@ -14,7 +14,7 @@ namespace Langmuir
 
   class GridView : public QGraphicsView
   {
-    Q_OBJECT
+  Q_OBJECT
 
   public:
     GridView(QWidget* parent = 0);
@@ -28,7 +28,7 @@ namespace Langmuir
 
   class GridItem : public QObject, public QGraphicsItem
   {
-    Q_OBJECT
+  Q_OBJECT
 
   public:
     GridItem(int type = 0, unsigned long int site = 0);
@@ -51,7 +51,7 @@ namespace Langmuir
 
   class GridScene : public QGraphicsScene
   {
-    Q_OBJECT
+  Q_OBJECT
 
   public:
     GridScene(unsigned long width = 0, unsigned long height = 0,
