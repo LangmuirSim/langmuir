@@ -32,8 +32,8 @@ namespace Langmuir
 
   protected:
     int m_charge;
+    std::vector<unsigned int> m_neighbors;
   };
-
 
   inline int ChargeAgent::charge()
   {

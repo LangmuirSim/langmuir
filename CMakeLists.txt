@@ -54,11 +54,6 @@ set(VIEWSRCS
 )
 
 set(MPISRCS
-  rand.cpp
-  cubicgrid.cpp
-  sourceagent.cpp
-  drainagent.cpp
-  simulation.cpp
   mpitest.cpp
 )
 
@@ -74,20 +69,21 @@ add_definitions(-Wall)
 add_executable(langmuirview langmuirview.cpp ${VIEWSRCS} ${qt_SRCS})
 add_executable(test test.cpp ${qt_SRCS} ${SRCS})
 
-#add_executable(mpitest ${qt_SRCS} ${MPISRCS})
+add_executable(mpitest ${qt_SRCS} ${MPISRCS} ${SRCS})
 
 # Libraries the executable needs to link to
 target_link_libraries(langmuirview #${MPI_LIBRARIES}
   ${Boost_LIBRARIES}
   ${QT_LIBRARIES})
 
-target_link_libraries(test ${QT_LIBRARIES}
+target_link_libraries(test
+  ${QT_LIBRARIES}
   ${Boost_LIBRARIES})
 
-#target_link_libraries(mpitest
+target_link_libraries(mpitest
 #  ${MPI_LIBRARIES}
-#  ${Boost_LIBRARIES}
-#  ${QT_LIBRARIES})
+  ${Boost_LIBRARIES}
+  ${QT_LIBRARIES})
 
 add_executable(qtconcurrent qtconcurrent.cpp)
 target_link_libraries(qtconcurrent ${QT_LIBRARIES})

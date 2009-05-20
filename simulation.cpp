@@ -9,6 +9,9 @@
 #include <iostream>
 #include <cstdlib>
 
+#include <QtCore/QFuture>
+#include <QtCore/QtConcurrentMap>
+
 namespace Langmuir
 {
   using std::vector;
@@ -26,15 +29,18 @@ namespace Langmuir
     createAgents(width * height, sourcePotential, drainPotential);
     // The e-field is constant between the electrodes - V / d
     m_world->setEField((drainPotential - sourcePotential) / (width*1.0e-9));
+
+    // Now inialise the potentials
+    updatePotentials();
   }
 
   Simulation::~Simulation()
   {
+    destroyAgents();
     delete m_world;
     m_world = 0;
     delete m_grid;
     m_grid = 0;
-    destroyAgents();
   }
 
   void Simulation::performIterations(int nIterations)
@@ -44,10 +50,12 @@ namespace Langmuir
       // Attempt to transport the charges through the film
       vector<ChargeAgent *> &charges = *m_world->charges();
       cout << "Charges in system: " << charges.size() << endl;
-      for (vector<ChargeAgent *>::const_iterator it = charges.begin();
-           it != charges.end(); ++it) {
-        (*it)->transport();
-      }
+
+      // Use QtConcurrnet to parallelise the charge calculations
+      QFuture<void> future = QtConcurrent::map(charges,
+                                               Simulation::chargeAgentIterate);
+      // We want to wait for it to finish before continuing on
+      future.waitForFinished();
 
       // Begin by performing charge injection at the source
       unsigned int site = m_source->transport();
@@ -101,7 +109,6 @@ namespace Langmuir
   void Simulation::createAgents(unsigned int numAgents, double sourcePotential,
                                 double drainPotential)
   {
-//    m_agents.resize(numAgents+2);
     // Add the normal agents
     for (unsigned int i = 0; i < numAgents; ++i) {
       // Mix some trap sites in
@@ -110,15 +117,13 @@ namespace Langmuir
     }
     // Add the source and the drain
     m_source = new SourceAgent(m_world, numAgents, sourcePotential);
-//    m_agents[num_agents] = m_source;
     m_world->grid()->setAgent(numAgents, m_source);
     m_drain = new DrainAgent(m_world, numAgents+1, drainPotential);
-//    m_agents[num_agents+1] = m_drain;
     m_world->grid()->setAgent(numAgents+1, m_drain);
     // Now to assign nearest neighbours for the electrodes.
     vector<unsigned int> neighbors = m_grid->col(0);
     cout << "Source neighbors: ";
-    for (int i = 0; i < neighbors.size(); ++i)
+    for (unsigned int i = 0; i < neighbors.size(); ++i)
       cout << neighbors[i] << " ";
     cout << endl;
     m_source->setNeighbors(neighbors);
@@ -131,11 +136,15 @@ namespace Langmuir
 
   void Simulation::destroyAgents()
   {
-    for (unsigned int i = 0; i < m_agents.size(); i++)
-    {
-      delete m_agents[i];
-      m_agents[i] = 0;
+    for (int i = 0; i < m_charges.size(); ++i) {
+      delete m_charges[i];
+      m_charges[i] = 0;
     }
+    m_charges.clear();
+    delete m_source;
+    m_source = 0;
+    delete m_drain;
+    m_drain = 0;
   }
 
   void Simulation::updatePotentials()
@@ -149,17 +158,23 @@ namespace Langmuir
     double c = m_source->potential();
 
     // The source to drain distance is simply the width of the device.
-    for (int i = 0; i < width; i++)
-    {
+    for (int i = 0; i < width; i++) {
       double tPotential = m * (double(i)+0.5) + c;
       vector<unsigned int> neighbors = m_grid->col(i);
       for (vector<unsigned int>::iterator j = neighbors.begin();
-      j != neighbors.end(); j++)
-      {
-        //            m_agents[*j]->setPotential(tPotential);
+           j != neighbors.end(); j++) {
+        m_grid->setPotential(*j, tPotential);
       }
       cout << "Row " << i << ", potential = " << tPotential << endl;
     }
+  }
+
+  inline void Simulation::chargeAgentIterate(ChargeAgent *chargeAgent)
+  {
+    // This function performs a single iteration for a charge agent, only thread
+    // safe calls can be made in this function. Other threads may access the
+    // current state of the chargeAgent, but will not attempt to modify it.
+    chargeAgent->transport();
   }
 
 } // End namespace Langmuir

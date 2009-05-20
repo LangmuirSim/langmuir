@@ -6,7 +6,7 @@
 #ifndef SIMULATION_H
 #define SIMULATION_H
 
-#include <vector>
+#include <QList>
 
 namespace Langmuir
 {
@@ -16,6 +16,7 @@ namespace Langmuir
   class Agent;
   class SourceAgent;
   class DrainAgent;
+  class ChargeAgent;
   class Simulation
   {
 
@@ -36,16 +37,9 @@ namespace Langmuir
     Grid *m_grid;
 
     /**
-     * Vector containing a list of all agents. The source is num_agents and the
-     * drain is num_agents + 1.
+     * Vector containing a list of all charge agents.
      */
-    std::vector<Agent *> m_agents;
-
-    /**
-     * Vector containing a list of the index of each site with a charge on it.
-     */
-    std::vector<Agent *> m_charges;
-    std::vector<Agent *> m_fCharges;
+    QList<Agent *> m_charges;
 
     /**
      * Pointer to the source.
@@ -85,6 +79,13 @@ namespace Langmuir
      * Move on to the next time tick - change to the future states, clean up.
      */
     void nextTick();
+
+    /**
+     * Private static member function - this function performs the majority of
+     * calculations for each iteration. These calculations are performed in
+     * threads and then any joining necessary is done at the end.
+     */
+    static void chargeAgentIterate(ChargeAgent *chargeAgent);
 
   };
 

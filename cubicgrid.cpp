@@ -13,6 +13,7 @@ namespace Langmuir
       m_width(width), m_height(height)
   {
     m_agents.resize(width*height+2, 0);
+    m_potentials.resize(width*height, 0.0);
     m_siteID.resize(width*height, 0);
   }
 

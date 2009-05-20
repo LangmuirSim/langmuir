@@ -99,12 +99,23 @@ namespace Langmuir
     virtual short siteID(unsigned int site);
 
     /**
+     * Set the potential at the site.
+     */
+    virtual void setPotential(unsigned int site, double potential);
+
+    /**
+     * Get the site potential.
+     */
+    virtual double potential(unsigned int site);
+
+    /**
      * Get the neighboring agents for the specified site.
      */
     virtual std::vector<Agent *> neighborAgents(unsigned int site) = 0;
 
   protected:
     std::vector<Agent *> m_agents;
+    std::vector<double> m_potentials;
     std::vector<short> m_siteID;  // The ID of the site at the index
   };
 
@@ -128,6 +139,16 @@ namespace Langmuir
   {
     // No range checking, etc
     return m_siteID[site];
+  }
+
+  inline void Grid::setPotential(unsigned int site, double potential)
+  {
+    m_potentials[site] = potential;
+  }
+
+  inline double Grid::potential(unsigned int site)
+  {
+    return m_potentials[site];
   }
 
 } // End namespace Langmuir
