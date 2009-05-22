@@ -11,8 +11,10 @@ namespace Langmuir
   using std::endl;
 
   SourceAgent::SourceAgent(World *world, unsigned int site, double potential) :
-      Agent(world, site), m_potential(potential), m_pBarrier(0.1)
+      Agent(Agent::Source, world, site), m_potential(potential), m_pBarrier(0.1),
+      m_charges(0)
   {
+
   }
 
   SourceAgent::~SourceAgent()
@@ -29,17 +31,18 @@ namespace Langmuir
   {
     // Determine whether a transport event will be attempted this tick
     double rn = m_world->random();
-    cout << "Source transport() called " << rn << endl;;
+    cout << "SourceAgent::transport() called " << rn
+        << "\nm_neighbors.size() " << m_neighbors.size() << endl;
     if (rn <= m_pBarrier) return -1;
 
     // This is currently limiting the number of charges that can be injected
     if (m_charges > 300) return -1;
 
     // Select a random neighbor and attempt transport.
-    int irn = int(m_world->random() * double(m_neighbors.size()));
-//    cout << "Source attempt - neighbor type " << m_world->grid()->siteID(m_neighbors[irn])
-//         << " site number " << m_neighbors[irn] << " " << irn
-//         << " " << m_world->grid()->agent(m_neighbors[irn]) << endl;
+    int irn = int(m_world->random() * double(m_neighbors.size()-0.00000001));
+    cout << "Source attempt - neighbor type " << m_world->grid()->siteID(m_neighbors[irn])
+         << " site number " << m_neighbors[irn] << " " << irn
+         << " " << m_world->grid()->agent(m_neighbors[irn]) << endl;
     // Use another random number to determine whether the charge is injected
     if (!m_world->grid()->agent(m_neighbors[irn]) && m_world->random() > 0.1) {
       cout << "Charge injected! " << m_neighbors[irn];

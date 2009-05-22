@@ -9,7 +9,7 @@
 
 namespace Langmuir
 {
-
+  class Logger;
   class Grid;
   class Rand;
   class ChargeAgent;
@@ -37,6 +37,7 @@ namespace Langmuir
 
   private:
     double m_eField;  // The electric field
+    Logger *m_logger; // The data logger for our world (on this process)
     Grid *m_grid;     // The grid in use in the world
     Rand *m_rand;     // Random number generator
     std::vector<ChargeAgent *> m_charges; // Charge carriers in the system

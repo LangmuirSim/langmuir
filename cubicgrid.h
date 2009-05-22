@@ -80,6 +80,11 @@ namespace Langmuir
      */
     std::vector<Agent *> neighborAgents(unsigned int site);
 
+    /**
+     * Set the agent at the current site
+     */
+    void setAgent(unsigned int site, Agent *agent);
+
   protected:
     unsigned int getRow(unsigned int site);
     unsigned int getColumn(unsigned int site);
@@ -90,6 +95,7 @@ namespace Langmuir
 
   inline Eigen::Vector2d CubicGrid::position(unsigned int site)
   {
+    if (site == static_cast<unsigned int>(-1)) return Eigen::Vector2d(-1,-1);
     return Eigen::Vector2d(0.5 + (site % m_width), 0.5 + int(site / m_width));
   }
 

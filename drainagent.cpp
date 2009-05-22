@@ -6,7 +6,7 @@ namespace Langmuir
 {
 
   DrainAgent::DrainAgent(World *world, unsigned int site, double potential) :
-      Agent(world, site), m_potential(potential)
+      Agent(Agent::Drain, world, site), m_potential(potential)
   {
   }
 

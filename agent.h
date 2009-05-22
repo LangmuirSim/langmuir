@@ -15,7 +15,16 @@ namespace Langmuir{
   class Agent {
 
   public:
-    Agent(World *world = 0, unsigned int site = 0);
+    /**
+     * \enum Different Agent types
+     */
+    enum Type {
+      Source,
+      Drain,
+      Charge
+    };
+
+    Agent(Type type, World *world = 0, unsigned int site = 0);
     virtual ~Agent() { }
 
     /**
@@ -52,11 +61,11 @@ namespace Langmuir{
     unsigned int m_site, m_fSite; // Current and future site index
     World *m_world;
     std::vector<unsigned int> m_neighbors;
-
+    short m_type;
   };
 
-  inline Agent::Agent (World *world, unsigned int site) :
-        m_site(-1), m_fSite(site), m_world(world)
+  inline Agent::Agent(Type type, World *world, unsigned int site) :
+        m_site(-1), m_fSite(site), m_world(world), m_type(type)
   {
   }
 

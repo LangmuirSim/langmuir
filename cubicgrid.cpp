@@ -1,6 +1,9 @@
 #include "cubicgrid.h"
 
 #include <cmath>
+#include <cstdlib>
+
+#include <QDebug>
 
 using namespace std;
 
@@ -24,9 +27,10 @@ namespace Langmuir
   vector<unsigned int> CubicGrid::neighbors(unsigned int site)
   {
     // Return the indexes of all nearest neighbours
-    vector<unsigned int> neighbors;
+    vector<unsigned int> neighbors(0);
     unsigned int column = getColumn(site);
     unsigned int row = getRow(site);
+
     // To the left
     if (column > 0)
       neighbors.push_back(getIndex(column-1, row));
@@ -41,8 +45,8 @@ namespace Langmuir
       neighbors.push_back(getIndex(column, row+1));
 
     // Now for the source and the drain....
-    if (column == 0)
-      neighbors.push_back(getIndex(m_width-1, m_height-1) + 1);
+//    if (column == 0)
+//      neighbors.push_back(getIndex(m_width-1, m_height-1) + 1);
     if (column == m_width - 1)
       neighbors.push_back(getIndex(m_width-1, m_height-1) + 2);
 
@@ -145,6 +149,18 @@ namespace Langmuir
 
     // Now we have all the nearest neighbours - between 2 and 4 in this case
     return neighbors;
+  }
+
+  void CubicGrid::setAgent(unsigned int site, Agent *agent)
+  {
+    if (site == m_width * m_height + 1) {
+      qDebug() << "Transport to drain attempted!" << site;
+      std::exit(1);
+    }
+    else {
+      qDebug() << "setAgent called" << site;
+      m_agents[site] = agent;
+    }
   }
 
 } // End namespace Langmuir

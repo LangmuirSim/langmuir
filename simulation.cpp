@@ -36,7 +36,7 @@ namespace Langmuir
 
   Simulation::~Simulation()
   {
-    destroyAgents();
+//    destroyAgents();
     delete m_world;
     m_world = 0;
     delete m_grid;
@@ -57,21 +57,17 @@ namespace Langmuir
       // We want to wait for it to finish before continuing on
       future.waitForFinished();
 
+      // Now we are done with the charge movement, move them to the next tick!
+      nextTick();
+
       // Begin by performing charge injection at the source
       unsigned int site = m_source->transport();
+      qDebug () << "Source transport returned site:" << site;
       if (site != errorValue) {
         cout << "New charge injected! " << site << endl;
         m_world->charges()->push_back(new ChargeAgent(m_world, site));
       }
-      else
-        cout << "Simulate loop returned " << site << endl;
 
-      if (m_world->grid()->agent(15))
-      cout << m_world->grid()->agent(15) << "->"
-           << m_world->grid()->agent(15)->site();
-
-      // Now we are done with this iteration - move on to the next tick!
-      nextTick();
     }
   }
 

@@ -45,6 +45,7 @@ set(SRCS
   drainagent.cpp
   chargeagent.cpp
   simulation.cpp
+  logger.cpp
   world.cpp
 )
 
