@@ -6,6 +6,9 @@
 #define WORLD_H
 
 #include <vector>
+#include <Eigen/Core>
+
+#include <QtCore/QList>
 
 namespace Langmuir
 {
@@ -33,20 +36,32 @@ namespace Langmuir
      */
     double random();
 
-    std::vector<ChargeAgent *> * charges();
+    QList<ChargeAgent *> * charges();
+
+    Eigen::MatrixXd * coupling();
 
   private:
     double m_eField;  // The electric field
     Logger *m_logger; // The data logger for our world (on this process)
     Grid *m_grid;     // The grid in use in the world
     Rand *m_rand;     // Random number generator
-    std::vector<ChargeAgent *> m_charges; // Charge carriers in the system
+    QList<ChargeAgent *> m_charges; // Charge carriers in the system
+
+    /**
+     * Square matrix containing the coupling constants between different site types
+     */
+    Eigen::MatrixXd m_coupling; // Enumerates coupling constants between different sites
 
   };
 
-  inline std::vector<ChargeAgent *> * World::charges()
+  inline QList<ChargeAgent *> * World::charges()
   {
     return &m_charges;
+  }
+
+  inline Eigen::MatrixXd * World::coupling()
+  {
+    return &m_coupling;
   }
 
 }

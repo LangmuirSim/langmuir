@@ -16,8 +16,8 @@ namespace Langmuir
       m_width(width), m_height(height)
   {
     m_agents.resize(width*height+2, 0);
-    m_potentials.resize(width*height, 0.0);
-    m_siteID.resize(width*height, 0);
+    m_potentials.resize(width*height+2, 0.0);
+    m_siteID.resize(width*height+2, 0);
   }
 
   CubicGrid::~CubicGrid()
@@ -154,11 +154,12 @@ namespace Langmuir
   void CubicGrid::setAgent(unsigned int site, Agent *agent)
   {
     if (site == m_width * m_height + 1) {
-      qDebug() << "Transport to drain attempted!" << site;
-      std::exit(1);
+//      qDebug() << "Transport to drain attempted!" << site;
+      m_agents[site] = agent;
+//      std::exit(1);
     }
     else {
-      qDebug() << "setAgent called" << site;
+//      qDebug() << "setAgent called" << site;
       m_agents[site] = agent;
     }
   }

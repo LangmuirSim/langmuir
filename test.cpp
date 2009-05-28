@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
 {
   QCoreApplication app(argc, argv);
   cout << "Testing cubic grid class...\n";
-  CubicGrid test(10, 10);
+  CubicGrid test(60, 40);
 
   int site1 = 5;
   int site2 = 66;
@@ -25,12 +25,12 @@ int main(int argc, char *argv[])
 
   // Create a 16x16 grid with a source potential of -5 and a drain potential of 0
   qDebug() << "Testing the simulation class.\n";
-  Simulation sim(10, 5, 0, -0.01);
+  Simulation sim(60, 60, 0, 1.0);
 
   for (int i = 0; i < 100000; i++) {
     sim.printGrid();
     sim.performIterations(1);
-    usleep(10000);
+    usleep(100);
   }
   qDebug() << "Simulation complete - destroy our objects...";
 }

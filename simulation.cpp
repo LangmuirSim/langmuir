@@ -48,7 +48,7 @@ namespace Langmuir
     //	cout << "Entered performIterations function.\n";
     for (int i = 0; i <  nIterations; ++i) {
       // Attempt to transport the charges through the film
-      vector<ChargeAgent *> &charges = *m_world->charges();
+      QList<ChargeAgent *> &charges = *m_world->charges();
       cout << "Charges in system: " << charges.size() << endl;
 
       // Use QtConcurrnet to parallelise the charge calculations
@@ -62,22 +62,26 @@ namespace Langmuir
 
       // Begin by performing charge injection at the source
       unsigned int site = m_source->transport();
-      qDebug () << "Source transport returned site:" << site;
+      //qDebug () << "Source transport returned site:" << site;
       if (site != errorValue) {
         cout << "New charge injected! " << site << endl;
         m_world->charges()->push_back(new ChargeAgent(m_world, site));
       }
-
     }
   }
 
   void Simulation::nextTick()
   {
     // Iterate over all sites to change their state
-    vector<ChargeAgent *> &charges = *m_world->charges();
-    for (vector<ChargeAgent *>::const_iterator it = charges.begin();
-         it != charges.end(); ++it) {
-      (*it)->completeTick();
+    QList<ChargeAgent *> &charges = *m_world->charges();
+    for (int i = 0; i < charges.size(); ++i) {
+      charges[i]->completeTick();
+      // Check if the charge was removed - then we should delete it
+      if (charges[i]->removed()) {
+        delete charges[i];
+        charges.removeAt(i);
+        --i;
+      }
     }
   }
 
@@ -89,12 +93,14 @@ namespace Langmuir
     for (unsigned int j = 0; j < height; ++j) {
       cout << "||";
       for (unsigned int i = 0; i < width; ++i) {
-        if (m_world->grid()->agent(i+j*width)) // Charge is present
-          cout << "*";
+        if (m_world->grid()->agent(i+j*width)) {// Charge is present
+          if (m_world->grid()->siteID(i+j*width) == 0)
+            cout << "*";
+          else
+            cout << "x";
+        }
         else if (m_world->grid()->siteID(i+j*width) == 1)
           cout << "O";
-//      else if (charges[i]->charge() == 0 && charges[i]->pBarrier() > 0.599)
-//        cout << "X";
         else
           cout << " ";
       }
@@ -105,17 +111,35 @@ namespace Langmuir
   void Simulation::createAgents(unsigned int numAgents, double sourcePotential,
                                 double drainPotential)
   {
+    /**
+     * Each site is assigned an ID, this ID identifies the type of site and
+     * coupling constants can also be retrieved from the world::coupling()
+     * matrix. The sites are as follows,
+     *
+     * 0: Normal transport site.
+     * 1: Trap site.
+     * 2: Source site.
+     * 3: Drain site.
+     *
+     * Currently a 4x4 matrix stores coupling. If a charge is transported to a
+     * drain site it is removed from the system.
+     */
+
     // Add the normal agents
     for (unsigned int i = 0; i < numAgents; ++i) {
       // Mix some trap sites in
-      if (m_world->random() > 0.95)
+      if (m_world->random() > 0.95) // Trap site
         m_world->grid()->setSiteID(i, 1);
+      else // Charge carrier site
+        m_world->grid()->setSiteID(i, 0);
     }
     // Add the source and the drain
     m_source = new SourceAgent(m_world, numAgents, sourcePotential);
     m_world->grid()->setAgent(numAgents, m_source);
+    m_world->grid()->setSiteID(numAgents, 2);
     m_drain = new DrainAgent(m_world, numAgents+1, drainPotential);
     m_world->grid()->setAgent(numAgents+1, m_drain);
+    m_world->grid()->setSiteID(numAgents+1, 3);
     // Now to assign nearest neighbours for the electrodes.
     vector<unsigned int> neighbors = m_grid->col(0);
     cout << "Source neighbors: ";
@@ -163,6 +187,8 @@ namespace Langmuir
       }
       cout << "Row " << i << ", potential = " << tPotential << endl;
     }
+    double tPotential = m * (double(width)+0.5) + c;
+    m_grid->setPotential(width*m_grid->height()+1, tPotential);
   }
 
   inline void Simulation::chargeAgentIterate(ChargeAgent *chargeAgent)

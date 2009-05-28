@@ -14,7 +14,7 @@ namespace Langmuir{
   using Eigen::Vector2d;
 
   ChargeAgent::ChargeAgent(World *world, unsigned int site) :
-      Agent(Agent::Charge, world, site), m_charge(-1)
+      Agent(Agent::Charge, world, site), m_charge(-1), m_removed(false)
   {
     qDebug() << "Charge injected into the system.";
     m_site = m_fSite;
@@ -31,7 +31,7 @@ namespace Langmuir{
   {
     // Set up some constants...
     const double q = 1.60217646e-19; // Magnitude of charge on an electron
-    const double kTinv = 1.0 / (1.3806504e-23 * 300); // inverse of kBT at 300K
+
     // Prefactor for force calculations q / 4 pi epsilon with a 1e-9 for m -> nm
     const double q4pe = q / (4.0*M_PI*8.854187817e-12 * 1e-9);
     // Choose the appropriate site and attempt a move
@@ -40,7 +40,7 @@ namespace Langmuir{
 
     // Now we select the proposed transport site at random
     unsigned int newSite = int(m_world->random() * (m_neighbors.size()-1.0e-20));
-    qDebug() << "Neighbors:" << m_neighbors.size() << "newSite:" << newSite;
+//    qDebug() << "Neighbors:" << m_neighbors.size() << "newSite:" << newSite;
     Vector2d pos2(grid->position(m_neighbors[newSite]));
 
     // Check if the proposed site to move to is already occupied
@@ -48,7 +48,7 @@ namespace Langmuir{
 //      return -1;
 
     // Figure out the potential of the site we are on
-    vector<ChargeAgent *> &charges = *m_world->charges();
+    QList<ChargeAgent *> &charges = *m_world->charges();
     double potential1(0.0), potential2(0.0);
     for (unsigned int i = 0; i < charges.size(); ++i) {
       if (charges[i] != this) {
@@ -81,34 +81,16 @@ namespace Langmuir{
     // A few electrons only perturb the potential by ~1e-20 or so.
     double pd = grid->potential(m_neighbors[newSite]) - grid->potential(m_site);
     pd *= m_charge * q;
-    qDebug() << "Potential difference neglecting charge:" << pd;
+//    qDebug() << "Potential difference neglecting charge:" << pd;
     pd += potential2 - potential1;
-    qDebug() << "Potential difference with charges:" << pd;
-
-//    pd *= m_charge;
-
-    // Now to decide if the hop will be made - using a simple exponential energy
-    // change acceptance now.
-    double randNumber = m_world->random();
-    qDebug() << "Deciding on whether to accept move..." << pd << exp(-pd * kTinv)
-        << randNumber;
-    if (pd > 0.0) {
-      if (exp(-pd * kTinv) < randNumber) {
-        m_fSite = m_neighbors[newSite];
-        qDebug() << "Charge move accepted..." << m_fSite;
-        return m_neighbors[newSite];
-      }
-    }
-    else if (0.55 < randNumber) {
+//    qDebug() << "Potential difference with charges:" << pd;
+    double coupling = couplingConstant(grid->siteID(m_site),
+                                       grid->siteID(m_neighbors[newSite]));
+    if (attemptTransport(pd, coupling)) {
       m_fSite = m_neighbors[newSite];
-      qDebug() << "Charge move accepted (2)..." << m_fSite;
-      return m_neighbors[newSite];
+      return m_fSite;
     }
-//    else {
-//      qDebug() << "Charge move rejected - no move this time...";
-//    }
 
-    // Change in potential energy is -qEd (d = distance)
     return -1;
   }
 
@@ -117,10 +99,11 @@ namespace Langmuir{
     if (m_site != m_fSite) {
       Vector2d pos1(m_world->grid()->position(m_site));
       Vector2d pos2(m_world->grid()->position(m_fSite));
-      qDebug() << "Charge move:"
+/*      qDebug() << "Charge move:"
           << pos1.x() << pos1.y()
           << "->"
-          << pos2.x() << pos2.y();
+          << pos2.x() << pos2.y()
+          << "\n" << m_site << "->" << m_fSite; */
 /*      if (pos1.x() < 0.0 && pos1.y() < 0.0) {
         qDebug() << "Charge injected into the system.";
         m_site = m_fSite;
@@ -129,13 +112,20 @@ namespace Langmuir{
         m_neighbors = m_world->grid()->neighbors(m_site);
         return;
       }
-      else */ if (fabs(pos2.x() - pos1.x()) > 1.01 ||
-               fabs(pos2.y() - pos1.y()) > 1.01) {
-        qDebug() << "WARNING!!! Error has occurred!!! Move too large.";
-      }
+      else */ //if (fabs(pos2.x() - pos1.x()) > 1.01 ||
+              // fabs(pos2.y() - pos1.y()) > 1.01) {
+       // qDebug() << "WARNING!!! Error has occurred!!! Move too large.";
+      //}
 
+      // Are we on a drain site? If so then we have been removed.
+      if (m_world->grid()->siteID(m_fSite) == 3) {
+        m_world->grid()->setAgent(m_site, 0);
+        m_removed = true;
+        qDebug() << "Charge moved to drain site - remove!";
+        return;
+      }
       // Check if another charge snuck into this site before us
-      if (m_world->grid()->agent(m_fSite)) {
+      else if (m_world->grid()->agent(m_fSite)) {
         // Abort the move - site is now occupied
         m_fSite = m_site;
         return;
@@ -143,11 +133,40 @@ namespace Langmuir{
 
       if (m_site != errorValue) // Vacate the old site
         m_world->grid()->setAgent(m_site, 0);
+      // Everything looks good - site this agent to the new site too.
       m_site = m_fSite;
       m_world->grid()->setAgent(m_site, this);
       // Update our neighbors
       m_neighbors = m_world->grid()->neighbors(m_site);
     }
+  }
+
+  inline double ChargeAgent::couplingConstant(short id1, short id2)
+  {
+    return (*m_world->coupling())(id1, id2);
+  }
+
+  inline bool ChargeAgent::attemptTransport(double pd, double coupling)
+  {
+    // Now to decide if the hop will be made - using a simple exponential energy
+    // change acceptance now.
+    const double kTinv = 1.0 / (1.3806504e-23 * 300); // inverse of kBT at 300K
+    double randNumber = m_world->random();
+//    qDebug() << "Deciding on whether to accept move..." << pd << exp(-pd * kTinv)
+//        << randNumber;
+    if (pd > 0.0) {
+//      qDebug() << "Method 1:" << pd << exp(-pd * kTinv) << randNumber;
+      if ((coupling * exp(-pd * kTinv)) > randNumber) {
+//        qDebug() << "Charge move accepted..." << m_fSite;
+        return true;
+      }
+    }
+    else if (coupling > randNumber) {
+//      qDebug() << "Method 2:" << pd << randNumber;
+//      qDebug() << "Charge move accepted (2)..." << m_fSite;
+      return true;
+    }
+    return false;
   }
 
 }

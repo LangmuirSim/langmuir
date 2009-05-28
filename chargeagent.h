@@ -30,14 +30,35 @@ namespace Langmuir
      */
     virtual void completeTick();
 
+    /**
+     * Has the charge been removed from the system?
+     */
+    bool removed();
+
   protected:
     int m_charge;
     std::vector<unsigned int> m_neighbors;
+    bool m_removed;
+
+    /**
+     * Get the coupling constant for the proposed move.
+     */
+    double couplingConstant(short id1, short id2);
+
+    /**
+     * Was the transport attempt successful.
+     */
+    bool attemptTransport(double pd, double coupling);
   };
 
   inline int ChargeAgent::charge()
   {
     return m_charge;
+  }
+
+  inline bool ChargeAgent::removed()
+  {
+    return m_removed;
   }
 
 } // End namespace Langmuir
