@@ -69,6 +69,7 @@ add_definitions(-Wall)
 # Add the executables
 add_executable(langmuirview langmuirview.cpp ${VIEWSRCS} ${qt_SRCS})
 add_executable(test test.cpp ${qt_SRCS} ${SRCS})
+add_executable(test2 test_no_coulomb.cpp ${qt_SRCS} ${SRCS})
 
 add_executable(mpitest ${qt_SRCS} ${MPISRCS} ${SRCS})
 
@@ -80,6 +81,9 @@ target_link_libraries(langmuirview #${MPI_LIBRARIES}
 target_link_libraries(test
   ${QT_LIBRARIES}
   ${Boost_LIBRARIES})
+
+target_link_libraries(test2
+  ${QT_LIBRARIES})
 
 target_link_libraries(mpitest
 #  ${MPI_LIBRARIES}

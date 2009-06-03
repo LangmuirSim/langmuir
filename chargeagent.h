@@ -12,8 +12,13 @@ namespace Langmuir
   {
 
   public:
-    ChargeAgent(World *world, unsigned int site);
+    ChargeAgent(World *world, unsigned int site, bool coulombInteraction = true);
     virtual ~ChargeAgent();
+
+    /**
+     * Enable or disable Coulomb interaction for this charge carrier.
+     */
+    void setCoulombInteraction(bool enabled);
 
     /**
      * Returns the charge of this node.
@@ -39,6 +44,13 @@ namespace Langmuir
     int m_charge;
     std::vector<unsigned int> m_neighbors;
     bool m_removed;
+    bool m_coulombInteraction; // Should the Coulomb interaction be calculated?
+
+    /**
+     * Calculate the potential difference arising from the Coulomb interaction
+     * between the two proposed sites.
+     */
+    double coulombInteraction(unsigned int newSite);
 
     /**
      * Get the coupling constant for the proposed move.

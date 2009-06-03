@@ -25,10 +25,11 @@ int main(int argc, char *argv[])
 
   // Create a 16x16 grid with a source potential of -5 and a drain potential of 0
   qDebug() << "Testing the simulation class.\n";
-  Simulation sim(60, 60, 0, 1.0);
+  Simulation sim(60, 10, 0, 1.0);
 
   for (int i = 0; i < 100000; i++) {
     sim.printGrid();
+    qDebug() << "Accepted charges:" << sim.totalChargesAccepted();
     sim.performIterations(1);
     usleep(100);
   }

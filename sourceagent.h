@@ -39,11 +39,31 @@ namespace Langmuir
      */
     virtual unsigned int transport();
 
+    void setMaxCharges(int number);
+
+    /**
+     * Used to inform the source agent that a charge has been removed from the
+     * system, allowing average charge density to be kept constant.
+     */
+    void decrementCharge();
+
   private:
     double m_potential;
     double m_pBarrier;
     int m_charges; // Number of charges injected
+    int m_maxCharges; // Maximum number of charges
   };
+
+  inline void SourceAgent::setMaxCharges(int number)
+  {
+    m_maxCharges = number;
+  }
+
+  inline void SourceAgent::decrementCharge()
+  {
+    if (m_charges > 0)
+      --m_charges;
+  }
 
 } // End namespace Langmuir
 

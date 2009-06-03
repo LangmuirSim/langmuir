@@ -12,10 +12,10 @@
 namespace Langmuir
 {
 
-class DrainAgent : public Agent
-{
+  class DrainAgent : public Agent
+  {
 
-public:
+  public:
     DrainAgent(World *world, unsigned int site, double potential = 0.0);
     ~DrainAgent();
 
@@ -47,9 +47,20 @@ public:
      */
     virtual unsigned int transport();
 
-private:
+    /**
+     * Total number of charges the drain has accepted.
+     */
+    unsigned long acceptedCharges();
+
+  private:
     double m_potential;
-};
+    unsigned long m_acceptedCharges; // Counter - number of accepted charges
+  };
+
+  inline unsigned long DrainAgent::acceptedCharges()
+  {
+    return m_acceptedCharges;
+  }
 
 } // End namespace Langmuir
 

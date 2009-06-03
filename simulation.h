@@ -21,25 +21,55 @@ namespace Langmuir
   {
 
   public:
-    Simulation(unsigned int width, unsigned int height, double sourcePotential,
-               double drainPotential);
+    /**
+     * Set up the basic parameters of the simulation.
+     * @param width The width of the grid.
+     * @param height The height of the grid.
+     * @param sourcePotential The potential at the source electrode.
+     * @param drainPotential The potential at the drain electrode.
+     */
+    Simulation(unsigned int width, unsigned int height,
+               double sourcePotential, double drainPotential);
+
+    /**
+     * Destructor.
+     */
     ~Simulation();
 
+    /**
+     * Set the number of charges to maintain in the system.
+     */
+    void setMaxCharges(int n);
+
+    /**
+     * Account for Coulomb interaction between charges.
+     */
+    void setCoulombInteractions(bool enabled);
+
+    /**
+     * Call this function to perform n iterations.
+     */
     void performIterations(int nIterations);
 
+    /**
+     * Used to print an ASCII grid to the terminal - low tech visualization.
+     */
     void printGrid();
 
+    /**
+     * Retrieve a charge drain count - total number of charges the drain has
+     * received since the simulation started.
+     */
+    unsigned long totalChargesAccepted();
+
   private:
+    bool m_coulombInteraction; // Should Coulomb interactions be taken into account?
+
     World *m_world;
     /**
      * Grid instance - used for nearest neighbours, distances etc
      */
     Grid *m_grid;
-
-    /**
-     * Vector containing a list of all charge agents.
-     */
-    QList<Agent *> m_charges;
 
     /**
      * Pointer to the source.
