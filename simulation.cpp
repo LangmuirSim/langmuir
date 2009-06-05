@@ -126,6 +126,11 @@ namespace Langmuir
     return m_drain->acceptedCharges();
   }
 
+  unsigned long Simulation::charges()
+  {
+    return m_world->charges()->size();
+  }
+
   void Simulation::createAgents(unsigned int numAgents, double sourcePotential,
                                 double drainPotential)
   {

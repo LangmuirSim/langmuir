@@ -62,6 +62,11 @@ namespace Langmuir
      */
     unsigned long totalChargesAccepted();
 
+    /**
+     * Retrieve the current number of charges in the system.
+     */
+    unsigned long charges();
+
   private:
     bool m_coulombInteraction; // Should Coulomb interactions be taken into account?
 
