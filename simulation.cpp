@@ -19,7 +19,8 @@ namespace Langmuir
   using std::endl;
 
   Simulation::Simulation(unsigned int width, unsigned int height,
-                         double sourcePotential, double drainPotential)
+                         double sourcePotential, double drainPotential,
+                         double trapPercent)
       : m_coulombInteraction(true)
   {
     m_world = new World;
@@ -27,7 +28,7 @@ namespace Langmuir
     m_world->setGrid(m_grid);
 
     // Create the agents for the simulation
-    createAgents(width * height, sourcePotential, drainPotential);
+    createAgents(width * height, sourcePotential, drainPotential, trapPercent);
     // The e-field is constant between the electrodes - V / d
     m_world->setEField((drainPotential - sourcePotential) / (width*1.0e-9));
 
@@ -132,7 +133,7 @@ namespace Langmuir
   }
 
   void Simulation::createAgents(unsigned int numAgents, double sourcePotential,
-                                double drainPotential)
+                                double drainPotential, double trapPercent)
   {
     /**
      * Each site is assigned an ID, this ID identifies the type of site and
@@ -151,7 +152,7 @@ namespace Langmuir
     // Add the normal agents
     for (unsigned int i = 0; i < numAgents; ++i) {
       // Mix some trap sites in
-      if (m_world->random() > 1.0) // Trap site
+      if (m_world->random() > (1.0 - trapPercent)) // Trap site
         m_world->grid()->setSiteID(i, 1);
       else // Charge carrier site
         m_world->grid()->setSiteID(i, 0);

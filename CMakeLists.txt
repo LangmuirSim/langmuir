@@ -11,7 +11,7 @@ find_package(Eigen2 REQUIRED) # find and setup Eigen2
 
 # Also need random number facilities from Boost
 find_package(Boost REQUIRED
-  COMPONENTS random mpi)
+  COMPONENTS mpi)
 
 message(STATUS "MPI_COMPILE_FLAGS: ${MPI_COMPILE_FLAGS}")
 message(STATUS "MPI_INCLUDE_PATH: ${MPI_INCLUDE_PATH}")
@@ -45,7 +45,6 @@ set(SRCS
   drainagent.cpp
   chargeagent.cpp
   simulation.cpp
-  logger.cpp
   world.cpp
 )
 
@@ -72,7 +71,13 @@ add_executable(test test.cpp ${qt_SRCS} ${SRCS})
 add_executable(test2 test_no_coulomb.cpp ${qt_SRCS} ${SRCS})
 add_executable(test3 test_coulomb.cpp ${qt_SRCS} ${SRCS})
 
-add_executable(mpitest ${qt_SRCS} ${MPISRCS} ${SRCS})
+add_executable(test4 test_coulomb_drain.cpp ${qt_SRCS} ${SRCS})
+add_executable(test5 test_no_coulomb_drain.cpp ${qt_SRCS} ${SRCS})
+
+add_executable(test6 test_no_coulomb_vacs.cpp ${qt_SRCS} ${SRCS})
+add_executable(test7 test_coulomb_vacs.cpp ${qt_SRCS} ${SRCS})
+
+#add_executable(mpitest ${qt_SRCS} ${MPISRCS} ${SRCS})
 
 # Libraries the executable needs to link to
 target_link_libraries(langmuirview #${MPI_LIBRARIES}
@@ -89,10 +94,22 @@ target_link_libraries(test2
 target_link_libraries(test3
   ${QT_LIBRARIES})
 
-target_link_libraries(mpitest
-#  ${MPI_LIBRARIES}
-  ${Boost_LIBRARIES}
+target_link_libraries(test4
   ${QT_LIBRARIES})
+
+target_link_libraries(test5
+  ${QT_LIBRARIES})
+
+target_link_libraries(test6
+  ${QT_LIBRARIES})
+
+target_link_libraries(test7
+  ${QT_LIBRARIES})
+
+#target_link_libraries(mpitest
+#  ${MPI_LIBRARIES}
+#  ${Boost_LIBRARIES}
+#  ${QT_LIBRARIES})
 
 add_executable(qtconcurrent qtconcurrent.cpp)
 target_link_libraries(qtconcurrent ${QT_LIBRARIES})

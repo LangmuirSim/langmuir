@@ -51,6 +51,7 @@ namespace Langmuir
      * Square matrix containing the coupling constants between different site types
      */
     Eigen::MatrixXd m_coupling; // Enumerates coupling constants between different sites
+    std::vector<double> m_sitePercents; // Percentage of each site in the grid
 
   };
 

@@ -29,7 +29,8 @@ namespace Langmuir
      * @param drainPotential The potential at the drain electrode.
      */
     Simulation(unsigned int width, unsigned int height,
-               double sourcePotential, double drainPotential);
+               double sourcePotential, double drainPotential,
+               double trapPercent = 0.0);
 
     /**
      * Destructor.
@@ -67,6 +68,11 @@ namespace Langmuir
      */
     unsigned long charges();
 
+    /**
+     * Retrieve the world object - can be used alter world properties.
+     */
+    World * world();
+
   private:
     bool m_coulombInteraction; // Should Coulomb interactions be taken into account?
 
@@ -90,7 +96,7 @@ namespace Langmuir
      * Create all the agents in the simulation and set up their initial state.
      */
     void createAgents(unsigned int num_agents, double sourcePotential,
-                      double drainPotential);
+                      double drainPotential, double trapPercent);
 
     /**
      * Destroy the agents once we are done with them.
@@ -123,6 +129,11 @@ namespace Langmuir
     static void chargeAgentIterate(ChargeAgent *chargeAgent);
 
   };
+
+  inline World * Simulation::world()
+  {
+    return m_world;
+  }
 
 } // End namespace Langmuir
 
