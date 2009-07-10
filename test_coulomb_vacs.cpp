@@ -23,6 +23,12 @@ int main(int argc, char *argv[])
     app.exit(1);
   }
 
+  double minTrap = 0.00;
+  if (args.size() > 2) {
+    qDebug() << "Setting the trap concentration:" << args.at(3);
+    minTrap = QString(args.at(3)).toDouble();
+  }
+
   qDebug() << "Input file:" << args.at(1) << "\nOutput file:" << args.at(2);
 
   // Open our main output file and get it ready for writing
@@ -35,11 +41,11 @@ int main(int argc, char *argv[])
   int height = 256;
   double sourceVoltage = 0.0;
   double drainVoltage = 1.0;
-  double minTrap = 0.00; // Percent
   double maxTrap = 0.30; // Percent
   double occupation = 0.01; // 1 percent constant charge occupation
-  int step = 2; // Number of steps
+  int step = 1; // Number of steps
   double stepSize = (maxTrap - minTrap) / (step-1);
+  stepSize = 0.0;
 
   qDebug() << "Testing the simulation class.\n";
 
