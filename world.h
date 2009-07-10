@@ -40,6 +40,8 @@ namespace Langmuir
 
     Eigen::MatrixXd * coupling();
 
+    Eigen::MatrixXd * interactionEnergies();
+
   private:
     double m_eField;  // The electric field
     Logger *m_logger; // The data logger for our world (on this process)
@@ -52,6 +54,7 @@ namespace Langmuir
      */
     Eigen::MatrixXd m_coupling; // Enumerates coupling constants between different sites
     std::vector<double> m_sitePercents; // Percentage of each site in the grid
+    Eigen::MatrixXd m_interactionEnergies; // Interaction energies
 
   };
 
@@ -63,6 +66,11 @@ namespace Langmuir
   inline Eigen::MatrixXd * World::coupling()
   {
     return &m_coupling;
+  }
+
+  inline Eigen::MatrixXd * World::interactionEnergies()
+  {
+    return &m_interactionEnergies;
   }
 
 }

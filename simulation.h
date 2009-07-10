@@ -117,6 +117,15 @@ namespace Langmuir
     void updatePotentials();
 
     /**
+     * Helper function - precalculate the interaction energies of charges at
+     * different sites. This is a vector of size width + length denoting the x,
+     * y displacement of the two sites under consideration. These values
+     * reduce necessary calculations in tight loops when considering Coulomb
+     * interactions.
+     */
+    void updateInteractionEnergies();
+
+    /**
      * Move on to the next time tick - change to the future states, clean up.
      */
     void nextTick();

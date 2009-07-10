@@ -90,21 +90,31 @@ namespace Langmuir
     return m_height;
   }
 
-  double CubicGrid::getTotalDistance(unsigned int site1, unsigned int site2)
+  double CubicGrid::totalDistance(unsigned int site1, unsigned int site2)
   {
     return sqrt((getRow(site1) - getRow(site2)) * (getRow(site1)
                  - getRow(site2)) + (getColumn(site1) - getColumn(site2))
                 * (getColumn(site1) - getColumn(site2)));
   }
 
-  double CubicGrid::getXDistance(unsigned int site1, unsigned int site2)
+  double CubicGrid::xDistance(unsigned int site1, unsigned int site2)
+  {
+    return fabs(int(getColumn(site1)) - int(getColumn(site2)));
+  }
+
+  double CubicGrid::yDistance(unsigned int site1, unsigned int site2)
   {
     return fabs(int(getRow(site1)) - int(getRow(site2)));
   }
 
-  double CubicGrid::getYDistance(unsigned int site1, unsigned int site2)
+  int CubicGrid::xDistancei(unsigned int site1, unsigned int site2)
   {
-    return fabs(int(getColumn(site1)) - int(getColumn(site2)));
+    return abs(int(getColumn(site1)) - int(getColumn(site2)));
+  }
+
+  int CubicGrid::yDistancei(unsigned int site1, unsigned int site2)
+  {
+    return abs(int(getRow(site1)) - int(getRow(site2)));
   }
 
   unsigned int CubicGrid::getRow(unsigned int site)

@@ -34,6 +34,7 @@ namespace Langmuir
 
     // Now inialise the potentials
     updatePotentials();
+    updateInteractionEnergies();
   }
 
   Simulation::~Simulation()
@@ -208,6 +209,18 @@ namespace Langmuir
     }
     double tPotential = m * (double(width)+0.5) + c;
     m_grid->setPotential(width*m_grid->height()+1, tPotential);
+  }
+
+  void Simulation::updateInteractionEnergies()
+  {
+    // These values are used in Coulomb interaction calculations.
+    Eigen::MatrixXd *energies = m_world->interactionEnergies();
+    energies->resize(m_grid->height()+1, m_grid->width()+1);
+    const double q = 1.60217646e-19; // Magnitude of charge on an electron
+    // Now calculate the numbers we need
+    for (unsigned int i = 0; i <= m_grid->height(); ++i)
+      for (unsigned int j = 0; j <= m_grid->width(); ++j)
+        (*energies)(i, j) = q / sqrt(i*i + j*j);
   }
 
   inline void Simulation::chargeAgentIterate(ChargeAgent *chargeAgent)

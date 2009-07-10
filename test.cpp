@@ -19,9 +19,9 @@ int main(int argc, char *argv[])
   int site1 = 5;
   int site2 = 66;
 
-  qDebug() << "Distance between sites:" << test.getTotalDistance(site1, site2)
-           << "," << test.getXDistance(site1, site2) << ","
-           << test.getYDistance(site1, site2) << "\n";
+  qDebug() << "Distance between sites:" << test.totalDistance(site1, site2)
+           << "," << test.xDistance(site1, site2) << ","
+           << test.yDistance(site1, site2) << "\n";
 
   // Create a 16x16 grid with a source potential of -5 and a drain potential of 0
   qDebug() << "Testing the simulation class.\n";

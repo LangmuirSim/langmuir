@@ -141,18 +141,22 @@ namespace Langmuir{
     for (int i = 0; i < charges.size(); ++i) {
       if (charges[i] != this) {
         // Potential at current site from other charges
-        double distance = (pos1 - grid->position(charges[i]->site())).norm();
-        if (fabs(distance) < 0.001) {
+        int dx = grid->xDistancei(m_site, charges[i]->site());
+        int dy = grid->yDistancei(m_site, charges[i]->site());
+        if (dx < 1 && dy < 1) {
           qDebug() << "Distance in charge agent too small!"
-              << distance << m_site << charges[i]->site();
+              << dx << dy << m_site << charges[i]->site();
           qDebug() << "Objects:" << this << charges[i];
           std::exit(1);
         }
-        potential1 += (charges[i]->charge() * q) / distance;
+        potential1 += (*m_world->interactionEnergies())(dy, dx)
+                      * charges[i]->charge();
         // Potential at new site from other charges
         if (newSite != charges[i]->site()) {
-          distance = (pos2 - grid->position(charges[i]->site())).norm();
-          potential2 += (charges[i]->charge() * q) / distance;
+          dx = grid->xDistancei(newSite, charges[i]->site());
+          dy = grid->yDistancei(newSite, charges[i]->site());
+          potential2 += (*m_world->interactionEnergies())(dy, dx)
+                        * charges[i]->charge();
         }
         else {
 //          qDebug() << "This site is already occupied - reject.";

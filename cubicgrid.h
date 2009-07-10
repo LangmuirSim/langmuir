@@ -58,17 +58,27 @@ namespace Langmuir
     /**
      * Get the total distance between the two sites.
      */
-    double getTotalDistance(unsigned int site1, unsigned int site2);
+    double totalDistance(unsigned int site1, unsigned int site2);
 
     /**
      * Get the x component of the distance between the two sites.
      */
-    double getXDistance(unsigned int site1, unsigned int site2);
+    double xDistance(unsigned int site1, unsigned int site2);
 
     /**
      * Get the y component of the distance between the two sites.
      */
-    double getYDistance(unsigned int site1, unsigned int site2);
+    double yDistance(unsigned int site1, unsigned int site2);
+
+    /**
+     * Get the x component of the distance between the two sites.
+     */
+    int xDistancei(unsigned int site1, unsigned int site2);
+
+    /**
+     * Get the y component of the distance between the two sites.
+     */
+    int yDistancei(unsigned int site1, unsigned int site2);
 
     /**
      * Convert a column/row into a one dimensional index.
