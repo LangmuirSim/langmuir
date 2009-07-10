@@ -35,11 +35,11 @@ int main(int argc, char *argv[])
   int height = 256;
   double sourceVoltage = 0.0;
   double drainVoltage = 1.0;
-  double minTrap = 0.25; // Percent
-  double maxTrap = 0.50; // Percent
+  double minTrap = 0.00; // Percent
+  double maxTrap = 0.30; // Percent
   double occupation = 0.01; // 1 percent constant charge occupation
   int step = 2; // Number of steps
-  double stepSize = (maxTrap - minTrap) / step;
+  double stepSize = (maxTrap - minTrap) / (step-1);
 
   qDebug() << "Testing the simulation class.\n";
 

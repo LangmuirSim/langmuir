@@ -37,9 +37,9 @@ int main(int argc, char *argv[])
   double drainVoltage = 0.0;
   double minDrain = 0.0; // Percent
   double maxDrain = 5.0; // Percent
-  double occupation = 0.05; // 5 percent constant charge occupation
-  int drainStep = 5; // Number of steps
-  double drainStepSize = (maxDrain - minDrain) / drainStep;
+  double occupation = 0.01; // 5 percent constant charge occupation
+  int drainStep = 11; // Number of steps
+  double drainStepSize = (maxDrain - minDrain) / (drainStep-1);
 
   qDebug() << "Testing the simulation class.\n";
 
