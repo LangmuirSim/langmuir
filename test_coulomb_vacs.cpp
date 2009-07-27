@@ -29,6 +29,15 @@ int main(int argc, char *argv[])
     minTrap = QString(args.at(3)).toDouble();
   }
 
+  int its = 250000;
+  if (args.size() > 3) {
+    qDebug() << "Setting the number of iterations:" << args.at(4);
+    its = args.at(4).toInt();
+  }
+  // We output the numbers 50 times in a run, so divide the desired its by that
+  its /= 50;
+  qDebug() << "Iterations to be used between output:" << its;
+
   qDebug() << "Input file:" << args.at(1) << "\nOutput file:" << args.at(2);
 
   // Open our main output file and get it ready for writing
@@ -87,7 +96,7 @@ int main(int argc, char *argv[])
     // Now for the real work
     unsigned int startCount = lastCount;
     for (int j = 0; j < 50; ++j) {
-      sim->performIterations(5000);
+      sim->performIterations(its);
       qDebug() << "Real:\t" << j << sim->totalChargesAccepted() - lastCount
           << sim->charges() << "of" << charges;
       out2 << j << "\t" << sim->totalChargesAccepted() - lastCount

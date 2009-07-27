@@ -40,7 +40,7 @@ namespace Langmuir{
 
     // Choose the appropriate site and attempt a move
     Grid *grid = m_world->grid();
-    Vector2d pos1(grid->position(m_site));
+//    Vector2d pos1(grid->position(m_site));
 
     // Now we select the proposed transport site at random
     unsigned int newSite = m_neighbors[int(m_world->random()
@@ -49,7 +49,6 @@ namespace Langmuir{
     // Check if the proposed site to move to is already occupied
     if (grid->agent(newSite) && grid->siteID(newSite) != 3)
       return -1;
-
 
 //    qDebug() << "Potential of charges:" << potential1 << potential2
 //        << "Difference" << potential2 - potential1;
@@ -80,8 +79,8 @@ namespace Langmuir{
   void ChargeAgent::completeTick()
   {
     if (m_site != m_fSite) {
-      Vector2d pos1(m_world->grid()->position(m_site));
-      Vector2d pos2(m_world->grid()->position(m_fSite));
+//      Vector2d pos1(m_world->grid()->position(m_site));
+//      Vector2d pos2(m_world->grid()->position(m_fSite));
 /*      qDebug() << "Charge move:"
           << pos1.x() << pos1.y()
           << "->"
@@ -131,14 +130,15 @@ namespace Langmuir{
     const double q4pe = q / (4.0*M_PI*8.854187817e-12 * 1e-9);
 
     Grid *grid = m_world->grid();
-    Vector2d pos1(grid->position(m_site));
+//    Vector2d pos1(grid->position(m_site));
     // Get the position of the proposed site
-    Vector2d pos2(grid->position(newSite));
+//    Vector2d pos2(grid->position(newSite));
 
     // Figure out the potential of the site we are on
     QList<ChargeAgent *> &charges = *m_world->charges();
     double potential1(0.0), potential2(0.0);
-    for (int i = 0; i < charges.size(); ++i) {
+    int chargeSize(charges.size());
+    for (int i = 0; i < chargeSize; ++i) {
       if (charges[i] != this) {
         // Potential at current site from other charges
         int dx = grid->xDistancei(m_site, charges[i]->site());
@@ -164,10 +164,7 @@ namespace Langmuir{
         }
       }
     }
-    potential1 *= m_charge * q4pe;
-    potential2 *= m_charge * q4pe;
-
-    return potential2 - potential1;
+    return m_charge * q4pe * (potential2 - potential1);
   }
 
   inline double ChargeAgent::couplingConstant(short id1, short id2)

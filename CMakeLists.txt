@@ -13,6 +13,8 @@ find_package(Eigen2 REQUIRED) # find and setup Eigen2
 find_package(Boost REQUIRED
   COMPONENTS mpi)
 
+set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
+
 message(STATUS "MPI_COMPILE_FLAGS: ${MPI_COMPILE_FLAGS}")
 message(STATUS "MPI_INCLUDE_PATH: ${MPI_INCLUDE_PATH}")
 message(STATUS "MPI_LINK_FLAGS: ${MPI_LINK_FLAGS}")
