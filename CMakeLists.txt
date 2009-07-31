@@ -48,6 +48,7 @@ set(SRCS
   chargeagent.cpp
   simulation.cpp
   world.cpp
+  inputparser.cpp
 )
 
 set(VIEWSRCS
@@ -78,6 +79,11 @@ add_executable(test5 test_no_coulomb_drain.cpp ${qt_SRCS} ${SRCS})
 
 add_executable(test6 test_no_coulomb_vacs.cpp ${qt_SRCS} ${SRCS})
 add_executable(test7 test_coulomb_vacs.cpp ${qt_SRCS} ${SRCS})
+
+add_executable(langmuir langmuir.cpp ${SRCS})
+target_link_libraries(langmuir
+  ${QT_LIBRARIES}
+  ${Boost_LIBRARIES})
 
 #add_executable(mpitest ${qt_SRCS} ${MPISRCS} ${SRCS})
 
