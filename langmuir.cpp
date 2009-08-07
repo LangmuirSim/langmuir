@@ -130,6 +130,7 @@ int main(int argc, char *argv[])
         << "\t" << par.chargePercentage * 100.0
         << "\t" << double(sim.charges()) / double(nCharges) * 100.0
         << "\t" << double(lastCount-startCount) / par.iterationsReal << "\n";
+    out.flush();
   }
 
   outputFile.close();
