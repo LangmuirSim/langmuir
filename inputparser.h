@@ -24,13 +24,13 @@ namespace Langmuir {
     SimulationParameters() : voltageSource(0.0), voltageDrain(0.0),
       trapPercentage(0.0), chargePercentage(0.01),
       gridWidth(10), gridHeight(10),
-      iterationsWarmup(1000), iterationsReal(5000), iterationsPrint(500),
-      coulomb(false) { }
+      iterationsWarmup(100000), iterationsReal(500000), iterationsPrint(10000),
+      coulomb(false), gridCharge(false) { }
 
     double voltageSource, voltageDrain, trapPercentage, chargePercentage;
     int gridWidth, gridHeight;
     int iterationsWarmup, iterationsReal, iterationsPrint;
-    bool coulomb;
+    bool coulomb, gridCharge;
   };
 
   class InputParser
@@ -65,6 +65,7 @@ namespace Langmuir {
       e_variableSteps,      // the number of steps to take from start to final
       e_gridWidth,          // the width of the grid
       e_gridHeight,         // the height of the grid
+      e_gridCharge,         // seed the grid with charges
       e_iterationsWarmup,   // the number of warm up iterations to perform
       e_iterationsReal,     // the number of iterations for the real run
       e_iterationsPrint,    // number of iterations before printing state

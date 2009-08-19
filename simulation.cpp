@@ -51,6 +51,27 @@ namespace Langmuir
     m_source->setMaxCharges(n);
   }
 
+  bool Simulation::seedCharges()
+  {
+    // We randomly place all of the charges in the grid
+    Grid *grid = m_world->grid();
+
+    unsigned int nSites = grid->width() * grid->height();
+    int maxCharges = m_source->maxCharges();
+
+    for (int i = 0; i < maxCharges; ) {
+      // Randomly select a site, ensure it is suitable, if so add a charge agent
+      unsigned int site = int(m_world->random() * (double(nSites) - 0.00001));
+      if (grid->siteID(site) == 0 && grid->agent(site) == 0) {
+        ChargeAgent *charge = new ChargeAgent(m_world, site, m_coulombInteraction);
+        m_world->charges()->push_back(charge);
+        m_source->incrementCharge();
+        ++i;
+      }
+    }
+    return true;
+  }
+
   void Simulation::setCoulombInteractions(bool enabled)
   {
     m_coulombInteraction = enabled;

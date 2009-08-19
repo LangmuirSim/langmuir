@@ -43,6 +43,11 @@ namespace Langmuir
     void setMaxCharges(int n);
 
     /**
+     * Seed the grid with the number of charges specified by setMaxCharges.
+     */
+    bool seedCharges();
+
+    /**
      * Account for Coulomb interaction between charges.
      */
     void setCoulombInteractions(bool enabled);

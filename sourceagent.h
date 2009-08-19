@@ -39,13 +39,27 @@ namespace Langmuir
      */
     virtual unsigned int transport();
 
+    /**
+     * Set the maximum number of charges that can be present in the system.
+     */
     void setMaxCharges(int number);
+
+    /**
+     * @return The maximum number of charges in the system.
+     */
+    int maxCharges();
 
     /**
      * Used to inform the source agent that a charge has been removed from the
      * system, allowing average charge density to be kept constant.
      */
     void decrementCharge();
+
+    /**
+     * Used to inform the source agent that a charge has been added to the
+     * system, allowing average charge density to be kept constant.
+     */
+    void incrementCharge();
 
   private:
     double m_potential;
@@ -59,10 +73,20 @@ namespace Langmuir
     m_maxCharges = number;
   }
 
+  inline int SourceAgent::maxCharges()
+  {
+    return m_maxCharges;
+  }
+
   inline void SourceAgent::decrementCharge()
   {
     if (m_charges > 0)
       --m_charges;
+  }
+
+  inline void SourceAgent::incrementCharge()
+  {
+    ++m_charges;
   }
 
 } // End namespace Langmuir

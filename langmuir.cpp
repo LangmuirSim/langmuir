@@ -56,6 +56,7 @@ int main(int argc, char *argv[])
       << "\niterations.print: " << par.iterationsPrint
       << "\ngrid.width: " << par.gridWidth
       << "\ngrid.height: " << par.gridHeight
+      << "\ngrid.charge: " << par.gridCharge
       << "\ninteractions.coulomb: " << par.coulomb
       << "\nvoltage.source: " << par.voltageSource
       << "\nvoltage.drain: " << par.voltageDrain
@@ -64,7 +65,7 @@ int main(int argc, char *argv[])
       << "\n\n";
 
   // Now output the column titles
-  out << "i\tSource (V)\tDrain (V)\tTrap (%)\tCharge Goal (%)"
+  out << "#i\tSource (V)\tDrain (V)\tTrap (%)\tCharge Goal (%)"
       << "\tCharge Reached (%)\tCharge Transport (per iteration)\n";
   out.flush();
 
@@ -82,6 +83,10 @@ int main(int argc, char *argv[])
     sim.setMaxCharges(nCharges);
     sim.setCoulombInteractions(par.coulomb);
 
+    // Charge the grid up is specified
+    if (par.gridCharge)
+      sim.seedCharges();
+
     // Now to start the simulation - warmup and then real counts
     QFile iterFile(outputFileName+"-i-"+QString::number(i)+".dat");
     if (!iterFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
@@ -90,13 +95,15 @@ int main(int argc, char *argv[])
       app.exit(1);
     }
     QTextStream iterOut(&iterFile);
-    iterOut << "i\tSource (V)\tDrain (V)\tTrap (%)\tCharge Goal (%)"
+    iterOut << "#i\tSource (V)\tDrain (V)\tTrap (%)\tCharge Goal (%)"
             << "\tCharge Reached (%)\tCharge Transport (per iteration)\n";
     unsigned long lastCount = 0;
     for (int j = 0; j < par.iterationsWarmup; j += par.iterationsPrint) {
-      qDebug() << "Accepted charges:" << sim.totalChargesAccepted();
       sim.performIterations(par.iterationsPrint);
       // Now to output the result of the simulation at this data point
+      qDebug() << j
+               << "\t" << double(sim.charges()) / double(nCharges) * 100.0
+               << "\t" << double(sim.totalChargesAccepted()-lastCount) / par.iterationsPrint;
       iterOut << j
               << "\t" << par.voltageSource
               << "\t" << par.voltageDrain
@@ -109,9 +116,11 @@ int main(int argc, char *argv[])
     }
     unsigned long startCount = lastCount;
     for (int j = 0; j < par.iterationsReal; j += par.iterationsPrint) {
-      qDebug() << "Accepted charges:" << sim.totalChargesAccepted();
       sim.performIterations(par.iterationsPrint);
       // Now to output the result of the simulation at this data point
+      qDebug() << j
+               << "\t" << double(sim.charges()) / double(nCharges) * 100.0
+               << "\t" << double(sim.totalChargesAccepted()-lastCount) / par.iterationsPrint;
       iterOut << j
               << "\t" << par.voltageSource
               << "\t" << par.voltageDrain

@@ -176,6 +176,20 @@ namespace Langmuir {
           qDebug() << "grid.height:" << m_parameters.gridHeight;
           break;
         }
+        case e_gridCharge: {
+          QString gridCharge = list.at(1).trimmed().toLower();
+          if (gridCharge == "true")
+            m_parameters.gridCharge = true;
+          else if (gridCharge == "false")
+            m_parameters.gridCharge = false;
+          else {
+            m_valid = false;
+            qDebug() << "Charging the grid is either true or false:"
+                << gridCharge;
+          }
+          qDebug() << "grid.charge:" << m_parameters.gridCharge;
+          break;
+        }
         case e_iterationsWarmup: {
           m_parameters.iterationsWarmup = list.at(1).toInt();
           if (m_parameters.iterationsWarmup < 0) {
@@ -241,6 +255,7 @@ namespace Langmuir {
     s_variables["grid.width"] = e_gridWidth;
     s_variables["grid.height"] = e_gridHeight;
     s_variables["grid.height"] = e_gridHeight;
+    s_variables["grid.charge"] = e_gridCharge;
     s_variables["iterations.warmup"] = e_iterationsWarmup;
     s_variables["iterations.real"] = e_iterationsReal;
     s_variables["iterations.print"] = e_iterationsPrint;
