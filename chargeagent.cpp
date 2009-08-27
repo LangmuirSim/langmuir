@@ -127,7 +127,11 @@ namespace Langmuir{
   {
     const double q = 1.60217646e-19; // Magnitude of charge on an electron
     // Prefactor for force calculations q / 4 pi epsilon with a 1e-9 for m -> nm
-    const double q4pe = q / (4.0*M_PI*8.854187817e-12 * 1e-9);
+    // Using a relative permittivity of 3.5 for now - should be configurable
+    const double q4pe = q / (4.0*M_PI*8.854187817e-12 * 3.5 * 1e-9);
+
+    // Cutting off interaction energies at 50nm
+    int cutoff = 50;
 
     Grid *grid = m_world->grid();
 //    Vector2d pos1(grid->position(m_site));
@@ -149,14 +153,18 @@ namespace Langmuir{
           qDebug() << "Objects:" << this << charges[i];
           std::exit(1);
         }
-        potential1 += (*m_world->interactionEnergies())(dy, dx)
-                      * charges[i]->charge();
+        if (dx < cutoff && dy < cutoff) {
+          potential1 += (*m_world->interactionEnergies())(dy, dx)
+                        * charges[i]->charge();
+        }
         // Potential at new site from other charges
         if (newSite != charges[i]->site()) {
           dx = grid->xDistancei(newSite, charges[i]->site());
           dy = grid->yDistancei(newSite, charges[i]->site());
-          potential2 += (*m_world->interactionEnergies())(dy, dx)
-                        * charges[i]->charge();
+          if (dx < cutoff && dy < cutoff) {
+            potential2 += (*m_world->interactionEnergies())(dy, dx)
+                          * charges[i]->charge();
+          }
         }
         else {
 //          qDebug() << "This site is already occupied - reject.";

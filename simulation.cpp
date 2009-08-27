@@ -236,11 +236,14 @@ namespace Langmuir
   {
     // These values are used in Coulomb interaction calculations.
     Eigen::MatrixXd *energies = m_world->interactionEnergies();
-    energies->resize(m_grid->height()+1, m_grid->width()+1);
+
+    // Currently hard coding a cut off of 50nm - no interactions beyond that added
+    int cutoff = 50;
+    energies->resize(cutoff, cutoff);
     const double q = 1.60217646e-19; // Magnitude of charge on an electron
     // Now calculate the numbers we need
-    for (unsigned int i = 0; i <= m_grid->height(); ++i)
-      for (unsigned int j = 0; j <= m_grid->width(); ++j)
+    for (unsigned int i = 0; i < cutoff; ++i)
+      for (unsigned int j = 0; j < cutoff; ++j)
         (*energies)(i, j) = q / sqrt(i*i + j*j);
   }
 
