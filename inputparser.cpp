@@ -56,6 +56,9 @@ namespace Langmuir {
       case e_chargePercentage:
         par->chargePercentage = tmp / 100.0;
         break;
+      case e_temperatureKelvin:
+        par->temperatureKelvin = tmp;
+        break;
       default: // This should not happen - error...
         m_valid = false;
         return false;
@@ -74,6 +77,8 @@ namespace Langmuir {
         return "trap.percentage";
       case e_chargePercentage:
         return "charge.percentage";
+      case e_temperatureKelvin:
+        return "temperature.kelvin";
       default: // This should not happen - error...
         return "error.undefined";
     }
@@ -123,13 +128,22 @@ namespace Langmuir {
           qDebug() << "Charge percentage:" << m_parameters.chargePercentage;
           break;
         }
+        case e_temperatureKelvin: {
+          m_parameters.temperatureKelvin = list.at(1).toDouble();
+          // The temperature cannot be lower than 0K
+          if (m.parameters.temperatureKelvin < 0.00) {
+            m_valid = false;
+          }
+          break;   
+        }   
         case e_variableWorking: {
           m_varyType = s_variables.value(list.at(1).toLower().trimmed());
           // Check that the working variable is a valid one
           if (m_varyType == e_voltageSource ||
               m_varyType == e_voltageDrain ||
               m_varyType == e_trapPercentage ||
-              m_varyType == e_chargePercentage) {
+              m_varyType == e_chargePercentage ||
+              m_varyType == e_temperatureKelvin) {
             qDebug() << "Working variable:" << m_varyType;
           }
           else {
@@ -248,6 +262,7 @@ namespace Langmuir {
     s_variables["voltage.drain"] = e_voltageDrain;
     s_variables["trap.percentage"] = e_trapPercentage;
     s_variables["charge.percentage"] = e_chargePercentage;
+    s_variables["temperature.kelvin"] = e_temperatureKelvin;
     s_variables["variable.working"] = e_variableWorking;
     s_variables["variable.start"] = e_variableStart;
     s_variables["variable.final"] = e_variableFinal;

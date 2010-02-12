@@ -62,10 +62,11 @@ int main(int argc, char *argv[])
       << "\nvoltage.drain: " << par.voltageDrain
       << "\ntrap.percentage: " << par.trapPercentage * 100.0
       << "\ncharge.percentage: " << par.chargePercentage * 100.0
+      << "\ntemperature.kelvin: " << par.temperatureKelvin
       << "\n\n";
 
   // Now output the column titles
-  out << "#i\tSource (V)\tDrain (V)\tTrap (%)\tCharge Goal (%)"
+  out << "#i\tTemperature (K)\tSource (V)\tDrain (V)\tTrap (%)\tCharge Goal (%)"
       << "\tCharge Reached (%)\tCharge Transport (per iteration)\n";
   out.flush();
 

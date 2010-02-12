@@ -22,12 +22,12 @@ namespace Langmuir {
    */
   struct SimulationParameters{
     SimulationParameters() : voltageSource(0.0), voltageDrain(0.0),
-      trapPercentage(0.0), chargePercentage(0.01),
+      trapPercentage(0.0), chargePercentage(0.01),temperatureKelvin(300.00),
       gridWidth(10), gridHeight(10),
       iterationsWarmup(100000), iterationsReal(500000), iterationsPrint(10000),
       coulomb(false), gridCharge(false) { }
 
-    double voltageSource, voltageDrain, trapPercentage, chargePercentage;
+    double voltageSource, voltageDrain, trapPercentage, chargePercentage, temperatureKelvin;
     int gridWidth, gridHeight;
     int iterationsWarmup, iterationsReal, iterationsPrint;
     bool coulomb, gridCharge;
@@ -59,6 +59,7 @@ namespace Langmuir {
       e_voltageDrain,       // voltage of the drain electrode
       e_trapPercentage,     // percentage of traps in the grid
       e_chargePercentage,   // percentage of charges in the grid - sets as target
+      e_temperatureKelvin,  // the absolute temperature
       e_variableWorking,    // the working variable that is being changed
       e_variableStart,      // the start of the variables range
       e_variableFinal,      // final value of the variable range
@@ -104,6 +105,8 @@ namespace Langmuir {
     double voltageDrain() const { return m_parameters.voltageDrain; }
 
     double trapPercentage() const { return m_parameters.trapPercentage; }
+
+    double temperatureKelvin() const {return m_parameters.temperatureKelvin;}
 
     int gridWidth() const { return m_parameters.gridWidth; }
 

@@ -184,7 +184,17 @@ namespace Langmuir{
   {
     // Now to decide if the hop will be made - using a simple exponential energy
     // change acceptance now.
-    const double kTinv = 1.0 / (1.3806504e-23 * 300); // inverse of kBT at 300K
+
+    //Define the Boltzmann constant
+    const double k = 1.3806504e-23;  // Boltzmann's constant in J/K
+
+    // Now define  a variable called kTinv using the variable temperatureKelvin.
+    // This should allow for the temperature to be set to a specific value or
+    // to be a working variable.
+
+    double kTinv = 1 / (k * temperatureKelvin);  // 1/kBT calcualted with a user defined
+                                                 // temperature.
+
     double randNumber = m_world->random();
 //    qDebug() << "Deciding on whether to accept move..." << pd << exp(-pd * kTinv)
 //        << randNumber;
