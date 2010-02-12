@@ -2,6 +2,7 @@
 
 #include "world.h"
 #include "grid.h"
+#include "inputparser.h" //This needs to be added to vary the temperature 
 
 #include <QtCore/QThread>
 #include <QtCore/QDebug>
