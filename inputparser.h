@@ -23,14 +23,14 @@ namespace Langmuir {
   struct SimulationParameters{
     SimulationParameters() : voltageSource(0.0), voltageDrain(0.0),
       trapPercentage(0.0), chargePercentage(0.01),temperatureKelvin(300.00),
-      gridWidth(10), gridHeight(10),
+      gridWidth(10), gridHeight(10), zDefect(0),
       iterationsWarmup(100000), iterationsReal(500000), iterationsPrint(10000),
-      coulomb(false), gridCharge(false) { }
+      coulomb(false), defectsCharged(false), gridCharge(false) { }
 
     double voltageSource, voltageDrain, trapPercentage, chargePercentage, temperatureKelvin;
-    int gridWidth, gridHeight;
+    int gridWidth, gridHeight, zDefect;
     int iterationsWarmup, iterationsReal, iterationsPrint;
-    bool coulomb, gridCharge;
+    bool coulomb, defectsCharged, gridCharge;
   };
 
   class InputParser
@@ -66,11 +66,13 @@ namespace Langmuir {
       e_variableSteps,      // the number of steps to take from start to final
       e_gridWidth,          // the width of the grid
       e_gridHeight,         // the height of the grid
+	  e_zDefect,            // charge on the defects (times q)
       e_gridCharge,         // seed the grid with charges
       e_iterationsWarmup,   // the number of warm up iterations to perform
       e_iterationsReal,     // the number of iterations for the real run
       e_iterationsPrint,    // number of iterations before printing state
       e_coulombInteraction, // should Coulomb interaction be used
+	  e_defectsCharged,     // are the defects charged?
       e_end
     };
 
@@ -111,6 +113,8 @@ namespace Langmuir {
     int gridWidth() const { return m_parameters.gridWidth; }
 
     int gridHeight() const { return m_parameters.gridHeight; }
+	  
+	int zDefect() const { return m_parameters.zDefect; }
 
     /**
      * Get the simulation parameters for the supplied step.

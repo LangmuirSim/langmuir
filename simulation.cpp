@@ -21,7 +21,7 @@ namespace Langmuir
   Simulation::Simulation(unsigned int width, unsigned int height,
                          double sourcePotential, double drainPotential,
                          double trapPercent)
-      : m_coulombInteraction(true)
+      : m_coulombInteraction(true), m_chargedDefects(true)
   {
     m_world = new World;
     m_grid = new CubicGrid(width, height);
@@ -76,6 +76,17 @@ namespace Langmuir
   {
     m_coulombInteraction = enabled;
   }
+	
+  void Simulation::setChargedDefects(bool on)
+  {
+	m_chargedDefects = on; 
+  }
+	
+  void Simulation::setZdefect(int zDefect)
+	{
+	   m_zDefect = zDefect;
+	}
+	
 
   void Simulation::performIterations(int nIterations)
   {
@@ -175,8 +186,11 @@ namespace Langmuir
     for (unsigned int i = 0; i < numAgents; ++i) {
       // Mix some trap sites in
       if (m_world->random() > (1.0 - trapPercent)) // Trap site
+	  {
         m_world->grid()->setSiteID(i, 1);
-      else // Charge carrier site
+		m_world->chargedDefects()->push_back(i);
+	  }
+	else // Charge carrier site
         m_world->grid()->setSiteID(i, 0);
     }
     // Add the source and the drain

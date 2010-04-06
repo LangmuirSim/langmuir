@@ -131,7 +131,7 @@ namespace Langmuir {
         case e_temperatureKelvin: {
           m_parameters.temperatureKelvin = list.at(1).toDouble();
           // The temperature cannot be lower than 0K
-          if (m.parameters.temperatureKelvin < 0.00) {
+          if (m_parameters.temperatureKelvin < 0.00) {
             m_valid = false;
           }
           break;   
@@ -190,6 +190,13 @@ namespace Langmuir {
           qDebug() << "grid.height:" << m_parameters.gridHeight;
           break;
         }
+		case e_zDefect:  {
+			m_parameters.zDefect=list.at(1).toInt();
+			if (m_parameters.zDefect < -1 || m_parameters.zDefect > 1) {
+			m_valid = false;
+			}
+			break;
+		}
         case e_gridCharge: {
           QString gridCharge = list.at(1).trimmed().toLower();
           if (gridCharge == "true")
@@ -245,7 +252,19 @@ namespace Langmuir {
           qDebug() << "interaction.coulomb:" << m_parameters.coulomb;
           break;
         }
+		case e_defectsCharged:  {
+		  QString interaction = list.at(1).trimmed().toLower();
+		  if (interaction == "true")
+			  m_parameters.defectsCharged = true;
+		  else if (interaction == "false")
+			  m_parameters.defectsCharged = false;
+		  else {
+			  m_valid = false;
+		  }
+		  break;
+		}
 
+			
         default:
           qDebug() << "Unknown key value encountered:" << key;
       }
@@ -270,11 +289,13 @@ namespace Langmuir {
     s_variables["grid.width"] = e_gridWidth;
     s_variables["grid.height"] = e_gridHeight;
     s_variables["grid.height"] = e_gridHeight;
+	s_variables["z.defect"] = e_zDefect;
     s_variables["grid.charge"] = e_gridCharge;
     s_variables["iterations.warmup"] = e_iterationsWarmup;
     s_variables["iterations.real"] = e_iterationsReal;
     s_variables["iterations.print"] = e_iterationsPrint;
     s_variables["interaction.coulomb"] = e_coulombInteraction;
+	s_variables["charged.defects"] = e_defectsCharged;
   }
 
 }

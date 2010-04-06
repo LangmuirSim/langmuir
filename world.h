@@ -37,6 +37,8 @@ namespace Langmuir
     double random();
 
     QList<ChargeAgent *> * charges();
+	  
+	QList<unsigned int> * chargedDefects();
 
     Eigen::MatrixXd * coupling();
 
@@ -48,6 +50,7 @@ namespace Langmuir
     Grid *m_grid;     // The grid in use in the world
     Rand *m_rand;     // Random number generator
     QList<ChargeAgent *> m_charges; // Charge carriers in the system
+	QList<unsigned int> m_chargedDefects; // Charged defects in the system
 
     /**
      * Square matrix containing the coupling constants between different site types
@@ -61,6 +64,11 @@ namespace Langmuir
   inline QList<ChargeAgent *> * World::charges()
   {
     return &m_charges;
+  }
+	
+  inline QList<unsigned int> * World::chargedDefects()
+  {
+	return &m_chargedDefects;
   }
 
   inline Eigen::MatrixXd * World::coupling()

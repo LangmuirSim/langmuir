@@ -19,6 +19,14 @@ namespace Langmuir
      * Enable or disable Coulomb interaction for this charge carrier.
      */
     void setCoulombInteraction(bool enabled);
+	  
+    // Enable or disable charged defects for this charge carrier
+	
+	void setChargedDefects(bool on);
+	  
+	//Set the charge on each defect
+	  
+	void setZdefect(int zDefect);
 
     /**
      * Returns the charge of this node.
@@ -42,16 +50,22 @@ namespace Langmuir
 
   protected:
     int m_charge;
+	int m_zDefect;
     std::vector<unsigned int> m_neighbors;
     bool m_removed;
     bool m_coulombInteraction; // Should the Coulomb interaction be calculated?
-
+	bool m_chargedDefects; // include charged defects?
     /**
      * Calculate the potential difference arising from the Coulomb interaction
      * between the two proposed sites.
      */
     double coulombInteraction(unsigned int newSite);
-
+	  
+    //Calculate the potential difference arising from elctrostatic interactions between
+    //the carrier and a charged defect. 
+	
+    double defectsCharged(unsigned int newSite);
+	  
     /**
      * Get the coupling constant for the proposed move.
      */
@@ -62,6 +76,8 @@ namespace Langmuir
      */
     bool attemptTransport(double pd, double coupling);
   };
+	
+ 
 
   inline int ChargeAgent::charge()
   {

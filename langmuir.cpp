@@ -58,6 +58,8 @@ int main(int argc, char *argv[])
       << "\ngrid.height: " << par.gridHeight
       << "\ngrid.charge: " << par.gridCharge
       << "\ninteractions.coulomb: " << par.coulomb
+	  << "\ncharged.defects:  " << par.defectsCharged
+	  << "\nz.defect:  " << par.zDefect
       << "\nvoltage.source: " << par.voltageSource
       << "\nvoltage.drain: " << par.voltageDrain
       << "\ntrap.percentage: " << par.trapPercentage * 100.0
@@ -83,6 +85,10 @@ int main(int argc, char *argv[])
     int nCharges = par.chargePercentage * double(par.gridWidth*par.gridHeight);
     sim.setMaxCharges(nCharges);
     sim.setCoulombInteractions(par.coulomb);
+	  // set charged defects
+	sim.setChargedDefects(par.defectsCharged);
+	// set charge on defects
+	sim.setZdefect(par.zDefect);
 
     // Charge the grid up is specified
     if (par.gridCharge)

@@ -51,10 +51,19 @@ namespace Langmuir
      * Account for Coulomb interaction between charges.
      */
     void setCoulombInteractions(bool enabled);
+	  
+	// Account for charged defects
+	
+	void setChargedDefects(bool on);
+	  
+	// Set the charge of the defect
+	  
+	void setZdefect(int zDefect);
 
     /**
      * Call this function to perform n iterations.
      */
+	  
     void performIterations(int nIterations);
 
     /**
@@ -80,6 +89,8 @@ namespace Langmuir
 
   private:
     bool m_coulombInteraction; // Should Coulomb interactions be taken into account?
+	bool m_chargedDefects;  // Enable charged defects
+	int m_zDefect; // Set the charge on the defect
 
     World *m_world;
     /**

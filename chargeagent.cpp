@@ -1,8 +1,8 @@
 #include "chargeagent.h"
+#include "inputparser.h"
 
 #include "world.h"
-#include "grid.h"
-#include "inputparser.h" //This needs to be added to vary the temperature 
+#include "grid.h" 
 
 #include <QtCore/QThread>
 #include <QtCore/QDebug>
@@ -15,7 +15,7 @@ namespace Langmuir{
   using Eigen::Vector2d;
 
   ChargeAgent::ChargeAgent(World *world, unsigned int site, bool coulombInteraction)
-      : Agent(Agent::Charge, world, site), m_charge(-1), m_removed(false),
+      : Agent(Agent::Charge, world, site), m_charge(-1), m_zDefect(-1), m_removed(false),
       m_coulombInteraction(coulombInteraction)
   {
 //    qDebug() << "Charge injected into the system.";
@@ -32,6 +32,11 @@ namespace Langmuir{
   void ChargeAgent::setCoulombInteraction(bool enabled)
   {
     m_coulombInteraction = enabled;
+  }
+	
+  void ChargeAgent::setChargedDefects(bool on)
+  {
+	m_chargedDefects = on;
   }
 
   unsigned int ChargeAgent::transport()
@@ -63,6 +68,10 @@ namespace Langmuir{
     // Add on the Coulomb interaction if it is being included
     if (m_coulombInteraction)
       pd += this->coulombInteraction(newSite);
+	  
+	// Add the interactions from charged defects
+	if (m_chargedDefects)
+	  pd += defectsCharged(newSite);
 
 //    qDebug() << "Potential difference with charges:" << pd;
 
@@ -175,7 +184,49 @@ namespace Langmuir{
     }
     return m_charge * q4pe * (potential2 - potential1);
   }
-
+	inline double ChargeAgent::defectsCharged(unsigned int newSite)
+	{
+		const double q = 1.60217646e-19; // Magnitude of charge on an electron
+		// Prefactor for force calculations q / 4 pi epsilon with a 1e-9 for m -> nm
+		const double q4pe = q / (4.0*M_PI*8.854187817e-12 * 3.5 * 1e-9);
+		
+		// Cutting off interaction energies at 50nm
+		int cutoff = 50;
+		
+		Grid *grid = m_world->grid();
+		//    Vector2d pos1(grid->position(m_site));
+		// Get the position of the proposed site
+		//    Vector2d pos2(grid->position(newSite));
+		
+		// Figure out the potential of the site we are on
+		QList<unsigned int> &chargedDefects = *m_world->chargedDefects();
+		double potential1(0.0), potential2(0.0);
+		int defectSize(chargedDefects.size());
+		for (int i = 0; i < defectSize; ++i) {
+				// Potential at current site from charged defects
+				int dx = grid->xDistancei(m_site, chargedDefects[i]);
+				int dy = grid->yDistancei(m_site, chargedDefects[i]);
+				if (dx < cutoff && dy < cutoff) {
+					potential1 += (*m_world->interactionEnergies())(dy, dx)
+					* chargedDefects[i];
+				}
+				// Potential at new site from charged defects
+				if (newSite != chargedDefects[i]) {
+					dx = grid->xDistancei(newSite, chargedDefects[i]);
+					dy = grid->yDistancei(newSite, chargedDefects[i]);
+					if (dx < cutoff && dy < cutoff) {
+						potential2 += (*m_world->interactionEnergies())(dy, dx)
+						* chargedDefects[i];
+					}
+				}
+				else {
+					//          qDebug() << "This site is already occupied - reject.";
+					return -1;
+				}
+		}
+		return m_charge * m_zDefect * q4pe * (potential2 - potential1);
+	}
+		
   inline double ChargeAgent::couplingConstant(short id1, short id2)
   {
     return (*m_world->coupling())(id1, id2);
@@ -188,14 +239,7 @@ namespace Langmuir{
 
     //Define the Boltzmann constant
     const double k = 1.3806504e-23;  // Boltzmann's constant in J/K
-
-    // Now define  a variable called kTinv using the variable temperatureKelvin.
-    // This should allow for the temperature to be set to a specific value or
-    // to be a working variable.
-
-    double kTinv = 1 / (k * temperatureKelvin);  // 1/kBT calcualted with a user defined
-                                                 // temperature.
-
+    double kTinv = 1 / (k * 300); 
     double randNumber = m_world->random();
 //    qDebug() << "Deciding on whether to accept move..." << pd << exp(-pd * kTinv)
 //        << randNumber;
