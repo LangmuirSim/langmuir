@@ -89,6 +89,8 @@ int main(int argc, char *argv[])
 	sim.setChargedDefects(par.defectsCharged);
 	// set charge on defects
 	sim.setZdefect(par.zDefect);
+	// set simulation temperature
+	sim.setTemperature(par.temperatureKelvin);
 
     // Charge the grid up is specified
     if (par.gridCharge)
@@ -112,6 +114,7 @@ int main(int argc, char *argv[])
                << "\t" << double(sim.charges()) / double(nCharges) * 100.0
                << "\t" << double(sim.totalChargesAccepted()-lastCount) / par.iterationsPrint;
       iterOut << j
+	      << "\t" << par.temperatureKelvin
               << "\t" << par.voltageSource
               << "\t" << par.voltageDrain
               << "\t" << par.trapPercentage * 100.0
@@ -140,6 +143,7 @@ int main(int argc, char *argv[])
     }
     // Now to output the result of the simulation at this data point
     out << i
+	<< "\t" << par.temperatureKelvin
         << "\t" << par.voltageSource
         << "\t" << par.voltageDrain
         << "\t" << par.trapPercentage * 100.0

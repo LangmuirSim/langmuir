@@ -1,5 +1,4 @@
 #include "chargeagent.h"
-#include "inputparser.h"
 
 #include "world.h"
 #include "grid.h" 
@@ -14,9 +13,9 @@ namespace Langmuir{
   using std::vector;
   using Eigen::Vector2d;
 
-  ChargeAgent::ChargeAgent(World *world, unsigned int site, bool coulombInteraction)
+  ChargeAgent::ChargeAgent(World *world, unsigned int site, bool coulombInteraction, double temperatureKelvin)
       : Agent(Agent::Charge, world, site), m_charge(-1), m_zDefect(-1), m_removed(false),
-      m_coulombInteraction(coulombInteraction)
+      m_coulombInteraction(coulombInteraction), m_temperatureKelvin(temperatureKelvin)
   {
 //    qDebug() << "Charge injected into the system.";
     m_site = m_fSite;
@@ -39,6 +38,12 @@ namespace Langmuir{
 	m_chargedDefects = on;
   }
 
+  double ChargeAgent::setTemperature(double temperatureKelvin)
+	{
+	m_temperatureKelvin = temperatureKelvin;
+		return temperatureKelvin;
+	}
+	
   unsigned int ChargeAgent::transport()
   {
     // Set up some constants...
@@ -78,7 +83,9 @@ namespace Langmuir{
     // Now attempt to move the charge
     double coupling = couplingConstant(grid->siteID(m_site),
                                        grid->siteID(newSite));
-    if (attemptTransport(pd, coupling)) {
+	double T = setTemperature(m_temperatureKelvin); // Sets the simulation temperature
+	  
+    if (attemptTransport(pd, coupling, T)) {
       m_fSite = newSite;
       return m_fSite;
     }
@@ -232,14 +239,14 @@ namespace Langmuir{
     return (*m_world->coupling())(id1, id2);
   }
 
-  inline bool ChargeAgent::attemptTransport(double pd, double coupling)
+  inline bool ChargeAgent::attemptTransport(double pd, double coupling, double T)
   {
     // Now to decide if the hop will be made - using a simple exponential energy
     // change acceptance now.
 
     //Define the Boltzmann constant
     const double k = 1.3806504e-23;  // Boltzmann's constant in J/K
-    double kTinv = 1 / (k * 300); 
+    double kTinv = 1 / (k * T); 
     double randNumber = m_world->random();
 //    qDebug() << "Deciding on whether to accept move..." << pd << exp(-pd * kTinv)
 //        << randNumber;

@@ -64,6 +64,10 @@ namespace Langmuir
      * Call this function to perform n iterations.
      */
 	  
+	// Set the simulation temperature
+	  
+	void setTemperature(double temperatureKelvin);
+	  
     void performIterations(int nIterations);
 
     /**
@@ -91,6 +95,7 @@ namespace Langmuir
     bool m_coulombInteraction; // Should Coulomb interactions be taken into account?
 	bool m_chargedDefects;  // Enable charged defects
 	int m_zDefect; // Set the charge on the defect
+	double m_temperatureKelvin; // Set the simulation temperature
 
     World *m_world;
     /**

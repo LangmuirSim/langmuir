@@ -87,6 +87,10 @@ namespace Langmuir
 	   m_zDefect = zDefect;
 	}
 	
+  void Simulation::setTemperature(double temperatureKelvin)
+	{
+		m_temperatureKelvin = temperatureKelvin;
+	}
 
   void Simulation::performIterations(int nIterations)
   {
