@@ -30,7 +30,7 @@ namespace Langmuir
      */
     Simulation(unsigned int width, unsigned int height,
                double sourcePotential, double drainPotential,
-               double trapPercent = 0.0);
+               double defectPercent = 0.0, double trapPercent = 0.0, double deltaEpsilon = 0.0);
 
     /**
      * Destructor.
@@ -59,14 +59,18 @@ namespace Langmuir
 	// Set the charge of the defect
 	  
 	void setZdefect(int zDefect);
+	  
+    // Set the simulation temperature
+	  
+	void setTemperature(double temperatureKelvin);
+	  
+	// Set the difference in site energy if "traps" are being included 
+	  
+	//void setDeltaEpsilon(double deltaEpsilon);
 
     /**
      * Call this function to perform n iterations.
      */
-	  
-	// Set the simulation temperature
-	  
-	void setTemperature(double temperatureKelvin);
 	  
     void performIterations(int nIterations);
 
@@ -96,6 +100,7 @@ namespace Langmuir
 	bool m_chargedDefects;  // Enable charged defects
 	int m_zDefect; // Set the charge on the defect
 	double m_temperatureKelvin; // Set the simulation temperature
+	//double m_deltaEpsilon; //Set the difference in site energy if "traps" are included
 
     World *m_world;
     /**
@@ -117,7 +122,7 @@ namespace Langmuir
      * Create all the agents in the simulation and set up their initial state.
      */
     void createAgents(unsigned int num_agents, double sourcePotential,
-                      double drainPotential, double trapPercent);
+                      double drainPotential, double defectPercent);
 
     /**
      * Destroy the agents once we are done with them.
@@ -135,7 +140,7 @@ namespace Langmuir
      * devices. Making a more generic implementation would be more difficult and
      * slower.
      */
-    void updatePotentials();
+    void updatePotentials(double trapPercent, double deltaEpsilon);
 
     /**
      * Helper function - precalculate the interaction energies of charges at

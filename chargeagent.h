@@ -12,7 +12,7 @@ namespace Langmuir
   {
 
   public:
-    ChargeAgent(World *world, unsigned int site, bool coulombInteraction = true, double temperatureKelvin = 300.0);
+    ChargeAgent(World *world, unsigned int site, bool coulombInteraction = true, double temperatureKelvin = 300.0, int zDefect = -1);
     virtual ~ChargeAgent();
 
     /**
@@ -21,6 +21,7 @@ namespace Langmuir
     void setCoulombInteraction(bool enabled);
 	  
 	// Set the simulation temperature
+	  
 	double setTemperature(double temperatureKelvin);
 	  
     // Enable or disable charged defects for this charge carrier
@@ -53,12 +54,12 @@ namespace Langmuir
 
   protected:
     int m_charge;
-    int m_zDefect;
-    std::vector<unsigned int> m_neighbors;
+	int m_zDefect;
+	std::vector<unsigned int> m_neighbors;
     bool m_removed;
     bool m_coulombInteraction; // Should the Coulomb interaction be calculated?
-    bool m_chargedDefects; // include charged defects?
-    double m_temperatureKelvin;
+	bool m_chargedDefects; // include charged defects?
+	double m_temperatureKelvin;
     /**
      * Calculate the potential difference arising from the Coulomb interaction
      * between the two proposed sites.

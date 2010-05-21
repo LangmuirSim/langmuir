@@ -62,13 +62,15 @@ int main(int argc, char *argv[])
 	  << "\nz.defect:  " << par.zDefect
       << "\nvoltage.source: " << par.voltageSource
       << "\nvoltage.drain: " << par.voltageDrain
+	  << "\ndefect.percentage: " << par.defectPercentage * 100.0
       << "\ntrap.percentage: " << par.trapPercentage * 100.0
       << "\ncharge.percentage: " << par.chargePercentage * 100.0
       << "\ntemperature.kelvin: " << par.temperatureKelvin
+	  << "\ndelta.epsilon: " << par.deltaEpsilon
       << "\n\n";
 
   // Now output the column titles
-  out << "#i\tTemperature (K)\tSource (V)\tDrain (V)\tTrap (%)\tCharge Goal (%)"
+  out << "#i\tTemperature (K)\tSource (V)\tDrain (V)\tDefect (%)\tTrap (%)\tCharge Goal (%)"
       << "\tCharge Reached (%)\tCharge Transport (per iteration)\n";
   out.flush();
 
@@ -80,8 +82,8 @@ int main(int argc, char *argv[])
         << "\nvoltage.drain:" << par.voltageDrain
         << "\ntrap.percentage:" << par.trapPercentage;
     Simulation sim(par.gridWidth, par.gridHeight,
-                   par.voltageSource, par.voltageDrain,
-                   par.trapPercentage);
+                   par.voltageSource, par.voltageDrain, par.defectPercentage,
+                   par.trapPercentage, par.deltaEpsilon);
     int nCharges = par.chargePercentage * double(par.gridWidth*par.gridHeight);
     sim.setMaxCharges(nCharges);
     sim.setCoulombInteractions(par.coulomb);
@@ -104,7 +106,7 @@ int main(int argc, char *argv[])
       app.exit(1);
     }
     QTextStream iterOut(&iterFile);
-    iterOut << "#i\tSource (V)\tDrain (V)\tTrap (%)\tCharge Goal (%)"
+    iterOut << "#i\tSource (V)\tDrain (V)\tDefect (%)\tTrap (%)\tCharge Goal (%)"
             << "\tCharge Reached (%)\tCharge Transport (per iteration)\n";
     unsigned long lastCount = 0;
     for (int j = 0; j < par.iterationsWarmup; j += par.iterationsPrint) {
@@ -114,9 +116,10 @@ int main(int argc, char *argv[])
                << "\t" << double(sim.charges()) / double(nCharges) * 100.0
                << "\t" << double(sim.totalChargesAccepted()-lastCount) / par.iterationsPrint;
       iterOut << j
-	      << "\t" << par.temperatureKelvin
+		      << "\t" << par.temperatureKelvin
               << "\t" << par.voltageSource
               << "\t" << par.voltageDrain
+		      << "\t" << par.defectPercentage * 100.00
               << "\t" << par.trapPercentage * 100.0
               << "\t" << par.chargePercentage * 100.0
               << "\t" << double(sim.charges()) / double(nCharges) * 100.0
@@ -132,8 +135,10 @@ int main(int argc, char *argv[])
                << "\t" << double(sim.charges()) / double(nCharges) * 100.0
                << "\t" << double(sim.totalChargesAccepted()-lastCount) / par.iterationsPrint;
       iterOut << j
+		      << "\t" << par.temperatureKelvin
               << "\t" << par.voltageSource
               << "\t" << par.voltageDrain
+		      << "\t" << par.defectPercentage * 100.0
               << "\t" << par.trapPercentage * 100.0
               << "\t" << par.chargePercentage * 100.0
               << "\t" << double(sim.charges()) / double(nCharges) * 100.0
@@ -143,9 +148,10 @@ int main(int argc, char *argv[])
     }
     // Now to output the result of the simulation at this data point
     out << i
-	<< "\t" << par.temperatureKelvin
+	    << "\t" << par.temperatureKelvin
         << "\t" << par.voltageSource
         << "\t" << par.voltageDrain
+	    << "\t" << par.defectPercentage * 100.0
         << "\t" << par.trapPercentage * 100.0
         << "\t" << par.chargePercentage * 100.0
         << "\t" << double(sim.charges()) / double(nCharges) * 100.0

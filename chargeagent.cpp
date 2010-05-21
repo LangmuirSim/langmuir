@@ -13,8 +13,8 @@ namespace Langmuir{
   using std::vector;
   using Eigen::Vector2d;
 
-  ChargeAgent::ChargeAgent(World *world, unsigned int site, bool coulombInteraction, double temperatureKelvin)
-      : Agent(Agent::Charge, world, site), m_charge(-1), m_zDefect(-1), m_removed(false),
+  ChargeAgent::ChargeAgent(World *world, unsigned int site, bool coulombInteraction, double temperatureKelvin, int zDefect)
+      : Agent(Agent::Charge, world, site), m_charge(-1), m_zDefect(zDefect), m_removed(false),
       m_coulombInteraction(coulombInteraction), m_temperatureKelvin(temperatureKelvin)
   {
 //    qDebug() << "Charge injected into the system.";
@@ -37,12 +37,17 @@ namespace Langmuir{
   {
 	m_chargedDefects = on;
   }
-
+	
+  void ChargeAgent::setZdefect(int zDefect)
+  {
+	m_zDefect = zDefect;
+  }
+		
   double ChargeAgent::setTemperature(double temperatureKelvin)
-	{
+  {
 	m_temperatureKelvin = temperatureKelvin;
-		return temperatureKelvin;
-	}
+	return temperatureKelvin;
+  }
 	
   unsigned int ChargeAgent::transport()
   {
@@ -76,7 +81,10 @@ namespace Langmuir{
 	  
 	// Add the interactions from charged defects
 	if (m_chargedDefects)
+	{
+	  setZdefect(m_zDefect);
 	  pd += defectsCharged(newSite);
+	}
 
 //    qDebug() << "Potential difference with charges:" << pd;
 
@@ -146,7 +154,7 @@ namespace Langmuir{
     // Prefactor for force calculations q / 4 pi epsilon with a 1e-9 for m -> nm
     // Using a relative permittivity of 3.5 for now - should be configurable
     const double q4pe = q / (4.0*M_PI*8.854187817e-12 * 3.5 * 1e-9);
-
+	
     // Cutting off interaction energies at 50nm
     int cutoff = 50;
 
@@ -196,7 +204,7 @@ namespace Langmuir{
 		const double q = 1.60217646e-19; // Magnitude of charge on an electron
 		// Prefactor for force calculations q / 4 pi epsilon with a 1e-9 for m -> nm
 		const double q4pe = q / (4.0*M_PI*8.854187817e-12 * 3.5 * 1e-9);
-		
+	
 		// Cutting off interaction energies at 50nm
 		int cutoff = 50;
 		

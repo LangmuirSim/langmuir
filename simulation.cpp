@@ -20,7 +20,7 @@ namespace Langmuir
 
   Simulation::Simulation(unsigned int width, unsigned int height,
                          double sourcePotential, double drainPotential,
-                         double trapPercent)
+                         double defectPercent, double trapPercent, double deltaEpsilon)
       : m_coulombInteraction(true), m_chargedDefects(true)
   {
     m_world = new World;
@@ -28,13 +28,19 @@ namespace Langmuir
     m_world->setGrid(m_grid);
 
     // Create the agents for the simulation
-    createAgents(width * height, sourcePotential, drainPotential, trapPercent);
+    createAgents(width * height, sourcePotential, drainPotential, defectPercent);
     // The e-field is constant between the electrodes - V / d
     m_world->setEField((drainPotential - sourcePotential) / (width*1.0e-9));
 
-    // Now inialise the potentials
-    updatePotentials();
+    // Now initialise the potentials
+    updatePotentials(trapPercent, deltaEpsilon);
     updateInteractionEnergies();
+	  
+	// Reset potentials if the trap percentage is varied
+	/*if (trapPercent > 0)
+	{
+		updatePotentials(trapPercent, m_deltaEpsilon);
+	}*/
   }
 
   Simulation::~Simulation()
@@ -91,7 +97,12 @@ namespace Langmuir
 	{
 		m_temperatureKelvin = temperatureKelvin;
 	}
-
+	
+  /*void Simulation::setDeltaEpsilon(double deltaEpsilon)
+	{
+		m_deltaEpsilon = deltaEpsilon;
+	}*/
+  
   void Simulation::performIterations(int nIterations)
   {
     //	cout << "Entered performIterations function.\n";
@@ -170,7 +181,7 @@ namespace Langmuir
   }
 
   void Simulation::createAgents(unsigned int numAgents, double sourcePotential,
-                                double drainPotential, double trapPercent)
+                                double drainPotential, double defectPercent)
   {
     /**
      * Each site is assigned an ID, this ID identifies the type of site and
@@ -178,7 +189,7 @@ namespace Langmuir
      * matrix. The sites are as follows,
      *
      * 0: Normal transport site.
-     * 1: Trap site.
+     * 1: Defect site.
      * 2: Source site.
      * 3: Drain site.
      *
@@ -188,8 +199,8 @@ namespace Langmuir
 
     // Add the normal agents
     for (unsigned int i = 0; i < numAgents; ++i) {
-      // Mix some trap sites in
-      if (m_world->random() > (1.0 - trapPercent)) // Trap site
+      // Mix some defects in
+      if (m_world->random() < defectPercent) // Defect 
 	  {
         m_world->grid()->setSiteID(i, 1);
 		m_world->chargedDefects()->push_back(i);
@@ -226,7 +237,7 @@ namespace Langmuir
     m_drain = 0;
   }
 
-  void Simulation::updatePotentials()
+  void Simulation::updatePotentials(double trapPercent, double deltaEpsilon)
   {
     // We are assuming one source, one drain that are parallel.
     // The most efficient way to calculate this is to work out the potential
@@ -239,15 +250,27 @@ namespace Langmuir
     // The source to drain distance is simply the width of the device.
     for (int i = 0; i < width; i++) {
       double tPotential = m * (double(i)+0.5) + c;
-      vector<unsigned int> neighbors = m_grid->col(i);
+	  vector<unsigned int> neighbors = m_grid->col(i);
       for (vector<unsigned int>::iterator j = neighbors.begin();
            j != neighbors.end(); j++) {
-        m_grid->setPotential(*j, tPotential);
+		  // We can randomly tweak a site energy
+		  if (m_world->random() < trapPercent)
+		  {
+			  m_grid->setPotential(*j, (tPotential + deltaEpsilon));
+//			  cout << " Site " a<< *j << " deltaE " << deltaEpsilon << " Potential " << tPotential << endl;
+		  }
+		  else
+		  {
+			  m_grid->setPotential(*j, tPotential);
+		  }
       }
 //      cout << "Row " << i << ", potential = " << tPotential << endl;
     }
-    double tPotential = m * (double(width)+0.5) + c;
-    m_grid->setPotential(width*m_grid->height()+1, tPotential);
+	
+	// Set the potential of the drain site
+    double tPotential = m * (double(width)+0.5) + c;	
+	m_grid->setPotential(width*m_grid->height()+1, tPotential);
+
   }
 
   void Simulation::updateInteractionEnergies()

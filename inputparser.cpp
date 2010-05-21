@@ -50,6 +50,9 @@ namespace Langmuir {
       case e_voltageDrain:
         par->voltageDrain = tmp;
         break;
+	  case e_defectPercentage:
+		par->defectPercentage = tmp / 100.0;
+		break;
       case e_trapPercentage:
         par->trapPercentage = tmp / 100.0;
         break;
@@ -73,6 +76,8 @@ namespace Langmuir {
         return "voltage.source";
       case e_voltageDrain:
         return "voltage.drain";
+	  case e_defectPercentage:
+		return "defect.percentage";
       case e_trapPercentage:
         return "trap.percentage";
       case e_chargePercentage:
@@ -106,10 +111,21 @@ namespace Langmuir {
           qDebug() << "Drain voltage:" << m_parameters.voltageDrain;
           break;
         }
+		case e_defectPercentage: {
+		  m_parameters.defectPercentage = list.at(1).toDouble() / 100;
+		  if (m_parameters.defectPercentage < 0.00 ||
+			  m_parameters.defectPercentage > (1.00 - trapPercentage())) {
+			   m_valid = false;
+				qDebug() << "Defect percentage out of range:"
+                << m_parameters.defectPercentage*100.0 << "(0.00 -- 100.00)";
+			}
+			qDebug() << "Defect percentage:" << m_parameters.defectPercentage;
+			break;
+        }
         case e_trapPercentage: {
           m_parameters.trapPercentage = list.at(1).toDouble() / 100.0;
           if (m_parameters.trapPercentage < 0.00 ||
-              m_parameters.trapPercentage > 1.00) {
+              m_parameters.trapPercentage > (1.00 - defectPercentage())) {
             m_valid = false;
             qDebug() << "Trap percentage out of range:"
                 << m_parameters.trapPercentage*100.0 << "(0.00 -- 100.00)";
@@ -134,13 +150,18 @@ namespace Langmuir {
           if (m_parameters.temperatureKelvin < 0.00) {
             m_valid = false;
           }
-          break;   
+          break; 
+		}
+		case e_deltaEpsilon: {
+			m_parameters.deltaEpsilon = list.at(1).toDouble();
+			break;
         }   
         case e_variableWorking: {
           m_varyType = s_variables.value(list.at(1).toLower().trimmed());
           // Check that the working variable is a valid one
           if (m_varyType == e_voltageSource ||
               m_varyType == e_voltageDrain ||
+			  m_varyType == e_defectPercentage ||
               m_varyType == e_trapPercentage ||
               m_varyType == e_chargePercentage ||
               m_varyType == e_temperatureKelvin) {
@@ -262,9 +283,7 @@ namespace Langmuir {
 			  m_valid = false;
 		  }
 		  break;
-		}
-
-			
+		}			
         default:
           qDebug() << "Unknown key value encountered:" << key;
       }
@@ -279,9 +298,11 @@ namespace Langmuir {
     // Initializes the static string to enum map necessary for input parsing
     s_variables["voltage.source"] = e_voltageSource;
     s_variables["voltage.drain"] = e_voltageDrain;
+	s_variables["defect.percentage"] = e_defectPercentage;
     s_variables["trap.percentage"] = e_trapPercentage;
     s_variables["charge.percentage"] = e_chargePercentage;
     s_variables["temperature.kelvin"] = e_temperatureKelvin;
+	s_variables["delta.epsilon"] = e_deltaEpsilon;
     s_variables["variable.working"] = e_variableWorking;
     s_variables["variable.start"] = e_variableStart;
     s_variables["variable.final"] = e_variableFinal;

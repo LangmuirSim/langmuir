@@ -21,13 +21,13 @@ namespace Langmuir {
    * easily be serialized and sent over MPI etc.
    */
   struct SimulationParameters{
-    SimulationParameters() : voltageSource(0.0), voltageDrain(0.0),
-      trapPercentage(0.0), chargePercentage(0.01),temperatureKelvin(300.00),
+    SimulationParameters() : voltageSource(0.0), voltageDrain(0.0), defectPercentage(0.0),
+      trapPercentage(0.0), chargePercentage(0.01),temperatureKelvin(300.00), deltaEpsilon(0.0),
       gridWidth(10), gridHeight(10), zDefect(0),
       iterationsWarmup(100000), iterationsReal(500000), iterationsPrint(10000),
-      coulomb(false), defectsCharged(false), gridCharge(false) { }
+      coulomb(false), defectsCharged(false), gridCharge(false) {}
 
-    double voltageSource, voltageDrain, trapPercentage, chargePercentage, temperatureKelvin;
+    double voltageSource, voltageDrain, defectPercentage, trapPercentage, chargePercentage, temperatureKelvin, deltaEpsilon;
     int gridWidth, gridHeight, zDefect;
     int iterationsWarmup, iterationsReal, iterationsPrint;
     bool coulomb, defectsCharged, gridCharge;
@@ -57,16 +57,18 @@ namespace Langmuir {
       e_undefined,
       e_voltageSource,      // voltage of the source electrode
       e_voltageDrain,       // voltage of the drain electrode
+	  e_defectPercentage,   // percentage of defects in the grid
       e_trapPercentage,     // percentage of traps in the grid
       e_chargePercentage,   // percentage of charges in the grid - sets as target
       e_temperatureKelvin,  // the absolute temperature
+	  e_deltaEpsilon,       // site energy difference for traps
       e_variableWorking,    // the working variable that is being changed
       e_variableStart,      // the start of the variables range
       e_variableFinal,      // final value of the variable range
       e_variableSteps,      // the number of steps to take from start to final
       e_gridWidth,          // the width of the grid
       e_gridHeight,         // the height of the grid
-	  e_zDefect,            // charge on the defects (times q)
+	  e_zDefect,            // charge on the defects (times e)
       e_gridCharge,         // seed the grid with charges
       e_iterationsWarmup,   // the number of warm up iterations to perform
       e_iterationsReal,     // the number of iterations for the real run
@@ -105,10 +107,14 @@ namespace Langmuir {
     double voltageSource() const { return m_parameters.voltageSource; }
 
     double voltageDrain() const { return m_parameters.voltageDrain; }
+	  
+	double defectPercentage() const {return m_parameters.defectPercentage; }
 
     double trapPercentage() const { return m_parameters.trapPercentage; }
 
     double temperatureKelvin() const {return m_parameters.temperatureKelvin;}
+	  
+	double deltaEpsilon() const {return m_parameters.deltaEpsilon;}
 
     int gridWidth() const { return m_parameters.gridWidth; }
 
