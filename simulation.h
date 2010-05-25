@@ -64,10 +64,6 @@ namespace Langmuir
 	  
 	void setTemperature(double temperatureKelvin);
 	  
-	// Set the difference in site energy if "traps" are being included 
-	  
-	//void setDeltaEpsilon(double deltaEpsilon);
-
     /**
      * Call this function to perform n iterations.
      */
@@ -100,7 +96,6 @@ namespace Langmuir
 	bool m_chargedDefects;  // Enable charged defects
 	int m_zDefect; // Set the charge on the defect
 	double m_temperatureKelvin; // Set the simulation temperature
-	//double m_deltaEpsilon; //Set the difference in site energy if "traps" are included
 
     World *m_world;
     /**

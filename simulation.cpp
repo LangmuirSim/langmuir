@@ -69,7 +69,7 @@ namespace Langmuir
       // Randomly select a site, ensure it is suitable, if so add a charge agent
       unsigned int site = int(m_world->random() * (double(nSites) - 0.00001));
       if (grid->siteID(site) == 0 && grid->agent(site) == 0) {
-        ChargeAgent *charge = new ChargeAgent(m_world, site, m_coulombInteraction);
+        ChargeAgent *charge = new ChargeAgent(m_world, site, m_coulombInteraction, m_temperatureKelvin, m_zDefect);
         m_world->charges()->push_back(charge);
         m_source->incrementCharge();
         ++i;
@@ -124,7 +124,7 @@ namespace Langmuir
       //qDebug () << "Source transport returned site:" << site;
       if (site != errorValue) {
 //        cout << "New charge injected! " << site << endl;
-        ChargeAgent *charge = new ChargeAgent(m_world, site, m_coulombInteraction);
+        ChargeAgent *charge = new ChargeAgent(m_world, site, m_coulombInteraction, m_temperatureKelvin, m_zDefect);
         m_world->charges()->push_back(charge);
       }
     }
@@ -279,7 +279,7 @@ namespace Langmuir
     Eigen::MatrixXd *energies = m_world->interactionEnergies();
 
     // Currently hard coding a cut off of 50nm - no interactions beyond that added
-    int cutoff = 50;
+    unsigned int cutoff = 50;
     energies->resize(cutoff, cutoff);
     const double q = 1.60217646e-19; // Magnitude of charge on an electron
     // Now calculate the numbers we need

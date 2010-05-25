@@ -37,18 +37,7 @@ namespace Langmuir{
   {
 	m_chargedDefects = on;
   }
-	
-  void ChargeAgent::setZdefect(int zDefect)
-  {
-	m_zDefect = zDefect;
-  }
-		
-  double ChargeAgent::setTemperature(double temperatureKelvin)
-  {
-	m_temperatureKelvin = temperatureKelvin;
-	return temperatureKelvin;
-  }
-	
+
   unsigned int ChargeAgent::transport()
   {
     // Set up some constants...
@@ -82,7 +71,6 @@ namespace Langmuir{
 	// Add the interactions from charged defects
 	if (m_chargedDefects)
 	{
-	  setZdefect(m_zDefect);
 	  pd += defectsCharged(newSite);
 	}
 
@@ -91,7 +79,7 @@ namespace Langmuir{
     // Now attempt to move the charge
     double coupling = couplingConstant(grid->siteID(m_site),
                                        grid->siteID(newSite));
-	double T = setTemperature(m_temperatureKelvin); // Sets the simulation temperature
+	double T = m_temperatureKelvin; // Sets the simulation temperature
 	  
     if (attemptTransport(pd, coupling, T)) {
       m_fSite = newSite;

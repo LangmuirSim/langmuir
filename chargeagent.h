@@ -20,18 +20,10 @@ namespace Langmuir
      */
     void setCoulombInteraction(bool enabled);
 	  
-	// Set the simulation temperature
-	  
-	double setTemperature(double temperatureKelvin);
-	  
     // Enable or disable charged defects for this charge carrier
 	
 	void setChargedDefects(bool on);
 	  
-	//Set the charge on each defect
-	  
-	void setZdefect(int zDefect);
-
     /**
      * Returns the charge of this node.
      */
