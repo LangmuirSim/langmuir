@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
     app.exit(1);
   }
 
-  QString inputFileName = args.at(1);
+  QString  inputFileName = args.at(1);
   QString outputFileName = args.size() > 2 ? args.at(2) : args.at(1);
 
   // Now open our input file
@@ -46,27 +46,28 @@ int main(int argc, char *argv[])
   QDateTime startDateTime(QDateTime::currentDateTime());
   // Output a summary of all simulation parameters
   out << "Langmuir Simulation Code\nHutchison Group\n\n"
-      << "Started: " << startDateTime.toString("hh:mm:ss d MMMM, yyyy")
-      << "\n\nvariable.working: " << input.workingVariable()
-      << "\nvariable.start: " << input.start()
-      << "\nvariable.final: " << input.final()
-      << "\nvariable.steps: " << input.steps()
-      << "\niterations.warmup: " << par.iterationsWarmup
-      << "\niterations.real: " << par.iterationsReal
-      << "\niterations.print: " << par.iterationsPrint
-      << "\ngrid.width: " << par.gridWidth
-      << "\ngrid.height: " << par.gridHeight
-      << "\ngrid.charge: " << par.gridCharge
+      << "Started: "                << startDateTime.toString("hh:mm:ss d MMMM, yyyy")
+      << "\n\nvariable.working: "   << input.workingVariable()
+      << "\nvariable.start: "       << input.start()
+      << "\nvariable.final: "       << input.final()
+      << "\nvariable.steps: "       << input.steps()
+      << "\niterations.warmup: "    << par.iterationsWarmup
+      << "\niterations.real: "      << par.iterationsReal
+      << "\niterations.print: "     << par.iterationsPrint
+      << "\ngrid.width: "           << par.gridWidth
+      << "\ngrid.height: "          << par.gridHeight
+      << "\ngrid.depth: "           << par.gridDepth
+      << "\ngrid.charge: "          << par.gridCharge
       << "\ninteractions.coulomb: " << par.coulomb
-	  << "\ncharged.defects:  " << par.defectsCharged
-	  << "\nz.defect:  " << par.zDefect
-      << "\nvoltage.source: " << par.voltageSource
-      << "\nvoltage.drain: " << par.voltageDrain
-	  << "\ndefect.percentage: " << par.defectPercentage * 100.0
-      << "\ntrap.percentage: " << par.trapPercentage * 100.0
-      << "\ncharge.percentage: " << par.chargePercentage * 100.0
-      << "\ntemperature.kelvin: " << par.temperatureKelvin
-	  << "\ndelta.epsilon: " << par.deltaEpsilon
+      << "\ncharged.defects:  "     << par.defectsCharged
+      << "\nz.defect:  "            << par.zDefect
+      << "\nvoltage.source: "       << par.voltageSource
+      << "\nvoltage.drain: "        << par.voltageDrain
+      << "\ndefect.percentage: "    << par.defectPercentage * 100.0
+      << "\ntrap.percentage: "      << par.trapPercentage * 100.0
+      << "\ncharge.percentage: "    << par.chargePercentage * 100.0
+      << "\ntemperature.kelvin: "   << par.temperatureKelvin
+      << "\ndelta.epsilon: "        << par.deltaEpsilon
       << "\n\n";
 
   // Now output the column titles
@@ -78,16 +79,16 @@ int main(int argc, char *argv[])
     // Get simulation parameters for the current step and set up a new object
     input.simulationParameters(&par, i);
     qDebug() << i
-        << "\nvoltage.source:" << par.voltageSource
-        << "\nvoltage.drain:" << par.voltageDrain
-        << "\ntrap.percentage:" << par.trapPercentage;
+             << "\nvoltage.source:"  << par.voltageSource
+             << "\nvoltage.drain:"   << par.voltageDrain
+             << "\ntrap.percentage:" << par.trapPercentage;
     Simulation sim(par.gridWidth, par.gridHeight,
                    par.voltageSource, par.voltageDrain, par.defectPercentage,
                    par.trapPercentage, par.deltaEpsilon);
     int nCharges = par.chargePercentage * double(par.gridWidth*par.gridHeight);
     sim.setMaxCharges(nCharges);
     sim.setCoulombInteractions(par.coulomb);
-	  // set charged defects
+        // set charged defects
 	sim.setChargedDefects(par.defectsCharged);
 	// set charge on defects
 	sim.setZdefect(par.zDefect);
@@ -102,7 +103,7 @@ int main(int argc, char *argv[])
     QFile iterFile(outputFileName+"-i-"+QString::number(i)+".dat");
     if (!iterFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
       qDebug() << "Error opening output file:"
-          << outputFileName+"-i-"+QString::number(i)+".dat";
+               << outputFileName+"-i-"+QString::number(i)+".dat";
       app.exit(1);
     }
     QTextStream iterOut(&iterFile);
@@ -115,15 +116,15 @@ int main(int argc, char *argv[])
       qDebug() << j
                << "\t" << double(sim.charges()) / double(nCharges) * 100.0
                << "\t" << double(sim.totalChargesAccepted()-lastCount) / par.iterationsPrint;
-      iterOut << j
-		      << "\t" << par.temperatureKelvin
-              << "\t" << par.voltageSource
-              << "\t" << par.voltageDrain
-		      << "\t" << par.defectPercentage * 100.00
-              << "\t" << par.trapPercentage * 100.0
-              << "\t" << par.chargePercentage * 100.0
-              << "\t" << double(sim.charges()) / double(nCharges) * 100.0
-              << "\t" << double(sim.totalChargesAccepted()-lastCount) / par.iterationsPrint << "\n";
+      iterOut  << j
+               << "\t" << par.temperatureKelvin
+               << "\t" << par.voltageSource
+               << "\t" << par.voltageDrain
+               << "\t" << par.defectPercentage * 100.00
+               << "\t" << par.trapPercentage * 100.0
+               << "\t" << par.chargePercentage * 100.0
+               << "\t" << double(sim.charges()) / double(nCharges) * 100.0
+               << "\t" << double(sim.totalChargesAccepted()-lastCount) / par.iterationsPrint << "\n";
       iterOut.flush();
       lastCount = sim.totalChargesAccepted();
     }
@@ -134,24 +135,24 @@ int main(int argc, char *argv[])
       qDebug() << j
                << "\t" << double(sim.charges()) / double(nCharges) * 100.0
                << "\t" << double(sim.totalChargesAccepted()-lastCount) / par.iterationsPrint;
-      iterOut << j
-		      << "\t" << par.temperatureKelvin
-              << "\t" << par.voltageSource
-              << "\t" << par.voltageDrain
-		      << "\t" << par.defectPercentage * 100.0
-              << "\t" << par.trapPercentage * 100.0
-              << "\t" << par.chargePercentage * 100.0
-              << "\t" << double(sim.charges()) / double(nCharges) * 100.0
-              << "\t" << double(sim.totalChargesAccepted()-lastCount) / par.iterationsPrint << "\n";
+      iterOut  << j
+               << "\t" << par.temperatureKelvin
+               << "\t" << par.voltageSource
+               << "\t" << par.voltageDrain
+               << "\t" << par.defectPercentage * 100.0
+               << "\t" << par.trapPercentage * 100.0
+               << "\t" << par.chargePercentage * 100.0
+               << "\t" << double(sim.charges()) / double(nCharges) * 100.0
+               << "\t" << double(sim.totalChargesAccepted()-lastCount) / par.iterationsPrint << "\n";
       iterOut.flush();
       lastCount = sim.totalChargesAccepted();
     }
     // Now to output the result of the simulation at this data point
     out << i
-	    << "\t" << par.temperatureKelvin
+        << "\t" << par.temperatureKelvin
         << "\t" << par.voltageSource
         << "\t" << par.voltageDrain
-	    << "\t" << par.defectPercentage * 100.0
+        << "\t" << par.defectPercentage * 100.0
         << "\t" << par.trapPercentage * 100.0
         << "\t" << par.chargePercentage * 100.0
         << "\t" << double(sim.charges()) / double(nCharges) * 100.0

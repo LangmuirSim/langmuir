@@ -23,12 +23,12 @@ namespace Langmuir {
   struct SimulationParameters{
     SimulationParameters() : voltageSource(0.0), voltageDrain(0.0), defectPercentage(0.0),
       trapPercentage(0.0), chargePercentage(0.01),temperatureKelvin(300.00), deltaEpsilon(0.0),
-      gridWidth(10), gridHeight(10), zDefect(0),
+      gridWidth(10), gridHeight(10), gridDepth(1), zDefect(0),
       iterationsWarmup(100000), iterationsReal(500000), iterationsPrint(10000),
       coulomb(false), defectsCharged(false), gridCharge(false) {}
 
     double voltageSource, voltageDrain, defectPercentage, trapPercentage, chargePercentage, temperatureKelvin, deltaEpsilon;
-    int gridWidth, gridHeight, zDefect;
+    int gridWidth, gridHeight, gridDepth, zDefect;
     int iterationsWarmup, iterationsReal, iterationsPrint;
     bool coulomb, defectsCharged, gridCharge;
   };
@@ -57,24 +57,25 @@ namespace Langmuir {
       e_undefined,
       e_voltageSource,      // voltage of the source electrode
       e_voltageDrain,       // voltage of the drain electrode
-	  e_defectPercentage,   // percentage of defects in the grid
+      e_defectPercentage,   // percentage of defects in the grid
       e_trapPercentage,     // percentage of traps in the grid
       e_chargePercentage,   // percentage of charges in the grid - sets as target
       e_temperatureKelvin,  // the absolute temperature
-	  e_deltaEpsilon,       // site energy difference for traps
+      e_deltaEpsilon,       // site energy difference for traps
       e_variableWorking,    // the working variable that is being changed
       e_variableStart,      // the start of the variables range
       e_variableFinal,      // final value of the variable range
       e_variableSteps,      // the number of steps to take from start to final
       e_gridWidth,          // the width of the grid
       e_gridHeight,         // the height of the grid
-	  e_zDefect,            // charge on the defects (times e)
+      e_gridDepth,          // the depth of the grid
+      e_zDefect,            // charge on the defects (times e)
       e_gridCharge,         // seed the grid with charges
       e_iterationsWarmup,   // the number of warm up iterations to perform
       e_iterationsReal,     // the number of iterations for the real run
       e_iterationsPrint,    // number of iterations before printing state
       e_coulombInteraction, // should Coulomb interaction be used
-	  e_defectsCharged,     // are the defects charged?
+      e_defectsCharged,     // are the defects charged?
       e_end
     };
 
@@ -103,24 +104,16 @@ namespace Langmuir {
      * @return The size of each step.
      */
     double stepSize() const { return (m_final - m_start) / double(m_steps); }
-
     double voltageSource() const { return m_parameters.voltageSource; }
-
     double voltageDrain() const { return m_parameters.voltageDrain; }
-	  
-	double defectPercentage() const {return m_parameters.defectPercentage; }
-
+    double defectPercentage() const { return m_parameters.defectPercentage; }
     double trapPercentage() const { return m_parameters.trapPercentage; }
-
-    double temperatureKelvin() const {return m_parameters.temperatureKelvin;}
-	  
-	double deltaEpsilon() const {return m_parameters.deltaEpsilon;}
-
-    int gridWidth() const { return m_parameters.gridWidth; }
-
-    int gridHeight() const { return m_parameters.gridHeight; }
-	  
-	int zDefect() const { return m_parameters.zDefect; }
+    double temperatureKelvin() const { return m_parameters.temperatureKelvin;}
+    double deltaEpsilon() const { return m_parameters.deltaEpsilon;}
+       int gridWidth() const { return m_parameters.gridWidth; }
+       int gridHeight() const { return m_parameters.gridHeight; }
+       int gridDepth() const { return m_parameters.gridDepth; }
+       int zDefect() const { return m_parameters.zDefect; }
 
     /**
      * Get the simulation parameters for the supplied step.
