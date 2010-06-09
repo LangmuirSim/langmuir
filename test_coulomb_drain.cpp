@@ -33,6 +33,7 @@ int main(int argc, char *argv[])
 
   int width = 1024;
   int height = 256;
+  int depth = 1;
   double sourceVoltage = 0.0;
   double drainVoltage = 0.0;
   double minDrain = 0.0; // Percent
@@ -45,7 +46,7 @@ int main(int argc, char *argv[])
 
   for (int i = 0; i < drainStep; ++i) {
     drainVoltage = minDrain + i * drainStepSize;
-    Simulation *sim = new Simulation(width, height, sourceVoltage, drainVoltage);
+    Simulation *sim = new Simulation(width, height, depth, sourceVoltage, drainVoltage);
     int charges = width * height * occupation;
     sim->setMaxCharges(charges);
     sim->setCoulombInteractions(true);

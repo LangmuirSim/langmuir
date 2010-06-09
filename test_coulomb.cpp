@@ -33,6 +33,7 @@ int main(int argc, char *argv[])
 
   int width = 1024;
   int height = 256;
+  int depth = 1;
   double sourceVoltage = 0.0;
   double drainVoltage = 1.0;
   double minOcc = 0.001; // Percent
@@ -43,7 +44,7 @@ int main(int argc, char *argv[])
   qDebug() << "Testing the simulation class.\n";
 
   for (int i = 0; i < occStep; ++i) {
-    Simulation *sim = new Simulation(width, height, sourceVoltage, drainVoltage);
+    Simulation *sim = new Simulation(width, height, depth, sourceVoltage, drainVoltage);
     int charges = width * height * (minOcc + i*occStepSize);
     sim->setMaxCharges(charges);
     sim->setCoulombInteractions(true);

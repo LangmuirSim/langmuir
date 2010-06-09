@@ -54,6 +54,7 @@ int main(int argc, char *argv[])
       << "\niterations.warmup: "    << par.iterationsWarmup
       << "\niterations.real: "      << par.iterationsReal
       << "\niterations.print: "     << par.iterationsPrint
+      << "\niterations.traj: "      << par.iterationsTraj
       << "\ngrid.width: "           << par.gridWidth
       << "\ngrid.height: "          << par.gridHeight
       << "\ngrid.depth: "           << par.gridDepth
@@ -71,67 +72,111 @@ int main(int argc, char *argv[])
       << "\n\n";
 
   // Now output the column titles
-  out << "#i\tTemperature (K)\tSource (V)\tDrain (V)\tDefect (%)\tTrap (%)\tCharge Goal (%)"
-      << "\tCharge Reached (%)\tCharge Transport (per iteration)\n";
+  out << "#i "              << "(n)" << "\t";
+  out << "Temperature "     << "(K)" << "\t";
+  out << "Source "          << "(V)" << "\t"; 
+  out << "Drain "           << "(V)" << "\t";
+  out << "Defect "          << "(%)" << "\t";
+  out << "Trap "            << "(%)" << "\t";
+  out << "ChargeGoal "      << "(%)" << "\t";
+  out << "ChargeReached "   << "(%)" << "\t";
+  out << "ChargeTransport " << "(I)" << "\n";
   out.flush();
 
   for (int i = 0; i < input.steps(); ++i) {
+
     // Get simulation parameters for the current step and set up a new object
     input.simulationParameters(&par, i);
-    qDebug() << i
-             << "\nvoltage.source:"  << par.voltageSource
-             << "\nvoltage.drain:"   << par.voltageDrain
-             << "\ntrap.percentage:" << par.trapPercentage;
-    Simulation sim(par.gridWidth, par.gridHeight,
-                   par.voltageSource, par.voltageDrain, par.defectPercentage,
-                   par.trapPercentage, par.deltaEpsilon);
-    int nCharges = par.chargePercentage * double(par.gridWidth*par.gridHeight);
+
+    // Set up a simulation
+    Simulation sim(par.gridWidth     , par.gridHeight  , par.gridDepth,
+                   par.voltageSource , par.voltageDrain, par.defectPercentage,
+                   par.trapPercentage, par.deltaEpsilon                       );
+
+    // Calculate the number of charges
+    int nCharges = par.chargePercentage * double(par.gridWidth*par.gridHeight*par.gridDepth);
     sim.setMaxCharges(nCharges);
+
+    // set coulomb interactions
     sim.setCoulombInteractions(par.coulomb);
-        // set charged defects
-	sim.setChargedDefects(par.defectsCharged);
-	// set charge on defects
-	sim.setZdefect(par.zDefect);
-	// set simulation temperature
-	sim.setTemperature(par.temperatureKelvin);
+
+    // set charged defects
+    sim.setChargedDefects(par.defectsCharged);
+
+    // set charge on defects
+    sim.setZdefect(par.zDefect);
+
+    // set simulation temperature
+    sim.setTemperature(par.temperatureKelvin);
 
     // Charge the grid up is specified
-    if (par.gridCharge)
-      sim.seedCharges();
+    if (par.gridCharge) sim.seedCharges();
 
-    // Now to start the simulation - warmup and then real counts
+    // Open outputfile for this simulation
     QFile iterFile(outputFileName+"-i-"+QString::number(i)+".dat");
     if (!iterFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
-      qDebug() << "Error opening output file:"
-               << outputFileName+"-i-"+QString::number(i)+".dat";
+      qDebug() << "Error opening output file:" << outputFileName+"-i-"+QString::number(i)+".dat";
       app.exit(1);
     }
     QTextStream iterOut(&iterFile);
-    iterOut << "#i\tSource (V)\tDrain (V)\tDefect (%)\tTrap (%)\tCharge Goal (%)"
-            << "\tCharge Reached (%)\tCharge Transport (per iteration)\n";
+   
+    // Open trajectoryFile for this simulation
+    QFile trajFile(outputFileName+"-i-"+QString::number(i)+".xyz");
+    if (!trajFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+      qDebug() << "Error opening trajectory file:" << outputFileName+"-i-"+QString::number(i)+".xyz";
+      app.exit(1);
+    }
+    QTextStream trajOut(&trajFile);
+
+    // Output Column Titles
+    iterOut << "#i "              << "(n)" << "\t";
+    iterOut << "Temperature "     << "(K)" << "\t";
+    iterOut << "Source "          << "(V)" << "\t";
+    iterOut << "Drain "           << "(V)" << "\t";
+    iterOut << "Defect "          << "(%)" << "\t";
+    iterOut << "Trap "            << "(%)" << "\t";
+    iterOut << "ChargeGoal "      << "(%)" << "\t";
+    iterOut << "ChargeReached "   << "(%)" << "\t";
+    iterOut << "ChargeTransport " << "(I)" << "\n";
+ 
+    // Perform Warmup
     unsigned long lastCount = 0;
     for (int j = 0; j < par.iterationsWarmup; j += par.iterationsPrint) {
-      sim.performIterations(par.iterationsPrint);
-      // Now to output the result of the simulation at this data point
-      qDebug() << j
-               << "\t" << double(sim.charges()) / double(nCharges) * 100.0
-               << "\t" << double(sim.totalChargesAccepted()-lastCount) / par.iterationsPrint;
-      iterOut  << j
-               << "\t" << par.temperatureKelvin
-               << "\t" << par.voltageSource
-               << "\t" << par.voltageDrain
-               << "\t" << par.defectPercentage * 100.00
-               << "\t" << par.trapPercentage * 100.0
-               << "\t" << par.chargePercentage * 100.0
-               << "\t" << double(sim.charges()) / double(nCharges) * 100.0
-               << "\t" << double(sim.totalChargesAccepted()-lastCount) / par.iterationsPrint << "\n";
+
+     // Perform Iterations
+     sim.performIterations(par.iterationsPrint);
+
+     // Output Trajectory
+     if ( par.iterationsXYZ ) sim.getGrid()->print3D(trajOut);
+
+     // Output Log
+     qDebug() << j
+              << "\t" << double(sim.charges()) / double(nCharges) * 100.0
+              << "\t" << double(sim.totalChargesAccepted()-lastCount) / par.iterationsPrint;
+     iterOut  << j
+              << "\t" << par.temperatureKelvin
+              << "\t" << par.voltageSource
+              << "\t" << par.voltageDrain
+              << "\t" << par.defectPercentage * 100.00
+              << "\t" << par.trapPercentage * 100.0
+              << "\t" << par.chargePercentage * 100.0
+              << "\t" << double(sim.charges()) / double(nCharges) * 100.0
+              << "\t" << double(sim.totalChargesAccepted()-lastCount) / par.iterationsPrint << "\n";
       iterOut.flush();
       lastCount = sim.totalChargesAccepted();
     }
+
+    // Perform production
     unsigned long startCount = lastCount;
     for (int j = 0; j < par.iterationsReal; j += par.iterationsPrint) {
+
+      // Perform Iterations
       sim.performIterations(par.iterationsPrint);
-      // Now to output the result of the simulation at this data point
+
+      // Output Trajectory
+      if ( par.iterationsXYZ ) sim.getGrid()->print3D(trajOut);
+
+      // Output Log
       qDebug() << j
                << "\t" << double(sim.charges()) / double(nCharges) * 100.0
                << "\t" << double(sim.totalChargesAccepted()-lastCount) / par.iterationsPrint;
@@ -158,6 +203,17 @@ int main(int argc, char *argv[])
         << "\t" << double(sim.charges()) / double(nCharges) * 100.0
         << "\t" << double(lastCount-startCount) / par.iterationsReal << "\n";
     out.flush();
+
+    iterFile.close();
+
+    if ( !par.iterationsXYZ ) 
+     {
+      trajFile.remove();
+     }
+    else
+     {
+      trajFile.close();
+     }
   }
 
   outputFile.close();

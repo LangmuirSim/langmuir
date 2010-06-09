@@ -1,9 +1,3 @@
-/**
- * InputParser parses an input file line by line, and sets up a simulation run
- * based upon the text input. This class operates on an instantiated Simulation
- * object, as well as provinding the variable that should be changed.
- */
-
 #ifndef INPUTPARSER_H
 #define INPUTPARSER_H
 
@@ -20,23 +14,69 @@ namespace Langmuir {
    * @struct All pertinent simulation parameters are stored in here. This can
    * easily be serialized and sent over MPI etc.
    */
-  struct SimulationParameters{
-    SimulationParameters() : voltageSource(0.0), voltageDrain(0.0), defectPercentage(0.0),
-      trapPercentage(0.0), chargePercentage(0.01),temperatureKelvin(300.00), deltaEpsilon(0.0),
-      gridWidth(10), gridHeight(10), gridDepth(1), zDefect(0),
-      iterationsWarmup(100000), iterationsReal(500000), iterationsPrint(10000),
-      coulomb(false), defectsCharged(false), gridCharge(false) {}
+  struct SimulationParameters {
 
-    double voltageSource, voltageDrain, defectPercentage, trapPercentage, chargePercentage, temperatureKelvin, deltaEpsilon;
-    int gridWidth, gridHeight, gridDepth, zDefect;
-    int iterationsWarmup, iterationsReal, iterationsPrint;
-    bool coulomb, defectsCharged, gridCharge;
+    double      voltageSource; 
+    double       voltageDrain;
+    double   defectPercentage;
+    double     trapPercentage;
+    double   chargePercentage;
+    double  temperatureKelvin;
+    double       deltaEpsilon;
+
+    int             gridWidth;
+    int            gridHeight;
+    int             gridDepth;
+    int               zDefect;
+    int      iterationsWarmup; 
+    int        iterationsReal;
+    int       iterationsPrint;
+    int        iterationsTraj; 
+
+    bool              coulomb;
+    bool       defectsCharged;
+    bool           gridCharge;
+    bool        iterationsXYZ;
+
+    SimulationParameters()
+    {
+     voltageSource         =    0.00;
+     voltageDrain          =    0.00;
+     defectPercentage      =    0.00;
+     trapPercentage        =    0.00;
+     chargePercentage      =    0.01;
+     temperatureKelvin     =  300.00;
+     deltaEpsilon          =    0.00;
+     gridWidth             =      10;
+     gridHeight            =      10;
+     gridDepth             =       1;
+     zDefect               =       0;
+     iterationsWarmup      =  100000;
+     iterationsReal        =  500000;
+     iterationsPrint       =   10000;
+     iterationsTraj        =   10000;
+     coulomb               =   false;
+     defectsCharged        =   false;
+     gridCharge            =   false;
+     iterationsXYZ         =   false;
+    }
   };
 
+  /**
+    *  @class InputParser
+    *  @brief Input reading class.
+    *
+    *  InputParser parses an input file line by line, and sets up a simulation run
+    *  based upon the text input. This class operates on an instantiated Simulation
+    *  object, as well as provinding the variable that should be changed.
+    *  @date 06/07/2010
+    */
   class InputParser
   {
   public:
     /**
+     * @brief Constructor.
+     *
      * Constructor. This is used to set up the Simulation instance, and saves
      * the parameters that should be varied in the simulation instance. These
      * parameters may be varied in serial fashion, or (TBC) distributed over the
@@ -74,33 +114,40 @@ namespace Langmuir {
       e_iterationsWarmup,   // the number of warm up iterations to perform
       e_iterationsReal,     // the number of iterations for the real run
       e_iterationsPrint,    // number of iterations before printing state
+      e_iterationsTraj,     // number of iteratiobs before printing trajectory
       e_coulombInteraction, // should Coulomb interaction be used
       e_defectsCharged,     // are the defects charged?
+      e_iterationsXYZ,      // should trajectory files be written
       e_end
     };
 
     /**
+     * @brief Working variable.
      * @return The variable that is being modified in the simulation.
      */
     VariableType varyType() const { return m_varyType; }
 
     /**
+     * @brief Working varibale start.
      * @return The start value of the variable that is being looped over.
      */
     double start() const { return m_start; }
 
     /**
+     * @brief Working variable stop.
      * @return The final value of the variable that is being looped over.
      */
     double final() const { return m_final; }
 
     /**
+     * @brief Working variable steps.
      * @return The number of steps to take moving between the start and finish
      * values.
      */
     int steps() const { return m_steps; }
 
     /**
+     * @brief Working variable step size.
      * @return The size of each step.
      */
     double stepSize() const { return (m_final - m_start) / double(m_steps); }
@@ -123,35 +170,75 @@ namespace Langmuir {
     bool simulationParameters(SimulationParameters *par, int step = 0);
 
     /**
+     * @brief Working variable name.
      * @return A QString with the name of the type that is being varied.
      */
     QString workingVariable() const;
 
   private:
-    VariableType m_varyType; // The variable that is being varied
+    /** 
+     * @brief Working variable type.
+     * 
+     * The variable that is changing.
+     */
+    VariableType m_varyType;
+
+    /** 
+     * @brief Working variable start.
+     * 
+     * The starting value of the variable that is changing.
+     */
     double m_start;
+
+    /** 
+     * @brief Working variable stop.
+     * 
+     * The ending value of the variable that is changing.
+     */
     double m_final;
+
+    /** 
+     * @brief Working variable steps.
+     * 
+     * The number of values between start and stop for the variable that is changing.
+     */
     int m_steps;
+
+    /** 
+     * @brief Valid.
+     * 
+     * Unknown.
+     */
     bool m_valid;
 
-    SimulationParameters m_parameters; // Simulation parameters
+    /** 
+     * @brief The values of parameters.
+     * 
+     * Struct of variable parameters.
+     */
+    SimulationParameters m_parameters;
 
     /**
+     * @brief string to variable type map
+     *
      * Map of the input keys to the different simulation parameters
      */
     static QMap<QString, VariableType> s_variables;
 
     /**
+     * @brief Line read.
+     *
      * Process a line of input.
      */
     void processLine(QIODevice *file);
 
     /**
+     * @brief set up map.
+     *
      * Initialize the static map of variables if necessary
      */
     void initializeVariables();
   };
 
 }
-
 #endif // INPUTPARSER_H

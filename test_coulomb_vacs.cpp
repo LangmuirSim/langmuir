@@ -48,6 +48,7 @@ int main(int argc, char *argv[])
 
   int width = 1024;
   int height = 256;
+  int depth = 1;
   double sourceVoltage = 0.0;
   double drainVoltage = 1.0;
   double maxTrap = 0.30; // Percent
@@ -60,7 +61,7 @@ int main(int argc, char *argv[])
 
   for (int i = 0; i < step; ++i) {
     double trapPercent = minTrap + i * stepSize;
-    Simulation *sim = new Simulation(width, height, sourceVoltage, drainVoltage,
+    Simulation *sim = new Simulation(width, height, depth, sourceVoltage, drainVoltage,
                                      trapPercent);
     int charges = width * height * occupation;
     sim->setMaxCharges(charges);

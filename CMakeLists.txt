@@ -119,5 +119,5 @@ target_link_libraries(test7
 #  ${Boost_LIBRARIES}
 #  ${QT_LIBRARIES})
 
-add_executable(qtconcurrent qtconcurrent.cpp)
-target_link_libraries(qtconcurrent ${QT_LIBRARIES})
+#add_executable(qtconcurrent qtconcurrent.cpp)
+#target_link_libraries(qtconcurrent ${QT_LIBRARIES})

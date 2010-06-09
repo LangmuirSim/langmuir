@@ -1,14 +1,11 @@
 #include "simulation.h"
-
 #include "world.h"
 #include "cubicgrid.h"
 #include "chargeagent.h"
 #include "sourceagent.h"
 #include "drainagent.h"
-
 #include <iostream>
 #include <cstdlib>
-
 #include <QtCore/QFuture>
 #include <QtCore/QtConcurrentMap>
 
@@ -18,43 +15,43 @@ namespace Langmuir
   using std::cout;
   using std::endl;
 
-  Simulation::Simulation(unsigned int width, unsigned int height,
-                         double sourcePotential, double drainPotential,
-                         double defectPercent, double trapPercent, double deltaEpsilon)
-      : m_coulombInteraction(true), m_chargedDefects(true)
+  Simulation::Simulation( unsigned int           width, 
+                          unsigned int          height,
+                          unsigned int           depth,
+                          double       sourcePotential, 
+                          double        drainPotential,
+                          double         defectPercent, 
+                          double           trapPercent, 
+                          double          deltaEpsilon  ) : 
+                          m_coulombInteraction(true), 
+                          m_chargedDefects(true)
   {
-    m_world = new World;
-    m_grid = new CubicGrid(width, height);
+    m_world   = new World;
+    m_grid    = new CubicGrid(width, height, depth);
     m_world->setGrid(m_grid);
 
     // Create the agents for the simulation
-    createAgents(width * height, sourcePotential, drainPotential, defectPercent);
+    createAgents(width * height * depth, sourcePotential, drainPotential, defectPercent);
+
     // The e-field is constant between the electrodes - V / d
     m_world->setEField((drainPotential - sourcePotential) / (width*1.0e-9));
 
     // Now initialise the potentials
-    updatePotentials(trapPercent, deltaEpsilon);
+    updatePotentials( trapPercent, deltaEpsilon );
     updateInteractionEnergies();
-	  
-	// Reset potentials if the trap percentage is varied
-	/*if (trapPercent > 0)
-	{
-		updatePotentials(trapPercent, m_deltaEpsilon);
-	}*/
   }
 
   Simulation::~Simulation()
   {
-//    destroyAgents();
     delete m_world;
-    m_world = 0;
-    delete m_grid;
-    m_grid = 0;
+    delete  m_grid;
+    m_world    = 0;
+    m_grid     = 0;
   }
 
   void Simulation::setMaxCharges(int n)
   {
-    m_source->setMaxCharges(n);
+   m_source->setMaxCharges(n);
   }
 
   bool Simulation::seedCharges()
@@ -62,7 +59,7 @@ namespace Langmuir
     // We randomly place all of the charges in the grid
     Grid *grid = m_world->grid();
 
-    unsigned int nSites = grid->width() * grid->height();
+    unsigned int nSites = grid->width() * grid->height() * grid->depth();
     int maxCharges = m_source->maxCharges();
 
     for (int i = 0; i < maxCharges; ) {
@@ -80,28 +77,28 @@ namespace Langmuir
 
   void Simulation::setCoulombInteractions(bool enabled)
   {
-    m_coulombInteraction = enabled;
+   m_coulombInteraction = enabled;
   }
 	
   void Simulation::setChargedDefects(bool on)
   {
-	m_chargedDefects = on; 
+   m_chargedDefects = on; 
   }
 	
   void Simulation::setZdefect(int zDefect)
-	{
-	   m_zDefect = zDefect;
-	}
+  {
+   m_zDefect = zDefect;
+  }
 	
   void Simulation::setTemperature(double temperatureKelvin)
-	{
-		m_temperatureKelvin = temperatureKelvin;
-	}
+  {
+   m_temperatureKelvin = temperatureKelvin;
+  }
 	
   /*void Simulation::setDeltaEpsilon(double deltaEpsilon)
-	{
-		m_deltaEpsilon = deltaEpsilon;
-	}*/
+  {
+   m_deltaEpsilon = deltaEpsilon;
+  }*/
   
   void Simulation::performIterations(int nIterations)
   {
@@ -111,8 +108,8 @@ namespace Langmuir
       QList<ChargeAgent *> &charges = *m_world->charges();
 
       // Use QtConcurrnet to parallelise the charge calculations
-      QFuture<void> future = QtConcurrent::map(charges,
-                                               Simulation::chargeAgentIterate);
+      QFuture<void> future = QtConcurrent::map(charges, Simulation::chargeAgentIterate);
+
       // We want to wait for it to finish before continuing on
       future.waitForFinished();
 
@@ -122,10 +119,10 @@ namespace Langmuir
       // Begin by performing charge injection at the source
       unsigned int site = m_source->transport();
       //qDebug () << "Source transport returned site:" << site;
+
       if (site != errorValue) {
-//        cout << "New charge injected! " << site << endl;
-        ChargeAgent *charge = new ChargeAgent(m_world, site, m_coulombInteraction, m_temperatureKelvin, m_zDefect);
-        m_world->charges()->push_back(charge);
+       ChargeAgent *charge = new ChargeAgent(m_world, site, m_coulombInteraction, m_temperatureKelvin, m_zDefect);
+       m_world->charges()->push_back(charge);
       }
     }
   }
@@ -150,7 +147,7 @@ namespace Langmuir
   void Simulation::printGrid()
   {
     system("clear");
-    unsigned int width = m_world->grid()->width();
+    unsigned int width  = m_world->grid()->width();
     unsigned int height = m_world->grid()->height();
     for (unsigned int j = 0; j < height; ++j) {
       cout << "||";
@@ -172,16 +169,15 @@ namespace Langmuir
 
   unsigned long Simulation::totalChargesAccepted()
   {
-    return m_drain->acceptedCharges();
+   return m_drain->acceptedCharges();
   }
 
   unsigned long Simulation::charges()
   {
-    return m_world->charges()->size();
+   return m_world->charges()->size();
   }
 
-  void Simulation::createAgents(unsigned int numAgents, double sourcePotential,
-                                double drainPotential, double defectPercent)
+  void Simulation::createAgents( unsigned int numAgents, double sourcePotential, double drainPotential, double defectPercent )
   {
     /**
      * Each site is assigned an ID, this ID identifies the type of site and
@@ -197,16 +193,17 @@ namespace Langmuir
      * drain site it is removed from the system.
      */
 
-    // Add the normal agents
-    for (unsigned int i = 0; i < numAgents; ++i) {
-      // Mix some defects in
-      if (m_world->random() < defectPercent) // Defect 
-	  {
-        m_world->grid()->setSiteID(i, 1);
-		m_world->chargedDefects()->push_back(i);
-	  }
-	else // Charge carrier site
-        m_world->grid()->setSiteID(i, 0);
+    // Add the agents
+    for ( unsigned int i = 0; i < numAgents; ++i ) {
+     if (m_world->random() < defectPercent)
+     {
+      m_world->grid()->setSiteID(i,1); //charge defect
+      m_world->chargedDefects()->push_back(i); 
+     }
+     else 
+     {
+      m_world->grid()->setSiteID(i,0); //Charge carrier site
+     }
     }
     // Add the source and the drain
     m_source = new SourceAgent(m_world, numAgents, sourcePotential);
@@ -215,16 +212,37 @@ namespace Langmuir
     m_drain = new DrainAgent(m_world, numAgents+1, drainPotential);
     m_world->grid()->setAgent(numAgents+1, m_drain);
     m_world->grid()->setSiteID(numAgents+1, 3);
+
     // Now to assign nearest neighbours for the electrodes.
-    vector<unsigned int> neighbors = m_grid->col(0);
-//    cout << "Source neighbors: " << neighbors.size() << endl;
-//    for (unsigned int i = 0; i < neighbors.size(); ++i)
-//      cout << neighbors[i] << " ";
-//    cout << endl;
+    vector<unsigned int> neighbors(0,0);
+
+    // Loop over layers
+    for ( unsigned int layer = 0; layer < m_grid->depth(); layer++ ) 
+    {
+     // Get column in this layer that is closest to the source
+     vector<unsigned int> column_neighbors_in_layer = m_grid->col(0,layer);
+     // Loop over this column
+     for ( unsigned int column_site = 0; column_site < column_neighbors_in_layer.size(); column_site++ ) 
+     {
+      neighbors.push_back( column_neighbors_in_layer[column_site] );
+     }
+    }
+    // Set the neighbors of the source
     m_source->setNeighbors(neighbors);
     neighbors.clear();
 
-    neighbors = m_grid->col(m_grid->width()-1);
+    // Loop over layers
+    for ( unsigned int layer = 0; layer < m_grid->depth(); layer++ )
+    {
+     // Get column in this layer that is closest to the source
+     vector<unsigned int> column_neighbors_in_layer = m_grid->col(m_grid->width()-1,layer);
+     // Loop over this column
+     for ( unsigned int column_site = 0; column_site < column_neighbors_in_layer.size(); column_site++ ) 
+     {
+      neighbors.push_back( column_neighbors_in_layer[column_site] );
+     }
+    }
+    // Set the neighbors of the drain
     m_drain->setNeighbors(neighbors);
     neighbors.clear();
   }
@@ -239,53 +257,57 @@ namespace Langmuir
 
   void Simulation::updatePotentials(double trapPercent, double deltaEpsilon)
   {
-    // We are assuming one source, one drain that are parallel.
-    // The most efficient way to calculate this is to work out the potential
-    // for each column in our system and then assign it to each agent.
-    int width = m_grid->width();
+   // We are assuming one source, one drain that are parallel.
+   // The most efficient way to calculate this is to work out the potential
+   // for each column in our system and then assign it to each agent.
+   int width = m_grid->width();
 
-    double m = (m_drain->potential() - m_source->potential()) / double(width);
-    double c = m_source->potential();
+   double m = (m_drain->potential() - m_source->potential()) / double(width);
+   double c = m_source->potential();
 
-    // The source to drain distance is simply the width of the device.
-    for (int i = 0; i < width; i++) {
-      double tPotential = m * (double(i)+0.5) + c;
-	  vector<unsigned int> neighbors = m_grid->col(i);
-      for (vector<unsigned int>::iterator j = neighbors.begin();
-           j != neighbors.end(); j++) {
-		  // We can randomly tweak a site energy
-		  if (m_world->random() < trapPercent)
-		  {
-			  m_grid->setPotential(*j, (tPotential + deltaEpsilon));
-//			  cout << " Site " a<< *j << " deltaE " << deltaEpsilon << " Potential " << tPotential << endl;
-		  }
-		  else
-		  {
-			  m_grid->setPotential(*j, tPotential);
-		  }
-      }
-//      cout << "Row " << i << ", potential = " << tPotential << endl;
+   // The source to drain distance is simply the width of the device.
+   for (int i = 0; i < width; i++) {
+    // The potential of this column
+    double tPotential = m * (double(i)+0.5) + c;
+    // Loop over layers and assign the potential to this column in layer
+    for ( unsigned int layer = 0; layer < m_grid->depth(); layer++ ) 
+    {
+     // All the members of this column in the given layer
+     vector<unsigned int> column_members = m_grid->col(i,layer);
+     // Loop over the members of this column in the given layer
+     for (vector<unsigned int>::iterator j = column_members.begin(); j != column_members.end(); j++)
+     {
+      // We can randomly tweak a site energy
+      if (m_world->random() < trapPercent) { m_grid->setPotential(*j, (tPotential + deltaEpsilon)); }
+      // Assign the potential
+      else { m_grid->setPotential(*j, tPotential); }
+     }
     }
-	
-	// Set the potential of the drain site
+    }
+    // Set the potential of the drain site
     double tPotential = m * (double(width)+0.5) + c;	
-	m_grid->setPotential(width*m_grid->height()+1, tPotential);
-
+    m_grid->setPotential(width*m_grid->height()*m_grid->depth()+1, tPotential);
   }
 
   void Simulation::updateInteractionEnergies()
   {
-    // These values are used in Coulomb interaction calculations.
-    Eigen::MatrixXd *energies = m_world->interactionEnergies();
-
+    //These values are used in Coulomb interaction calculations.
+    TripleIndexArray& energies = m_world->interactionEnergies();
+ 
     // Currently hard coding a cut off of 50nm - no interactions beyond that added
     unsigned int cutoff = 50;
-    energies->resize(cutoff, cutoff);
+
+    energies.resize(cutoff,cutoff,cutoff);
     const double q = 1.60217646e-19; // Magnitude of charge on an electron
+
     // Now calculate the numbers we need
-    for (unsigned int i = 0; i < cutoff; ++i)
-      for (unsigned int j = 0; j < cutoff; ++j)
-        (*energies)(i, j) = q / sqrt(i*i + j*j);
+    for (unsigned int col = 0; col < cutoff; ++col){
+     for (unsigned int row = 0; row < cutoff; ++row){
+      for (unsigned int lay = 0; lay < cutoff; ++lay) {
+       energies(col,row,lay)  = q / sqrt(col*col + row*row + lay*lay);
+      }        
+     }
+    }
   }
 
   inline void Simulation::chargeAgentIterate(ChargeAgent *chargeAgent)

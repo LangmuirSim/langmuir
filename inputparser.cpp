@@ -286,6 +286,16 @@ namespace Langmuir {
         break;
        }
 
+       case e_iterationsTraj: {
+        m_parameters.iterationsTraj = list.at(1).toInt();
+        if (m_parameters.iterationsTraj < 0) {
+         m_valid = false;
+         qDebug() << "Traj iterations must be >=0.";
+        }
+        qDebug() << "iterations.traj:" << m_parameters.iterationsTraj;
+        break;
+       }
+
        case e_coulombInteraction: {
         QString interaction = list.at(1).trimmed().toLower();
         if (interaction == "true") {
@@ -315,6 +325,20 @@ namespace Langmuir {
          }
          break;
         }			
+
+        case e_iterationsXYZ:  {
+         QString interaction = list.at(1).trimmed().toLower();
+         if (interaction == "true") {
+          m_parameters.iterationsXYZ = true;
+         }
+         else if (interaction == "false") {
+          m_parameters.iterationsXYZ = false;
+         }
+         else {
+          m_valid = false;
+         }
+         break;
+        }
 
         default:
          qDebug() << "Unknown key value encountered:" << key;
@@ -346,6 +370,8 @@ namespace Langmuir {
     s_variables["iterations.warmup"] = e_iterationsWarmup;
     s_variables["iterations.real"] = e_iterationsReal;
     s_variables["iterations.print"] = e_iterationsPrint;
+    s_variables["iterations.traj"] = e_iterationsTraj;
+    s_variables["iterations.xyz"] = e_iterationsXYZ;
     s_variables["interaction.coulomb"] = e_coulombInteraction;
     s_variables["charged.defects"] = e_defectsCharged;
   }

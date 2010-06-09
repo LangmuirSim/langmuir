@@ -21,12 +21,54 @@ namespace Langmuir {
 
   World::~World()
   {
-    delete m_rand;
+   delete m_rand;
   }
 
   double World::random()
   {
-    return m_rand->number();
+   return m_rand->number();
+  }
+
+  TripleIndexArray::TripleIndexArray()
+  {
+   values.clear();
+   m_width = 0;
+   m_area = 0;
+   m_col = 0;
+   m_row = 0;
+   m_lay = 0;
+  }
+
+  TripleIndexArray::TripleIndexArray(unsigned int col, unsigned int row, unsigned int lay)
+  {
+   values.clear();
+   values.resize(col*row*lay);
+   m_width = col;
+   m_area = col*row;
+   m_col = col;
+   m_row = row;
+   m_lay = lay;
+  }
+
+  void TripleIndexArray::resize(unsigned int col, unsigned int row, unsigned int lay)
+  {
+   values.clear();
+   values.resize(col*row*lay);
+   m_width = col;
+   m_area = col*row;
+   m_col = col;
+   m_row = row;
+   m_lay = lay;
+  }
+
+  double& TripleIndexArray::operator() (unsigned int col, unsigned int row, unsigned int lay)
+  {
+   return values[col+m_width*row+lay*m_area];
+  }
+
+  double TripleIndexArray::operator() (unsigned int col, unsigned int row, unsigned int lay) const
+  {
+   return values[col+m_width*row+lay*m_area];
   }
 
 }
