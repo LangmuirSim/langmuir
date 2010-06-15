@@ -61,7 +61,9 @@ int main(int argc, char *argv[])
       << "\ngrid.charge: "          << par.gridCharge
       << "\ninteractions.coulomb: " << par.coulomb
       << "\ncharged.defects:  "     << par.defectsCharged
+	  << "\ncharged.traps: "        << par.trapsCharged
       << "\nz.defect:  "            << par.zDefect
+	  << "\nz.trap:    "            << par.zTrap
       << "\nvoltage.source: "       << par.voltageSource
       << "\nvoltage.drain: "        << par.voltageDrain
       << "\ndefect.percentage: "    << par.defectPercentage * 100.0
@@ -80,7 +82,7 @@ int main(int argc, char *argv[])
   out << "Trap "            << "(%)" << "\t";
   out << "ChargeGoal "      << "(%)" << "\t";
   out << "ChargeReached "   << "(%)" << "\t";
-  out << "ChargeTransport " << "(I)" << "\n";
+  out << "ChargeTransport " << "(per iteration)" << "\n";
   out.flush();
 
   for (int i = 0; i < input.steps(); ++i) {
@@ -102,9 +104,15 @@ int main(int argc, char *argv[])
 
     // set charged defects
     sim.setChargedDefects(par.defectsCharged);
+	  
+	// set charged traps
+	sim.setChargedTraps(par.trapsCharged);
 
     // set charge on defects
     sim.setZdefect(par.zDefect);
+	  
+	// set charge on traps
+	sim.setZtrap(par.zTrap);
 
     // set simulation temperature
     sim.setTemperature(par.temperatureKelvin);
@@ -137,7 +145,7 @@ int main(int argc, char *argv[])
     iterOut << "Trap "            << "(%)" << "\t";
     iterOut << "ChargeGoal "      << "(%)" << "\t";
     iterOut << "ChargeReached "   << "(%)" << "\t";
-    iterOut << "ChargeTransport " << "(I)" << "\n";
+    iterOut << "ChargeTransport " << "(per iteration)" << "\n";
  
     // Perform Warmup
     unsigned long lastCount = 0;

@@ -34,7 +34,7 @@ namespace Langmuir
      * @warning default temperature is 300 K.
      * @warning default defects set to false.
      */
-    ChargeAgent(World *world, unsigned int site, bool coulombInteraction = true, double temperatureKelvin = 300.0, int zDefect = -1);
+    ChargeAgent(World *world, unsigned int site, bool coulombInteraction = true, double temperatureKelvin = 300.0, int zDefect = -1, int zTrap = -1);
 
     /**
      * @brief virutal Destructor.
@@ -56,6 +56,10 @@ namespace Langmuir
      * @param enabled boolean value for option. 
      */
     void setChargedDefects(bool on);
+	  
+    // Enables electrostatic interaction between charge carriers and charged trap sites
+	  
+	void setChargedTraps(bool ok);
 
     /**
      * @brief charge.
@@ -97,11 +101,13 @@ namespace Langmuir
      */
     int m_charge;
 
-    /**
-     * @brief Defect status. 
-     * @todo figure out what this actually is.
-     */
-    int m_zDefect;
+   // Charge on defect
+	  
+	int m_zDefect;
+	  
+   // Charge on Trap
+	  
+	int m_zTrap;
 
     /**
      * @brief neighborlist.
@@ -130,6 +136,8 @@ namespace Langmuir
      * If or not charged defects should be calculated.
      */
     bool m_chargedDefects; // include charged defects?
+	  
+	bool m_chargedTraps; // include charged traps?
 
     /**
      * @brief simulation temperature.
@@ -157,6 +165,11 @@ namespace Langmuir
      * @return potential potential difference calculated.
      */
     double defectsCharged(unsigned int newSite);
+	  
+	/*Calculates the potential difference from electrostatic interactions 
+	  between carriers and charged traps*/
+	  
+	double trapsCharged(unsigned int newSite);
 
     /**
      * @brief coupling constant.

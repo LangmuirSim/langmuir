@@ -77,14 +77,22 @@ namespace Langmuir
      * @param enabled boolean value for option.
      */  
     void setChargedDefects(bool on);
-
+	
+	// Enables interaction for charge carriers with charged traps
+	  
+	void setChargedTraps(bool ok);
+	  
     /**
      * @brief Charged Defects
      *
-     * Allow for charge defects in the simulation.
+     * Sets the magnitude of the charge on defects.
      * @param zDefect charge of defects.
      */	  
     void setZdefect(int zDefect);
+	  
+	//Sets the magnitude of the charge on traps.
+	  
+	void setZtrap(int zTrap);
 
     /**
      * @brief Simulation temperature.
@@ -150,9 +158,13 @@ namespace Langmuir
     /**
      * @brief Defect presence.
      *
-     * Boolean allowing defects to be present in the simulation.
+     * Boolean allowing charged defects to be present in the simulation.
      */
     bool m_chargedDefects;
+	  
+	// Allows trap sites to have a charge
+	  
+	bool m_chargedTraps; 
 
     /**
      * @brief Charge Defect charge.
@@ -160,6 +172,10 @@ namespace Langmuir
      * The charge on defects in the simulation.
      */
     int    m_zDefect;
+	  
+	// The charge on traps in the simulation.
+	  
+	int    m_zTrap;
 
     /**
      * @brief Simulation temperature.

@@ -24,7 +24,8 @@ namespace Langmuir
                           double           trapPercent, 
                           double          deltaEpsilon  ) : 
                           m_coulombInteraction(true), 
-                          m_chargedDefects(true)
+                          m_chargedDefects(true), 
+	                      m_chargedTraps(true)
   {
     m_world   = new World;
     m_grid    = new CubicGrid(width, height, depth);
@@ -66,7 +67,7 @@ namespace Langmuir
       // Randomly select a site, ensure it is suitable, if so add a charge agent
       unsigned int site = int(m_world->random() * (double(nSites) - 0.00001));
       if (grid->siteID(site) == 0 && grid->agent(site) == 0) {
-        ChargeAgent *charge = new ChargeAgent(m_world, site, m_coulombInteraction, m_temperatureKelvin, m_zDefect);
+        ChargeAgent *charge = new ChargeAgent(m_world, site, m_coulombInteraction, m_temperatureKelvin, m_zDefect, m_zTrap);
         m_world->charges()->push_back(charge);
         m_source->incrementCharge();
         ++i;
@@ -85,20 +86,25 @@ namespace Langmuir
    m_chargedDefects = on; 
   }
 	
+  void Simulation::setChargedTraps(bool ok)
+  {
+   m_chargedTraps = ok;
+  }
+	
   void Simulation::setZdefect(int zDefect)
   {
    m_zDefect = zDefect;
+  }
+	
+  void Simulation::setZtrap(int zTrap)
+  {
+   m_zTrap = zTrap;
   }
 	
   void Simulation::setTemperature(double temperatureKelvin)
   {
    m_temperatureKelvin = temperatureKelvin;
   }
-	
-  /*void Simulation::setDeltaEpsilon(double deltaEpsilon)
-  {
-   m_deltaEpsilon = deltaEpsilon;
-  }*/
   
   void Simulation::performIterations(int nIterations)
   {
@@ -121,7 +127,7 @@ namespace Langmuir
       //qDebug () << "Source transport returned site:" << site;
 
       if (site != errorValue) {
-       ChargeAgent *charge = new ChargeAgent(m_world, site, m_coulombInteraction, m_temperatureKelvin, m_zDefect);
+       ChargeAgent *charge = new ChargeAgent(m_world, site, m_coulombInteraction, m_temperatureKelvin, m_zDefect, m_zTrap);
        m_world->charges()->push_back(charge);
       }
     }
@@ -197,8 +203,8 @@ namespace Langmuir
     for ( unsigned int i = 0; i < numAgents; ++i ) {
      if (m_world->random() < defectPercent)
      {
-      m_world->grid()->setSiteID(i,1); //charge defect
-      m_world->chargedDefects()->push_back(i); 
+      m_world->grid()->setSiteID(i,1); //defect
+      m_world->chargedDefects()->push_back(i); //Add defect to list - for charged defects
      }
      else 
      {
@@ -278,7 +284,10 @@ namespace Langmuir
      for (vector<unsigned int>::iterator j = column_members.begin(); j != column_members.end(); j++)
      {
       // We can randomly tweak a site energy
-      if (m_world->random() < trapPercent) { m_grid->setPotential(*j, (tPotential + deltaEpsilon)); }
+      if (m_world->random() < trapPercent) {
+		m_grid->setPotential(*j, (tPotential + deltaEpsilon)); 
+	    m_world->chargedTraps()->push_back(*j);
+	  }
       // Assign the potential
       else { m_grid->setPotential(*j, tPotential); }
      }

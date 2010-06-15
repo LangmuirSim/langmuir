@@ -152,12 +152,15 @@ namespace Langmuir {
         // The temperature cannot be lower than 0K
         if (m_parameters.temperatureKelvin < 0.00) {
          m_valid = false;
+		 qDebug() << "Absolute temperature must be < 0K";
         }
+		qDebug() << "temperature.kelvin: " << m_parameters.temperatureKelvin; 
         break; 
        }
 
        case e_deltaEpsilon: {
         m_parameters.deltaEpsilon = list.at(1).toDouble();
+		qDebug() << "delta.epsilon: " << m_parameters.deltaEpsilon;
         break;
        }   
 
@@ -236,9 +239,21 @@ namespace Langmuir {
         m_parameters.zDefect=list.at(1).toInt();
         if (m_parameters.zDefect < -1 || m_parameters.zDefect > 1) {
          m_valid = false;
+		 qDebug() << "Charge on defect must be +/- 1e";
         }
+		qDebug() << "z.defect: " << m_parameters.zDefect;
         break;
        }
+			  
+		case e_zTrap: {
+		m_parameters.zTrap=list.at(1).toInt();
+		if (m_parameters.zTrap < -1 || m_parameters.zTrap>1){
+		 m_valid = false;
+		qDebug() << "Charge on trap must be +/- 1e";
+		}
+		 qDebug() << "zTrap: " << m_parameters.zTrap;
+		 break;
+		}
 
        case e_gridCharge: {
         QString gridCharge = list.at(1).trimmed().toLower();
@@ -322,10 +337,27 @@ namespace Langmuir {
          }
          else {
           m_valid = false;
+		  qDebug() << "Charged defects are either true or false: ";
          }
+		  qDebug() << "charged.defects: " << m_parameters.defectsCharged;
          break;
         }			
 
+		  case e_trapsCharged:  {
+			  QString interaction = list.at(1).trimmed().toLower();
+			  if (interaction == "true") {
+				  m_parameters.trapsCharged = true;
+			  }
+			  else if (interaction == "false") {
+				  m_parameters.trapsCharged = false;
+			  }
+			  else {
+				  m_valid = false;
+				  qDebug() << "Charged traps are either true or false: ";
+			  }
+			  qDebug() << "charged.traps: " << m_parameters.trapsCharged;
+			  break;
+		  }			
         case e_iterationsXYZ:  {
          QString interaction = list.at(1).trimmed().toLower();
          if (interaction == "true") {
@@ -366,6 +398,7 @@ namespace Langmuir {
     s_variables["grid.height"] = e_gridHeight;
     s_variables["grid.depth"] = e_gridDepth;
     s_variables["z.defect"] = e_zDefect;
+	s_variables["z.trap"] = e_zTrap;
     s_variables["grid.charge"] = e_gridCharge;
     s_variables["iterations.warmup"] = e_iterationsWarmup;
     s_variables["iterations.real"] = e_iterationsReal;
@@ -374,6 +407,7 @@ namespace Langmuir {
     s_variables["iterations.xyz"] = e_iterationsXYZ;
     s_variables["interaction.coulomb"] = e_coulombInteraction;
     s_variables["charged.defects"] = e_defectsCharged;
+	s_variables["charged.traps"] = e_trapsCharged;
   }
 
 }

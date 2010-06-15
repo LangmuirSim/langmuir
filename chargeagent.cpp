@@ -11,10 +11,11 @@ namespace Langmuir{
   using   std::vector;
   using Eigen::Vector3d;
 
-  ChargeAgent::ChargeAgent(World *world, unsigned int site, bool coulombInteraction, double temperatureKelvin, int zDefect) : 
+  ChargeAgent::ChargeAgent(World *world, unsigned int site, bool coulombInteraction, double temperatureKelvin, int zDefect, int zTrap) : 
    Agent(Agent::Charge, world, site), 
    m_charge(-1), 
    m_zDefect(zDefect), 
+   m_zTrap(zTrap),
    m_removed(false),
    m_coulombInteraction(coulombInteraction), 
    m_temperatureKelvin(temperatureKelvin)
@@ -42,6 +43,11 @@ namespace Langmuir{
   {
     m_chargedDefects = on;
   }
+	
+  void ChargeAgent::setChargedTraps(bool ok)
+  {
+	m_chargedTraps = ok;
+  }
 
   unsigned int ChargeAgent::transport()
   {
@@ -68,7 +74,10 @@ namespace Langmuir{
 	  
    // Add the interactions from charged defects
    if (m_chargedDefects) pd += defectsCharged(newSite);
-
+	  
+   // Add the interactions from charged traps
+   if (m_chargedTraps) pd += trapsCharged(newSite);
+	  
    // Get the coupling constant
    double coupling = couplingConstant(grid->siteID(m_site),grid->siteID(newSite));
 
@@ -212,7 +221,46 @@ inline double ChargeAgent::defectsCharged(unsigned int newSite)
 }
  return m_charge * m_zDefect * q4pe * (potential2 - potential1);
 }
+
+	inline double ChargeAgent::trapsCharged(unsigned int newSite)
+	{
+		const double q = 1.60217646e-19; // Magnitude of charge on an electron
+		// Prefactor for force calculations q / 4 pi epsilon with a 1e-9 for m -> nm
+		const double q4pe = q / (4.0*M_PI*8.854187817e-12 * 3.5 * 1e-9);
 		
+		// Cutting off interaction energies at 50nm
+		int cutoff = 50;
+		
+		Grid *grid = m_world->grid();
+		
+		// Figure out the potential of the site we are on
+		QList<unsigned int> &chargedTraps = *m_world->chargedTraps();
+		double potential1(0.0), potential2(0.0);
+		int trapSize(chargedTraps.size());
+		for (int i = 0; i < trapSize; ++i) {
+			// Potential at current site from charged traps
+			int dx = grid->xDistancei(m_site, chargedTraps[i]);
+			int dy = grid->yDistancei(m_site, chargedTraps[i]);
+			int dz = grid->zDistancei(m_site, chargedTraps[i]);
+			if (dx < cutoff && dy < cutoff && dz < cutoff) {
+				potential1 += m_world->interactionEnergies()(dx,dy,dz)*chargedTraps[i];
+			}
+			// Potential at new site from charged defects
+			if (newSite != chargedTraps[i]) {
+				dx = grid->xDistancei(newSite, chargedTraps[i]);
+				dy = grid->yDistancei(newSite, chargedTraps[i]);
+				dz = grid->zDistancei(newSite, chargedTraps[i]);
+				if (dx < cutoff && dy < cutoff) {
+					potential2 += m_world->interactionEnergies()(dx,dy,dz)*chargedTraps[i];
+				}
+			}
+			else {
+				return -1;
+			}
+		}
+		return m_charge * m_zTrap * q4pe * (potential2 - potential1);
+	}
+	
 inline double ChargeAgent::couplingConstant(short id1, short id2)
 {
  return (*m_world->coupling())(id1, id2);

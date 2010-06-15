@@ -28,6 +28,7 @@ namespace Langmuir {
     int            gridHeight;
     int             gridDepth;
     int               zDefect;
+	int                 zTrap;
     int      iterationsWarmup; 
     int        iterationsReal;
     int       iterationsPrint;
@@ -35,6 +36,7 @@ namespace Langmuir {
 
     bool              coulomb;
     bool       defectsCharged;
+	bool         trapsCharged;
     bool           gridCharge;
     bool        iterationsXYZ;
 
@@ -51,12 +53,14 @@ namespace Langmuir {
      gridHeight            =      10;
      gridDepth             =       1;
      zDefect               =       0;
+	 zTrap                 =       0;
      iterationsWarmup      =  100000;
      iterationsReal        =  500000;
      iterationsPrint       =   10000;
      iterationsTraj        =   10000;
      coulomb               =   false;
      defectsCharged        =   false;
+	 trapsCharged          =   false;
      gridCharge            =   false;
      iterationsXYZ         =   false;
     }
@@ -110,6 +114,7 @@ namespace Langmuir {
       e_gridHeight,         // the height of the grid
       e_gridDepth,          // the depth of the grid
       e_zDefect,            // charge on the defects (times e)
+	  e_zTrap,              // charge on traps (times e)
       e_gridCharge,         // seed the grid with charges
       e_iterationsWarmup,   // the number of warm up iterations to perform
       e_iterationsReal,     // the number of iterations for the real run
@@ -117,6 +122,7 @@ namespace Langmuir {
       e_iterationsTraj,     // number of iteratiobs before printing trajectory
       e_coulombInteraction, // should Coulomb interaction be used
       e_defectsCharged,     // are the defects charged?
+	  e_trapsCharged,       // are the traps charged?
       e_iterationsXYZ,      // should trajectory files be written
       e_end
     };
