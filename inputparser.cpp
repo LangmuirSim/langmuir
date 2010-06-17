@@ -50,9 +50,9 @@ namespace Langmuir {
       case e_voltageDrain:
         par->voltageDrain = tmp;
         break;
-	  case e_defectPercentage:
-		par->defectPercentage = tmp / 100.0;
-		break;
+      case e_defectPercentage:
+        par->defectPercentage = tmp / 100.0;
+        break;
       case e_trapPercentage:
         par->trapPercentage = tmp / 100.0;
         break;
@@ -76,8 +76,8 @@ namespace Langmuir {
         return "voltage.source";
       case e_voltageDrain:
         return "voltage.drain";
-	  case e_defectPercentage:
-		return "defect.percentage";
+      case e_defectPercentage:
+        return "defect.percentage";
       case e_trapPercentage:
         return "trap.percentage";
       case e_chargePercentage:
@@ -152,15 +152,15 @@ namespace Langmuir {
         // The temperature cannot be lower than 0K
         if (m_parameters.temperatureKelvin < 0.00) {
          m_valid = false;
-		 qDebug() << "Absolute temperature must be < 0K";
+         qDebug() << "Absolute temperature must be < 0K";
         }
-		qDebug() << "temperature.kelvin: " << m_parameters.temperatureKelvin; 
+        qDebug() << "temperature.kelvin: " << m_parameters.temperatureKelvin; 
         break; 
        }
 
        case e_deltaEpsilon: {
         m_parameters.deltaEpsilon = list.at(1).toDouble();
-		qDebug() << "delta.epsilon: " << m_parameters.deltaEpsilon;
+        qDebug() << "delta.epsilon: " << m_parameters.deltaEpsilon;
         break;
        }   
 
@@ -245,15 +245,15 @@ namespace Langmuir {
         break;
        }
 			  
-		case e_zTrap: {
-		m_parameters.zTrap=list.at(1).toInt();
-		if (m_parameters.zTrap < -1 || m_parameters.zTrap>1){
-		 m_valid = false;
-		qDebug() << "Charge on trap must be +/- 1e";
-		}
-		 qDebug() << "zTrap: " << m_parameters.zTrap;
-		 break;
-		}
+       case e_zTrap: {
+        m_parameters.zTrap=list.at(1).toInt();
+        if (m_parameters.zTrap < -1 || m_parameters.zTrap>1){
+         m_valid = false;
+         qDebug() << "Charge on trap must be +/- 1e";
+        }
+         qDebug() << "zTrap: " << m_parameters.zTrap;
+         break;
+        }
 
        case e_gridCharge: {
         QString gridCharge = list.at(1).trimmed().toLower();
@@ -268,6 +268,19 @@ namespace Langmuir {
          qDebug() << "Charging the grid is either true or false:" << gridCharge;
         }
         qDebug() << "grid.charge:" << m_parameters.gridCharge;
+        break;
+       }
+
+       case e_potentialForm: {
+        QString potentialForm = list.at(1).trimmed().toLower();
+        if (potentialForm == "linear") {
+         m_parameters.potentialForm = "linear";
+        }
+        else {
+         m_valid = false;
+         qDebug() << "The only option for potential is linear:" << potentialForm;
+        }
+        qDebug() << "potential.form" << m_parameters.potentialForm;
         break;
        }
 
@@ -343,21 +356,22 @@ namespace Langmuir {
          break;
         }			
 
-		  case e_trapsCharged:  {
-			  QString interaction = list.at(1).trimmed().toLower();
-			  if (interaction == "true") {
-				  m_parameters.trapsCharged = true;
-			  }
-			  else if (interaction == "false") {
-				  m_parameters.trapsCharged = false;
-			  }
-			  else {
-				  m_valid = false;
-				  qDebug() << "Charged traps are either true or false: ";
-			  }
-			  qDebug() << "charged.traps: " << m_parameters.trapsCharged;
-			  break;
-		  }			
+        case e_trapsCharged:  {
+         QString interaction = list.at(1).trimmed().toLower();
+         if (interaction == "true") {
+          m_parameters.trapsCharged = true;
+         }
+         else if (interaction == "false") {
+          m_parameters.trapsCharged = false;
+         }
+         else {
+          m_valid = false;
+          qDebug() << "Charged traps are either true or false: ";
+         }
+          qDebug() << "charged.traps: " << m_parameters.trapsCharged;
+          break;
+        }
+			
         case e_iterationsXYZ:  {
          QString interaction = list.at(1).trimmed().toLower();
          if (interaction == "true") {
@@ -373,7 +387,7 @@ namespace Langmuir {
         }
 
         default:
-         qDebug() << "Unknown key value encountered:" << key;
+        qDebug() << "Unknown key value encountered:" << key;
       }
     }
   }
@@ -398,7 +412,7 @@ namespace Langmuir {
     s_variables["grid.height"] = e_gridHeight;
     s_variables["grid.depth"] = e_gridDepth;
     s_variables["z.defect"] = e_zDefect;
-	s_variables["z.trap"] = e_zTrap;
+    s_variables["z.trap"] = e_zTrap;
     s_variables["grid.charge"] = e_gridCharge;
     s_variables["iterations.warmup"] = e_iterationsWarmup;
     s_variables["iterations.real"] = e_iterationsReal;
@@ -407,7 +421,8 @@ namespace Langmuir {
     s_variables["iterations.xyz"] = e_iterationsXYZ;
     s_variables["interaction.coulomb"] = e_coulombInteraction;
     s_variables["charged.defects"] = e_defectsCharged;
-	s_variables["charged.traps"] = e_trapsCharged;
+    s_variables["charged.traps"] = e_trapsCharged;
+    s_variables["potential.form"] = e_potentialForm;
   }
 
 }

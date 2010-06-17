@@ -12,7 +12,8 @@ namespace Langmuir
   class SourceAgent;
   class DrainAgent;
   class ChargeAgent;
-
+  class Potential;
+  struct SimulationParameters;
   /**
     *  @class Simulation
     *  @brief Simulation management.
@@ -28,17 +29,9 @@ namespace Langmuir
      * @brief Constructor.
      *
      * Set up the basic parameters of the simulation.
-     * @param width the width of the grid.
-     * @param height the height of the grid.
-     * @param depth the depth of the grid.
-     * @param sourcePotential the potential at the source electrode.
-     * @param drainPotential the potential at the drain electrode.
-     * @param defectPercent the percent of defects.
-     * @param trapPercent the percent of traps.
-     * @param deltaEpsilon the value of epsilon.
-     * @param depth the depth of the grid.
+     * @param par parameter struct
      */
-    Simulation( unsigned int width, unsigned int height, unsigned int depth, double sourcePotential, double drainPotential, double defectPercent = 0.0, double trapPercent = 0.0, double deltaEpsilon = 0.0);
+    Simulation( SimulationParameters *par );
 
     /**
      * @brief Destructor.
@@ -148,6 +141,16 @@ namespace Langmuir
     unsigned long charges();
 
     /**
+     * @brief ncharges
+     *
+     * Retrieve the current number of charges in the system.
+     */
+    int getMaxCharges()
+    {
+     return m_maxcharges; 
+    }
+
+    /**
      * @brief World access.
      *
      * Retrieve the world object - can be used alter world properties.
@@ -199,6 +202,13 @@ namespace Langmuir
     double m_temperatureKelvin;
 
     /**
+     * @brief Charge Defect charge.
+     *
+     * The charge on traps in the simulation.
+     */
+    int m_maxcharges;
+
+    /**
      * @brief World pointer.
      *
      * Address of the world object used for the simulation.
@@ -211,6 +221,13 @@ namespace Langmuir
      * Address of the grid object used for the simulation.
      */
     Grid *m_grid;
+
+    /**
+     * @brief Potential calculator
+     *
+     * Address of the potential object for the simulation.
+     */
+    Potential *m_potential;
 
     /**
      * @brief Source pointer.
@@ -260,7 +277,7 @@ namespace Langmuir
      * @brief Precalculate interaction energies.
      * 
      * precalculate the interaction energies of charges at different sites. 
-     * This is a vector of size width + length denoting the x, y displacement of the two sites under consideration. 
+     * This is a vector of size width + length + depth denoting the x, y displacement of the two sites under consideration. 
      * These values reduce necessary calculations in tight loops when considering Coulomb interactions.
      */
     void updateInteractionEnergies();

@@ -1,9 +1,11 @@
 #include "simulation.h"
 #include "world.h"
+#include "linearpotential.h"
 #include "cubicgrid.h"
 #include "chargeagent.h"
 #include "sourceagent.h"
 #include "drainagent.h"
+#include "inputparser.h"
 #include <iostream>
 #include <cstdlib>
 #include <QtCore/QFuture>
@@ -15,31 +17,51 @@ namespace Langmuir
   using std::cout;
   using std::endl;
 
-  Simulation::Simulation( unsigned int           width, 
-                          unsigned int          height,
-                          unsigned int           depth,
-                          double       sourcePotential, 
-                          double        drainPotential,
-                          double         defectPercent, 
-                          double           trapPercent, 
-                          double          deltaEpsilon  ) : 
-                          m_coulombInteraction(true), 
-                          m_chargedDefects(true), 
-	                      m_chargedTraps(true)
+  Simulation::Simulation( SimulationParameters *par )
   {
-    m_world   = new World;
-    m_grid    = new CubicGrid(width, height, depth);
+    // Create the world object
+    m_world = new World;
+
+    // Create the grid object
+    m_grid = new CubicGrid(par->gridWidth, par->gridHeight, par->gridDepth);
+
+    // Let the world know about the grid
     m_world->setGrid(m_grid);
 
     // Create the agents for the simulation
-    createAgents(width * height * depth, sourcePotential, drainPotential, defectPercent);
+    createAgents(m_grid->volume(), par->voltageSource, par->voltageDrain, par->defectPercentage);
 
-    // The e-field is constant between the electrodes - V / d
-    m_world->setEField((drainPotential - sourcePotential) / (width*1.0e-9));
+    // Now initialise the potential from the external field
+    updatePotentials( par->trapPercentage, par->deltaEpsilon );
 
-    // Now initialise the potentials
-    updatePotentials( trapPercent, deltaEpsilon );
+    // precalculate potentials for interacting charges ( carriers, defects, traps )
     updateInteractionEnergies();
+
+    // Set coulomb interactions
+    m_coulombInteraction = par->coulomb;
+
+    // Set charged defects
+    m_chargedDefects = par->defectsCharged;
+
+    // Set charged traps
+    m_chargedTraps = par->trapsCharged;
+
+    // Set charge on defects
+    m_zDefect = par->zDefect;
+
+    // Set charge on traps
+    m_zTrap = par->zTrap;
+
+    // Set simulation temperature
+    m_temperatureKelvin = par->temperatureKelvin;
+
+    // Calculate the number of charge carriers
+    int nCharges = par->chargePercentage * double(m_grid->volume());
+    setMaxCharges(nCharges);
+
+    // Charge the grid up is specified
+    if (par->gridCharge) seedCharges();
+
   }
 
   Simulation::~Simulation()
@@ -53,6 +75,7 @@ namespace Langmuir
   void Simulation::setMaxCharges(int n)
   {
    m_source->setMaxCharges(n);
+   m_maxcharges = n;
   }
 
   bool Simulation::seedCharges()

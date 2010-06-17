@@ -49,6 +49,7 @@ set(SRCS
   simulation.cpp
   world.cpp
   inputparser.cpp
+  linearpotential.cpp
 )
 
 set(VIEWSRCS
