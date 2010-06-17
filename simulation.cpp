@@ -284,10 +284,11 @@ namespace Langmuir
      for (vector<unsigned int>::iterator j = column_members.begin(); j != column_members.end(); j++)
      {
       // We can randomly tweak a site energy
-      if (m_world->random() < trapPercent) {
-		m_grid->setPotential(*j, (tPotential + deltaEpsilon)); 
-	    m_world->chargedTraps()->push_back(*j);
-	  }
+      if (m_world->random() < trapPercent)
+      {
+       m_grid->setPotential(*j, (tPotential + deltaEpsilon)); 
+       m_world->chargedTraps()->push_back(*j);
+      }
       // Assign the potential
       else { m_grid->setPotential(*j, tPotential); }
      }

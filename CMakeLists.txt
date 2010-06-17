@@ -11,7 +11,7 @@ find_package(Eigen2 REQUIRED) # find and setup Eigen2
 
 # Also need random number facilities from Boost
 find_package(Boost REQUIRED
-  COMPONENTS mpi)
+)#  COMPONENTS mpi)
 
 set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
 

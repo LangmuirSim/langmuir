@@ -206,9 +206,12 @@ namespace Langmuir
       */
     QList<unsigned int> * chargedDefects();
 	  
-	// List of charged traps 
-	  
-	QList<unsigned int> * chargedTraps();
+    /**
+      * @brief member access.
+      *
+      * Get the address of a list of charged traps.
+      */
+    QList<unsigned int> * chargedTraps();
 
     /**
       * @brief member access.
@@ -231,7 +234,7 @@ namespace Langmuir
     Rand                 *m_rand;                // Random number generator
     QList<ChargeAgent *>  m_charges;             // Charge carriers in the system
     QList<unsigned int>   m_chargedDefects;      // Charged defects in the system
-	QList<unsigned int>   m_chargedTraps;        // Charged traps in the system
+    QList<unsigned int>   m_chargedTraps;        // Charged traps in the system
     Eigen::MatrixXd       m_coupling;            // Enumerates coupling constants between different sites
     std::vector<double>   m_sitePercents;        // Percentage of each site in the grid
     TripleIndexArray      m_interactionEnergies; //Interaction energies
