@@ -211,7 +211,7 @@ inline double ChargeAgent::defectsCharged(unsigned int newSite)
    dx = grid->xDistancei(newSite, chargedDefects[i]);
    dy = grid->yDistancei(newSite, chargedDefects[i]);
    dz = grid->zDistancei(newSite, chargedDefects[i]);
-  if (dx < cutoff && dy < cutoff) {
+  if (dx < cutoff && dy < cutoff && dz < cutoff) {
    potential2 += m_world->interactionEnergies()(dx,dy,dz)*chargedDefects[i];
   }
  }
@@ -242,15 +242,15 @@ inline double ChargeAgent::defectsCharged(unsigned int newSite)
 			int dx = grid->xDistancei(m_site, chargedTraps[i]);
 			int dy = grid->yDistancei(m_site, chargedTraps[i]);
 			int dz = grid->zDistancei(m_site, chargedTraps[i]);
-			if (dx < cutoff && dy < cutoff && dz < cutoff) {
+			if (dx < cutoff && dy < cutoff && dz < cutoff && dx != 0 && dy != 0 && dz != 0) {
 				potential1 += m_world->interactionEnergies()(dx,dy,dz)*chargedTraps[i];
 			}
-			// Potential at new site from charged defects
+			// Potential at new site from charged traps
 			if (newSite != chargedTraps[i]) {
 				dx = grid->xDistancei(newSite, chargedTraps[i]);
 				dy = grid->yDistancei(newSite, chargedTraps[i]);
 				dz = grid->zDistancei(newSite, chargedTraps[i]);
-				if (dx < cutoff && dy < cutoff) {
+				if (dx < cutoff && dy < cutoff && dx != 0 && dy != 0 && dz != 0) {
 					potential2 += m_world->interactionEnergies()(dx,dy,dz)*chargedTraps[i];
 				}
 			}
