@@ -16,9 +16,10 @@ int main(int argc, char *argv[])
 {
   QCoreApplication app(argc, argv);
   QStringList args = app.arguments();
-  if (args.size() < 3) {
-    qDebug() << "Need atleast 1 argument - the input and output file names.";
-    app.exit(1);
+
+  if (args.size() < 2) {
+    qDebug() << "correct use is langmuir input.dat (output.dat)";
+    throw(std::invalid_argument("bad input"));
   }
 
   QString  inputFileName = args.at(1);
@@ -61,11 +62,12 @@ int main(int argc, char *argv[])
       << "\ngrid.charge: "          << par.gridCharge
       << "\ninteractions.coulomb: " << par.coulomb
       << "\ncharged.defects:  "     << par.defectsCharged
-	  << "\ncharged.traps: "        << par.trapsCharged
+      << "\ncharged.traps: "        << par.trapsCharged
       << "\nz.defect:  "            << par.zDefect
-	  << "\nz.trap:    "            << par.zTrap
+      << "\nz.trap:    "            << par.zTrap
       << "\nvoltage.source: "       << par.voltageSource
       << "\nvoltage.drain: "        << par.voltageDrain
+      << "\npotential.form: "       << par.potentialForm
       << "\ndefect.percentage: "    << par.defectPercentage * 100.0
       << "\ntrap.percentage: "      << par.trapPercentage * 100.0
       << "\ncharge.percentage: "    << par.chargePercentage * 100.0
@@ -91,31 +93,7 @@ int main(int argc, char *argv[])
     input.simulationParameters(&par, i);
 
     // Set up a simulation
-    Simulation sim(par.gridWidth     , par.gridHeight  , par.gridDepth,
-                   par.voltageSource , par.voltageDrain, par.defectPercentage,
-                   par.trapPercentage, par.deltaEpsilon                       );
-
-    // Calculate the number of charges
-    int nCharges = par.chargePercentage * double(par.gridWidth*par.gridHeight*par.gridDepth);
-    sim.setMaxCharges(nCharges);
-
-    // set coulomb interactions
-    sim.setCoulombInteractions(par.coulomb);
-
-    // set charged defects
-    sim.setChargedDefects(par.defectsCharged);
-	  
-	// set charged traps
-	sim.setChargedTraps(par.trapsCharged);
-
-    // set charge on defects
-    sim.setZdefect(par.zDefect);
-	  
-	// set charge on traps
-	sim.setZtrap(par.zTrap);
-
-    // set simulation temperature
-    sim.setTemperature(par.temperatureKelvin);
+    Simulation sim(&par);
 
     // Charge the grid up is specified
     if (par.gridCharge) sim.seedCharges();
@@ -159,7 +137,7 @@ int main(int argc, char *argv[])
 
      // Output Log
      qDebug() << j
-              << "\t" << double(sim.charges()) / double(nCharges) * 100.0
+              << "\t" << double(sim.charges()) / double(sim.getMaxCharges()) * 100.0
               << "\t" << double(sim.totalChargesAccepted()-lastCount) / par.iterationsPrint;
      iterOut  << j
               << "\t" << par.temperatureKelvin
@@ -168,7 +146,7 @@ int main(int argc, char *argv[])
               << "\t" << par.defectPercentage * 100.00
               << "\t" << par.trapPercentage * 100.0
               << "\t" << par.chargePercentage * 100.0
-              << "\t" << double(sim.charges()) / double(nCharges) * 100.0
+              << "\t" << double(sim.charges()) / double(sim.getMaxCharges()) * 100.0
               << "\t" << double(sim.totalChargesAccepted()-lastCount) / par.iterationsPrint << "\n";
       iterOut.flush();
       lastCount = sim.totalChargesAccepted();
@@ -186,7 +164,7 @@ int main(int argc, char *argv[])
 
       // Output Log
       qDebug() << j
-               << "\t" << double(sim.charges()) / double(nCharges) * 100.0
+               << "\t" << double(sim.charges()) / double(sim.getMaxCharges()) * 100.0
                << "\t" << double(sim.totalChargesAccepted()-lastCount) / par.iterationsPrint;
       iterOut  << j
                << "\t" << par.temperatureKelvin
@@ -195,7 +173,7 @@ int main(int argc, char *argv[])
                << "\t" << par.defectPercentage * 100.0
                << "\t" << par.trapPercentage * 100.0
                << "\t" << par.chargePercentage * 100.0
-               << "\t" << double(sim.charges()) / double(nCharges) * 100.0
+               << "\t" << double(sim.charges()) / double(sim.getMaxCharges()) * 100.0
                << "\t" << double(sim.totalChargesAccepted()-lastCount) / par.iterationsPrint << "\n";
       iterOut.flush();
       lastCount = sim.totalChargesAccepted();
@@ -208,7 +186,7 @@ int main(int argc, char *argv[])
         << "\t" << par.defectPercentage * 100.0
         << "\t" << par.trapPercentage * 100.0
         << "\t" << par.chargePercentage * 100.0
-        << "\t" << double(sim.charges()) / double(nCharges) * 100.0
+        << "\t" << double(sim.charges()) / double(sim.getMaxCharges()) * 100.0
         << "\t" << double(lastCount-startCount) / par.iterationsReal << "\n";
     out.flush();
 

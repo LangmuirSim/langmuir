@@ -264,6 +264,24 @@ namespace Langmuir
     virtual double potential(unsigned int site);
 
     /**
+     * @brief Set source potential.
+     *
+     * Store the source potential in the potential array.
+     * The location in the potential array is the number of grid sites.
+     * @param site potential.
+     */
+    virtual void setSourcePotential(double potential);
+
+    /**
+     * @brief Set drain potential.
+     *
+     * Store the drain potential in the potential array.
+     * The location in the potential array is the number of grid sites + 1.
+     * @param site potential.
+     */
+    virtual void setDrainPotential(double potential);
+
+    /**
      * @brief neighborlist agents.
      *
      * Get a list of neightboring agent pointers for sites immediatly next to the given site.
@@ -331,6 +349,16 @@ namespace Langmuir
   inline double Grid::potential(unsigned int site)
   {
     return m_potentials[site];
+  }
+
+  inline void Grid::setSourcePotential(double potential)
+  {
+    m_potentials[m_potentials.size()-2] = potential;
+  }
+
+  inline void Grid::setDrainPotential(double potential)
+  {
+    m_potentials[m_potentials.size()-1] = potential;
   }
 
 } // End namespace Langmuir

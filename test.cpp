@@ -3,7 +3,7 @@
 
 #include "cubicgrid.h"
 #include "simulation.h"
-
+#include "inputparser.h"
 #include <QtCore/QCoreApplication>
 #include <QtCore/QDebug>
 
@@ -65,10 +65,33 @@ int main(int argc, char *argv[])
     qDebug() << "Error opening output file:" << "test.dat";
     return -1;
   }
-  Simulation sim(1024,256,1,0.1,1.0,0,0,0);
-  //sim.setCoulombInteractions(false);
-  sim.seedCharges();
 
+  SimulationParameters par;
+
+  par.voltageSource = 0.0;
+  par.voltageDrain = 1.0;
+  par.defectPercentage = 0.0;
+  par.trapPercentage = 0.0;
+  par.chargePercentage = 0.0;
+  par.temperatureKelvin = 300.0;
+  par.deltaEpsilon = 0.0;
+  par.gridWidth = 1024;
+  par.gridHeight = 256;
+  par.gridDepth = 0;
+  par.zDefect = 0;
+  par.zTrap = 0;
+  par.iterationsWarmup = 0;
+  par.iterationsReal = 1000;
+  par.iterationsPrint = 100;
+  par.iterationsTraj = 100;
+  par.coulomb = false;
+  par.defectsCharged = false;
+  par.trapsCharged = false;
+  par.gridCharge = false;
+  par.iterationsXYZ = false;
+  par.potentialForm = SimulationParameters::o_linearpotential;
+
+  Simulation sim(&par);
   for (int i = 0; i < 1000; i++) {
     qDebug() << "Step: " << i << "Accepted charges:" << sim.totalChargesAccepted();
     sim.performIterations(1);

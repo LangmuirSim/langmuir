@@ -3,7 +3,7 @@
 
 #include "cubicgrid.h"
 #include "simulation.h"
-
+#include "inputparser.h"
 #include <QtCore/QCoreApplication>
 #include <QtCore/QStringList>
 #include <QtCore/QDebug>
@@ -31,28 +31,47 @@ int main(int argc, char *argv[])
     return 1;
   QTextStream out(&output);
 
-  int width = 1024;
-  int height = 256;
-  int depth = 1;
-  double sourceVoltage = 0.0;
-  double drainVoltage = 0.0;
   double minDrain = 0.0; // Percent
   double maxDrain = 5.0; // Percent
   double occupation = 0.01; // 5 percent constant charge occupation
   int drainStep = 11; // Number of steps
   double drainStepSize = (maxDrain - minDrain) / (drainStep-1);
 
+  SimulationParameters par;
+
+  par.voltageSource = 0.0;
+  par.voltageDrain = 1.0;
+  par.defectPercentage = 0.0;
+  par.trapPercentage = 0.0;
+  par.chargePercentage = 0.05;
+  par.temperatureKelvin = 300.0;
+  par.deltaEpsilon = 0.0;
+  par.gridWidth = 1024;
+  par.gridHeight = 256;
+  par.gridDepth = 0;
+  par.zDefect = 0;
+  par.zTrap = 0;
+  par.iterationsWarmup = 0;
+  par.iterationsReal = 1000;
+  par.iterationsPrint = 100;
+  par.iterationsTraj = 100;
+  par.coulomb = false;
+  par.defectsCharged = false;
+  par.trapsCharged = false;
+  par.gridCharge = false;
+  par.iterationsXYZ = false;
+  par.potentialForm = SimulationParameters::o_linearpotential;
+
   qDebug() << "Testing the simulation class.\n";
 
   for (int i = 0; i < drainStep; ++i) {
-    drainVoltage = minDrain + i * drainStepSize;
-    Simulation *sim = new Simulation(width, height, depth, sourceVoltage, drainVoltage);
-    int charges = width * height * occupation;
-    sim->setMaxCharges(charges);
-    sim->setCoulombInteractions(false);
+    double drainVoltage = minDrain + i * drainStepSize;
+    par.voltageDrain = drainVoltage;
+    Simulation *sim = new Simulation(&par);
+    int charges = par.gridWidth * par.gridHeight * occupation;
 
     qDebug() << "Starting simulation run...\nCoulomb: false\nCharges:"
-        << charges << "\tOccupation:" << double(charges) / (width*height)
+        << charges << "\tOccupation:" << double(charges) / (par.gridWidth*par.gridHeight)
         << "\tDrain Voltage:" << drainVoltage;
 
     QFile output2(args.at(2)+QString::number(i)+".txt");
@@ -60,8 +79,8 @@ int main(int argc, char *argv[])
       return 1;
     QTextStream out2(&output2);
     out2 << "Charges: " << charges << "\tOccupation: "
-        << double(charges) / (width*height)
-	<< "\tSource: " << sourceVoltage
+        << double(charges) / (par.gridWidth*par.gridHeight)
+	<< "\tSource: " << par.voltageSource
 	<< "\tDrain: " << drainVoltage << "\n\n";
 
     unsigned long lastCount = 0;
