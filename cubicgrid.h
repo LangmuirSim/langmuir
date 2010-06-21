@@ -264,7 +264,7 @@ namespace Langmuir
      *
      * Write out positions of agent.
      */
-    void print3D( QTextStream& stream );  
+    void print3D( QTextStream& stream );
 
   protected:
     /**

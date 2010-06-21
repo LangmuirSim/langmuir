@@ -3,7 +3,7 @@
 
 #include "cubicgrid.h"
 #include "simulation.h"
-
+#include "inputparser.h"
 #include <QtCore/QCoreApplication>
 #include <QtCore/QStringList>
 #include <QtCore/QDebug>
@@ -31,33 +31,52 @@ int main(int argc, char *argv[])
     return 1;
   QTextStream out(&output);
 
-  int width = 1024;
-  int height = 256;
-  int depth = 1;
-  double sourceVoltage = 0.0;
-  double drainVoltage = 1.0;
   double minOcc = 0.001; // Percent
   double maxOcc = 0.2; // Percent
   int occStep = 20; // Number of steps
   double occStepSize = (maxOcc - minOcc) / occStep;
 
+  SimulationParameters par;
+
+  par.voltageSource = 0.0;
+  par.voltageDrain = 1.0;
+  par.defectPercentage = 0.0;
+  par.trapPercentage = 0.0;
+  par.chargePercentage = minOcc;
+  par.temperatureKelvin = 300.0;
+  par.deltaEpsilon = 0.0;
+  par.gridWidth = 1024;
+  par.gridHeight = 256;
+  par.gridDepth = 0;
+  par.zDefect = 0;
+  par.zTrap = 0;
+  par.iterationsWarmup = 0;
+  par.iterationsReal = 1000;
+  par.iterationsPrint = 100;
+  par.iterationsTraj = 100;
+  par.coulomb = false;
+  par.defectsCharged = false;
+  par.trapsCharged = false;
+  par.gridCharge = false;
+  par.iterationsXYZ = false;
+  par.potentialForm = SimulationParameters::o_linearpotential;
+
   qDebug() << "Testing the simulation class.\n";
 
   for (int i = 0; i < occStep; ++i) {
-    Simulation *sim = new Simulation(width, height, depth, sourceVoltage, drainVoltage);
-    int charges = width * height * (minOcc + i*occStepSize);
-    sim->setMaxCharges(charges);
-    sim->setCoulombInteractions(false);
+    par.chargePercentage = minOcc + i*occStepSize;
+    Simulation *sim = new Simulation(&par);
+    int charges = par.gridWidth * par.gridHeight * (minOcc + i*occStepSize);
 
     qDebug() << "Starting simulation run...\nCoulomb: false\nCharges:"
-        << charges << "\tOccupation:" << double(charges) / (width*height);
+        << charges << "\tOccupation:" << double(charges) / (par.gridWidth*par.gridHeight);
 
     QFile output2(args.at(2)+QString::number(i)+".txt");
     if (!output2.open(QIODevice::WriteOnly | QIODevice::Text))
       return 1;
     QTextStream out2(&output2);
     out2 << "Charges: " << charges << "\tOccuptation: "
-        << double(charges) / (width*height) << "\n\n";
+        << double(charges) / (par.gridWidth*par.gridHeight) << "\n\n";
 
     unsigned long lastCount = 0;
     for (int j = 0; j < 25; ++j) {

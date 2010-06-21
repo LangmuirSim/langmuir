@@ -3,11 +3,14 @@
 
 #include<iostream>
 #include<cmath>
+#include<stdexcept>
+#include"potentialpoint.h"
+#include<QTextStream>
 
 namespace Langmuir
 {
   /**
-    *  @class EField.
+    *  @class Potential.
     *  @brief The potential in a system produced by the enviroment.
     *
     *  Pure virtual base class to inherited by all externalfield classes.
@@ -26,6 +29,33 @@ namespace Langmuir
     }
 
     /**
+     * @brief A method to insert a point of defined potential
+     *
+     * We sometimes want base pointers to add points of defined potential.
+     * Only the expert derived classes know how to add them correctly.
+     * @param point a point of defined potential
+     */
+    virtual void addPoint( PotentialPoint point ) = 0;
+
+    /**
+     * @brief A method to insert a point of defined potential for the source
+     *
+     * We sometimes want base pointers to add points of defined potential.
+     * Only the expert derived classes know how to add them correctly.
+     * @param point a point of defined potential
+     */
+    virtual void addSourcePoint( PotentialPoint point ) = 0;
+
+    /**
+     * @brief A method to insert a point of defined potential for the drain
+     *
+     * We sometimes want base pointers to add points of defined potential.
+     * Only the expert derived classes know how to add them correctly.
+     * @param point a point of defined potential
+     */
+    virtual void addDrainPoint( PotentialPoint point ) = 0;
+
+    /**
      * @brief calculate the potential
      *
      * Use internal information about the potential to determine the value at this point.
@@ -34,7 +64,7 @@ namespace Langmuir
      * @param lay index of layer
      * @return potential value of potential at this location
      */  
-    virtual double operator()( int col, int row, int lay ) = 0;
+    virtual double calculate( double col, double row, double lay ) = 0;
 
     /**
       * @brief stream operator overload to print potential
@@ -51,6 +81,21 @@ namespace Langmuir
      return potential.print(os);
     }
 
+    /**
+      * @brief print a slice of potential for plotting
+      * 
+      * The potential is printed in a way so that it may be plotted.
+      * @param stream write to this stream
+      * @param xstart starting value of x
+      * @param xstop starting value of x
+      * @param ystart starting value of y
+      * @param ystop starting value of y
+      * @param zvalue value of z
+      * @param xdelta delta value for x
+      * @param ydelta delta value for y
+      */
+    virtual void plot( QTextStream& stream, double xstart = -10.0, double xstop = 10.0, double ystart = -10.0, double ystop = 10.0, double zvalue = 0.0, double xdelta = 1.0, double ydelta = 1.0 ) = 0; 
+
   protected:
 
     /**
@@ -61,153 +106,6 @@ namespace Langmuir
     virtual std::ostream& print(std::ostream& os) = 0;
 
   };
-
-  /**
-    * @class PotentialPoint
-    * @brief container for potential values
-    *
-    * Assumes integer (non continuous) x, y, and z values.
-    * Potential itself is stored as a double.
-    * @date 06/15/2010
-    */
- class PotentialPoint
- {
- public:
-
-  /**
-    * @brief default constructor
-    *
-    * Initializes a 4 dimensional vector (x,y,z,V) 
-    * @param col the integer x value.
-    * @param row the integer y value.
-    * @param lay the integer z value.
-    * @param potential the floating potential value
-    */
-  PotentialPoint( int col, int row, int lay, double potential )
-  {
-   this->col = col;
-   this->row = row;
-   this->lay = lay;
-   this->potential = potential;
-  }
-
-  /**
-    * @brief default destructor
-    */
- ~PotentialPoint()
-  {
-  }
-
-  /**
-    * @brief operator << overload 
-    *
-    * Allows the expression: ostream << PotentialPoint;
-    */
-  friend std::ostream& operator<<(std::ostream& os, const PotentialPoint& p)
-  {
-   os << "{ " << p.col << " " << p.row << " " << p.lay << " " << p.potential << " }";
-   return os;
-  }
-
-  /**
-    * @struct comparison functor
-    *
-    * Used for sorting points with standard library.
-    */
-  struct less_than_by_x_value
-  {
-   /**
-     * @brief functor operator () overload
-     *
-     * compare two points by x value and less than operator.
-     */
-   bool operator()(const PotentialPoint& lhs, const PotentialPoint& rhs) const
-   { 
-    return lhs.x() < rhs.x(); 
-   }
-  };
-
-  /**
-    * @struct comparison functor
-    *
-    * Used for sorting points with standard library.
-    */
-  struct less_than_by_y_value
-  {
-   /**
-     * @brief functor operator () overload
-     *
-     * compare two points by y value and less than operator.
-     */
-   bool operator()(const PotentialPoint& lhs, const PotentialPoint& rhs) const
-   { 
-    return lhs.y() < rhs.y(); 
-   }
-  };
-
-  /**
-    * @struct comparison functor
-    *
-    * Used for sorting points with standard library.
-    */
-  struct less_than_by_z_value
-  {
-   /**
-     * @brief functor operator () overload
-     *
-     * compare two points by z value and less than operator.
-     */
-   bool operator()(const PotentialPoint& lhs, const PotentialPoint& rhs) const
-   { 
-    return lhs.z() < rhs.z(); 
-   }
-  };
-
- /**
-   * @brief access col value
-   * @return col value
-   */
- inline const int& x() const { return col; }
-
- /**
-   * @brief access row value
-   * @return row value
-   */
- inline const int& y() const { return row; }
-
- /**
-   * @brief access lay value
-   * @return lay value
-   */
- inline const int& z() const { return lay; }
-
- /**
-   * @brief access potential value
-   * @return potential value
-   */
- inline const double& V() const { return potential; }
- 
- protected:
-  /**
-    * @brief value of x coordinate 
-    */
-  int col;
-
-  /** 
-    * @brief value of y coordinate
-    */
-  int row;
-
-  /**
-    * @brief value of z coordinate
-    */
-  int lay;
-
-  /**
-    * @brief value of potential coordinate
-    */
-  double potential;
- };
 
 }
 #endif

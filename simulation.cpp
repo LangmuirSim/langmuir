@@ -10,6 +10,9 @@
 #include <cstdlib>
 #include <QtCore/QFuture>
 #include <QtCore/QtConcurrentMap>
+#include <QtCore/QStringList>
+#include <QtCore/QFile>
+#include <QtCore/QTextStream>
 
 namespace Langmuir
 {
@@ -19,57 +22,59 @@ namespace Langmuir
 
   Simulation::Simulation( SimulationParameters *par )
   {
-    // Create the world object
-    m_world = new World;
+    m_world = new World; // Create the world object
+    m_grid = new CubicGrid(par->gridWidth, par->gridHeight, par->gridDepth); // Create the grid object
+    m_world->setGrid(m_grid); // Let the world know about the grid
+    createAgents(m_grid->volume(), par->voltageSource, par->voltageDrain, par->defectPercentage); // Create the agents for the simulation
 
-    // Create the grid object
-    m_grid = new CubicGrid(par->gridWidth, par->gridHeight, par->gridDepth);
+    m_coulombInteraction = par->coulomb; // Set coulomb interactions
+    m_chargedDefects = par->defectsCharged; // Set charged defects
+    m_chargedTraps = par->trapsCharged; // Set charged traps
+    m_zDefect = par->zDefect; // Set charge on defects
+    m_zTrap = par->zTrap; // Set charge on traps
+    m_temperatureKelvin = par->temperatureKelvin; // Set simulation temperature
 
-    // Let the world know about the grid
-    m_world->setGrid(m_grid);
-
-    // Create the agents for the simulation
-    createAgents(m_grid->volume(), par->voltageSource, par->voltageDrain, par->defectPercentage);
-
-    // Now initialise the potential from the external field
-    updatePotentials( par->trapPercentage, par->deltaEpsilon );
-
-    // precalculate potentials for interacting charges ( carriers, defects, traps )
-    updateInteractionEnergies();
-
-    // Set coulomb interactions
-    m_coulombInteraction = par->coulomb;
-
-    // Set charged defects
-    m_chargedDefects = par->defectsCharged;
-
-    // Set charged traps
-    m_chargedTraps = par->trapsCharged;
-
-    // Set charge on defects
-    m_zDefect = par->zDefect;
-
-    // Set charge on traps
-    m_zTrap = par->zTrap;
-
-    // Set simulation temperature
-    m_temperatureKelvin = par->temperatureKelvin;
-
-    // Calculate the number of charge carriers
-    int nCharges = par->chargePercentage * double(m_grid->volume());
+    int nCharges = par->chargePercentage * double(m_grid->volume()); // Calculate the number of charge carriers
     setMaxCharges(nCharges);
 
-    // Charge the grid up is specified
-    if (par->gridCharge) seedCharges();
+    if (par->potentialForm == SimulationParameters::o_linearpotential) // Set up external potential calculator
+    {
+     m_potential = new LinearPotential(par->potentialPoints);
+     //Add the source to the linear potential
+     m_potential->addSourcePoint( PotentialPoint(0,0,0,par->voltageSource) );
+     //Add the drain to the linear potential
+     m_potential->addDrainPoint( PotentialPoint(par->gridWidth,0,0,par->voltageDrain) );
+    }
+    else
+    {
+     qDebug() << "Can not set up the external potential!";
+     throw(std::logic_error("unknown potential"));
+    }
+
+    //for ( double layer = 0; layer <= 10.0; layer += 1.0 )
+    //{
+    // QString outfilename;
+    // outfilename.setNum(layer);
+    // QFile outputFile(outfilename+".xyz");
+    // outputFile.open(QIODevice::WriteOnly | QIODevice::Text);
+    // QTextStream out(&outputFile);
+    // m_potential->plot(out,0.0,1000.0,0.0,200.0,layer,10.0,10.0);
+    //}
+    //throw(-1);
+
+    updatePotentials( par->trapPercentage, par->deltaEpsilon ); // Calculate potentials at grid sites and add traps
+    updateInteractionEnergies(); // precalculate potentials for interacting charges ( carriers, defects, traps )
+    if (par->gridCharge) seedCharges(); // Charge the grid up is specified
 
   }
 
   Simulation::~Simulation()
   {
-    delete m_world;
-    delete  m_grid;
-    m_world    = 0;
-    m_grid     = 0;
+    delete       m_world;
+    delete        m_grid;
+    delete   m_potential;
+    m_world          = 0;
+    m_grid           = 0;
   }
 
   void Simulation::setMaxCharges(int n)
@@ -286,6 +291,43 @@ namespace Langmuir
 
   void Simulation::updatePotentials(double trapPercent, double deltaEpsilon)
   {
+
+   double tPotential = 0;
+
+   for ( unsigned int x = 0; x < m_grid->width(); x++ )
+   {
+    for ( unsigned int y = 0; y < m_grid->height(); y++ )
+    {
+     for ( unsigned int z = 0; z < m_grid->depth(); z++ )
+     {
+
+      // Get the potential at this site
+      tPotential = m_potential->calculate(x+0.5,y+0.5,z+0.5);
+ 
+      // The site ID ( this is bad its specific to 3D cubic grids )
+      unsigned int site = x+m_grid->width()*y+z*m_grid->area();
+
+      // We can randomly tweak a site energy
+      if (m_world->random() < trapPercent)
+      {
+       m_grid->setPotential(site, (tPotential + deltaEpsilon)); 
+       m_world->chargedTraps()->push_back(0);
+      }
+
+      // Assign the potential
+      else { m_grid->setPotential(site, tPotential); }
+
+     }
+    }
+   }
+
+   //Set the potential of the Source
+   m_grid->setSourcePotential( m_potential->calculate(0.0,0.0,0.0) );
+
+   //Set the potential of the Drain
+   m_grid->setDrainPotential( m_potential->calculate(double(m_grid->width()),0.0,0.0) );
+
+/*
    // We are assuming one source, one drain that are parallel.
    // The most efficient way to calculate this is to work out the potential
    // for each column in our system and then assign it to each agent.
@@ -318,8 +360,9 @@ namespace Langmuir
     }
     }
     // Set the potential of the drain site
-    double tPotential = m * (double(width)+0.5) + c;	
-    m_grid->setPotential(width*m_grid->height()*m_grid->depth()+1, tPotential);
+    //tPotential = m * (double(width)+0.5) + c;	
+    //m_grid->setPotential(width*m_grid->height()*m_grid->depth()+1, tPotential);
+*/
   }
 
   void Simulation::updateInteractionEnergies()
@@ -341,6 +384,10 @@ namespace Langmuir
       }        
      }
     }
+
+    // The interaction energy is zero when R is zero
+    for (unsigned int col = 0; col < cutoff; ++col) energies(col,col,col) = 0;
+
   }
 
   inline void Simulation::chargeAgentIterate(ChargeAgent *chargeAgent)

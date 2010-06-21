@@ -46,7 +46,7 @@ namespace Langmuir{
 	
   void ChargeAgent::setChargedTraps(bool ok)
   {
-	m_chargedTraps = ok;
+    m_chargedTraps = ok;
   }
 
   unsigned int ChargeAgent::transport()

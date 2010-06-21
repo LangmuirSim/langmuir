@@ -16,9 +16,10 @@ int main(int argc, char *argv[])
 {
   QCoreApplication app(argc, argv);
   QStringList args = app.arguments();
-  if (args.size() < 3) {
-    qDebug() << "Need atleast 1 argument - the input and output file names.";
-    app.exit(1);
+
+  if (args.size() < 2) {
+    qDebug() << "correct use is langmuir input.dat (output.dat)";
+    throw(std::invalid_argument("bad input"));
   }
 
   QString  inputFileName = args.at(1);

@@ -3,8 +3,9 @@
 
 #include <QMap>
 #include <vector>
-#include <QString>
-
+#include "potential.h"
+#include <stdexcept>
+class QString;
 class QIODevice;
 
 namespace Langmuir {
@@ -14,6 +15,12 @@ namespace Langmuir {
    * easily be serialized and sent over MPI etc.
    */
   struct SimulationParameters {
+
+    enum Option {
+
+     o_linearpotential
+
+    };
 
     double      voltageSource; 
     double       voltageDrain;
@@ -39,33 +46,35 @@ namespace Langmuir {
     bool           gridCharge;
     bool        iterationsXYZ;
 
-    QString     potentialForm;
+    Option      potentialForm;
+    std::vector<PotentialPoint> potentialPoints;
 
     SimulationParameters()
     {
-     voltageSource         =    0.00;
-     voltageDrain          =    0.00;
-     defectPercentage      =    0.00;
-     trapPercentage        =    0.00;
-     chargePercentage      =    0.01;
-     temperatureKelvin     =  300.00;
-     deltaEpsilon          =    0.00;
-     gridWidth             =      10;
-     gridHeight            =      10;
-     gridDepth             =       1;
-     zDefect               =       0;
-     zTrap                 =       0;
-     iterationsWarmup      =  100000;
-     iterationsReal        =  500000;
-     iterationsPrint       =   10000;
-     iterationsTraj        =   10000;
-     coulomb               =   false;
-     defectsCharged        =   false;
-     trapsCharged          =   false;
-     gridCharge            =   false;
-     iterationsXYZ         =   false;
-     potentialForm         ="linear";
+     voltageSource         =               0.00;
+     voltageDrain          =               1.00;
+     defectPercentage      =               0.00;
+     trapPercentage        =               0.00;
+     chargePercentage      =               0.01;
+     temperatureKelvin     =             300.00;
+     deltaEpsilon          =               0.00;
+     gridWidth             =               1024;
+     gridHeight            =                256;
+     gridDepth             =                  1;
+     zDefect               =                  0;
+     zTrap                 =                  0;
+     iterationsWarmup      =               1000;
+     iterationsReal        =              10000;
+     iterationsPrint       =               1000;
+     iterationsTraj        =               1000;
+     coulomb               =              false;
+     defectsCharged        =              false;
+     trapsCharged          =              false;
+     gridCharge            =              false;
+     iterationsXYZ         =              false;
+     potentialForm         =  o_linearpotential;
     }
+
   };
 
   /**
@@ -127,6 +136,7 @@ namespace Langmuir {
       e_trapsCharged,       // are the traps charged?
       e_iterationsXYZ,      // should trajectory files be written
       e_potentialForm,      // V = Vx + Vy + Vz (only option currently)
+      e_potentialPoint,     // A point of defined potential (x,y,z,V)
       e_end
     };
 

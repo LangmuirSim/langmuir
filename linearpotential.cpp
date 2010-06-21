@@ -7,38 +7,131 @@ namespace Langmuir
 
  LinearPotential::LinearPotential()
  {
+ }
 
+ LinearPotential::LinearPotential( vector<PotentialPoint>& PotentialPoints )
+ {
+  for ( unsigned int i = 0; i < PotentialPoints.size(); i++ ) 
+  {
+   addPoint(PotentialPoints[i]);
+  }
  }
 
  LinearPotential::~LinearPotential()
  {
+ }
+
+ void LinearPotential::addPoint( PotentialPoint point )
+ {
+
+  if ( point.onOrigin() )
+  {
+   cout << "Do not define potential points on origin... can not determine axis." << "\n";
+   throw(std::invalid_argument("bad input"));
+  }
+  else if ( point.onXAxis() )
+  {
+   addXPoint(point);
+  }
+  else if ( point.onYAxis() )
+  {
+   addYPoint(point);
+  }
+  else if ( point.onZAxis() )
+  {
+   addZPoint(point);
+  }
+  else
+  {
+   cout << "Linear potential specified but point not defined on an axis. In addPoint." << "\n";
+   cout << point << "\n";
+   throw(std::invalid_argument("bad input"));
+  }
+ }
+
+ void LinearPotential::addSourcePoint( PotentialPoint point )
+ {
+
+  if ( !(point.x() == 0) )
+  {
+   cout << "Linear potential of source specified is invalid." << "\n";
+   throw(std::invalid_argument("bad input"));
+  }
+
+  if ( !(point.y() == 0) )
+  {
+   cout << "Linear potential of source specified is invalid." << "\n";
+   throw(std::invalid_argument("bad input"));
+  }
+
+  if ( !(point.z() == 0) )
+  {
+   cout << "Linear potential of source specified is invalid." << "\n";
+   throw(std::invalid_argument("bad input"));
+  }
+
+  addXPoint(point);
 
  }
 
- double LinearPotential::operator()( int col, int row, int lay )
+ void LinearPotential::addDrainPoint( PotentialPoint point )
  {
-  unsigned int x = regionX(col);
-  unsigned int y = regionY(row);
-  unsigned int z = regionZ(lay);
 
-  double potential  = mx[x]*double(col)+bx[x];
-         potential += my[y]*double(row)+by[y];
-         potential += mz[z]*double(lay)+bz[z];
- 
+  if ( !(point.y() == 0) )
+  {
+   cout << "Linear potential of source specified is invalid." << "\n";
+   throw(std::invalid_argument("bad input"));
+  }
+
+  if ( !(point.z() == 0) )
+  {
+   cout << "Linear potential of source specified is invalid." << "\n";
+   throw(std::invalid_argument("bad input"));
+  }
+
+  addXPoint(point);
+
+ }
+
+ double LinearPotential::calculate( double col, double row, double lay )
+ {
+
+  double potential = 0;
+
+  //Is a region even defined
+  if ( xx.size() >= 2 )
+  {
+   unsigned int x = regionX(col);
+   potential += mx[x]*col+bx[x];
+  }
+
+  //Is a region even defined
+  if ( yy.size() >= 2 )
+  {
+  unsigned int y = regionY(row);
+  potential += my[y]*row+by[y];
+  }
+
+  //Is a region even defined
+  if ( zz.size() >= 2 )
+  {
+  unsigned int z = regionZ(lay);
+  potential += mz[z]*lay+bz[z];
+  }
+
   return potential;
  }
 
  ostream& LinearPotential::print(ostream& os)
  {
-  os << "HELLO!";
+  for ( unsigned int i = 0; i < xx.size(); i++ ) os << xx[i] << "\n";
+  for ( unsigned int i = 0; i < yy.size(); i++ ) os << yy[i] << "\n";
+  for ( unsigned int i = 0; i < zz.size(); i++ ) os << zz[i] << "\n";
   return os;
  }
 
- unsigned int LinearPotential::regionX( int x )
+ unsigned int LinearPotential::regionX( double x )
  {
-  //Is a region even defined
-  if ( xx.size() < 2 ) throw( std::domain_error("no region is defined along x in potential") );
-
   //Below the range of defined points
   if ( x < xx[0].x() ) return 0;
 
@@ -52,11 +145,8 @@ namespace Langmuir
   return region;
  }
 
- unsigned int LinearPotential::regionY( int y )
+ unsigned int LinearPotential::regionY( double y )
  {
-  //Is a region even defined
-  if ( yy.size() < 2 ) throw( std::domain_error("no region is defined along y in potential") );
-
   //Below the range of defined points
   if ( y < yy[0].y() ) return 0;
 
@@ -70,11 +160,8 @@ namespace Langmuir
   return region;
  }
  
- unsigned int LinearPotential::regionZ( int z )
+ unsigned int LinearPotential::regionZ( double z )
  {
-  //Is a region even defined
-  if ( zz.size() < 2 ) throw( std::domain_error("no region is defined along z in potential") );
-
   //Below the range of defined points
   if ( z < zz[0].z() ) return 0;
 
@@ -88,7 +175,22 @@ namespace Langmuir
   return region;
  }
 
- void LinearPotential::addXPoint( int col, double potential )
+ void LinearPotential::addXPoint( PotentialPoint& p )
+ {
+  addXPoint(p.x(),p.V());
+ }
+
+ void LinearPotential::addYPoint( PotentialPoint& p )
+ {
+  addYPoint(p.y(),p.V());
+ }
+
+ void LinearPotential::addZPoint( PotentialPoint& p )
+ {
+  addZPoint(p.z(),p.V());
+ }
+
+ void LinearPotential::addXPoint( double col, double potential )
  {
   double deltaX    = 0;
   double deltaY    = 0;
@@ -179,7 +281,7 @@ namespace Langmuir
   }
  }
 
- void LinearPotential::addYPoint( int row, double potential )
+ void LinearPotential::addYPoint( double row, double potential )
  {
   double deltaX    = 0;
   double deltaY    = 0;
@@ -270,7 +372,7 @@ namespace Langmuir
   }
  }
 
- void LinearPotential::addZPoint( int lay, double potential )
+ void LinearPotential::addZPoint( double lay, double potential )
  {
   double deltaX    = 0;
   double deltaY    = 0;
@@ -361,4 +463,15 @@ namespace Langmuir
   }
  }
 
+ void LinearPotential::plot( QTextStream& stream, double xstart, double xstop, double ystart, double ystop, double zvalue, double xdelta, double ydelta )
+ {
+  for ( double x = xstart; x <= xstop; x += xdelta )
+  {
+   for ( double y = ystart; y <= ystop; y += ydelta )
+   {
+    stream << x << " " << y << " " << calculate(x,y,zvalue) << "\n";
+   }
+   stream << "\n";
+  }
+ }
 }
