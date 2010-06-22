@@ -446,6 +446,40 @@ namespace Langmuir {
          break;
         }
 
+        case e_potentialSTDEV: {
+         m_parameters.gaussianSTDEV = list.at(1).toDouble();
+         if (m_parameters.gaussianSTDEV <= 0.00) {
+          m_valid = false;
+          qDebug() << "Negative or zero standard deviation specified for random noise";
+          throw(std::invalid_argument("bad input"));
+         }
+         //qDebug() << "potential.stdev: " << m_parameters.gaussianSTDEV;
+         break;
+        }
+
+        case e_potentialAVERG: {
+         m_parameters.gaussianAVERG = list.at(1).toDouble();
+         //qDebug() << "potential.averg: " << m_parameters.gaussianAVERG;
+         break;
+        }
+
+        case e_potentialNoise:  {
+         QString choice = list.at(1).trimmed().toLower();
+         if (choice == "true") {
+          m_parameters.gaussianNoise = true;
+         }
+         else if (choice == "false") {
+          m_parameters.gaussianNoise = false;
+         }
+         else {
+          m_valid = false;
+          qDebug() << "potential.noise is either true or false: ";
+          throw(std::invalid_argument("bad input"));
+         }
+         //qDebug() << "potential.noise: " << m_parameters.gaussianNoise;
+         break;
+        }
+
         default:
         qDebug() << "Unknown key value encountered:" << key;
       }
@@ -484,6 +518,9 @@ namespace Langmuir {
     s_variables["charged.traps"] = e_trapsCharged;
     s_variables["potential.form"] = e_potentialForm;
     s_variables["potential.point"] = e_potentialPoint;
+    s_variables["potential.noise"] = e_potentialNoise;
+    s_variables["potential.stdev"] = e_potentialSTDEV;
+    s_variables["potential.averg"] = e_potentialAVERG;
   }
 
 }

@@ -29,6 +29,8 @@ namespace Langmuir {
     double   chargePercentage;
     double  temperatureKelvin;
     double       deltaEpsilon;
+    double      gaussianSTDEV;
+    double      gaussianAVERG;
 
     int             gridWidth;
     int            gridHeight;
@@ -45,6 +47,7 @@ namespace Langmuir {
     bool         trapsCharged;
     bool           gridCharge;
     bool        iterationsXYZ;
+    bool        gaussianNoise;
 
     Option      potentialForm;
     std::vector<PotentialPoint> potentialPoints;
@@ -73,6 +76,9 @@ namespace Langmuir {
      gridCharge            =              false;
      iterationsXYZ         =              false;
      potentialForm         =  o_linearpotential;
+     gaussianNoise         =              false;
+     gaussianSTDEV         =               0.05;
+     gaussianAVERG         =               0.00;
     }
 
   };
@@ -137,6 +143,9 @@ namespace Langmuir {
       e_iterationsXYZ,      // should trajectory files be written
       e_potentialForm,      // V = Vx + Vy + Vz (only option currently)
       e_potentialPoint,     // A point of defined potential (x,y,z,V)
+      e_potentialNoise,     // Should random noise be added to energy levels
+      e_potentialSTDEV,     // What is the standard deviation of the random noise
+      e_potentialAVERG,     // What is the average of the random noise
       e_end
     };
 

@@ -7,6 +7,7 @@
 
 #include <boost/random/uniform_int.hpp>
 #include <boost/random/uniform_real.hpp>
+#include <boost/random/normal_distribution.hpp>
 #include <boost/random/variate_generator.hpp>
 
 using namespace std;
@@ -40,6 +41,15 @@ namespace Langmuir{
   {
     // Generate a random number between min and max...
     return (*m_uni)();
+  }
+
+  double Rand::normalNumber(double mean, double sigma)
+  {
+    boost::normal_distribution<double> norm_dist(mean, sigma);
+    boost::variate_generator<baseGenerator&, boost::normal_distribution<double> >  normal_sampler(*m_gen, norm_dist);
+
+    // sample from the distribution
+    return normal_sampler();
   }
 
 } // End namespace Langmuir

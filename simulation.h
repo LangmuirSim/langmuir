@@ -271,7 +271,8 @@ namespace Langmuir
      * @param trapPercent the percent of traps present.
      * @param deltaEpsilon the energy of a trap.
      */
-    void updatePotentials(double trapPercent, double deltaEpsilon);
+    void updatePotentials( SimulationParameters *par );
+    //void updatePotentials(double trapPercent, double deltaEpsilon);
 
     /**
      * @brief Precalculate interaction energies.

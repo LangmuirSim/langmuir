@@ -1,4 +1,5 @@
 #include "simulation.h"
+#include "rand.h"
 #include "world.h"
 #include "linearpotential.h"
 #include "cubicgrid.h"
@@ -62,7 +63,7 @@ namespace Langmuir
     //}
     //throw(-1);
 
-    updatePotentials( par->trapPercentage, par->deltaEpsilon ); // Calculate potentials at grid sites and add traps
+    updatePotentials( par );
     updateInteractionEnergies(); // precalculate potentials for interacting charges ( carriers, defects, traps )
     if (par->gridCharge) seedCharges(); // Charge the grid up is specified
 
@@ -289,10 +290,12 @@ namespace Langmuir
     m_drain = 0;
   }
 
-  void Simulation::updatePotentials(double trapPercent, double deltaEpsilon)
+  void Simulation::updatePotentials( SimulationParameters *par )
   {
 
    double tPotential = 0;
+   Rand rand; // Create a new random-number generator for gaussian broadening
+   double gaussianDisorder = 0.0;
 
    for ( unsigned int x = 0; x < m_grid->width(); x++ )
    {
@@ -303,15 +306,22 @@ namespace Langmuir
 
       // Get the potential at this site
       tPotential = m_potential->calculate(x+0.5,y+0.5,z+0.5);
+
+      // Randomly add some noise
+      if ( par->gaussianNoise )
+      {
+       gaussianDisorder = rand.normalNumber(par->gaussianAVERG,par->gaussianSTDEV);
+       tPotential += gaussianDisorder;
+      }
  
       // The site ID ( this is bad its specific to 3D cubic grids )
       unsigned int site = x+m_grid->width()*y+z*m_grid->area();
 
       // We can randomly tweak a site energy
-      if (m_world->random() < trapPercent)
+      if (m_world->random() < par->trapPercentage)
       {
-       m_grid->setPotential(site, (tPotential + deltaEpsilon)); 
-       m_world->chargedTraps()->push_back(0);
+       m_grid->setPotential(site, (tPotential + par->deltaEpsilon));
+       m_world->chargedTraps()->push_back(site);
       }
 
       // Assign the potential

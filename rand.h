@@ -24,6 +24,7 @@ namespace Langmuir
     Rand(double min, double max);
     ~Rand();
     double number();
+    double normalNumber(double mean, double stdDeviation); // Random number from a normal distribution about the mean
 //    double number(double min, double max);
 
   private:
