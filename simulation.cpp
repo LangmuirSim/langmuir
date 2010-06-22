@@ -294,7 +294,6 @@ namespace Langmuir
   {
 
    double tPotential = 0;
-   Rand rand; // Create a new random-number generator for gaussian broadening
    double gaussianDisorder = 0.0;
 
    for ( unsigned int x = 0; x < m_grid->width(); x++ )
@@ -310,7 +309,7 @@ namespace Langmuir
       // Randomly add some noise
       if ( par->gaussianNoise )
       {
-       gaussianDisorder = rand.normalNumber(par->gaussianAVERG,par->gaussianSTDEV);
+       gaussianDisorder = m_world->random(par->gaussianAVERG,par->gaussianSTDEV);
        tPotential += gaussianDisorder;
       }
  

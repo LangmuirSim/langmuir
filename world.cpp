@@ -28,6 +28,11 @@ namespace Langmuir {
    return m_rand->number();
   }
 
+  double World::random( double average, double stdev )
+  {
+   return m_rand->normalNumber(average,stdev);
+  }
+
   TripleIndexArray::TripleIndexArray()
   {
    values.clear();

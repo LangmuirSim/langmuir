@@ -177,6 +177,15 @@ namespace Langmuir
     double random();
 
     /**
+      * @brief random number generation.
+      *
+      * Get a random number with average and standard deviation of gaussian.
+      * @param average average of gaussian
+      * @param stdev standard deviation of gaussian
+      */
+    double random( double average, double stdev );
+
+    /**
       * @brief member access.
       *
       * Get the address of a list of charge agents.
