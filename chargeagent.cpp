@@ -57,10 +57,13 @@ namespace Langmuir{
    // Get a pointer to the grid for easy access
    Grid *grid = m_world->grid();
 
-   // Select a proposed transport site at random
-   unsigned int newSite = m_neighbors[int(m_world->random()*(m_neighbors.size()-1.0e-20))];
+   // Select a proposed transport site at random, but esure that it is not the source
+	  unsigned int newSite;
+	  do{newSite = m_neighbors[int(m_world->random()*(m_neighbors.size()-1.0e-20))];}
+	  while (grid->siteID(newSite) == 2); // source siteID
 
    // Check if the proposed site to move to is already occupied, return -1 if unsucessful
+   // Also return if we picked the drain
    if (grid->agent(newSite) && grid->siteID(newSite) != 3) return -1;
 
    // Now to add on the background potential - from the applied field
