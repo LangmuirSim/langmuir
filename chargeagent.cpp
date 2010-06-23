@@ -11,13 +11,15 @@ namespace Langmuir{
   using   std::vector;
   using Eigen::Vector3d;
 
-  ChargeAgent::ChargeAgent(World *world, unsigned int site, bool coulombInteraction, double temperatureKelvin, int zDefect, int zTrap) : 
+  ChargeAgent::ChargeAgent(World *world, unsigned int site, bool coulombInteraction, bool chargedDefects, bool chargedTraps , double temperatureKelvin, int zDefect, int zTrap) : 
    Agent(Agent::Charge, world, site), 
    m_charge(-1), 
    m_zDefect(zDefect), 
    m_zTrap(zTrap),
    m_removed(false),
    m_coulombInteraction(coulombInteraction), 
+   m_chargedDefects(chargedDefects), 
+   m_chargedTraps(chargedTraps),
    m_temperatureKelvin(temperatureKelvin)
   {
     //current site and future site are the same

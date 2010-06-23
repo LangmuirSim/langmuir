@@ -34,7 +34,7 @@ namespace Langmuir
      * @warning default temperature is 300 K.
      * @warning default defects set to false.
      */
-    ChargeAgent(World *world, unsigned int site, bool coulombInteraction = true, double temperatureKelvin = 300.0, int zDefect = -1, int zTrap = -1);
+    ChargeAgent(World *world, unsigned int site, bool coulombInteraction = true, bool chargedDefects = true, bool chargedTraps = true, double temperatureKelvin = 300.0, int zDefect = -1, int zTrap = -1);
 
     /**
      * @brief virutal Destructor.

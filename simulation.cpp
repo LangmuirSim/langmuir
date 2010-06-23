@@ -96,7 +96,7 @@ namespace Langmuir
       // Randomly select a site, ensure it is suitable, if so add a charge agent
       unsigned int site = int(m_world->random() * (double(nSites) - 0.00001));
       if (grid->siteID(site) == 0 && grid->agent(site) == 0) {
-        ChargeAgent *charge = new ChargeAgent(m_world, site, m_coulombInteraction, m_temperatureKelvin, m_zDefect, m_zTrap);
+        ChargeAgent *charge = new ChargeAgent(m_world, site, m_coulombInteraction, m_chargedDefects, m_chargedTraps, m_temperatureKelvin, m_zDefect, m_zTrap);
         m_world->charges()->push_back(charge);
         m_source->incrementCharge();
         ++i;
@@ -156,7 +156,7 @@ namespace Langmuir
       //qDebug () << "Source transport returned site:" << site;
 
       if (site != errorValue) {
-       ChargeAgent *charge = new ChargeAgent(m_world, site, m_coulombInteraction, m_temperatureKelvin, m_zDefect, m_zTrap);
+       ChargeAgent *charge = new ChargeAgent(m_world, site, m_coulombInteraction, m_chargedDefects, m_chargedTraps, m_temperatureKelvin, m_zDefect, m_zTrap);
        m_world->charges()->push_back(charge);
       }
     }
