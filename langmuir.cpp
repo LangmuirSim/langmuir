@@ -95,9 +95,6 @@ int main(int argc, char *argv[])
     // Set up a simulation
     Simulation sim(&par);
 
-    // Charge the grid up is specified
-    if (par.gridCharge) sim.seedCharges();
-
     // Open outputfile for this simulation
     QFile iterFile(outputFileName+"-i-"+QString::number(i)+".dat");
     if (!iterFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
@@ -136,9 +133,7 @@ int main(int argc, char *argv[])
      if ( par.iterationsXYZ ) sim.getGrid()->print3D(trajOut);
 
      // Output Log
-     qDebug() << j
-              << "\t" << double(sim.charges()) / double(sim.getMaxCharges()) * 100.0
-              << "\t" << double(sim.totalChargesAccepted()-lastCount) / par.iterationsPrint;
+
      iterOut  << j
               << "\t" << par.temperatureKelvin
               << "\t" << par.voltageSource
