@@ -89,6 +89,8 @@ int main(int argc, char *argv[])
 
   for (int i = 0; i < input.steps(); ++i) {
 
+    qDebug() << "Simulation: " << i;
+
     // Get simulation parameters for the current step and set up a new object
     input.simulationParameters(&par, i);
 
@@ -133,7 +135,6 @@ int main(int argc, char *argv[])
      if ( par.iterationsXYZ ) sim.getGrid()->print3D(trajOut);
 
      // Output Log
-
      iterOut  << j
               << "\t" << par.temperatureKelvin
               << "\t" << par.voltageSource
@@ -156,11 +157,11 @@ int main(int argc, char *argv[])
 
       // Output Trajectory
       if ( par.iterationsXYZ ) sim.getGrid()->print3D(trajOut);
-
       // Output Log
-      qDebug() << j
-               << "\t" << double(sim.charges()) / double(sim.getMaxCharges()) * 100.0
-               << "\t" << double(sim.totalChargesAccepted()-lastCount) / par.iterationsPrint;
+      qDebug()   << "      step: " << j;
+      //qDebug() << j
+      //         << "\t" << double(sim.charges()) / double(sim.getMaxCharges()) * 100.0
+      //         << "\t" << double(sim.totalChargesAccepted()-lastCount) / par.iterationsPrint;
       iterOut  << j
                << "\t" << par.temperatureKelvin
                << "\t" << par.voltageSource
@@ -195,6 +196,7 @@ int main(int argc, char *argv[])
      {
       trajFile.close();
      }
+  qDebug() << "";
   }
 
   outputFile.close();

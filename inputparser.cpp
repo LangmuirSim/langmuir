@@ -177,7 +177,7 @@ namespace Langmuir {
              m_varyType == e_trapPercentage ||
              m_varyType == e_chargePercentage ||
              m_varyType == e_temperatureKelvin ) {
-             qDebug() << "Working variable:" << m_varyType;
+             //qDebug() << "Working variable:" << m_varyType;
         }
         else {
          m_valid = false;
