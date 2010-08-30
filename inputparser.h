@@ -4,7 +4,10 @@
 #include <QMap>
 #include <vector>
 #include "potential.h"
+#include <iostream>
 #include <stdexcept>
+#include <string>
+#include <sstream>
 class QString;
 class QIODevice;
 
@@ -15,6 +18,12 @@ namespace Langmuir {
    * easily be serialized and sent over MPI etc.
    */
   struct SimulationParameters {
+
+    /**
+      * @brief operator overload to print parameters
+      * @return reference to QTextStream
+      */
+    friend  QTextStream& operator<<(  QTextStream& qt, SimulationParameters& par );
 
     enum Option {
 
@@ -150,6 +159,12 @@ namespace Langmuir {
     };
 
     /**
+      * @brief operator overload to print input parser
+      * @return reference to QTextStream
+      */
+    friend  QTextStream& operator<<(  QTextStream& qt, InputParser& inp );
+
+    /**
      * @brief Working variable.
      * @return The variable that is being modified in the simulation.
      */
@@ -238,6 +253,20 @@ namespace Langmuir {
      * Unknown.
      */
     bool m_valid;
+
+    /** 
+     * @brief Working variable current step.
+     * 
+     * The current step of the working variable.
+     */
+    int m_step;
+
+    /** 
+     * @brief Working variable current value.
+     * 
+     * The current value of the working variable.
+     */
+    double m_value;
 
     /** 
      * @brief The values of parameters.
