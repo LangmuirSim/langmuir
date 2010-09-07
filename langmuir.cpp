@@ -68,6 +68,8 @@ int main(int argc, char *argv[])
       << "\nvoltage.source: "       << par.voltageSource
       << "\nvoltage.drain: "        << par.voltageDrain
       << "\npotential.form: "       << par.potentialForm
+	  << "\npotential.averg: "      << par.potentialAVERG
+	  << "\npotential.stdev: "      << par.potentialSTDEV
       << "\ndefect.percentage: "    << par.defectPercentage * 100.0
       << "\ntrap.percentage: "      << par.trapPercentage * 100.0
       << "\ncharge.percentage: "    << par.chargePercentage * 100.0
