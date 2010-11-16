@@ -23,9 +23,9 @@ int main(int argc, char *argv[])
   }
 
   QString  inputFileName = args.at(1);
-  QString outputFileName = args.size() > 2 ? args.at(2) : args.at(1);
+  QString outputFileName = args.size() > 2 ? args.at(2) : args.at(1).split(".")[0];
 
-  // Now open our input file
+  // Open input file
   QFile inputFile(inputFileName);
   if (!inputFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
     qDebug() << "Error opening intput file:" << inputFileName;
@@ -36,60 +36,49 @@ int main(int argc, char *argv[])
   SimulationParameters par;
   input.simulationParameters(&par);
 
-  // Open our main output file and get it ready for writing
+  // Open summary file 
   QFile outputFile(outputFileName+".dat");
   if (!outputFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
-    qDebug() << "Error opening output file:" << outputFileName + ".dat";
+    qDebug() << "Error opening summary file:" << outputFileName + ".dat";
     app.exit(1);
   }
   QTextStream out(&outputFile);
+  out.setRealNumberPrecision(12);
+  out.setFieldWidth(20);
+  out << scientific;
 
+  // Open log file 
+  QFile logFile(outputFileName+".log");
+  if (!logFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+    qDebug() << "Error opening log file:" << outputFileName + ".log";
+    app.exit(1);
+  }
+  QTextStream log(&logFile);
+
+  // Find start time
   QDateTime startDateTime(QDateTime::currentDateTime());
-  // Output a summary of all simulation parameters
-  out << "Langmuir Simulation Code\nHutchison Group\n\n"
-      << "Started: "                << startDateTime.toString("hh:mm:ss d MMMM, yyyy")
-      << "\n\nvariable.working: "   << input.workingVariable()
-      << "\nvariable.start: "       << input.start()
-      << "\nvariable.final: "       << input.final()
-      << "\nvariable.steps: "       << input.steps()
-      << "\niterations.warmup: "    << par.iterationsWarmup
-      << "\niterations.real: "      << par.iterationsReal
-      << "\niterations.print: "     << par.iterationsPrint
-      << "\niterations.traj: "      << par.iterationsTraj
-      << "\ngrid.width: "           << par.gridWidth
-      << "\ngrid.height: "          << par.gridHeight
-      << "\ngrid.depth: "           << par.gridDepth
-      << "\ngrid.charge: "          << par.gridCharge
-      << "\ninteractions.coulomb: " << par.coulomb
-      << "\ncharged.defects:  "     << par.defectsCharged
-      << "\ncharged.traps: "        << par.trapsCharged
-      << "\nz.defect:  "            << par.zDefect
-      << "\nz.trap:    "            << par.zTrap
-      << "\nvoltage.source: "       << par.voltageSource
-      << "\nvoltage.drain: "        << par.voltageDrain
-      << "\npotential.form: "       << par.potentialForm
-	  << "\npotential.averg: "      << par.potentialAVERG
-	  << "\npotential.stdev: "      << par.potentialSTDEV
-      << "\ndefect.percentage: "    << par.defectPercentage * 100.0
-      << "\ntrap.percentage: "      << par.trapPercentage * 100.0
-      << "\ncharge.percentage: "    << par.chargePercentage * 100.0
-      << "\ntemperature.kelvin: "   << par.temperatureKelvin
-      << "\ndelta.epsilon: "        << par.deltaEpsilon
-      << "\n\n";
 
-  // Now output the column titles
-  out << "#i "              << "(n)" << "\t";
-  out << "Temperature "     << "(K)" << "\t";
-  out << "Source "          << "(V)" << "\t"; 
-  out << "Drain "           << "(V)" << "\t";
-  out << "Defect "          << "(%)" << "\t";
-  out << "Trap "            << "(%)" << "\t";
-  out << "ChargeGoal "      << "(%)" << "\t";
-  out << "ChargeReached "   << "(%)" << "\t";
-  out << "ChargeTransport " << "(per iteration)" << "\n";
+  // Output log title
+  log << "Langmuir Simulation Code"       << "\n";
+  log << "Hutchison Group"                << "\n";
+  log << "\n\n";
+
+  // Output summary file column titles
+  out << "working(n)";
+  out << "temperature(K)";
+  out << "source(eV)";
+  out << "drain(eV)";
+  out << "defects(%)";
+  out << "trap(%)";
+  out << "carriers(%)";
+  out << "reached(%)";
+  out << "accepted(#/step)";
+  out << "\n";
   out.flush();
 
   for (int i = 0; i < input.steps(); ++i) {
+
+    qDebug() << "Simulation: " << i;
 
     // Get simulation parameters for the current step and set up a new object
     input.simulationParameters(&par, i);
@@ -97,32 +86,40 @@ int main(int argc, char *argv[])
     // Set up a simulation
     Simulation sim(&par);
 
-    // Open outputfile for this simulation
-    QFile iterFile(outputFileName+"-i-"+QString::number(i)+".dat");
+    // Write log file for this step
+    log << input << "\n" << par << "\n\n\n\n";
+    log.flush();
+
+    // Open iteration file for this simulation
+    QFile iterFile(outputFileName+QString::number(i)+".dat");
     if (!iterFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
       qDebug() << "Error opening output file:" << outputFileName+"-i-"+QString::number(i)+".dat";
       app.exit(1);
     }
     QTextStream iterOut(&iterFile);
-   
+    iterOut.setRealNumberPrecision(12);
+    iterOut.setFieldWidth(20);
+    iterOut << scientific;
+
     // Open trajectoryFile for this simulation
-    QFile trajFile(outputFileName+"-i-"+QString::number(i)+".xyz");
+    QFile trajFile(outputFileName+QString::number(i)+".xyz");
     if (!trajFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
       qDebug() << "Error opening trajectory file:" << outputFileName+"-i-"+QString::number(i)+".xyz";
       app.exit(1);
     }
     QTextStream trajOut(&trajFile);
 
-    // Output Column Titles
-    iterOut << "#i "              << "(n)" << "\t";
-    iterOut << "Temperature "     << "(K)" << "\t";
-    iterOut << "Source "          << "(V)" << "\t";
-    iterOut << "Drain "           << "(V)" << "\t";
-    iterOut << "Defect "          << "(%)" << "\t";
-    iterOut << "Trap "            << "(%)" << "\t";
-    iterOut << "ChargeGoal "      << "(%)" << "\t";
-    iterOut << "ChargeReached "   << "(%)" << "\t";
-    iterOut << "ChargeTransport " << "(per iteration)" << "\n";
+    // Output iteration file column titles
+    iterOut << "move(n)";
+    iterOut << "temperature(K)";
+    iterOut << "source(eV)";
+    iterOut << "drain(eV)";
+    iterOut << "defects(%)";
+    iterOut << "trap(%)";
+    iterOut << "carriers(%)";
+    iterOut << "reached(%)";
+    iterOut << "accepted(#/step)";
+    iterOut << "\n";
  
     // Perform Warmup
     unsigned long lastCount = 0;
@@ -135,16 +132,15 @@ int main(int argc, char *argv[])
      if ( par.iterationsXYZ ) sim.getGrid()->print3D(trajOut);
 
      // Output Log
-
      iterOut  << j
-              << "\t" << par.temperatureKelvin
-              << "\t" << par.voltageSource
-              << "\t" << par.voltageDrain
-              << "\t" << par.defectPercentage * 100.00
-              << "\t" << par.trapPercentage * 100.0
-              << "\t" << par.chargePercentage * 100.0
-              << "\t" << double(sim.charges()) / double(sim.getMaxCharges()) * 100.0
-              << "\t" << double(sim.totalChargesAccepted()-lastCount) / par.iterationsPrint << "\n";
+              << par.temperatureKelvin
+              << par.voltageSource
+              << par.voltageDrain
+              << par.defectPercentage * 100.00
+              << par.trapPercentage * 100.0
+              << par.chargePercentage * 100.0
+              << double(sim.charges()) / double(sim.getMaxCharges()) * 100.0
+              << double(sim.totalChargesAccepted()-lastCount) / par.iterationsPrint << "\n";
       iterOut.flush();
       lastCount = sim.totalChargesAccepted();
     }
@@ -159,32 +155,30 @@ int main(int argc, char *argv[])
       // Output Trajectory
       if ( par.iterationsXYZ ) sim.getGrid()->print3D(trajOut);
 
-      // Output Log
-      qDebug() << j
-               << "\t" << double(sim.charges()) / double(sim.getMaxCharges()) * 100.0
-               << "\t" << double(sim.totalChargesAccepted()-lastCount) / par.iterationsPrint;
+      // Output Iteration
+      qDebug() << "      step: " << j;
       iterOut  << j
-               << "\t" << par.temperatureKelvin
-               << "\t" << par.voltageSource
-               << "\t" << par.voltageDrain
-               << "\t" << par.defectPercentage * 100.0
-               << "\t" << par.trapPercentage * 100.0
-               << "\t" << par.chargePercentage * 100.0
-               << "\t" << double(sim.charges()) / double(sim.getMaxCharges()) * 100.0
-               << "\t" << double(sim.totalChargesAccepted()-lastCount) / par.iterationsPrint << "\n";
+               << par.temperatureKelvin
+               << par.voltageSource
+               << par.voltageDrain
+               << par.defectPercentage * 100.0
+               << par.trapPercentage * 100.0
+               << par.chargePercentage * 100.0
+               << double(sim.charges()) / double(sim.getMaxCharges()) * 100.0
+               << double(sim.totalChargesAccepted()-lastCount) / par.iterationsPrint << "\n";
       iterOut.flush();
       lastCount = sim.totalChargesAccepted();
     }
     // Now to output the result of the simulation at this data point
     out << i
-        << "\t" << par.temperatureKelvin
-        << "\t" << par.voltageSource
-        << "\t" << par.voltageDrain
-        << "\t" << par.defectPercentage * 100.0
-        << "\t" << par.trapPercentage * 100.0
-        << "\t" << par.chargePercentage * 100.0
-        << "\t" << double(sim.charges()) / double(sim.getMaxCharges()) * 100.0
-        << "\t" << double(lastCount-startCount) / par.iterationsReal << "\n";
+        << par.temperatureKelvin
+        << par.voltageSource
+        << par.voltageDrain
+        << par.defectPercentage * 100.0
+        << par.trapPercentage * 100.0
+        << par.chargePercentage * 100.0
+        << double(sim.charges()) / double(sim.getMaxCharges()) * 100.0
+        << double(lastCount-startCount) / par.iterationsReal << "\n";
     out.flush();
 
     iterFile.close();
@@ -197,9 +191,60 @@ int main(int argc, char *argv[])
      {
       trajFile.close();
      }
+
+  qDebug() << "";
   }
 
+  // Close summary file
   outputFile.close();
+
+  // Find end time
+  QDateTime endDateTime(QDateTime::currentDateTime());
+
+  // Output start and end time to log file
+  log.setFieldWidth(80);
+  log.setPadChar('*');
+  log << center << "Simulation Summary" << reset << "\n\n";
+
+  log.setPadChar(' ');
+  log.setRealNumberPrecision(10);
+  log << right << scientific;
+  log << "1.  Time" << "\n";
+
+  log << left;
+  log.setFieldWidth(20);
+  log << "     A.  time.start";
+  log.setFieldWidth(40);
+  log << right;
+  log << startDateTime.toString("hh:mm:ss d MMMM, yyyy");
+  log.setFieldWidth(20);
+  log << "-" << "\n";
+
+  log << left;
+  log.setFieldWidth(20);
+  log << "     B.  time.stop";
+  log.setFieldWidth(40);
+  log << right;
+  log << endDateTime.toString("hh:mm:ss d MMMM, yyyy");
+  log.setFieldWidth(20);
+  log << "-" << "\n";
+
+  log << left;
+  log.setFieldWidth(40);
+  log << "     C.  time.elapsed";
+  log.setFieldWidth(20);
+  log << right;
+  log << startDateTime.secsTo(endDateTime) << "sec" << "\n";
+
+  log << "\n";
+  log.setFieldWidth(80);
+  log.setPadChar('*');
+  log << center << "*" << reset << "\n";
+  log.flush();
+
+  // Close log file
+  logFile.close();
+ 
   qDebug() << "Simulation complete - destroy our objects...";
 
 }

@@ -7,11 +7,13 @@
 #include <QtCore/QStringList>
 #include <QtCore/QDebug>
 
+using namespace std;
+
 namespace Langmuir {
 
   InputParser::InputParser(const QString& fileName)
       : m_varyType(e_undefined), m_start(0.0), m_final(0.0), m_steps(1),
-      m_valid(true)
+      m_valid(true), m_step(0), m_value(0.0)
   {
     if (s_variables.isEmpty())
       initializeVariables();
@@ -36,34 +38,43 @@ namespace Langmuir {
     if (step < 0 || step >= m_steps) // Invalid step supplied, do nothing
       return false;
 
+    // Record the current step  
+    m_step = step;
+
     // Copy our parameters
     *par = m_parameters;
 
     // Work out which variable to change, and supply the correct variable
-    double tmp = double(step) * (m_final - m_start) / double(m_steps-1)
-                 + m_start;
+    double tmp = double(step) * (m_final - m_start) / double(m_steps-1) + m_start;
 
     switch (m_varyType) {
       case e_voltageSource:
         par->voltageSource = tmp;
+        m_value = par->voltageSource;
         break;
       case e_voltageDrain:
         par->voltageDrain = tmp;
+        m_value = par->voltageDrain;
         break;
       case e_defectPercentage:
         par->defectPercentage = tmp / 100.0;
+        m_value = par->defectPercentage;
         break;
       case e_trapPercentage:
         par->trapPercentage = tmp / 100.0;
+        m_value = par->trapPercentage;
         break;
       case e_chargePercentage:
         par->chargePercentage = tmp / 100.0;
+        m_value = par->chargePercentage;
         break;
       case e_temperatureKelvin:
         par->temperatureKelvin = tmp;
+        m_value = par->temperatureKelvin;
         break;
       default: // This should not happen - error...
         m_valid = false;
+        m_value = 0.0;
         return false;
     }
     return true;
@@ -85,7 +96,7 @@ namespace Langmuir {
       case e_temperatureKelvin:
         return "temperature.kelvin";
       default: // This should not happen - error...
-        return "error.undefined";
+        return "single.point";
     }
   }
 
@@ -121,7 +132,7 @@ namespace Langmuir {
         m_parameters.defectPercentage = list.at(1).toDouble() / 100;
         if (m_parameters.defectPercentage < 0.00 || m_parameters.defectPercentage > (1.00 - trapPercentage())) {
          m_valid = false;
-         qDebug() << "Defect percentage out of range:" <<  m_parameters.defectPercentage*100.0 << "(0.00 -- 100.00)";
+         qDebug() << "Defect percentage out of range:" <<  m_parameters.defectPercentage*100.0 << " (0.00 -- 100.00)";
          throw(std::invalid_argument("bad input"));
 	}
         //qDebug()  << "Defect percentage:" << m_parameters.defectPercentage;
@@ -132,7 +143,7 @@ namespace Langmuir {
         m_parameters.trapPercentage = list.at(1).toDouble() / 100.0;
         if (m_parameters.trapPercentage < 0.00 || m_parameters.trapPercentage > (1.00 - defectPercentage())) {
          m_valid = false;
-         qDebug() << "Trap percentage out of range:" <<  m_parameters.trapPercentage*100.0 << "(0.00 -- 100.00)";
+         qDebug() << "Trap percentage out of range:" <<  m_parameters.trapPercentage*100.0 << " (0.00 -- 100.00)";
          throw(std::invalid_argument("bad input"));
         }
         //qDebug() << "Trap percentage:" << m_parameters.trapPercentage;
@@ -143,7 +154,7 @@ namespace Langmuir {
         m_parameters.chargePercentage = list.at(1).toDouble() / 100.0;
         if (m_parameters.chargePercentage < 0.00 || m_parameters.chargePercentage > 1.00) {
          m_valid = false;
-         qDebug() << "Charge percentage out of range:" << m_parameters.chargePercentage*100.0 << "(0.00 -- 100.00)";
+         qDebug() << "Charge percentage out of range:" << m_parameters.chargePercentage*100.0 << " (0.00 -- 100.00)";
          throw(std::invalid_argument("bad input"));
         }
         //qDebug() << "Charge percentage:" << m_parameters.chargePercentage;
@@ -153,9 +164,9 @@ namespace Langmuir {
        case e_temperatureKelvin: {
         m_parameters.temperatureKelvin = list.at(1).toDouble();
         // The temperature cannot be lower than 0K
-        if (m_parameters.temperatureKelvin < 0.00) {
+        if (m_parameters.temperatureKelvin <= 0) {
          m_valid = false;
-         qDebug() << "Absolute temperature must be < 0K";
+         qDebug() << "Absolute temperature must be > 0K";
          throw(std::invalid_argument("bad input"));
         }
         //qDebug() << "temperature.kelvin: " << m_parameters.temperatureKelvin; 
@@ -177,7 +188,7 @@ namespace Langmuir {
              m_varyType == e_trapPercentage ||
              m_varyType == e_chargePercentage ||
              m_varyType == e_temperatureKelvin ) {
-             qDebug() << "Working variable:" << m_varyType;
+             //qDebug() << "Working variable:" << m_varyType;
         }
         else {
          m_valid = false;
@@ -521,6 +532,325 @@ namespace Langmuir {
     s_variables["potential.noise"] = e_potentialNoise;
     s_variables["potential.stdev"] = e_potentialSTDEV;
     s_variables["potential.averg"] = e_potentialAVERG;
+  }
+
+  QTextStream& operator<<(  QTextStream& qt, InputParser& inp )
+  {
+    qt.setFieldWidth(80);
+    qt.setPadChar('*');
+    qt << center << "Simulation Parameters" << reset << "\n\n";
+
+    qt.setPadChar(' ');
+    qt.setRealNumberPrecision(10);
+    qt << right << scientific;
+    qt << "1.  Working Variable" << "\n";
+
+    qt << left;
+    qt.setFieldWidth(40);
+    qt << "     A.  variable.working";
+    qt.setFieldWidth(20);
+    qt << right;
+    qt << inp.workingVariable() << "-" << "\n";
+
+    qt << left;
+    qt.setFieldWidth(40);
+    qt << "     B.  variable.start";
+    qt.setFieldWidth(20);
+    qt << right;
+    qt << inp.start() << "-" << "\n";
+
+    qt << left;
+    qt.setFieldWidth(40);
+    qt << "     C.  variable.final";
+    qt.setFieldWidth(20);
+    qt << right;
+    qt << inp.final() << "-" << "\n";
+
+    qt << left;
+    qt.setFieldWidth(40);
+    qt << "     D.  variable.steps";
+    qt.setFieldWidth(20);
+    qt << right;
+    qt << inp.steps() << "-" << "\n";
+
+    qt << left;
+    qt.setFieldWidth(40);
+    qt << "     E.  variable.stepsize";
+    qt.setFieldWidth(20);
+    qt << right;
+    qt << inp.stepSize() << "-" << "\n";
+
+    qt << left;
+    qt.setFieldWidth(40);
+    qt << "     F.  variable.value";
+    qt.setFieldWidth(20);
+    qt << right;
+    qt << inp.m_value << "-" << "\n";
+
+    qt << left;
+    qt.setFieldWidth(40);
+    qt << "     G.  variable.step";
+    qt.setFieldWidth(20);
+    qt << right;
+    qt << inp.m_step << "-" << "\n";
+
+
+    qt << "\n";
+    qt.setFieldWidth(80);
+    qt.setPadChar('*');
+    qt << center << "*" << reset;
+
+    return qt;
+  }
+
+  QTextStream& operator<<( QTextStream& qt, SimulationParameters& par )
+  {
+    qt.setFieldWidth(80);
+    qt.setPadChar('*');
+    qt << center << "Step Parameter Summary" << reset << "\n\n";
+   
+    qt.setPadChar(' ');
+    qt.setRealNumberPrecision(10);
+    qt << right << scientific;
+    qt << "1.  Simulation Variables" << "\n";
+
+    qt << left;
+    qt.setFieldWidth(40);
+    qt << "     A.  iterations.warmup";
+    qt.setFieldWidth(20);
+    qt << right;
+    qt << par.iterationsWarmup << "steps" << "\n";
+
+    qt << left;
+    qt.setFieldWidth(40);
+    qt << "     B.  iterations.real";
+    qt.setFieldWidth(20);
+    qt << right;
+    qt << par.iterationsReal << "steps" << "\n";
+
+    qt << left;
+    qt.setFieldWidth(40);
+    qt << "     C.  iterations.print";
+    qt.setFieldWidth(20);
+    qt << right;
+    qt << par.iterationsPrint << "steps" << "\n";
+
+    qt << left;
+    qt.setFieldWidth(40);
+    qt << "     D.  iterations.traj";
+    qt.setFieldWidth(20);
+    qt << right;
+    qt << par.iterationsTraj << "steps" << "\n";
+
+    qt << left;
+    qt.setFieldWidth(40);
+    qt << "     E.  iterations.xyz";
+    qt.setFieldWidth(20);
+    qt << right;
+    if ( par.iterationsXYZ ) qt << "true"  << "bool" << "\n";
+    else                     qt << "false" << "bool" << "\n";
+
+    qt << "\n";
+    qt << reset;
+    qt.setPadChar(' ');
+    qt.setRealNumberPrecision(10);
+    qt << right << scientific;
+    qt << "2.  Grid Variables" << "\n";
+
+    qt << left;
+    qt.setFieldWidth(40);
+    qt << "     A.  grid.height";
+    qt.setFieldWidth(20);
+    qt << right;
+    qt << par.gridHeight << "cells" << "\n";
+
+    qt << left;
+    qt.setFieldWidth(40);
+    qt << "     B.  grid.width";
+    qt.setFieldWidth(20);
+    qt << right;
+    qt << par.gridWidth << "cells" << "\n";
+
+    qt << left;
+    qt.setFieldWidth(40);
+    qt << "     C.  grid.depth";
+    qt.setFieldWidth(20);
+    qt << right;
+    qt << par.gridDepth << "cells" << "\n";
+
+    qt << "\n";
+    qt << reset;
+    qt.setPadChar(' ');
+    qt.setRealNumberPrecision(10);
+    qt << right << scientific;
+    qt << "3.  Potential Variables" << "\n";
+
+    qt << left;
+    qt.setFieldWidth(40);
+    qt << "     A.  voltage.source";
+    qt.setFieldWidth(20);
+    qt << right;
+    qt << par.voltageSource << "V" << "\n";
+
+    qt << left;
+    qt.setFieldWidth(40);
+    qt << "     B.  voltage.drain";
+    qt.setFieldWidth(20);
+    qt << right;
+    qt << par.voltageDrain << "V" << "\n";
+
+    qt << left;
+    qt.setFieldWidth(40);
+    qt << "     C.  potential.form";
+    qt.setFieldWidth(20);
+    qt << right;
+    if ( par.potentialForm == 0 ) qt << "linear"          << "enum" << "\n";
+    else                          qt << par.potentialForm << "enum" << "\n";
+
+    qt << "\n";
+    qt << reset;
+    qt.setPadChar(' ');
+    qt.setRealNumberPrecision(10);
+    qt << right << scientific;
+    qt << "4.  Thermodynamic Variables" << "\n";
+
+    qt << left;
+    qt.setFieldWidth(40);
+    qt << "     A.  temperature.kelvin";
+    qt.setFieldWidth(20);
+    qt << right;
+    qt << par.temperatureKelvin << "K" << "\n";
+
+    qt << "\n";
+    qt << reset;
+    qt.setPadChar(' ');
+    qt.setRealNumberPrecision(10);
+    qt << right << scientific;
+    qt << "5.  Charge Carriers" << "\n";
+
+    qt << left;
+    qt.setFieldWidth(40);
+    qt << "     A.  charge.percentage";
+    qt.setFieldWidth(20);
+    qt << right;
+    qt << par.chargePercentage << "%" << "\n";
+
+    qt << left;
+    qt.setFieldWidth(40);
+    qt << "     B.  interaction.coulomb";
+    qt.setFieldWidth(20);
+    qt << right;
+    if ( par.coulomb ) qt << "true"  << "bool" << "\n";
+    else               qt << "false" << "bool" << "\n";
+
+    qt << left;
+    qt.setFieldWidth(40);
+    qt << "     C.  grid.charge";
+    qt.setFieldWidth(20);
+    qt << right;
+    if ( par.gridCharge ) qt << "true"  << "bool" << "\n";
+    else                  qt << "false" << "bool" << "\n";
+
+    qt << "\n";
+    qt << reset;
+    qt.setPadChar(' ');
+    qt.setRealNumberPrecision(10);
+    qt << right << scientific;
+    qt << "6.  Trap Variables" << "\n";
+
+    qt << left;
+    qt.setFieldWidth(40);
+    qt << "     A.  trap.percentage";
+    qt.setFieldWidth(20);
+    qt << right;
+    qt << par.trapPercentage << "%" << "\n";
+
+    qt << left;
+    qt.setFieldWidth(40);
+    qt << "     B.  delta.epsilon";
+    qt.setFieldWidth(20);
+    qt << right;
+    qt << par.deltaEpsilon << "eV" << "\n";
+
+    qt << left;
+    qt.setFieldWidth(40);
+    qt << "     C.  charged.traps";
+    qt.setFieldWidth(20);
+    qt << right;
+    if ( par.trapsCharged ) qt << "true"  << "bool" << "\n";
+    else                    qt << "false" << "bool" << "\n";
+
+    qt << left;
+    qt.setFieldWidth(40);
+    qt << "     D.  z.trap";
+    qt.setFieldWidth(20);
+    qt << right;
+    qt << par.zTrap << "e" << "\n";
+
+    qt << "\n";
+    qt << reset;
+    qt.setPadChar(' ');
+    qt.setRealNumberPrecision(10);
+    qt << right << scientific;
+    qt << "7.  Defect Variables" << "\n";
+
+    qt << left;
+    qt.setFieldWidth(40);
+    qt << "     A.  defect.percentage";
+    qt.setFieldWidth(20);
+    qt << right;
+    qt << par.defectPercentage << "%" << "\n";
+
+    qt << left;
+    qt.setFieldWidth(40);
+    qt << "     B.  charged.defects";
+    qt.setFieldWidth(20);
+    qt << right;
+    if ( par.defectsCharged ) qt << "true"  << "bool" << "\n";
+    else                      qt << "false" << "bool" << "\n";
+
+    qt << left;
+    qt.setFieldWidth(40);
+    qt << "     C.  z.defect";
+    qt.setFieldWidth(20);
+    qt << right;
+    qt << par.zDefect << "e" << "\n";
+
+    qt << "\n";
+    qt << reset;
+    qt.setPadChar(' ');
+    qt.setRealNumberPrecision(10);
+    qt << right << scientific;
+    qt << "8.  Gaussian Noise Variables" << "\n";
+
+    qt << left;
+    qt.setFieldWidth(40);
+    qt << "     A.  gaussian.noise";
+    qt.setFieldWidth(20);
+    qt << right;
+    if ( par.gaussianNoise ) qt << "true"  << "bool" << "\n";
+    else                     qt << "false" << "bool" << "\n";
+
+    qt << left;
+    qt.setFieldWidth(40);
+    qt << "     B.  gaussian.averg";
+    qt.setFieldWidth(20);
+    qt << right;
+    qt << par.gaussianAVERG << "eV" << "\n";
+
+    qt << left;
+    qt.setFieldWidth(40);
+    qt << "     C.  gaussian.stdev";
+    qt.setFieldWidth(20);
+    qt << right;
+    qt << par.gaussianSTDEV << "eV" << "\n";
+
+    qt << "\n";
+    qt.setFieldWidth(80);
+    qt.setPadChar('*');
+    qt << center << "*" << reset;
+
+    return qt;
   }
 
 }

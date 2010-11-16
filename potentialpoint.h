@@ -4,6 +4,7 @@
 #include<iostream>
 #include<cmath>
 #include<stdexcept>
+#include<QTextStream>
 
   /**
     * @class PotentialPoint
@@ -50,6 +51,24 @@
   {
    os << "{ " << p.col << " " << p.row << " " << p.lay << " " << p.potential << " }";
    return os;
+  }
+
+  /**
+    * @brief operator << overload 
+    *
+    * Allows the expression: ostream << PotentialPoint;
+    */
+  friend QTextStream& operator<<(QTextStream& qt, const PotentialPoint& p)
+  {
+   qt.setFieldWidth(1);
+   qt <<   "(";
+   qt << p.col;
+   qt <<   ",";
+   qt << p.row;
+   qt <<   ",";
+   qt << p.lay;
+   qt <<   ")";
+   return qt;
   }
 
   /**
