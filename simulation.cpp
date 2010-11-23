@@ -62,8 +62,9 @@ namespace Langmuir
     // m_potential->plot(out,0.0,1000.0,0.0,200.0,layer,10.0,10.0);
     //}
     //throw(-1);
-
-    updatePotentials( par );
+	if(par->trapsHetero) heteroTraps( par );
+	else updatePotentials( par );
+	  
     updateInteractionEnergies(); // precalculate potentials for interacting charges ( carriers, defects, traps )
     if (par->gridCharge) seedCharges(); // Charge the grid up is specified
 
@@ -134,7 +135,7 @@ namespace Langmuir
   {
    m_temperatureKelvin = temperatureKelvin;
   }
-  
+
   void Simulation::performIterations(int nIterations)
   {
     //	cout << "Entered performIterations function.\n";
@@ -289,7 +290,69 @@ namespace Langmuir
     delete m_drain;
     m_drain = 0;
   }
-
+ void Simulation::heteroTraps( SimulationParameters *par)
+	{
+		double tPotential = 0;
+		double gaussianDisorder = 0.0;
+		
+		for ( unsigned int x = 0; x < m_grid->width(); x++ )
+		{
+			for ( unsigned int y = 0; y < m_grid->height(); y++ )
+			{
+				for ( unsigned int z = 0; z < m_grid->depth(); z++ )
+				{
+					// Get the potential at this site
+					tPotential = m_potential->calculate(x+0.5,y+0.5,z+0.5);
+					
+					// Randomly add some noise
+					if ( par->gaussianNoise )
+					{
+						gaussianDisorder = m_world->random(par->gaussianAVERG,par->gaussianSTDEV);
+						tPotential += gaussianDisorder;
+					}
+					
+					// The site ID ( this is bad its specific to 3D cubic grids )
+					unsigned int site = x+m_grid->width()*y+z*m_grid->area();
+					
+					// Add seeds for heterogeneous traps
+					if (m_world->random() < (0.1 *(par->trapPercentage)))
+					{
+						m_grid->setPotential(site, (tPotential + par->deltaEpsilon));
+						m_world->chargedTraps()->push_back(site);
+	
+						int trapSize(m_world->chargedTraps()->size());
+						int trapCount = (par->trapPercentage)*(par->gridWidth) * (par->gridHeight) * (par->gridDepth);
+					
+						while (trapSize < trapCount)
+						{
+							for (int i = 0; i < trapSize; ++i)
+							{
+								// Select a random neighbor
+								unsigned int newTrap;
+								//unsigned int ID = (*m_world->chargedTraps())[i];
+								vector<unsigned int> m_neighbors = m_grid->neighbors((*m_world->chargedTraps())[i]);
+								newTrap = m_neighbors[int(m_world->random()*(m_neighbors.size() - 1.0e-20))];
+							
+								// Make sure it is not already a trap site
+							
+								if ((*m_world->chargedTraps())[newTrap]) return; 
+								
+								else
+								{
+									m_grid->setPotential(site, (tPotential + par->deltaEpsilon));
+									m_world->chargedTraps()->push_back(site);
+								}
+							}
+						}
+					}
+					// Assign the potential
+					else { m_grid->setPotential(site, tPotential); }
+					
+				}
+			}
+		}
+	}
+	
   void Simulation::updatePotentials( SimulationParameters *par )
   {
 

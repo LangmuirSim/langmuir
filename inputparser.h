@@ -57,6 +57,7 @@ namespace Langmuir {
     bool           gridCharge;
     bool        iterationsXYZ;
     bool        gaussianNoise;
+	bool          trapsHetero;
 
     Option      potentialForm;
     std::vector<PotentialPoint> potentialPoints;
@@ -86,10 +87,10 @@ namespace Langmuir {
      iterationsXYZ         =              false;
      potentialForm         =  o_linearpotential;
      gaussianNoise         =              false;
-     gaussianSTDEV         =               0.05;
+	 gaussianSTDEV         =               0.05;
      gaussianAVERG         =               0.00;
-    }
-
+     trapsHetero           =              false;
+	}
   };
 
   /**
@@ -155,6 +156,7 @@ namespace Langmuir {
       e_potentialNoise,     // Should random noise be added to energy levels
       e_potentialSTDEV,     // What is the standard deviation of the random noise
       e_potentialAVERG,     // What is the average of the random noise
+	  e_trapsHetero,        // Distrubute traps heterogeneously?  
       e_end
     };
 

@@ -246,7 +246,7 @@ namespace Langmuir
  {
   return &m_chargedTraps;
  }
-
+	
  inline Eigen::MatrixXd * World::coupling()
  {
   return &m_coupling;

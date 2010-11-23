@@ -491,6 +491,22 @@ namespace Langmuir {
          break;
         }
 
+		case e_trapsHetero:  {
+			QString trapsHetero = list.at(1).trimmed().toLower();
+			  if (trapsHetero == "true") {
+				  m_parameters.trapsHetero = true;
+			  }
+			  else if (trapsHetero == "false") {
+				  m_parameters.trapsHetero = false;
+			  }
+			  else {
+				  m_valid = false;
+				  qDebug() << "Heterogeneous Traps are either true or false: ";
+				  throw(std::invalid_argument("bad input"));
+			  }
+			  //qDebug() << "traps.heterogeneous: " << m_parameters.trapsHetero;
+			  break;
+		  }			
         default:
         qDebug() << "Unknown key value encountered:" << key;
       }
@@ -532,6 +548,7 @@ namespace Langmuir {
     s_variables["potential.noise"] = e_potentialNoise;
     s_variables["potential.stdev"] = e_potentialSTDEV;
     s_variables["potential.averg"] = e_potentialAVERG;
+	s_variables["traps.heterogeneous"]    = e_trapsHetero;
   }
 
   QTextStream& operator<<(  QTextStream& qt, InputParser& inp )

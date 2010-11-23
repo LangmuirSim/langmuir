@@ -102,14 +102,15 @@ namespace Langmuir
      * @param temperatureKelvin temperature to use in Kelvin units.
      */
     void setTemperature(double temperatureKelvin);
-	  
-    /**
+
+	/**
      * @brief Perform Iterations. 
      *
      * Perform so many iterations of the simulation.
      * @param nIterations number of iterations to perform.
      */
-    void performIterations(int nIterations);
+	  
+	void performIterations(int nIterations);
 
     /**
      * @brief 2D visualize
@@ -199,8 +200,8 @@ namespace Langmuir
      *
      * The temperature to perform the simulation at.
      */
-    double m_temperatureKelvin;
-
+    double m_temperatureKelvin; 
+	  
     /**
      * @brief Charge Defect charge.
      *
@@ -260,6 +261,10 @@ namespace Langmuir
      * Destroy the agents once we are done with them.
      */
     void destroyAgents();
+	  
+	// Create heterogeneous traps
+	  
+	void heteroTraps( SimulationParameters *par);
 
     /**
      * @brief update the potential at each site.
@@ -271,6 +276,7 @@ namespace Langmuir
      * @param trapPercent the percent of traps present.
      * @param deltaEpsilon the energy of a trap.
      */
+	  
     void updatePotentials( SimulationParameters *par );
     //void updatePotentials(double trapPercent, double deltaEpsilon);
 
@@ -281,6 +287,7 @@ namespace Langmuir
      * This is a vector of size width + length + depth denoting the x, y displacement of the two sites under consideration. 
      * These values reduce necessary calculations in tight loops when considering Coulomb interactions.
      */
+	  
     void updateInteractionEnergies();
 
     /**
