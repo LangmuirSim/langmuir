@@ -325,7 +325,8 @@ namespace Langmuir
 					
 						while (trapSize < trapCount)
 						{
-							for (int i = 0; i < trapSize; ++i)
+							int i = 0;
+							while (i < trapSize)
 							{
 								// Select a random neighbor
 								unsigned int newTrap;
@@ -335,12 +336,13 @@ namespace Langmuir
 							
 								// Make sure it is not already a trap site
 							
-								if ((*m_world->chargedTraps())[newTrap]) return; 
-								
+								if (m_world->chargedTraps()->contains(newTrap))
+									continue;
 								else
-								{
+								{ // create a new trap site and increment i (the loop variable)
 									m_grid->setPotential(site, (tPotential + par->deltaEpsilon));
 									m_world->chargedTraps()->push_back(site);
+									i++;
 								}
 							}
 						}
