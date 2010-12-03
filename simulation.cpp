@@ -62,6 +62,7 @@ namespace Langmuir
     // m_potential->plot(out,0.0,1000.0,0.0,200.0,layer,10.0,10.0);
     //}
     //throw(-1);
+	qDebug() << "setting hetero traps " << par->trapsHetero;
 	if(par->trapsHetero) heteroTraps( par );
 	else updatePotentials( par );
 	  
@@ -186,20 +187,20 @@ namespace Langmuir
     unsigned int width  = m_world->grid()->width();
     unsigned int height = m_world->grid()->height();
     for (unsigned int j = 0; j < height; ++j) {
-      cout << "||";
+      qDebug() << "||";
       for (unsigned int i = 0; i < width; ++i) {
         if (m_world->grid()->agent(i+j*width)) {// Charge is present
           if (m_world->grid()->siteID(i+j*width) == 0)
-            cout << "*";
+            qDebug() << "*";
           else
-            cout << "x";
+            qDebug() << "x";
         }
         else if (m_world->grid()->siteID(i+j*width) == 1)
-          cout << "O";
+          qDebug() << "O";
         else
-          cout << " ";
+          qDebug() << " ";
       }
-      cout << "||\n";
+      qDebug() << "||\n";
     }
   }
 
@@ -295,6 +296,8 @@ namespace Langmuir
 		double tPotential = 0;
 		double gaussianDisorder = 0.0;
 		
+		qDebug() << "entering heteroTraps" << par->trapPercentage;
+		
 		for ( unsigned int x = 0; x < m_grid->width(); x++ )
 		{
 			for ( unsigned int y = 0; y < m_grid->height(); y++ )
@@ -319,40 +322,57 @@ namespace Langmuir
 					{
 						m_grid->setPotential(site, (tPotential + par->deltaEpsilon));
 						m_world->chargedTraps()->push_back(site);
-	
-						int trapSize(m_world->chargedTraps()->size());
-						int trapCount = (par->trapPercentage)*(par->gridWidth) * (par->gridHeight) * (par->gridDepth);
-					
-						while (trapSize < trapCount)
-						{
-							int i = 0;
-							while (i < trapSize)
-							{
-								// Select a random neighbor
-								unsigned int newTrap;
-								//unsigned int ID = (*m_world->chargedTraps())[i];
-								vector<unsigned int> m_neighbors = m_grid->neighbors((*m_world->chargedTraps())[i]);
-								newTrap = m_neighbors[int(m_world->random()*(m_neighbors.size() - 1.0e-20))];
-							
-								// Make sure it is not already a trap site
-							
-								if (m_world->chargedTraps()->contains(newTrap))
-									continue;
-								else
-								{ // create a new trap site and increment i (the loop variable)
-									m_grid->setPotential(site, (tPotential + par->deltaEpsilon));
-									m_world->chargedTraps()->push_back(site);
-									i++;
-								}
-							}
-						}
 					}
+					 
 					// Assign the potential
 					else { m_grid->setPotential(site, tPotential); }
-					
 				}
 			}
 		}
+		
+		int trapCount = (par->trapPercentage)*(par->gridWidth) * (par->gridHeight) * (par->gridDepth);
+		
+		qDebug() << "Trap Seeds: " << m_world->chargedTraps()->size(); 
+		//for (int i = 0; i < m_world->chargedTraps()->size(); i++)
+		//{
+		//	qDebug() << (*m_world->chargedTraps())[i]; 
+		//}
+		
+		//Now loop over our seeds
+		while ((m_world->chargedTraps()->size()) < trapCount) 
+		{
+			// Select a random trap
+			unsigned int trapSeed = int(m_world->random()*(m_world->chargedTraps()->size() - 1.0e-20));
+			
+			// Select a random neighbor
+			unsigned int newTrap;
+			vector<unsigned int> m_neighbors = m_grid->neighbors(trapSeed);
+			//qDebug() << "Neighbors: " << m_neighbors.size();
+			newTrap = m_neighbors[int(m_world->random()*(m_neighbors.size() - 1.0e-20))];
+			//qDebug() << "newTrap: " << newTrap; 
+			// Make sure it is not already a trap site
+				
+			if (m_world->chargedTraps()->contains(newTrap))
+			continue;
+			
+			else
+			{ // create a new trap site and save it
+			  m_grid->setPotential(newTrap, (tPotential + par->deltaEpsilon));
+			  m_world->chargedTraps()->push_back(newTrap); 
+			  //qDebug() << "Traps: " << m_world->chargedTraps()->size();
+			}
+		}
+		/*for (int i=0; i < m_world->chargedTraps()->size(); i++)
+		{
+			qDebug() << (*m_world->chargedTraps())[i]; 
+		}
+	    */
+		//Set the potential of the Source
+		m_grid->setSourcePotential( m_potential->calculate(0.0,0.0,0.0) );
+		
+		//Set the potential of the Drain
+		m_grid->setDrainPotential( m_potential->calculate(double(m_grid->width()),0.0,0.0) );
+		
 	}
 	
   void Simulation::updatePotentials( SimulationParameters *par )

@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
     app.exit(1);
   }
   QTextStream out(&outputFile);
-  out.setRealNumberPrecision(12);
+  out.setRealNumberPrecision(5);
   out.setFieldWidth(20);
   out << scientific;
 
@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
       app.exit(1);
     }
     QTextStream iterOut(&iterFile);
-    iterOut.setRealNumberPrecision(12);
+    iterOut.setRealNumberPrecision(5);
     iterOut.setFieldWidth(20);
     iterOut << scientific;
 
