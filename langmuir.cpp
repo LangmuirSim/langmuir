@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
     log.flush();
 
     // Open iteration file for this simulation
-    QFile iterFile(outputFileName+QString::number(i)+".dat");
+    QFile iterFile(outputFileName+"-i-"+QString::number(i)+".dat");
     if (!iterFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
       qDebug() << "Error opening output file:" << outputFileName+"-i-"+QString::number(i)+".dat";
       app.exit(1);
