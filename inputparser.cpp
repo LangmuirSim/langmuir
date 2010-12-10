@@ -506,7 +506,19 @@ namespace Langmuir {
 			  }
 			  //qDebug() << "traps.heterogeneous: " << m_parameters.trapsHetero;
 			  break;
-		  }			
+		  }		
+			  
+		  case e_seedPercentage: {
+			  m_parameters.seedPercentage = list.at(1).toDouble() / 100.0;
+			  if (m_parameters.seedPercentage < 0.00 || m_parameters.seedPercentage > (1.00 - trapPercentage())) {
+				  m_valid = false;
+				  qDebug() << "Seed percentage out of range:" <<  m_parameters.trapPercentage*100.0 << " (0.00 -- 100.00)";
+				  throw(std::invalid_argument("bad input"));
+			  }
+			  //qDebug() << "seed.percentage:" << m_parameters.seedPercentage;
+			  break;
+		  }
+			  
         default:
         qDebug() << "Unknown key value encountered:" << key;
       }
@@ -549,6 +561,7 @@ namespace Langmuir {
     s_variables["potential.stdev"] = e_potentialSTDEV;
     s_variables["potential.averg"] = e_potentialAVERG;
 	s_variables["traps.heterogeneous"]    = e_trapsHetero;
+	s_variables["seed.percentage"] = e_seedPercentage;
   }
 
   QTextStream& operator<<(  QTextStream& qt, InputParser& inp )

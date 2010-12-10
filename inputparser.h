@@ -40,6 +40,7 @@ namespace Langmuir {
     double       deltaEpsilon;
     double      gaussianSTDEV;
     double      gaussianAVERG;
+	double     seedPercentage;
 
     int             gridWidth;
     int            gridHeight;
@@ -90,6 +91,7 @@ namespace Langmuir {
 	 gaussianSTDEV         =               0.05;
      gaussianAVERG         =               0.00;
      trapsHetero           =              false;
+	 seedPercentage        =               0.10; 
 	}
   };
 
@@ -156,7 +158,8 @@ namespace Langmuir {
       e_potentialNoise,     // Should random noise be added to energy levels
       e_potentialSTDEV,     // What is the standard deviation of the random noise
       e_potentialAVERG,     // What is the average of the random noise
-	  e_trapsHetero,        // Distrubute traps heterogeneously?  
+	  e_trapsHetero,        // Distrubute traps heterogeneously? 
+	  e_seedPercentage,     // Percentage of trap seeds for heterogeneous traps
       e_end
     };
 

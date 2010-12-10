@@ -62,7 +62,7 @@ namespace Langmuir
     // m_potential->plot(out,0.0,1000.0,0.0,200.0,layer,10.0,10.0);
     //}
     //throw(-1);
-	qDebug() << "setting hetero traps " << par->trapsHetero;
+	//qDebug() << "setting hetero traps " << par->trapsHetero;
 	if(par->trapsHetero) heteroTraps( par );
 	else updatePotentials( par );
 	  
@@ -296,7 +296,7 @@ namespace Langmuir
 		double tPotential = 0;
 		double gaussianDisorder = 0.0;
 		
-		qDebug() << "entering heteroTraps" << par->trapPercentage;
+		//qDebug() << "entering heteroTraps" << par->trapPercentage;
 		
 		for ( unsigned int x = 0; x < m_grid->width(); x++ )
 		{
@@ -318,7 +318,7 @@ namespace Langmuir
 					unsigned int site = x+m_grid->width()*y+z*m_grid->area();
 					
 					// Add seeds for heterogeneous traps
-					if (m_world->random() < (0.1 *(par->trapPercentage)))
+					if (m_world->random() < ((par->seedPercentage) *(par->trapPercentage)))
 					{
 						m_grid->setPotential(site, (tPotential + par->deltaEpsilon));
 						m_world->chargedTraps()->push_back(site);
