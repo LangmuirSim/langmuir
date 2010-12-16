@@ -510,9 +510,9 @@ namespace Langmuir {
 			  
 		  case e_seedPercentage: {
 			  m_parameters.seedPercentage = list.at(1).toDouble() / 100.0;
-			  if (m_parameters.seedPercentage < 0.00 || m_parameters.seedPercentage > (1.00 - trapPercentage())) {
+			  if (m_parameters.seedPercentage < 0.00 || m_parameters.seedPercentage > m_parameters.trapPercentage) {
 				  m_valid = false;
-				  qDebug() << "Seed percentage out of range:" <<  m_parameters.trapPercentage*100.0 << " (0.00 -- 100.00)";
+				  qDebug() << "Seed percentage out of range:" <<  m_parameters.seedPercentage*100.0 << " (0.00 -- 100.00)";
 				  throw(std::invalid_argument("bad input"));
 			  }
 			  //qDebug() << "seed.percentage:" << m_parameters.seedPercentage;

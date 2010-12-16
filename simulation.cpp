@@ -332,7 +332,7 @@ namespace Langmuir
 		
 		int trapCount = (par->trapPercentage)*(par->gridWidth) * (par->gridHeight) * (par->gridDepth);
 		
-		qDebug() << "Trap Seeds: " << m_world->chargedTraps()->size(); 
+		//qDebug() << "Trap Seeds: " << m_world->chargedTraps()->size(); 
 		//for (int i = 0; i < m_world->chargedTraps()->size(); i++)
 		//{
 		//	qDebug() << (*m_world->chargedTraps())[i]; 
@@ -362,11 +362,8 @@ namespace Langmuir
 			  //qDebug() << "Traps: " << m_world->chargedTraps()->size();
 			}
 		}
-		/*for (int i=0; i < m_world->chargedTraps()->size(); i++)
-		{
-			qDebug() << (*m_world->chargedTraps())[i]; 
-		}
-	    */
+		qDebug() << "Traps: " << m_world->chargedTraps()->size(); 
+	    
 		//Set the potential of the Source
 		m_grid->setSourcePotential( m_potential->calculate(0.0,0.0,0.0) );
 		
