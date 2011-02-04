@@ -4,6 +4,7 @@ cmake_minimum_required( VERSION 2.8.2 )
 
 set( CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG" )
 set( QT_MIN_VERSION "4.7.0" )
+set( QT_USE_QTOPENGL TRUE )
 
 set( sources 
       rand.cpp
@@ -29,6 +30,7 @@ include( ${QT_USE_FILE} )
 include_directories( ${EIGEN2_INCLUDE_DIR} )
 include_directories( ${Boost_INCLUDE_DIRS} )
 include_directories( ${BOOST_PYTHON_INCLUDES} )
+include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
 
 add_definitions( -Wall )
 add_definitions( ${QT_DEFINITIONS} )
@@ -48,7 +50,6 @@ if ( OPENCL_FOUND )
  target_link_libraries( langmuirOpenCl ${OPENCL_LIBRARIES} )
 
  if ( GLEW_FOUND )
-  set(QT_USE_QTOPENGL TRUE)
   QT4_WRAP_CPP( moc_output ${meta_object_headers} )
   include_directories( ${GLEW_INCLUDE_PATH} )
   add_executable( langmuirView langmuirview.cpp gridview.cpp ${sources} ${moc_output} )
