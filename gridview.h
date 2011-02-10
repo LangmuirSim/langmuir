@@ -5,6 +5,9 @@
 #include <QtGui>
 #include <GL/glew.h>
 #include <QGLWidget>
+#include <QGLShader>
+#include <QGLShaderProgram>
+#include <QMatrix>
 #include <QGLBuffer>
 
 namespace Langmuir
@@ -13,9 +16,7 @@ namespace Langmuir
   class GridViewGL:public QGLWidget
   {
   Q_OBJECT public:
-    GridViewGL (QWidget * parent):QGLWidget (parent)
-    {
-    }
+    GridViewGL (QWidget * parent);
     QSize minimumSizeHint () const;
     QSize sizeHint () const;
 
@@ -25,6 +26,15 @@ namespace Langmuir
     void paintGL ();
 
   private:
+/*
+    QGLShaderProgram *program;
+
+    QMatrix4x4 projectionMatrix;
+    QMatrix4x4 viewMatrix;
+    QMatrix4x4 modelMatrix;
+*/
+    GLuint vbuffer;
+    GLuint cbuffer;
 
   };
 
