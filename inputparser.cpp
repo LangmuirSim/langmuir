@@ -114,7 +114,7 @@ namespace Langmuir
     if (line.at (0) == '#')
       return;
 
-    QStringList list = line.split ('=', QString::SkipEmptyParts);
+    QStringList list = line.split("#",QString::SkipEmptyParts).at(0).split ('=', QString::SkipEmptyParts);
 
     if (list.size () == 2)
       {
