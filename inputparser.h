@@ -11,88 +11,97 @@
 class QString;
 class QIODevice;
 
-namespace Langmuir {
+namespace Langmuir
+{
 
   /**
    * @struct All pertinent simulation parameters are stored in here. This can
    * easily be serialized and sent over MPI etc.
    */
-  struct SimulationParameters {
+  struct SimulationParameters
+  {
 
     /**
       * @brief operator overload to print parameters
       * @return reference to QTextStream
       */
-    friend  QTextStream& operator<<(  QTextStream& qt, SimulationParameters& par );
+    friend QTextStream & operator<< (QTextStream & qt,
+                                     SimulationParameters & par);
 
-    enum Option {
+    enum Option
+    {
 
-     o_linearpotential
-
+      o_linearpotential
     };
 
-    double      voltageSource; 
-    double       voltageDrain;
-    double   defectPercentage;
-    double     trapPercentage;
-    double   chargePercentage;
-    double  temperatureKelvin;
-    double       deltaEpsilon;
-    double      gaussianSTDEV;
-    double      gaussianAVERG;
-	double     seedPercentage;
+    double voltageSource;
+    double voltageDrain;
+    double defectPercentage;
+    double trapPercentage;
+    double chargePercentage;
+    double temperatureKelvin;
+    double deltaEpsilon;
+    double gaussianSTDEV;
+    double gaussianAVERG;
+    double seedPercentage;
+    double sourceBarrier;
 
-    int             gridWidth;
-    int            gridHeight;
-    int             gridDepth;
-    int               zDefect;
-    int                 zTrap;
-    int      iterationsWarmup; 
-    int        iterationsReal;
-    int       iterationsPrint;
-    int        iterationsTraj; 
+    int gridWidth;
+    int gridHeight;
+    int gridDepth;
+    int zDefect;
+    int zTrap;
+    int iterationsWarmup;
+    int iterationsReal;
+    int iterationsPrint;
+    int iterationsTraj;
+    int outputPrecision;
+    int outputWidth;
 
-    bool              coulomb;
-    bool       defectsCharged;
-    bool         trapsCharged;
-    bool           gridCharge;
-    bool        iterationsXYZ;
-    bool        gaussianNoise;
-	bool          trapsHetero;
+    bool coulomb;
+    bool defectsCharged;
+    bool trapsCharged;
+    bool gridCharge;
+    bool iterationsXYZ;
+    bool gaussianNoise;
+    bool trapsHetero;
 
-    Option      potentialForm;
-    std::vector<PotentialPoint> potentialPoints;
+    Option potentialForm;
+      std::vector < PotentialPoint > potentialPoints;
 
-    SimulationParameters()
+      SimulationParameters ()
     {
-     voltageSource         =               0.00;
-     voltageDrain          =               1.00;
-     defectPercentage      =               0.00;
-     trapPercentage        =               0.00;
-     chargePercentage      =               0.01;
-     temperatureKelvin     =             300.00;
-     deltaEpsilon          =               0.00;
-     gridWidth             =               1024;
-     gridHeight            =                256;
-     gridDepth             =                  1;
-     zDefect               =                  0;
-     zTrap                 =                  0;
-     iterationsWarmup      =               1000;
-     iterationsReal        =              10000;
-     iterationsPrint       =               1000;
-     iterationsTraj        =               1000;
-     coulomb               =              false;
-     defectsCharged        =              false;
-     trapsCharged          =              false;
-     gridCharge            =              false;
-     iterationsXYZ         =              false;
-     potentialForm         =  o_linearpotential;
-     gaussianNoise         =              false;
-	 gaussianSTDEV         =               0.05;
-     gaussianAVERG         =               0.00;
-     trapsHetero           =              false;
-	 seedPercentage        =               0.10; 
-	}
+      voltageSource = 0.00;
+      voltageDrain = 1.00;
+      defectPercentage = 0.00;
+      trapPercentage = 0.00;
+      chargePercentage = 0.01;
+      temperatureKelvin = 300.00;
+      deltaEpsilon = 0.00;
+      gridWidth = 1024;
+      gridHeight = 256;
+      gridDepth = 1;
+      zDefect = 0;
+      zTrap = 0;
+      iterationsWarmup = 1000;
+      iterationsReal = 10000;
+      iterationsPrint = 1000;
+      iterationsTraj = 1000;
+      coulomb = false;
+      defectsCharged = false;
+      trapsCharged = false;
+      gridCharge = false;
+      iterationsXYZ = false;
+      potentialForm = o_linearpotential;
+      gaussianNoise = false;
+      gaussianSTDEV = 0.05;
+      gaussianAVERG = 0.00;
+      trapsHetero = false;
+      seedPercentage = 0.10;
+      sourceBarrier = 0.10;
+      outputPrecision = 5;
+      outputWidth = 20;
+    }
   };
 
   /**
@@ -119,47 +128,51 @@ namespace Langmuir {
      * @param simulation The simulation object that should be set up with the
      * parameters in the input file.
      */
-    InputParser(const QString& fileName);
+    InputParser (const QString & fileName);
 
     /**
      * @enum The supported variables that can be varied - only one may be varied
      * in a simulation, although this could be extended to support more if the
      * need arises.
      */
-    enum VariableType {
+    enum VariableType
+    {
       e_undefined,
-      e_voltageSource,      // voltage of the source electrode
-      e_voltageDrain,       // voltage of the drain electrode
-      e_defectPercentage,   // percentage of defects in the grid
-      e_trapPercentage,     // percentage of traps in the grid
-      e_chargePercentage,   // percentage of charges in the grid - sets as target
-      e_temperatureKelvin,  // the absolute temperature
-      e_deltaEpsilon,       // site energy difference for traps
-      e_variableWorking,    // the working variable that is being changed
-      e_variableStart,      // the start of the variables range
-      e_variableFinal,      // final value of the variable range
-      e_variableSteps,      // the number of steps to take from start to final
-      e_gridWidth,          // the width of the grid
-      e_gridHeight,         // the height of the grid
-      e_gridDepth,          // the depth of the grid
-      e_zDefect,            // charge on the defects (times e)
-      e_zTrap,              // charge on traps (times e)
-      e_gridCharge,         // seed the grid with charges
-      e_iterationsWarmup,   // the number of warm up iterations to perform
-      e_iterationsReal,     // the number of iterations for the real run
-      e_iterationsPrint,    // number of iterations before printing state
-      e_iterationsTraj,     // number of iteratiobs before printing trajectory
-      e_coulombInteraction, // should Coulomb interaction be used
-      e_defectsCharged,     // are the defects charged?
-      e_trapsCharged,       // are the traps charged?
-      e_iterationsXYZ,      // should trajectory files be written
-      e_potentialForm,      // V = Vx + Vy + Vz (only option currently)
-      e_potentialPoint,     // A point of defined potential (x,y,z,V)
-      e_potentialNoise,     // Should random noise be added to energy levels
-      e_potentialSTDEV,     // What is the standard deviation of the random noise
-      e_potentialAVERG,     // What is the average of the random noise
-	  e_trapsHetero,        // Distrubute traps heterogeneously? 
-	  e_seedPercentage,     // Percentage of trap seeds for heterogeneous traps
+      e_voltageSource,                // voltage of the source electrode
+      e_voltageDrain,                // voltage of the drain electrode
+      e_defectPercentage,        // percentage of defects in the grid
+      e_trapPercentage,                // percentage of traps in the grid
+      e_chargePercentage,        // percentage of charges in the grid - sets as target
+      e_temperatureKelvin,        // the absolute temperature
+      e_deltaEpsilon,                // site energy difference for traps
+      e_variableWorking,        // the working variable that is being changed
+      e_variableStart,                // the start of the variables range
+      e_variableFinal,                // final value of the variable range
+      e_variableSteps,                // the number of steps to take from start to final
+      e_gridWidth,                // the width of the grid
+      e_gridHeight,                // the height of the grid
+      e_gridDepth,                // the depth of the grid
+      e_zDefect,                // charge on the defects (times e)
+      e_zTrap,                        // charge on traps (times e)
+      e_gridCharge,                // seed the grid with charges
+      e_iterationsWarmup,        // the number of warm up iterations to perform
+      e_iterationsReal,                // the number of iterations for the real run
+      e_iterationsPrint,        // number of iterations before printing state
+      e_iterationsTraj,                // number of iteratiobs before printing trajectory
+      e_coulombInteraction,        // should Coulomb interaction be used
+      e_defectsCharged,                // are the defects charged?
+      e_trapsCharged,                // are the traps charged?
+      e_iterationsXYZ,                // should trajectory files be written
+      e_potentialForm,                // V = Vx + Vy + Vz (only option currently)
+      e_potentialPoint,                // A point of defined potential (x,y,z,V)
+      e_potentialNoise,                // Should random noise be added to energy levels
+      e_potentialSTDEV,                // What is the standard deviation of the random noise
+      e_potentialAVERG,                // What is the average of the random noise
+      e_trapsHetero,                // Distrubute traps heterogeneously? 
+      e_seedPercentage,                // Percentage of trap seeds for heterogeneous traps
+      e_sourceBarrier,                // Probability that we inject a charge from the source ( when under max charges )
+      e_outputPrecision,        // decimal places to show in output
+      e_outputWidth,                // number of char per output field
       e_end
     };
 
@@ -167,61 +180,106 @@ namespace Langmuir {
       * @brief operator overload to print input parser
       * @return reference to QTextStream
       */
-    friend  QTextStream& operator<<(  QTextStream& qt, InputParser& inp );
+    friend QTextStream & operator<< (QTextStream & qt, InputParser & inp);
 
     /**
      * @brief Working variable.
      * @return The variable that is being modified in the simulation.
      */
-    VariableType varyType() const { return m_varyType; }
+    VariableType varyType () const
+    {
+      return m_varyType;
+    }
 
     /**
      * @brief Working varibale start.
      * @return The start value of the variable that is being looped over.
      */
-    double start() const { return m_start; }
+    double start () const
+    {
+      return m_start;
+    }
 
     /**
      * @brief Working variable stop.
      * @return The final value of the variable that is being looped over.
      */
-    double final() const { return m_final; }
+    double final () const
+    {
+      return m_final;
+    }
 
     /**
      * @brief Working variable steps.
      * @return The number of steps to take moving between the start and finish
      * values.
      */
-    int steps() const { return m_steps; }
+    int steps () const
+    {
+      return m_steps;
+    }
 
     /**
      * @brief Working variable step size.
      * @return The size of each step.
      */
-    double stepSize() const { return (m_final - m_start) / double(m_steps); }
-    double voltageSource() const { return m_parameters.voltageSource; }
-    double voltageDrain() const { return m_parameters.voltageDrain; }
-    double defectPercentage() const { return m_parameters.defectPercentage; }
-    double trapPercentage() const { return m_parameters.trapPercentage; }
-    double temperatureKelvin() const { return m_parameters.temperatureKelvin;}
-    double deltaEpsilon() const { return m_parameters.deltaEpsilon;}
-       int gridWidth() const { return m_parameters.gridWidth; }
-       int gridHeight() const { return m_parameters.gridHeight; }
-       int gridDepth() const { return m_parameters.gridDepth; }
-       int zDefect() const { return m_parameters.zDefect; }
+    double stepSize () const
+    {
+      return (m_final - m_start) / double (m_steps);
+    }
+    double voltageSource () const
+    {
+      return m_parameters.voltageSource;
+    }
+    double voltageDrain () const
+    {
+      return m_parameters.voltageDrain;
+    }
+    double defectPercentage () const
+    {
+      return m_parameters.defectPercentage;
+    }
+    double trapPercentage () const
+    {
+      return m_parameters.trapPercentage;
+    }
+    double temperatureKelvin () const
+    {
+      return m_parameters.temperatureKelvin;
+    }
+    double deltaEpsilon () const
+    {
+      return m_parameters.deltaEpsilon;
+    }
+    int gridWidth () const
+    {
+      return m_parameters.gridWidth;
+    }
+    int gridHeight () const
+    {
+      return m_parameters.gridHeight;
+    }
+    int gridDepth () const
+    {
+      return m_parameters.gridDepth;
+    }
+    int zDefect () const
+    {
+      return m_parameters.zDefect;
+    }
 
     /**
      * Get the simulation parameters for the supplied step.
      * @param par The SimulationParameters @struct that will be set up.
      * @param step The step
      */
-    bool simulationParameters(SimulationParameters *par, int step = 0);
+    bool simulationParameters (SimulationParameters * par, int step = 0);
 
     /**
      * @brief Working variable name.
      * @return A QString with the name of the type that is being varied.
      */
-    QString workingVariable() const;
+    QString workingVariable () const;
 
   private:
     /** 
@@ -229,7 +287,7 @@ namespace Langmuir {
      * 
      * The variable that is changing.
      */
-    VariableType m_varyType;
+      VariableType m_varyType;
 
     /** 
      * @brief Working variable start.
@@ -285,21 +343,21 @@ namespace Langmuir {
      *
      * Map of the input keys to the different simulation parameters
      */
-    static QMap<QString, VariableType> s_variables;
+    static QMap < QString, VariableType > s_variables;
 
     /**
      * @brief Line read.
      *
      * Process a line of input.
      */
-    void processLine(QIODevice *file);
+    void processLine (QIODevice * file);
 
     /**
      * @brief set up map.
      *
      * Initialize the static map of variables if necessary
      */
-    void initializeVariables();
+    void initializeVariables ();
   };
 
 }
