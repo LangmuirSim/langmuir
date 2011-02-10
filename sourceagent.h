@@ -8,7 +8,7 @@
 namespace Langmuir
 {
 
-  class SourceAgent : public Agent
+  class SourceAgent:public Agent
   {
 
   public:
@@ -19,26 +19,33 @@ namespace Langmuir
     *  Depending on the potential of the source, positive or negative charges enter the simulation be emerging from the source.
     *  @date 06/07/2010
     */
-    SourceAgent(World *world, unsigned int site, double potential = 0.0);
+    SourceAgent (World * world, unsigned int site, double potential =
+                 0.0, double barrier = 0.10);
 
     /**
      * @brief virutal Destructor.
      */
-    virtual ~SourceAgent();
+    virtual ~ SourceAgent ();
 
     /**
      * @brief set potential.
      *
      * Set the potential of the source.
      */
-    virtual void setPotential(double potential)	{ m_potential = potential; }
+    virtual void setPotential (double potential)
+    {
+      m_potential = potential;
+    }
 
     /**
      * @brief get potential.
      *
      * Get the potential of the source.
      */
-    virtual double potential() { return m_potential; }
+    virtual double potential ()
+    {
+      return m_potential;
+    }
 
     /**
      * @brief charge of agent.
@@ -46,7 +53,7 @@ namespace Langmuir
      * Get the charge of this agent.  What does that even mean for a source?
      * @return charge the charge of this agent.
      */
-    virtual int charge();
+    virtual int charge ();
 
     /**
      * @brief transport (from???) the source. 
@@ -54,14 +61,14 @@ namespace Langmuir
      * Agent chooses a site and hands off to site.
      * @return site index of the site the charge carrier was moved to.  -1 if the transport was unsucessful.
      */
-    virtual unsigned int transport();
+    virtual unsigned int transport ();
 
     /**
      * @brief max charges.
      *
      * Set the maximum number of charges that can be present in the system.
      */
-    void setMaxCharges(int number);
+    void setMaxCharges (int number);
 
     /**
      * @brief max charges.
@@ -69,7 +76,7 @@ namespace Langmuir
      * Get the max number of possible charges.
      * @return The maximum number of charges in the system.
      */
-    int maxCharges();
+    int maxCharges ();
 
     /**
      * @brief remove a charge.
@@ -77,7 +84,7 @@ namespace Langmuir
      * Used to inform the source agent that a charge has been removed from the
      * system, allowing average charge density to be kept constant.
      */
-    void decrementCharge();
+    void decrementCharge ();
 
     /**
      * @brief add a charge.
@@ -85,7 +92,7 @@ namespace Langmuir
      * Used to inform the source agent that a charge has been added to the
      * system, allowing average charge density to be kept constant.
      */
-    void incrementCharge();
+    void incrementCharge ();
 
   private:
     /**
@@ -117,27 +124,27 @@ namespace Langmuir
     int m_maxCharges;
   };
 
-  inline void SourceAgent::setMaxCharges(int number)
+  inline void SourceAgent::setMaxCharges (int number)
   {
     m_maxCharges = number;
   }
 
-  inline int SourceAgent::maxCharges()
+  inline int SourceAgent::maxCharges ()
   {
     return m_maxCharges;
   }
 
-  inline void SourceAgent::decrementCharge()
+  inline void SourceAgent::decrementCharge ()
   {
     if (m_charges > 0)
       --m_charges;
   }
 
-  inline void SourceAgent::incrementCharge()
+  inline void SourceAgent::incrementCharge ()
   {
     ++m_charges;
   }
 
-} // End namespace Langmuir
+}                                // End namespace Langmuir
 
 #endif
