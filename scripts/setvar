@@ -1,72 +1,43 @@
 #!/usr/bin/python
 import sys
 import os
-import optparse as op
+import argparse
 
-def printverbose(string):
- try:
-  if not options.silent:
-   print("message: "+str(string))
- except:
-  pass
+parser = argparse.ArgumentParser(description='script to read/write key=value pairs to an input file')
+parser.add_argument('-i',action='store',type=str,dest='ifile',help='input file (optional)',default=None)
+parser.add_argument('-o',action='store',type=str,dest='ofile',help='output file (optional)',default=None)
+parser.add_argument('-k',action='store',type=str,dest='key',help='key (required)',default=None)
+parser.add_argument('-v',action='store',type=str,dest='value',help='value (required)',default=None)
+parser.add_argument('-a',action='store_true',dest='append',help='append key=value pair (if found in input) (false)',default=False)
+options = parser.parse_args()
 
-parser = op.OptionParser()
-parser.add_option("-i",dest="ifile",default="ifile.inp",action="store",type="string",help="input file to modify",metavar="IFILE")
-parser.add_option("-o",dest="ofile",default=None,action="store",type="string",help="output file to write",metavar="OFILE")
-parser.add_option("-k",dest="key",default=None,action="store",type="string",help="variable key to write", metavar="KEY")
-parser.add_option("-n",dest="value",default=None,action="store",type="string",help="variable value to write",metavar="VALUE")
-parser.add_option("-s", "--silent",action="store_true", dest="silent",help="do not print messages to screen")
-
-(options, args) = parser.parse_args()
-
-if not ( options.value and options.key ):
+if not options.key or not options.value:
  parser.print_help()
+ print("\nmust at least give a key and value pair")
  sys.exit()
 
-try:
- printverbose("opening "+options.ifile)
- handle   = open(options.ifile,'r')
- contents = handle.readlines()
- handle.close()
-except:
- printverbose("no infile found - creating a new infile") 
- contents= []
+if options.append:
+ if options.ifile and not options.ofile:
+  os.system('cp %s %s.bak'%(options.ifile,options.ifile))
+  os.system('echo "%s=%s" >> %s'%(options.key,options.value,options.ifile))
+  os.system('diff %s.bak %s'%(options.ifile,options.ifile))
+ if options.ifile and options.ofile:
+  os.system('cat %s > %s'%(options.ifile,options.ofile))
+  os.system('echo "%s=%s" >> %s'%(options.key,options.value,options.ofile))
+  os.system('diff %s %s'%(options.ifile,options.ofile))
+ if not options.ifile and not options.ofile:
+  handle = open('default.inp','w')
+  handle.write("%s=%s"%(options.key,options.value))
+  handle.close()
 
-printverbose("looking at values")
-VARIABLES = []
-for line in contents:
- items = line.strip().split("=")
- if len(items) == 2:
-  VARIABLES.append(items)
- else:
-  printverbose("ignoring line: "+line.strip())
-
-NEWVARS = []
-count = 0
-for items in VARIABLES:
- if not items[0] == options.key:
-  NEWVARS.append(items[0] + "=" + items[1]+"\n") 
- else:
-  printverbose("found key and value: " + items[0] + " " + items[1])
-  NEWVARS.append(options.key+"="+options.value+"\n")
-  count += 1
-
-if count == 0:
- printverbose("adding new key and value")
- NEWVARS.append(options.key+"="+options.value+"\n")
-if count == 1:
- printverbose("overwriting key and value")
-if count >= 2:
- raise ValueError("duplicate key and value found")
-
-if options.ofile:
- printverbose("writing results in "+options.ofile)
- outfile = open(options.ofile,'w')
 else:
- printverbose("writing results in "+options.ifile)
- outfile = open(options.ifile,'w')
-
-for line in NEWVARS:
- outfile.write(line)
-
-outfile.close()
+ if options.ifile and not options.ofile:
+  os.system('sed --in-place=.bak -e "s/^\s*#*\(%s\)=\S*\(\s*#*.*$\)/\\1=%s\\2/" %s'%(options.key,options.value,options.ifile))
+  os.system('diff %s.bak %s'%(options.ifile,options.ifile))
+ if options.ifile and options.ofile:
+  os.system('sed -e "s/^\s*#*\(%s\)=\S*\(\s*#*.*$\)/\\1=%s\\2/" %s > %s'%(options.key,options.value,options.ifile,options.ofile))
+  os.system('diff %s %s'%(options.ifile,options.ofile))
+ if not options.ifile and not options.ofile:
+  handle = open('default.inp','w')
+  handle.write("%s=%s"%(options.key,options.value))
+  handle.close()
