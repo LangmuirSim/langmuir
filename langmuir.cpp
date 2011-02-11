@@ -20,15 +20,25 @@ main (int argc, char *argv[])
 
   // read command line arguments
   QStringList args = app.arguments ();
-  if ((args.size () < 2) || (args.size () > 3))
+
+  QString iFileName = "";
+  QString oFileName = "";
+  if ( args.size() == 2 )
     {
-      qDebug () << "correct use is langmuir input.dat (output.dat)";
-      qFatal ("bad input");
+      iFileName = args.at(1);
+      QStringList tokens = args.at(1).split("/",QString::SkipEmptyParts);
+      oFileName = tokens[tokens.size()-1].split(".",QString::SkipEmptyParts)[0];
     }
-  QString inputFileName = args.at (1);
-  QString oFileName =
-    args.size () >
-    2 ? args.at (2).split (".")[0] : args.at (1).split (".")[0];
+  else if ( args.size() == 3 )
+    {
+      iFileName = args.at(1);
+      oFileName = args.at(2);
+    }
+  else
+    {
+      qDebug() << "correct use is langmuir input.dat (output.dat)";
+      qFatal("bad input");
+    }
 
   // Declare output pointers
   QFile *oFile;                        //summary
@@ -39,7 +49,7 @@ main (int argc, char *argv[])
   QTextStream *tout;
 
   // Open and read input file
-  InputParser input (inputFileName);
+  InputParser input (iFileName);
   SimulationParameters par;
   input.simulationParameters (&par);
 
