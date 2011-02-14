@@ -270,7 +270,7 @@ namespace Langmuir
       }
     // Add the source and the drain
     m_source =
-      new SourceAgent (m_world, m_grid->volume (), par->voltageSource);
+      new SourceAgent (m_world, m_grid->volume (), par->voltageSource, par->sourceBarrier);
     m_world->grid ()->setAgent (m_grid->volume (), m_source);
     m_world->grid ()->setSiteID (m_grid->volume (), 2);
     m_drain =
