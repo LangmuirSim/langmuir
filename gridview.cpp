@@ -8,6 +8,17 @@ namespace Langmuir
 
   }
 
+  GridViewGL::~GridViewGL ()
+  {
+   glDetachShader(program,vshader);
+   glDetachShader(program,fshader);
+   glDeleteShader(vshader);
+   glDeleteShader(fshader);
+   glDeleteProgram(program);
+   glDeleteBuffers(1,&vbuffer);
+   glDeleteBuffers(1,&cbuffer);
+  }
+
   QSize GridViewGL::minimumSizeHint () const
   {
     return QSize (200, 200);
@@ -21,6 +32,37 @@ namespace Langmuir
   void GridViewGL::initializeGL ()
   {
    glewInit();
+
+   vshader = glCreateShader(GL_VERTEX_SHADER);
+   fshader = glCreateShader(GL_FRAGMENT_SHADER);
+
+   const char * vsource = "void main() { gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex; }\n";
+//    "uniform mat4 pMatrix;\n"
+//    "uniform mat4 mMatrix;\n"
+//    "uniform mat4 vMatrix;\n"
+//    "attribute vec4 vertex;\n"
+//    "void main(void)\n"
+//    "{\n"
+//    " gl_Position = pMatrix * vertex;\n"
+//    "}";
+
+   const char * fsource = "void main() { gl_FragColor = vec4(1.0); }\n";
+//    "void main(void)\n"
+//    "{\n"
+//    " gl_FragColor = vec4(1.0,0.0,0.0,0.0);\n"
+//    "}";
+
+   glShaderSource(vshader,1,&vsource,NULL);
+   glShaderSource(fshader,1,&fsource,NULL);
+
+   glCompileShader(vshader);
+   glCompileShader(fshader);
+
+   program = glCreateProgram();
+   glAttachShader(program,vshader);
+   glAttachShader(program,fshader);
+   glLinkProgram(program);
+
 /*
    glShadeModel (GL_SMOOTH);
    glClearColor (0.0f, 0.0f, 0.0f, 0.0f);
@@ -93,6 +135,9 @@ namespace Langmuir
    glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    glLoadIdentity();
    glTranslatef(0.0,0.0,-5.0);
+
+   glUseProgram(program);
+
    glEnable(GL_POINT_SMOOTH);
    glPointSize(5.0);
 
@@ -111,6 +156,8 @@ namespace Langmuir
    glDisableClientState(GL_VERTEX_ARRAY);
 
    glBindBuffer(GL_ARRAY_BUFFER,0);
+
+   glUseProgram(0);
 /*
     viewMatrix.setToIdentity();
     modelMatrix.setToIdentity();

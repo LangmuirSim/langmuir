@@ -17,6 +17,7 @@ namespace Langmuir
   {
   Q_OBJECT public:
     GridViewGL (QWidget * parent);
+   ~GridViewGL ();
     QSize minimumSizeHint () const;
     QSize sizeHint () const;
 
@@ -35,6 +36,10 @@ namespace Langmuir
 */
     GLuint vbuffer;
     GLuint cbuffer;
+
+    GLuint vshader;
+    GLuint fshader;
+    GLuint program;
 
   };
 
