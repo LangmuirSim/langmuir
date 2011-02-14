@@ -31,14 +31,14 @@ namespace Langmuir
      * Set up the basic parameters of the simulation.
      * @param par parameter struct
      */
-    Simulation( SimulationParameters *par );
+    Simulation (SimulationParameters * par);
 
     /**
      * @brief Destructor.
      *
      * Releases the random number generator.
      */
-    ~Simulation();
+    ~Simulation ();
 
     /**
      * @brief Set number of charges.
@@ -46,14 +46,14 @@ namespace Langmuir
      * Set the number of charges to maintain in the system.
      * @param N the number of charges to use.
      */
-    void setMaxCharges(int n);
+    void setMaxCharges (int n);
 
     /**
      * @brief Place charges on grid.
      *
      * Seed the grid with the number of charges specified by setMaxCharges.
      */
-    bool seedCharges();
+    bool seedCharges ();
 
     /**
      * @brief Coulomb interactions
@@ -61,39 +61,39 @@ namespace Langmuir
      * Toggle Coulomb interactions for charge carriers.
      * @param enabled boolean value for option.
      */
-    void setCoulombInteractions(bool enabled);
+    void setCoulombInteractions (bool enabled);
 
     /**
      * @brief Defects
      *
      * Toggle interaction for charge carriers with charged defects.
      * @param enabled boolean value for option.
-     */  
-    void setChargedDefects(bool on);
-	
+     */
+    void setChargedDefects (bool on);
+
     /**
      * @brief Charged Traps
      *
      * Enables interaction for charge carriers with charged traps
      * @param enabled boolean value for option.
      */
-    void setChargedTraps(bool ok);
-	  
+    void setChargedTraps (bool ok);
+
     /**
      * @brief Defect charge
      *
      * Sets the magnitude of the charge on defects.
      * @param Zdefect charge of defects.
-     */	  
-    void setZdefect(int zDefect);
+     */
+    void setZdefect (int zDefect);
 
     /**
      * @brief Trap charge
      *
      * Sets the magnitude of the charge on traps.
      * @param Ztrap charge of traps.
-     */	  
-    void setZtrap(int zTrap);
+     */
+    void setZtrap (int zTrap);
 
     /**
      * @brief Simulation temperature.
@@ -101,30 +101,33 @@ namespace Langmuir
      * Set the simulation temperature to be used in the metropolis criterion.
      * @param temperatureKelvin temperature to use in Kelvin units.
      */
-    void setTemperature(double temperatureKelvin);
+    void setTemperature (double temperatureKelvin);
 
-	/**
+        /**
      * @brief Perform Iterations. 
      *
      * Perform so many iterations of the simulation.
      * @param nIterations number of iterations to perform.
      */
-	  
-	void performIterations(int nIterations);
+
+    void performIterations (int nIterations);
 
     /**
      * @brief 2D visualize
      *
      * Used to print an ASCII grid to the terminal - low tech visualization.
      */
-    void printGrid();
+    void printGrid ();
 
     /**
      * @brief Access the Grid
      *
      * Get the address of the Simulation Grid.
      */
-    Grid * getGrid() { return m_grid; }
+    Grid *getGrid ()
+    {
+      return m_grid;
+    }
 
     /**
      * @brief Drain Count.
@@ -132,23 +135,23 @@ namespace Langmuir
      * Retrieve a charge drain count - total number of charges the drain has
      * received since the simulation started.
      */
-    unsigned long totalChargesAccepted();
+    unsigned long totalChargesAccepted ();
 
     /**
      * @brief ncharges
      *
      * Retrieve the current number of charges in the system.
      */
-    unsigned long charges();
+    unsigned long charges ();
 
     /**
      * @brief ncharges
      *
      * Retrieve the current number of charges in the system.
      */
-    int getMaxCharges()
+    int getMaxCharges ()
     {
-     return m_maxcharges; 
+      return m_maxcharges;
     }
 
     /**
@@ -156,7 +159,7 @@ namespace Langmuir
      *
      * Retrieve the world object - can be used alter world properties.
      */
-    World * world();
+    World *world ();
 
   private:
 
@@ -173,13 +176,13 @@ namespace Langmuir
      * Boolean allowing charged defects to be present in the simulation.
      */
     bool m_chargedDefects;
-	  
+
     /**
      * @brief Charge trap presence.
      *
      * Boolean allowing trap sites to have a charge
      */
-    bool m_chargedTraps; 
+    bool m_chargedTraps;
 
     /**
      * @brief Charge Defect charge.
@@ -187,7 +190,7 @@ namespace Langmuir
      * The charge on defects in the simulation.
      */
     int m_zDefect;
-	  
+
     /**
      * @brief Charge Defect charge.
      *
@@ -200,8 +203,8 @@ namespace Langmuir
      *
      * The temperature to perform the simulation at.
      */
-    double m_temperatureKelvin; 
-	  
+    double m_temperatureKelvin;
+
     /**
      * @brief Charge Defect charge.
      *
@@ -253,18 +256,19 @@ namespace Langmuir
      * @param drainPotential the potential of the drain agent.
      * @param defectPercent the percent of defects present.
      */
-    void createAgents(unsigned int num_agents, double sourcePotential, double drainPotential, double defectPercent);
+    //void createAgents(unsigned int num_agents, double sourcePotential, double drainPotential, double defectPercent);
+    void createAgents (SimulationParameters * par);
 
     /**
      * @brief Release agent memory.
      *
      * Destroy the agents once we are done with them.
      */
-    void destroyAgents();
-	  
-	// Create heterogeneous traps
-	  
-	void heteroTraps( SimulationParameters *par);
+    void destroyAgents ();
+
+    // Create heterogeneous traps
+
+    void heteroTraps (SimulationParameters * par);
 
     /**
      * @brief update the potential at each site.
@@ -276,8 +280,8 @@ namespace Langmuir
      * @param trapPercent the percent of traps present.
      * @param deltaEpsilon the energy of a trap.
      */
-	  
-    void updatePotentials( SimulationParameters *par );
+
+    void updatePotentials (SimulationParameters * par);
     //void updatePotentials(double trapPercent, double deltaEpsilon);
 
     /**
@@ -287,15 +291,15 @@ namespace Langmuir
      * This is a vector of size width + length + depth denoting the x, y displacement of the two sites under consideration. 
      * These values reduce necessary calculations in tight loops when considering Coulomb interactions.
      */
-	  
-    void updateInteractionEnergies();
+
+    void updateInteractionEnergies ();
 
     /**
      * @brief Next simulation Tick.
      *
      * Move on to the next time tick - change to the future states, clean up.
      */
-    void nextTick();
+    void nextTick ();
 
     /**
      * @brief charge agent iterations.
@@ -305,15 +309,15 @@ namespace Langmuir
      * threads and then any joining necessary is done at the end.
      * @param chargeAgent pointer to charge agent.
      */
-    static void chargeAgentIterate(ChargeAgent *chargeAgent);
+    static void chargeAgentIterate (ChargeAgent * chargeAgent);
 
   };
 
-  inline World * Simulation::world()
+  inline World *Simulation::world ()
   {
     return m_world;
   }
 
-} // End namespace Langmuir
+}                                // End namespace Langmuir
 
 #endif
