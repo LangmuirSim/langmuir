@@ -38,7 +38,7 @@ grid_variables["grid.height"] = "256"
 grid_variables["grid.depth"] = "1"
 
 carrier_variables = ODict()
-carrier_variables["charge.percentage"] = "0.01"
+carrier_variables["charge.percentage"] = "1.00"
 carrier_variables["grid.charge"] = "false"
 carrier_variables["interaction.coulomb"] = "false"
 
