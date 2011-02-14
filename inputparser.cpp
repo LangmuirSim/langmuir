@@ -600,14 +600,13 @@ namespace Langmuir
 
           case e_sourceBarrier:
             {
-              m_parameters.sourceBarrier = list.at (1).toDouble () / 100;
+              m_parameters.sourceBarrier = list.at (1).toDouble ();
               if (m_parameters.sourceBarrier <= 0.00
                   || m_parameters.sourceBarrier > 1.00)
                 {
                   m_valid = false;
                   qDebug () << "Source injection probability out of range:" <<
-                    m_parameters.defectPercentage *
-                    100.0 << " (0.00 -- 100.00)";
+                    m_parameters.defectPercentage << " (0.00 -- 1.00)";
                   qFatal ("bad input");
                 }
               break;
