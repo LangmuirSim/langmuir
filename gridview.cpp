@@ -10,13 +10,6 @@ namespace Langmuir
 
   GridViewGL::~GridViewGL ()
   {
-   glDetachShader(program,vshader);
-   glDetachShader(program,fshader);
-   glDeleteShader(vshader);
-   glDeleteShader(fshader);
-   glDeleteProgram(program);
-   glDeleteBuffers(1,&vbuffer);
-   glDeleteBuffers(1,&cbuffer);
   }
 
   QSize GridViewGL::minimumSizeHint () const
@@ -33,65 +26,6 @@ namespace Langmuir
   {
    glewInit();
 
-   vshader = glCreateShader(GL_VERTEX_SHADER);
-   fshader = glCreateShader(GL_FRAGMENT_SHADER);
-
-   const char * vsource = "void main() { gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex; }\n";
-//    "uniform mat4 pMatrix;\n"
-//    "uniform mat4 mMatrix;\n"
-//    "uniform mat4 vMatrix;\n"
-//    "attribute vec4 vertex;\n"
-//    "void main(void)\n"
-//    "{\n"
-//    " gl_Position = pMatrix * vertex;\n"
-//    "}";
-
-   const char * fsource = "void main() { gl_FragColor = vec4(1.0); }\n";
-//    "void main(void)\n"
-//    "{\n"
-//    " gl_FragColor = vec4(1.0,0.0,0.0,0.0);\n"
-//    "}";
-
-   glShaderSource(vshader,1,&vsource,NULL);
-   glShaderSource(fshader,1,&fsource,NULL);
-
-   glCompileShader(vshader);
-   glCompileShader(fshader);
-
-   program = glCreateProgram();
-   glAttachShader(program,vshader);
-   glAttachShader(program,fshader);
-   glLinkProgram(program);
-
-/*
-   glShadeModel (GL_SMOOTH);
-   glClearColor (0.0f, 0.0f, 0.0f, 0.0f);
-   glClearDepth (1.0f);
-   glEnable (GL_DEPTH_TEST);
-   glDepthFunc (GL_LEQUAL);
-   glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-
-   program = new QGLShaderProgram(this);
-   program->addShaderFromSourceCode(QGLShader::Vertex,
-     "uniform mat4 pMatrix;\n"
-     "uniform mat4 mMatrix;\n"
-     "uniform mat4 vMatrix;\n"
-     "attribute vec4 vertex;\n"
-     "void main(void)\n"
-     "{\n"
-     " gl_Position = pMatrix * vertex;\n"
-     "}");
-   program->addShaderFromSourceCode(QGLShader::Fragment,
-     "void main(void)\n"
-     "{\n"
-     " gl_FragColor = vec4(1.0,0.0,0.0,0.0);\n"
-     "}");
-   program->link();
-
-   viewMatrix.setToIdentity();
-   modelMatrix.setToIdentity();
-   projectionMatrix.setToIdentity();
-*/
    QVector<float> pos(16,0);
    QVector<float> col(16,0);
 
@@ -104,25 +38,105 @@ namespace Langmuir
    pos[12] = -1.0; pos[13] = -1.0; pos[14] =  0.0; pos[15] = 1.0;
    col[12] =  1.0; col[13] =  0.0; col[14] =  0.0; col[15] = 1.0;
 
+   glGenVertexArrays(1,&varray);
+   glBindVertexArray(varray);
+
    glGenBuffers(1,&vbuffer);
    glBindBuffer(GL_ARRAY_BUFFER,vbuffer);
-   glBufferData(GL_ARRAY_BUFFER,pos.size()*sizeof(float),&pos[0],GL_DYNAMIC_DRAW);
-   glBindBuffer(GL_ARRAY_BUFFER,0);
+   glBufferData(GL_ARRAY_BUFFER, pos.size() * sizeof(float), &pos[0], GL_STATIC_DRAW);
 
-   glGenBuffers(1,&cbuffer);
-   glBindBuffer(GL_ARRAY_BUFFER,cbuffer);
-   glBufferData(GL_ARRAY_BUFFER,col.size()*sizeof(float),&col[0],GL_DYNAMIC_DRAW);
-   glBindBuffer(GL_ARRAY_BUFFER,0);
+   glVertexAttribPointer(0,4,GL_FLOAT,GL_FALSE,0,0);
+   glEnableVertexAttribArray(0);
 
-  }
+   glGenBuffers(1,&fbuffer);
+   glBindBuffer(GL_ARRAY_BUFFER,fbuffer);
+   glBufferData(GL_ARRAY_BUFFER, col.size() * sizeof(float), &col[0], GL_STATIC_DRAW);
+
+   glVertexAttribPointer(1,4,GL_FLOAT,GL_FALSE,0,0);
+   glEnableVertexAttribArray(1);
+
+   QFile vfile("shader.vert");
+   if (!vfile.open(QIODevice::ReadOnly|QIODevice::Text)) qFatal("can not open shader file");
+   QByteArray varray = vfile.readAll();
+   vfile.close();
+   char * vsource = new char[varray.size()];
+   for ( int i = 0; i < varray.size(); i++ ) vsource[i] = varray[i];
+
+   QFile ffile("shader.frag");
+   if (!ffile.open(QIODevice::ReadOnly|QIODevice::Text)) qFatal("can not open shader file");
+   QByteArray farray = ffile.readAll();
+   ffile.close();
+   char * fsource = new char[farray.size()];
+   for ( int i = 0; i < farray.size(); i++ ) fsource[i] = farray[i];
+
+   vshader = glCreateShader(GL_VERTEX_SHADER);
+   glShaderSource(vshader,1,(const GLchar**)&vsource,0);
+   glCompileShader(vshader);
+   {
+    int compiled = GL_TRUE;
+    glGetShaderiv(vshader,GL_COMPILE_STATUS,&compiled);
+    if ( compiled == GL_FALSE )
+    {
+     int maxLength = 0;
+     glGetShaderiv(vshader,GL_INFO_LOG_LENGTH,&maxLength);
+     char * Log = new char [ maxLength ];
+     glGetShaderInfoLog(vshader,maxLength,&maxLength,Log);
+     qDebug() << Log;
+     delete Log;
+     qFatal("can not compile vertex shader");
+    }
+   }
+
+   fshader = glCreateShader(GL_VERTEX_SHADER);
+   glShaderSource(fshader,1,(const GLchar**)&fsource,0);
+   glCompileShader(fshader);
+   {
+    int compiled = GL_TRUE;
+    glGetShaderiv(fshader,GL_COMPILE_STATUS,&compiled);
+    if ( compiled == GL_FALSE )
+    {
+     int maxLength = 0;
+     glGetShaderiv(fshader,GL_INFO_LOG_LENGTH,&maxLength);
+     char * Log = new char [ maxLength ];
+     glGetShaderInfoLog(fshader,maxLength,&maxLength,Log);
+     qDebug() << Log;
+     delete Log;
+     qFatal("can not compile fragment shader");
+    }
+   }
+
+   program = glCreateProgram();
+   glAttachShader(program,vshader);
+   glAttachShader(program,fshader);
+
+   glBindAttribLocation(program,0,"in_Position");
+   glBindAttribLocation(program,1,"in_Color");
+
+   glLinkProgram(program);
+
+   {
+    int linked = GL_TRUE;
+    glGetProgramiv(program,GL_LINK_STATUS,&linked);
+    if ( linked == GL_FALSE )
+    {
+     int maxLength = 0;
+     glGetProgramiv(program,GL_INFO_LOG_LENGTH,&maxLength);
+     char * Log = new char [ maxLength ];
+     glGetProgramInfoLog(program,maxLength,&maxLength,Log);
+     qDebug() << Log;
+     delete Log;
+     qFatal("can not link program");
+    }
+   }
+
+   delete vsource;
+   delete fsource;
+
+ }
 
   void GridViewGL::resizeGL (int w, int h)
   {
    glViewport(0,0,w,h);
-/*
-   projectionMatrix.setToIdentity();
-   projectionMatrix.perspective(60.0,qreal(w)/qreal(h),1.0,100.0); 
-*/
    glMatrixMode(GL_PROJECTION);
    glLoadIdentity();
    gluPerspective(45.0f,(GLfloat)w/(GLfloat)h,0.1f,100.0f);
@@ -135,60 +149,11 @@ namespace Langmuir
    glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    glLoadIdentity();
    glTranslatef(0.0,0.0,-5.0);
-
-   glUseProgram(program);
-
    glEnable(GL_POINT_SMOOTH);
    glPointSize(5.0);
-
-   glBindBuffer(GL_ARRAY_BUFFER,vbuffer);
-   glBindBuffer(GL_ARRAY_BUFFER,cbuffer);
-
-   glVertexPointer(4,GL_FLOAT,0,0);
-   glColorPointer(4,GL_FLOAT,0,0);
-
-   glEnableClientState(GL_VERTEX_ARRAY);
-   glEnableClientState(GL_COLOR_ARRAY);
-
+   glUseProgram(program);
    glDrawArrays(GL_POINTS,0,4);
-
-   glDisableClientState(GL_COLOR_ARRAY);
-   glDisableClientState(GL_VERTEX_ARRAY);
-
-   glBindBuffer(GL_ARRAY_BUFFER,0);
-
    glUseProgram(0);
-/*
-    viewMatrix.setToIdentity();
-    modelMatrix.setToIdentity();
-
-    viewMatrix.translate(0,0,-5.0);
-
-    glEnable(GL_POINT_SMOOTH);
-    glPointSize(5.0);
-
-    program->bind();
-    program->enableAttributeArray("vertex");
-    program->setAttributeBuffer("vertex",GL_FLOAT,0,4);
-    program->setUniformValue("pMatrix",projectionMatrix);
-    program->setUniformValue("mMatrix",modelMatrix);
-    program->setUniformValue("vMatrix",viewMatrix);
-
-    glBindBuffer(GL_ARRAY_BUFFER,vbuffer);
-    glBindBuffer(GL_ARRAY_BUFFER,cbuffer); 
-
-    glVertexPointer(4,GL_FLOAT,0,0);
-    glColorPointer(4,GL_FLOAT,0,0);
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_COLOR_ARRAY);
-    glDrawArrays(GL_POINTS,0,4);
-    glDisableClientState(GL_COLOR_ARRAY);
-    glDisableClientState(GL_VERTEX_ARRAY);
-    glBindBuffer(GL_ARRAY_BUFFER,0);
-
-    program->disableAttributeArray("vertex");
-    program->release();
-*/
   }
 
   MainWindow::MainWindow ()

@@ -27,19 +27,14 @@ namespace Langmuir
     void paintGL ();
 
   private:
-/*
-    QGLShaderProgram *program;
 
-    QMatrix4x4 projectionMatrix;
-    QMatrix4x4 viewMatrix;
-    QMatrix4x4 modelMatrix;
-*/
-    GLuint vbuffer;
-    GLuint cbuffer;
+   GLuint program;
+   GLuint vshader;
+   GLuint fshader;
 
-    GLuint vshader;
-    GLuint fshader;
-    GLuint program;
+   GLuint varray;
+   GLuint vbuffer;
+   GLuint fbuffer;
 
   };
 
