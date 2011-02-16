@@ -1,13 +1,14 @@
 #include "drainagent.h"
+#include "world.h"
+#include "grid.h"
+#include "inputparser.h"
 
 using namespace std;
 
 namespace Langmuir
 {
 
-  DrainAgent::DrainAgent(World *world, unsigned int site, double potential) :
-      Agent(Agent::Drain, world, site), m_potential(potential),
-      m_acceptedCharges(0)
+  DrainAgent::DrainAgent(World *world, unsigned int site) : Agent(Agent::Drain, world, site), m_acceptedCharges(0)
   {
   }
 

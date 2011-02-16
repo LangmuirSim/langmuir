@@ -1,59 +1,19 @@
 #include "sourceagent.h"
 #include "world.h"
 #include "grid.h"
+#include "inputparser.h"
 
 namespace Langmuir
 {
-  SourceAgent::SourceAgent ( World * world, unsigned int site, double potential, double barrier, int barrierCalculationType, 
-   bool chargedDefects, bool chargedTraps, double temperatureKelvin, int zDefect, int zTrap ):
-   Agent(Agent::Source, world, site)
+  SourceAgent::SourceAgent ( World * world, unsigned int site ) : Agent( Agent::Source, world, site )
   {
    m_site = site;
-   m_potential = potential;
-   m_pBarrier  = barrier;
-   m_pBarrierCalculationType = barrierCalculationType;
-   m_chargedDefects = chargedDefects;
-   m_chargedTraps = chargedTraps;
-   m_temperatureKelvin = temperatureKelvin;
-   m_zDefect = zDefect;
-   m_zTrap = zTrap;
    m_charges = 0;
    m_maxCharges = 100;
-
-   qDebug() << "INPUT WORLD:        " << world;
-   qDebug() << "INPUT SITE:         " << site;
-   qDebug() << "INPUT POTENTIAL:    " << potential;
-   qDebug() << "INPUT PBARRIER:     " << barrier;
-   qDebug() << "INPUT CALC:         " << barrierCalculationType;
-   qDebug() << "INPUT DEFECT:       " << chargedDefects;
-   qDebug() << "INPUT TRAP:         " << chargedTraps;
-   qDebug() << "INPUT TEMP:         " << temperatureKelvin;
-   qDebug() << "INPUT ZDEFECT:      " << zDefect;
-   qDebug() << "INPUT ZTRAP:        " << zTrap;
-
-   qDebug() << "SOURCE WORLD:       " << m_world;
-   qDebug() << "SOURCE SITE:        " << this->site();
-   qDebug() << "SOURCE POTENTIAL:   " << m_potential;
-   qDebug() << "SOURCE PBARRIER:    " << m_pBarrier;
-   qDebug() << "SOURCE CALC:        " << m_pBarrierCalculationType;
-   qDebug() << "SOURCE DEFECT:      " << m_chargedDefects;
-   qDebug() << "SOURCE TRAP:        " << m_chargedTraps;
-   qDebug() << "SOURCE TEMP:        " << m_temperatureKelvin;
-   qDebug() << "SOURCE ZDEFECT:     " << m_zDefect;
-   qDebug() << "SOURCE ZTRAP:       " << m_zTrap;
-   qDebug() << "SOURCE CHARGES:     " << m_charges;
-   qDebug() << "SOURCE MAXCHARGES:  " << m_maxCharges;
-  qFatal("bye");
   }
 
   SourceAgent::~SourceAgent ()
   {
-  }
-
-  int SourceAgent::charge ()
-  {
-    // Always has a charge of 1
-    return 1;
   }
 
   unsigned int SourceAgent::transport ()
@@ -63,12 +23,12 @@ namespace Langmuir
     // Used to maintain the average number of charges in the system
     if (m_charges >= m_maxCharges) return -1;
 
-    switch ( m_pBarrierCalculationType )
+    switch ( m_world->parameters()->sourceBarrierCalculationType )
     {
       case 0: //constant case
       {
        // Do not inject 100*m_pBarrier percent of the time
-       if ( m_world->random() <= m_pBarrier ) return -1;
+       if ( m_world->random() <= m_world->parameters()->sourceBarrier ) return -1;
 
        // Select a random neighbor
        int irn = int ( m_world->random () * double ( m_neighbors.size () - 0.00000001 ) );

@@ -13,6 +13,7 @@ namespace Langmuir
   class Grid;
   class Rand;
   class ChargeAgent;
+  struct SimulationParameters;
 
   /**
     * @class Triple Index Array
@@ -169,6 +170,20 @@ namespace Langmuir
     void setGrid(Grid *grid) { m_grid = grid; }
 
     /**
+      * @brief member access.
+      *
+      * Get the address of the parameters object.
+      */
+    SimulationParameters * parameters() const { return m_parameters; }
+
+    /**
+      * @brief member access.
+      *
+      * Set the address of the parameters object.
+      */
+    void setParameters(SimulationParameters *parameters) { m_parameters = parameters; }
+
+    /**
       * @brief random number generation.
       *
       * Get a random number between 0 and 1.
@@ -222,6 +237,7 @@ namespace Langmuir
    private:
     Grid                 *m_grid;                // The grid in use in the world
     Rand                 *m_rand;                // Random number generator
+    SimulationParameters *m_parameters;          // Simulation Parameters
     QList<ChargeAgent *>  m_charges;             // Charge carriers in the system
     QList<unsigned int>   m_chargedDefects;      // Charged defects in the system
     QList<unsigned int>   m_chargedTraps;        // Charged traps in the system
