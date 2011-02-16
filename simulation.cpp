@@ -26,8 +26,6 @@ namespace Langmuir
     m_world = new World;        // Create the world object
     m_grid = new CubicGrid (par->gridWidth, par->gridHeight, par->gridDepth);        // Create the grid object
     m_world->setGrid (m_grid);        // Let the world know about the grid
-    //createAgents(m_grid->volume(), par->voltageSource, par->voltageDrain, par->defectPercentage); // Create the agents for the simulation
-    createAgents (par);
 
     m_coulombInteraction = par->coulomb;        // Set coulomb interactions
     m_chargedDefects = par->defectsCharged;        // Set charged defects
@@ -36,10 +34,12 @@ namespace Langmuir
     m_zTrap = par->zTrap;        // Set charge on traps
     m_temperatureKelvin = par->temperatureKelvin;        // Set simulation temperature
 
+    createAgents (par);  // Create agents
+
     int nCharges = par->chargePercentage * double (m_grid->volume ());        // Calculate the number of charge carriers
       setMaxCharges (nCharges);
 
-    if (par->potentialForm == SimulationParameters::o_linearpotential)        // Set up external potential calculator
+    if (par->potentialForm == 0)        // Set up external potential calculator
       {
         m_potential = new LinearPotential (par->potentialPoints);
         //Add the source to the linear potential
@@ -270,7 +270,7 @@ namespace Langmuir
       }
     // Add the source and the drain
     m_source =
-      new SourceAgent (m_world, m_grid->volume (), par->voltageSource, par->sourceBarrier);
+      new SourceAgent (m_world, m_grid->volume (), par->voltageSource, par->sourceBarrier, par->sourceBarrierCalculationType, m_chargedDefects, m_chargedTraps, m_temperatureKelvin, m_zDefect, m_zTrap);
     m_world->grid ()->setAgent (m_grid->volume (), m_source);
     m_world->grid ()->setSiteID (m_grid->volume (), 2);
     m_drain =

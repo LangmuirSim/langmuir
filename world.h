@@ -10,7 +10,6 @@
 
 namespace Langmuir
 {
-  class Logger;
   class Grid;
   class Rand;
   class ChargeAgent;
@@ -149,7 +148,7 @@ namespace Langmuir
       * Default Constructor.
       */
     World();
-    
+
     /**
       * Default Destructor.
       */
@@ -198,7 +197,7 @@ namespace Langmuir
       * Get the address of a list of charged defects.
       */
     QList<unsigned int> * chargedDefects();
-	  
+
     /**
       * @brief member access.
       *
@@ -221,7 +220,6 @@ namespace Langmuir
     TripleIndexArray& interactionEnergies();
 
    private:
-    Logger               *m_logger;              // The data logger for our world (on this process)
     Grid                 *m_grid;                // The grid in use in the world
     Rand                 *m_rand;                // Random number generator
     QList<ChargeAgent *>  m_charges;             // Charge carriers in the system
@@ -236,7 +234,7 @@ namespace Langmuir
  {
   return &m_charges;
  }
-	
+
  inline QList<unsigned int> * World::chargedDefects()
  {
   return &m_chargedDefects;
@@ -246,7 +244,7 @@ namespace Langmuir
  {
   return &m_chargedTraps;
  }
-	
+
  inline Eigen::MatrixXd * World::coupling()
  {
   return &m_coupling;

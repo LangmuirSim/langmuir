@@ -2,6 +2,7 @@
 #define AGENT_H
 
 #include <vector>
+#include <QtCore>
 
 namespace Langmuir{
 

@@ -3,8 +3,6 @@
 
 #include "agent.h"
 
-#include <vector>
-
 namespace Langmuir
 {
 
@@ -19,8 +17,8 @@ namespace Langmuir
     *  Depending on the potential of the source, positive or negative charges enter the simulation be emerging from the source.
     *  @date 06/07/2010
     */
-    SourceAgent (World * world, unsigned int site, double potential =
-                 0.0, double barrier = 0.10);
+    SourceAgent (World * world, unsigned int site, double potential =0.0, double barrier = 0.10, int barrierCalculationType = 0,
+     bool chargedDefects = false, bool chargedTraps = false, double temperatureKelvin = 300.0, int zDefect = -1, int zTrap = -1 );
 
     /**
      * @brief virutal Destructor.
@@ -110,6 +108,51 @@ namespace Langmuir
     double m_pBarrier;
 
     /**
+      * @brief Injection Barrier Calculation
+      *
+      * What type of barrier calculation to perform.
+      * (0) constant: compare to a set probability
+      * (1) coulomb: determine probability from a Coulomb loop
+      */
+    int m_pBarrierCalculationType;
+
+    /**
+     * @brief defect status.
+     *
+     * If or not charged defects should be calculated.
+     */
+    bool m_chargedDefects; // include charged defects?
+
+    /**
+     * @brief trap status.
+     *
+     * If or not charged traps should be calculated.
+     */
+    bool m_chargedTraps; // include charged traps?
+
+    /**
+     * @brief simulation temperature.
+     *
+     * Temperature to compute the metropolis criterion at.
+     * @param site serial cell index of site to interact with.
+     */
+    double m_temperatureKelvin;
+
+    /**
+     * @brief Charge Defect charge.
+     *
+     * The charge on defects in the simulation.
+     */
+    int m_zDefect;
+
+    /**
+     * @brief Charge Defect charge.
+     *
+     * The charge on traps in the simulation.
+     */
+    int m_zTrap;
+
+    /**
       * @brief Charges.
       *
       * Number of charges injected.
@@ -122,6 +165,7 @@ namespace Langmuir
       * Maximum number of charges.
       */
     int m_maxCharges;
+
   };
 
   inline void SourceAgent::setMaxCharges (int number)

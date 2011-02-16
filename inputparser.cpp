@@ -333,8 +333,7 @@ namespace Langmuir
               QString potentialForm = list.at (1).trimmed ().toLower ();
               if (potentialForm == "linear")
                 {
-                  m_parameters.potentialForm =
-                    SimulationParameters::o_linearpotential;
+                  m_parameters.potentialForm = 0;
                 }
               else
                 {
@@ -636,6 +635,27 @@ namespace Langmuir
               break;
             }
 
+          case e_sourceBarrierCalculationType:
+            {
+              QString type = list.at (1).trimmed ().toLower ();
+              if (type == "constant")
+                {
+                  m_parameters.sourceBarrierCalculationType = 0;
+                }
+              else if (type == "coulomb")
+                {
+                  m_parameters.sourceBarrierCalculationType = 1;
+                }
+              else
+                {
+                  m_valid = false;
+                  qDebug () <<
+                    "options for source barrier calculation type are constant and coulomb";
+                  qFatal ("bad input");
+                }
+              break;
+            }
+
           default:
             qDebug () << "Unknown key value encountered:" << key;
           }
@@ -681,5 +701,6 @@ namespace Langmuir
     s_variables["source.barrier"] = e_sourceBarrier;
     s_variables["output.precision"] = e_outputPrecision;
     s_variables["output.width"] = e_outputWidth;
+    s_variables["source.barrier.calculation.type"] = e_sourceBarrierCalculationType;
   }
 }
