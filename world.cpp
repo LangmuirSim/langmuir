@@ -3,7 +3,7 @@
 
 namespace Langmuir {
 
-  World::World() : m_grid(0), m_rand(new Rand(0.0, 1.0))
+  World::World() : m_grid(0), m_rand(new Rand(0.0, 1.0)), m_parameters(0)
   {
     // This array is always the number of different sites + 2. The final two
     // rows/columns are for the source and drain site types.

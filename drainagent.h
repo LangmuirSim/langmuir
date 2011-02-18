@@ -3,8 +3,6 @@
 
 #include "agent.h"
 
-#include <vector>
-
 namespace Langmuir
 {
 
@@ -31,26 +29,12 @@ namespace Langmuir
      * @param potential potential of the drain.
      * @warning default potential is set to zero.
      */
-    DrainAgent(World *world, unsigned int site, double potential = 0.0);
+    DrainAgent(World *world, unsigned int site);
 
     /**
      * @brief virutal Destructor.
      */
    ~DrainAgent();
-
-    /**
-     * @brief set potential.
-     *
-     * Set the potential of the drain.
-     */
-    virtual void setPotential(double potential) { m_potential = potential; }
-
-    /**
-     * @brief get potential.
-     *
-     * Get the potential of the drain.
-     */
-    virtual double potential() { return m_potential; }
 
     /**
      * @brief attept charge move.
@@ -88,13 +72,6 @@ namespace Langmuir
     unsigned long acceptedCharges();
 
   private:
-    /**
-      * @brief potential.
-      *
-      * Potential of the drain.
-      */
-    double m_potential;
-
     /**
       * @brief total charges.
       *

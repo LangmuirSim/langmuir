@@ -38,7 +38,7 @@ grid_variables["grid.height"] = "256"
 grid_variables["grid.depth"] = "1"
 
 carrier_variables = ODict()
-carrier_variables["charge.percentage"] = "0.01"
+carrier_variables["charge.percentage"] = "1.00"
 carrier_variables["grid.charge"] = "false"
 carrier_variables["interaction.coulomb"] = "false"
 
@@ -53,7 +53,7 @@ trap_variables["delta.epsilon"] = "0.00"
 trap_variables["charged.traps"] = "false"
 trap_variables["z.trap"] = "0"
 trap_variables["traps.heterogeneous"] = "false"
-trap_variables["seed.percentage"] = "0.10"
+trap_variables["seed.percentage"] = "10.0"
 
 energy_variables = ODict()
 energy_variables["temperature.kelvin"] = "300.0"
@@ -63,6 +63,7 @@ energy_variables["potential.noise"] = "false"
 energy_variables["potential.stdev"] = "0.05"
 energy_variables["potential.averg"] = "0.00"
 energy_variables["source.barrier"] = "0.10"
+energy_variables["source.barrier.calculation.type"] = "constant"
 energy_variables["potential.form"] = "o_linearpotential"
 energy_variables["potential.point"] = "(0,0,0,0)"
 

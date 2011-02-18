@@ -3,8 +3,6 @@
 
 #include "agent.h"
 
-#include <vector>
-
 namespace Langmuir
 {
 
@@ -13,14 +11,13 @@ namespace Langmuir
 
   public:
   /**
-    *  @class DrainAgent
+    *  @class SourceAgent
     *  @brief A agent acting as a source for charges.
     *
     *  Depending on the potential of the source, positive or negative charges enter the simulation be emerging from the source.
     *  @date 06/07/2010
     */
-    SourceAgent (World * world, unsigned int site, double potential =
-                 0.0, double barrier = 0.10);
+    SourceAgent ( World * world, unsigned int site );
 
     /**
      * @brief virutal Destructor.
@@ -28,40 +25,19 @@ namespace Langmuir
     virtual ~ SourceAgent ();
 
     /**
-     * @brief set potential.
-     *
-     * Set the potential of the source.
-     */
-    virtual void setPotential (double potential)
-    {
-      m_potential = potential;
-    }
-
-    /**
-     * @brief get potential.
-     *
-     * Get the potential of the source.
-     */
-    virtual double potential ()
-    {
-      return m_potential;
-    }
-
-    /**
-     * @brief charge of agent.
-     *
-     * Get the charge of this agent.  What does that even mean for a source?
-     * @return charge the charge of this agent.
-     */
-    virtual int charge ();
-
-    /**
-     * @brief transport (from???) the source. 
+     * @brief transport (charge injection) the source.
      *
      * Agent chooses a site and hands off to site.
      * @return site index of the site the charge carrier was moved to.  -1 if the transport was unsucessful.
      */
     virtual unsigned int transport ();
+
+    /**
+      * @bried charge of the source (cause the makes sense!)
+      *
+      * The Source doesnt really have a charge.  But this method is pure within the base agent class.
+      */
+    virtual int charge() { return 1; }
 
     /**
      * @brief max charges.
@@ -95,19 +71,6 @@ namespace Langmuir
     void incrementCharge ();
 
   private:
-    /**
-      * @brief potential.
-      *
-      * Potential of the source.
-      */
-    double m_potential;
-
-    /**
-      * @brief Barrier.
-      *
-      * Not sure what this is.
-      */
-    double m_pBarrier;
 
     /**
       * @brief Charges.
@@ -122,6 +85,7 @@ namespace Langmuir
       * Maximum number of charges.
       */
     int m_maxCharges;
+
   };
 
   inline void SourceAgent::setMaxCharges (int number)

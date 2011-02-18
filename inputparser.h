@@ -28,12 +28,6 @@ namespace Langmuir
     friend QTextStream & operator<< (QTextStream & qt,
                                      SimulationParameters & par);
 
-    enum Option
-    {
-
-      o_linearpotential
-    };
-
     double voltageSource;
     double voltageDrain;
     double defectPercentage;
@@ -57,6 +51,8 @@ namespace Langmuir
     int iterationsTraj;
     int outputPrecision;
     int outputWidth;
+    int sourceBarrierCalculationType;
+    int potentialForm;
 
     bool coulomb;
     bool defectsCharged;
@@ -66,8 +62,7 @@ namespace Langmuir
     bool gaussianNoise;
     bool trapsHetero;
 
-    Option potentialForm;
-      std::vector < PotentialPoint > potentialPoints;
+    std::vector < PotentialPoint > potentialPoints;
 
       SimulationParameters ()
     {
@@ -92,7 +87,7 @@ namespace Langmuir
       trapsCharged = false;
       gridCharge = false;
       iterationsXYZ = false;
-      potentialForm = o_linearpotential;
+      potentialForm = 0;
       gaussianNoise = false;
       gaussianSTDEV = 0.05;
       gaussianAVERG = 0.00;
@@ -101,6 +96,7 @@ namespace Langmuir
       sourceBarrier = 0.10;
       outputPrecision = 5;
       outputWidth = 20;
+      sourceBarrierCalculationType = 0;
     }
   };
 
@@ -170,9 +166,10 @@ namespace Langmuir
       e_potentialAVERG,                // What is the average of the random noise
       e_trapsHetero,                // Distrubute traps heterogeneously? 
       e_seedPercentage,                // Percentage of trap seeds for heterogeneous traps
-      e_sourceBarrier,                // Probability that we inject a charge from the source ( when under max charges )
+      e_sourceBarrier,                // Probability that we inject a charge from the source ( when under max charges ) - sourceBarrierCalculationType = constant
       e_outputPrecision,        // decimal places to show in output
       e_outputWidth,                // number of char per output field
+      e_sourceBarrierCalculationType, // how to determine the probability to inject charges from the source ( constant, coulomb )
       e_end
     };
 

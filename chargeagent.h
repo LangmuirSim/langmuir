@@ -22,44 +22,15 @@ namespace Langmuir
      * @brief Default Constructor.
      *
      * Creates a charge agent.
-     * Assigns the agent a serial site index.  
-     * Points the agent to the world, where simulation parameters may be accessed.
-     * Lets the agent know the temperature to compute the metropolis criterion with.  
-     * Sets defect and coulomb options.
      * @param world address of the world object.
      * @param site serial site index.
-     * @param coulombInteraction flag to compute coulomb interactions during moves.
-     * @param temperatureKelvin temperature to compute metropolis criterion with.
-     * @warning default coulombInteraction is True.
-     * @warning default temperature is 300 K.
-     * @warning default defects set to false.
      */
-    ChargeAgent(World *world, unsigned int site, bool coulombInteraction = true, bool chargedDefects = true, bool chargedTraps = true, double temperatureKelvin = 300.0, int zDefect = -1, int zTrap = -1);
+    ChargeAgent(World *world, unsigned int site);
 
     /**
      * @brief virutal Destructor.
      */
     virtual ~ChargeAgent();
-
-    /**
-     * @brief Coulomb interactions
-     *
-     * Toggle Coulomb interaction for this charge carrier.
-     * @param enabled boolean value for option. 
-     */
-    void setCoulombInteraction(bool enabled);
-	  
-    /**
-     * @brief Charged Defects
-     *
-     * Toggle Coulomb interaction for this charge carrier with Charged defects.
-     * @param enabled boolean value for option. 
-     */
-    void setChargedDefects(bool on);
-	  
-    // Enables electrostatic interaction between charge carriers and charged trap sites
-	  
-	void setChargedTraps(bool ok);
 
     /**
      * @brief charge.
@@ -101,14 +72,6 @@ namespace Langmuir
      */
     int m_charge;
 
-   // Charge on defect
-	  
-	int m_zDefect;
-	  
-   // Charge on Trap
-	  
-	int m_zTrap;
-
     /**
      * @brief neighborlist.
      *
@@ -124,29 +87,6 @@ namespace Langmuir
     bool m_removed;
 
     /**
-     * @brief coulomb interaction status.
-     *
-     * If or not the coulomb interactions should be calculated.
-     */
-    bool m_coulombInteraction;
-
-    /**
-     * @brief defect status.
-     *
-     * If or not charged defects should be calculated.
-     */
-    bool m_chargedDefects; // include charged defects?
-	  
-	bool m_chargedTraps; // include charged traps?
-
-    /**
-     * @brief simulation temperature.
-     *
-     * Temperature to compute the metropolis criterion at.
-     */
-    double m_temperatureKelvin;
-
-    /**
      * @brief coulomb interaction.
      *
      * Calculate the potential difference arising from the Coulomb interaction
@@ -160,16 +100,21 @@ namespace Langmuir
      * @brief defect interaction.
      *
      * Calculate the potential difference arising from the Coulomb interaction
-     * between the carrier and a charged defect.
+     * between the carrier and all charged defect.
      * @param site serial cell index of site to interact with.
      * @return potential potential difference calculated.
      */
     double defectsCharged(unsigned int newSite);
-	  
-	/*Calculates the potential difference from electrostatic interactions 
-	  between carriers and charged traps*/
-	  
-	double trapsCharged(unsigned int newSite);
+
+    /**
+     * @brief defect interaction.
+     *
+     * Calculate the potential difference arising from the Coulomb interaction
+     * between the carrier and all charged traps.
+     * @param site serial cell index of site to interact with.
+     * @return potential potential difference calculated.
+     */
+    double trapsCharged(unsigned int newSite);
 
     /**
      * @brief coupling constant.

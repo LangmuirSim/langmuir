@@ -10,10 +10,10 @@
 
 namespace Langmuir
 {
-  class Logger;
   class Grid;
   class Rand;
   class ChargeAgent;
+  struct SimulationParameters;
 
   /**
     * @class Triple Index Array
@@ -149,7 +149,7 @@ namespace Langmuir
       * Default Constructor.
       */
     World();
-    
+
     /**
       * Default Destructor.
       */
@@ -168,6 +168,20 @@ namespace Langmuir
       * Set the address of the grid object.
       */
     void setGrid(Grid *grid) { m_grid = grid; }
+
+    /**
+      * @brief member access.
+      *
+      * Get the address of the parameters object.
+      */
+    SimulationParameters * parameters() const { return m_parameters; }
+
+    /**
+      * @brief member access.
+      *
+      * Set the address of the parameters object.
+      */
+    void setParameters(SimulationParameters *parameters) { m_parameters = parameters; }
 
     /**
       * @brief random number generation.
@@ -198,7 +212,7 @@ namespace Langmuir
       * Get the address of a list of charged defects.
       */
     QList<unsigned int> * chargedDefects();
-	  
+
     /**
       * @brief member access.
       *
@@ -221,9 +235,9 @@ namespace Langmuir
     TripleIndexArray& interactionEnergies();
 
    private:
-    Logger               *m_logger;              // The data logger for our world (on this process)
     Grid                 *m_grid;                // The grid in use in the world
     Rand                 *m_rand;                // Random number generator
+    SimulationParameters *m_parameters;          // Simulation Parameters
     QList<ChargeAgent *>  m_charges;             // Charge carriers in the system
     QList<unsigned int>   m_chargedDefects;      // Charged defects in the system
     QList<unsigned int>   m_chargedTraps;        // Charged traps in the system
@@ -236,7 +250,7 @@ namespace Langmuir
  {
   return &m_charges;
  }
-	
+
  inline QList<unsigned int> * World::chargedDefects()
  {
   return &m_chargedDefects;
@@ -246,7 +260,7 @@ namespace Langmuir
  {
   return &m_chargedTraps;
  }
-	
+
  inline Eigen::MatrixXd * World::coupling()
  {
   return &m_coupling;

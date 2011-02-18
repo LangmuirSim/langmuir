@@ -2,6 +2,7 @@
 import sys
 import os
 import argparse
+import subprocess
 
 parser = argparse.ArgumentParser(description='script to read/write key=value pairs to an input file')
 parser.add_argument('-i',action='store',type=str,dest='ifile',help='input file (optional)',default=None)
@@ -32,11 +33,25 @@ if options.append:
 
 else:
  if options.ifile and not options.ofile:
-  os.system('sed --in-place=.bak -e "s/^\s*#*\(%s\)=\S*\(\s*#*.*$\)/\\1=%s\\2/" %s'%(options.key,options.value,options.ifile))
-  os.system('diff %s.bak %s'%(options.ifile,options.ifile))
+  process = subprocess.Popen(['grep','-n',options.key,options.ifile],stdout=subprocess.PIPE)
+  stdout, stderr = process.communicate()
+  if len(stdout) > 0:
+   os.system('sed --in-place=.bak -e "s/^\s*#*\(%s\)=\S*\(\s*#*.*$\)/\\1=%s\\2/" %s'%(options.key,options.value,options.ifile))
+   os.system('diff %s.bak %s'%(options.ifile,options.ifile))
+  else:
+   os.system('cp %s %s.bak'%(options.ifile,options.ifile))
+   os.system('echo "%s=%s" >> %s'%(options.key,options.value,options.ifile))
+   os.system('diff %s.bak %s'%(options.ifile,options.ifile))
  if options.ifile and options.ofile:
-  os.system('sed -e "s/^\s*#*\(%s\)=\S*\(\s*#*.*$\)/\\1=%s\\2/" %s > %s'%(options.key,options.value,options.ifile,options.ofile))
-  os.system('diff %s %s'%(options.ifile,options.ofile))
+  process = subprocess.Popen(['grep','-n',options.key,options.ifile],stdout=subprocess.PIPE)
+  stdout, stderr = process.communicate()
+  if len(stdout) > 0:
+   os.system('sed -e "s/^\s*#*\(%s\)=\S*\(\s*#*.*$\)/\\1=%s\\2/" %s > %s'%(options.key,options.value,options.ifile,options.ofile))
+   os.system('diff %s %s'%(options.ifile,options.ofile))
+  else:
+   os.system('cat %s > %s'%(options.ifile,options.ofile))
+   os.system('echo "%s=%s" >> %s'%(options.key,options.value,options.ofile))
+   os.system('diff %s %s'%(options.ifile,options.ofile))
  if not options.ifile and not options.ofile:
   handle = open('default.inp','w')
   handle.write("%s=%s"%(options.key,options.value))

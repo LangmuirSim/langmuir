@@ -333,8 +333,7 @@ namespace Langmuir
               QString potentialForm = list.at (1).trimmed ().toLower ();
               if (potentialForm == "linear")
                 {
-                  m_parameters.potentialForm =
-                    SimulationParameters::o_linearpotential;
+                  m_parameters.potentialForm = 0;
                 }
               else
                 {
@@ -600,14 +599,13 @@ namespace Langmuir
 
           case e_sourceBarrier:
             {
-              m_parameters.sourceBarrier = list.at (1).toDouble () / 100;
+              m_parameters.sourceBarrier = list.at (1).toDouble ();
               if (m_parameters.sourceBarrier <= 0.00
                   || m_parameters.sourceBarrier > 1.00)
                 {
                   m_valid = false;
                   qDebug () << "Source injection probability out of range:" <<
-                    m_parameters.defectPercentage *
-                    100.0 << " (0.00 -- 100.00)";
+                    m_parameters.defectPercentage << " (0.00 -- 1.00)";
                   qFatal ("bad input");
                 }
               break;
@@ -632,6 +630,27 @@ namespace Langmuir
                 {
                   m_valid = false;
                   qDebug () << "output width must be >0.";
+                  qFatal ("bad input");
+                }
+              break;
+            }
+
+          case e_sourceBarrierCalculationType:
+            {
+              QString type = list.at (1).trimmed ().toLower ();
+              if (type == "constant")
+                {
+                  m_parameters.sourceBarrierCalculationType = 0;
+                }
+              else if (type == "coulomb")
+                {
+                  m_parameters.sourceBarrierCalculationType = 1;
+                }
+              else
+                {
+                  m_valid = false;
+                  qDebug () <<
+                    "options for source barrier calculation type are constant and coulomb";
                   qFatal ("bad input");
                 }
               break;
@@ -682,5 +701,6 @@ namespace Langmuir
     s_variables["source.barrier"] = e_sourceBarrier;
     s_variables["output.precision"] = e_outputPrecision;
     s_variables["output.width"] = e_outputWidth;
+    s_variables["source.barrier.calculation.type"] = e_sourceBarrierCalculationType;
   }
 }

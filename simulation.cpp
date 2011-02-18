@@ -23,32 +23,40 @@ namespace Langmuir
 
     Simulation::Simulation (SimulationParameters * par)
   {
-    m_world = new World;        // Create the world object
-    m_grid = new CubicGrid (par->gridWidth, par->gridHeight, par->gridDepth);        // Create the grid object
-    m_world->setGrid (m_grid);        // Let the world know about the grid
-    //createAgents(m_grid->volume(), par->voltageSource, par->voltageDrain, par->defectPercentage); // Create the agents for the simulation
-    createAgents (par);
+    // Store the address of the simulation parameters object
+    m_parameters = par;
 
-    m_coulombInteraction = par->coulomb;        // Set coulomb interactions
-    m_chargedDefects = par->defectsCharged;        // Set charged defects
-    m_chargedTraps = par->trapsCharged;        // Set charged traps
-    m_zDefect = par->zDefect;        // Set charge on defects
-    m_zTrap = par->zTrap;        // Set charge on traps
-    m_temperatureKelvin = par->temperatureKelvin;        // Set simulation temperature
+    // Create the world object
+    m_world = new World;
 
-    int nCharges = par->chargePercentage * double (m_grid->volume ());        // Calculate the number of charge carriers
-      setMaxCharges (nCharges);
+    // Create the grid object
+    m_grid = new CubicGrid (m_parameters->gridWidth, m_parameters->gridHeight, m_parameters->gridDepth);
 
-    if (par->potentialForm == SimulationParameters::o_linearpotential)        // Set up external potential calculator
+    // Let the world know about the grid
+    m_world->setGrid (m_grid);
+
+    // Let the world know about the simulation parameters
+    m_world->setParameters (m_parameters);
+
+    // Create the agents
+    createAgents ();
+
+    // Calculate the number of charge carriers
+    int nCharges = m_parameters->chargePercentage * double (m_grid->volume ());
+    m_source->setMaxCharges (nCharges);
+    m_maxcharges = nCharges;
+
+    // Set up and Calculate potential due to electrodes
+    if (m_parameters->potentialForm == 0)
       {
-        m_potential = new LinearPotential (par->potentialPoints);
+        m_potential = new LinearPotential (m_parameters->potentialPoints);
         //Add the source to the linear potential
         m_potential->
-          addSourcePoint (PotentialPoint (0, 0, 0, par->voltageSource));
+          addSourcePoint (PotentialPoint (0, 0, 0, m_parameters->voltageSource));
         //Add the drain to the linear potential
         m_potential->
           addDrainPoint (PotentialPoint
-                         (par->gridWidth, 0, 0, par->voltageDrain));
+                         (m_parameters->gridWidth, 0, 0, m_parameters->voltageDrain));
       }
     else
       {
@@ -56,25 +64,15 @@ namespace Langmuir
         throw (std::logic_error ("unknown potential"));
       }
 
-    //for ( double layer = 0; layer <= 10.0; layer += 1.0 )
-    //{
-    // QString outfilename;
-    // outfilename.setNum(layer);
-    // QFile outputFile(outfilename+".xyz");
-    // outputFile.open(QIODevice::WriteOnly | QIODevice::Text);
-    // QTextStream out(&outputFile);
-    // m_potential->plot(out,0.0,1000.0,0.0,200.0,layer,10.0,10.0);
-    //}
-    //throw(-1);
-    //qDebug() << "setting hetero traps " << par->trapsHetero;
-    if (par->trapsHetero)
-      heteroTraps (par);
-    else
-      updatePotentials (par);
+    // precalculate and store site energies
+    if (m_parameters->trapsHetero) heteroTraps ();
+    else updatePotentials ();
 
-    updateInteractionEnergies ();        // precalculate potentials for interacting charges ( carriers, defects, traps )
-    if (par->gridCharge)
-      seedCharges ();                // Charge the grid up is specified
+    // precalculate and store coulomb interaction energies
+    updateInteractionEnergies ();
+
+    // place charges on the grid randomly
+    if (m_parameters->gridCharge) seedCharges ();
 
   }
 
@@ -85,12 +83,6 @@ namespace Langmuir
     delete m_potential;
     m_world = 0;
     m_grid = 0;
-  }
-
-  void Simulation::setMaxCharges (int n)
-  {
-    m_source->setMaxCharges (n);
-    m_maxcharges = n;
   }
 
   bool Simulation::seedCharges ()
@@ -108,46 +100,13 @@ namespace Langmuir
           int (m_world->random () * (double (nSites) - 0.00001));
         if (grid->siteID (site) == 0 && grid->agent (site) == 0)
           {
-            ChargeAgent *charge =
-              new ChargeAgent (m_world, site, m_coulombInteraction,
-                               m_chargedDefects, m_chargedTraps,
-                               m_temperatureKelvin, m_zDefect, m_zTrap);
+            ChargeAgent *charge = new ChargeAgent (m_world, site);
             m_world->charges ()->push_back (charge);
             m_source->incrementCharge ();
             ++i;
           }
       }
     return true;
-  }
-
-  void Simulation::setCoulombInteractions (bool enabled)
-  {
-    m_coulombInteraction = enabled;
-  }
-
-  void Simulation::setChargedDefects (bool on)
-  {
-    m_chargedDefects = on;
-  }
-
-  void Simulation::setChargedTraps (bool ok)
-  {
-    m_chargedTraps = ok;
-  }
-
-  void Simulation::setZdefect (int zDefect)
-  {
-    m_zDefect = zDefect;
-  }
-
-  void Simulation::setZtrap (int zTrap)
-  {
-    m_zTrap = zTrap;
-  }
-
-  void Simulation::setTemperature (double temperatureKelvin)
-  {
-    m_temperatureKelvin = temperatureKelvin;
   }
 
   void Simulation::performIterations (int nIterations)
@@ -174,10 +133,7 @@ namespace Langmuir
 
         if (site != errorValue)
           {
-            ChargeAgent *charge =
-              new ChargeAgent (m_world, site, m_coulombInteraction,
-                               m_chargedDefects, m_chargedTraps,
-                               m_temperatureKelvin, m_zDefect, m_zTrap);
+            ChargeAgent *charge = new ChargeAgent (m_world, site );
             m_world->charges ()->push_back (charge);
           }
       }
@@ -209,22 +165,18 @@ namespace Langmuir
     unsigned int height = m_world->grid ()->height ();
     for (unsigned int j = 0; j < height; ++j)
       {
-        qDebug () << "||";
+        std::cout << "||";
         for (unsigned int i = 0; i < width; ++i)
           {
-            if (m_world->grid ()->agent (i + j * width))
-              {                        // Charge is present
-                if (m_world->grid ()->siteID (i + j * width) == 0)
-                  qDebug () << "*";
-                else
-                  qDebug () << "x";
-              }
-            else if (m_world->grid ()->siteID (i + j * width) == 1)
-              qDebug () << "O";
-            else
-              qDebug () << " ";
+            int index = m_world->grid()->getIndex(i,j,0);
+            if (m_world->grid ()->agent (index))
+            {
+             if (m_world->grid ()->siteID(index) == 0) { std::cout << "*"; }
+             else { std::cout << m_world->grid()->siteID(index); }
+            }
+            else std::cout << " ";
           }
-        qDebug () << "||\n";
+        std::cout << "||\n";
       }
   }
 
@@ -238,8 +190,7 @@ namespace Langmuir
     return m_world->charges ()->size ();
   }
 
-//  void Simulation::createAgents( unsigned int numAgents, double sourcePotential, double drainPotential, double defectPercent )
-  void Simulation::createAgents (SimulationParameters * par)
+  void Simulation::createAgents ()
   {
     /**
      * Each site is assigned an ID, this ID identifies the type of site and
@@ -258,7 +209,7 @@ namespace Langmuir
     // Add the agents
     for (unsigned int i = 0; i < m_grid->volume (); ++i)
       {
-        if (m_world->random () < par->defectPercentage)
+        if (m_world->random () < m_parameters->defectPercentage)
           {
             m_world->grid ()->setSiteID (i, 1);        //defect
             m_world->chargedDefects ()->push_back (i);        //Add defect to list - for charged defects
@@ -269,12 +220,10 @@ namespace Langmuir
           }
       }
     // Add the source and the drain
-    m_source =
-      new SourceAgent (m_world, m_grid->volume (), par->voltageSource, par->sourceBarrier);
+    m_source = new SourceAgent (m_world, m_grid->volume ());
     m_world->grid ()->setAgent (m_grid->volume (), m_source);
     m_world->grid ()->setSiteID (m_grid->volume (), 2);
-    m_drain =
-      new DrainAgent (m_world, m_grid->volume () + 1, par->voltageDrain);
+    m_drain = new DrainAgent (m_world, m_grid->volume () + 1);
     m_world->grid ()->setAgent (m_grid->volume () + 1, m_drain);
     m_world->grid ()->setSiteID (m_grid->volume () + 1, 3);
 
@@ -323,7 +272,8 @@ namespace Langmuir
     delete m_drain;
     m_drain = 0;
   }
-  void Simulation::heteroTraps (SimulationParameters * par)
+
+  void Simulation::heteroTraps ()
   {
     double tPotential = 0;
     double gaussianDisorder = 0.0;
@@ -341,11 +291,11 @@ namespace Langmuir
                   m_potential->calculate (x + 0.5, y + 0.5, z + 0.5);
 
                 // Randomly add some noise
-                if (par->gaussianNoise)
+                if (m_parameters->gaussianNoise)
                   {
                     gaussianDisorder =
-                      m_world->random (par->gaussianAVERG,
-                                       par->gaussianSTDEV);
+                      m_world->random (m_parameters->gaussianAVERG,
+                                       m_parameters->gaussianSTDEV);
                     tPotential += gaussianDisorder;
                   }
 
@@ -355,10 +305,10 @@ namespace Langmuir
 
                 // Add seeds for heterogeneous traps
                 if (m_world->random () <
-                    ((par->seedPercentage) * (par->trapPercentage)))
+                    ((m_parameters->seedPercentage) * (m_parameters->trapPercentage)))
                   {
                     m_grid->setPotential (site,
-                                          (tPotential + par->deltaEpsilon));
+                                          (tPotential + m_parameters->deltaEpsilon));
                     m_world->chargedTraps ()->push_back (site);
                   }
 
@@ -372,8 +322,8 @@ namespace Langmuir
       }
 
     int trapCount =
-      (par->trapPercentage) * (par->gridWidth) * (par->gridHeight) *
-      (par->gridDepth);
+      (m_parameters->trapPercentage) * (m_parameters->gridWidth) * (m_parameters->gridHeight) *
+      (m_parameters->gridDepth);
 
     //qDebug() << "Trap Seeds: " << m_world->chargedTraps()->size(); 
     //for (int i = 0; i < m_world->chargedTraps()->size(); i++)
@@ -404,7 +354,7 @@ namespace Langmuir
 
         else
           {                        // create a new trap site and save it
-            m_grid->setPotential (newTrap, (tPotential + par->deltaEpsilon));
+            m_grid->setPotential (newTrap, (tPotential + m_parameters->deltaEpsilon));
             m_world->chargedTraps ()->push_back (newTrap);
             //qDebug() << "Traps: " << m_world->chargedTraps()->size();
           }
@@ -421,7 +371,7 @@ namespace Langmuir
 
   }
 
-  void Simulation::updatePotentials (SimulationParameters * par)
+  void Simulation::updatePotentials ()
   {
 
     double tPotential = 0;
@@ -439,11 +389,11 @@ namespace Langmuir
                   m_potential->calculate (x + 0.5, y + 0.5, z + 0.5);
 
                 // Randomly add some noise
-                if (par->gaussianNoise)
+                if (m_parameters->gaussianNoise)
                   {
                     gaussianDisorder =
-                      m_world->random (par->gaussianAVERG,
-                                       par->gaussianSTDEV);
+                      m_world->random (m_parameters->gaussianAVERG,
+                                       m_parameters->gaussianSTDEV);
                     tPotential += gaussianDisorder;
                   }
 
@@ -452,10 +402,10 @@ namespace Langmuir
                   x + m_grid->width () * y + z * m_grid->area ();
 
                 // We can randomly tweak a site energy
-                if (m_world->random () < par->trapPercentage)
+                if (m_world->random () < m_parameters->trapPercentage)
                   {
                     m_grid->setPotential (site,
-                                          (tPotential + par->deltaEpsilon));
+                                          (tPotential + m_parameters->deltaEpsilon));
                     m_world->chargedTraps ()->push_back (site);
                   }
 
@@ -473,9 +423,7 @@ namespace Langmuir
     m_grid->setSourcePotential (m_potential->calculate (0.0, 0.0, 0.0));
 
     //Set the potential of the Drain
-    m_grid->setDrainPotential (m_potential->
-                               calculate (double (m_grid->width ()), 0.0,
-                                          0.0));
+    m_grid->setDrainPotential (m_potential->calculate (double (m_grid->width ()), 0.0,0.0));
 
 /*
    // We are assuming one source, one drain that are parallel.
