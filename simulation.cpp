@@ -165,22 +165,18 @@ namespace Langmuir
     unsigned int height = m_world->grid ()->height ();
     for (unsigned int j = 0; j < height; ++j)
       {
-        qDebug () << "||";
+        std::cout << "||";
         for (unsigned int i = 0; i < width; ++i)
           {
-            if (m_world->grid ()->agent (i + j * width))
-              {                        // Charge is present
-                if (m_world->grid ()->siteID (i + j * width) == 0)
-                  qDebug () << "*";
-                else
-                  qDebug () << "x";
-              }
-            else if (m_world->grid ()->siteID (i + j * width) == 1)
-              qDebug () << "O";
-            else
-              qDebug () << " ";
+            int index = m_world->grid()->getIndex(i,j,0);
+            if (m_world->grid ()->agent (index))
+            {
+             if (m_world->grid ()->siteID(index) == 0) { std::cout << "*"; }
+             else { std::cout << m_world->grid()->siteID(index); }
+            }
+            else std::cout << " ";
           }
-        qDebug () << "||\n";
+        std::cout << "||\n";
       }
   }
 

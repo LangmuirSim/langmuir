@@ -158,6 +158,8 @@ main (int argc, char *argv[])
                        lastCount) / double (par.iterationsPrint) << "\n";
           iout->flush ();
           lastCount = sim.totalChargesAccepted ();
+
+          //sim.printGrid();
         }
 
       // Perform production
@@ -186,6 +188,8 @@ main (int argc, char *argv[])
                        lastCount) / double (par.iterationsPrint) << "\n";
           iout->flush ();
           lastCount = sim.totalChargesAccepted ();
+
+          //sim.printGrid();
         }
 
       // Now to output the result of the simulation at this data point

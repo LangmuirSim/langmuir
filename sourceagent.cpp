@@ -1,4 +1,5 @@
 #include "sourceagent.h"
+#include "chargeagent.h"
 #include "world.h"
 #include "grid.h"
 #include "inputparser.h"
@@ -21,7 +22,11 @@ namespace Langmuir
 
     // Determine whether a transport event will be attempted this tick
     // Used to maintain the average number of charges in the system
-    if (m_charges >= m_maxCharges) return -1;
+    if (m_charges >= m_maxCharges) 
+    {
+     //qDebug() << "R (we are at max charges)";
+     return -1;
+    }
 
     switch ( m_world->parameters()->sourceBarrierCalculationType )
     {
@@ -56,18 +61,75 @@ namespace Langmuir
        {
         irn = int ( m_world->random () * double ( m_neighbors.size () - 0.00000001 ) );
         tries += 1;
-        if ( tries >= 1000 ) return -1;
+        if ( tries >= 1000 ) 
+        {
+         //qDebug() << "R (we can't find an empty site)";
+         return -1;
+        }
        }
 
-       // Perform a Coulomb calculation
-       const double q = 1.60217646e-19; // Magnitude of charge on an electron
-       // Prefactor for force calculations q / 4 pi epsilon with a 1e-9 for m -> nm
-       const double q4pe = q / (4.0*M_PI*8.854187817e-12 * 3.5 * 1e-9);
-       // Cutting off interaction energies at 50nm
+       double potential = 0;
+       const double q4pe = 1.60217646e-19 / (4.0*M_PI*8.854187817e-12 * 3.5 * 1e-9);
        int cutoff = 50;
-       // Pointer to the grid
        Grid *grid = m_world->grid();
+       const double kTinv = 1/(1.3806504e-23*m_world->parameters()->temperatureKelvin);
+       {
+        QList<ChargeAgent *> &charges = *m_world->charges();
+        double v = 0.0;
+        for (int i = 0; i < charges.size(); ++i) {
+          int dx = grid->xDistancei(irn, charges[i]->site());
+          int dy = grid->yDistancei(irn, charges[i]->site());
+          int dz = grid->zDistancei(irn, charges[i]->site());
+          if ( dx < cutoff && dy < cutoff && dz < cutoff ) { v += m_world->interactionEnergies()(dx,dy,dz)*charges[i]->charge(); }
+        }
+        potential += ( -1 * q4pe * v );
+       }
+/*
+       if ( m_world->parameters()->defectsCharged )
+       {
+        QList<unsigned int> &chargedDefects = *m_world->chargedDefects();
+        double v = 0.0;
+        for (int i = 0; i < chargedDefects.size(); ++i) {
+          int dx = grid->xDistancei(irn, chargedDefects[i]);
+          int dy = grid->yDistancei(irn, chargedDefects[i]);
+          int dz = grid->zDistancei(irn, chargedDefects[i]);
+          if ( dx < cutoff && dy < cutoff && dz < cutoff ) { v += m_world->interactionEnergies()(dx,dy,dz); }
+        }
+        potential += m_world->parameters()->zDefect * q4pe * v;
+       }
 
+       if ( m_world->parameters()->trapsCharged )
+       {
+        QList<unsigned int> &chargedTraps = *m_world->chargedTraps();
+        double v = 0.0;
+        for (int i = 0; i < chargedDefects.size(); ++i) {
+          int dx = grid->xDistancei(irn, chargedTraps[i]);
+          int dy = grid->yDistancei(irn, chargedTraps[i]);
+          int dz = grid->zDistancei(irn, chargedTraps[i]);
+          if ( dx < cutoff && dy < cutoff && dz < cutoff ) { v += m_world->interactionEnergies()(dx,dy,dz); }
+        }
+        potential += m_world->parameters()->zTrap * q4pe * v;
+       }
+*/
+       if ( potential > 0 )
+       {
+        double random_number = m_world->random();
+        if ( exp(-potential*kTinv) > random_number )
+        {
+         ++m_charges; //qDebug() << "(A) V>0 ["<<potential<<"] E["<<exp(-potential*kTinv)<<"] R["<<random_number<<"]";
+         return m_neighbors[irn];
+        }
+        else
+        {
+         //qDebug() << "(R) V>0["<<potential<<"] E["<<exp(-potential*kTinv)<<"] R["<<random_number<<"]";
+         return -1;
+        }
+       }
+       else
+       {
+        ++m_charges; //qDebug() << "(A) V<0["<<potential<<"] E["<<exp(-potential*kTinv)<<"] R["<<1.0<<"]";
+        return m_neighbors[irn];
+       }
        break;
       }
 
@@ -79,44 +141,6 @@ namespace Langmuir
     }
 
     return -1;
-
-/*
- {
-  const double q = 1.60217646e-19; // Magnitude of charge on an electron
-  // Prefactor for force calculations q / 4 pi epsilon with a 1e-9 for m -> nm
-  const double q4pe = q / (4.0*M_PI*8.854187817e-12 * 3.5 * 1e-9);
-	
-  // Cutting off interaction energies at 50nm
-  int cutoff = 50;
-
-  Grid *grid = m_world->grid();
-		
-  // Figure out the potential of the site we are on
-  QList<unsigned int> &chargedDefects = *m_world->chargedDefects();
-  double potential1(0.0), potential2(0.0);
-  int defectSize(chargedDefects.size());
-  for (int i = 0; i < defectSize; ++i) {
-  // Potential at current site from charged defects
-  int dx = grid->xDistancei(m_site, chargedDefects[i]);
-  int dy = grid->yDistancei(m_site, chargedDefects[i]);
-  int dz = grid->zDistancei(m_site, chargedDefects[i]);
-  if (dx < cutoff && dy < cutoff && dz < cutoff) {
-   potential1 += m_world->interactionEnergies()(dx,dy,dz)*chargedDefects[i];
-  }
-  // Potential at new site from charged defects
-  if (newSite != chargedDefects[i]) {
-   dx = grid->xDistancei(newSite, chargedDefects[i]);
-   dy = grid->yDistancei(newSite, chargedDefects[i]);
-   dz = grid->zDistancei(newSite, chargedDefects[i]);
-  if (dx < cutoff && dy < cutoff && dz < cutoff) {
-   potential2 += m_world->interactionEnergies()(dx,dy,dz)*chargedDefects[i];
-  }
- }
- else {
- return -1;
- }
-}
-*/
 /*
     // Determine whether a transport event will be attempted this tick
     // Used to maintain the average number of charges in the system
@@ -142,5 +166,4 @@ namespace Langmuir
     return -1;
 */
   }
-
 }                                // End Langmuir namespace
