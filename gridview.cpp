@@ -26,6 +26,11 @@ namespace Langmuir
   {
    glewInit();
 
+   const char * opgl = (const char *)glGetString(GL_VERSION);
+   qDebug() << opgl;
+   const char * glsl = (const char *)glGetString(GL_SHADING_LANGUAGE_VERSION);
+   qDebug() << glsl;
+
    QVector<float> pos(16,0);
    QVector<float> col(16,0);
 
@@ -61,6 +66,7 @@ namespace Langmuir
    vfile.close();
    char * vsource = new char[varray.size()];
    for ( int i = 0; i < varray.size(); i++ ) vsource[i] = varray[i];
+   vsource[varray.size()-1] = '\0';
 
    QFile ffile("shader.frag");
    if (!ffile.open(QIODevice::ReadOnly|QIODevice::Text)) qFatal("can not open shader file");
@@ -68,6 +74,7 @@ namespace Langmuir
    ffile.close();
    char * fsource = new char[farray.size()];
    for ( int i = 0; i < farray.size(); i++ ) fsource[i] = farray[i];
+   fsource[farray.size()-1] = '\0';
 
    vshader = glCreateShader(GL_VERTEX_SHADER);
    glShaderSource(vshader,1,(const GLchar**)&vsource,0);
