@@ -5,10 +5,6 @@
 #include <QtGui>
 #include <GL/glew.h>
 #include <QGLWidget>
-#include <QGLShader>
-#include <QGLShaderProgram>
-#include <QMatrix>
-#include <QGLBuffer>
 
 namespace Langmuir
 {
@@ -16,35 +12,59 @@ namespace Langmuir
   class GridViewGL:public QGLWidget
   {
   Q_OBJECT public:
-    GridViewGL (QWidget * parent);
-   ~GridViewGL ();
-    QSize minimumSizeHint () const;
-    QSize sizeHint () const;
+    GridViewGL(QWidget * parent);
+   ~GridViewGL();
+    QSize minimumSizeHint() const;
+    QSize sizeHint() const;
 
-  protected:
-    void initializeGL ();
-    void resizeGL (int w, int h);
-    void paintGL ();
+   public slots:
+    void setXRotation(int angle);
+    void setYRotation(int angle);
+    void setZRotation(int angle);
+    void setXTranslation(float length);
+    void setYTranslation(float length);
+    void setZTranslation(float length);
+    void timerUpdateGL();
 
-  private:
+   signals:
+    void xRotationChanged(int angle);
+    void yRotationChanged(int angle);
+    void zRotationChanged(int angle);
+    void xTranslationChanged(float length);
+    void yTranslationChanged(float length);
+    void zTranslationChanged(float length);
 
-   GLuint program;
-   GLuint vshader;
-   GLuint fshader;
+   protected:
+    void initializeGL();
+    void resizeGL(int w, int h);
+    void paintGL();
+    void mousePressEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
+    void wheelEvent(QWheelEvent *event);
+    void keyPressEvent(QKeyEvent *event);
 
-   GLuint varray;
-   GLuint vbuffer;
-   GLuint fbuffer;
-
+   private:
+    void NormalizeAngle(int &angle);
+    int xRot;
+    int yRot;
+    int zRot;
+    float xTran;
+    float yTran;
+    float zTran;
+    float xDelta;
+    float yDelta;
+    float zDelta;
+    QPoint lastPos;
+    QTimer *timer;
   };
 
   class MainWindow:public QWidget
   {
   Q_OBJECT public:
-    MainWindow ();
+    MainWindow();
 
-  private:
-    GridViewGL * glWidget;
+    private:
+     GridViewGL * glWidget;
   };
 
 }
