@@ -28,7 +28,7 @@ namespace Langmuir
      return -1;
     }
 
-    switch ( m_world->parameters()->sourceBarrierCalculationType )
+    switch ( m_world->parameters()->sourceType )
     {
       case 0: //constant case
       {
@@ -85,7 +85,7 @@ namespace Langmuir
         potential += ( -1 * q4pe * v );
        }
 /*
-       if ( m_world->parameters()->defectsCharged )
+       if ( m_world->parameters()->chargedDefects )
        {
         QList<unsigned int> &chargedDefects = *m_world->chargedDefects();
         double v = 0.0;
@@ -98,7 +98,7 @@ namespace Langmuir
         potential += m_world->parameters()->zDefect * q4pe * v;
        }
 
-       if ( m_world->parameters()->trapsCharged )
+       if ( m_world->parameters()->chargedTraps )
        {
         QList<unsigned int> &chargedTraps = *m_world->chargedTraps();
         double v = 0.0;

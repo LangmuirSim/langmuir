@@ -12,9 +12,7 @@ using namespace std;
 namespace Langmuir
 {
 
-  InputParser::InputParser (const QString &
-                            fileName):m_varyType (e_undefined), m_start (0.0),
-    m_final (0.0), m_steps (1), m_valid (true), m_step (0), m_value (0.0)
+  InputParser::InputParser (const QString & fileName)
   {
     if (s_variables.isEmpty ())
       initializeVariables ();
@@ -40,72 +38,49 @@ namespace Langmuir
       {
         m_parameters.outputWidth = 20;
       }
+    if ( m_parameters.defectPercentage > 1.00 - m_parameters.trapPercentage ) qFatal("percent defects + percent traps > 100 percent");
 
   }
 
   bool InputParser::simulationParameters (SimulationParameters * par,
                                           int step)
   {
-    if (step < 0 || step >= m_steps)        // Invalid step supplied, do nothing
+    if (step < 0 || step >= m_parameters.variableSteps)        // Invalid step supplied, do nothing
       return false;
-
-    // Record the current step  
-    m_step = step;
 
     // Copy our parameters
     *par = m_parameters;
 
     // Work out which variable to change, and supply the correct variable
     double tmp =
-      double (step) * (m_final - m_start) / double (m_steps - 1) + m_start;
+      double (step) * (m_parameters.variableFinal -
+                       m_parameters.variableStart) /
+      double (m_parameters.variableSteps - 1) + m_parameters.variableStart;
 
-    switch (m_varyType)
+    switch (m_parameters.variableWorking)
       {
       case e_voltageSource:
         par->voltageSource = tmp;
-        m_value = par->voltageSource;
         break;
       case e_voltageDrain:
         par->voltageDrain = tmp;
-        m_value = par->voltageDrain;
         break;
       case e_defectPercentage:
         par->defectPercentage = tmp / 100.0;
-        m_value = par->defectPercentage;
         break;
       case e_trapPercentage:
         par->trapPercentage = tmp / 100.0;
-        m_value = par->trapPercentage;
         break;
       case e_chargePercentage:
         par->chargePercentage = tmp / 100.0;
-        m_value = par->chargePercentage;
         break;
       case e_temperatureKelvin:
         par->temperatureKelvin = tmp;
-        m_value = par->temperatureKelvin;
         break;
       default:
-        m_valid = false;
-        m_value = 0.0;
         return false;
       }
     return true;
-  }
-
-  QString InputParser::workingVariable () const
-  {
-    switch (m_varyType)
-      {
-      case e_voltageSource:
-        return "voltage.source";
-        case e_voltageDrain:return "voltage.drain";
-        case e_defectPercentage:return "defect.percentage";
-        case e_trapPercentage:return "trap.percentage";
-        case e_chargePercentage:return "charge.percentage";
-        case e_temperatureKelvin:return "temperature.kelvin";
-        default:return "single.point";
-      }
   }
 
   inline void InputParser::processLine (QIODevice * file)
@@ -114,7 +89,10 @@ namespace Langmuir
     if (line.at (0) == '#')
       return;
 
-    QStringList list = line.split("#",QString::SkipEmptyParts).at(0).split ('=', QString::SkipEmptyParts);
+    QStringList list =
+      line.split ("#", QString::SkipEmptyParts).at (0).split ('=',
+                                                              QString::
+                                                              SkipEmptyParts);
 
     if (list.size () == 2)
       {
@@ -139,11 +117,10 @@ namespace Langmuir
           case e_defectPercentage:
             {
               m_parameters.defectPercentage = list.at (1).toDouble () / 100;
-              if (m_parameters.defectPercentage < 0.00
-                  || m_parameters.defectPercentage >
-                  (1.00 - trapPercentage ()))
+              if (m_parameters.defectPercentage < 0.00)
+                //|| m_parameters.defectPercentage >
+                //(1.00 - trapPercentage ()))
                 {
-                  m_valid = false;
                   qDebug () << "Defect percentage out of range:" <<
                     m_parameters.defectPercentage *
                     100.0 << " (0.00 -- 100.00)";
@@ -155,11 +132,10 @@ namespace Langmuir
           case e_trapPercentage:
             {
               m_parameters.trapPercentage = list.at (1).toDouble () / 100.0;
-              if (m_parameters.trapPercentage < 0.00
-                  || m_parameters.trapPercentage >
-                  (1.00 - defectPercentage ()))
+              if (m_parameters.trapPercentage < 0.00)
+                //|| m_parameters.trapPercentage >
+                //(1.00 - defectPercentage ()))
                 {
-                  m_valid = false;
                   qDebug () << "Trap percentage out of range:" <<
                     m_parameters.trapPercentage *
                     100.0 << " (0.00 -- 100.00)";
@@ -174,7 +150,6 @@ namespace Langmuir
               if (m_parameters.chargePercentage < 0.00
                   || m_parameters.chargePercentage > 1.00)
                 {
-                  m_valid = false;
                   qDebug () << "Charge percentage out of range:" <<
                     m_parameters.chargePercentage *
                     100.0 << " (0.00 -- 100.00)";
@@ -188,7 +163,6 @@ namespace Langmuir
               m_parameters.temperatureKelvin = list.at (1).toDouble ();
               if (m_parameters.temperatureKelvin <= 0)
                 {
-                  m_valid = false;
                   qDebug () << "Absolute temperature must be > 0K";
                   qFatal ("bad input");
                 }
@@ -203,19 +177,18 @@ namespace Langmuir
 
           case e_variableWorking:
             {
-              m_varyType =
+              m_parameters.variableWorking =
                 s_variables.value (list.at (1).toLower ().trimmed ());
-              if (m_varyType == e_voltageSource ||
-                  m_varyType == e_voltageDrain ||
-                  m_varyType == e_defectPercentage ||
-                  m_varyType == e_trapPercentage ||
-                  m_varyType == e_chargePercentage ||
-                  m_varyType == e_temperatureKelvin)
+              if (m_parameters.variableWorking == e_voltageSource ||
+                  m_parameters.variableWorking == e_voltageDrain ||
+                  m_parameters.variableWorking == e_defectPercentage ||
+                  m_parameters.variableWorking == e_trapPercentage ||
+                  m_parameters.variableWorking == e_chargePercentage ||
+                  m_parameters.variableWorking == e_temperatureKelvin)
                 {
                 }
               else
                 {
-                  m_valid = false;
                   qDebug () << "Working variable set to an invalid type:"
                     << list.at (1).toLower ().trimmed ();
                   qFatal ("bad input");
@@ -225,22 +198,21 @@ namespace Langmuir
 
           case e_variableStart:
             {
-              m_start = list.at (1).toDouble ();
+              m_parameters.variableStart = list.at (1).toDouble ();
               break;
             }
 
           case e_variableFinal:
             {
-              m_final = list.at (1).toDouble ();
+              m_parameters.variableFinal = list.at (1).toDouble ();
               break;
             }
 
           case e_variableSteps:
             {
-              m_steps = list.at (1).toInt ();
-              if (m_steps < 1)
+              m_parameters.variableSteps = list.at (1).toInt ();
+              if (m_parameters.variableSteps < 1)
                 {
-                  m_valid = false;
                   qDebug () << "Number of steps must be >=1.";
                   qFatal ("bad input");
                 }
@@ -252,7 +224,6 @@ namespace Langmuir
               m_parameters.gridWidth = list.at (1).toInt ();
               if (m_parameters.gridWidth < 1)
                 {
-                  m_valid = false;
                   qDebug () << "Grid width must be >=1.";
                   qFatal ("bad input");
                 }
@@ -264,7 +235,6 @@ namespace Langmuir
               m_parameters.gridHeight = list.at (1).toInt ();
               if (m_parameters.gridHeight < 1)
                 {
-                  m_valid = false;
                   qDebug () << "Grid height must be >=1.";
                   qFatal ("bad input");
                 }
@@ -276,7 +246,6 @@ namespace Langmuir
               m_parameters.gridDepth = list.at (1).toInt ();
               if (m_parameters.gridDepth < 1)
                 {
-                  m_valid = false;
                   qDebug () << "Grid depth must be >=1.";
                   qFatal ("bad input");
                 }
@@ -288,7 +257,6 @@ namespace Langmuir
               m_parameters.zDefect = list.at (1).toInt ();
               if (m_parameters.zDefect < -1 || m_parameters.zDefect > 1)
                 {
-                  m_valid = false;
                   qDebug () << "Charge on defect must be +/- 1e";
                   qFatal ("bad input");
                 }
@@ -300,7 +268,6 @@ namespace Langmuir
               m_parameters.zTrap = list.at (1).toInt ();
               if (m_parameters.zTrap < -1 || m_parameters.zTrap > 1)
                 {
-                  m_valid = false;
                   qDebug () << "Charge on trap must be +/- 1e";
                   qFatal ("bad input");
                 }
@@ -320,7 +287,6 @@ namespace Langmuir
                 }
               else
                 {
-                  m_valid = false;
                   qDebug () << "Charging the grid is either true or false:" <<
                     gridCharge;
                   qFatal ("bad input");
@@ -337,7 +303,6 @@ namespace Langmuir
                 }
               else
                 {
-                  m_valid = false;
                   qDebug () << "potential.form must be linear:" <<
                     m_parameters.potentialForm;
                   qFatal ("bad input");
@@ -350,7 +315,6 @@ namespace Langmuir
               m_parameters.iterationsWarmup = list.at (1).toInt ();
               if (m_parameters.iterationsWarmup < 0)
                 {
-                  m_valid = false;
                   qDebug () << "Warmup iterations must be >=0.";
                   qFatal ("bad input");
                 }
@@ -362,7 +326,6 @@ namespace Langmuir
               m_parameters.iterationsReal = list.at (1).toInt ();
               if (m_parameters.iterationsReal < 1)
                 {
-                  m_valid = false;
                   qDebug () << "Real iterations must be >=1.";
                   qFatal ("bad input");
                 }
@@ -374,20 +337,7 @@ namespace Langmuir
               m_parameters.iterationsPrint = list.at (1).toInt ();
               if (m_parameters.iterationsPrint < 0)
                 {
-                  m_valid = false;
                   qDebug () << "Print iterations must be >=0.";
-                  qFatal ("bad input");
-                }
-              break;
-            }
-
-          case e_iterationsTraj:
-            {
-              m_parameters.iterationsTraj = list.at (1).toInt ();
-              if (m_parameters.iterationsTraj < 0)
-                {
-                  m_valid = false;
-                  qDebug () << "Traj iterations must be >=0.";
                   qFatal ("bad input");
                 }
               break;
@@ -406,7 +356,6 @@ namespace Langmuir
                 }
               else
                 {
-                  m_valid = false;
                   qDebug () <<
                     "Coulomb interactions are either true or false:" <<
                     interaction;
@@ -415,61 +364,58 @@ namespace Langmuir
               break;
             }
 
-          case e_defectsCharged:
+          case e_chargedDefects:
             {
               QString interaction = list.at (1).trimmed ().toLower ();
               if (interaction == "true")
                 {
-                  m_parameters.defectsCharged = true;
+                  m_parameters.chargedDefects = true;
                 }
               else if (interaction == "false")
                 {
-                  m_parameters.defectsCharged = false;
+                  m_parameters.chargedDefects = false;
                 }
               else
                 {
-                  m_valid = false;
                   qDebug () << "Charged defects are either true or false: ";
                   qFatal ("bad input");
                 }
               break;
             }
 
-          case e_trapsCharged:
+          case e_chargedTraps:
             {
               QString interaction = list.at (1).trimmed ().toLower ();
               if (interaction == "true")
                 {
-                  m_parameters.trapsCharged = true;
+                  m_parameters.chargedTraps = true;
                 }
               else if (interaction == "false")
                 {
-                  m_parameters.trapsCharged = false;
+                  m_parameters.chargedTraps = false;
                 }
               else
                 {
-                  m_valid = false;
                   qDebug () << "Charged traps are either true or false: ";
                   qFatal ("bad input");
                 }
               break;
             }
 
-          case e_iterationsXYZ:
+          case e_outputXyz:
             {
               QString interaction = list.at (1).trimmed ().toLower ();
               if (interaction == "true")
                 {
-                  m_parameters.iterationsXYZ = true;
+                  m_parameters.outputXyz = true;
                 }
               else if (interaction == "false")
                 {
-                  m_parameters.iterationsXYZ = false;
+                  m_parameters.outputXyz = false;
                 }
               else
                 {
-                  m_valid = false;
-                  qDebug () << "iterations.xyz is either true or false: ";
+                  qDebug () << "output.xyz is either true or false: ";
                   qFatal ("bad input");
                 }
               break;
@@ -478,11 +424,10 @@ namespace Langmuir
           case e_potentialPoint:
             {
               QStringList q =
-                list.at (1).trimmed ().toLower ().remove ("(").remove (")").
-                split (",");
+                list.at (1).trimmed ().toLower ().remove ("(").
+                remove (")").split (",");
               if (q.length () != 4)
                 {
-                  m_valid = false;
                   qDebug () << "Invalid potential.point specified: " << q;
                   qFatal ("bad input");
                 }
@@ -515,17 +460,16 @@ namespace Langmuir
                     ok;
                   qFatal ("bad input");
                 }
-              m_parameters.potentialPoints.
-                push_back (PotentialPoint (x, y, z, V));
+              m_parameters.
+                potentialPoints.push_back (PotentialPoint (x, y, z, V));
               break;
             }
 
-          case e_potentialSTDEV:
+          case e_gaussianStdev:
             {
-              m_parameters.gaussianSTDEV = list.at (1).toDouble ();
-              if (m_parameters.gaussianSTDEV <= 0.00)
+              m_parameters.gaussianStdev = list.at (1).toDouble ();
+              if (m_parameters.gaussianStdev <= 0.00)
                 {
-                  m_valid = false;
                   qDebug () <<
                     "Negative or zero standard deviation specified for random noise";
                   qFatal ("bad input");
@@ -533,13 +477,13 @@ namespace Langmuir
               break;
             }
 
-          case e_potentialAVERG:
+          case e_gaussianAverg:
             {
-              m_parameters.gaussianAVERG = list.at (1).toDouble ();
+              m_parameters.gaussianAverg = list.at (1).toDouble ();
               break;
             }
 
-          case e_potentialNoise:
+          case e_gaussianNoise:
             {
               QString choice = list.at (1).trimmed ().toLower ();
               if (choice == "true")
@@ -552,27 +496,25 @@ namespace Langmuir
                 }
               else
                 {
-                  m_valid = false;
                   qDebug () << "potential.noise is either true or false: ";
                   qFatal ("bad input");
                 }
               break;
             }
 
-          case e_trapsHetero:
+          case e_trapsHeterogeneous:
             {
-              QString trapsHetero = list.at (1).trimmed ().toLower ();
-              if (trapsHetero == "true")
+              QString trapsHeterogeneous = list.at (1).trimmed ().toLower ();
+              if (trapsHeterogeneous == "true")
                 {
-                  m_parameters.trapsHetero = true;
+                  m_parameters.trapsHeterogeneous = true;
                 }
-              else if (trapsHetero == "false")
+              else if (trapsHeterogeneous == "false")
                 {
-                  m_parameters.trapsHetero = false;
+                  m_parameters.trapsHeterogeneous = false;
                 }
               else
                 {
-                  m_valid = false;
                   qDebug () <<
                     "Heterogeneous Traps are either true or false: ";
                   qFatal ("bad input");
@@ -587,7 +529,6 @@ namespace Langmuir
                   || m_parameters.seedPercentage >
                   m_parameters.trapPercentage)
                 {
-                  m_valid = false;
                   qDebug () << "Seed percentage out of range:" <<
                     m_parameters.seedPercentage *
                     100.0 << " (0.00 -- 100.00)";
@@ -599,13 +540,12 @@ namespace Langmuir
 
           case e_sourceBarrier:
             {
-              m_parameters.sourceBarrier = list.at (1).toDouble ();
+              m_parameters.sourceBarrier = list.at (1).toDouble () / 100.0;
               if (m_parameters.sourceBarrier <= 0.00
                   || m_parameters.sourceBarrier > 1.00)
                 {
-                  m_valid = false;
                   qDebug () << "Source injection probability out of range:" <<
-                    m_parameters.defectPercentage << " (0.00 -- 1.00)";
+                    m_parameters.defectPercentage << " (0.00 -- 100.00)";
                   qFatal ("bad input");
                 }
               break;
@@ -616,7 +556,6 @@ namespace Langmuir
               m_parameters.outputPrecision = list.at (1).toInt ();
               if (m_parameters.outputPrecision <= 0)
                 {
-                  m_valid = false;
                   qDebug () << "output precision must be >0.";
                   qFatal ("bad input");
                 }
@@ -628,27 +567,25 @@ namespace Langmuir
               m_parameters.outputWidth = list.at (1).toInt ();
               if (m_parameters.outputWidth <= 0)
                 {
-                  m_valid = false;
                   qDebug () << "output width must be >0.";
                   qFatal ("bad input");
                 }
               break;
             }
 
-          case e_sourceBarrierCalculationType:
+          case e_sourceType:
             {
               QString type = list.at (1).trimmed ().toLower ();
               if (type == "constant")
                 {
-                  m_parameters.sourceBarrierCalculationType = 0;
+                  m_parameters.sourceType = 0;
                 }
               else if (type == "coulomb")
                 {
-                  m_parameters.sourceBarrierCalculationType = 1;
+                  m_parameters.sourceType = 1;
                 }
               else
                 {
-                  m_valid = false;
                   qDebug () <<
                     "options for source barrier calculation type are constant and coulomb";
                   qFatal ("bad input");
@@ -666,41 +603,43 @@ namespace Langmuir
 
   void InputParser::initializeVariables ()
   {
-    s_variables["voltage.source"] = e_voltageSource;
-    s_variables["voltage.drain"] = e_voltageDrain;
-    s_variables["defect.percentage"] = e_defectPercentage;
-    s_variables["trap.percentage"] = e_trapPercentage;
-    s_variables["charge.percentage"] = e_chargePercentage;
-    s_variables["temperature.kelvin"] = e_temperatureKelvin;
-    s_variables["delta.epsilon"] = e_deltaEpsilon;
-    s_variables["variable.working"] = e_variableWorking;
-    s_variables["variable.start"] = e_variableStart;
-    s_variables["variable.final"] = e_variableFinal;
-    s_variables["variable.steps"] = e_variableSteps;
-    s_variables["grid.width"] = e_gridWidth;
-    s_variables["grid.height"] = e_gridHeight;
-    s_variables["grid.depth"] = e_gridDepth;
-    s_variables["z.defect"] = e_zDefect;
-    s_variables["z.trap"] = e_zTrap;
-    s_variables["grid.charge"] = e_gridCharge;
-    s_variables["iterations.warmup"] = e_iterationsWarmup;
-    s_variables["iterations.real"] = e_iterationsReal;
-    s_variables["iterations.print"] = e_iterationsPrint;
-    s_variables["iterations.traj"] = e_iterationsTraj;
-    s_variables["iterations.xyz"] = e_iterationsXYZ;
     s_variables["interaction.coulomb"] = e_coulombInteraction;
-    s_variables["charged.defects"] = e_defectsCharged;
-    s_variables["charged.traps"] = e_trapsCharged;
-    s_variables["potential.form"] = e_potentialForm;
-    s_variables["potential.point"] = e_potentialPoint;
-    s_variables["potential.noise"] = e_potentialNoise;
-    s_variables["potential.stdev"] = e_potentialSTDEV;
-    s_variables["potential.averg"] = e_potentialAVERG;
-    s_variables["traps.heterogeneous"] = e_trapsHetero;
+    s_variables["charged.defects"] = e_chargedDefects;
+    s_variables["gaussian.noise"] = e_gaussianNoise;
+    s_variables["grid.charge"] = e_gridCharge;
+    s_variables["output.xyz"] = e_outputXyz;
+    s_variables["charged.traps"] = e_chargedTraps;
+    s_variables["traps.heterogeneous"] = e_trapsHeterogeneous;
+
+    s_variables["charge.percentage"] = e_chargePercentage;
+    s_variables["defect.percentage"] = e_defectPercentage;
+    s_variables["delta.epsilon"] = e_deltaEpsilon;
+    s_variables["gaussian.averg"] = e_gaussianAverg;
+    s_variables["gaussian.stdev"] = e_gaussianStdev;
     s_variables["seed.percentage"] = e_seedPercentage;
     s_variables["source.barrier"] = e_sourceBarrier;
+    s_variables["temperature.kelvin"] = e_temperatureKelvin;
+    s_variables["trap.percentage"] = e_trapPercentage;
+    s_variables["variable.final"] = e_variableFinal;
+    s_variables["variable.start"] = e_variableStart;
+    s_variables["voltage.drain"] = e_voltageDrain;
+    s_variables["voltage.source"] = e_voltageSource;
+
+    s_variables["grid.depth"] = e_gridDepth;
+    s_variables["grid.height"] = e_gridHeight;
+    s_variables["grid.width"] = e_gridWidth;
+    s_variables["iterations.print"] = e_iterationsPrint;
+    s_variables["iterations.real"] = e_iterationsReal;
+    s_variables["iterations.warmup"] = e_iterationsWarmup;
     s_variables["output.precision"] = e_outputPrecision;
     s_variables["output.width"] = e_outputWidth;
-    s_variables["source.barrier.calculation.type"] = e_sourceBarrierCalculationType;
+    s_variables["potential.form"] = e_potentialForm;
+    s_variables["source.type"] = e_sourceType;
+    s_variables["variable.steps"] = e_variableSteps;
+    s_variables["variable.working"] = e_variableWorking;
+    s_variables["z.defect"] = e_zDefect;
+    s_variables["z.trap"] = e_zTrap;
+    s_variables["potential.point"] = e_potentialPoint;
+
   }
 }

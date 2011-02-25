@@ -82,7 +82,7 @@ main (int argc, char *argv[])
   (*oout) << "\n";
   oout->flush ();
 
-  for (int i = 0; i < input.steps (); ++i)
+  for (int i = 0; i < par.variableSteps; ++i)
     {
 
       double timeStepStart = timer.now ();
@@ -109,7 +109,7 @@ main (int argc, char *argv[])
       (*iout) << scientific;
 
       // Open trajectoryFile for this simulation
-      if (par.iterationsXYZ)
+      if (par.outputXyz)
         {
           tFile = new QFile (oFileName + QString::number (i) + ".xyz");
           if (!(tFile->open (QIODevice::WriteOnly | QIODevice::Text)))
@@ -142,7 +142,7 @@ main (int argc, char *argv[])
           sim.performIterations (par.iterationsPrint);
 
           // Output Trajectory
-          if (par.iterationsXYZ)
+          if (par.outputXyz)
             sim.getGrid ()->print3D ((*tout));
 
           // Output Iteration Information
@@ -171,7 +171,7 @@ main (int argc, char *argv[])
           sim.performIterations (par.iterationsPrint);
 
           // Output Trajectory
-          if (par.iterationsXYZ)
+          if (par.outputXyz)
             sim.getGrid ()->print3D ((*tout));
 
           // Output Iteration
@@ -209,7 +209,7 @@ main (int argc, char *argv[])
       delete iFile;
       delete iout;
 
-      if (par.iterationsXYZ)
+      if (par.outputXyz)
         {
           tFile->close ();
           delete tFile;
