@@ -145,7 +145,7 @@ namespace Langmuir
       e_gaussianAverg, // average of the random noise
       e_gaussianStdev, // standard deviation of the random noise
       e_seedPercentage, // percentage of trap seeds for heterogeneous traps
-      e_sourceBarrier, // probability to inject a charge from the source  when sourceType = constant
+      e_sourceBarrier, // probability to reject charge injection when sourceType = constant
       e_temperatureKelvin, // the absolute temperature
       e_trapPercentage, // percentage of traps in the grid
       e_variableFinal, // final value of the variable range

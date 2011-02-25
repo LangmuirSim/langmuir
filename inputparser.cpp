@@ -38,6 +38,7 @@ namespace Langmuir
       {
         m_parameters.outputWidth = 20;
       }
+    if ( m_parameters.defectPercentage > 1.00 - m_parameters.trapPercentage ) qFatal("percent defects + percent traps > 100 percent");
 
   }
 
@@ -539,12 +540,12 @@ namespace Langmuir
 
           case e_sourceBarrier:
             {
-              m_parameters.sourceBarrier = list.at (1).toDouble ();
+              m_parameters.sourceBarrier = list.at (1).toDouble () / 100.0;
               if (m_parameters.sourceBarrier <= 0.00
                   || m_parameters.sourceBarrier > 1.00)
                 {
                   qDebug () << "Source injection probability out of range:" <<
-                    m_parameters.defectPercentage << " (0.00 -- 1.00)";
+                    m_parameters.defectPercentage << " (0.00 -- 100.00)";
                   qFatal ("bad input");
                 }
               break;
