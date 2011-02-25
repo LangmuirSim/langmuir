@@ -54,9 +54,9 @@ namespace Langmuir{
    if (m_world->parameters()->coulomb)
     pd += this->coulombInteraction(newSite);
    // Add the interactions from charged defects
-   if (m_world->parameters()->defectsCharged) pd += defectsCharged(newSite);
+   if (m_world->parameters()->chargedDefects) pd += chargedDefects(newSite);
    // Add the interactions from charged traps
-   if (m_world->parameters()->trapsCharged) pd += trapsCharged(newSite);
+   if (m_world->parameters()->chargedTraps) pd += chargedTraps(newSite);
    // Get the coupling constant
    double coupling = couplingConstant(grid->siteID(m_site),grid->siteID(newSite));
 
@@ -162,7 +162,7 @@ inline double ChargeAgent::coulombInteraction(unsigned int newSite)
  return m_charge * q4pe * (potential2 - potential1);
 }
 
-inline double ChargeAgent::defectsCharged(unsigned int newSite)
+inline double ChargeAgent::chargedDefects(unsigned int newSite)
  {
   const double q = 1.60217646e-19; // Magnitude of charge on an electron
   // Prefactor for force calculations q / 4 pi epsilon with a 1e-9 for m -> nm
@@ -199,7 +199,7 @@ inline double ChargeAgent::defectsCharged(unsigned int newSite)
  return m_charge * m_world->parameters()->zDefect * q4pe * (potential2 - potential1);
 }
 
- inline double ChargeAgent::trapsCharged(unsigned int newSite)
+ inline double ChargeAgent::chargedTraps(unsigned int newSite)
  {
   const double q = 1.60217646e-19; // Magnitude of charge on an electron
   // Prefactor for force calculations q / 4 pi epsilon with a 1e-9 for m -> nm

@@ -85,10 +85,10 @@ int main(int argc, char *argv[])
   par.iterationsPrint = 100;
   par.iterationsTraj = 100;
   par.coulomb = false;
-  par.defectsCharged = false;
-  par.trapsCharged = false;
+  par.chargedDefects = false;
+  par.chargedTraps = false;
   par.gridCharge = false;
-  par.iterationsXYZ = false;
+  par.outputXyz = false;
   par.potentialForm = SimulationParameters::o_linearpotential;
 
   Simulation sim(&par);

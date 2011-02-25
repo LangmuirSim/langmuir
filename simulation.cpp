@@ -65,7 +65,7 @@ namespace Langmuir
       }
 
     // precalculate and store site energies
-    if (m_parameters->trapsHetero) heteroTraps ();
+    if (m_parameters->trapsHeterogeneous) heteroTraps ();
     else updatePotentials ();
 
     // precalculate and store coulomb interaction energies
@@ -293,8 +293,8 @@ namespace Langmuir
                 if (m_parameters->gaussianNoise)
                   {
                     gaussianDisorder =
-                      m_world->random (m_parameters->gaussianAVERG,
-                                       m_parameters->gaussianSTDEV);
+                      m_world->random (m_parameters->gaussianAverg,
+                                       m_parameters->gaussianStdev);
                     tPotential += gaussianDisorder;
                   }
 
@@ -391,8 +391,8 @@ namespace Langmuir
                 if (m_parameters->gaussianNoise)
                   {
                     gaussianDisorder =
-                      m_world->random (m_parameters->gaussianAVERG,
-                                       m_parameters->gaussianSTDEV);
+                      m_world->random (m_parameters->gaussianAverg,
+                                       m_parameters->gaussianStdev);
                     tPotential += gaussianDisorder;
                   }
 

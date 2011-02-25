@@ -104,7 +104,7 @@ namespace Langmuir
      * @param site serial cell index of site to interact with.
      * @return potential potential difference calculated.
      */
-    double defectsCharged(unsigned int newSite);
+    double chargedDefects(unsigned int newSite);
 
     /**
      * @brief defect interaction.
@@ -114,7 +114,7 @@ namespace Langmuir
      * @param site serial cell index of site to interact with.
      * @return potential potential difference calculated.
      */
-    double trapsCharged(unsigned int newSite);
+    double chargedTraps(unsigned int newSite);
 
     /**
      * @brief coupling constant.
