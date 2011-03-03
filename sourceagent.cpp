@@ -6,9 +6,8 @@
 
 namespace Langmuir
 {
-  SourceAgent::SourceAgent(World * world,
-                            unsigned int site):Agent(Agent::Source, world,
-                                                      site)
+  SourceAgent::SourceAgent(World * world, unsigned int site) : 
+    Agent(Agent::Source, world,site)
   {
     m_site = site;
     m_charges = 0;
@@ -41,7 +40,7 @@ namespace Langmuir
         int dx = grid->xDistancei(newSite, charges[i]->site());
         int dy = grid->yDistancei(newSite, charges[i]->site());
         int dz = grid->zDistancei(newSite, charges[i]->site());
-        if(dx < m_world->parameters()->electrostaticCutoff &&
+        if( dx < m_world->parameters()->electrostaticCutoff &&
             dy < m_world->parameters()->electrostaticCutoff &&
             dz < m_world->parameters()->electrostaticCutoff)
           {
@@ -76,7 +75,7 @@ namespace Langmuir
         int dx = grid->xImageDistancei(newSite, charges[i]->site());
         int dy = grid->yDistancei(newSite, charges[i]->site());
         int dz = grid->zDistancei(newSite, charges[i]->site());
-        if(dx < m_world->parameters()->electrostaticCutoff &&
+        if( dx < m_world->parameters()->electrostaticCutoff &&
             dy < m_world->parameters()->electrostaticCutoff &&
             dz < m_world->parameters()->electrostaticCutoff)
           {
@@ -148,9 +147,9 @@ namespace Langmuir
 
       case 0:                        //constant case
         {
-          siteInteraction(m_neighbors[irn]);
-          coulombInteraction(m_neighbors[irn]);
-          imageInteraction(m_neighbors[irn]);
+          //siteInteraction(m_neighbors[irn]);
+          //coulombInteraction(m_neighbors[irn]);
+          //imageInteraction(m_neighbors[irn]);
           // Do not inject 100*sourceBarrier percent of the time
           if(m_world->random() <= m_world->parameters()->sourceBarrier)
             {
@@ -170,7 +169,7 @@ namespace Langmuir
       case 1:                        //coulomb loop case
         {
           double potential = siteInteraction(m_neighbors[irn]) + coulombInteraction(m_neighbors[irn]);
-          imageInteraction(m_neighbors[irn]);
+          //imageInteraction(m_neighbors[irn]);
           if ( attemptTransport(potential) )
             {
               ++m_charges;
