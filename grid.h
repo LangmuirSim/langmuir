@@ -161,6 +161,39 @@ namespace Langmuir
      */
     virtual double zDistance(unsigned int site1, unsigned int site2) = 0;
 
+    /**
+     * @brief xdistance
+     *
+     * Get the floating x component of the distance between the two sites.
+     * The x-component of the second site is relfected through the yz-plane.
+     * @param site1 serial cell index of site1.
+     * @param site2 serial cell index of site2.
+     * @return distance distance value is double.
+     */
+    virtual double xImageDistance(unsigned int site1, unsigned int site2) = 0;
+
+    /**
+     * @brief ydistance
+     *
+     * Get the floating y component of the distance between the two sites.
+     * The y-component of the second site is reflected through the xz-plane.
+     * @param site1 serial cell index of site1.
+     * @param site2 serial cell index of site2.
+     * @return distance distance value is double.
+     */
+    virtual double yImageDistance(unsigned int site1, unsigned int site2) = 0;
+
+    /**
+     * @brief zdistance
+     *
+     * Get the floating z component of the distance between the two sites.
+     * The z-component of the second site is reflected through the xy-plane.
+     * @param site1 serial cell index of site1.
+     * @param site2 serial cell index of site2.
+     * @return distance distance value is double.
+     */
+    virtual double zImageDistance(unsigned int site1, unsigned int site2) = 0;
+
    /**
      * @brief integer xdistance
      *
@@ -190,6 +223,39 @@ namespace Langmuir
      * @return distance distance value is int.
      */
     virtual int zDistancei(unsigned int site1, unsigned int site2) = 0;
+
+   /**
+     * @brief integer xdistance
+     *
+     * Get the integer x component of the distance between the two sites.
+     * The x-component of the second site is relfected through the yz-plane.
+     * @param site1 serial cell index of site1.
+     * @param site2 serial cell index of site2.
+     * @return distance distance value is int.
+     */
+    virtual int xImageDistancei(unsigned int site1, unsigned int site2) = 0;
+
+    /**
+     * @brief integer ydistance
+     *
+     * Get the integer y component of the distance between the two sites.
+     * The y-component of the second site is reflected through the xz-plane.
+     * @param site1 serial cell index of site1.
+     * @param site2 serial cell index of site2.
+     * @return distance distance value is int.
+     */
+    virtual int yImageDistancei(unsigned int site1, unsigned int site2) = 0;
+
+    /**
+     * @brief integer zdistance
+     *
+     * Get the integer z component of the distance between the two sites.
+     * The z-component of the second site is reflected through the xy-plane.
+     * @param site1 serial cell index of site1.
+     * @param site2 serial cell index of site2.
+     * @return distance distance value is int.
+     */
+    virtual int zImageDistancei(unsigned int site1, unsigned int site2) = 0;
 
     /**
      * @brief serial cell index

@@ -29,7 +29,7 @@ namespace Langmuir
     while (!file->atEnd ())
         processLine (file);
 
-    //fix errors parameter conflicts
+    //fix errors and parameter conflicts
     if (m_parameters.outputWidth < (m_parameters.outputPrecision + 15))
       {
         m_parameters.outputWidth = m_parameters.outputPrecision + 15;
@@ -38,7 +38,17 @@ namespace Langmuir
       {
         m_parameters.outputWidth = 20;
       }
-    if ( m_parameters.defectPercentage > 1.00 - m_parameters.trapPercentage ) qFatal("percent defects + percent traps > 100 percent");
+    if (m_parameters.defectPercentage > 1.00 - m_parameters.trapPercentage)
+      qFatal ("percent defects + percent traps > 100 percent");
+
+    m_parameters.inverseKT =
+      1.0 / (m_parameters.boltzmannConstant * m_parameters.temperatureKelvin);
+
+    m_parameters.electrostaticPrefactor =
+      m_parameters.elementaryCharge / (4.0 * M_PI *
+                                       m_parameters.dielectricConstant *
+                                       m_parameters.permittivityFreeSpace *
+                                       m_parameters.gridDistanceFactor);
 
   }
 
@@ -59,26 +69,78 @@ namespace Langmuir
 
     switch (m_parameters.variableWorking)
       {
+
       case e_voltageSource:
-        par->voltageSource = tmp;
-        break;
+        {
+          par->voltageSource = tmp;
+          break;
+        }
+
       case e_voltageDrain:
-        par->voltageDrain = tmp;
-        break;
+        {
+          par->voltageDrain = tmp;
+          break;
+        }
+
       case e_defectPercentage:
-        par->defectPercentage = tmp / 100.0;
-        break;
+        {
+          par->defectPercentage = tmp / 100.0;
+          if (par->defectPercentage < 0 || par->defectPercentage > 1.00)
+            {
+              qFatal
+                ("percent defects specified by working variable out of range");
+            }
+          if (par->defectPercentage > 1.00 - par->trapPercentage)
+            {
+              qFatal
+                ("percent defects + percent traps > 100 percent specified by working variable");
+            }
+          break;
+        }
+
       case e_trapPercentage:
-        par->trapPercentage = tmp / 100.0;
-        break;
+        {
+          par->trapPercentage = tmp / 100.0;
+          if (par->trapPercentage < 0 || par->trapPercentage > 1.00)
+            {
+              qFatal
+                ("percent defects specified by working variable out of range");
+            }
+          if (par->defectPercentage > 1.00 - par->trapPercentage)
+            {
+              qFatal
+                ("percent defects + percent traps > 100 percent specified by working variable");
+            }
+          break;
+        }
+
       case e_chargePercentage:
-        par->chargePercentage = tmp / 100.0;
-        break;
+        {
+          par->chargePercentage = tmp / 100.0;
+          if (par->chargePercentage < 0 || par->chargePercentage > 1.00)
+            qFatal
+              ("percent defects specified by working variable out of range");
+          break;
+        }
+
       case e_temperatureKelvin:
-        par->temperatureKelvin = tmp;
-        break;
+        {
+          par->temperatureKelvin = tmp;
+          if (par->temperatureKelvin <= 0)
+            {
+              qFatal
+                ("zero or negative temperature specified by working variable");
+            }
+          par->inverseKT =
+            1.0 / (par->boltzmannConstant * par->temperatureKelvin);
+          break;
+        }
+
       default:
-        return false;
+        {
+          return false;
+        }
+
       }
     return true;
   }
@@ -91,8 +153,7 @@ namespace Langmuir
 
     QStringList list =
       line.split ("#", QString::SkipEmptyParts).at (0).split ('=',
-                                                              QString::
-                                                              SkipEmptyParts);
+                                                              QString::SkipEmptyParts);
 
     if (list.size () == 2)
       {
@@ -117,9 +178,7 @@ namespace Langmuir
           case e_defectPercentage:
             {
               m_parameters.defectPercentage = list.at (1).toDouble () / 100;
-              if (m_parameters.defectPercentage < 0.00)
-                //|| m_parameters.defectPercentage >
-                //(1.00 - trapPercentage ()))
+              if (m_parameters.defectPercentage < 0.00 || m_parameters.defectPercentage > 1.00)
                 {
                   qDebug () << "Defect percentage out of range:" <<
                     m_parameters.defectPercentage *
@@ -132,9 +191,7 @@ namespace Langmuir
           case e_trapPercentage:
             {
               m_parameters.trapPercentage = list.at (1).toDouble () / 100.0;
-              if (m_parameters.trapPercentage < 0.00)
-                //|| m_parameters.trapPercentage >
-                //(1.00 - defectPercentage ()))
+              if (m_parameters.trapPercentage < 0.00 || m_parameters.trapPercentage > 1.00)
                 {
                   qDebug () << "Trap percentage out of range:" <<
                     m_parameters.trapPercentage *
@@ -166,6 +223,9 @@ namespace Langmuir
                   qDebug () << "Absolute temperature must be > 0K";
                   qFatal ("bad input");
                 }
+              m_parameters.inverseKT =
+                1.0 / (m_parameters.boltzmannConstant *
+                       m_parameters.temperatureKelvin);
               break;
             }
 
@@ -424,8 +484,8 @@ namespace Langmuir
           case e_potentialPoint:
             {
               QStringList q =
-                list.at (1).trimmed ().toLower ().remove ("(").
-                remove (")").split (",");
+                list.at (1).trimmed ().toLower ().remove ("(").remove (")").
+                split (",");
               if (q.length () != 4)
                 {
                   qDebug () << "Invalid potential.point specified: " << q;
@@ -460,8 +520,8 @@ namespace Langmuir
                     ok;
                   qFatal ("bad input");
                 }
-              m_parameters.
-                potentialPoints.push_back (PotentialPoint (x, y, z, V));
+              m_parameters.potentialPoints.
+                push_back (PotentialPoint (x, y, z, V));
               break;
             }
 
@@ -584,10 +644,14 @@ namespace Langmuir
                 {
                   m_parameters.sourceType = 1;
                 }
+              else if (type == "image")
+                {
+                  m_parameters.sourceType = 2;
+                }
               else
                 {
                   qDebug () <<
-                    "options for source barrier calculation type are constant and coulomb";
+                    "options for source barrier calculation type are constant, coulomb, and image";
                   qFatal ("bad input");
                 }
               break;
