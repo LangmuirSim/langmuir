@@ -140,7 +140,22 @@ namespace Langmuir
 
   double CubicGrid::zDistance(unsigned int site1, unsigned int site2)
   {
-    return fabs(int(getLayer(site1)) - int(getLayer(site2))); 
+    return fabs(int(getLayer(site1)) - int(getLayer(site2)));
+  }
+
+  double CubicGrid::xImageDistance(unsigned int site1, unsigned int site2)
+  {
+    return fabs(int(getColumn(site1)) + int(getColumn(site2)))+1;
+  }
+
+  double CubicGrid::yImageDistance(unsigned int site1, unsigned int site2)
+  {
+    return fabs(int(getRow(site1)) + int(getRow(site2)))+1;
+  }
+
+  double CubicGrid::zImageDistance(unsigned int site1, unsigned int site2)
+  {
+    return fabs(int(getLayer(site1)) + int(getLayer(site2)))+1;
   }
 
   int CubicGrid::xDistancei(unsigned int site1, unsigned int site2)
@@ -156,6 +171,21 @@ namespace Langmuir
   int CubicGrid::zDistancei(unsigned int site1, unsigned int site2)
   {
     return abs(int(getLayer(site1)) - int(getLayer(site2)));
+  }
+
+  int CubicGrid::xImageDistancei(unsigned int site1, unsigned int site2)
+  {
+    return abs(int(getColumn(site1)) + int(getColumn(site2)))+1;
+  }
+
+  int CubicGrid::yImageDistancei(unsigned int site1, unsigned int site2)
+  {
+    return abs(int(getRow(site1)) + int(getRow(site2)))+1;
+  }
+
+  int CubicGrid::zImageDistancei(unsigned int site1, unsigned int site2)
+  {
+    return abs(int(getLayer(site1)) + int(getLayer(site2)))+1;
   }
 
   unsigned int CubicGrid::getRow(unsigned int site)

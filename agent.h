@@ -51,6 +51,13 @@ namespace Langmuir{
     virtual void setNeighbors(std::vector<unsigned int> neighbors);
 
     /**
+     * @brief set neighbors.
+     *
+     * Get the nearest neighbours of the agent.
+     */
+    virtual const std::vector<unsigned int>& getNeighbors() const;
+
+    /**
      * @brief charge.
      *
      * Data access to this charge carriers charge in units of electronic charge.
@@ -132,6 +139,11 @@ namespace Langmuir{
   inline void Agent::setNeighbors(std::vector<unsigned int> neighbors)
   {
     m_neighbors = neighbors;
+  }
+
+  inline const std::vector<unsigned int>& Agent::getNeighbors() const
+  {
+    return m_neighbors;
   }
 
   inline void Agent::completeTick()

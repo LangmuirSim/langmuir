@@ -26,8 +26,7 @@ namespace Langmuir
 
   if ( point.onOrigin() )
   {
-   cout << "Do not define potential points on origin... can not determine axis." << "\n";
-   throw(std::invalid_argument("bad input"));
+   qFatal("Do not define potential points on origin... can not determine axis.");
   }
   else if ( point.onXAxis() )
   {
@@ -43,9 +42,7 @@ namespace Langmuir
   }
   else
   {
-   cout << "Linear potential specified but point not defined on an axis. In addPoint." << "\n";
-   cout << point << "\n";
-   throw(std::invalid_argument("bad input"));
+   qFatal("Linear potential specified but point not defined on an axis. In addPoint.");
   }
  }
 
@@ -54,20 +51,17 @@ namespace Langmuir
 
   if ( !(point.x() == 0) )
   {
-   cout << "Linear potential of source specified is invalid." << "\n";
-   throw(std::invalid_argument("bad input"));
+   qFatal("Linear potential of source specified is invalid.");
   }
 
   if ( !(point.y() == 0) )
   {
-   cout << "Linear potential of source specified is invalid." << "\n";
-   throw(std::invalid_argument("bad input"));
+   qFatal("Linear potential of source specified is invalid.");
   }
 
   if ( !(point.z() == 0) )
   {
-   cout << "Linear potential of source specified is invalid." << "\n";
-   throw(std::invalid_argument("bad input"));
+   qFatal("Linear potential of source specified is invalid.");
   }
 
   addXPoint(point);
@@ -79,14 +73,12 @@ namespace Langmuir
 
   if ( !(point.y() == 0) )
   {
-   cout << "Linear potential of source specified is invalid." << "\n";
-   throw(std::invalid_argument("bad input"));
+   qFatal("Linear potential of drain specified is invalid.");
   }
 
   if ( !(point.z() == 0) )
   {
-   cout << "Linear potential of source specified is invalid." << "\n";
-   throw(std::invalid_argument("bad input"));
+   qFatal("Linear potential of drain specified is invalid.");
   }
 
   addXPoint(point);
@@ -97,12 +89,14 @@ namespace Langmuir
  {
 
   double potential = 0;
+  bool defined = false;
 
   //Is a region even defined
   if ( xx.size() >= 2 )
   {
    unsigned int x = regionX(col);
    potential += mx[x]*col+bx[x];
+   defined = true;
   }
 
   //Is a region even defined
@@ -110,6 +104,7 @@ namespace Langmuir
   {
   unsigned int y = regionY(row);
   potential += my[y]*row+by[y];
+  defined = true;
   }
 
   //Is a region even defined
@@ -117,7 +112,10 @@ namespace Langmuir
   {
   unsigned int z = regionZ(lay);
   potential += mz[z]*lay+bz[z];
+  defined = true;
   }
+
+  if ( !defined ) qFatal("not enough points defined to calculate potential");
 
   return potential;
  }
@@ -159,7 +157,7 @@ namespace Langmuir
 
   return region;
  }
- 
+
  unsigned int LinearPotential::regionZ( double z )
  {
   //Below the range of defined points

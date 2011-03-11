@@ -97,7 +97,7 @@ namespace Langmuir
       {
         // Randomly select a site, ensure it is suitable, if so add a charge agent
         unsigned int site =
-          int (m_world->random () * (double (nSites) - 0.00001));
+          int (m_world->random () * (double (nSites) - 1.0e-20));
         if (grid->siteID (site) == 0 && grid->agent (site) == 0)
           {
             ChargeAgent *charge = new ChargeAgent (m_world, site);
@@ -127,9 +127,11 @@ namespace Langmuir
         // Now we are done with the charge movement, move them to the next tick!
         nextTick ();
 
+        //qDebug() << "[";
         // Begin by performing charge injection at the source
         unsigned int site = m_source->transport ();
         //qDebug () << "Source transport returned site:" << site;
+        //qDebug() << "]";
 
         if (site != errorValue)
           {
@@ -373,7 +375,6 @@ namespace Langmuir
 
   void Simulation::updatePotentials ()
   {
-
     double tPotential = 0;
     double gaussianDisorder = 0.0;
 
@@ -468,27 +469,23 @@ namespace Langmuir
     //These values are used in Coulomb interaction calculations.
     TripleIndexArray & energies = m_world->interactionEnergies ();
 
-    // Currently hard coding a cut off of 50nm - no interactions beyond that added
-    unsigned int cutoff = 50;
-
-    energies.resize (cutoff, cutoff, cutoff);
-    const double q = 1.60217646e-19;        // Magnitude of charge on an electron
+    energies.resize (m_parameters->electrostaticCutoff, m_parameters->electrostaticCutoff, m_parameters->electrostaticCutoff);
 
     // Now calculate the numbers we need
-    for (unsigned int col = 0; col < cutoff; ++col)
+    for (int col = 0; col < m_parameters->electrostaticCutoff; ++col)
       {
-        for (unsigned int row = 0; row < cutoff; ++row)
+        for (int row = 0; row < m_parameters->electrostaticCutoff; ++row)
           {
-            for (unsigned int lay = 0; lay < cutoff; ++lay)
+            for (int lay = 0; lay < m_parameters->electrostaticCutoff; ++lay)
               {
                 energies (col, row, lay) =
-                  q / sqrt (col * col + row * row + lay * lay);
+                  m_parameters->elementaryCharge / sqrt (col * col + row * row + lay * lay);
               }
           }
       }
 
     // The interaction energy is zero when R is zero
-    for (unsigned int col = 0; col < cutoff; ++col)
+    for (int col = 0; col < m_parameters->electrostaticCutoff; ++col)
       energies (col, col, col) = 0;
 
   }

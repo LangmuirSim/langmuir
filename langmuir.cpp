@@ -87,7 +87,7 @@ main (int argc, char *argv[])
 
       double timeStepStart = timer.now ();
 
-      qDebug () << "Simulation: " << i;
+      qDebug() << "Simulation: " << i;
 
       // Get simulation parameters for the current step and set up a new object
       input.simulationParameters (&par, i);
@@ -146,6 +146,7 @@ main (int argc, char *argv[])
             sim.getGrid ()->print3D ((*tout));
 
           // Output Iteration Information
+          qDebug() << "    warmup: " << j;
           (*iout) << j
             << par.temperatureKelvin
             << par.voltageSource
@@ -175,7 +176,7 @@ main (int argc, char *argv[])
             sim.getGrid ()->print3D ((*tout));
 
           // Output Iteration
-          qDebug () << "      step: " << j;
+          qDebug() << "      step: " << j;
           (*iout) << j
             << par.temperatureKelvin
             << par.voltageSource
@@ -216,7 +217,7 @@ main (int argc, char *argv[])
           delete tout;
         }
 
-      qDebug () << "";
+      qDebug() << "";
     }
 
   //output time
@@ -227,6 +228,6 @@ main (int argc, char *argv[])
   delete oFile;
   delete oout;
 
-  qDebug () << "Simulation complete - destroy our objects...";
+  qDebug() << "Simulation complete - destroy our objects...";
 
 }

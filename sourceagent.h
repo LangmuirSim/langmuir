@@ -30,7 +30,7 @@ namespace Langmuir
      * Agent chooses a site and hands off to site.
      * @return site index of the site the charge carrier was moved to.  -1 if the transport was unsucessful.
      */
-    virtual unsigned int transport ();
+    virtual unsigned int transport ( );
 
     /**
       * @bried charge of the source (cause the makes sense!)
@@ -69,6 +69,47 @@ namespace Langmuir
      * system, allowing average charge density to be kept constant.
      */
     void incrementCharge ();
+
+  protected:
+
+    /**
+     * @brief site interaction.
+     *
+     * Calculate the site potential at the proposed site.
+     * @param site serial cell index of site to interact with.
+     * @return potential potential calculated.
+     */
+    double siteInteraction(unsigned int newSite);
+
+    /**
+     * @brief coulomb interaction.
+     *
+     * Calculate the potential arising from the Coulomb interaction
+     * between the proposed site and other carriers.
+     * @param site serial cell index of site to interact with.
+     * @return potential potential calculated.
+     */
+    double coulombInteraction(unsigned int newSite);
+
+    /**
+     * @brief coulomb interaction.
+     *
+     * Calculate the potential difference arising from the Coulomb interaction
+     * between the proposed site and images of other carriers.
+     * @param site serial cell index of site to interact with.
+     * @return potential potential calculated.
+     */
+    double imageInteraction(unsigned int newSite);
+
+    /**
+     * @brief Transport attempt success.
+     *
+     * Apply the metropolis criterion for a transport attempt.
+     *
+     * @param pd potential difference between old and new site.
+     * @return success Boolean.  True if transported, False if rejected.
+     */
+    bool attemptTransport(double pd);
 
   private:
 
