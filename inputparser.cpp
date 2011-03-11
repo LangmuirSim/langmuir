@@ -587,7 +587,7 @@ namespace Langmuir
               m_parameters.seedPercentage = list.at (1).toDouble () / 100.0;
               if (m_parameters.seedPercentage < 0.00
                   || m_parameters.seedPercentage >
-                  m_parameters.trapPercentage)
+                  1.00)
                 {
                   qDebug () << "Seed percentage out of range:" <<
                     m_parameters.seedPercentage *
