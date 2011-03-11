@@ -424,7 +424,7 @@ namespace Langmuir
    QVector<float> varray(1024*3);
    for ( int i = 0; i < varray.size(); i+=3 )
    {
-    varray[i+0] = i;
+    varray[i+0] = (i+2)/3;
     varray[i+1] = 0;
     varray[i+2] = 0;
    }
