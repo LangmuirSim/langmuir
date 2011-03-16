@@ -77,7 +77,7 @@ namespace Langmuir
 	  outputGrid = false;
       electrostaticCutoff = 50;
 
-      chargePercentage = 0.0;
+      chargePercentage = 0.01;
       defectPercentage = 0.00;
       deltaEpsilon = 0.00;
       gaussianAverg = 0.0;
