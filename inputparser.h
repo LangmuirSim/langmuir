@@ -23,6 +23,7 @@ namespace Langmuir
     bool outputXyz;
     bool chargedTraps;
     bool trapsHeterogeneous;
+	bool outputGrid;
 
     double chargePercentage;
     double defectPercentage;
@@ -73,6 +74,7 @@ namespace Langmuir
       outputXyz = false;
       chargedTraps = false;
       trapsHeterogeneous = false;
+	  outputGrid = false;
       electrostaticCutoff = 50;
 
       chargePercentage = 0.0;
@@ -159,6 +161,7 @@ namespace Langmuir
       e_outputXyz,                // should trajectory files be written
       e_chargedTraps,                // are the traps charged?
       e_trapsHeterogeneous,        // distrubute traps heterogeneously?
+	  e_outputGrid,                // generate a pdf image of the grid?
       e_chargePercentage,        // percentage of charges in the grid - sets as target
 
       e_defectPercentage,        // percentage of defects in the grid

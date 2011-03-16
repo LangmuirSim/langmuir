@@ -14,6 +14,9 @@
 #include <QtCore/QStringList>
 #include <QtCore/QFile>
 #include <QtCore/QTextStream>
+#include <QPrinter>
+#include <QPainter>
+#include <QColor>
 
 namespace Langmuir
 {
@@ -74,6 +77,8 @@ namespace Langmuir
     // place charges on the grid randomly
     if (m_parameters->gridCharge) seedCharges ();
 
+    // Generate grid image
+	  if (m_parameters->outputGrid) gridImage();
   }
 
   Simulation::~Simulation ()
@@ -321,7 +326,7 @@ namespace Langmuir
               }
           }
       }
-
+	  
     int trapCount =
       (m_parameters->trapPercentage) * (m_parameters->gridWidth) * (m_parameters->gridHeight) *
       (m_parameters->gridDepth);
@@ -342,11 +347,17 @@ namespace Langmuir
 
         // Select a random neighbor
         unsigned int newTrap;
-        vector < unsigned int >m_neighbors = m_grid->neighbors (trapSeed);
+        vector < unsigned int >m_neighbors = m_grid->neighbors(m_world->chargedTraps()->at(trapSeed));
         //qDebug() << "Neighbors: " << m_neighbors.size();
         newTrap =
           m_neighbors[int
                       (m_world->random () * (m_neighbors.size () - 1.0e-20))];
+		  
+		// Check to make sure the newTrap isn't the source or drain...
+		 if ((m_world->grid()->siteID(newTrap)) == 2 ||
+			 (m_world->grid()->siteID(newTrap)) == 3) 
+			 continue;
+			 
         //qDebug() << "newTrap: " << newTrap; 
         // Make sure it is not already a trap site
 
@@ -355,16 +366,21 @@ namespace Langmuir
 
         else
           {                        // create a new trap site and save it
+			  unsigned int x = m_grid->getRow(newTrap);
+			  unsigned int y = m_grid->getColumn(newTrap);
+			  unsigned int z = m_grid->getLayer(newTrap);
+			  tPotential =
+			  m_potential->calculate (x + 0.5, y + 0.5, z + 0.5);
             m_grid->setPotential (newTrap, (tPotential + m_parameters->deltaEpsilon));
             m_world->chargedTraps ()->push_back (newTrap);
             //qDebug() << "Traps: " << m_world->chargedTraps()->size();
           }
       }
-    qDebug () << "Traps: " << m_world->chargedTraps ()->size ();
+    //qDebug () << "Traps: " << m_world->chargedTraps ()->size ();
 
     //Set the potential of the Source
     m_grid->setSourcePotential (m_potential->calculate (0.0, 0.0, 0.0));
-
+	  
     //Set the potential of the Drain
     m_grid->setDrainPotential (m_potential->
                                calculate (double (m_grid->width ()), 0.0,
@@ -372,6 +388,38 @@ namespace Langmuir
 
   }
 
+	void Simulation::gridImage()
+	{
+		{
+			QPrinter printer;
+			printer.setOutputFormat(QPrinter::PdfFormat);
+			printer.setOrientation(QPrinter::Landscape);
+			printer.setOutputFileName("grid" + QString::number(m_parameters->trapPercentage * 100) + ".pdf");
+			
+			QPainter painter;
+			if (! painter.begin(&printer)) //Failed to open the file
+			{
+				
+				qWarning("failed to open file, is it writable?");
+				return ;
+			}
+			
+			painter.setWindow(QRect(0,0,1024,1024));
+			painter.setBrush(Qt::blue);
+			painter.setPen(Qt::darkBlue);
+
+			for(int i = 0; i < m_world->chargedTraps()->size(); i++)
+			{
+				unsigned int rowCoord = m_grid->getRow(m_world->chargedTraps()->at(i));
+				//qDebug() << rowCoord;
+				unsigned int colCoord = m_grid->getColumn(m_world->chargedTraps()->at(i));
+				//qDebug() << colCoord;
+				painter.drawRect(colCoord,rowCoord,1,1);
+			}
+			painter.end();
+		}
+	}
+	
   void Simulation::updatePotentials ()
   {
     double tPotential = 0;

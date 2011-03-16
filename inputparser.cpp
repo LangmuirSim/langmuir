@@ -481,6 +481,26 @@ namespace Langmuir
               break;
             }
 
+			  case e_outputGrid:
+			  {
+				  QString interaction = list.at (1).trimmed ().toLower ();
+				  if (interaction == "true")
+				  {
+					  m_parameters.outputGrid = true;
+				  }
+				  else if (interaction == "false")
+				  {
+					  m_parameters.outputGrid = false;
+				  }
+				  else
+				  {
+					  qDebug () << "output.grid is either true or false: ";
+					  qFatal ("bad input");
+				  }
+				  break;
+			  }
+				  
+				  
           case e_potentialPoint:
             {
               QStringList q =
@@ -674,6 +694,7 @@ namespace Langmuir
     s_variables["output.xyz"] = e_outputXyz;
     s_variables["charged.traps"] = e_chargedTraps;
     s_variables["traps.heterogeneous"] = e_trapsHeterogeneous;
+	s_variables["output.grid"] = e_outputGrid;
 
     s_variables["charge.percentage"] = e_chargePercentage;
     s_variables["defect.percentage"] = e_defectPercentage;

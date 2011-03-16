@@ -279,6 +279,34 @@ namespace Langmuir
      */
     virtual void setAgent(unsigned int site, Agent *agent);
 
+	  
+	  /**
+	   * @brief get row.
+	   * 
+	   * Get the row index of a given site.
+	   * @param site serial cell index.
+	   * @return row row cell index.
+	   */
+	virtual unsigned int getRow(unsigned int site) = 0;
+	  
+	  /**
+	   * @brief get column.
+	   * 
+	   * Get the column index of a given site.
+	   * @param site serial cell index.
+	   * @return column column cell index.
+	   */
+	virtual unsigned int getColumn(unsigned int site) = 0;
+	  
+	  /**
+	   * @brief get layer.
+	   * 
+	   * Get the layer index of a given site.
+	   * @param site serial cell index.
+	   * @return layer layer cell index.
+	   */
+    virtual unsigned int getLayer(unsigned int site) = 0;
+	  
     /**
      * @brief Get site agent.
      *
@@ -287,6 +315,7 @@ namespace Langmuir
      * @return agent pointer to agent.
      * @warning unchecked access to agent list.
      */
+	  
     virtual Agent * agent(unsigned int site);
 
     /**
