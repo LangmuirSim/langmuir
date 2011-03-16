@@ -4,11 +4,12 @@ import os
 import argparse
 import shutil
 
-parser = argparse.ArgumentParser(description='script to read/write key=value pairs to an input file')
+parser = argparse.ArgumentParser(description='script to read/write key/value pairs to an input file')
 parser.add_argument('-i',action='store',type=str,dest='ifile',help='input file (optional)',default=None)
 parser.add_argument('-o',action='store',type=str,dest='ofile',help='output file (optional)',default=None)
 parser.add_argument('-k',action='store',type=str,dest='key',help='key (required)',default=None)
 parser.add_argument('-v',action='store',type=str,dest='value',help='value (required)',default=None)
+parser.add_argument('-d',action='store',type=str,dest='delim',help='deliminator (optional)',default="=")
 parser.add_argument('-a',action='store_true',dest='append',help='append key=value pair (false)',default=False)
 parser.add_argument('-r',action='store_true',dest='recursive',help='run in recursive mode (false)',default=False)
 parser.add_argument('-s',action='store_true',dest='silent',help='do not print messages (false)',default=False)
@@ -124,11 +125,11 @@ if options.recursive:
      printVerbose("backing up %s to %s"%(writefile,backupFile(writefile)))
 
     if options.append:
-     printVerbose("appending %s=%s to %s"%(options.key,options.value,writefile))
-     appendToFile(writefile,"%s=%s"%(options.key,options.value))
+     printVerbose("appending %s%s%s to %s"%(options.key,options.delim,options.value,writefile))
+     appendToFile(writefile,"%s%s%s"%(options.key,options.delim,options.value))
     else:
-     printVerbose("replacing %s=??? with %s=%s in %s"%(options.key,options.key,options.value,writefile))
-     replaceInFile(writefile,"%s="%(options.key),"%s=%s"%(options.key,options.value))
+     printVerbose("replacing %s%s??? with %s%s%s in %s"%(options.key,options.delim,options.key,options.delim,options.value,writefile))
+     replaceInFile(writefile,"%s%s"%(options.key,options.delim),"%s%s%s"%(options.key,options.delim,options.value))
 
  if count == 0:
   printError("no files named %s found in subdirectories!"%options.ifile)
@@ -155,10 +156,10 @@ else:
   printVerbose("backing up %s to %s"%(writefile,backupFile(writefile)))
 
  if options.append:
-  printVerbose("appending %s=%s to %s"%(options.key,options.value,writefile))
-  appendToFile(writefile,"%s=%s"%(options.key,options.value))
+  printVerbose("appending %s%s%s to %s"%(options.key,options.delim,options.value,writefile))
+  appendToFile(writefile,"%s%s%s"%(options.key,options.delim,options.value))
  else:
-  printVerbose("replacing %s=??? with %s=%s in %s"%(options.key,options.key,options.value,writefile))
-  replaceInFile(writefile,"%s="%(options.key),"%s=%s"%(options.key,options.value))
+  printVerbose("replacing %s%s??? with %s%s%s in %s"%(options.key,options.delim,options.key,options.delim,options.value,writefile))
+  replaceInFile(writefile,"%s%s"%(options.key,options.delim),"%s%s%s"%(options.key,options.delim,options.value))
 
 printVerbose("exit success")
