@@ -2,57 +2,174 @@
 import sys
 import os
 import argparse
-import subprocess
+import shutil
 
-parser = argparse.ArgumentParser(description='script to read/write key=value pairs to an input file')
+parser = argparse.ArgumentParser(description='script to read/write key/value pairs to an input file')
 parser.add_argument('-i',action='store',type=str,dest='ifile',help='input file (optional)',default=None)
 parser.add_argument('-o',action='store',type=str,dest='ofile',help='output file (optional)',default=None)
 parser.add_argument('-k',action='store',type=str,dest='key',help='key (required)',default=None)
 parser.add_argument('-v',action='store',type=str,dest='value',help='value (required)',default=None)
-parser.add_argument('-a',action='store_true',dest='append',help='append key=value pair (if found in input) (false)',default=False)
+parser.add_argument('-d',action='store',type=str,dest='delim',help='deliminator (optional)',default="=")
+parser.add_argument('-a',action='store_true',dest='append',help='append key=value pair (false)',default=False)
+parser.add_argument('-r',action='store_true',dest='recursive',help='run in recursive mode (false)',default=False)
+parser.add_argument('-s',action='store_true',dest='silent',help='do not print messages (false)',default=False)
 options = parser.parse_args()
 
-if not options.key or not options.value:
+def backupFile(path,keep_original=True):
+ count = -1
+ new_path = None
+ while True:
+  if os.path.exists(path):
+   if count == -1:
+    new_path = "%s.bak" % (path)
+   else:
+    new_path = "%s.bak.%s" % (path, count)
+   if os.path.exists(new_path):
+    count += 1
+    continue
+   else:
+    if keep_original:
+     if os.path.isfile(path):
+      shutil.copy(path,new_path)
+     elif os.path.isdir(path):
+      shutil.copytree(path, new_path)
+    else:
+     shutil.move(path, new_path)
+    break
+  else:
+   break
+ return new_path
+
+def printVerbose(string):
+ if not options.silent:
+  try:
+   print(str(string).strip())
+  except:
+   print("printVerbose can not convert argument to str")
+
+def printError(string):
  parser.print_help()
- print("\nmust at least give a key and value pair")
- sys.exit()
+ try:
+  print("\nERROR: "+str(string).strip()+"\n")
+ except:
+  print("printError can not convert argument to str")
+ sys.exit(-1)
+
+def appendToFile(filename,string):
+
+ if os.path.exists(filename):
+  handle = open(filename,'r')
+  contents = handle.readlines()
+  handle.close()
+  handle = open(filename,'w')
+  handle.write(string.strip()+'\n')
+  for line in contents: handle.write(line)
+  handle.close()
+ else:
+  handle = open(filename,'a')
+  handle.write(string.strip()+'\n')
+  handle.close()
+
+def replaceInFile(filename,keyword,string):
+ if os.path.exists(filename):
+  handle = open(filename,'r')
+  contents = handle.readlines()
+  handle.close()
+  handle = open(filename,'w')
+  count = 0
+  for i in range(len(contents)):
+   if keyword in contents[i]:
+    handle.write( string.strip()+'\n' )
+    count += 1
+   else:
+    handle.write(contents[i])
+  if count > 0:
+   printVerbose('replaced %d lines'%(count))
+  else:
+   printVerbose("%s wasn't found in file - nothing has changed"%(keyword))
+ else:
+  appendToFile(filename,string)
+
+def fileExists(name):
+ if not os.path.exists(name):
+  printError("file %s does not exist"%(name))
+
+cwd = os.getcwd()
+
+if not options.key or not options.value: printError("must at least give a key and value pair")
 
 if options.append:
- if options.ifile and not options.ofile:
-  os.system('cp %s %s.bak'%(options.ifile,options.ifile))
-  os.system('echo "%s=%s" >> %s'%(options.key,options.value,options.ifile))
-  os.system('diff %s.bak %s'%(options.ifile,options.ifile))
- if options.ifile and options.ofile:
-  os.system('cat %s > %s'%(options.ifile,options.ofile))
-  os.system('echo "%s=%s" >> %s'%(options.key,options.value,options.ofile))
-  os.system('diff %s %s'%(options.ifile,options.ofile))
- if not options.ifile and not options.ofile:
-  handle = open('default.inp','w')
-  handle.write("%s=%s"%(options.key,options.value))
-  handle.close()
+ printVerbose("append mode active")
+else:
+ printVerbose("replace mode active")
+
+if options.recursive:
+
+ printVerbose("recursive mode active")
+ if not options.ifile: printError("must give input file name in recursive mode")
+
+ count = 0
+
+ for root, dirs, files in os.walk(cwd):
+  for f in files:
+   if f ==  options.ifile:
+
+    count += 1
+
+    if options.ifile and options.ofile:
+     writefile = os.path.join(root,options.ofile)
+     fileExists(os.path.join(root,options.ifile))
+     shutil.copy( os.path.join(root,options.ifile), os.path.join(root,options.ofile) )
+
+    if options.ifile and not options.ofile:
+     writefile = os.path.join(root,options.ifile)
+     fileExists(os.path.join(root,options.ifile))
+
+    if not options.ifile and options.ofile:
+     writefile = os.path.join(root,options.ofile)
+
+    if not options.ifile and not options.ofile:
+     writefile = os.path.join(root,"default.inp")
+
+    if os.path.exists(writefile):
+     printVerbose("backing up %s to %s"%(writefile,backupFile(writefile)))
+
+    if options.append:
+     printVerbose("appending %s%s%s to %s"%(options.key,options.delim,options.value,writefile))
+     appendToFile(writefile,"%s%s%s"%(options.key,options.delim,options.value))
+    else:
+     printVerbose("replacing %s%s??? with %s%s%s in %s"%(options.key,options.delim,options.key,options.delim,options.value,writefile))
+     replaceInFile(writefile,"%s%s"%(options.key,options.delim),"%s%s%s"%(options.key,options.delim,options.value))
+
+ if count == 0:
+  printError("no files named %s found in subdirectories!"%options.ifile)
 
 else:
- if options.ifile and not options.ofile:
-  process = subprocess.Popen(['grep','-n',options.key,options.ifile],stdout=subprocess.PIPE)
-  stdout, stderr = process.communicate()
-  if len(stdout) > 0:
-   os.system('sed --in-place=.bak -e "s/^\s*#*\(%s\)=\S*\(\s*#*.*$\)/\\1=%s\\2/" %s'%(options.key,options.value,options.ifile))
-   os.system('diff %s.bak %s'%(options.ifile,options.ifile))
-  else:
-   os.system('cp %s %s.bak'%(options.ifile,options.ifile))
-   os.system('echo "%s=%s" >> %s'%(options.key,options.value,options.ifile))
-   os.system('diff %s.bak %s'%(options.ifile,options.ifile))
+
+ printVerbose("recursive mode disabled")
  if options.ifile and options.ofile:
-  process = subprocess.Popen(['grep','-n',options.key,options.ifile],stdout=subprocess.PIPE)
-  stdout, stderr = process.communicate()
-  if len(stdout) > 0:
-   os.system('sed -e "s/^\s*#*\(%s\)=\S*\(\s*#*.*$\)/\\1=%s\\2/" %s > %s'%(options.key,options.value,options.ifile,options.ofile))
-   os.system('diff %s %s'%(options.ifile,options.ofile))
-  else:
-   os.system('cat %s > %s'%(options.ifile,options.ofile))
-   os.system('echo "%s=%s" >> %s'%(options.key,options.value,options.ofile))
-   os.system('diff %s %s'%(options.ifile,options.ofile))
+  writefile = os.path.join(cwd,options.ofile)
+  fileExists(os.path.join(cwd,options.ifile))
+  shutil.copy( os.path.join(cwd,options.ifile), os.path.join(cwd,options.ofile) )
+
+ if options.ifile and not options.ofile:
+  writefile = os.path.join(cwd,options.ifile)
+  fileExists(os.path.join(cwd,options.ifile))
+
+ if not options.ifile and options.ofile:
+  writefile = os.path.join(cwd,options.ofile)
+
  if not options.ifile and not options.ofile:
-  handle = open('default.inp','w')
-  handle.write("%s=%s"%(options.key,options.value))
-  handle.close()
+  writefile = os.path.join(cwd,"default.inp")
+
+ if os.path.exists(writefile):
+  printVerbose("backing up %s to %s"%(writefile,backupFile(writefile)))
+
+ if options.append:
+  printVerbose("appending %s%s%s to %s"%(options.key,options.delim,options.value,writefile))
+  appendToFile(writefile,"%s%s%s"%(options.key,options.delim,options.value))
+ else:
+  printVerbose("replacing %s%s??? with %s%s%s in %s"%(options.key,options.delim,options.key,options.delim,options.value,writefile))
+  replaceInFile(writefile,"%s%s"%(options.key,options.delim),"%s%s%s"%(options.key,options.delim,options.value))
+
+printVerbose("exit success")
