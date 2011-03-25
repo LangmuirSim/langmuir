@@ -179,6 +179,9 @@ namespace Langmuir
      */
     void updatePotentials ();
     void heteroTraps ();
+	
+	// Prints grid sites
+	void gridImage(); 
 
     /**
      * @brief Precalculate interaction energies.

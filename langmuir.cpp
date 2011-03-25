@@ -1,9 +1,13 @@
 #include "inputparser.h"
 #include "cubicgrid.h"
+#include "world.h"
 #include "simulation.h"
 #include "timer.h"
 
-#include <QtCore/QCoreApplication>
+#include <QApplication>
+#include <QPrinter>
+#include <QPainter>
+#include <QColor>
 #include <QtCore/QStringList>
 #include <QtCore/QFile>
 #include <QtCore/QTextStream>
@@ -16,7 +20,7 @@ using namespace Langmuir;
 int
 main (int argc, char *argv[])
 {
-  QCoreApplication app (argc, argv);
+  QApplication app (argc, argv);
 
   // read command line arguments
   QStringList args = app.arguments ();
@@ -121,6 +125,7 @@ main (int argc, char *argv[])
           tout = new QTextStream (tFile);
         }
 
+		
       // Output iteration file column titles
       (*iout) << "move(n)";
       (*iout) << "temperature(K)";
@@ -219,7 +224,6 @@ main (int argc, char *argv[])
 
       qDebug() << "";
     }
-
   //output time
   (*oout) << reset << "\n" << "approxTime(s): " << timer.elapsed ();
 
