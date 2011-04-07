@@ -26,43 +26,177 @@ namespace Langmuir
   {
   }
 
-  vector<unsigned int> CubicGrid::neighbors(unsigned int site)
+  vector<unsigned int> CubicGrid::neighbors(unsigned int site, unsigned int hoppingRange)
   {
+
     // Return the indexes of all nearest neighbours
-    vector<unsigned int>     neighbors(0);
-    unsigned int column = getColumn(site);
-    unsigned int row    =    getRow(site);
-    unsigned int layer  =  getLayer(site);
+    vector<unsigned int>      nList(0);
+    unsigned int col = getColumn(site);
+    unsigned int row =    getRow(site);
+    unsigned int lay =  getLayer(site);
 
-    // To the west
-    if (column > 0)
-      neighbors.push_back(getIndex(column-1, row, layer));
-    // To the east
-    if (column < m_width - 1)
-      neighbors.push_back(getIndex(column+1, row, layer));
+    switch ( hoppingRange )
+    {
+     case 1:
+     {
+      // To the west
+      if (col > 0)
+        nList.push_back(getIndex(col-1,row,lay));
+      // To the east
+      if (col < m_width - 1)
+        nList.push_back(getIndex(col+1,row,lay));
+      // To the south
+      if (row > 0)
+        nList.push_back(getIndex(col,row-1,lay));
+      // To the north
+      if (row < m_height - 1)
+        nList.push_back(getIndex(col,row+1,lay));
+      // Below
+      if (lay > 0)
+        nList.push_back(getIndex(col,row,lay-1));
+      // Above
+      if (lay < m_depth - 1)
+        nList.push_back(getIndex(col,row,lay+1));
+      // Now for the source and the drain....
+      if (col == 0)
+        nList.push_back(getIndex(m_width-1,m_height-1,m_depth-1) + 1);
+      if (col == m_width - 1)
+        nList.push_back(getIndex(m_width-1,m_height-1,m_depth-1) + 2);
+      // Now we have all the nearest neighbours - between 4 and 6 in this case
+      return nList;
+      break;
+     }
+     case 2:
+     {
+       if (col > 0)
+        {
+         nList.push_back( getIndex(col-1,row,lay));
+         if (row < m_height -1)
+          nList.push_back( getIndex(col-1,row+1,lay));
+         if (row > 0)
+          nList.push_back( getIndex(col-1,row-1,lay));
+         if (col > 1)
+          nList.push_back( getIndex(col-2,row,lay));
+        }
+       if (col < m_width - 1)
+        {
+         nList.push_back( getIndex(col+1,row,lay));
+         if (row < m_height - 1)
+          nList.push_back( getIndex(col+1,row+1,lay));
+         if (row > 0)
+          nList.push_back( getIndex(col+1,row-1,lay));
+         if (col < m_width - 2)
+          nList.push_back( getIndex(col+2,row,lay));
+        }
+       if (row > 0)
+        {
+         nList.push_back( getIndex(col,row-1,lay));
+         if (row > 1)
+          nList.push_back( getIndex(col,row-2,lay));
+        }
+       if (row < m_height - 1)
+        {
+         nList.push_back( getIndex(col,row+1,lay));
+         if (row < m_height - 2)
+          nList.push_back( getIndex(col,row+2,lay));
+        }
+       if (lay > 0)
+        {
+         nList.push_back( getIndex(col,row,lay-1));
+         if (lay > 1)
+          nList.push_back( getIndex(col,row,lay-2));
+         if (col > 0)
+          {
+           nList.push_back( getIndex(col-1,row,lay-1));
+           if (row < m_height -1)
+            nList.push_back( getIndex(col-1,row+1,lay-1));
+           if (row > 0)
+            nList.push_back( getIndex(col-1,row-1,lay-1));
+          }
+         if (col < m_width - 1)
+          {
+           nList.push_back( getIndex(col+1,row,lay-1));
+           if (row < m_height - 1)
+            nList.push_back( getIndex(col+1,row+1,lay-1));
+           if (row > 0)
+            nList.push_back( getIndex(col+1,row-1,lay-1));
+          }
+         if (row > 0)
+          nList.push_back( getIndex(col,row-1,lay-1));
+         if (row < m_height - 1)
+          nList.push_back( getIndex(col,row+1,lay-1));
+        }
+       if (lay < m_depth-1)
+        {
+         nList.push_back( getIndex(col,row,lay+1));
+         if (lay < m_depth-2)
+          nList.push_back( getIndex(col,row,lay+2));
+         if (col > 0)
+          {
+           nList.push_back( getIndex(col-1,row,lay+1));
+           if (row < m_height -1)
+            nList.push_back( getIndex(col-1,row+1,lay+1));
+           if (row > 0)
+            nList.push_back( getIndex(col-1,row-1,lay+1));
+          }
+         if (col < m_width - 1)
+          {
+           nList.push_back( getIndex(col+1,row,lay+1));
+           if (row < m_height - 1)
+            nList.push_back( getIndex(col+1,row+1,lay+1));
+           if (row > 0)
+            nList.push_back( getIndex(col+1,row-1,lay+1));
+          }
+         if (row > 0)
+          nList.push_back( getIndex(col,row-1,lay+1));
+         if (row < m_height - 1)
+          nList.push_back( getIndex(col,row+1,lay+1));
+        }
+      if (col == 0)
+        nList.push_back(getIndex(m_width-1,m_height-1,m_depth-1) + 1);
+      if (col == m_width - 1)
+        nList.push_back(getIndex(m_width-1,m_height-1,m_depth-1) + 2);
+      return nList;
+      break;
+     }
+     default:
+     {
+      int cutoff = hoppingRange * hoppingRange;
+      for ( int z = (lay - hoppingRange); z < int(lay + hoppingRange + 1); z += 1 )
+      {
+       if ( z >= 0 && z < int(m_depth) )
+       {
+        for ( int x = (col - hoppingRange); x < int(col + hoppingRange + 1); x += 1 )
+        {
+         if ( x >= 0 && x < int(m_width) )
+         {
+          for ( int y = (row - hoppingRange); y < int(row + hoppingRange + 1); y += 1 )
+          {
+           if ( y >= 0 && y < int(m_height) )
+           {
+            if ( !(x == int(col) && y == int(row) && z == int(lay)) )
+            {
+             int r2 = ( col - x ) * ( col - x ) + ( row - y ) * ( row - y ) + ( lay - z ) * ( lay - z );
+             if ( r2 <= cutoff )
+             {
+              nList.push_back(getIndex(x,y,z));
+             }
+            }
+           }
+          }
+         }
+        }
+       }
+      }
+      if (col == 0)
+        nList.push_back(getIndex(m_width-1,m_height-1,m_depth-1) + 1);
+      if (col == m_width - 1)
+        nList.push_back(getIndex(m_width-1,m_height-1,m_depth-1) + 2);
+      return nList;
+      break;
+     }
+    }
 
-    // To the south
-    if (row > 0)
-      neighbors.push_back(getIndex(column, row-1, layer));
-    // To the north
-    if (row < m_height - 1)
-      neighbors.push_back(getIndex(column, row+1, layer));
- 
-    // Below
-    if (layer > 0)
-      neighbors.push_back(getIndex(column, row, layer-1));
-    // Above
-    if (layer < m_depth - 1)
-      neighbors.push_back(getIndex(column, row, layer+1));
-
-    // Now for the source and the drain....
-    if (column == 0)
-      neighbors.push_back(getIndex(m_width-1, m_height-1,m_depth-1) + 1);
-    if (column == m_width - 1)
-      neighbors.push_back(getIndex(m_width-1, m_height-1,m_depth-1) + 2);
-
-    // Now we have all the nearest neighbours - between 4 and 6 in this case
-    return neighbors;
   }
 
   vector<unsigned int> CubicGrid::row(unsigned int row, unsigned int layer)
@@ -208,48 +342,6 @@ namespace Langmuir
    return ( m_width * ( row + layer*m_height ) + column );
   }
 
-  std::vector<Agent *> CubicGrid::neighborAgents(unsigned int site)
-  {
-    // Return the indexes of all nearest neighbours
-    vector<Agent *>             neighbors;
-    unsigned int column = getColumn(site);
-    unsigned int row    =    getRow(site);
-    unsigned int layer  =  getLayer(site);
-
-    // To the west
-    if (column > 0)
-      neighbors.push_back(agent(getIndex(column-1, row, layer)));
-    // To the east
-    if (column < m_width - 1)
-      neighbors.push_back(agent(getIndex(column+1, row, layer)));
-
-    // To the south
-    if (row > 0)
-      neighbors.push_back(agent(getIndex(column, row-1, layer)));
-    // To the north 
-    if (row < m_height - 1)
-      neighbors.push_back(agent(getIndex(column, row+1, layer)));
-
-    // Below
-    if (layer > 0)
-      neighbors.push_back(agent(getIndex(column, row, layer-1)));
-    // Above
-    if (layer < m_depth - 1)
-      neighbors.push_back(agent(getIndex(column, row, layer+1)));
-
-    // Add the source agent
-    if (column == 0)
-      neighbors.push_back(agent(getIndex(m_width-1, m_height-1, m_depth-1) + 1));
-
-    // Add the drain agent
-    if (column == m_width - 1)
-      neighbors.push_back(agent(getIndex(m_width-1, m_height-1, m_depth-1) + 2));
-
-    // Now we have all the nearest neighbours - between 4 and 6 in this case
-    return neighbors;
-
-  }
-
   void CubicGrid::setAgent(unsigned int site, Agent *agent)
   {
    m_agents[site] = agent;
@@ -258,33 +350,33 @@ namespace Langmuir
   void CubicGrid::print3D( QTextStream& stream )
   {
    stream << m_agents.size()-2+2*m_height*m_depth << "\n\n";
-   for ( unsigned int i = 0; i < m_agents.size()-2; i++ ) 
+   for ( unsigned int i = 0; i < m_agents.size()-2; i++ )
    {
-    if ( m_agents[i] ) 
+    if ( m_agents[i] )
     {
      if ( siteID(i) == 0 )//A Charge
      {
       Eigen::Vector3d pos = position(i);
-      stream << "A " << pos[0] << " " << pos[1] << " " << pos[2] << "\n";  
+      stream << "A " << pos[0] << " " << pos[1] << " " << pos[2] << "\n";
      }
-     else if ( siteID(i) == 1 )//A Defect or Trap 
-     { 
+     else if ( siteID(i) == 1 )//A Defect or Trap
+     {
       Eigen::Vector3d pos = position(i);
-      stream << "B " << pos[0] << " " << pos[1] << " " << pos[2] << "\n"; 
+      stream << "B " << pos[0] << " " << pos[1] << " " << pos[2] << "\n";
      }
-     else 
+     else
      {
       cout << "AGENT ERROR: " << siteID(i) << "\n";
       throw(-1);
      }
     }
-    else 
+    else
     {
      stream << "A -0.5 -0.5 -0.5" << "\n";
     }
   }
 
-  for ( unsigned int i = 0; i < m_depth; i++ ) 
+  for ( unsigned int i = 0; i < m_depth; i++ )
   {
    for ( unsigned int j = 0; j < m_height; j++ )
    {
