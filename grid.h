@@ -45,7 +45,7 @@ namespace Langmuir
      * @param site serial cell index.
      * @return neighbors list of serial site indices.
      */
-    virtual std::vector<unsigned int> neighbors(unsigned int site) = 0;
+    virtual std::vector<unsigned int> neighbors(unsigned int site, unsigned int hoppingRange) = 0;
 
     /**
      * @brief rowlist.
@@ -279,34 +279,33 @@ namespace Langmuir
      */
     virtual void setAgent(unsigned int site, Agent *agent);
 
-	  
-	  /**
-	   * @brief get row.
-	   * 
-	   * Get the row index of a given site.
-	   * @param site serial cell index.
-	   * @return row row cell index.
-	   */
-	virtual unsigned int getRow(unsigned int site) = 0;
-	  
-	  /**
-	   * @brief get column.
-	   * 
-	   * Get the column index of a given site.
-	   * @param site serial cell index.
-	   * @return column column cell index.
-	   */
-	virtual unsigned int getColumn(unsigned int site) = 0;
-	  
-	  /**
-	   * @brief get layer.
-	   * 
-	   * Get the layer index of a given site.
-	   * @param site serial cell index.
-	   * @return layer layer cell index.
-	   */
+    /**
+     * @brief get row.
+     * 
+     * Get the row index of a given site.
+     * @param site serial cell index.
+     * @return row row cell index.
+     */
+    virtual unsigned int getRow(unsigned int site) = 0;
+
+    /**
+     * @brief get column.
+     * 
+     * Get the column index of a given site.
+     * @param site serial cell index.
+     * @return column column cell index.
+     */
+    virtual unsigned int getColumn(unsigned int site) = 0;
+
+    /**
+     * @brief get layer.
+     * 
+     * Get the layer index of a given site.
+     * @param site serial cell index.
+     * @return layer layer cell index.
+     */
     virtual unsigned int getLayer(unsigned int site) = 0;
-	  
+
     /**
      * @brief Get site agent.
      *
@@ -315,7 +314,7 @@ namespace Langmuir
      * @return agent pointer to agent.
      * @warning unchecked access to agent list.
      */
-	  
+
     virtual Agent * agent(unsigned int site);
 
     /**
@@ -375,15 +374,6 @@ namespace Langmuir
      * @param site potential.
      */
     virtual void setDrainPotential(double potential);
-
-    /**
-     * @brief neighborlist agents.
-     *
-     * Get a list of neightboring agent pointers for sites immediatly next to the given site.
-     * @param site serial cell index.
-     * @return neighbors list of agent pointers.
-     */
-    virtual std::vector<Agent *> neighborAgents(unsigned int site) = 0;
 
     /**
      * @brief print XYZ.

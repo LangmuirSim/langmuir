@@ -25,7 +25,7 @@ namespace Langmuir
     m_world->grid ()->setAgent (m_site, this);
 
     //figure out the neighbors of this site
-    m_neighbors = m_world->grid ()->neighbors (m_site);
+    m_neighbors = m_world->grid ()->neighbors (m_site,m_world->parameters()->hoppingRange);
   }
 
   ChargeAgent::~ChargeAgent ()
@@ -116,7 +116,7 @@ namespace Langmuir
         m_world->grid ()->setAgent (m_site, this);
 
         // Update our neighbors
-        m_neighbors = m_world->grid ()->neighbors (m_site);
+        m_neighbors = m_world->grid ()->neighbors (m_site,m_world->parameters()->hoppingRange);
       }
   }
 

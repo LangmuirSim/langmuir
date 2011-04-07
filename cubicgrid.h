@@ -53,7 +53,7 @@ namespace Langmuir
      * @param site serial cell index.
      * @return neighbors list of serial site indices.
      */
-    std::vector<unsigned int> neighbors(unsigned int site);
+    std::vector<unsigned int> neighbors(unsigned int site, unsigned int hoppingRange);
 
     /**
      * @brief rowlist.
@@ -277,15 +277,6 @@ namespace Langmuir
      * @warning layer index optional.  default is layer zero.
      */
     unsigned int getIndex( unsigned int column, unsigned int row, unsigned int layer = 0 );
-
-    /**
-     * @brief neighborlist agents.
-     *
-     * Get a list of neightboring agent pointers for sites immediatly next to the given site.
-     * @param site serial cell index.
-     * @return neighbors list of agent pointers.
-     */
-    std::vector<Agent *> neighborAgents(unsigned int site);
 
     /**
      * @brief set agent.
