@@ -481,26 +481,25 @@ namespace Langmuir
               break;
             }
 
-			  case e_outputGrid:
-			  {
-				  QString interaction = list.at (1).trimmed ().toLower ();
-				  if (interaction == "true")
-				  {
-					  m_parameters.outputGrid = true;
-				  }
-				  else if (interaction == "false")
-				  {
-					  m_parameters.outputGrid = false;
-				  }
-				  else
-				  {
-					  qDebug () << "output.grid is either true or false: ";
-					  qFatal ("bad input");
-				  }
-				  break;
-			  }
-				  
-				  
+          case e_outputGrid:
+          {
+              QString interaction = list.at (1).trimmed ().toLower ();
+              if (interaction == "true")
+              {
+                  m_parameters.outputGrid = true;
+              }
+              else if (interaction == "false")
+              {
+                  m_parameters.outputGrid = false;
+              }
+              else
+              {
+                  qDebug () << "output.grid is either true or false: ";
+                  qFatal ("bad input");
+              }
+              break;
+          }
+
           case e_potentialPoint:
             {
               QStringList q =
@@ -677,6 +676,17 @@ namespace Langmuir
               break;
             }
 
+          case e_hoppingRange:
+            {
+              m_parameters.hoppingRange = list.at (1).toInt ();
+              if (m_parameters.hoppingRange < 1)
+                {
+                  qDebug () << "hopping range must be > 1.";
+                  qFatal ("bad input");
+                }
+              break;
+            }
+
           default:
             qDebug () << "Unknown key value encountered:" << key;
           }
@@ -694,7 +704,7 @@ namespace Langmuir
     s_variables["output.xyz"] = e_outputXyz;
     s_variables["charged.traps"] = e_chargedTraps;
     s_variables["traps.heterogeneous"] = e_trapsHeterogeneous;
-	s_variables["output.grid"] = e_outputGrid;
+    s_variables["output.grid"] = e_outputGrid;
 
     s_variables["charge.percentage"] = e_chargePercentage;
     s_variables["defect.percentage"] = e_defectPercentage;
@@ -724,7 +734,7 @@ namespace Langmuir
     s_variables["variable.working"] = e_variableWorking;
     s_variables["z.defect"] = e_zDefect;
     s_variables["z.trap"] = e_zTrap;
+    s_variables["hopping.range"] = e_hoppingRange;
     s_variables["potential.point"] = e_potentialPoint;
-
   }
 }

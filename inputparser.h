@@ -23,7 +23,7 @@ namespace Langmuir
     bool outputXyz;
     bool chargedTraps;
     bool trapsHeterogeneous;
-	bool outputGrid;
+    bool outputGrid;
 
     double chargePercentage;
     double defectPercentage;
@@ -62,6 +62,7 @@ namespace Langmuir
     int variableWorking;
     int zDefect;
     int zTrap;
+    int hoppingRange;
 
       std::vector < PotentialPoint > potentialPoints;
 
@@ -74,7 +75,7 @@ namespace Langmuir
       outputXyz = false;
       chargedTraps = false;
       trapsHeterogeneous = false;
-	  outputGrid = false;
+      outputGrid = false;
       electrostaticCutoff = 50;
 
       chargePercentage = 0.01;
@@ -110,6 +111,7 @@ namespace Langmuir
       variableWorking = -1;
       zDefect = 0;
       zTrap = 0;
+      hoppingRange = 1;
 
       electrostaticPrefactor =
         elementaryCharge / (4.0 * M_PI * dielectricConstant *
@@ -161,7 +163,7 @@ namespace Langmuir
       e_outputXyz,                // should trajectory files be written
       e_chargedTraps,                // are the traps charged?
       e_trapsHeterogeneous,        // distrubute traps heterogeneously?
-	  e_outputGrid,                // generate a pdf image of the grid?
+      e_outputGrid,                // generate a pdf image of the grid?
       e_chargePercentage,        // percentage of charges in the grid - sets as target
 
       e_defectPercentage,        // percentage of defects in the grid
@@ -191,6 +193,7 @@ namespace Langmuir
       e_variableWorking,        // the working variable that is being changed
       e_zDefect,                // charge on the defects (units e)
       e_zTrap,                        // charge on traps (units e)
+      e_hoppingRange,           //number of neighbors to hop between
 
       e_potentialPoint,                // A point of defined potential (x,y,z,V)
 

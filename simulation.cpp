@@ -79,6 +79,7 @@ namespace Langmuir
 
     // Generate grid image
 	  if (m_parameters->outputGrid) gridImage();
+    if (m_parameters->outputGrid) gridImage();
   }
 
   Simulation::~Simulation ()
@@ -237,39 +238,49 @@ namespace Langmuir
     // Now to assign nearest neighbours for the electrodes.
     vector < unsigned int >neighbors (0, 0);
 
-    // Loop over layers
-    for (unsigned int layer = 0; layer < m_grid->depth (); layer++)
-      {
-        // Get column in this layer that is closest to the source
-        vector < unsigned int >column_neighbors_in_layer =
-          m_grid->col (0, layer);
-        // Loop over this column
-        for (unsigned int column_site = 0;
-             column_site < column_neighbors_in_layer.size (); column_site++)
-          {
-            neighbors.push_back (column_neighbors_in_layer[column_site]);
-          }
-      }
-    // Set the neighbors of the source
-    m_source->setNeighbors (neighbors);
-    neighbors.clear ();
+    switch ( m_parameters->hoppingRange )
+    {
 
-    // Loop over layers
-    for (unsigned int layer = 0; layer < m_grid->depth (); layer++)
-      {
-        // Get column in this layer that is closest to the source
-        vector < unsigned int >column_neighbors_in_layer =
-          m_grid->col (m_grid->width () - 1, layer);
-        // Loop over this column
-        for (unsigned int column_site = 0;
-             column_site < column_neighbors_in_layer.size (); column_site++)
-          {
-            neighbors.push_back (column_neighbors_in_layer[column_site]);
-          }
-      }
-    // Set the neighbors of the drain
-    m_drain->setNeighbors (neighbors);
-    neighbors.clear ();
+     default:
+     {
+      // Loop over layers
+      for (unsigned int layer = 0; layer < m_grid->depth (); layer++)
+        {
+          // Get column in this layer that is closest to the source
+          vector < unsigned int >column_neighbors_in_layer =
+            m_grid->col (0, layer);
+          // Loop over this column
+          for (unsigned int column_site = 0;
+               column_site < column_neighbors_in_layer.size (); column_site++)
+            {
+              neighbors.push_back (column_neighbors_in_layer[column_site]);
+            }
+        }
+      // Set the neighbors of the source
+      m_source->setNeighbors (neighbors);
+      neighbors.clear ();
+
+      // Loop over layers
+      for (unsigned int layer = 0; layer < m_grid->depth (); layer++)
+        {
+          // Get column in this layer that is closest to the source
+          vector < unsigned int >column_neighbors_in_layer =
+            m_grid->col (m_grid->width () - 1, layer);
+          // Loop over this column
+          for (unsigned int column_site = 0;
+               column_site < column_neighbors_in_layer.size (); column_site++)
+            {
+              neighbors.push_back (column_neighbors_in_layer[column_site]);
+            }
+        }
+      // Set the neighbors of the drain
+      m_drain->setNeighbors (neighbors);
+      neighbors.clear ();
+      break;
+     }
+
+    }
+
   }
 
   void Simulation::destroyAgents ()
@@ -326,7 +337,7 @@ namespace Langmuir
               }
           }
       }
-	  
+
     int trapCount =
       (m_parameters->trapPercentage) * (m_parameters->gridWidth) * (m_parameters->gridHeight) *
       (m_parameters->gridDepth);
@@ -347,17 +358,17 @@ namespace Langmuir
 
         // Select a random neighbor
         unsigned int newTrap;
-        vector < unsigned int >m_neighbors = m_grid->neighbors(m_world->chargedTraps()->at(trapSeed));
+        vector < unsigned int >m_neighbors = m_grid->neighbors(m_world->chargedTraps()->at(trapSeed),1);
         //qDebug() << "Neighbors: " << m_neighbors.size();
         newTrap =
           m_neighbors[int
                       (m_world->random () * (m_neighbors.size () - 1.0e-20))];
-		  
-		// Check to make sure the newTrap isn't the source or drain...
-		 if ((m_world->grid()->siteID(newTrap)) == 2 ||
-			 (m_world->grid()->siteID(newTrap)) == 3) 
-			 continue;
-			 
+
+        // Check to make sure the newTrap isn't the source or drain...
+         if ((m_world->grid()->siteID(newTrap)) == 2 ||
+             (m_world->grid()->siteID(newTrap)) == 3) 
+             continue;
+
         //qDebug() << "newTrap: " << newTrap; 
         // Make sure it is not already a trap site
 
@@ -366,11 +377,11 @@ namespace Langmuir
 
         else
           {                        // create a new trap site and save it
-			  unsigned int x = m_grid->getRow(newTrap);
-			  unsigned int y = m_grid->getColumn(newTrap);
-			  unsigned int z = m_grid->getLayer(newTrap);
-			  tPotential =
-			  m_potential->calculate (x + 0.5, y + 0.5, z + 0.5);
+            unsigned int x = m_grid->getRow(newTrap);
+            unsigned int y = m_grid->getColumn(newTrap);
+            unsigned int z = m_grid->getLayer(newTrap);
+            tPotential =
+            m_potential->calculate (x + 0.5, y + 0.5, z + 0.5);
             m_grid->setPotential (newTrap, (tPotential + m_parameters->deltaEpsilon));
             m_world->chargedTraps ()->push_back (newTrap);
             //qDebug() << "Traps: " << m_world->chargedTraps()->size();
@@ -380,7 +391,7 @@ namespace Langmuir
 
     //Set the potential of the Source
     m_grid->setSourcePotential (m_potential->calculate (0.0, 0.0, 0.0));
-	  
+
     //Set the potential of the Drain
     m_grid->setDrainPotential (m_potential->
                                calculate (double (m_grid->width ()), 0.0,
@@ -388,42 +399,38 @@ namespace Langmuir
 
   }
 
-	void Simulation::gridImage()
-	{
-		{
-			QPrinter printer;
-			printer.setOutputFormat(QPrinter::PdfFormat);
-			printer.setOrientation(QPrinter::Landscape);
-			printer.setOutputFileName("grid" + 
-									  QString::number(m_parameters->trapPercentage * 100) + 
-									  "-" +
-									  QString::number(m_parameters->seedPercentage * 100) +
-									  ".pdf");
-			
-			QPainter painter;
-			if (! painter.begin(&printer)) //Failed to open the file
-			{
-				
-				qWarning("failed to open file, is it writable?");
-				return ;
-			}
-			
-			painter.setWindow(QRect(0,0,1024,1024));
-			painter.setBrush(Qt::blue);
-			painter.setPen(Qt::darkBlue);
+  void Simulation::gridImage()
+  {
+      {
+          QPrinter printer;
+          printer.setOutputFormat(QPrinter::PdfFormat);
+          printer.setOrientation(QPrinter::Landscape);
+          printer.setOutputFileName("grid" + QString::number(m_parameters->trapPercentage * 100) + ".pdf");
 
-			for(int i = 0; i < m_world->chargedTraps()->size(); i++)
-			{
-				unsigned int rowCoord = m_grid->getRow(m_world->chargedTraps()->at(i));
-				//qDebug() << rowCoord;
-				unsigned int colCoord = m_grid->getColumn(m_world->chargedTraps()->at(i));
-				//qDebug() << colCoord;
-				painter.drawRect(colCoord,rowCoord,1,1);
-			}
-			painter.end();
-		}
-	}
-	
+          QPainter painter;
+          if (! painter.begin(&printer)) //Failed to open the file
+          {
+
+              qWarning("failed to open file, is it writable?");
+              return ;
+          }
+
+          painter.setWindow(QRect(0,0,1024,1024));
+          painter.setBrush(Qt::blue);
+          painter.setPen(Qt::darkBlue);
+
+          for(int i = 0; i < m_world->chargedTraps()->size(); i++)
+          {
+              unsigned int rowCoord = m_grid->getRow(m_world->chargedTraps()->at(i));
+              //qDebug() << rowCoord;
+              unsigned int colCoord = m_grid->getColumn(m_world->chargedTraps()->at(i));
+              //qDebug() << colCoord;
+              painter.drawRect(colCoord,rowCoord,1,1);
+          }
+          painter.end();
+      }
+  }
+
   void Simulation::updatePotentials ()
   {
     double tPotential = 0;
