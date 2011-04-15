@@ -78,6 +78,7 @@ namespace Langmuir
     if (m_parameters->gridCharge) seedCharges ();
 
     // Generate grid image
+	  if (m_parameters->outputGrid) gridImage();
     if (m_parameters->outputGrid) gridImage();
   }
 
@@ -386,7 +387,7 @@ namespace Langmuir
             //qDebug() << "Traps: " << m_world->chargedTraps()->size();
           }
       }
-    //qDebug () << "Traps: " << m_world->chargedTraps ()->size ();
+    qDebug () << "Traps: " << m_world->chargedTraps ()->size ();
 
     //Set the potential of the Source
     m_grid->setSourcePotential (m_potential->calculate (0.0, 0.0, 0.0));

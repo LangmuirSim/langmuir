@@ -80,7 +80,7 @@ namespace Langmuir
 
       chargePercentage = 0.01;
       defectPercentage = 0.00;
-      deltaEpsilon = 0.00;
+      deltaEpsilon = -0.10;
       gaussianAverg = 0.0;
       gaussianStdev = 0.0;
       seedPercentage = 0.0;
