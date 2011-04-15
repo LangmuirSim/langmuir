@@ -376,7 +376,7 @@ namespace Langmuir
             //qDebug() << "Traps: " << m_world->chargedTraps()->size();
           }
       }
-    //qDebug () << "Traps: " << m_world->chargedTraps ()->size ();
+    qDebug () << "Traps: " << m_world->chargedTraps ()->size ();
 
     //Set the potential of the Source
     m_grid->setSourcePotential (m_potential->calculate (0.0, 0.0, 0.0));
@@ -394,7 +394,11 @@ namespace Langmuir
 			QPrinter printer;
 			printer.setOutputFormat(QPrinter::PdfFormat);
 			printer.setOrientation(QPrinter::Landscape);
-			printer.setOutputFileName("grid" + QString::number(m_parameters->trapPercentage * 100) + ".pdf");
+			printer.setOutputFileName("grid" + 
+									  QString::number(m_parameters->trapPercentage * 100) + 
+									  "-" +
+									  QString::number(m_parameters->seedPercentage * 100) +
+									  ".pdf");
 			
 			QPainter painter;
 			if (! painter.begin(&printer)) //Failed to open the file
