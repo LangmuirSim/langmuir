@@ -86,6 +86,20 @@ namespace Langmuir
      */
     bool m_removed;
 
+   /**
+     * @brief steps in existance
+     *
+     * lifetime of the carrier in steps
+     */
+    int m_lifetime;
+
+   /**
+     * @brief distance traveled
+     *
+     * distance the carrier has traveled during its lifetime
+     */
+    double m_distance;
+
     /**
      * @brief coulomb interaction.
      *
