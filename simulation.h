@@ -173,15 +173,15 @@ namespace Langmuir
      * @brief update the potential at each site.
      *
      * This only needs to be done when initializing the system or when the source and/or drain potential is modified.
-     * Right now we are assuming that there is one source, one drain and that they are parallel. 
+     * Right now we are assuming that there is one source, one drain and that they are parallel.
      * This is a good assumption as it simplifies many things in the simulation and also applies to many different real world devices.
      * Making a more generic implementation would be more difficult and slower.
      */
     void updatePotentials ();
     void heteroTraps ();
-	
-	// Prints grid sites
-	void gridImage(); 
+
+    // Prints grid sites
+    void gridImage();
 
     /**
      * @brief Precalculate interaction energies.
@@ -197,7 +197,7 @@ namespace Langmuir
      *
      * Move on to the next time tick - change to the future states, clean up.
      */
-    void nextTick ();
+    void nextTick ( );
 
     /**
      * @brief charge agent iterations.

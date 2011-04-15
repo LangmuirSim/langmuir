@@ -14,7 +14,7 @@ namespace Langmuir
   using Eigen::Vector3d;
 
     ChargeAgent::ChargeAgent (World * world, unsigned int site):Agent (Agent::Charge, world, site), 
-     m_charge (-1), m_removed (false), m_lifetime(0), m_distance(0.0)
+     m_charge (-1), m_removed (false), m_lifetime(0), m_distanceTraveled(0.0)
   {
     //current site and future site are the same
     m_site = m_fSite;
@@ -64,7 +64,7 @@ namespace Langmuir
      else
      {
       m_fSite = newSite;
-      m_distance += 1.0;
+      m_distanceTraveled += 1.0;
       return m_fSite;
      }
     }
@@ -95,7 +95,7 @@ namespace Langmuir
       {
         // Set the future site is sucessful
         m_fSite = newSite;
-        m_distance += 1.0;
+        m_distanceTraveled += 1.0;
         return m_fSite;
       }
 

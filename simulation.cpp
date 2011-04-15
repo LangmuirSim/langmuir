@@ -78,7 +78,6 @@ namespace Langmuir
     if (m_parameters->gridCharge) seedCharges ();
 
     // Generate grid image
-	  if (m_parameters->outputGrid) gridImage();
     if (m_parameters->outputGrid) gridImage();
   }
 
@@ -157,6 +156,7 @@ namespace Langmuir
         // Check if the charge was removed - then we should delete it
         if (charges[i]->removed ())
           {
+            //qDebug() << charges[i]->lifetime() << charges[i]->distanceTraveled();
             delete charges[i];
             charges.removeAt (i);
             m_drain->acceptCharge (-1);
