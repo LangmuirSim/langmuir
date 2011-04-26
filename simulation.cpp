@@ -156,6 +156,7 @@ namespace Langmuir
         // Check if the charge was removed - then we should delete it
         if (charges[i]->removed ())
           {
+            //qDebug() << charges[i]->lifetime() << charges[i]->distanceTraveled();
             delete charges[i];
             charges.removeAt (i);
             m_drain->acceptCharge (-1);
@@ -387,7 +388,7 @@ namespace Langmuir
             //qDebug() << "Traps: " << m_world->chargedTraps()->size();
           }
       }
-    //qDebug () << "Traps: " << m_world->chargedTraps ()->size ();
+    qDebug () << "Traps: " << m_world->chargedTraps ()->size ();
 
     //Set the potential of the Source
     m_grid->setSourcePotential (m_potential->calculate (0.0, 0.0, 0.0));

@@ -13,10 +13,8 @@ namespace Langmuir
   using std::vector;
   using Eigen::Vector3d;
 
-    ChargeAgent::ChargeAgent (World * world,
-                              unsigned int site):Agent (Agent::Charge, world,
-                                                        site), m_charge (-1),
-    m_removed (false)
+    ChargeAgent::ChargeAgent (World * world, unsigned int site):Agent (Agent::Charge, world, site), 
+     m_charge (-1), m_removed (false), m_lifetime(0), m_distanceTraveled(0.0)
   {
     //current site and future site are the same
     m_site = m_fSite;
@@ -34,10 +32,13 @@ namespace Langmuir
 
   unsigned int ChargeAgent::transport ()
   {
+    // Increase lifetime in existance
+    m_lifetime += 1;
+
     // Get a pointer to the grid for easy access
     Grid *grid = m_world->grid ();
 
-    // Select a proposed transport site at random, but esure that it is not the source
+    // Select a proposed transport site at random, but ensure that it is not the source
     unsigned int newSite;
     do
       {
@@ -47,10 +48,26 @@ namespace Langmuir
       }
     while (grid->siteID (newSite) == 2);        // source siteID
 
-    // Check if the proposed site to move to is already occupied, return -1 if unsucessful
-    // Also return if we picked the drain
+    // Check the proposed site, return unsucessful if it is the SOURCE, a DEFECT, or another CARRIER
     if (grid->agent (newSite) && grid->siteID (newSite) != 3)
       return -1;
+
+    // If the site is the DRAIN, accept with a constant probability
+    if ( grid->siteID (newSite) == 3 )
+    {
+     // Do not accept 100*sourceBarrier percent of the time
+     if(m_world->random() <= m_world->parameters()->sourceBarrier)
+     {
+      return -1;
+     }
+     // accept the charge carrier
+     else
+     {
+      m_fSite = newSite;
+      m_distanceTraveled += 1.0;
+      return m_fSite;
+     }
+    }
 
     // Now to add on the background potential - from the applied field
     // A few electrons only perturb the potential by ~1e-20 or so.
@@ -78,6 +95,7 @@ namespace Langmuir
       {
         // Set the future site is sucessful
         m_fSite = newSite;
+        m_distanceTraveled += 1.0;
         return m_fSite;
       }
 

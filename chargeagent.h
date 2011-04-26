@@ -63,6 +63,22 @@ namespace Langmuir
      */
     bool removed();
 
+    /**
+     * @brief lifetime or step count.
+     *
+     * how many steps the charge agent has been in existance
+     * @return steps.
+     */
+    int lifetime();
+
+    /**
+     * @brief distance traveled during lifetime.
+     *
+     * how far has the charge traveled during its lifetime
+     * @return distance.
+     */
+    double distanceTraveled();
+
   protected:
 
     /**
@@ -85,6 +101,20 @@ namespace Langmuir
      * Carrier status. If or not the charge has been removed from the simulation.
      */
     bool m_removed;
+
+   /**
+     * @brief steps in existance
+     *
+     * lifetime of the carrier in steps
+     */
+    int m_lifetime;
+
+   /**
+     * @brief distance traveled
+     *
+     * distance the carrier has traveled during its lifetime
+     */
+    double m_distanceTraveled;
 
     /**
      * @brief coulomb interaction.
@@ -148,6 +178,18 @@ namespace Langmuir
   {
     return m_removed;
   }
+
+  inline int ChargeAgent::lifetime()
+  {
+   return m_lifetime;
+  }
+
+  inline double ChargeAgent::distanceTraveled()
+  {
+   return m_distanceTraveled;
+  }
+
+
 
 } // End namespace Langmuir
 
