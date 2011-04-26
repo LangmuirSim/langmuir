@@ -3,12 +3,33 @@
 
 using namespace Langmuir;
 
-int
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
   QApplication app (argc, argv);
 
-  MainWindow window;
+  // read command line arguments
+  QStringList args = app.arguments ();
+
+  QString iFileName = "";
+  QString oFileName = "";
+  if ( args.size() == 2 )
+    {
+      iFileName = args.at(1);
+      QStringList tokens = args.at(1).split("/",QString::SkipEmptyParts);
+      oFileName = tokens[tokens.size()-1].split(".",QString::SkipEmptyParts)[0];
+    }
+  else if ( args.size() == 3 )
+    {
+      iFileName = args.at(1);
+      oFileName = args.at(2);
+    }
+  else
+    {
+      qDebug() << "correct use is langmuirView input.dat (output.dat)";
+      qFatal("bad input");
+    }
+
+  MainWindow window( iFileName );
   window.resize (window.sizeHint ());
 
   if ((float) (window.width () * window.height ()) /

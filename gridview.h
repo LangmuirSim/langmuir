@@ -3,7 +3,10 @@
 
 #include "inputparser.h"
 #include "cubicgrid.h"
+#include "world.h"
 #include "simulation.h"
+#include "chargeagent.h"
+#include "cubicgrid.h"
 
 #include <QtCore>
 #include <QtGui>
@@ -29,18 +32,20 @@ namespace Langmuir
   class PointArray : public QObject
   {
   Q_OBJECT public:
-   PointArray( QObject *parent = 0, QColor color = QColor(255,255,255,255) );
+   PointArray( QObject *parent, QVector<float>& xyz, QColor color, float pointsize );
   ~PointArray();
-   void draw() const;
+   void draw( int size ) const;
+   void update( QVector<float>& xyz );
    private:
     GLuint vVBO;
     QColor col;
+    float m_pointsize;
   };
 
   class GridViewGL : public QGLWidget
   {
   Q_OBJECT public:
-    GridViewGL(QWidget * parent);
+    GridViewGL(QWidget * parent, QString input );
    ~GridViewGL();
     QSize minimumSizeHint() const;
     QSize sizeHint() const;
@@ -90,6 +95,7 @@ namespace Langmuir
     Box *drain;
 
     PointArray *carriers;
+    PointArray *defects;
 
     InputParser *pInput;
     SimulationParameters *pPar;
@@ -100,7 +106,7 @@ namespace Langmuir
   class MainWindow:public QWidget
   {
   Q_OBJECT public:
-    MainWindow();
+    MainWindow(QString input);
     private:
      GridViewGL *glWidget;
   };

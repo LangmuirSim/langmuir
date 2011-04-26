@@ -3,12 +3,13 @@
 namespace Langmuir
 {
 
-  GridViewGL::GridViewGL(QWidget * parent):QGLWidget(parent)
+  GridViewGL::GridViewGL(QWidget * parent, QString input ):QGLWidget(parent)
   {
    setFocusPolicy(Qt::StrongFocus);
    pPar = new SimulationParameters;
-   pInput = new InputParser("adam.inp");
+   pInput = new InputParser(input);
    pInput->simulationParameters(pPar);
+   if ( pPar->iterationsPrint > 100 ) { qFatal("iterations.print must be kept low for gridview to render"); }
    pSim = new Simulation(pPar);
    xRot  = 0;
    yRot  = 0;
@@ -28,6 +29,11 @@ namespace Langmuir
    delete pPar;
    delete pSim;
    delete pInput;
+   delete carriers;
+   if( pSim->world()->chargedDefects()->size() > 0 ) { delete defects; }
+   delete base;
+   delete source;
+   delete drain;
   }
 
   QSize GridViewGL::minimumSizeHint() const
@@ -53,28 +59,61 @@ namespace Langmuir
     glEnable(GL_COLOR_MATERIAL);
     glEnable(GL_POINT_SMOOTH);
 
-    int e_thick1 = 5;
-    int e_thick2 = 5;
+    base = new Box(this,QVector3D(pPar->gridWidth,pPar->gridHeight,5),QVector3D(5,0,5),QColor(255,255,255,255));
+    source = new Box( this, QVector3D(5,pPar->gridHeight,pPar->gridDepth+5),QVector3D(0,0,5),QColor(255,0,0,255));
+    drain = new Box(this,QVector3D(5,pPar->gridHeight,pPar->gridDepth+5),QVector3D(5+pPar->gridWidth,0,5),QColor(0,0,255,255));
 
-    base = new Box(this,QVector3D(pPar->gridWidth,pPar->gridHeight,e_thick2),QVector3D(e_thick1,0,e_thick2),QColor(255,255,255,255));
-    source = new Box( this, QVector3D(e_thick1,pPar->gridHeight,pPar->gridDepth+e_thick2),QVector3D(0,0,e_thick2),QColor(255,0,0,255));
-    drain = new Box(this,QVector3D(e_thick1,pPar->gridHeight,pPar->gridDepth+e_thick2),QVector3D(e_thick1+pPar->gridWidth,0,e_thick2),QColor(0,0,255,255));
+    QList< ChargeAgent* > *charges = pSim->world()->charges();
+    QVector<float> xyz;
+    Grid *grid = pSim->world()->grid();
+    for ( int i = 0; i < charges->size(); i++ )
+    {
+     unsigned int site = charges->at(i)->site();
+     Eigen::Vector3d position = grid->position( site );
+     xyz.push_back( position.x()+5 );
+     xyz.push_back( position.y() );
+     xyz.push_back( position.z()+15 );
+    }
+    carriers = new PointArray(this,xyz,QColor(0,0,255,255),3.0f);
 
-    carriers = new PointArray(this,QColor(0,0,255,255));
+    if(  pSim->world()->chargedDefects()->size() > 0 ) {
+    QList< unsigned int > *defectList = pSim->world()->chargedDefects();
+    xyz.clear();
+    for ( int i = 0; i < defectList->size(); i++ )
+    {
+     Eigen::Vector3d position = grid->position( defectList->at(i) );
+     xyz.push_back( position.x()+5 );
+     xyz.push_back( position.y() );
+     xyz.push_back( position.z()+15 );
+    }
+    defects  = new PointArray(this,xyz,QColor(0,0,0,255),3.0f);
+    }
 
-    float move_camera = pPar->gridWidth + e_thick1;
-    if ( pPar->gridWidth < pPar->gridHeight ) { move_camera = pPar->gridHeight + e_thick1; }
-    xTran = -(pPar->gridWidth+e_thick1)/2.0f;
-    yTran = -(pPar->gridHeight+e_thick1)/2.0f;
+    float move_camera = pPar->gridWidth + 5;
+    if ( pPar->gridWidth < pPar->gridHeight ) { move_camera = pPar->gridHeight + 5; }
+    xTran = -(pPar->gridWidth+5)/2.0f;
+    yTran = -(pPar->gridHeight+5)/2.0f;
     zTran = -(move_camera)-0.01*(move_camera);
 
-    //qtimer->start(1000);
+    qtimer->start(10);
   }
 
   void GridViewGL::timerUpdateGL()
   {
-   //qDebug() << QString("xTran %1 yTran %2 zTran %3 xRot %4 yRot %5 zRot %6").arg(xTran).arg(yTran).arg(zTran).arg(xRot).arg(yRot).arg(zRot);
-   //updateGL();
+   pSim->performIterations( pPar->iterationsPrint );
+   QList< ChargeAgent* > *charges = pSim->world()->charges();
+   QVector<float> xyz;
+   Grid *grid = pSim->world()->grid();
+   for ( int i = 0; i < charges->size(); i++ )
+   {
+    unsigned int site = charges->at(i)->site();
+    Eigen::Vector3d position = grid->position( site );
+    xyz.push_back( position.x()+5 );
+    xyz.push_back( position.y() );
+    xyz.push_back( position.z()+15.0 );
+   }
+   carriers->update( xyz );
+   updateGL();
   }
 
   void GridViewGL::NormalizeAngle(int &angle)
@@ -167,8 +206,6 @@ namespace Langmuir
       {
         setXTranslation(xTran+xDelta*dx);
         setYTranslation(yTran-yDelta*dy);
-        //setXRotation(xRot + 8 * dy);
-        //setZRotation(zRot + 8 * dx);
       }
     lastPos = event->pos();
   }
@@ -247,9 +284,8 @@ namespace Langmuir
     base->draw();
     source->draw();
     drain->draw();
-
-    carriers->draw();
-
+    carriers->draw( pSim->world()->charges()->size() );
+    if ( pSim->world()->chargedDefects()->size() > 0 ) { defects->draw( pSim->world()->chargedDefects()->size() ); }
   }
 
   Box::Box( QObject *parent, QVector3D dimensions, QVector3D origin, QColor color ) : QObject(parent), col(color)
@@ -418,21 +454,12 @@ namespace Langmuir
     glDisableClientState(GL_NORMAL_ARRAY);
   }
 
-  PointArray::PointArray( QObject *parent, QColor color ) : QObject(parent), col(color)
+  PointArray::PointArray( QObject *parent, QVector<float>& xyz, QColor color, float pointsize ) : QObject(parent), col(color)
   {
-
-   QVector<float> varray(1024*3);
-   for ( int i = 0; i < varray.size(); i+=3 )
-   {
-    varray[i+0] = (i+2)/3;
-    varray[i+1] = 0;
-    varray[i+2] = 0;
-   }
-
+   m_pointsize = pointsize;
    glGenBuffers(1,&vVBO);
    glBindBuffer(GL_ARRAY_BUFFER,vVBO);
-   glBufferData(GL_ARRAY_BUFFER,varray.size()*sizeof(float),varray.constData(),GL_STATIC_DRAW);
-
+   glBufferData(GL_ARRAY_BUFFER,xyz.size()*sizeof(float),xyz.constData(),GL_DYNAMIC_DRAW);
   }
 
   PointArray::~PointArray()
@@ -440,23 +467,28 @@ namespace Langmuir
    glDeleteBuffers(1,&vVBO);
   }
 
-  void PointArray::draw() const
+  void PointArray::draw( int size ) const
   {
-    glPointSize(1.0f);
+    glPointSize(m_pointsize);
 
     glEnableClientState(GL_VERTEX_ARRAY);
     glBindBuffer(GL_ARRAY_BUFFER,vVBO);
     glVertexPointer(3,GL_FLOAT,0,0);
 
     glColor4f(col.redF(),col.greenF(),col.blueF(),col.alphaF());
-    glDrawArrays(GL_POINTS,0,1024);
+    glDrawArrays(GL_POINTS,0,size);
 
     glDisableClientState(GL_VERTEX_ARRAY);
   }
 
-  MainWindow::MainWindow()
+  void PointArray::update( QVector<float>& xyz )
   {
-    glWidget = new GridViewGL(this);
+   glBufferData(GL_ARRAY_BUFFER,xyz.size()*sizeof(float),xyz.constData(),GL_DYNAMIC_DRAW);
+  }
+
+  MainWindow::MainWindow(QString input)
+  {
+    glWidget = new GridViewGL(this,input);
     QHBoxLayout *mainLayout = new QHBoxLayout;
     mainLayout->addWidget(glWidget);
     setLayout(mainLayout);
