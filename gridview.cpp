@@ -20,6 +20,7 @@ namespace Langmuir
    xDelta = 2.5;
    yDelta = 2.5;
    zDelta = 100.0;
+   thickness = 10.0;
    qtimer = new QTimer(this);
    connect(qtimer, SIGNAL(timeout()), this, SLOT(timerUpdateGL()));
   }
@@ -30,10 +31,19 @@ namespace Langmuir
    delete pSim;
    delete pInput;
    delete carriers;
-   if( pSim->world()->chargedDefects()->size() > 0 ) { delete defects; }
+   delete defects;
    delete base;
    delete source;
    delete drain;
+   delete side1;
+   delete side2;
+   delete side3;
+   delete side4;
+   delete side5;
+   delete side6;
+   delete x;
+   delete y;
+   delete z;
   }
 
   QSize GridViewGL::minimumSizeHint() const
@@ -49,7 +59,7 @@ namespace Langmuir
   void GridViewGL::initializeGL()
   {
     glewInit();
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
     glClearDepth(1.0f);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
@@ -58,10 +68,73 @@ namespace Langmuir
     glEnable(GL_LIGHT0);
     glEnable(GL_COLOR_MATERIAL);
     glEnable(GL_POINT_SMOOTH);
+    //glHint(GL_POINT_SMOOTH_HINT, GL_FASTEST);
 
-    base = new Box(this,QVector3D(pPar->gridWidth,pPar->gridHeight,5),QVector3D(5,0,5),QColor(255,255,255,255));
-    source = new Box( this, QVector3D(5,pPar->gridHeight,pPar->gridDepth+5),QVector3D(0,0,5),QColor(255,0,0,255));
-    drain = new Box(this,QVector3D(5,pPar->gridHeight,pPar->gridDepth+5),QVector3D(5+pPar->gridWidth,0,5),QColor(0,0,255,255));
+    x = new Box( this,
+                 QVector3D( 10*thickness, 1, 1 ),
+                 QVector3D( -2.0*thickness, -2.0*thickness, -2.0*thickness ),
+                 QColor( 255, 0, 0, 255 )
+                 );
+    y = new Box( this,
+                 QVector3D( 1, 10.0*thickness, 1 ),
+                 QVector3D( -2.0*thickness, -2.0*thickness, -2.0*thickness ),
+                 QColor( 0, 255, 0, 255 )
+               );
+    z = new Box( this,
+                 QVector3D( 1, 1, 10.0*thickness ),
+                 QVector3D( -2.0*thickness, -2.0*thickness, -2.0*thickness ),
+                 QColor( 0, 0, 255, 255 )
+               );
+
+    base = new Box( this,
+                    QVector3D( pPar->gridWidth, pPar->gridHeight, thickness ),
+                    QVector3D( 0, 0, -thickness ),
+                    QColor( 25, 25, 25, 255 )
+                  );
+    source = new Box( this,
+                      QVector3D( 2.0*thickness, pPar->gridHeight, thickness + pPar->gridDepth * thickness ),
+                      QVector3D( -2.0*thickness, 0, -thickness ),
+                      QColor( 0, 0, 255, 255 )
+                    );
+    drain = new Box( this,
+                     QVector3D( 2.0*thickness, pPar->gridHeight, thickness + pPar->gridDepth * thickness ),
+                     QVector3D( pPar->gridWidth, 0, -thickness ),
+                     QColor( 255, 0, 0, 255 )
+                   );
+
+    side1 = new Box( this,
+                     QVector3D( pPar->gridWidth, thickness, thickness ),
+                     QVector3D( 0, -thickness, -thickness ),
+                     QColor( 255, 255, 255, 255 )
+                   );
+    side2 = new Box( this,
+                     QVector3D( pPar->gridWidth, thickness, thickness ),
+                     QVector3D( 0, pPar->gridHeight, -thickness ),
+                     QColor( 255, 255, 255, 255 )
+                   );
+    side3 = new Box( this,
+                     QVector3D( 2.0*thickness, thickness, thickness + pPar->gridDepth * thickness ),
+                     QVector3D( -2.0*thickness, -thickness, -thickness ),
+                     QColor( 30, 144, 255, 255 )
+                   );
+    side4 = new Box( this,
+                     QVector3D( 2.0*thickness, thickness, thickness + pPar->gridDepth * thickness ),
+                     QVector3D( -2.0*thickness, pPar->gridHeight, -thickness ),
+                     QColor( 30, 144, 255, 255 )
+                   );
+    side5 = new Box( this,
+                     QVector3D( 2.0*thickness, thickness, thickness + pPar->gridDepth * thickness ),
+                     QVector3D( pPar->gridWidth, -thickness, -thickness ),
+                     QColor( 205, 92, 92, 255 )
+                   );
+    side6 = new Box( this,
+                     QVector3D( 2.0*thickness, thickness, thickness + pPar->gridDepth * thickness ),
+                     QVector3D( pPar->gridWidth, pPar->gridHeight, -thickness ),
+                     QColor( 205, 92, 92, 255 )
+                   );
+     xRot  =  5000.0;
+     yRot  =     0.0;
+     zRot  =     0.0;
 
     QList< ChargeAgent* > *charges = pSim->world()->charges();
     QVector<float> xyz;
@@ -70,32 +143,30 @@ namespace Langmuir
     {
      unsigned int site = charges->at(i)->site();
      Eigen::Vector3d position = grid->position( site );
-     xyz.push_back( position.x()+5 );
+     xyz.push_back( position.x() );
      xyz.push_back( position.y() );
-     xyz.push_back( position.z()+15 );
+     xyz.push_back( thickness*position.z() );
     }
-    carriers = new PointArray(this,xyz,QColor(0,0,255,255),3.0f);
+    carriers = new PointArray(this,xyz,QColor(255,0,0,0),3.0f);
 
-    if(  pSim->world()->chargedDefects()->size() > 0 ) {
     QList< unsigned int > *defectList = pSim->world()->chargedDefects();
     xyz.clear();
     for ( int i = 0; i < defectList->size(); i++ )
     {
      Eigen::Vector3d position = grid->position( defectList->at(i) );
-     xyz.push_back( position.x()+5 );
+     xyz.push_back( position.x() );
      xyz.push_back( position.y() );
-     xyz.push_back( position.z()+15 );
+     xyz.push_back( thickness*position.z() );
     }
-    defects  = new PointArray(this,xyz,QColor(0,0,0,255),3.0f);
-    }
+    defects  = new PointArray(this,xyz,QColor(0,255,0,255),3.0f);
 
-    float move_camera = pPar->gridWidth + 5;
-    if ( pPar->gridWidth < pPar->gridHeight ) { move_camera = pPar->gridHeight + 5; }
-    xTran = -(pPar->gridWidth+5)/2.0f;
-    yTran = -(pPar->gridHeight+5)/2.0f;
+    float move_camera = pPar->gridWidth;
+    if ( pPar->gridWidth < pPar->gridHeight ) { move_camera = pPar->gridHeight; }
+    xTran = -(pPar->gridWidth)*0.5f;
+    yTran = -(pPar->gridHeight)*0.25f;
     zTran = -(move_camera)-0.01*(move_camera);
 
-    qtimer->start(10);
+   qtimer->start(10);
   }
 
   void GridViewGL::timerUpdateGL()
@@ -108,12 +179,13 @@ namespace Langmuir
    {
     unsigned int site = charges->at(i)->site();
     Eigen::Vector3d position = grid->position( site );
-    xyz.push_back( position.x()+5 );
+    xyz.push_back( position.x() );
     xyz.push_back( position.y() );
-    xyz.push_back( position.z()+15.0 );
+    xyz.push_back( thickness*position.z() );
    }
    carriers->update( xyz );
    updateGL();
+   //qDebug() << QString("TRAN: (%1, %2, %3) ROTA: (%4, %5, %6)").arg(xTran).arg(yTran).arg(zTran).arg(xRot).arg(yRot).arg(zRot);
   }
 
   void GridViewGL::NormalizeAngle(int &angle)
@@ -284,8 +356,17 @@ namespace Langmuir
     base->draw();
     source->draw();
     drain->draw();
+    side1->draw();
+    side2->draw();
+    side3->draw();
+    side4->draw();
+    side5->draw();
+    side6->draw();
+    //x->draw();
+    //y->draw();
+    //z->draw();
     carriers->draw( pSim->world()->charges()->size() );
-    if ( pSim->world()->chargedDefects()->size() > 0 ) { defects->draw( pSim->world()->chargedDefects()->size() ); }
+    defects->draw( pSim->world()->chargedDefects()->size() );
   }
 
   Box::Box( QObject *parent, QVector3D dimensions, QVector3D origin, QColor color ) : QObject(parent), col(color)
@@ -483,6 +564,7 @@ namespace Langmuir
 
   void PointArray::update( QVector<float>& xyz )
   {
+   glBindBuffer(GL_ARRAY_BUFFER,vVBO);
    glBufferData(GL_ARRAY_BUFFER,xyz.size()*sizeof(float),xyz.constData(),GL_DYNAMIC_DRAW);
   }
 

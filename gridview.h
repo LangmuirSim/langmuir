@@ -1,6 +1,7 @@
 #ifndef GRID_VIEW_H
 #define GRID_VIEW_H
 
+#include <GL/glew.h>
 #include "inputparser.h"
 #include "cubicgrid.h"
 #include "world.h"
@@ -10,7 +11,6 @@
 
 #include <QtCore>
 #include <QtGui>
-#include <GL/glew.h>
 #include <QGLWidget>
 #include <QMatrix4x4>
 
@@ -87,12 +87,23 @@ namespace Langmuir
     float xDelta;
     float yDelta;
     float zDelta;
+    float thickness;
     QPoint lastPos;
     QTimer *qtimer;
 
     Box *base;
     Box *source;
     Box *drain;
+    Box *side1;
+    Box *side2;
+    Box *side3;
+    Box *side4;
+    Box *side5;
+    Box *side6;
+
+    Box *x;
+    Box *y;
+    Box *z;
 
     PointArray *carriers;
     PointArray *defects;

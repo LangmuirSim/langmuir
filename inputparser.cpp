@@ -687,6 +687,49 @@ namespace Langmuir
               break;
             }
 
+          case e_openCL:
+            {
+              QString useOpenCL = list.at (1).trimmed ().toLower ();
+              if (useOpenCL == "true")
+                {
+                  m_parameters.openCL = true;
+                }
+              else if (useOpenCL == "false")
+                {
+                  m_parameters.openCL = false;
+                }
+              else
+                {
+                  qDebug () << "OpenCL is either true or false:" <<
+                    useOpenCL;
+                  qFatal ("bad input");
+                }
+              break;
+            }
+
+          case e_workSize:
+            {
+              m_parameters.workSize = list.at (1).toInt ();
+              if (m_parameters.workSize <= 0)
+                {
+                  qDebug () << "Local work group size must be larger than 0.";
+                  qFatal ("bad input");
+                }
+              break;
+            }
+
+          case e_kernelFile:
+            {
+              m_parameters.kernelFile = list.at (1);
+              break;
+            }
+
+          case e_randomSeed:
+            {
+              m_parameters.seed = list.at (1).toInt ();
+              break;
+            }
+
           default:
             qDebug () << "Unknown key value encountered:" << key;
           }
@@ -705,6 +748,7 @@ namespace Langmuir
     s_variables["charged.traps"] = e_chargedTraps;
     s_variables["traps.heterogeneous"] = e_trapsHeterogeneous;
     s_variables["output.grid"] = e_outputGrid;
+    s_variables["use.opencl"] = e_openCL;
 
     s_variables["charge.percentage"] = e_chargePercentage;
     s_variables["defect.percentage"] = e_defectPercentage;
@@ -735,6 +779,10 @@ namespace Langmuir
     s_variables["z.defect"] = e_zDefect;
     s_variables["z.trap"] = e_zTrap;
     s_variables["hopping.range"] = e_hoppingRange;
+    s_variables["work.size"] = e_workSize;
+    s_variables["kernel.file"] = e_kernelFile;
     s_variables["potential.point"] = e_potentialPoint;
+    s_variables["random.seed"] = e_randomSeed;
+
   }
 }

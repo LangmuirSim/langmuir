@@ -1,6 +1,8 @@
 #ifndef SIMULATION_H
 #define SIMULATION_H
 
+extern int globalstep;
+
 #include <QList>
 
 namespace Langmuir
@@ -208,6 +210,19 @@ namespace Langmuir
      * @param chargeAgent pointer to charge agent.
      */
     static void chargeAgentIterate (ChargeAgent * chargeAgent);
+
+    /**
+      * @brief finishes what chargeAgentIterate fails to do when OpenCL is used
+      *
+      * In between generating future sites, and deciding if those future sites
+      * can be moved to, we calculate coulomb interactions.  We need to gather
+      * ALL the future sites before sending them to a compute device before
+      * before deciding the outcome.
+      */
+    static void chargeAgentDecideFuture( ChargeAgent * chargeAgent );
+
+    void compareHostAndDevice();
+    int tick;
 
   };
 

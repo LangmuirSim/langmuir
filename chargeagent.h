@@ -43,15 +43,25 @@ namespace Langmuir
     /**
      * @brief transport the carrier.
      *
-     * Agent chooses a site and hands off to site.
+     * calls chooseFuture, and then decideFuture
      * @return site index of the site the charge carrier was moved to.  -1 if the transport was unsucessful.
      */
     virtual unsigned int transport();
 
     /**
+      * @brief choose future site
+      */
+    virtual void chooseFuture( int clID = 0 );
+
+    /**
+      * @brief decide if future chosen site is ok
+      */
+    virtual unsigned int decideFuture();
+
+    /**
      * @brief complete the tick.
      *
-     * Update the simulation by accepting or rejecting a Monte Carlor move.
+     * Update the simulation by accepting or rejecting a Monte Carlo move.
      */
     virtual void completeTick();
 
@@ -79,6 +89,19 @@ namespace Langmuir
      */
     double distanceTraveled();
 
+    /**
+      * @brief access clID
+      */
+    inline int id() { return clID; }
+
+    /**
+      * @brief calculate coulomb energy difference between
+      * initial state = m_site
+      * final state = m_fSite
+      * interacts with all other charges carrier, all of which
+      * are assumed to be in initial state
+      */
+    inline double interaction() { return coulombInteraction(m_fSite); }
   protected:
 
     /**
@@ -115,6 +138,15 @@ namespace Langmuir
      * distance the carrier has traveled during its lifetime
      */
     double m_distanceTraveled;
+
+   /**
+     * @brief Host memory array index ~ constantly changing...
+     * this is an index used to read and write information 
+     * about this charge carrier to and from a global array(s).
+     * In particular, its used to write site IDS to m_iHost, m_fHost,
+     * and read Coulomb energies from m_oHost. ( all OpenCL stuff )
+     */
+    int clID;
 
     /**
      * @brief coulomb interaction.
@@ -153,7 +185,7 @@ namespace Langmuir
      * @param type1 type of site 1.
      * @param type2 type of site 2.
      * @return coupling coupling constant between these two site types.
-     */	  
+     */
     double couplingConstant(short id1, short id2);
 
     /**
@@ -163,10 +195,9 @@ namespace Langmuir
      *
      * @param pd potential difference between old and new site.
      * @param coupling coupling constant between old and new site types.
-     * @param T temperature to calculate metropolis criterion at.
      * @return success Boolean.  True if transported, False if rejected.
      */
-    bool attemptTransport(double pd, double coupling, double T);
+    bool attemptTransport(double pd, double coupling);
   };
 
   inline int ChargeAgent::charge()

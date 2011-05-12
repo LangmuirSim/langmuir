@@ -20,8 +20,8 @@ namespace Langmuir
   class Rand
   {
   public:
-    Rand();
-    Rand(double min, double max);
+    Rand( int seed = -1 );
+    Rand(double min, double max, int seed = -1 );
     ~Rand();
     double number();
     double normalNumber(double mean, double stdDeviation); // Random number from a normal distribution about the mean

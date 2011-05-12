@@ -24,6 +24,7 @@ namespace Langmuir
     bool chargedTraps;
     bool trapsHeterogeneous;
     bool outputGrid;
+    bool openCL;
 
     double chargePercentage;
     double defectPercentage;
@@ -47,6 +48,7 @@ namespace Langmuir
     double electrostaticPrefactor;
     double inverseKT;
     int electrostaticCutoff;
+    int globalSize;
 
     int gridDepth;
     int gridHeight;
@@ -63,10 +65,13 @@ namespace Langmuir
     int zDefect;
     int zTrap;
     int hoppingRange;
+    int workSize;
 
-      std::vector < PotentialPoint > potentialPoints;
+    int seed;
+    QString kernelFile;
+    std::vector < PotentialPoint > potentialPoints;
 
-      SimulationParameters ()
+    SimulationParameters ()
     {
       coulomb = false;
       chargedDefects = false;
@@ -76,7 +81,7 @@ namespace Langmuir
       chargedTraps = false;
       trapsHeterogeneous = false;
       outputGrid = false;
-      electrostaticCutoff = 50;
+      openCL = false;
 
       chargePercentage = 0.01;
       defectPercentage = 0.00;
@@ -96,6 +101,7 @@ namespace Langmuir
       elementaryCharge = 1.60217646e-19;
       permittivityFreeSpace = 8.854187817e-12;
       gridDistanceFactor = 1e-9;
+      electrostaticCutoff = 50;
 
       gridDepth = 1;
       gridHeight = 256;
@@ -112,6 +118,10 @@ namespace Langmuir
       zDefect = 0;
       zTrap = 0;
       hoppingRange = 1;
+      workSize = 32;
+      globalSize = 0;
+      seed = -1;
+      kernelFile = "kernel.cl";
 
       electrostaticPrefactor =
         elementaryCharge / (4.0 * M_PI * dielectricConstant *
@@ -165,6 +175,7 @@ namespace Langmuir
       e_trapsHeterogeneous,        // distrubute traps heterogeneously?
       e_outputGrid,                // generate a pdf image of the grid?
       e_chargePercentage,        // percentage of charges in the grid - sets as target
+      e_openCL,                  // should OpenCL be used
 
       e_defectPercentage,        // percentage of defects in the grid
       e_deltaEpsilon,                // site energy difference for traps
@@ -193,9 +204,12 @@ namespace Langmuir
       e_variableWorking,        // the working variable that is being changed
       e_zDefect,                // charge on the defects (units e)
       e_zTrap,                        // charge on traps (units e)
-      e_hoppingRange,           //number of neighbors to hop between
+      e_hoppingRange,           // number of neighbors to hop between
+      e_workSize,              // local size of OpenCL work groups
+      e_randomSeed,            // seed for random number generator
 
-      e_potentialPoint,                // A point of defined potential (x,y,z,V)
+      e_kernelFile,            // source file containing OpenCL kernel
+      e_potentialPoint,        // A point of defined potential (x,y,z,V)
 
       e_end
     };
