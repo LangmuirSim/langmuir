@@ -369,10 +369,10 @@ namespace Langmuir
      return "CL_BUILD_PROGRAM_FAILURE";
    else if (error == CL_MAP_FAILURE)
      return "CL_MAP_FAILURE";
-   else if (error == CL_MISALIGNED_SUB_BUFFER_OFFSET)
-     return "CL_MISALIGNED_SUB_BUFFER_OFFSET";
-   else if (error == CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST)
-     return "CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST";
+   //else if (error == CL_MISALIGNED_SUB_BUFFER_OFFSET)
+   //  return "CL_MISALIGNED_SUB_BUFFER_OFFSET";
+   //else if (error == CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST)
+   //  return "CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST";
    else if (error == CL_INVALID_VALUE)
      return "CL_INVALID_VALUE";
    else if (error == CL_INVALID_DEVICE_TYPE)
@@ -455,8 +455,8 @@ namespace Langmuir
      return "CL_INVALID_MIP_LEVEL";
    else if (error == CL_INVALID_GLOBAL_WORK_SIZE)
      return "CL_INVALID_GLOBAL_WORK_SIZE";
-   else if (error == CL_INVALID_PROPERTY)
-     return "CL_INVALID_PROPERTY";
+   //else if (error == CL_INVALID_PROPERTY)
+   //  return "CL_INVALID_PROPERTY";
    else
      return "CL_UNKNOWN_ERROR";
  }
