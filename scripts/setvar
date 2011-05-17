@@ -56,19 +56,9 @@ def printError(string):
  sys.exit(-1)
 
 def appendToFile(filename,string):
-
- if os.path.exists(filename):
-  handle = open(filename,'r')
-  contents = handle.readlines()
-  handle.close()
-  handle = open(filename,'w')
-  handle.write(string.strip()+'\n')
-  for line in contents: handle.write(line)
-  handle.close()
- else:
-  handle = open(filename,'a')
-  handle.write(string.strip()+'\n')
-  handle.close()
+ handle = open(filename,'a')
+ handle.write(string.strip()+'\n')
+ handle.close()
 
 def replaceInFile(filename,keyword,string):
  if os.path.exists(filename):

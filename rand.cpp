@@ -14,18 +14,25 @@ using namespace std;
 
 namespace Langmuir{
 
-  Rand::Rand()
+  Rand::Rand( int seed )
   {
     m_gen = new baseGenerator(42u);
+    if ( seed >= 0 )
+     m_gen->seed( seed );
+    else
+     m_gen->seed(static_cast<unsigned int>(std::time(0)));
     m_dist = new boost::uniform_real<>(0, 1);
     m_uni = new boost::variate_generator<baseGenerator&, boost::uniform_real<> >(*m_gen, *m_dist);
   }
 
-  Rand::Rand(double min, double max)
+  Rand::Rand(double min, double max, int seed )
   {
     // Produce a random number distribution between min and max inclusive
     m_gen = new baseGenerator(42u);
-    m_gen->seed(static_cast<unsigned int>(std::time(0)));
+    if ( seed >= 0 )
+     m_gen->seed( seed );
+    else
+     m_gen->seed(static_cast<unsigned int>(std::time(0)));
     m_dist = new boost::uniform_real<>(min, max);
     m_uni = new boost::variate_generator<baseGenerator&, boost::uniform_real<> >(*m_gen, *m_dist);
   }

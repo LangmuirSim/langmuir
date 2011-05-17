@@ -1,67 +1,127 @@
-#ifndef GRIDDISPLAY_H
-#define GRIDDISPLAY_H
+#ifndef GRID_VIEW_H
+#define GRID_VIEW_H
 
-#include <QDialog>
-#include <QGraphicsItem>
-#include <QGraphicsScene>
-#include <QGraphicsView>
-#include <QObject>
-#include <QVector>
+#include <GL/glew.h>
+#include "inputparser.h"
+#include "cubicgrid.h"
+#include "world.h"
+#include "simulation.h"
+#include "chargeagent.h"
+#include "cubicgrid.h"
+
+#include <QtCore>
+#include <QtGui>
+#include <QGLWidget>
+#include <QMatrix4x4>
 
 namespace Langmuir
 {
-  class Grid;
 
-  class GridView : public QGraphicsView
+  class Box : public QObject
   {
-  Q_OBJECT
+  Q_OBJECT public:
+   Box( QObject *parent = 0, QVector3D dimensions = QVector3D(1,1,1), QVector3D origin = QVector3D(0,0,0), QColor color = QColor(255,255,255,255) );
+  ~Box();
+   void draw() const;
+  private:
+   GLuint vVBO;
+   GLuint nVBO;
+   QColor col;
+  };
 
-  public:
-    GridView(QWidget* parent = 0);
-    explicit GridView(QGraphicsScene* scene, QWidget* parent = 0);
+  class PointArray : public QObject
+  {
+  Q_OBJECT public:
+   PointArray( QObject *parent, QVector<float>& xyz, QColor color, float pointsize );
+  ~PointArray();
+   void draw( int size ) const;
+   void update( QVector<float>& xyz );
+   private:
+    GLuint vVBO;
+    QColor col;
+    float m_pointsize;
+  };
 
-  protected:
+  class GridViewGL : public QGLWidget
+  {
+  Q_OBJECT public:
+    GridViewGL(QWidget * parent, QString input );
+   ~GridViewGL();
+    QSize minimumSizeHint() const;
+    QSize sizeHint() const;
+
+   public slots:
+    void setXRotation(int angle);
+    void setYRotation(int angle);
+    void setZRotation(int angle);
+    void setXTranslation(float length);
+    void setYTranslation(float length);
+    void setZTranslation(float length);
+    void timerUpdateGL();
+
+   signals:
+    void xRotationChanged(int angle);
+    void yRotationChanged(int angle);
+    void zRotationChanged(int angle);
+    void xTranslationChanged(float length);
+    void yTranslationChanged(float length);
+    void zTranslationChanged(float length);
+
+   protected:
+    void initializeGL();
+    void resizeGL(int w, int h);
+    void paintGL();
+    void mousePressEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
     void wheelEvent(QWheelEvent *event);
-    void scaleView(qreal scaleFactor);
+    void keyPressEvent(QKeyEvent *event);
+
+   private:
+    void NormalizeAngle(int &angle);
+    int xRot;
+    int yRot;
+    int zRot;
+    float xTran;
+    float yTran;
+    float zTran;
+    float xDelta;
+    float yDelta;
+    float zDelta;
+    float thickness;
+    QPoint lastPos;
+    QTimer *qtimer;
+
+    Box *base;
+    Box *source;
+    Box *drain;
+    Box *side1;
+    Box *side2;
+    Box *side3;
+    Box *side4;
+    Box *side5;
+    Box *side6;
+
+    Box *x;
+    Box *y;
+    Box *z;
+
+    PointArray *carriers;
+    PointArray *defects;
+
+    InputParser *pInput;
+    SimulationParameters *pPar;
+    Simulation *pSim;
 
   };
 
-  class GridItem : public QObject, public QGraphicsItem
+  class MainWindow:public QWidget
   {
-  Q_OBJECT
-
-  public:
-    GridItem(int type = 0, unsigned long int site = 0);
-    ~GridItem();
-    void setCharge(int charge);
-    inline int charge() { return m_charge; }
-    QRectF boundingRect() const;
-    QPainterPath shape() const;
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
-               QWidget *widget);
-
-  private:
-    int m_type;
-    unsigned long int m_site;
-    int m_charge;
-    QColor* m_color;
-    int m_width, m_height;
-    QRectF m_rect;
+  Q_OBJECT public:
+    MainWindow(QString input);
+    private:
+     GridViewGL *glWidget;
   };
 
-  class GridScene : public QGraphicsScene
-  {
-  Q_OBJECT
-
-  public:
-    GridScene(unsigned long width = 0, unsigned long height = 0,
-              QObject* parent = 0);
-    ~GridScene();
-
-  private:
-    Grid *m_grid;
-    QVector<int> *m_sites;
-  };
 }
 
-#endif /*GRIDDISPLAY_H */
+#endif

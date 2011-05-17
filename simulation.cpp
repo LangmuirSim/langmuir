@@ -30,7 +30,7 @@ namespace Langmuir
     m_parameters = par;
 
     // Create the world object
-    m_world = new World;
+    m_world = new World( par->seed );
 
     // Create the grid object
     m_grid = new CubicGrid (m_parameters->gridWidth, m_parameters->gridHeight, m_parameters->gridDepth);
@@ -40,6 +40,9 @@ namespace Langmuir
 
     // Let the world know about the simulation parameters
     m_world->setParameters (m_parameters);
+
+    // Initialize OpenCL
+    if ( m_parameters->openCL ) m_world->initializeOpenCL();
 
     // Create the agents
     createAgents ();
@@ -78,8 +81,10 @@ namespace Langmuir
     if (m_parameters->gridCharge) seedCharges ();
 
     // Generate grid image
-	  if (m_parameters->outputGrid) gridImage();
     if (m_parameters->outputGrid) gridImage();
+
+    // tick is the global step number of this simulation
+    tick = 0;
   }
 
   Simulation::~Simulation ()
@@ -123,27 +128,54 @@ namespace Langmuir
         // Attempt to transport the charges through the film
         QList < ChargeAgent * >&charges = *m_world->charges ();
 
+        // If using OpenCL, launch the Kernel to calculate Coulomb Interactions
+        if ( m_parameters->openCL && charges.size() > 0 )
+        {
+         // first have the charge carriers propose future sites
+         for ( int j = 0; j < charges.size(); j++ ) charges[j]->chooseFuture(j);
+
+         // copy the current sites and the future sites to the GPU
+         m_world->copyHostToDevice();
+
+         // tell the GPU to perform all coulomb calculations
+         m_world->launchKernel();
+
+         // copy the results of the coulomb calculation back to the CPU ( every charge carrier gets a result )
+         m_world->copyDeviceToHost();
+
+         // make sure all the previous things finish
+         m_world->clFinish();
+
+         //check the answer during debugging
+         //compareHostAndDevice();
+
+         // now use the results of the coulomb calculations to decide if the carreirs should have moved
+         QFuture < void > future = QtConcurrent::map (charges, Simulation::chargeAgentDecideFuture);
+         future.waitForFinished();
+        }
+        else // Not using OpenCL
+        {
         // Use QtConcurrnet to parallelise the charge calculations
-        QFuture < void >future =
-          QtConcurrent::map (charges, Simulation::chargeAgentIterate);
+        QFuture < void >future = QtConcurrent::map (charges, Simulation::chargeAgentIterate);
 
         // We want to wait for it to finish before continuing on
         future.waitForFinished ();
+        }
 
         // Now we are done with the charge movement, move them to the next tick!
         nextTick ();
 
-        //qDebug() << "[";
+        //std::cout.flush();
         // Begin by performing charge injection at the source
         unsigned int site = m_source->transport ();
-        //qDebug () << "Source transport returned site:" << site;
-        //qDebug() << "]";
-
         if (site != errorValue)
           {
             ChargeAgent *charge = new ChargeAgent (m_world, site );
             m_world->charges ()->push_back (charge);
           }
+
+        tick += 1;
+
       }
   }
 
@@ -157,6 +189,7 @@ namespace Langmuir
         // Check if the charge was removed - then we should delete it
         if (charges[i]->removed ())
           {
+            //std::cout << tick << " " << charges[i]->lifetime() << " " << charges[i]->distanceTraveled() << "\n";
             delete charges[i];
             charges.removeAt (i);
             m_drain->acceptCharge (-1);
@@ -290,6 +323,7 @@ namespace Langmuir
     delete m_drain;
     m_drain = 0;
   }
+
   void Simulation::heteroTraps ()
   {
     double tPotential = 0;
@@ -404,9 +438,7 @@ namespace Langmuir
     m_grid->setDrainPotential (m_potential->
                                calculate (double (m_grid->width ()), 0.0,
                                           0.0));
-	  
 	//qDebug() << "Drain Potential: " << m_grid->potential(m_grid->volume() + 1);
-
   }
 
   void Simulation::gridImage()
@@ -546,16 +578,18 @@ namespace Langmuir
           {
             for (int lay = 0; lay < m_parameters->electrostaticCutoff; ++lay)
               {
-                energies (col, row, lay) =
-                  m_parameters->elementaryCharge / sqrt (col * col + row * row + lay * lay);
+                double r = sqrt (col * col + row * row + lay * lay);
+                if ( r > 0 && r < m_parameters->electrostaticCutoff )
+                 {
+                  energies (col, row, lay) = m_parameters->elementaryCharge / r;
+                 }
+                else
+                 {
+                  energies (col, row, lay) = 0.0;
+                 }
               }
           }
       }
-
-    // The interaction energy is zero when R is zero
-    for (int col = 0; col < m_parameters->electrostaticCutoff; ++col)
-      energies (col, col, col) = 0;
-
   }
 
   inline void Simulation::chargeAgentIterate (ChargeAgent * chargeAgent)
@@ -563,7 +597,41 @@ namespace Langmuir
     // This function performs a single iteration for a charge agent, only thread
     // safe calls can be made in this function. Other threads may access the
     // current state of the chargeAgent, but will not attempt to modify it.
-    chargeAgent->transport ();
+    chargeAgent->transport();
+  }
+
+  inline void Simulation::chargeAgentDecideFuture( ChargeAgent * chargeAgent )
+  {
+    // same rules apply here as for chargeAgentIterate;
+    // why is this called? because chargeAgent->transport()
+    // only calls chargeAgent->decideFuture() if we arent using OpenCL
+    chargeAgent->decideFuture();
+  }
+
+  void Simulation::compareHostAndDevice()
+  {
+   QList < ChargeAgent * >&charges = *m_world->charges ();
+   for ( int j = 0; j < charges.size(); j++ )
+   {
+    double host = charges[j]->interaction();
+    double device = m_world->getOutputHost(j);
+    double percent = abs( device - host ) / host * 100.00;
+    if ( percent > 1e-8 )
+    {
+     qDebug("site: %10d; fsite: %10d; (xi,yi,zi): ( %5d, %5d, %5d ); (xf,yf,zf): ( %5d, %5d, %5d ); device: % 10.10e host: % 10.10e percent: %25.20f",
+      charges[j]->site(),
+      charges[j]->site(true),
+      m_world->grid()->getColumn( charges[j]->site() ),
+      m_world->grid()->getRow( charges[j]->site() ),
+      m_world->grid()->getLayer( charges[j]->site() ),
+      m_world->grid()->getColumn( charges[j]->site(true) ),
+      m_world->grid()->getRow( charges[j]->site(true) ),
+      m_world->grid()->getLayer( charges[j]->site(true) ),
+      device,
+      host,
+      ( device - host ) / host * 100.00 );
+    }
+   }
   }
 
 }                                // End namespace Langmuir

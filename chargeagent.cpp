@@ -13,10 +13,8 @@ namespace Langmuir
   using std::vector;
   using Eigen::Vector3d;
 
-    ChargeAgent::ChargeAgent (World * world,
-                              unsigned int site):Agent (Agent::Charge, world,
-                                                        site), m_charge (-1),
-    m_removed (false)
+    ChargeAgent::ChargeAgent (World * world, unsigned int site):Agent (Agent::Charge, world, site), 
+     m_charge (-1), m_removed (false), m_lifetime(0), m_distanceTraveled(0.0), clID(0)
   {
     //current site and future site are the same
     m_site = m_fSite;
@@ -32,57 +30,104 @@ namespace Langmuir
   {
   }
 
-  unsigned int ChargeAgent::transport ()
+  void ChargeAgent::chooseFuture( int clID )
   {
+    // Select a proposed transport site at random, but ensure that it is not the source
+    do
+      {
+        m_fSite = m_neighbors[int(m_world->random() * (m_neighbors.size() - 1.0e-20))];
+      }
+    while (m_world->grid()->siteID(m_fSite) == 2); // source siteID
+
+    if ( m_world->parameters()->openCL )
+     {
+      this->clID = clID;
+      m_world->setISiteHost( clID, m_site );
+      m_world->setFSiteHost( clID, m_fSite );
+     }
+  }
+
+  unsigned int ChargeAgent::decideFuture()
+  {
+    // Increase lifetime in existance
+    m_lifetime += 1;
+
     // Get a pointer to the grid for easy access
     Grid *grid = m_world->grid ();
 
-    // Select a proposed transport site at random, but esure that it is not the source
-    unsigned int newSite;
-    do
-      {
-        newSite =
-          m_neighbors[int
-                      (m_world->random () * (m_neighbors.size () - 1.0e-20))];
-      }
-    while (grid->siteID (newSite) == 2);        // source siteID
+    // Check the proposed site, return unsucessful if it is the SOURCE, a DEFECT, or another CARRIER
+    if ( grid->agent(m_fSite) && grid->siteID (m_fSite) != 3 ) { m_fSite = m_site; return -1; }
 
-    // Check if the proposed site to move to is already occupied, return -1 if unsucessful
-    // Also return if we picked the drain
-    if (grid->agent (newSite) && grid->siteID (newSite) != 3)
+    // If the site is the DRAIN, accept with a constant probability
+    if ( grid->siteID(m_fSite) == 3 )
+    {
+     // Do not accept 100*sourceBarrier percent of the time
+     if(m_world->random() <= m_world->parameters()->sourceBarrier)
+     {
+      m_fSite = m_site;
       return -1;
+     }
+     // accept the charge carrier
+     else
+     {
+      m_distanceTraveled += 1.0;
+      return m_fSite;
+     }
+    }
 
     // Now to add on the background potential - from the applied field
     // A few electrons only perturb the potential by ~1e-20 or so.
-    double pd = grid->potential (newSite) - grid->potential (m_site);
-    pd *= m_charge * m_world->parameters ()->elementaryCharge;
+    double pd = grid->potential(m_fSite) - grid->potential (m_site);
+    pd *= m_charge * m_world->parameters()->elementaryCharge;
 
     // Add on the Coulomb interaction if it is being included
-    if (m_world->parameters ()->coulomb)
-      pd += this->coulombInteraction (newSite);
-    // Add the interactions from charged defects
-    if (m_world->parameters ()->chargedDefects)
-      pd += chargedDefects (newSite);
-    // Add the interactions from charged traps
-    if (m_world->parameters ()->chargedTraps)
-      pd += chargedTraps (newSite);
-    // Get the coupling constant
-    double coupling =
-      couplingConstant (grid->siteID (m_site), grid->siteID (newSite));
+    if ( m_world->parameters()->coulomb )
+      {
+        // get the answer from OpenCL output vector
+        if (m_world->parameters()->openCL)
+          {
+            //if ( qFuzzyCompare( m_world->getOutputHost( clID ), -1 ) ) qFatal("error");
+            pd += m_world->getOutputHost( clID );
+          }
+       // or calculate it on the CPU
+       else
+          {
+            pd += this->coulombInteraction (m_fSite);
+          }
 
-    // Get the temperature
-    double T = m_world->parameters ()->temperatureKelvin;
+       // Add the interactions from charged defects ( on the CPU still... )
+       if (m_world->parameters()->chargedDefects)
+          {
+            pd += chargedDefects (m_fSite);
+          }
+
+       // Add the interactions from charged traps
+       if (m_world->parameters()->chargedTraps)
+          {
+            pd += chargedTraps(m_fSite);
+          }
+      }
 
     // Apply metropolis criterion
-    if (attemptTransport (pd, coupling, T))
+    if (attemptTransport (pd, couplingConstant(grid->siteID(m_site), grid->siteID(m_fSite)) ))
       {
         // Set the future site is sucessful
-        m_fSite = newSite;
+        m_distanceTraveled += 1.0;
         return m_fSite;
       }
 
     // Return -1 if transport unsucessful
+    m_fSite = m_site;
     return -1;
+  }
+
+  unsigned int ChargeAgent::transport ()
+  {
+    // Select a proposed transport site
+    chooseFuture();
+
+    // decide if the future site is ok to transport to
+    return decideFuture();
   }
 
   void ChargeAgent::completeTick ()
@@ -137,9 +182,15 @@ namespace Langmuir
     // Potential after
     double potential2 = 0.0;
 
+    //qDebug("size = %5d",chargeSize);
+    //qDebug("site = %5d",this->site());
+    //qDebug("fsite= %5d",newSite);
     for (int i = 0; i < chargeSize; ++i)
       {
-
+        //qDebug("on i = %5d",i);
+        //qDebug("size = %5d",chargeSize);
+        //qDebug("site = %5d",this->site());
+        //qDebug("fsite= %5d",newSite);
         if (charges[i] != this)
           {
 
@@ -147,13 +198,14 @@ namespace Langmuir
             int dx = grid->xDistancei (m_site, charges[i]->site ());
             int dy = grid->yDistancei (m_site, charges[i]->site ());
             int dz = grid->zDistancei (m_site, charges[i]->site ());
+            //qDebug("i: %5d dx1: %5d dy1: %5d dz1: %5d",i,dx,dy,dz);
             if (dx < m_world->parameters ()->electrostaticCutoff &&
                 dy < m_world->parameters ()->electrostaticCutoff &&
                 dz < m_world->parameters ()->electrostaticCutoff)
               {
                 potential1 +=
-                  m_world->interactionEnergies ()(dx, dy,
-                                                  dz) * charges[i]->charge ();
+                  m_world->interactionEnergies()(dx, dy, dz) * charges[i]->charge();
+                  //qDebug("NOW i = %d, array = %e, q1 = %d, q2 = %d, prefactor = %e",i,m_world->interactionEnergies()(dx, dy, dz),charges[i]->charge(),m_charge,m_world->parameters()->electrostaticPrefactor);
               }
 
             // Potential at new site from other charges
@@ -162,21 +214,21 @@ namespace Langmuir
                 dx = grid->xDistancei (newSite, charges[i]->site ());
                 dy = grid->yDistancei (newSite, charges[i]->site ());
                 dz = grid->zDistancei (newSite, charges[i]->site ());
+                //qDebug("i: %5d dx2: %5d dy2: %5d dz2: %5d",i,dx,dy,dz);
                 if (dx < m_world->parameters ()->electrostaticCutoff &&
                     dy < m_world->parameters ()->electrostaticCutoff &&
                     dz < m_world->parameters ()->electrostaticCutoff)
                   {
-                    potential2 +=
-                      m_world->interactionEnergies ()(dx, dy,
-                                                      dz) *
-                      charges[i]->charge ();
+                    potential2 += m_world->interactionEnergies()(dx, dy, dz) * charges[i]->charge();
+                    //qDebug("FUTURE i = %d, array = %e, q1 = %d, q2 = %d, prefactor = %e",i,m_world->interactionEnergies()(dx, dy, dz),charges[i]->charge(),m_charge,m_world->parameters()->electrostaticPrefactor);
                   }
               }
-            else
-              {
-                return -1;
-              }
-          }
+             else
+               {
+                 // NOTE: this else case should never happen if decideFuture did its job correctly
+                 return -1;
+               }
+          } //else{ qDebug("charge[i]==this"); }
       }
     return m_charge * m_world->parameters ()->electrostaticPrefactor *
       (potential2 - potential1);
@@ -293,10 +345,9 @@ namespace Langmuir
     return (*m_world->coupling ())(id1, id2);
   }
 
-  inline bool ChargeAgent::attemptTransport (double pd, double coupling,
-                                             double T)
+  inline bool ChargeAgent::attemptTransport (double pd, double coupling)
   {
-    double randNumber = m_world->random ();
+    double randNumber = m_world->random();
     if (pd > 0.0)
       {
         if ((coupling * exp (-pd * m_world->parameters ()->inverseKT)) >

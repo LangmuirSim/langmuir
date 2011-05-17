@@ -1,27 +1,46 @@
-
-
 #include "gridview.h"
-
 #include <QtGui>
 
 using namespace Langmuir;
 
-int main(int argc, char **argv)
+int main (int argc, char **argv)
 {
-  QApplication app(argc, argv);
+  QApplication app (argc, argv);
 
-  GridScene scene(60, 10);
-  scene.setSceneRect(0, 0, 60, 10);
-  scene.setItemIndexMethod(QGraphicsScene::NoIndex);
+  // read command line arguments
+  QStringList args = app.arguments ();
 
-  GridView view(&scene);
-//  view.setRenderHint(QPainter::Antialiasing);
-//  view.setCacheMode(QGraphicsView::CacheBackground);
-  view.setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
-  view.setDragMode(QGraphicsView::ScrollHandDrag);
-  view.setWindowTitle(QT_TRANSLATE_NOOP(QGraphicsView, "Langmuir Grid View"));
-  view.resize(110, 610);
-  view.show();
+  QString iFileName = "";
+  QString oFileName = "";
+  if ( args.size() == 2 )
+    {
+      iFileName = args.at(1);
+      QStringList tokens = args.at(1).split("/",QString::SkipEmptyParts);
+      oFileName = tokens[tokens.size()-1].split(".",QString::SkipEmptyParts)[0];
+    }
+  else if ( args.size() == 3 )
+    {
+      iFileName = args.at(1);
+      oFileName = args.at(2);
+    }
+  else
+    {
+      qDebug() << "correct use is langmuirView input.dat (output.dat)";
+      qFatal("bad input");
+    }
 
-  return app.exec();
- }
+  MainWindow window( iFileName );
+  window.resize (window.sizeHint ());
+
+  if ((float) (window.width () * window.height ()) /
+      (float) (QApplication::desktop ()->width () *
+           QApplication::desktop ()->height ()) < 0.75f)
+    {
+      window.show ();
+    }
+  else
+    {
+      window.showMaximized ();
+    }
+  return app.exec ();
+}

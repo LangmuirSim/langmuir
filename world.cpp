@@ -1,9 +1,11 @@
 #include "world.h"
 #include "rand.h"
+#include "inputparser.h"
+#include "cubicgrid.h"
 
 namespace Langmuir {
 
-  World::World() : m_grid(0), m_rand(new Rand(0.0, 1.0)), m_parameters(0)
+  World::World( int seed ) : m_grid(0), m_rand(new Rand(0.0, 1.0, seed)), m_parameters(0)
   {
     // This array is always the number of different sites + 2. The final two
     // rows/columns are for the source and drain site types.
@@ -73,6 +75,127 @@ namespace Langmuir {
   double TripleIndexArray::operator() (unsigned int col, unsigned int row, unsigned int lay) const
   {
    return values[col+m_width*row+lay*m_area];
+  }
+
+  void World::initializeOpenCL( )
+  {
+    // figure out the global work size
+    int maxCharges = m_parameters->chargePercentage * double( m_grid->volume() );
+    m_parameters->globalSize = maxCharges * m_parameters->workSize;
+    if ( ! m_parameters->coulomb ) qFatal("can not used openCL with the coulomb interaction turned off");
+    if ( m_parameters->chargedDefects || m_parameters->chargedTraps ) qFatal("charged defects and charged traps not currently implemented in OpenCL");
+    if ( maxCharges == 0 ) qFatal("can not use OpenCL when there are no charges");
+    if ( m_parameters->workSize == 0 ) qFatal("can not use OpenCL with zero work size - try an power of two (ex: 32)");
+    if ( m_parameters->workSize > 1024 ) qFatal("local work size can not exceed 1024");
+    if ( (m_parameters->workSize & (m_parameters->workSize-1))) qFatal("local work size should be a power of 2");
+    if ( m_parameters->globalSize == 0 ) qFatal("global work item size was set to 0");
+    if ( m_parameters->globalSize > 1024*1024*64 ) qFatal("global work item size too large - try a smaller work size or lower charge.percentage");
+
+    //obtain platforms
+    m_error = cl::Platform::get (&m_platforms);
+    Q_ASSERT_X (m_platforms.size () > 0, "cl::Platform::get", "can not find any platforms!");
+    Q_ASSERT_X (m_error == CL_SUCCESS, "cl::Platform::get", qPrintable(clErrorString (m_error)));
+
+    //obtain devices
+    m_error = m_platforms[0].getDevices (CL_DEVICE_TYPE_GPU, &m_devices);
+    Q_ASSERT_X (m_devices.size () > 0, "cl::Platform::getDevices", "can not find any devices!");
+    Q_ASSERT_X (m_error == CL_SUCCESS, "cl::Platform::getDevices", qPrintable(clErrorString (m_error)));
+
+    //obtain context
+    cl_context_properties contextProperties[3] =
+      { CL_CONTEXT_PLATFORM, (cl_context_properties) m_platforms[0] (), 0 };
+    m_contexts.push_back (cl::Context(m_devices, contextProperties, NULL, NULL, &m_error));
+    Q_ASSERT_X (m_error == CL_SUCCESS, "cl::Context", qPrintable(clErrorString (m_error)));
+
+    //obtain command queue
+    m_queues.push_back (cl::CommandQueue (m_contexts[0], m_devices[0], 0, &m_error));
+    Q_ASSERT_X (m_error == CL_SUCCESS, "cl::CommandQueue", qPrintable(clErrorString (m_error)));
+    m_error = m_queues[0].finish();
+    Q_ASSERT_X (m_error == CL_SUCCESS, "cl::CommandQueue::finish", qPrintable(clErrorString (m_error)));
+
+    //obtain kernel source
+    QFile file (m_parameters->kernelFile);
+    Q_ASSERT_X (file.open (QIODevice::ReadOnly | QIODevice::Text), "kernels.cl", qPrintable(QString("m_error opening kernel file: %1").arg(m_parameters->kernelFile)));
+    QByteArray contents = file.readAll ();
+    QString define = QString("#define PREFACTOR %1\n#define CUTOFF2 %2\n#define ASIZE %3\n#define XSIZE %4\n#define YSIZE %5\n#define NCHARGES 10\n").
+     arg(m_parameters->electrostaticPrefactor * m_parameters->elementaryCharge,0,'e',100).
+     arg(m_parameters->electrostaticCutoff*m_parameters->electrostaticCutoff).
+     arg(m_parameters->gridWidth*m_parameters->gridHeight).
+     arg(m_parameters->gridWidth).
+     arg(m_parameters->gridHeight);
+    contents.insert (0, define);
+
+    //make the program string into the source
+    cl::Program::Sources source (1, std::make_pair (contents, contents.size ()));
+
+    //make the source into a program associated with the context
+    m_programs.push_back (cl::Program (m_contexts[0], source, &m_error));
+    Q_ASSERT_X (m_error == CL_SUCCESS, "cl:Program", qPrintable(clErrorString(m_error)));
+
+    //compile the program
+    m_error = m_programs[0].build (m_devices, NULL, NULL, NULL);
+    Q_ASSERT_X (m_error == CL_SUCCESS, "cl:Program::build", qPrintable(clErrorString(m_error)));
+
+    //construct the kernel
+    m_error = m_programs[0].createKernels (&m_kernels);
+    Q_ASSERT_X (m_error == CL_SUCCESS, "cl:Program::createKernels", qPrintable(clErrorString(m_error)));
+
+    //initialize Host Memory
+    m_iHost.resize( maxCharges, 0 );
+    m_fHost.resize( maxCharges, 0 );
+    m_oHost.resize( maxCharges, 0 );
+
+    //initialize Device Memory
+    m_iDevice = cl::Buffer(m_contexts[0], CL_MEM_READ_ONLY, maxCharges * sizeof (int), NULL, &m_error);
+    Q_ASSERT_X (m_error == CL_SUCCESS, "cl::Buffer", qPrintable (clErrorString (m_error)));
+
+    m_fDevice = cl::Buffer(m_contexts[0], CL_MEM_READ_ONLY, maxCharges * sizeof (int), NULL, &m_error);
+    Q_ASSERT_X (m_error == CL_SUCCESS, "cl::Buffer", qPrintable (clErrorString (m_error)));
+
+    m_oDevice = cl::Buffer(m_contexts[0], CL_MEM_WRITE_ONLY, maxCharges * sizeof (double), NULL, &m_error);
+    Q_ASSERT_X (m_error == CL_SUCCESS, "cl::Buffer", qPrintable (clErrorString (m_error)));
+
+    //copyHostToDevice( maxCharges );
+    //copyDeviceToHost( maxCharges );
+  }
+
+  void World::launchKernel( )
+  {
+    m_error = m_kernels[0].setArg (0, m_iDevice);
+    Q_ASSERT_X (m_error == CL_SUCCESS, "cl::Kernel::setArg", qPrintable (clErrorString (m_error)));
+
+    m_error = m_kernels[0].setArg (1, m_fDevice);
+    Q_ASSERT_X (m_error == CL_SUCCESS, "cl::Kernel::setArg", qPrintable (clErrorString (m_error)));
+
+    m_error = m_kernels[0].setArg (2, m_oDevice);
+    Q_ASSERT_X (m_error == CL_SUCCESS, "cl::Kernel::setArg", qPrintable (clErrorString (m_error)));
+
+    m_error = m_kernels[0].setArg (3, m_charges.size() );
+    Q_ASSERT_X (m_error == CL_SUCCESS, "cl::Kernel::setArg", qPrintable (clErrorString (m_error)));
+
+    m_error = m_queues[0].enqueueNDRangeKernel (m_kernels[0], cl::NDRange (0), cl::NDRange (m_parameters->globalSize), cl::NDRange (m_parameters->workSize), NULL, NULL);
+    Q_ASSERT_X (m_error == CL_SUCCESS, "cl::CommandQueue::enqueueNDRangeKernel", qPrintable (clErrorString (m_error)));
+  }
+
+  void World::copyDeviceToHost( )
+  {
+    m_error = m_queues[0].enqueueReadBuffer (m_oDevice, CL_TRUE, 0, m_charges.size() * sizeof (double), &m_oHost[0], NULL, NULL);
+    Q_ASSERT_X (m_error == CL_SUCCESS, "cl::CommandQueue::enqueueReadBuffer", qPrintable (clErrorString (m_error)));
+  }
+
+  void World::copyHostToDevice( )
+  {
+    m_error = m_queues[0].enqueueWriteBuffer (m_iDevice, CL_TRUE, 0, m_charges.size() * sizeof (int), &m_iHost[0], NULL, NULL);
+    Q_ASSERT_X (m_error == CL_SUCCESS, "cl::CommandQueue::enqueueWriteBuffer", qPrintable (clErrorString (m_error)));
+
+    m_error = m_queues[0].enqueueWriteBuffer (m_fDevice, CL_TRUE, 0, m_charges.size() * sizeof (int), &m_fHost[0], NULL, NULL);
+    Q_ASSERT_X (m_error == CL_SUCCESS, "cl::CommandQueue::enqueueWriteBuffer", qPrintable (clErrorString (m_error)));
+  }
+
+  void World::clFinish()
+  {
+    m_error = m_queues[0].finish();
+    Q_ASSERT_X (m_error == CL_SUCCESS, "cl::CommandQueue::finish", qPrintable (clErrorString (m_error)));
   }
 
 }

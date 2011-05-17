@@ -17,8 +17,7 @@
 using namespace std;
 using namespace Langmuir;
 
-int
-main (int argc, char *argv[])
+int main (int argc, char *argv[])
 {
   QApplication app (argc, argv);
 
@@ -125,7 +124,6 @@ main (int argc, char *argv[])
           tout = new QTextStream (tFile);
         }
 
-		
       // Output iteration file column titles
       (*iout) << "move(n)";
       (*iout) << "temperature(K)";
