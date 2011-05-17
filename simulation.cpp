@@ -342,7 +342,7 @@ namespace Langmuir
       (m_parameters->trapPercentage) * (m_parameters->gridWidth) * (m_parameters->gridHeight) *
       (m_parameters->gridDepth);
 
-    //qDebug() << "Trap Seeds: " << m_world->chargedTraps()->size(); 
+    qDebug() << "Trap Seeds: " << m_world->chargedTraps()->size(); 
     //for (int i = 0; i < m_world->chargedTraps()->size(); i++)
     //{
     //      qDebug() << (*m_world->chargedTraps())[i]; 
@@ -388,14 +388,24 @@ namespace Langmuir
           }
       }
     qDebug () << "Traps: " << m_world->chargedTraps ()->size ();
+	
+	  //for (unsigned int i = 0; i < m_grid->volume (); i++)
+	  //{
+		//  qDebug() << i << "  " << m_grid->potential(i);
+	  //}
 
+				  
     //Set the potential of the Source
     m_grid->setSourcePotential (m_potential->calculate (0.0, 0.0, 0.0));
+	  
+	//qDebug() << "Source Potential: " << m_grid->potential(m_grid->volume());
 
     //Set the potential of the Drain
     m_grid->setDrainPotential (m_potential->
                                calculate (double (m_grid->width ()), 0.0,
                                           0.0));
+	  
+	//qDebug() << "Drain Potential: " << m_grid->potential(m_grid->volume() + 1);
 
   }
 
