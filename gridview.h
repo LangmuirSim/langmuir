@@ -17,29 +17,94 @@
 namespace Langmuir
 {
 
-  class Box : public QObject
+  class ColoredObject : public QObject
   {
   Q_OBJECT public:
-   Box( QObject *parent = 0, QVector3D dimensions = QVector3D(1,1,1), QVector3D origin = QVector3D(0,0,0), QColor color = QColor(255,255,255,255) );
-  ~Box();
-   void draw() const;
-  private:
-   GLuint vVBO;
-   GLuint nVBO;
-   QColor col;
+   ColoredObject( QObject *parent )
+    : QObject( parent ), invisible(false) {};
+   const QColor& getColor() const { return color; };
+
+   public slots:
+    void setColor( QColor color );
+    void setInvisible( int checkState );
+ 
+   signals:
+    void colorChanged( QColor color );
+
+   protected:
+    QColor color;
+    bool invisible;
   };
 
-  class PointArray : public QObject
+  class SpinBox : public QDoubleSpinBox
+  {
+  Q_OBJECT public:
+   SpinBox( QWidget * parent ) : QDoubleSpinBox( parent ) {};
+   public slots:
+    void setValueSlot( double value ) { this->setValue( value ); }
+  };
+
+  class Button : public QPushButton
+  {
+  Q_OBJECT public:
+   Button( QWidget * parent ) : QPushButton( parent ) {};
+   public slots:
+    void setTextSlot( QString value ) { this->setText( value ); }
+  };
+
+  class ColorButton : public Button
+  {
+  Q_OBJECT public:
+   ColorButton( QWidget * parent, ColoredObject * coloredObject = 0, QColorDialog * colorDialog = 0 )
+    : Button( parent ), coloredObject( coloredObject ), colorDialog( colorDialog ) {};
+   public slots:
+    void openColorDialog();
+   private:
+    ColoredObject* coloredObject;
+    QColorDialog* colorDialog;
+  };
+
+  class StayOpen : public QWidget
+  {
+  Q_OBJECT public:
+   StayOpen( QWidget * parent ) : QWidget( parent ) {};
+   protected:
+    void closeEvent( QCloseEvent *event ) { event->ignore(); }
+  };
+
+  class Box : public ColoredObject
+  {
+  Q_OBJECT public:
+   Box( QObject *parent, QVector3D dimensions, QVector3D origin, QColor color );
+  ~Box();
+   void draw() const;
+
+   private:
+    GLuint vVBO;
+    GLuint nVBO;
+  };
+
+  class PointArray : public ColoredObject
   {
   Q_OBJECT public:
    PointArray( QObject *parent, QVector<float>& xyz, QColor color, float pointsize );
   ~PointArray();
-   void draw( int size ) const;
-   void update( QVector<float>& xyz );
+   void draw( int size, int height, float fov ) const;
+   void update( QVector<float>& xyz, int size );
+   const QColor& getColor() const { return color; };
+
+   public slots:
+    void setSpheres( int checkState );
+    void setPointSize( double pointSize );
+
+   signals:
+    void pointSizeChanged( double pointSize );
+
    private:
     GLuint vVBO;
-    QColor col;
-    float m_pointsize;
+    GLuint prog;
+    float pointSize;
+    bool spheres;
   };
 
   class GridViewGL : public QGLWidget
@@ -51,24 +116,28 @@ namespace Langmuir
     QSize sizeHint() const;
 
    public slots:
-    void setXRotation(int angle);
-    void setYRotation(int angle);
-    void setZRotation(int angle);
-    void setXTranslation(float length);
-    void setYTranslation(float length);
-    void setZTranslation(float length);
+    void setXTranslation( double length );
+    void setYTranslation( double length );
+    void setZTranslation( double length );
+    void setXRotation( double angle );
+    void setYRotation( double angle );
+    void setZRotation( double angle );
+    void setPauseStatus();
     void timerUpdateGL();
 
    signals:
-    void xRotationChanged(int angle);
-    void yRotationChanged(int angle);
-    void zRotationChanged(int angle);
-    void xTranslationChanged(float length);
-    void yTranslationChanged(float length);
-    void zTranslationChanged(float length);
+    void xTranslationChanged( double angle );
+    void yTranslationChanged( double angle );
+    void zTranslationChanged( double angle );
+    void xRotationChanged( double angle );
+    void yRotationChanged( double angle );
+    void zRotationChanged( double angle );
+    void pauseChanged( QString );
 
    protected:
     void initializeGL();
+    void initializeNavigator();
+    void initializeSceneOptions();
     void resizeGL(int w, int h);
     void paintGL();
     void mousePressEvent(QMouseEvent *event);
@@ -77,20 +146,15 @@ namespace Langmuir
     void keyPressEvent(QKeyEvent *event);
 
    private:
-    void NormalizeAngle(int &angle);
-    int xRot;
-    int yRot;
-    int zRot;
-    float xTran;
-    float yTran;
-    float zTran;
-    float xDelta;
-    float yDelta;
-    float zDelta;
+    void NormalizeAngle(double &angle);
+    QVector3D translation;
+    QVector3D rotation;
+    QVector3D delta;
     float thickness;
+    float fov;
+    bool pause;
     QPoint lastPos;
     QTimer *qtimer;
-
     Box *base;
     Box *source;
     Box *drain;
@@ -100,17 +164,27 @@ namespace Langmuir
     Box *side4;
     Box *side5;
     Box *side6;
-
-    Box *x;
-    Box *y;
-    Box *z;
-
+    ColoredObject *background;
+    QVector<float> pointBuffer;
     PointArray *carriers;
     PointArray *defects;
-
     InputParser *pInput;
     SimulationParameters *pPar;
     Simulation *pSim;
+
+    StayOpen* navigator;
+    QGridLayout* navigatorLayout;
+    Button* navigatorPauseButton;
+    QList< QLabel* > navigatorLabels;
+    QList< SpinBox* > navigatorDSBoxes;
+
+    StayOpen* sceneOptions;
+    QColorDialog* sceneOptionsColorDialog;
+    QGridLayout* sceneOptionsLayout;
+    QList< ColorButton* > sceneOptionsColorButtons;
+    QList< QLabel* > sceneOptionsLabels;
+    QList< QCheckBox * > sceneOptionsCheckBoxes;
+    QList< SpinBox* > sceneOptionsDSBoxes;
 
   };
 
@@ -118,8 +192,7 @@ namespace Langmuir
   {
   Q_OBJECT public:
     MainWindow(QString input);
-    private:
-     GridViewGL *glWidget;
+    GridViewGL *glWidget;
   };
 
 }

@@ -411,11 +411,10 @@ namespace Langmuir
 
         else
           {                        // create a new trap site and save it
-            unsigned int x = m_grid->getRow(newTrap);
-            unsigned int y = m_grid->getColumn(newTrap);
+            unsigned int x = m_grid->getColumn(newTrap);
+            unsigned int y = m_grid->getRow(newTrap);
             unsigned int z = m_grid->getLayer(newTrap);
-            tPotential =
-            m_potential->calculate (x + 0.5, y + 0.5, z + 0.5);
+            tPotential = m_potential->calculate (x + 0.5, y + 0.5, z + 0.5);
             m_grid->setPotential (newTrap, (tPotential + m_parameters->deltaEpsilon));
             m_world->chargedTraps ()->push_back (newTrap);
             //qDebug() << "Traps: " << m_world->chargedTraps()->size();
