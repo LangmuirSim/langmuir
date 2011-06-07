@@ -272,8 +272,8 @@ namespace Langmuir
     /**
       * @brief copy a charge carrier's current site ID to the m_iHost vector
       *
-      * had to do this because to copy to the GPU we need a closely packed array of values
-      * the data *needed* from each Agent objects isnt closely packed.  Wish there was a
+      * had to do this because to copy to the GPU we need a closely packed array of values.
+      * The data *needed* from each Agent object isn't closely packed.  Wish there was a
       * way around this - its an extra copying step.
       */
     inline void setISiteHost( int index, int value ) { m_iHost[index] = value; }
@@ -287,6 +287,11 @@ namespace Langmuir
       * @brief read a value in m_oDevice - which should be the result of a coulomb calculation.
       */
     inline const double& getOutputHost( int index ) const { return m_oHost[index]; }
+
+    /**
+      * @brief if or not OpenCL could be set up correctly and used
+      */
+    inline const bool canUseOpenCL() const;
 
    private:
 
@@ -313,7 +318,7 @@ namespace Langmuir
     cl::Buffer                    m_iDevice;     // Device site ids (initial)
     cl::Buffer                    m_fDevice;     // Device site ids (initial)
     cl::Buffer                    m_oDevice;     // Device output vector
-
+    bool                          m_okCL;        // Can openCL be used
  };
 
  inline QList<ChargeAgent *> * World::charges()
@@ -339,6 +344,11 @@ namespace Langmuir
  inline TripleIndexArray& World::interactionEnergies()
  {
   return m_interactionEnergies;
+ }
+
+ inline const bool World::canUseOpenCL() const
+ {
+  return m_okCL;
  }
 
  inline QString World::clErrorString (cl_int error)
