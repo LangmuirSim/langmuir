@@ -48,10 +48,7 @@ namespace Langmuir
             void draw();
 
         public slots:
-            void setTexture( int tid )
-            {
-                this->tid = tid;
-            }
+            void setTexture( int tid );
 
         private:
             QGLBuffer vBuffer;
@@ -87,10 +84,7 @@ namespace Langmuir
         Q_OBJECT public:
             DSpinBox( QWidget * parent ) : QDoubleSpinBox( parent ) {};
         public slots:
-            void setValueSlot( double value )
-            {
-                this->setValue( value );
-            }
+            void setValueSlot( double value );
     };
 
     class SSpinBox : public QSpinBox
@@ -98,10 +92,7 @@ namespace Langmuir
         Q_OBJECT public:
             SSpinBox( QWidget * parent ) : QSpinBox( parent ) {};
         public slots:
-            void setValueSlot( int value )
-            {
-                this->setValue( value );
-            }
+            void setValueSlot( int value );
     };
 
     class CheckBox : public QCheckBox
@@ -109,21 +100,15 @@ namespace Langmuir
         Q_OBJECT public:
             CheckBox( QWidget * parent ) : QCheckBox( parent ) {};
         public slots:
-            void setValueSlot( int checkState )
-            {
-                this->setCheckState( Qt::CheckState( checkState ) );
-            }
+            void setValueSlot( int checkState );
     };
 
     class Button : public QPushButton
     {
         Q_OBJECT public:
-            Button( QWidget * parent );
+            Button( QWidget * parent ) : QPushButton( parent ) {};
         public slots:
-            void setTextSlot( QString value )
-            {
-                this->setText( value );
-            }
+            void setTextSlot( QString value );
             void setColorSlot( QColor color );
     };
 
@@ -189,9 +174,9 @@ namespace Langmuir
             void setZRotation( double angle );
             void setTimerInterval( int time );
             void setIterationsPrint( int iterationsPrint );
-            void toggleCoulombStatus(int checkState);
-            void toggleOpenCLStatus(int checkState);
-            void toggleTrapsTexture(int checkState);
+            void toggleCoulombStatus( int checkState );
+            void toggleOpenCLStatus( int checkState );
+            void toggleTrapsTexture( int checkState );
             void togglePauseStatus();
             void toggleRecording();
             void timerUpdateGL();

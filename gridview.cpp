@@ -798,38 +798,12 @@ namespace Langmuir
             tBuffer.release();
 
             glBindTexture(GL_TEXTURE_2D,0);
-
-            /*
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA ,GL_ONE_MINUS_SRC_ALPHA);
-            glPolygonMode(GL_BACK, GL_LINE);
-            glLineWidth(1.0);
-            glCullFace(GL_FRONT);
-            glDepthFunc(GL_LEQUAL);
-
-            float black[4] = { 0, 0, 0, 1 };
-            glEnableClientState(GL_VERTEX_ARRAY);
-            vBuffer.bind();
-            glVertexPointer(3,GL_FLOAT,0,0);
-            glEnableClientState(GL_NORMAL_ARRAY);
-            nBuffer.bind();
-            glNormalPointer(GL_FLOAT,0,0);
-            glMaterialfv(GL_FRONT, GL_AMBIENT, black );
-            glMaterialfv(GL_FRONT, GL_DIFFUSE, black );
-            glMaterialfv(GL_FRONT, GL_SPECULAR, white );
-            glMaterialf(GL_FRONT, GL_SHININESS, 96);
-            glDrawArrays(GL_QUADS,0,24);
-            glDisableClientState(GL_VERTEX_ARRAY);
-            glDisableClientState(GL_NORMAL_ARRAY);
-            vBuffer.release();
-            nBuffer.release();
-
-            glDepthFunc(GL_LESS);
-            glCullFace(GL_BACK);
-            glPolygonMode(GL_BACK, GL_FILL);
-            glDisable(GL_BLEND);
-            */
         }
+    }
+
+    void Box::setTexture( int tid )
+    {
+        this->tid = tid;
     }
 
     PointArray::PointArray( QObject *parent, QVector<float>& xyz) : ColoredObject(parent)
@@ -1589,7 +1563,9 @@ openFileDialog:
                 if ( fileSuf1 != fileSuf2 )
                 {
                     QMessageBox msgBox;
-                    msgBox.setText(QString("The encoding chosen is %1, but the file suffix is %2.  Note that the encoding will remain %1 unless you choose a new file name..").arg(fileSuf2).arg(fileSuf1));
+                    msgBox.setText(QString("The encoding chosen is %1, but the file suffix is %2.  Note that the encoding will remain %1 unless you choose a new file name..")
+                     .arg(fileSuf2)
+                     .arg(fileSuf1));
                     msgBox.setInformativeText(QString("Save as?"));
                     msgBox.setStandardButtons(QMessageBox::Cancel);
                     msgBox.setIcon(QMessageBox::Question);
@@ -1693,8 +1669,24 @@ openFileDialog:
 
     }
 
-    Button::Button( QWidget * parent ) : QPushButton( parent )
+    void DSpinBox::setValueSlot( double value )
     {
+        this->setValue( value );
+    }
+
+    void SSpinBox::setValueSlot( int value )
+    {
+        this->setValue( value );
+    }
+
+    void CheckBox::setValueSlot( int checkState )
+    {
+        this->setCheckState( Qt::CheckState( checkState ) );
+    }
+
+    void Button::setTextSlot( QString value )
+    {
+        this->setText( value );
     }
 
     void Button::setColorSlot( QColor color )

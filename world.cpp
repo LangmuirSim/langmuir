@@ -120,7 +120,7 @@ namespace Langmuir {
 
     //obtain kernel source
     QFile file (m_parameters->kernelFile);
-    if ( ! file.open (QIODevice::ReadOnly | QIODevice::Text) ) {
+    if ( ! ( file.open (QIODevice::ReadOnly | QIODevice::Text) ) ) {
      qDebug() << qPrintable(QString("m_error opening kernel file: %1").arg(m_parameters->kernelFile));
      return; }
     QByteArray contents = file.readAll ();
