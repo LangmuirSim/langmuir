@@ -187,7 +187,6 @@ namespace Langmuir
         }
     }
 
-<<<<<<< HEAD
         // Now we are done with the charge movement, move them to the next tick!
         nextTick ();
 
