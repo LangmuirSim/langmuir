@@ -5,7 +5,7 @@
 
 namespace Langmuir {
 
-  World::World( int seed ) : m_grid(0), m_rand(new Rand(0.0, 1.0, seed)), m_parameters(0)
+  World::World( int seed ) : m_grid(0), m_rand(new Rand(0.0, 1.0, seed)), m_parameters(0), m_okCL( false )
   {
     // This array is always the number of different sites + 2. The final two
     // rows/columns are for the source and drain site types.
@@ -79,43 +79,50 @@ namespace Langmuir {
 
   void World::initializeOpenCL( )
   {
-    // figure out the global work size
-    int maxCharges = m_parameters->chargePercentage * double( m_grid->volume() );
-    m_parameters->globalSize = maxCharges * m_parameters->workSize;
-    if ( ! m_parameters->coulomb ) qFatal("can not used openCL with the coulomb interaction turned off");
-    if ( m_parameters->chargedDefects || m_parameters->chargedTraps ) qFatal("charged defects and charged traps not currently implemented in OpenCL");
-    if ( maxCharges == 0 ) qFatal("can not use OpenCL when there are no charges");
-    if ( m_parameters->workSize == 0 ) qFatal("can not use OpenCL with zero work size - try an power of two (ex: 32)");
-    if ( m_parameters->workSize > 1024 ) qFatal("local work size can not exceed 1024");
-    if ( (m_parameters->workSize & (m_parameters->workSize-1))) qFatal("local work size should be a power of 2");
-    if ( m_parameters->globalSize == 0 ) qFatal("global work item size was set to 0");
-    if ( m_parameters->globalSize > 1024*1024*64 ) qFatal("global work item size too large - try a smaller work size or lower charge.percentage");
+    //can't use openCL yet
+    m_okCL = false;
 
     //obtain platforms
     m_error = cl::Platform::get (&m_platforms);
-    Q_ASSERT_X (m_platforms.size () > 0, "cl::Platform::get", "can not find any platforms!");
-    Q_ASSERT_X (m_error == CL_SUCCESS, "cl::Platform::get", qPrintable(clErrorString (m_error)));
+    if ( m_platforms.size () <= 0 ) {
+     qDebug() << "can not find any platforms!";
+     return; }
+    if ( m_error != CL_SUCCESS ) {
+     qDebug() << qPrintable(clErrorString (m_error));
+     return; }
 
     //obtain devices
     m_error = m_platforms[0].getDevices (CL_DEVICE_TYPE_GPU, &m_devices);
-    Q_ASSERT_X (m_devices.size () > 0, "cl::Platform::getDevices", "can not find any devices!");
-    Q_ASSERT_X (m_error == CL_SUCCESS, "cl::Platform::getDevices", qPrintable(clErrorString (m_error)));
+    if ( m_devices.size () <= 0 ) {
+     qDebug() << "can not find any devices!";
+     return; }
+    if ( m_error != CL_SUCCESS ) {
+     qDebug() << qPrintable(clErrorString (m_error));
+     return; }
 
     //obtain context
     cl_context_properties contextProperties[3] =
       { CL_CONTEXT_PLATFORM, (cl_context_properties) m_platforms[0] (), 0 };
     m_contexts.push_back (cl::Context(m_devices, contextProperties, NULL, NULL, &m_error));
-    Q_ASSERT_X (m_error == CL_SUCCESS, "cl::Context", qPrintable(clErrorString (m_error)));
+    if ( m_error != CL_SUCCESS ) {
+     qDebug() << qPrintable(clErrorString (m_error));
+     return; }
 
     //obtain command queue
     m_queues.push_back (cl::CommandQueue (m_contexts[0], m_devices[0], 0, &m_error));
-    Q_ASSERT_X (m_error == CL_SUCCESS, "cl::CommandQueue", qPrintable(clErrorString (m_error)));
+    if ( m_error != CL_SUCCESS ) {
+     qDebug() << qPrintable(clErrorString (m_error));
+     return; }
     m_error = m_queues[0].finish();
-    Q_ASSERT_X (m_error == CL_SUCCESS, "cl::CommandQueue::finish", qPrintable(clErrorString (m_error)));
+    if ( m_error != CL_SUCCESS ) {
+     qDebug() << qPrintable(clErrorString (m_error));
+     return; }
 
     //obtain kernel source
     QFile file (m_parameters->kernelFile);
-    Q_ASSERT_X (file.open (QIODevice::ReadOnly | QIODevice::Text), "kernels.cl", qPrintable(QString("m_error opening kernel file: %1").arg(m_parameters->kernelFile)));
+    if ( ! ( file.open (QIODevice::ReadOnly | QIODevice::Text) ) ) {
+     qDebug() << qPrintable(QString("m_error opening kernel file: %1").arg(m_parameters->kernelFile));
+     return; }
     QByteArray contents = file.readAll ();
     QString define = QString("#define PREFACTOR %1\n#define CUTOFF2 %2\n#define ASIZE %3\n#define XSIZE %4\n#define YSIZE %5\n#define NCHARGES 10\n").
      arg(m_parameters->electrostaticPrefactor * m_parameters->elementaryCharge,0,'e',100).
@@ -130,15 +137,33 @@ namespace Langmuir {
 
     //make the source into a program associated with the context
     m_programs.push_back (cl::Program (m_contexts[0], source, &m_error));
-    Q_ASSERT_X (m_error == CL_SUCCESS, "cl:Program", qPrintable(clErrorString(m_error)));
+    if ( m_error != CL_SUCCESS ) {
+     qDebug() << qPrintable(clErrorString(m_error));
+     return; }
 
     //compile the program
     m_error = m_programs[0].build (m_devices, NULL, NULL, NULL);
-    Q_ASSERT_X (m_error == CL_SUCCESS, "cl:Program::build", qPrintable(clErrorString(m_error)));
+    if ( m_error != CL_SUCCESS ) {
+     qDebug() << qPrintable(clErrorString(m_error));
+     return; }
 
     //construct the kernel
     m_error = m_programs[0].createKernels (&m_kernels);
-    Q_ASSERT_X (m_error == CL_SUCCESS, "cl:Program::createKernels", qPrintable(clErrorString(m_error)));
+    if ( m_error != CL_SUCCESS ) {
+     qDebug() << qPrintable(clErrorString(m_error));
+     return; }
+
+    // figure out the global work size
+    int maxCharges = m_parameters->chargePercentage * double( m_grid->volume() );
+    m_parameters->globalSize = maxCharges * m_parameters->workSize;
+    //if ( ! m_parameters->coulomb ) qFatal("can not used openCL with the coulomb interaction turned off");
+    //if ( m_parameters->chargedDefects || m_parameters->chargedTraps ) qFatal("charged defects and charged traps not currently implemented in OpenCL");
+    if ( maxCharges == 0 ) qFatal("can not use OpenCL when there are no charges");
+    if ( m_parameters->workSize == 0 ) qFatal("can not use OpenCL with zero work size - try an power of two (ex: 32)");
+    if ( m_parameters->workSize > 1024 ) qFatal("local work size can not exceed 1024");
+    if ( (m_parameters->workSize & (m_parameters->workSize-1))) qFatal("local work size should be a power of 2");
+    if ( m_parameters->globalSize == 0 ) qFatal("global work item size was set to 0");
+    if ( m_parameters->globalSize > 1024*1024*64 ) qFatal("global work item size too large - try a smaller work size or lower charge.percentage");
 
     //initialize Host Memory
     m_iHost.resize( maxCharges, 0 );
@@ -147,16 +172,22 @@ namespace Langmuir {
 
     //initialize Device Memory
     m_iDevice = cl::Buffer(m_contexts[0], CL_MEM_READ_ONLY, maxCharges * sizeof (int), NULL, &m_error);
-    Q_ASSERT_X (m_error == CL_SUCCESS, "cl::Buffer", qPrintable (clErrorString (m_error)));
+    if ( m_error != CL_SUCCESS ) {
+     qDebug() << qPrintable (clErrorString (m_error));
+     return; }
 
     m_fDevice = cl::Buffer(m_contexts[0], CL_MEM_READ_ONLY, maxCharges * sizeof (int), NULL, &m_error);
-    Q_ASSERT_X (m_error == CL_SUCCESS, "cl::Buffer", qPrintable (clErrorString (m_error)));
+    if ( m_error != CL_SUCCESS ) {
+     qDebug() << qPrintable (clErrorString (m_error));
+     return; }
 
     m_oDevice = cl::Buffer(m_contexts[0], CL_MEM_WRITE_ONLY, maxCharges * sizeof (double), NULL, &m_error);
-    Q_ASSERT_X (m_error == CL_SUCCESS, "cl::Buffer", qPrintable (clErrorString (m_error)));
+    if ( m_error != CL_SUCCESS ) {
+     qDebug() << qPrintable (clErrorString (m_error));
+     return; }
 
-    //copyHostToDevice( maxCharges );
-    //copyDeviceToHost( maxCharges );
+    //should be ok to use OpenCL
+    m_okCL = true;
   }
 
   void World::launchKernel( )

@@ -106,6 +106,14 @@ namespace Langmuir
      */
     World *world ();
 
+    /**
+     * @brief change parameters
+     *
+     * toggle openCL if valid
+     */
+    bool turnOnOpenCL();
+    bool turnOffOpenCL();
+
   private:
 
     /**

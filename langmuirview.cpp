@@ -5,42 +5,41 @@ using namespace Langmuir;
 
 int main (int argc, char **argv)
 {
-  QApplication app (argc, argv);
+    QApplication app (argc, argv);
 
-  // read command line arguments
-  QStringList args = app.arguments ();
+    // read command line arguments
+    QStringList args = app.arguments ();
 
-  QString iFileName = "";
-  QString oFileName = "";
-  if ( args.size() == 2 )
+    QString iFileName = "";
+    QString oFileName = "";
+    if ( args.size() == 2 )
     {
-      iFileName = args.at(1);
-      QStringList tokens = args.at(1).split("/",QString::SkipEmptyParts);
-      oFileName = tokens[tokens.size()-1].split(".",QString::SkipEmptyParts)[0];
+        iFileName = args.at(1);
+        QStringList tokens = args.at(1).split("/",QString::SkipEmptyParts);
+        oFileName = tokens[tokens.size()-1].split(".",QString::SkipEmptyParts)[0];
     }
-  else if ( args.size() == 3 )
+    else if ( args.size() == 3 )
     {
-      iFileName = args.at(1);
-      oFileName = args.at(2);
+        iFileName = args.at(1);
+        oFileName = args.at(2);
     }
-  else
+    else
     {
-      qDebug() << "correct use is langmuirView input.dat (output.dat)";
-      qFatal("bad input");
+        QMessageBox::critical(0, "Langmuir", "correct use is:\n\n\tlangmuirView input.dat (output.dat)\t\n", QMessageBox::Ok);
+        qFatal("bad input");
     }
 
-  MainWindow window( iFileName );
-  window.resize (window.sizeHint ());
+    MainWindow window( iFileName );
 
-  if ((float) (window.width () * window.height ()) /
-      (float) (QApplication::desktop ()->width () *
-           QApplication::desktop ()->height ()) < 0.75f)
+    if ((float) (window.width () * window.height ()) /
+            (float) (QApplication::desktop ()->width () *
+                     QApplication::desktop ()->height ()) < 0.75f)
     {
-      window.show ();
+        window.show ();
     }
-  else
+    else
     {
-      window.showMaximized ();
+        window.showMaximized ();
     }
-  return app.exec ();
+    return app.exec ();
 }

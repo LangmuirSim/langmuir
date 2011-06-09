@@ -720,7 +720,7 @@ namespace Langmuir
 
           case e_kernelFile:
             {
-              m_parameters.kernelFile = list.at (1);
+              m_parameters.kernelFile = list.at (1).trimmed ();
               break;
             }
 
