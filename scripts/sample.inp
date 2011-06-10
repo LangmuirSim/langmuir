@@ -1,0 +1,16 @@
+grid.charge=true
+charge.percentage=1.00
+voltage.drain=1.00
+grid.height=256
+grid.width=256
+iterations.print=10
+iterations.real=10000
+iterations.warmup=1000
+kernel.file=/home/adam/Workspace/science/langmuirQtCreator/kernel.cl
+use.openCL=true
+interaction.coulomb=true
+work.size=32
+variable.working=voltage.drain
+variable.steps=2
+variable.start=1.0
+variable.final=2.0
