@@ -197,7 +197,7 @@ namespace Langmuir
         // Check if the charge was removed - then we should delete it
         if (charges[i]->removed ())
           {
-            std::cout << tick << " " << charges[i]->lifetime() << " " << charges[i]->distanceTraveled() << "\n";
+            //std::cout << tick << " " << charges[i]->lifetime() << " " << charges[i]->distanceTraveled() << "\n";
             delete charges[i];
             charges.removeAt (i);
             m_drain->acceptCharge (-1);
