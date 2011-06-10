@@ -47,13 +47,13 @@ namespace Langmuir
     m_parameters.electrostaticPrefactor =
       m_parameters.elementaryCharge / (4.0 * M_PI *
                                        m_parameters.dielectricConstant *
-                                       m_parameters.permittivityFreeSpace *
-                                       m_parameters.gridDistanceFactor);
+                                       m_parameters.permittivitySpace *
+                                       m_parameters.gridFactor);
 
   }
 
   bool InputParser::simulationParameters (SimulationParameters * par,
-                                          int step)
+                                          int step )
   {
     if (step < 0 || step >= m_parameters.variableSteps)        // Invalid step supplied, do nothing
       return false;
@@ -403,16 +403,16 @@ namespace Langmuir
               break;
             }
 
-          case e_coulombInteraction:
+          case e_interactionCoulomb:
             {
               QString interaction = list.at (1).trimmed ().toLower ();
               if (interaction == "true")
                 {
-                  m_parameters.coulomb = true;
+                  m_parameters.interactionCoulomb = true;
                 }
               else if (interaction == "false")
                 {
-                  m_parameters.coulomb = false;
+                  m_parameters.interactionCoulomb = false;
                 }
               else
                 {
@@ -687,16 +687,16 @@ namespace Langmuir
               break;
             }
 
-          case e_openCL:
+          case e_useOpenCL:
             {
               QString useOpenCL = list.at (1).trimmed ().toLower ();
               if (useOpenCL == "true")
                 {
-                  m_parameters.openCL = true;
+                  m_parameters.useOpenCL = true;
                 }
               else if (useOpenCL == "false")
                 {
-                  m_parameters.openCL = false;
+                  m_parameters.useOpenCL = false;
                 }
               else
                 {
@@ -726,7 +726,7 @@ namespace Langmuir
 
           case e_randomSeed:
             {
-              m_parameters.seed = list.at (1).toInt ();
+              m_parameters.randomSeed = list.at (1).toInt ();
               break;
             }
 
@@ -740,49 +740,120 @@ namespace Langmuir
 
   void InputParser::initializeVariables ()
   {
-    s_variables["interaction.coulomb"] = e_coulombInteraction;
-    s_variables["charged.defects"] = e_chargedDefects;
-    s_variables["gaussian.noise"] = e_gaussianNoise;
-    s_variables["grid.charge"] = e_gridCharge;
-    s_variables["output.xyz"] = e_outputXyz;
-    s_variables["charged.traps"] = e_chargedTraps;
-    s_variables["traps.heterogeneous"] = e_trapsHeterogeneous;
-    s_variables["output.grid"] = e_outputGrid;
-    s_variables["use.opencl"] = e_openCL;
-
+    s_variables["boltzmaan.constant"] = e_boltzmannConstant;
     s_variables["charge.percentage"] = e_chargePercentage;
+    s_variables["charged.defects"] = e_chargedDefects;
+    s_variables["charged.traps"] = e_chargedTraps;
     s_variables["defect.percentage"] = e_defectPercentage;
     s_variables["delta.epsilon"] = e_deltaEpsilon;
+    s_variables["dielectric.constant"] = e_dielectricConstant;
+    s_variables["electrostatic.cutoff"] = e_electrostaticCutoff;
+    s_variables["electrostatic.prefactor"] = e_electrostaticPrefactor;
+    s_variables["elementary.charge"] = e_elementaryCharge;
     s_variables["gaussian.averg"] = e_gaussianAverg;
+    s_variables["gaussian.noise"] = e_gaussianNoise;
     s_variables["gaussian.stdev"] = e_gaussianStdev;
-    s_variables["seed.percentage"] = e_seedPercentage;
-    s_variables["source.barrier"] = e_sourceBarrier;
-    s_variables["temperature.kelvin"] = e_temperatureKelvin;
-    s_variables["trap.percentage"] = e_trapPercentage;
-    s_variables["variable.final"] = e_variableFinal;
-    s_variables["variable.start"] = e_variableStart;
-    s_variables["voltage.drain"] = e_voltageDrain;
-    s_variables["voltage.source"] = e_voltageSource;
-
+    s_variables["global.size"] = e_globalSize;
+    s_variables["grid.charge"] = e_gridCharge;
     s_variables["grid.depth"] = e_gridDepth;
+    s_variables["grid.factor"] = e_gridFactor;
     s_variables["grid.height"] = e_gridHeight;
     s_variables["grid.width"] = e_gridWidth;
+    s_variables["hopping.range"] = e_hoppingRange;
+    s_variables["interaction.coulomb"] = e_interactionCoulomb;
+    s_variables["inverse.KT"] = e_inverseKT;
     s_variables["iterations.print"] = e_iterationsPrint;
     s_variables["iterations.real"] = e_iterationsReal;
     s_variables["iterations.warmup"] = e_iterationsWarmup;
+    s_variables["kernel.file"] = e_kernelFile;
+    s_variables["use.opencl"] = e_useOpenCL;
+    s_variables["output.grid"] = e_outputGrid;
     s_variables["output.precision"] = e_outputPrecision;
     s_variables["output.width"] = e_outputWidth;
+    s_variables["output.xyz"] = e_outputXyz;
+    s_variables["permittivity.space"] = e_permittivitySpace;
     s_variables["potential.form"] = e_potentialForm;
-    s_variables["source.type"] = e_sourceType;
-    s_variables["variable.steps"] = e_variableSteps;
-    s_variables["variable.working"] = e_variableWorking;
-    s_variables["z.defect"] = e_zDefect;
-    s_variables["z.trap"] = e_zTrap;
-    s_variables["hopping.range"] = e_hoppingRange;
-    s_variables["work.size"] = e_workSize;
-    s_variables["kernel.file"] = e_kernelFile;
     s_variables["potential.point"] = e_potentialPoint;
     s_variables["random.seed"] = e_randomSeed;
-
+    s_variables["seed.percentage"] = e_seedPercentage;
+    s_variables["source.barrier"] = e_sourceBarrier;
+    s_variables["source.type"] = e_sourceType;
+    s_variables["temperature.kelvin"] = e_temperatureKelvin;
+    s_variables["trap.percentage"] = e_trapPercentage;
+    s_variables["traps.heterogeneous"] = e_trapsHeterogeneous;
+    s_variables["variable.final"] = e_variableFinal;
+    s_variables["variable.start"] = e_variableStart;
+    s_variables["variable.steps"] = e_variableSteps;
+    s_variables["variable.working"] = e_variableWorking;
+    s_variables["voltage.drain"] = e_voltageDrain;
+    s_variables["voltage.source"] = e_voltageSource;
+    s_variables["work.size"] = e_workSize;
+    s_variables["z.defect"] = e_zDefect;
+    s_variables["z.trap"] = e_zTrap;
   }
+
+  QString InputParser::printParameters ( SimulationParameters * par )
+  {
+      SimulationParameters *variables;
+      if ( par == NULL ) { variables = & m_parameters; }
+      else { variables = par; }
+      QStringList pairs;
+      pairs << QString("%1=%2").arg(s_variables.key( e_boltzmannConstant )).arg(variables->boltzmannConstant);
+      pairs << QString("%1=%2").arg(s_variables.key( e_chargePercentage )).arg(variables->chargePercentage);
+      pairs << QString("%1=%2").arg(s_variables.key( e_chargedDefects )).arg(variables->chargedDefects);
+      pairs << QString("%1=%2").arg(s_variables.key( e_chargedTraps )).arg(variables->chargedTraps);
+      pairs << QString("%1=%2").arg(s_variables.key( e_defectPercentage )).arg(variables->defectPercentage);
+      pairs << QString("%1=%2").arg(s_variables.key( e_deltaEpsilon )).arg(variables->deltaEpsilon);
+      pairs << QString("%1=%2").arg(s_variables.key( e_dielectricConstant )).arg(variables->dielectricConstant);
+      pairs << QString("%1=%2").arg(s_variables.key( e_electrostaticCutoff )).arg(variables->electrostaticCutoff);
+      pairs << QString("%1=%2").arg(s_variables.key( e_electrostaticPrefactor )).arg(variables->electrostaticPrefactor);
+      pairs << QString("%1=%2").arg(s_variables.key( e_elementaryCharge )).arg(variables->elementaryCharge);
+      pairs << QString("%1=%2").arg(s_variables.key( e_gaussianAverg )).arg(variables->gaussianAverg);
+      pairs << QString("%1=%2").arg(s_variables.key( e_gaussianNoise )).arg(variables->gaussianNoise);
+      pairs << QString("%1=%2").arg(s_variables.key( e_gaussianStdev )).arg(variables->gaussianStdev);
+      pairs << QString("%1=%2").arg(s_variables.key( e_globalSize )).arg(variables->globalSize);
+      pairs << QString("%1=%2").arg(s_variables.key( e_gridCharge )).arg(variables->gridCharge);
+      pairs << QString("%1=%2").arg(s_variables.key( e_gridDepth )).arg(variables->gridDepth);
+      pairs << QString("%1=%2").arg(s_variables.key( e_gridFactor )).arg(variables->gridFactor);
+      pairs << QString("%1=%2").arg(s_variables.key( e_gridHeight )).arg(variables->gridHeight);
+      pairs << QString("%1=%2").arg(s_variables.key( e_gridWidth )).arg(variables->gridWidth);
+      pairs << QString("%1=%2").arg(s_variables.key( e_hoppingRange )).arg(variables->hoppingRange);
+      pairs << QString("%1=%2").arg(s_variables.key( e_interactionCoulomb )).arg(variables->interactionCoulomb);
+      pairs << QString("%1=%2").arg(s_variables.key( e_inverseKT )).arg(variables->inverseKT);
+      pairs << QString("%1=%2").arg(s_variables.key( e_iterationsPrint )).arg(variables->iterationsPrint);
+      pairs << QString("%1=%2").arg(s_variables.key( e_iterationsReal )).arg(variables->iterationsReal);
+      pairs << QString("%1=%2").arg(s_variables.key( e_iterationsWarmup )).arg(variables->iterationsWarmup);
+      pairs << QString("%1=%2").arg(s_variables.key( e_kernelFile )).arg(variables->kernelFile);
+      pairs << QString("%1=%2").arg(s_variables.key( e_useOpenCL )).arg(variables->useOpenCL);
+      pairs << QString("%1=%2").arg(s_variables.key( e_outputGrid )).arg(variables->outputGrid);
+      pairs << QString("%1=%2").arg(s_variables.key( e_outputPrecision )).arg(variables->outputPrecision);
+      pairs << QString("%1=%2").arg(s_variables.key( e_outputWidth )).arg(variables->outputWidth);
+      pairs << QString("%1=%2").arg(s_variables.key( e_outputXyz )).arg(variables->outputXyz);
+      pairs << QString("%1=%2").arg(s_variables.key( e_permittivitySpace )).arg(variables->permittivitySpace);
+      pairs << QString("%1=%2").arg(s_variables.key( e_potentialForm )).arg(variables->potentialForm);
+      for ( unsigned int i = 0; i < variables->potentialPoints.size(); i++ )
+      {
+      QString s = "";
+      pairs << variables->potentialPoints[i].toString();
+      //pairs << QString("%1=%2").arg(s_variables.key( e_potentialPoint )).arg(variables->potentialPoints[i]);
+      }
+      pairs << QString("%1=%2").arg(s_variables.key( e_randomSeed )).arg(variables->randomSeed);
+      pairs << QString("%1=%2").arg(s_variables.key( e_seedPercentage )).arg(variables->seedPercentage);
+      pairs << QString("%1=%2").arg(s_variables.key( e_sourceBarrier )).arg(variables->sourceBarrier);
+      pairs << QString("%1=%2").arg(s_variables.key( e_sourceType )).arg(variables->sourceType);
+      pairs << QString("%1=%2").arg(s_variables.key( e_temperatureKelvin )).arg(variables->temperatureKelvin);
+      pairs << QString("%1=%2").arg(s_variables.key( e_trapPercentage )).arg(variables->trapPercentage);
+      pairs << QString("%1=%2").arg(s_variables.key( e_trapsHeterogeneous )).arg(variables->trapsHeterogeneous);
+      pairs << QString("%1=%2").arg(s_variables.key( e_variableFinal )).arg(variables->variableFinal);
+      pairs << QString("%1=%2").arg(s_variables.key( e_variableStart )).arg(variables->variableStart);
+      pairs << QString("%1=%2").arg(s_variables.key( e_variableSteps )).arg(variables->variableSteps);
+      pairs << QString("%1=%2").arg(s_variables.key( e_variableWorking )).arg(variables->variableWorking);
+      pairs << QString("%1=%2").arg(s_variables.key( e_voltageDrain )).arg(variables->voltageDrain);
+      pairs << QString("%1=%2").arg(s_variables.key( e_voltageSource )).arg(variables->voltageSource);
+      pairs << QString("%1=%2").arg(s_variables.key( e_workSize )).arg(variables->workSize);
+      pairs << QString("%1=%2").arg(s_variables.key( e_zDefect )).arg(variables->zDefect);
+      pairs << QString("%1=%2").arg(s_variables.key( e_zTrap )).arg(variables->zTrap);
+      return pairs.join("\n");
+  }
+
 }

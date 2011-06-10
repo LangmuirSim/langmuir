@@ -30,7 +30,7 @@ namespace Langmuir
         m_parameters = par;
 
         // Create the world object
-        m_world = new World( par->seed );
+        m_world = new World( par->randomSeed );
 
         // Create the grid object
         m_grid = new CubicGrid (m_parameters->gridWidth, m_parameters->gridHeight, m_parameters->gridDepth);
@@ -43,7 +43,7 @@ namespace Langmuir
 
         // Initialize OpenCL
         m_world->initializeOpenCL();
-        if ( m_parameters->openCL )
+        if ( m_parameters->useOpenCL )
         {
             turnOnOpenCL();
         }
@@ -137,7 +137,7 @@ namespace Langmuir
             QList < ChargeAgent * >&charges = *m_world->charges ();
 
             // If using OpenCL, launch the Kernel to calculate Coulomb Interactions
-            if ( m_parameters->openCL && charges.size() > 0 )
+            if ( m_parameters->useOpenCL && charges.size() > 0 )
             {
                 // first have the charge carriers propose future sites
                 for ( int j = 0; j < charges.size(); j++ ) charges[j]->chooseFuture(j);
@@ -652,23 +652,23 @@ namespace Langmuir
     {
         if ( ! ( m_world->canUseOpenCL() ) )
         {
-            m_parameters->openCL = false;
+            m_parameters->useOpenCL = false;
             qDebug() << "can not use openCL on this platform - openCL has been turned off";
             return false;
         }
-        if ( ! ( m_parameters->coulomb ) )
+        if ( ! ( m_parameters->interactionCoulomb ) )
         {
-            m_parameters->openCL = false;
+            m_parameters->useOpenCL = false;
             qDebug() << "OpenCL is on but coulomb interactions are off - disabling openCL";
             return false;
         }
-        m_parameters->openCL = true;
+        m_parameters->useOpenCL = true;
         return true;
     }
 
     inline bool Simulation::turnOffOpenCL()
     {
-        m_parameters->openCL = false;
+        m_parameters->useOpenCL = false;
         return false;
     }
 

@@ -5,7 +5,7 @@
 
 namespace Langmuir {
 
-  World::World( int seed ) : m_grid(0), m_rand(new Rand(0.0, 1.0, seed)), m_parameters(0), m_okCL( false )
+  World::World( int seed ) : m_grid(0), m_rand(new Rand(0.0, 1.0, seed)), m_parameters(0)
   {
     // This array is always the number of different sites + 2. The final two
     // rows/columns are for the source and drain site types.
@@ -80,7 +80,7 @@ namespace Langmuir {
   void World::initializeOpenCL( )
   {
     //can't use openCL yet
-    m_okCL = false;
+    m_parameters->okCL = false;
 
     //obtain platforms
     m_error = cl::Platform::get (&m_platforms);
@@ -187,7 +187,12 @@ namespace Langmuir {
      return; }
 
     //should be ok to use OpenCL
-    m_okCL = true;
+    m_parameters->okCL = true;
+  }
+
+  const bool World::canUseOpenCL() const
+  {
+   return m_parameters->okCL;
   }
 
   void World::launchKernel( )

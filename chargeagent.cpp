@@ -39,7 +39,7 @@ namespace Langmuir
       }
     while (m_world->grid()->siteID(m_fSite) == 2); // source siteID
 
-    if ( m_world->parameters()->openCL )
+    if ( m_world->parameters()->useOpenCL )
      {
       this->clID = clID;
       m_world->setISiteHost( clID, m_site );
@@ -81,10 +81,10 @@ namespace Langmuir
     pd *= m_charge * m_world->parameters()->elementaryCharge;
 
     // Add on the Coulomb interaction if it is being included
-    if ( m_world->parameters()->coulomb )
+    if ( m_world->parameters()->interactionCoulomb )
       {
         // get the answer from OpenCL output vector
-        if (m_world->parameters()->openCL)
+        if (m_world->parameters()->useOpenCL)
           {
             //if ( qFuzzyCompare( m_world->getOutputHost( clID ), -1 ) ) qFatal("error");
             pd += m_world->getOutputHost( clID );

@@ -113,6 +113,7 @@ namespace Langmuir
      */
     bool turnOnOpenCL();
     bool turnOffOpenCL();
+    int getTick();
 
   private:
 
@@ -239,6 +240,10 @@ namespace Langmuir
     return m_world;
   }
 
+  inline int Simulation::getTick()
+  {
+      return tick;
+  }
 }                                // End namespace Langmuir
 
 #endif

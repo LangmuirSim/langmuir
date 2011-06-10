@@ -14,14 +14,16 @@
 #include <QtCore/QDateTime>
 #include <QtCore/QDebug>
 
-using namespace std;
 using namespace Langmuir;
+
+// Print information to the screen about simulation status
+void progress( int sim, int warm, int real, int total, double time );
 
 int main (int argc, char *argv[])
 {
   QApplication app (argc, argv);
 
-  // read command line arguments
+  // Read command line arguments
   QStringList args = app.arguments ();
 
   QString iFileName = "";
@@ -68,7 +70,7 @@ int main (int argc, char *argv[])
   oout->setFieldWidth (par.outputWidth);
   (*oout) << scientific;
 
-  //start timer
+  // Start timer
   Timer timer;
 
   // Output summary file column titles
@@ -85,12 +87,13 @@ int main (int argc, char *argv[])
   (*oout) << "\n";
   oout->flush ();
 
+  // Total steps per simulation
+  int total = par.iterationsWarmup + par.iterationsReal;
+
   for (int i = 0; i < par.variableSteps; ++i)
     {
-
+      // Get the time we start this simulation
       double timeStepStart = timer.now ();
-
-      qDebug() << "Simulation: " << i;
 
       // Get simulation parameters for the current step and set up a new object
       input.simulationParameters (&par, i);
@@ -149,7 +152,6 @@ int main (int argc, char *argv[])
             sim.getGrid ()->print3D ((*tout));
 
           // Output Iteration Information
-          qDebug() << "    warmup: " << j;
           (*iout) << j
             << par.temperatureKelvin
             << par.voltageSource
@@ -163,7 +165,7 @@ int main (int argc, char *argv[])
           iout->flush ();
           lastCount = sim.totalChargesAccepted ();
 
-          //sim.printGrid();
+          progress( i, j, 0, total, timer.elapsed(timeStepStart) );
         }
 
       // Perform production
@@ -179,7 +181,6 @@ int main (int argc, char *argv[])
             sim.getGrid ()->print3D ((*tout));
 
           // Output Iteration
-          qDebug() << "      step: " << j;
           (*iout) << j
             << par.temperatureKelvin
             << par.voltageSource
@@ -193,8 +194,9 @@ int main (int argc, char *argv[])
           iout->flush ();
           lastCount = sim.totalChargesAccepted ();
 
-          //sim.printGrid();
+          progress( i, par.iterationsWarmup, j, total, timer.elapsed(timeStepStart) );
         }
+        progress( i, par.iterationsWarmup, par.iterationsReal, total, timer.elapsed(timeStepStart) ); std::cout << "\n";
 
       // Now to output the result of the simulation at this data point
       (*oout) << i
@@ -220,7 +222,6 @@ int main (int argc, char *argv[])
           delete tout;
         }
 
-      qDebug() << "";
     }
   //output time
   (*oout) << reset << "\n" << "approxTime(s): " << timer.elapsed ();
@@ -230,6 +231,52 @@ int main (int argc, char *argv[])
   delete oFile;
   delete oout;
 
-  qDebug() << "Simulation complete - destroy our objects...";
+}
 
+void progress( int sim, int warm, int real, int total, double time )
+{
+    double percent = double( warm + real ) / double ( total ) * 100.0;
+    double remaining = time / ( warm + real ) * ( total - warm - real );
+
+    double factor = 1.0;
+    QString unit = "s ";
+    if ( time >= 60.0 )
+    {
+        unit = "m "; factor = 60.0;
+        if ( time >= 3600.0 )
+        {
+            unit = "hr"; factor = 3600.0;
+            if ( time >= 86400.0 )
+            {
+                unit = "d "; factor = 86400.0;
+            }
+        }
+    }
+    QString timeString = QString("%1 %2").arg(time/factor, 9,'f',5).arg( unit );
+
+    factor = 1.0;
+    unit = "s ";
+    if ( remaining >= 60.0 )
+    {
+        unit = "m "; factor = 60.0;
+        if ( remaining >= 3600.0 )
+        {
+            unit = "hr"; factor = 3600.0;
+            if ( remaining >= 86400.0 )
+            {
+                unit = "d "; factor = 86400.0;
+            }
+        }
+    }
+    QString remainingString = QString("%1 %2").arg(remaining/factor, 9,'f',5).arg( unit );
+
+    std::cout << QString( "simulation: %1 | warmup: %2 | real: %3 | percent: %4 % | time: %5| remaining: %6\r")
+                 .arg(sim,3)
+                 .arg(warm,9)
+                 .arg(real,9)
+                 .arg(percent,6,'f',2)
+                 .arg(timeString)
+                 .arg(remainingString)
+                 .toStdString();
+    std::cout.flush();
 }

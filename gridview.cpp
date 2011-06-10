@@ -221,7 +221,7 @@ namespace Langmuir
         carriers->setPointSize(0.5f);
         defects->setPointSize(0.5f);
 
-        if ( pPar->coulomb )
+        if ( pPar->interactionCoulomb )
         {
             emit coulombStatusChanged( Qt::Checked );
         }
@@ -230,7 +230,7 @@ namespace Langmuir
             emit coulombStatusChanged( Qt::Unchecked );
         }
 
-        if ( pPar->openCL )
+        if ( pPar->useOpenCL )
         {
             emit openCLStatusChanged( Qt::Checked );
         }
@@ -384,13 +384,13 @@ namespace Langmuir
         {
             case Qt::Checked :
             {
-                pPar->coulomb = true;
+                pPar->interactionCoulomb = true;
                 emit coulombStatusChanged( Qt::Checked );
                 break;
             }
             default :
             {
-                pPar->coulomb = false;
+                pPar->interactionCoulomb = false;
                 pSim->turnOffOpenCL();
                 emit openCLStatusChanged( Qt::Unchecked );
                 emit coulombStatusChanged( Qt::Unchecked );
@@ -438,7 +438,7 @@ namespace Langmuir
                     }
                     else
                     {
-                        if ( ! pPar->coulomb )
+                        if ( ! pPar->interactionCoulomb )
                         {
 
                             QMessageBox::warning( this, tr( "Langmuir" ), QString("Can not turn OpenCL.  Coulomb interations are turned off."));
@@ -809,11 +809,11 @@ namespace Langmuir
     PointArray::PointArray( QObject *parent, QVector<float>& xyz) : ColoredObject(parent)
     {
         const char *vsource =
-            " uniform float pointRadius;  // point size in world space\n"
-            " uniform float pointScale;   // scale to calculate size in pixels\n"
+            " uniform float pointRadius;\n"
+            " uniform float pointScale;\n"
             " uniform float densityScale;\n"
             " uniform float densityOffset;\n"
-            " varying vec3 posEye;        // position of center in eye space\n"
+            " varying vec3 posEye;\n"
             " void main()\n"
             " {\n"
             "     posEye = vec3(gl_ModelViewMatrix * vec4(gl_Vertex.xyz, 1.0));\n"
@@ -827,8 +827,8 @@ namespace Langmuir
             " }\n";
 
         const char *fsource =
-            " uniform float pointRadius;  // point size in world space\n"
-            " varying vec3 posEye;        // position of center in eye space\n"
+            " uniform float pointRadius;\n"
+            " varying vec3 posEye;\n"
             " void main()\n"
             " {\n"
             "     const vec3 lightDir = vec3(0.577, 0.577, 0.577);\n"
@@ -837,7 +837,7 @@ namespace Langmuir
             "     vec3 n;\n"
             "     n.xy = gl_TexCoord[0].xy*vec2(2.0, -2.0) + vec2(-1.0, 1.0);\n"
             "     float mag = dot(n.xy, n.xy);\n"
-            "     if (mag > 1.0) discard;   // kill pixels outside circle\n"
+            "     if (mag > 1.0) discard;\n"
             "     n.z = sqrt(1.0-mag);\n"
             "\n"
             "     vec3 spherePosEye = posEye + n*pointRadius;\n"

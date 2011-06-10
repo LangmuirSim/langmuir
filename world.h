@@ -291,7 +291,7 @@ namespace Langmuir
     /**
       * @brief if or not OpenCL could be set up correctly and used
       */
-    inline const bool canUseOpenCL() const;
+    const bool canUseOpenCL() const;
 
    private:
 
@@ -318,7 +318,6 @@ namespace Langmuir
     cl::Buffer                    m_iDevice;     // Device site ids (initial)
     cl::Buffer                    m_fDevice;     // Device site ids (initial)
     cl::Buffer                    m_oDevice;     // Device output vector
-    bool                          m_okCL;        // Can openCL be used
  };
 
  inline QList<ChargeAgent *> * World::charges()
@@ -344,11 +343,6 @@ namespace Langmuir
  inline TripleIndexArray& World::interactionEnergies()
  {
   return m_interactionEnergies;
- }
-
- inline const bool World::canUseOpenCL() const
- {
-  return m_okCL;
  }
 
  inline QString World::clErrorString (cl_int error)

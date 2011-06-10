@@ -16,7 +16,7 @@ namespace Langmuir
    */
   struct SimulationParameters
   {
-    bool coulomb;
+    bool interactionCoulomb;
     bool chargedDefects;
     bool gaussianNoise;
     bool gridCharge;
@@ -24,8 +24,8 @@ namespace Langmuir
     bool chargedTraps;
     bool trapsHeterogeneous;
     bool outputGrid;
-    bool openCL;
-
+    bool useOpenCL;
+    bool okCL;
     double chargePercentage;
     double defectPercentage;
     double deltaEpsilon;
@@ -39,17 +39,15 @@ namespace Langmuir
     double variableStart;
     double voltageDrain;
     double voltageSource;
-
     double boltzmannConstant;
     double dielectricConstant;
     double elementaryCharge;
-    double permittivityFreeSpace;
-    double gridDistanceFactor;
+    double permittivitySpace;
+    double gridFactor;
     double electrostaticPrefactor;
     double inverseKT;
     int electrostaticCutoff;
     int globalSize;
-
     int gridDepth;
     int gridHeight;
     int gridWidth;
@@ -66,14 +64,13 @@ namespace Langmuir
     int zTrap;
     int hoppingRange;
     int workSize;
-
-    int seed;
+    int randomSeed;
     QString kernelFile;
     std::vector < PotentialPoint > potentialPoints;
 
     SimulationParameters ()
     {
-      coulomb = false;
+      interactionCoulomb = false;
       chargedDefects = false;
       gaussianNoise = false;
       gridCharge = false;
@@ -81,8 +78,7 @@ namespace Langmuir
       chargedTraps = false;
       trapsHeterogeneous = false;
       outputGrid = false;
-      openCL = false;
-
+      useOpenCL = false;
       chargePercentage = 0.01;
       defectPercentage = 0.00;
       deltaEpsilon = -0.10;
@@ -99,10 +95,9 @@ namespace Langmuir
       boltzmannConstant = 1.3806504e-23;
       dielectricConstant = 3.5;
       elementaryCharge = 1.60217646e-19;
-      permittivityFreeSpace = 8.854187817e-12;
-      gridDistanceFactor = 1e-9;
+      permittivitySpace = 8.854187817e-12;
+      gridFactor = 1e-9;
       electrostaticCutoff = 50;
-
       gridDepth = 1;
       gridHeight = 256;
       gridWidth = 1024;
@@ -120,14 +115,12 @@ namespace Langmuir
       hoppingRange = 1;
       workSize = 32;
       globalSize = 0;
-      seed = -1;
+      randomSeed = -1;
       kernelFile = "kernel.cl";
-
       electrostaticPrefactor =
         elementaryCharge / (4.0 * M_PI * dielectricConstant *
-                            permittivityFreeSpace * gridDistanceFactor);
+                            permittivitySpace * gridFactor);
       inverseKT = 1.0 / (boltzmannConstant * temperatureKelvin);
-
     }
 
   };
@@ -165,8 +158,7 @@ namespace Langmuir
     enum VariableType
     {
       e_undefined,
-
-      e_coulombInteraction,        // should Coulomb interaction be used
+      e_interactionCoulomb,        // should Coulomb interaction be used
       e_chargedDefects,                // are the defects charged?
       e_gaussianNoise,                // add random noise to energy levels?
       e_gridCharge,                // seed the grid with charges
@@ -175,8 +167,7 @@ namespace Langmuir
       e_trapsHeterogeneous,        // distrubute traps heterogeneously?
       e_outputGrid,                // generate a pdf image of the grid?
       e_chargePercentage,        // percentage of charges in the grid - sets as target
-      e_openCL,                  // should OpenCL be used
-
+      e_useOpenCL,                  // should OpenCL be used
       e_defectPercentage,        // percentage of defects in the grid
       e_deltaEpsilon,                // site energy difference for traps
       e_gaussianAverg,                // average of the random noise
@@ -189,7 +180,6 @@ namespace Langmuir
       e_variableStart,                // the start of the variables range
       e_voltageDrain,                // voltage of the drain electrode
       e_voltageSource,                // voltage of the source electrode
-
       e_gridDepth,                // the depth of the grid
       e_gridHeight,                // the height of the grid
       e_gridWidth,                // the width of the grid
@@ -207,10 +197,18 @@ namespace Langmuir
       e_hoppingRange,           // number of neighbors to hop between
       e_workSize,              // local size of OpenCL work groups
       e_randomSeed,            // seed for random number generator
-
       e_kernelFile,            // source file containing OpenCL kernel
       e_potentialPoint,        // A point of defined potential (x,y,z,V)
-
+      e_okCL,                // can openCL be used on this platform?
+      e_boltzmannConstant,  // thermodynamics constant - non-variable
+      e_dielectricConstant, // electrostatics constant - non-variable
+      e_electrostaticCutoff, // electrostatics constant - non-variable
+      e_electrostaticPrefactor, // collection of electrostatic constants - non-variable
+      e_elementaryCharge, // charge of electron - non-variable
+      e_globalSize, // total number of OpenCL workers - non-variable
+      e_gridFactor, // distance between centers of grid sites - non-variable
+      e_inverseKT, //  inverse average thermal energy - non-variable
+      e_permittivitySpace, // electrostatics constant - non-variable
       e_end
     };
 
@@ -218,8 +216,15 @@ namespace Langmuir
      * Get the simulation parameters for the supplied step.
      * @param par The SimulationParameters @struct that will be set up.
      * @param step The step
+     * @param step Save the parameter pointer to m_parameters
      */
-    bool simulationParameters (SimulationParameters * par, int step = 0);
+    bool simulationParameters ( SimulationParameters * par, int step = 0 );
+
+    /**
+     * Show the names and current values stored in par.
+     * Shows current values in m_parameters if par = NULL.
+     */
+    QString printParameters ( SimulationParameters * par = NULL );
 
   private:
     /** 

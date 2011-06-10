@@ -71,6 +71,11 @@
    return qt;
   }
 
+  QString toString()
+  {
+    return QString( "(%1,%2,%3,%4)" ).arg(col).arg(row).arg(lay).arg(potential);
+  }
+
   /**
     * @struct comparison functor
     *
