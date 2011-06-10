@@ -170,23 +170,6 @@ namespace Langmuir
                 future.waitForFinished ();
             }
 
-            // Now we are done with the charge movement, move them to the next tick!
-            nextTick ();
-
-            //std::cout.flush();
-            // Begin by performing charge injection at the source
-            unsigned int site = m_source->transport ();
-            if (site != errorValue)
-            {
-                ChargeAgent *charge = new ChargeAgent (m_world, site );
-                m_world->charges ()->push_back (charge);
-            }
-
-            tick += 1;
-
-        }
-    }
-
         // Now we are done with the charge movement, move them to the next tick!
         nextTick ();
 
@@ -223,29 +206,6 @@ namespace Langmuir
           }
       }
   }
-
-  void Simulation::printGrid ()
-  {
-    system ("clear");
-    unsigned int width = m_world->grid ()->width ();
-    unsigned int height = m_world->grid ()->height ();
-    for (unsigned int j = 0; j < height; ++j)
-      {
-        std::cout << "||";
-        for (unsigned int i = 0; i < width; ++i)
-          {
-            int index = m_world->grid()->getIndex(i,j,0);
-            if (m_world->grid ()->agent (index))
-            {
-                //std::cout << tick << " " << charges[i]->lifetime() << " " << charges[i]->distanceTraveled() << "\n";
-                delete charges[i];
-                charges.removeAt (i);
-                m_drain->acceptCharge (-1);
-                m_source->decrementCharge ();
-                --i;
-            }
-        }
-    }
 
     void Simulation::printGrid ()
     {
