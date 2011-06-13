@@ -5,42 +5,135 @@ namespace Langmuir
 
     QImage GridViewGL::drawEnergyLandscape( unsigned int layer )
     {
+        //Create an empty image of the appropriate size
         QImage img( pPar->gridWidth, pPar->gridHeight, QImage::Format_ARGB32_Premultiplied );
         img.fill( 0 );
+
+        //Create a painter to draw the image
         QPainter painter( &img );
+        //Move the origin from top left to bottom right
         painter.scale( 1.0, -1.0 );
         painter.translate( 0.0, -pPar->gridHeight );
+        //Resize the painter window to the grid dimensions
         painter.setWindow( QRect( 0, 0, pPar->gridWidth, pPar->gridHeight ) );
+        //Set the background to be white
         painter.fillRect ( QRect( 0, 0, pPar->gridWidth, pPar->gridHeight ), Qt::white );
+        //Set the trap color to a light gray
         painter.setPen( QColor( 100, 100, 100, 255 ) );
+        //Draw the traps as dots
         for ( int i = 0; i < pSim->world()->chargedTraps()->size(); i++ )
         {
+            //Index of a trap site
             int ndx = pSim->world()->chargedTraps()->at( i );
+            //If this trap is in the Layer we are drawing...
             if ( pSim->getGrid()->getLayer( ndx ) == layer )
             {
+                //Draw the trap as a point at (x,y) = (col,row)
                 painter.drawPoint( QPoint( pSim->getGrid()->getColumn( ndx ), pSim->getGrid()->getRow( ndx ) ) );
             }
         }
+        //return the new image ( its not copied on return because of how Qt stores images )
         return img;
     }
 
     GridViewGL::GridViewGL( const QGLFormat &format, QWidget * parent, QString input ): QGLWidget( format, parent )
     {
+        //This Widget responds to the keyboard
         setFocusPolicy(Qt::StrongFocus);
+
+        //Create simulation parameters struct
         pPar = new SimulationParameters;
-        pInput = new InputParser(input);
-        pInput->simulationParameters(pPar);
+
+        //See if simulation parameters should be set to default values
+        QStringList options;
+        options << QObject::tr("LangmuirView::PredefinedParameters::Default")
+                << QObject::tr("LangmuirView::PredefinedParameters::NeutralDefects")
+                << QObject::tr("LangmuirView::PredefinedParameters::HomogeneousTraps")
+                << QObject::tr("LangmuirView::PredefinedParameters::HeterogeneousTraps");
+        if ( options.contains( input ) )
+        {
+                if ( input == "LangmuirView::PredefinedParameters::Default" )
+                {
+                    //Adjust some of Langmuir's default parameters so things aren't too boring
+                    pPar->iterationsPrint = 10;
+                    pPar->gridCharge = true;
+                    pPar->chargePercentage = 0.02;
+                    pPar->voltageDrain = 10.0;
+                }
+                if( input == "LangmuirView::PredefinedParameters::NeutralDefects" )
+                {
+                    pPar->gridWidth = 256;
+                    pPar->gridHeight = 256;
+                    pPar->defectPercentage = 0.01;
+                    pPar->chargePercentage = 0.02;
+                    pPar->voltageDrain = 10.0;
+                    pPar->gridCharge = true;
+                    pPar->iterationsPrint = 10;
+                }
+                if( input == "LangmuirView::PredefinedParameters::HomogeneousTraps" )
+                {
+                    pPar->gridWidth = 256;
+                    pPar->gridHeight = 256;
+                    pPar->trapPercentage = 0.25;
+                    pPar->deltaEpsilon = 0.1;
+                    pPar->chargePercentage = 0.02;
+                    pPar->voltageDrain = 10.0;
+                    pPar->gridCharge = true;
+                    pPar->iterationsPrint = 10;
+                }
+                if( input == "LangmuirView::PredefinedParameters::HeterogeneousTraps" )
+                {
+                    pPar->gridWidth = 256;
+                    pPar->gridHeight = 256;
+                    pPar->trapsHeterogeneous = true;
+                    pPar->trapPercentage = 0.25;
+                    pPar->seedPercentage = 0.01;
+                    pPar->deltaEpsilon = 0.1;
+                    pPar->chargePercentage = 0.02;
+                    pPar->voltageDrain = 10.0;
+                    pPar->gridCharge = true;
+                    pPar->iterationsPrint = 10;
+                }
+                pInput = NULL;
+        }
+        //Or... get the simulation parameters from an input file
+        else
+        {
+            pInput = new InputParser(input);
+            pInput->simulationParameters(pPar);
+            //Its probably an error if the input file read contains no parameters
+            if ( pInput->getReadCount() == 0 )
+            {
+                QMessageBox::critical(
+                this,
+                tr("Langmuir"),
+                QString("No parameters were found in the input file.  Langmuir's default parameters will be used."),
+                QMessageBox::Ok );
+
+                //Adjust some of Langmuir's default parameters so things aren't too boring
+                pPar->iterationsPrint = 10;
+                pPar->gridCharge = true;
+                pPar->chargePercentage = 0.02;
+                pPar->voltageDrain = 10.0;
+            }
+        }
+
+        //Restrict the value on iterations.print to be low ( it controls how many steps are done everytime updateGL is called )
         if ( pPar->iterationsPrint > 100 )
         {
             QMessageBox::warning(
-                this,
-                tr("Langmuir"),
-                QString("The parameter iterations.print must be <= 100 for GridView to render,"
-                        " so it has been changed from %1 to 10.").arg(pPar->iterationsPrint),
-                QMessageBox::Ok );
+            this,
+            tr("Langmuir"),
+            QString("The parameter iterations.print must be <= 100 for GridView to render,"
+                    " so it has been changed from %1 to 10.").arg(pPar->iterationsPrint),
+            QMessageBox::Ok );
             pPar->iterationsPrint = 10;
         }
+
+        //Create the simulation with the parameters chosen
         pSim = new Simulation(pPar);
+
+        //Set default values
         lastCount = 0;
         translation.setX( 0 );
         translation.setY( 0 );
@@ -59,14 +152,17 @@ namespace Langmuir
         qtimer = new QTimer(this);
         recordTimer = NULL;
         trapsTexture = 0;
+
+        //Connect: make sure updateGL is called every updateTime ms
         connect(qtimer, SIGNAL(timeout()), this, SLOT(timerUpdateGL()));
     }
 
     GridViewGL::~GridViewGL()
     {
+        //Delete the objects who aren't derived from QObject
         delete pPar;
         delete pSim;
-        delete pInput;
+        if ( pInput ) { delete pInput; }
     }
 
     QSize GridViewGL::minimumSizeHint() const
@@ -357,6 +453,22 @@ namespace Langmuir
             emit pauseChanged( QString("pause") );
             emit statusMessage( "playing" );
         }
+    }
+
+    void GridViewGL::resetView()
+    {
+        translation.setX( -(pPar->gridWidth)*0.5f );
+        translation.setY( -(pPar->gridHeight)*0.5f );
+        translation.setZ( -(pPar->gridHeight)-thickness );
+        rotation.setX( 0 );
+        rotation.setY( 0 );
+        rotation.setZ( 0 );
+        emit xTranslationChanged( translation.x() );
+        emit yTranslationChanged( translation.y() );
+        emit zTranslationChanged( translation.z() );
+        emit xRotationChanged( rotation.x() );
+        emit yRotationChanged( rotation.y() );
+        emit zRotationChanged( rotation.z() );
     }
 
     void GridViewGL::setTimerInterval( int time )
@@ -1024,6 +1136,7 @@ namespace Langmuir
         connect( navigator->spinBoxes[3], SIGNAL( valueChanged(double) ), glWidget, SLOT( setXRotation(double) ) );
         connect( navigator->spinBoxes[4], SIGNAL( valueChanged(double) ), glWidget, SLOT( setYRotation(double) ) );
         connect( navigator->spinBoxes[5], SIGNAL( valueChanged(double) ), glWidget, SLOT( setZRotation(double) ) );
+        connect( navigator->buttons[0], SIGNAL( clicked() ), glWidget, SLOT( resetView() ) );
         connect( glWidget, SIGNAL( xTranslationChanged(double) ), navigator->spinBoxes[0], SLOT( setValueSlot(double) ) );
         connect( glWidget, SIGNAL( yTranslationChanged(double) ), navigator->spinBoxes[1], SLOT( setValueSlot(double) ) );
         connect( glWidget, SIGNAL( zTranslationChanged(double) ), navigator->spinBoxes[2], SLOT( setValueSlot(double) ) );
@@ -1175,6 +1288,10 @@ namespace Langmuir
         spinBoxes[4]->setWrapping(true);
         spinBoxes[5]->setWrapping(true);
 
+        buttons.push_back( new Button( this ) );
+        buttons[0]->setText( "reset" );
+        buttons[0]->setColorSlot( QColor("black") );
+
         layout = new QGridLayout( this );
         layout->addWidget(    labels[0],  0,  0 );
         layout->addWidget(    labels[1],  0,  2 );
@@ -1188,6 +1305,7 @@ namespace Langmuir
         layout->addWidget( spinBoxes[3],  1,  1 );
         layout->addWidget( spinBoxes[4],  1,  3 );
         layout->addWidget( spinBoxes[5],  1,  5 );
+        layout->addWidget(   buttons[0],  2,  0, 1, 6 );
 
         adjustSize();
     }
@@ -1547,7 +1665,7 @@ namespace Langmuir
         }
 
         QString stub = "untitled";
-openFileDialog:
+        openFileDialog:
         QString fileName = QFileDialog::getSaveFileName( this, tr("Save Screen Shot"), QDir::current().absoluteFilePath(stub), tr( qPrintable( formats.join(";;") ) ), &filter );
         QString fileSuf1 = QFileInfo( fileName ).suffix();
         QString fileSuf2 = filter.split("(", QString::SkipEmptyParts)[1].remove(")").remove(";").remove(".").remove("*");

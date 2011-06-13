@@ -100,7 +100,7 @@ namespace Langmuir
       electrostaticCutoff = 50;
       gridDepth = 1;
       gridHeight = 256;
-      gridWidth = 1024;
+      gridWidth = 256;
       iterationsPrint = 1000;
       iterationsReal = 10000;
       iterationsWarmup = 1000;
@@ -227,6 +227,13 @@ namespace Langmuir
      */
     QString printParameters ( SimulationParameters * par = NULL );
 
+    /**
+     * @brief access lines read.
+     *
+     * Get the number of valid parameters read in input file
+     */
+    int getReadCount();
+
   private:
     /** 
      * @brief The values of parameters.
@@ -255,6 +262,14 @@ namespace Langmuir
      * Initialize the static map of variables if necessary
      */
     void initializeVariables ();
+
+    /**
+     * @brief lines read.
+     *
+     * Count the number of valid parameters read in input file
+     */
+    int readCount;
+
   };
 
 }

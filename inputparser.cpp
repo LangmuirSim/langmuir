@@ -17,6 +17,8 @@ namespace Langmuir
     if (s_variables.isEmpty ())
       initializeVariables ();
 
+    readCount = 0;
+
     // Open up this input file
     QFile *file = new QFile (fileName);
     if (!file->open (QIODevice::ReadOnly | QIODevice::Text))
@@ -166,12 +168,14 @@ namespace Langmuir
           case e_voltageSource:
             {
               m_parameters.voltageSource = list.at (1).toDouble ();
+              readCount += 1;
               break;
             }
 
           case e_voltageDrain:
             {
               m_parameters.voltageDrain = list.at (1).toDouble ();
+              readCount += 1;
               break;
             }
 
@@ -185,6 +189,7 @@ namespace Langmuir
                     100.0 << " (0.00 -- 100.00)";
                   qFatal ("bad input");
                 }
+              readCount += 1;
               break;
             }
 
@@ -198,6 +203,7 @@ namespace Langmuir
                     100.0 << " (0.00 -- 100.00)";
                   qFatal ("bad input");
                 }
+              readCount += 1;
               break;
             }
 
@@ -212,6 +218,7 @@ namespace Langmuir
                     100.0 << " (0.00 -- 100.00)";
                   qFatal ("bad input");
                 }
+              readCount += 1;
               break;
             }
 
@@ -226,12 +233,14 @@ namespace Langmuir
               m_parameters.inverseKT =
                 1.0 / (m_parameters.boltzmannConstant *
                        m_parameters.temperatureKelvin);
+              readCount += 1;
               break;
             }
 
           case e_deltaEpsilon:
             {
               m_parameters.deltaEpsilon = list.at (1).toDouble ();
+              readCount += 1;
               break;
             }
 
@@ -253,18 +262,21 @@ namespace Langmuir
                     << list.at (1).toLower ().trimmed ();
                   qFatal ("bad input");
                 }
+              readCount += 1;
               break;
             }
 
           case e_variableStart:
             {
               m_parameters.variableStart = list.at (1).toDouble ();
+              readCount += 1;
               break;
             }
 
           case e_variableFinal:
             {
               m_parameters.variableFinal = list.at (1).toDouble ();
+              readCount += 1;
               break;
             }
 
@@ -276,6 +288,7 @@ namespace Langmuir
                   qDebug () << "Number of steps must be >=1.";
                   qFatal ("bad input");
                 }
+              readCount += 1;
               break;
             }
 
@@ -287,6 +300,7 @@ namespace Langmuir
                   qDebug () << "Grid width must be >=1.";
                   qFatal ("bad input");
                 }
+              readCount += 1;
               break;
             }
 
@@ -298,6 +312,7 @@ namespace Langmuir
                   qDebug () << "Grid height must be >=1.";
                   qFatal ("bad input");
                 }
+              readCount += 1;
               break;
             }
 
@@ -309,6 +324,7 @@ namespace Langmuir
                   qDebug () << "Grid depth must be >=1.";
                   qFatal ("bad input");
                 }
+              readCount += 1;
               break;
             }
 
@@ -320,6 +336,7 @@ namespace Langmuir
                   qDebug () << "Charge on defect must be +/- 1e";
                   qFatal ("bad input");
                 }
+              readCount += 1;
               break;
             }
 
@@ -331,6 +348,7 @@ namespace Langmuir
                   qDebug () << "Charge on trap must be +/- 1e";
                   qFatal ("bad input");
                 }
+              readCount += 1;
               break;
             }
 
@@ -351,6 +369,7 @@ namespace Langmuir
                     gridCharge;
                   qFatal ("bad input");
                 }
+              readCount += 1;
               break;
             }
 
@@ -367,6 +386,7 @@ namespace Langmuir
                     m_parameters.potentialForm;
                   qFatal ("bad input");
                 }
+              readCount += 1;
               break;
             }
 
@@ -378,6 +398,7 @@ namespace Langmuir
                   qDebug () << "Warmup iterations must be >=0.";
                   qFatal ("bad input");
                 }
+              readCount += 1;
               break;
             }
 
@@ -389,6 +410,7 @@ namespace Langmuir
                   qDebug () << "Real iterations must be >=1.";
                   qFatal ("bad input");
                 }
+              readCount += 1;
               break;
             }
 
@@ -400,6 +422,7 @@ namespace Langmuir
                   qDebug () << "Print iterations must be >=0.";
                   qFatal ("bad input");
                 }
+              readCount += 1;
               break;
             }
 
@@ -421,6 +444,7 @@ namespace Langmuir
                     interaction;
                   qFatal ("bad input");
                 }
+              readCount += 1;
               break;
             }
 
@@ -440,6 +464,7 @@ namespace Langmuir
                   qDebug () << "Charged defects are either true or false: ";
                   qFatal ("bad input");
                 }
+              readCount += 1;
               break;
             }
 
@@ -459,6 +484,7 @@ namespace Langmuir
                   qDebug () << "Charged traps are either true or false: ";
                   qFatal ("bad input");
                 }
+              readCount += 1;
               break;
             }
 
@@ -478,6 +504,7 @@ namespace Langmuir
                   qDebug () << "output.xyz is either true or false: ";
                   qFatal ("bad input");
                 }
+              readCount += 1;
               break;
             }
 
@@ -497,6 +524,7 @@ namespace Langmuir
                   qDebug () << "output.grid is either true or false: ";
                   qFatal ("bad input");
               }
+              readCount += 1;
               break;
           }
 
@@ -541,6 +569,7 @@ namespace Langmuir
                 }
               m_parameters.potentialPoints.
                 push_back (PotentialPoint (x, y, z, V));
+              readCount += 1;
               break;
             }
 
@@ -554,6 +583,7 @@ namespace Langmuir
                   m_parameters.potentialPoints.
                     push_back(PotentialPoint (0,0,2,2*slopeZ));
                 }
+              readCount += 1;
               break;
             }
 
@@ -566,12 +596,14 @@ namespace Langmuir
                     "Negative or zero standard deviation specified for random noise";
                   qFatal ("bad input");
                 }
+              readCount += 1;
               break;
             }
 
           case e_gaussianAverg:
             {
               m_parameters.gaussianAverg = list.at (1).toDouble ();
+              readCount += 1;
               break;
             }
 
@@ -591,6 +623,7 @@ namespace Langmuir
                   qDebug () << "potential.noise is either true or false: ";
                   qFatal ("bad input");
                 }
+              readCount += 1;
               break;
             }
 
@@ -611,6 +644,7 @@ namespace Langmuir
                     "Heterogeneous Traps are either true or false: ";
                   qFatal ("bad input");
                 }
+              readCount += 1;
               break;
             }
 
@@ -626,6 +660,7 @@ namespace Langmuir
                     100.0 << " (0.00 -- 100.00)";
                   qFatal ("bad input");
                 }
+              readCount += 1;
               break;
             }
 
@@ -640,6 +675,7 @@ namespace Langmuir
                     m_parameters.defectPercentage << " (0.00 -- 100.00)";
                   qFatal ("bad input");
                 }
+              readCount += 1;
               break;
             }
 
@@ -651,6 +687,7 @@ namespace Langmuir
                   qDebug () << "output precision must be >0.";
                   qFatal ("bad input");
                 }
+              readCount += 1;
               break;
             }
 
@@ -662,6 +699,7 @@ namespace Langmuir
                   qDebug () << "output width must be >0.";
                   qFatal ("bad input");
                 }
+              readCount += 1;
               break;
             }
 
@@ -686,6 +724,7 @@ namespace Langmuir
                     "options for source barrier calculation type are constant, coulomb, and image";
                   qFatal ("bad input");
                 }
+              readCount += 1;
               break;
             }
 
@@ -697,6 +736,7 @@ namespace Langmuir
                   qDebug () << "hopping range must be > 1.";
                   qFatal ("bad input");
                 }
+              readCount += 1;
               break;
             }
 
@@ -717,6 +757,7 @@ namespace Langmuir
                     useOpenCL;
                   qFatal ("bad input");
                 }
+              readCount += 1;
               break;
             }
 
@@ -728,23 +769,27 @@ namespace Langmuir
                   qDebug () << "Local work group size must be larger than 0.";
                   qFatal ("bad input");
                 }
+              readCount += 1;
               break;
             }
 
           case e_kernelFile:
             {
               m_parameters.kernelFile = list.at (1).trimmed ();
+              readCount += 1;
               break;
             }
 
           case e_randomSeed:
             {
               m_parameters.randomSeed = list.at (1).toInt ();
+              readCount += 1;
               break;
             }
 
           default:
-            qDebug () << "Unknown key value encountered:" << key;
+            qDebug () << "Unknown key value encountered:" << qPrintable( line.trimmed() );
+            break;
           }
       }
   }
@@ -867,6 +912,11 @@ namespace Langmuir
       pairs << QString("%1=%2").arg(s_variables.key( e_zDefect )).arg(variables->zDefect);
       pairs << QString("%1=%2").arg(s_variables.key( e_zTrap )).arg(variables->zTrap);
       return pairs.join("\n");
+  }
+
+  int InputParser::getReadCount()
+  {
+      return readCount;
   }
 
 }

@@ -25,8 +25,38 @@ int main (int argc, char **argv)
     }
     else
     {
-        QMessageBox::critical(0, "Langmuir", "correct use is:\n\n\tlangmuirView input.dat (output.dat)\t\n", QMessageBox::Ok);
-        qFatal("bad input");
+        QStringList options;
+        options << QObject::tr("choose input file")
+                << QObject::tr("LangmuirView::PredefinedParameters::Default")
+                << QObject::tr("LangmuirView::PredefinedParameters::NeutralDefects")
+                << QObject::tr("LangmuirView::PredefinedParameters::HomogeneousTraps")
+                << QObject::tr("LangmuirView::PredefinedParameters::HeterogeneousTraps");
+        bool ok = false;
+        QString item = QInputDialog::getItem(0, QObject::tr("Langmuir"), QObject::tr("Langmuir requires an input file!"), options, 0, false, &ok);
+        if (ok && !item.isEmpty())
+        {
+            switch( options.indexOf(item) )
+            {
+            case 0:
+            {
+                iFileName = QFileDialog::getOpenFileName( 0, QObject::tr("Input File Name"), QDir::currentPath() );
+                if ( iFileName.isEmpty() )
+                {
+                    QMessageBox::critical(0,QObject::tr("Langmuir"),QObject::tr("No input file chosen!"));
+                }
+                break;
+            }
+            default:
+            {
+                iFileName = item;
+                break;
+            }
+            }
+        }
+        else
+        {
+           return 0;
+        }
     }
 
     MainWindow window( iFileName );

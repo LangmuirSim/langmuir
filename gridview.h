@@ -164,6 +164,7 @@ namespace Langmuir
             ~GridViewGL();
             QSize minimumSizeHint() const;
             QSize sizeHint() const;
+            QImage drawEnergyLandscape( unsigned int layer = 0 );
 
         public slots:
             void setXTranslation( double length );
@@ -182,7 +183,7 @@ namespace Langmuir
             void timerUpdateGL();
             void timerRecordShot();
             void screenShot();
-            QImage drawEnergyLandscape( unsigned int layer = 0 );
+            void resetView();
 
         signals:
             void xTranslationChanged( double angle );
@@ -259,6 +260,7 @@ namespace Langmuir
             QGridLayout* layout;
             QList< QLabel* > labels;
             QList< DSpinBox* > spinBoxes;
+            QList< Button* > buttons;
     };
 
     class SceneOptions: public QWidget
