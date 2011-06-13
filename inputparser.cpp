@@ -544,6 +544,19 @@ namespace Langmuir
               break;
             }
 
+          case e_slopeZ:
+            {
+              double slopeZ = list.at (1).toDouble ();
+              if (slopeZ != 0.00)
+                {
+                  m_parameters.potentialPoints.
+                    push_back(PotentialPoint (0,0,1,slopeZ));
+                  m_parameters.potentialPoints.
+                    push_back(PotentialPoint (0,0,2,2*slopeZ));
+                }
+              break;
+            }
+
           case e_gaussianStdev:
             {
               m_parameters.gaussianStdev = list.at (1).toDouble ();
@@ -776,6 +789,7 @@ namespace Langmuir
     s_variables["potential.point"] = e_potentialPoint;
     s_variables["random.seed"] = e_randomSeed;
     s_variables["seed.percentage"] = e_seedPercentage;
+    s_variables["slope.z"] = e_slopeZ;
     s_variables["source.barrier"] = e_sourceBarrier;
     s_variables["source.type"] = e_sourceType;
     s_variables["temperature.kelvin"] = e_temperatureKelvin;
@@ -834,8 +848,7 @@ namespace Langmuir
       for ( unsigned int i = 0; i < variables->potentialPoints.size(); i++ )
       {
       QString s = "";
-      pairs << variables->potentialPoints[i].toString();
-      //pairs << QString("%1=%2").arg(s_variables.key( e_potentialPoint )).arg(variables->potentialPoints[i]);
+      pairs << QString("%1=%2").arg(s_variables.key( e_potentialPoint )).arg(variables->potentialPoints[i].toString());
       }
       pairs << QString("%1=%2").arg(s_variables.key( e_randomSeed )).arg(variables->randomSeed);
       pairs << QString("%1=%2").arg(s_variables.key( e_seedPercentage )).arg(variables->seedPercentage);

@@ -199,6 +199,7 @@ namespace Langmuir
       e_randomSeed,            // seed for random number generator
       e_kernelFile,            // source file containing OpenCL kernel
       e_potentialPoint,        // A point of defined potential (x,y,z,V)
+      e_slopeZ,               // convienence: makes two potential points at (0,0,1,slope.z) and (0,0,2,2*slope.z) - ( simulates gate potential )
       e_okCL,                // can openCL be used on this platform?
       e_boltzmannConstant,  // thermodynamics constant - non-variable
       e_dielectricConstant, // electrostatics constant - non-variable

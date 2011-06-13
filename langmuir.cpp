@@ -17,7 +17,7 @@
 using namespace Langmuir;
 
 // Print information to the screen about simulation status
-void progress( int sim, int warm, int real, int total, double time );
+void progress( int sim, int warm, int real, int total, double time, bool flush = true );
 
 int main (int argc, char *argv[])
 {
@@ -233,7 +233,7 @@ int main (int argc, char *argv[])
 
 }
 
-void progress( int sim, int warm, int real, int total, double time )
+void progress( int sim, int warm, int real, int total, double time, bool flush )
 {
     double percent = double( warm + real ) / double ( total ) * 100.0;
     double remaining = time / ( warm + real ) * ( total - warm - real );
@@ -278,5 +278,5 @@ void progress( int sim, int warm, int real, int total, double time )
                  .arg(timeString)
                  .arg(remainingString)
                  .toStdString();
-    std::cout.flush();
+    if ( flush ) { std::cout.flush(); } else { std::cout << "\n"; }
 }
