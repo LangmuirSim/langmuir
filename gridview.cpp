@@ -167,7 +167,7 @@ namespace Langmuir
 
     QSize GridViewGL::minimumSizeHint() const
     {
-        return QSize(50, 50);
+        return QSize(256, 256);
     }
 
     QSize GridViewGL::sizeHint() const
@@ -181,8 +181,7 @@ namespace Langmuir
         glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
         glClearDepth(1.0f);
         glEnable(GL_DEPTH_TEST);
-        glEnable(GL_CULL_FACE);
-        glShadeModel(GL_SMOOTH);
+        glShadeModel(GL_FLAT);
 
         QImage img;
         img.load("texture.jpeg");
@@ -198,42 +197,34 @@ namespace Langmuir
         source = new Box( this,
                           QVector3D( 2.0*thickness, pPar->gridHeight, thickness + pPar->gridDepth * thickness ),
                           QVector3D( -2.0*thickness, 0, -thickness ) );
-        source->setTexture( metalTexture );
 
         drain = new Box( this,
                          QVector3D( 2.0*thickness, pPar->gridHeight, thickness + pPar->gridDepth * thickness ),
                          QVector3D( pPar->gridWidth, 0, -thickness ) );
-        drain->setTexture( metalTexture );
 
         side1 = new Box( this,
                          QVector3D( pPar->gridWidth, thickness, thickness ),
                          QVector3D( 0, -thickness, -thickness ) );
-        side1->setTexture( metalTexture );
 
         side2 = new Box( this,
                          QVector3D( pPar->gridWidth, thickness, thickness ),
                          QVector3D( 0, pPar->gridHeight, -thickness ) );
-        side2->setTexture( metalTexture );
 
         side3 = new Box( this,
                          QVector3D( 2.0*thickness, thickness, thickness + pPar->gridDepth * thickness ),
                          QVector3D( -2.0*thickness, -thickness, -thickness ) );
-        side3->setTexture( metalTexture );
 
         side4 = new Box( this,
                          QVector3D( 2.0*thickness, thickness, thickness + pPar->gridDepth * thickness ),
                          QVector3D( -2.0*thickness, pPar->gridHeight, -thickness ) );
-        side4->setTexture( metalTexture );
 
         side5 = new Box( this,
                          QVector3D( 2.0*thickness, thickness, thickness + pPar->gridDepth * thickness ),
                          QVector3D( pPar->gridWidth, -thickness, -thickness ) );
-        side5->setTexture( metalTexture );
 
         side6 = new Box( this,
                          QVector3D( 2.0*thickness, thickness, thickness + pPar->gridDepth * thickness ),
                          QVector3D( pPar->gridWidth, pPar->gridHeight, -thickness ) );
-        side6->setTexture( metalTexture );
 
         background = new ColoredObject( this );
         ambientLight = new ColoredObject( this );
@@ -277,8 +268,8 @@ namespace Langmuir
 
         recordDialog = new RecordDialog(this);
 
-        translation.setX( -(pPar->gridWidth)*0.5f );
-        translation.setY( -(pPar->gridHeight)*0.5f );
+        translation.setX( 0 );
+        translation.setY( 0 );
         translation.setZ( -(pPar->gridHeight)-thickness );
         rotation.setX( 0 );
         rotation.setY( 0 );
@@ -457,8 +448,8 @@ namespace Langmuir
 
     void GridViewGL::resetView()
     {
-        translation.setX( -(pPar->gridWidth)*0.5f );
-        translation.setY( -(pPar->gridHeight)*0.5f );
+        translation.setX( 0.0 );
+        translation.setY( 0.0 );
         translation.setZ( -(pPar->gridHeight)-thickness );
         rotation.setX( 0 );
         rotation.setY( 0 );
@@ -669,16 +660,19 @@ namespace Langmuir
 
     void GridViewGL::paintGL()
     {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
         glLightfv(GL_LIGHT0,GL_AMBIENT,ambientLight->getLight());
         glLightfv(GL_LIGHT0,GL_DIFFUSE,diffuseLight->getLight());
         glLightfv(GL_LIGHT0,GL_SPECULAR,specularLight->getLight());
+        glClearDepth(1.0);
         glClearColor(background->getColor().redF(),background->getColor().greenF(),background->getColor().blueF(),background->getColor().alphaF());
         glLoadIdentity();
         glTranslatef(translation.x(),translation.y(),translation.z());
         glRotatef(rotation.x(),1.0,0.0,0.0);
         glRotatef(rotation.y(),0.0,1.0,0.0);
         glRotatef(rotation.z(),0.0,0.0,1.0);
+        glPushMatrix();
+        glTranslatef( -0.5 * ( pPar->gridWidth + 4.0 * thickness ), - 0.5 * ( pPar->gridHeight + 2.0 * thickness ), 0 );
         base->draw();
         source->draw();
         drain->draw();
@@ -690,6 +684,7 @@ namespace Langmuir
         side6->draw();
         carriers->draw( pSim->world()->charges()->size(), this->height(), fov );
         defects->draw( pSim->world()->chargedDefects()->size(), this->height(), fov );
+        glPopMatrix();
     }
 
     Box::Box( QObject *parent, QVector3D dimensions, QVector3D origin ) : ColoredObject(parent), tid( 0 )
@@ -892,12 +887,9 @@ namespace Langmuir
                 glBindTexture(GL_TEXTURE_2D,tid);
             }
 
-            float white[4] = { 1, 1, 1, 1 };
-
             glMaterialfv(GL_FRONT, GL_AMBIENT, this->getLight() );
             glMaterialfv(GL_FRONT, GL_DIFFUSE, this->getLight() );
-            glMaterialfv(GL_FRONT, GL_SPECULAR, white );
-            glMaterialf(GL_FRONT, GL_SHININESS, 96);
+            glMaterialf(GL_FRONT, GL_SHININESS, 128);
 
             glDrawArrays(GL_QUADS,0,24);
 
