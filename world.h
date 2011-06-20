@@ -250,14 +250,14 @@ namespace Langmuir
       *
       * these doubles are put inside m_oDevice; they should contain the results of coulomb calculations.
       */
-    void copyDeviceToHost( );
+    void copyDeviceToHost( int hostOffset = 0, int deviceOffset = 0 );
 
     /**
       * @brief copy n = m_charges.size() * 2 ints from CPU to GPU
       *
       * the ints are the current and future(proposed) site IDs of charge carriers
       */
-    void copyHostToDevice( );
+    void copyHostToDevice( int hostOffset = 0, int deviceOffset = 0 );
 
     /**
       * @brief tell the GPU to perform coulomb calculations
