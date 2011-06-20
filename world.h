@@ -222,14 +222,14 @@ namespace Langmuir
       *
       * Get the address of a list of charged defects.
       */
-    QList<unsigned int> * chargedDefects();
+    QList<unsigned int> * defectSiteIDs();
 
     /**
       * @brief member access.
       *
       * Get the address of a list of charged traps.
       */
-    QList<unsigned int> * chargedTraps();
+    QList<unsigned int> * trapSiteIDs();
 
     /**
       * @brief member access.
@@ -299,10 +299,9 @@ namespace Langmuir
     Rand                 *m_rand;                // Random number generator
     SimulationParameters *m_parameters;          // Simulation Parameters
     QList<ChargeAgent *>  m_charges;             // Charge carriers in the system
-    QList<unsigned int>   m_chargedDefects;      // Charged defects in the system
-    QList<unsigned int>   m_chargedTraps;        // Charged traps in the system
+    QList<unsigned int>   m_defectSiteIDs;       // Site ids of defects in the system
+    QList<unsigned int>   m_trapSiteIDs;         // Site ids of traps in the system
     Eigen::MatrixXd       m_coupling;            // Enumerates coupling constants between different sites
-    std::vector<double>   m_sitePercents;        // Percentage of each site in the grid
     TripleIndexArray      m_interactionEnergies; // Interaction energies
 
     cl_int                        m_error;       // OpenCL error code
@@ -325,14 +324,14 @@ namespace Langmuir
   return &m_charges;
  }
 
- inline QList<unsigned int> * World::chargedDefects()
+ inline QList<unsigned int> * World::defectSiteIDs()
  {
-  return &m_chargedDefects;
+  return &m_defectSiteIDs;
  }
 
- inline QList<unsigned int> * World::chargedTraps()
+ inline QList<unsigned int> * World::trapSiteIDs()
  {
-  return &m_chargedTraps;
+  return &m_trapSiteIDs;
  }
 
  inline Eigen::MatrixXd * World::coupling()

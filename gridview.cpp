@@ -21,10 +21,10 @@ namespace Langmuir
         //Set the trap color to a light gray
         painter.setPen( QColor( 100, 100, 100, 255 ) );
         //Draw the traps as dots
-        for ( int i = 0; i < pSim->world()->chargedTraps()->size(); i++ )
+        for ( int i = 0; i < pSim->world()->trapSiteIDs()->size(); i++ )
         {
             //Index of a trap site
-            int ndx = pSim->world()->chargedTraps()->at( i );
+            int ndx = pSim->world()->trapSiteIDs()->at( i );
             //If this trap is in the Layer we are drawing...
             if ( pSim->getGrid()->getLayer( ndx ) == layer )
             {
@@ -212,7 +212,7 @@ namespace Langmuir
         }
         carriers = new PointArray(this,pointBuffer);
 
-        QList< unsigned int > *defectList = pSim->world()->chargedDefects();
+        QList< unsigned int > *defectList = pSim->world()->defectSiteIDs();
         QVector< float > xyz( defectList->size() * 4, 1 );
         for ( int i = 0; i < defectList->size(); i++ )
         {
@@ -641,7 +641,7 @@ namespace Langmuir
         side5->draw();
         side6->draw();
         carriers->draw( pSim->world()->charges()->size(), this->height(), fov );
-        defects->draw( pSim->world()->chargedDefects()->size(), this->height(), fov );
+        defects->draw( pSim->world()->defectSiteIDs()->size(), this->height(), fov );
         glPopMatrix();
     }
 

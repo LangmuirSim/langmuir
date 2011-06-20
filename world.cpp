@@ -14,10 +14,6 @@ namespace Langmuir {
                   0.000, 0.000, 0.000, 0.000,
                   0.333, 0.000, 0.002, 0.002,
                   0.333, 0.000, 0.002, 0.002;
-    // This is the number of different site types and should add up to 1.0
-    m_sitePercents.resize(2);
-    m_sitePercents[0] = 0.95;
-    m_sitePercents[1] = 0.05;
   }
 
   World::~World()

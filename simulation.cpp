@@ -267,7 +267,7 @@ namespace Langmuir
             if (m_world->random () < m_parameters->defectPercentage)
             {
                 m_world->grid ()->setSiteID (i, 1);        //defect
-                m_world->chargedDefects ()->push_back (i);        //Add defect to list - for charged defects
+                m_world->defectSiteIDs ()->push_back (i);        //Add defect to list - for charged defects
             }
             else
             {
@@ -374,7 +374,7 @@ namespace Langmuir
                     {
                         m_grid->setPotential (site,
                                               (tPotential + m_parameters->deltaEpsilon));
-                        m_world->chargedTraps ()->push_back (site);
+                        m_world->trapSiteIDs ()->push_back (site);
                     }
 
                     // Assign the potential
@@ -397,16 +397,16 @@ namespace Langmuir
         //}
 
         //Now loop over our seeds
-        while ((m_world->chargedTraps ()->size ()) < trapCount)
+        while ((m_world->trapSiteIDs ()->size ()) < trapCount)
         {
             // Select a random trap
             unsigned int trapSeed =
                 int (m_world->random () *
-                     (m_world->chargedTraps ()->size () - 1.0e-20));
+                     (m_world->trapSiteIDs ()->size () - 1.0e-20));
 
             // Select a random neighbor
             unsigned int newTrap;
-            vector < unsigned int >m_neighbors = m_grid->neighbors(m_world->chargedTraps()->at(trapSeed),1);
+            vector < unsigned int >m_neighbors = m_grid->neighbors(m_world->trapSiteIDs()->at(trapSeed),1);
             //qDebug() << "Neighbors: " << m_neighbors.size();
             newTrap =
                 m_neighbors[int
@@ -420,7 +420,7 @@ namespace Langmuir
             //qDebug() << "newTrap: " << newTrap;
             // Make sure it is not already a trap site
 
-            if (m_world->chargedTraps ()->contains (newTrap))
+            if (m_world->trapSiteIDs ()->contains (newTrap))
                 continue;
 
             else
@@ -431,7 +431,7 @@ namespace Langmuir
                 unsigned int z = m_grid->getLayer(newTrap);
                 tPotential = m_potential->calculate (x + 0.5, y + 0.5, z + 0.5);
                 m_grid->setPotential (newTrap, (tPotential + m_parameters->deltaEpsilon));
-                m_world->chargedTraps ()->push_back (newTrap);
+                m_world->trapSiteIDs ()->push_back (newTrap);
                 //qDebug() << "Traps: " << m_world->chargedTraps()->size();
             }
         }
@@ -475,11 +475,11 @@ namespace Langmuir
             painter.setBrush(Qt::blue);
             painter.setPen(Qt::darkBlue);
 
-            for(int i = 0; i < m_world->chargedTraps()->size(); i++)
+            for(int i = 0; i < m_world->trapSiteIDs()->size(); i++)
             {
-                unsigned int rowCoord = m_grid->getRow(m_world->chargedTraps()->at(i));
+                unsigned int rowCoord = m_grid->getRow(m_world->trapSiteIDs()->at(i));
                 //qDebug() << rowCoord;
-                unsigned int colCoord = m_grid->getColumn(m_world->chargedTraps()->at(i));
+                unsigned int colCoord = m_grid->getColumn(m_world->trapSiteIDs()->at(i));
                 //qDebug() << colCoord;
                 painter.drawRect(colCoord,rowCoord,1,1);
             }
@@ -521,7 +521,7 @@ namespace Langmuir
                     {
                         m_grid->setPotential (site,
                                               (tPotential + m_parameters->deltaEpsilon));
-                        m_world->chargedTraps ()->push_back (site);
+                        m_world->trapSiteIDs ()->push_back (site);
                     }
 
                     // Assign the potential

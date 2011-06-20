@@ -240,7 +240,7 @@ namespace Langmuir
     Grid *grid = m_world->grid ();
 
     // Reference to charged defects in the system
-    QList < unsigned int >&chargedDefects = *m_world->chargedDefects ();
+    QList < unsigned int >&chargedDefects = *m_world->defectSiteIDs ();
 
     // Potential before
     double potential1 = 0.0;
@@ -292,7 +292,7 @@ namespace Langmuir
     Grid *grid = m_world->grid ();
 
     // Reference to charged traps
-    QList < unsigned int >&chargedTraps = *m_world->chargedTraps ();
+    QList < unsigned int >&chargedTraps = *m_world->trapSiteIDs ();
 
     // Potential before
     double potential1 = 0.0;
