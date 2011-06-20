@@ -234,18 +234,18 @@ namespace Langmuir {
     Q_ASSERT_X (m_error == CL_SUCCESS, "cl::CommandQueue::enqueueNDRangeKernel", qPrintable (clErrorString (m_error)));
   }
 
-  void World::copyDeviceToHost( int hostOffset, int deviceOffset )
+  void World::copyDeviceToHost( )
   {
-    m_error = m_queues[0].enqueueReadBuffer (m_oDevice, CL_TRUE, deviceOffset, m_charges.size() * sizeof (double), &m_oHost[hostOffset], NULL, NULL);
+    m_error = m_queues[0].enqueueReadBuffer (m_oDevice, CL_TRUE, 0, m_charges.size() * sizeof (double), &m_oHost[0], NULL, NULL);
     Q_ASSERT_X (m_error == CL_SUCCESS, "cl::CommandQueue::enqueueReadBuffer", qPrintable (clErrorString (m_error)));
   }
 
-  void World::copyHostToDevice( int hostOffset, int deviceOffset )
+  void World::copyHostToDevice( )
   {
-    m_error = m_queues[0].enqueueWriteBuffer (m_iDevice, CL_TRUE, deviceOffset, m_charges.size() * sizeof (int), &m_iHost[hostOffset], NULL, NULL);
+    m_error = m_queues[0].enqueueWriteBuffer (m_iDevice, CL_TRUE, 0, m_charges.size() * sizeof (int), &m_iHost[0], NULL, NULL);
     Q_ASSERT_X (m_error == CL_SUCCESS, "cl::CommandQueue::enqueueWriteBuffer", qPrintable (clErrorString (m_error)));
 
-    m_error = m_queues[0].enqueueWriteBuffer (m_fDevice, CL_TRUE, deviceOffset, m_charges.size() * sizeof (int), &m_fHost[hostOffset], NULL, NULL);
+    m_error = m_queues[0].enqueueWriteBuffer (m_fDevice, CL_TRUE, 0, m_charges.size() * sizeof (int), &m_fHost[0], NULL, NULL);
     Q_ASSERT_X (m_error == CL_SUCCESS, "cl::CommandQueue::enqueueWriteBuffer", qPrintable (clErrorString (m_error)));
   }
 
