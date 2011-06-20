@@ -98,10 +98,11 @@ namespace Langmuir
       * @brief calculate coulomb energy difference between
       * initial state = m_site
       * final state = m_fSite
-      * interacts with all other charges carrier, all of which
-      * are assumed to be in initial state
+      * interacts with all other charge carriers, all of which
+      * are assumed to be in initial state. Interacts with defects
       */
-    inline double interaction() { return coulombInteraction(m_fSite); }
+    double interaction();
+
   protected:
 
     /**

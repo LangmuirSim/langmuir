@@ -363,4 +363,17 @@ namespace Langmuir
     return false;
   }
 
+  double ChargeAgent::interaction()
+  {
+      if ( m_world->parameters()->chargedDefects )
+      {
+          if ( m_world->parameters()->chargedTraps )
+          {
+              return coulombInteraction(m_fSite) + chargedDefects(m_fSite) + chargedTraps(m_fSite);
+          }
+          return coulombInteraction(m_fSite) + chargedDefects(m_fSite);
+      }
+      return coulombInteraction(m_fSite);
+  }
+
 }
