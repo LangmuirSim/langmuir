@@ -45,56 +45,14 @@ namespace Langmuir
         pPar = new SimulationParameters;
 
         //See if simulation parameters should be set to default values
-        QStringList options;
-        options << QObject::tr("LangmuirView::PredefinedParameters::Default")
-                << QObject::tr("LangmuirView::PredefinedParameters::NeutralDefects")
-                << QObject::tr("LangmuirView::PredefinedParameters::HomogeneousTraps")
-                << QObject::tr("LangmuirView::PredefinedParameters::HeterogeneousTraps");
-        if ( options.contains( input ) )
+        if ( input == "default" )
         {
-                if ( input == "LangmuirView::PredefinedParameters::Default" )
-                {
-                    //Adjust some of Langmuir's default parameters so things aren't too boring
-                    pPar->iterationsPrint = 10;
-                    pPar->gridCharge = true;
-                    pPar->chargePercentage = 0.02;
-                    pPar->voltageDrain = 10.0;
-                }
-                if( input == "LangmuirView::PredefinedParameters::NeutralDefects" )
-                {
-                    pPar->gridWidth = 256;
-                    pPar->gridHeight = 256;
-                    pPar->defectPercentage = 0.01;
-                    pPar->chargePercentage = 0.02;
-                    pPar->voltageDrain = 10.0;
-                    pPar->gridCharge = true;
-                    pPar->iterationsPrint = 10;
-                }
-                if( input == "LangmuirView::PredefinedParameters::HomogeneousTraps" )
-                {
-                    pPar->gridWidth = 256;
-                    pPar->gridHeight = 256;
-                    pPar->trapPercentage = 0.25;
-                    pPar->deltaEpsilon = 0.1;
-                    pPar->chargePercentage = 0.02;
-                    pPar->voltageDrain = 10.0;
-                    pPar->gridCharge = true;
-                    pPar->iterationsPrint = 10;
-                }
-                if( input == "LangmuirView::PredefinedParameters::HeterogeneousTraps" )
-                {
-                    pPar->gridWidth = 256;
-                    pPar->gridHeight = 256;
-                    pPar->trapsHeterogeneous = true;
-                    pPar->trapPercentage = 0.25;
-                    pPar->seedPercentage = 0.01;
-                    pPar->deltaEpsilon = 0.1;
-                    pPar->chargePercentage = 0.02;
-                    pPar->voltageDrain = 10.0;
-                    pPar->gridCharge = true;
-                    pPar->iterationsPrint = 10;
-                }
-                pInput = NULL;
+            //Adjust some of Langmuir's default parameters so things aren't too boring
+            pPar->iterationsPrint = 10;
+            pPar->gridCharge = true;
+            pPar->chargePercentage = 0.02;
+            pPar->voltageDrain = 10.0;
+            pInput = NULL;
         }
         //Or... get the simulation parameters from an input file
         else

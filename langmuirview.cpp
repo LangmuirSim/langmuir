@@ -27,10 +27,7 @@ int main (int argc, char **argv)
     {
         QStringList options;
         options << QObject::tr("choose input file")
-                << QObject::tr("LangmuirView::PredefinedParameters::Default")
-                << QObject::tr("LangmuirView::PredefinedParameters::NeutralDefects")
-                << QObject::tr("LangmuirView::PredefinedParameters::HomogeneousTraps")
-                << QObject::tr("LangmuirView::PredefinedParameters::HeterogeneousTraps");
+                << QObject::tr("default");
         bool ok = false;
         QString item = QInputDialog::getItem(0, QObject::tr("Langmuir"), QObject::tr("Langmuir requires an input file!"), options, 0, false, &ok);
         if (ok && !item.isEmpty())
