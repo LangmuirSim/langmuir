@@ -153,17 +153,40 @@ namespace Langmuir {
      qDebug() << qPrintable(clErrorString(m_error));
      return; }
 
-    // figure out the global work size
+    //figure out global work size
     int maxCharges = m_parameters->chargePercentage * double( m_grid->volume() );
     m_parameters->globalSize = maxCharges * m_parameters->workSize;
-    //if ( ! m_parameters->coulomb ) qFatal("can not used openCL with the coulomb interaction turned off");
-    //if ( m_parameters->chargedDefects || m_parameters->chargedTraps ) qFatal("charged defects and charged traps not currently implemented in OpenCL");
+
+    //check for errors - with max charges
     if ( maxCharges == 0 ) qFatal("can not use OpenCL when there are no charges");
-    if ( m_parameters->workSize == 0 ) qFatal("can not use OpenCL with zero work size - try an power of two (ex: 32)");
-    if ( m_parameters->workSize > 1024 ) qFatal("local work size can not exceed 1024");
-    if ( (m_parameters->workSize & (m_parameters->workSize-1))) qFatal("local work size should be a power of 2");
+
+    //check for errors - work size
+    if ( m_parameters->workSize == 0 ) qFatal("can not use OpenCL with zero work size - try a power of two (ex: 32)");
+    int maxWorkGroupSize =
+     m_devices[0].getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>(&m_error);
+    if ( m_parameters->workSize > maxWorkGroupSize )
+     qFatal("local work size can not exceed %d",maxWorkGroupSize);
+    if ( (m_parameters->workSize & (m_parameters->workSize-1)))
+     qFatal("local work size should be a power of 2");
+
+    //check for errors - global size
     if ( m_parameters->globalSize == 0 ) qFatal("global work item size was set to 0");
-    if ( m_parameters->globalSize > 1024*1024*64 ) qFatal("global work item size too large - try a smaller work size or lower charge.percentage");
+    std::vector<size_t> maxWorkItemSizes =
+     m_devices[0].getInfo<CL_DEVICE_MAX_WORK_ITEM_SIZES>(&m_error);
+    if ( m_parameters->globalSize > int(maxWorkItemSizes[0]*maxWorkItemSizes[1]*maxWorkItemSizes[2]) )
+     qFatal("global work item size exceeds max = %d*%d*%d = %d,  try a smaller work size or lower charge.percentage",
+      int(maxWorkItemSizes[0]),
+      int(maxWorkItemSizes[1]),
+      int(maxWorkItemSizes[0]),
+      int(maxWorkItemSizes[2]*
+          maxWorkItemSizes[1]*
+          maxWorkItemSizes[2]));
+
+    //check for errors - global size memory usage
+    int bytes = ( sizeof(int) + sizeof(int) + sizeof(double) ) * maxCharges;
+    int maxMemory = m_devices[0].getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>(&m_error);
+    if ( bytes > maxMemory )
+     qWarning("max charges may exceed device memory - expecting crash");
 
     //initialize Host Memory
     m_iHost.resize( maxCharges, 0 );
