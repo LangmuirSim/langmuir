@@ -41,17 +41,6 @@ namespace Langmuir
         // Let the world know about the simulation parameters
         m_world->setParameters (m_parameters);
 
-        // Initialize OpenCL
-        m_world->initializeOpenCL();
-        if ( m_parameters->useOpenCL )
-        {
-            turnOnOpenCL();
-        }
-        else
-        {
-            turnOffOpenCL();
-        }
-
         // Create the agents
         createAgents ();
 
@@ -90,6 +79,17 @@ namespace Langmuir
 
         // Generate grid image
         if (m_parameters->outputGrid) gridImage();
+
+        // Initialize OpenCL
+        m_world->initializeOpenCL();
+        if ( m_parameters->useOpenCL )
+        {
+            turnOnOpenCL();
+        }
+        else
+        {
+            turnOffOpenCL();
+        }
 
         // tick is the global step number of this simulation
         tick = 0;
