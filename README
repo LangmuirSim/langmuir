@@ -14,7 +14,6 @@ Qt4
 OpenCL
 Eigen
 OpenGL ( optional )
-GLEW ( optional )
 CMake
 
 To build the engine go to the source directory and run the following commands,
