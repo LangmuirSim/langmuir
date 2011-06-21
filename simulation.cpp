@@ -629,8 +629,8 @@ namespace Langmuir
         {
             double host = charges[j]->interaction();
             double device = m_world->getOutputHost(j);
-            double percent = abs( device - host ) / host * 100.00;
-            if ( percent > 1e-8 )
+            double percent = fabs( ( device - host ) / host  * 100.00 );
+            if ( percent > 1e-5 && !(qFuzzyCompare(host,-1.00)) )
             {
                 qDebug("site: %10d; fsite: %10d; (xi,yi,zi): ( %5d, %5d, %5d ); (xf,yf,zf): ( %5d, %5d, %5d ); device: % 10.10e host: % 10.10e percent: %25.20f",
                        charges[j]->site(),
@@ -643,7 +643,7 @@ namespace Langmuir
                        m_world->grid()->getLayer( charges[j]->site(true) ),
                        device,
                        host,
-                       ( device - host ) / host * 100.00 );
+                       percent );
             }
         }
     }

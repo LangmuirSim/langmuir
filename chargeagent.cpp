@@ -86,23 +86,25 @@ namespace Langmuir
         // get the answer from OpenCL output vector
         if (m_world->parameters()->useOpenCL)
           {
-            //if ( qFuzzyCompare( m_world->getOutputHost( clID ), -1 ) ) qFatal("error");
+            //obtain coulomb interactions from OpenCL ( defects and carrier interactions )
             pd += m_world->getOutputHost( clID );
           }
-       // or calculate it on the CPU
-       else
+        // or calculate it on the CPU
+        else
           {
+            //obtain coulomb interactions on Host
             pd += this->coulombInteraction (m_fSite);
-          }
 
-       // Add the interactions from charged defects ( on the CPU still... )
-       if (m_world->parameters()->chargedDefects)
-          {
-            pd += chargedDefects (m_fSite);
-          }
+            //add the interactions from charged defects ( on CPU )
+            if (m_world->parameters()->chargedDefects)
+            {
+             pd += chargedDefects (m_fSite);
+            }
 
-       // Add the interactions from charged traps
-       if (m_world->parameters()->chargedTraps)
+           }
+
+        // Add the interactions from charged traps ( this part hasn't been implemented in OpenCL yet )
+        if (m_world->parameters()->chargedTraps)
           {
             pd += chargedTraps(m_fSite);
           }

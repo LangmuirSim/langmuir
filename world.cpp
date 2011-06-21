@@ -116,7 +116,7 @@ namespace Langmuir {
      qDebug() << qPrintable(clErrorString (m_error));
      return; }
 
-    //obtain kernel source
+    //obtain main kernel source
     QFile file (m_parameters->kernelFile);
     if ( ! ( file.open (QIODevice::ReadOnly | QIODevice::Text) ) ) {
      qDebug() << qPrintable(QString("m_error opening kernel file: %1").arg(m_parameters->kernelFile));
@@ -129,6 +129,7 @@ namespace Langmuir {
      arg(m_parameters->gridWidth).
      arg(m_parameters->gridHeight);
     contents.insert (0, define);
+    file.close();
 
     //make the program string into the source
     cl::Program::Sources source (1, std::make_pair (contents, contents.size ()));
@@ -146,7 +147,38 @@ namespace Langmuir {
      return; }
 
     //construct the kernel
-    m_error = m_programs[0].createKernels (&m_kernels);
+    m_kernels.push_back( cl::Kernel(m_programs[0],"popcorn",&m_error) );
+    if ( m_error != CL_SUCCESS ) {
+     qDebug() << qPrintable(clErrorString(m_error));
+     return; }
+
+    //obtain defect kernel source
+    QFile file2 ("defects.cl");
+    if ( ! ( file2.open (QIODevice::ReadOnly | QIODevice::Text) ) ) {
+     qDebug() << qPrintable(QString("m_error opening kernel file: %1").arg("defects.cl"));
+     return; }
+    contents.clear();
+    contents = file2.readAll ();
+    contents.insert (0, define);
+    file2.close();
+
+    //make the program string into the source
+    source = cl::Program::Sources(1, std::make_pair (contents, contents.size ()));
+
+    //make the source into a program associated with the context
+    m_programs.push_back (cl::Program (m_contexts[0], source, &m_error));
+    if ( m_error != CL_SUCCESS ) {
+     qDebug() << qPrintable(clErrorString(m_error));
+     return; }
+
+    //compile the program
+    m_error = m_programs[1].build (m_devices, NULL, NULL, NULL);
+    if ( m_error != CL_SUCCESS ) {
+     qDebug() << qPrintable(clErrorString(m_error));
+     return; }
+
+    //construct the kernel
+    m_kernels.push_back( cl::Kernel(m_programs[1],"defects",&m_error) );
     if ( m_error != CL_SUCCESS ) {
      qDebug() << qPrintable(clErrorString(m_error));
      return; }
@@ -207,6 +239,96 @@ namespace Langmuir {
      qDebug() << qPrintable (clErrorString (m_error));
      return; }
 
+    //upload initial data
+    m_error = m_queues[0].enqueueWriteBuffer (m_fDevice, CL_TRUE, 0, m_charges.size() * sizeof (int), &m_fHost[0], NULL, NULL);
+    if ( m_error != CL_SUCCESS ) {
+     qDebug() << qPrintable (clErrorString (m_error));
+     return; }
+
+    m_error = m_queues[0].enqueueWriteBuffer (m_iDevice, CL_TRUE, 0, m_charges.size() * sizeof (int), &m_iHost[0], NULL, NULL);
+    if ( m_error != CL_SUCCESS ) {
+     qDebug() << qPrintable (clErrorString (m_error));
+     return; }
+
+    m_error = m_queues[0].enqueueWriteBuffer (m_oDevice, CL_TRUE, 0, m_charges.size() * sizeof (float), &m_oHost[0], NULL, NULL);
+    if ( m_error != CL_SUCCESS ) {
+     qDebug() << qPrintable (clErrorString (m_error));
+     return; }
+
+    //prepare for charged defects
+    if ( m_parameters->defectPercentage > 0 && m_defectSiteIDs.size() > 0 )
+    {
+        //initialize device memory
+        m_dDevice = cl::Buffer(m_contexts[0], CL_MEM_READ_ONLY, m_defectSiteIDs.size() * sizeof (int), NULL, &m_error);
+        if ( m_error != CL_SUCCESS ) {
+         qDebug() << qPrintable (clErrorString (m_error));
+         return; }
+
+        //create continuous memory on host with defect site ids
+        QVector<int> dHost = QVector<int>( m_defectSiteIDs.size() );
+        for ( int i = 0; i < m_defectSiteIDs.size(); i++ )
+        {
+            dHost[i] = m_defectSiteIDs[i];
+        }
+
+        //upload defect site ids
+        m_error = m_queues[0].enqueueWriteBuffer (m_dDevice, CL_TRUE, 0, m_defectSiteIDs.size() * sizeof (int), &dHost[0], NULL, NULL);
+        if ( m_error != CL_SUCCESS ) {
+         qDebug() << qPrintable (clErrorString (m_error));
+         return; }
+    }
+
+    //preset kernel arguments that dont change
+    m_error = m_kernels[0].setArg (0, m_iDevice);
+    if ( m_error != CL_SUCCESS ) {
+     qDebug() << qPrintable (clErrorString (m_error));
+     return; }
+
+    m_error = m_kernels[0].setArg (1, m_fDevice);
+    if ( m_error != CL_SUCCESS ) {
+     qDebug() << qPrintable (clErrorString (m_error));
+     return; }
+
+    m_error = m_kernels[0].setArg (2, m_oDevice);
+    if ( m_error != CL_SUCCESS ) {
+     qDebug() << qPrintable (clErrorString (m_error));
+     return; }
+
+    m_error = m_kernels[1].setArg (0, m_iDevice);
+    if ( m_error != CL_SUCCESS ) {
+     qDebug() << qPrintable (clErrorString (m_error));
+     return; }
+
+    m_error = m_kernels[1].setArg (1, m_fDevice);
+    if ( m_error != CL_SUCCESS ) {
+     qDebug() << qPrintable (clErrorString (m_error));
+     return; }
+    m_error = m_kernels[1].setArg (2, m_dDevice);
+    if ( m_error != CL_SUCCESS ) {
+     qDebug() << qPrintable (clErrorString (m_error));
+     return; }
+
+    m_error = m_kernels[1].setArg (3, m_oDevice);
+    if ( m_error != CL_SUCCESS ) {
+     qDebug() << qPrintable (clErrorString (m_error));
+     return; }
+
+    m_error = m_kernels[1].setArg (4, m_defectSiteIDs.size() );
+    if ( m_error != CL_SUCCESS ) {
+     qDebug() << qPrintable (clErrorString (m_error));
+     return; }
+
+    m_error = m_kernels[1].setArg (5, m_parameters->zDefect );
+    if ( m_error != CL_SUCCESS ) {
+     qDebug() << qPrintable (clErrorString (m_error));
+     return; }
+
+    //force queues to finish
+    m_error = m_queues[0].finish();
+    if ( m_error != CL_SUCCESS ) {
+     qDebug() << qPrintable (clErrorString (m_error));
+     return; }
+
     //should be ok to use OpenCL
     m_parameters->okCL = true;
   }
@@ -218,20 +340,18 @@ namespace Langmuir {
 
   void World::launchKernel( )
   {
-    m_error = m_kernels[0].setArg (0, m_iDevice);
-    Q_ASSERT_X (m_error == CL_SUCCESS, "cl::Kernel::setArg", qPrintable (clErrorString (m_error)));
-
-    m_error = m_kernels[0].setArg (1, m_fDevice);
-    Q_ASSERT_X (m_error == CL_SUCCESS, "cl::Kernel::setArg", qPrintable (clErrorString (m_error)));
-
-    m_error = m_kernels[0].setArg (2, m_oDevice);
-    Q_ASSERT_X (m_error == CL_SUCCESS, "cl::Kernel::setArg", qPrintable (clErrorString (m_error)));
-
     m_error = m_kernels[0].setArg (3, m_charges.size() );
     Q_ASSERT_X (m_error == CL_SUCCESS, "cl::Kernel::setArg", qPrintable (clErrorString (m_error)));
 
     m_error = m_queues[0].enqueueNDRangeKernel (m_kernels[0], cl::NDRange (0), cl::NDRange (m_parameters->globalSize), cl::NDRange (m_parameters->workSize), NULL, NULL);
     Q_ASSERT_X (m_error == CL_SUCCESS, "cl::CommandQueue::enqueueNDRangeKernel", qPrintable (clErrorString (m_error)));
+
+    if ( m_parameters->chargedDefects )
+    {
+      m_error = m_queues[0].enqueueNDRangeKernel (m_kernels[1], cl::NDRange (0), cl::NDRange (m_parameters->globalSize), cl::NDRange (m_parameters->workSize), NULL, NULL);
+      Q_ASSERT_X (m_error == CL_SUCCESS, "cl::CommandQueue::enqueueNDRangeKernel", qPrintable (clErrorString (m_error)));
+    }
+
   }
 
   void World::copyDeviceToHost( )

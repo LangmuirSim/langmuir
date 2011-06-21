@@ -315,7 +315,8 @@ namespace Langmuir
     std::vector<int>              m_fHost;       // Host site ids (final)
     std::vector<double>           m_oHost;       // Host output vector
     cl::Buffer                    m_iDevice;     // Device site ids (initial)
-    cl::Buffer                    m_fDevice;     // Device site ids (initial)
+    cl::Buffer                    m_fDevice;     // Device site ids (final)
+    cl::Buffer                    m_dDevice;     // Device site ids (for defects)
     cl::Buffer                    m_oDevice;     // Device output vector
  };
 
