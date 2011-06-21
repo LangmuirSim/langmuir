@@ -117,9 +117,10 @@ namespace Langmuir {
      return; }
 
     //obtain main kernel source
-    QFile file (m_parameters->kernelFile);
+    QDir dir(m_parameters->kernelsPath);
+    QFile file (dir.absoluteFilePath("kernel.cl"));
     if ( ! ( file.open (QIODevice::ReadOnly | QIODevice::Text) ) ) {
-     qDebug() << qPrintable(QString("m_error opening kernel file: %1").arg(m_parameters->kernelFile));
+     qDebug() << qPrintable(QString("m_error opening kernel file: %1").arg(dir.absoluteFilePath("kernel.cl")));
      return; }
     QByteArray contents = file.readAll ();
     QString define = QString("#define PREFACTOR %1\n#define CUTOFF2 %2\n#define ASIZE %3\n#define XSIZE %4\n#define YSIZE %5\n#define NCHARGES 10\n").
@@ -153,9 +154,9 @@ namespace Langmuir {
      return; }
 
     //obtain defect kernel source
-    QFile file2 ("defects.cl");
+    QFile file2 (dir.absoluteFilePath("defects.cl"));
     if ( ! ( file2.open (QIODevice::ReadOnly | QIODevice::Text) ) ) {
-     qDebug() << qPrintable(QString("m_error opening kernel file: %1").arg("defects.cl"));
+     qDebug() << qPrintable(QString("m_error opening kernel file: %1").arg(dir.absoluteFilePath("defects.cl")));
      return; }
     contents.clear();
     contents = file2.readAll ();

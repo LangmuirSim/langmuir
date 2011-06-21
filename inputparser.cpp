@@ -773,9 +773,9 @@ namespace Langmuir
               break;
             }
 
-          case e_kernelFile:
+          case e_kernelsPath:
             {
-              m_parameters.kernelFile = list.at (1).trimmed ();
+              m_parameters.kernelsPath = list.at (1).trimmed ();
               readCount += 1;
               break;
             }
@@ -823,7 +823,7 @@ namespace Langmuir
     s_variables["iterations.print"] = e_iterationsPrint;
     s_variables["iterations.real"] = e_iterationsReal;
     s_variables["iterations.warmup"] = e_iterationsWarmup;
-    s_variables["kernel.file"] = e_kernelFile;
+    s_variables["kernels.path"] = e_kernelsPath;
     s_variables["use.opencl"] = e_useOpenCL;
     s_variables["output.grid"] = e_outputGrid;
     s_variables["output.precision"] = e_outputPrecision;
@@ -882,7 +882,7 @@ namespace Langmuir
       pairs << QString("%1=%2").arg(s_variables.key( e_iterationsPrint )).arg(variables->iterationsPrint);
       pairs << QString("%1=%2").arg(s_variables.key( e_iterationsReal )).arg(variables->iterationsReal);
       pairs << QString("%1=%2").arg(s_variables.key( e_iterationsWarmup )).arg(variables->iterationsWarmup);
-      pairs << QString("%1=%2").arg(s_variables.key( e_kernelFile )).arg(variables->kernelFile);
+      pairs << QString("%1=%2").arg(s_variables.key( e_kernelsPath )).arg(variables->kernelsPath);
       pairs << QString("%1=%2").arg(s_variables.key( e_useOpenCL )).arg(variables->useOpenCL);
       pairs << QString("%1=%2").arg(s_variables.key( e_outputGrid )).arg(variables->outputGrid);
       pairs << QString("%1=%2").arg(s_variables.key( e_outputPrecision )).arg(variables->outputPrecision);

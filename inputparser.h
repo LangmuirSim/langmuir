@@ -65,7 +65,7 @@ namespace Langmuir
     int hoppingRange;
     int workSize;
     int randomSeed;
-    QString kernelFile;
+    QString kernelsPath;
     std::vector < PotentialPoint > potentialPoints;
 
     SimulationParameters ()
@@ -116,7 +116,7 @@ namespace Langmuir
       workSize = 32;
       globalSize = 0;
       randomSeed = -1;
-      kernelFile = "kernel.cl";
+      kernelsPath = ".";
       electrostaticPrefactor =
         elementaryCharge / (4.0 * M_PI * dielectricConstant *
                             permittivitySpace * gridFactor);
@@ -197,7 +197,7 @@ namespace Langmuir
       e_hoppingRange,           // number of neighbors to hop between
       e_workSize,              // local size of OpenCL work groups
       e_randomSeed,            // seed for random number generator
-      e_kernelFile,            // source file containing OpenCL kernel
+      e_kernelsPath,            // source file containing OpenCL kernel
       e_potentialPoint,        // A point of defined potential (x,y,z,V)
       e_slopeZ,               // convenience: makes two potential points at (0,0,1,slope.z) and (0,0,2,2*slope.z) - ( simulates gate potential )
       e_okCL,                // can openCL be used on this platform?
