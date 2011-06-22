@@ -331,11 +331,6 @@ namespace Langmuir
           case e_zDefect:
             {
               m_parameters.zDefect = list.at (1).toInt ();
-              if (m_parameters.zDefect < -1 || m_parameters.zDefect > 1)
-                {
-                  qDebug () << "Charge on defect must be +/- 1e";
-                  qFatal ("bad input");
-                }
               readCount += 1;
               break;
             }
@@ -343,11 +338,6 @@ namespace Langmuir
           case e_zTrap:
             {
               m_parameters.zTrap = list.at (1).toInt ();
-              if (m_parameters.zTrap < -1 || m_parameters.zTrap > 1)
-                {
-                  qDebug () << "Charge on trap must be +/- 1e";
-                  qFatal ("bad input");
-                }
               readCount += 1;
               break;
             }
