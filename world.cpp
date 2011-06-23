@@ -241,17 +241,17 @@ namespace Langmuir {
      return; }
 
     //upload initial data
-    m_error = m_queues[0].enqueueWriteBuffer (m_fDevice, CL_TRUE, 0, m_charges.size() * sizeof (int), &m_fHost[0], NULL, NULL);
+    m_error = m_queues[0].enqueueWriteBuffer (m_fDevice, CL_TRUE, 0, m_fHost.size() * sizeof (int), &m_fHost[0], NULL, NULL);
     if ( m_error != CL_SUCCESS ) {
      qDebug() << qPrintable (clErrorString (m_error));
      return; }
 
-    m_error = m_queues[0].enqueueWriteBuffer (m_iDevice, CL_TRUE, 0, m_charges.size() * sizeof (int), &m_iHost[0], NULL, NULL);
+    m_error = m_queues[0].enqueueWriteBuffer (m_iDevice, CL_TRUE, 0, m_iHost.size() * sizeof (int), &m_iHost[0], NULL, NULL);
     if ( m_error != CL_SUCCESS ) {
      qDebug() << qPrintable (clErrorString (m_error));
      return; }
 
-    m_error = m_queues[0].enqueueWriteBuffer (m_oDevice, CL_TRUE, 0, m_charges.size() * sizeof (float), &m_oHost[0], NULL, NULL);
+    m_error = m_queues[0].enqueueWriteBuffer (m_oDevice, CL_TRUE, 0, m_oHost.size() * sizeof (float), &m_oHost[0], NULL, NULL);
     if ( m_error != CL_SUCCESS ) {
      qDebug() << qPrintable (clErrorString (m_error));
      return; }
