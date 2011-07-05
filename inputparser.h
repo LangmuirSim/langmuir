@@ -24,6 +24,7 @@ namespace Langmuir
     bool chargedTraps;
     bool trapsHeterogeneous;
     bool outputGrid;
+    bool outputStats;
     bool useOpenCL;
     bool okCL;
     double chargePercentage;
@@ -78,6 +79,7 @@ namespace Langmuir
       chargedTraps = false;
       trapsHeterogeneous = false;
       outputGrid = false;
+      outputStats = false;
       useOpenCL = false;
       chargePercentage = 0.01;
       defectPercentage = 0.00;
@@ -166,6 +168,7 @@ namespace Langmuir
       e_chargedTraps,                // are the traps charged?
       e_trapsHeterogeneous,        // distrubute traps heterogeneously?
       e_outputGrid,                // generate a pdf image of the grid?
+      e_outputStats,                // output lifetime and pathlength to file?
       e_chargePercentage,        // percentage of charges in the grid - sets as target
       e_useOpenCL,                  // should OpenCL be used
       e_defectPercentage,        // percentage of defects in the grid

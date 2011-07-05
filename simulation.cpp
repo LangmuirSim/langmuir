@@ -190,21 +190,45 @@ namespace Langmuir
   void Simulation::nextTick ()
   {
     // Iterate over all sites to change their state
-    QList < ChargeAgent * >&charges = *m_world->charges ();
-    for (int i = 0; i < charges.size (); ++i)
+    QList < ChargeAgent * >&charges = *m_world->charges();
+    if( m_parameters->outputStats )
+    {
+      for (int i = 0; i < charges.size (); ++i)
       {
         charges[i]->completeTick ();
         // Check if the charge was removed - then we should delete it
         if (charges[i]->removed ())
-          {
-            //std::cout << tick << " " << charges[i]->lifetime() << " " << charges[i]->distanceTraveled() << "\n";
-            delete charges[i];
-            charges.removeAt (i);
-            m_drain->acceptCharge (-1);
-            m_source->decrementCharge ();
-            --i;
-          }
+        {
+          m_world->statMessage( QString( "%1 %2 %3\n" )
+                                   .arg(tick,m_parameters->outputWidth)
+                                   .arg(charges[i]->lifetime(),m_parameters->outputWidth)
+                                   .arg(charges[i]->distanceTraveled(),m_parameters->outputWidth) );
+          delete charges[i];
+          charges.removeAt (i);
+          m_drain->acceptCharge (-1);
+          m_source->decrementCharge ();
+          --i;
+        }
       }
+
+      m_world->statFlush();
+    }
+    else
+    {
+      for (int i = 0; i < charges.size (); ++i)
+      {
+        charges[i]->completeTick ();
+        // Check if the charge was removed - then we should delete it
+        if (charges[i]->removed ())
+        {
+          delete charges[i];
+          charges.removeAt (i);
+          m_drain->acceptCharge (-1);
+          m_source->decrementCharge ();
+          --i;
+        }
+      }
+    }
   }
 
     void Simulation::printGrid ()

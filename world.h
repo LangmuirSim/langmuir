@@ -190,9 +190,9 @@ namespace Langmuir
     /**
       * @brief member access.
       *
-      * Set the address of the parameters object.
+      * Set the address of the parameters object.  Initialize stat file if necessary.
       */
-    void setParameters(SimulationParameters *parameters) { m_parameters = parameters; }
+    void setParameters(SimulationParameters *parameters);
 
     /**
       * @brief random number generation.
@@ -293,6 +293,16 @@ namespace Langmuir
       */
     const bool canUseOpenCL() const;
 
+    /**
+      * @brief write message to stat file
+      */
+    void statMessage( QString message );
+
+    /**
+      * @brief flush the stat file
+      */
+    void statFlush( );
+
    private:
 
     Grid                 *m_grid;                // The grid in use in the world
@@ -303,6 +313,8 @@ namespace Langmuir
     QList<unsigned int>   m_trapSiteIDs;         // Site ids of traps in the system
     Eigen::MatrixXd       m_coupling;            // Enumerates coupling constants between different sites
     TripleIndexArray      m_interactionEnergies; // Interaction energies
+    QFile                *m_statFile;             // Place to write lifetime and pathlength information
+    QTextStream          *m_statStream;           // Text stream for stat file
 
     cl_int                        m_error;       // OpenCL error code
     std::vector<cl::Platform>     m_platforms;   // OpenCL platforms

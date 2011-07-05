@@ -5,7 +5,7 @@
 
 namespace Langmuir {
 
-  World::World( int seed ) : m_grid(0), m_rand(new Rand(0.0, 1.0, seed)), m_parameters(NULL)
+  World::World( int seed ) : m_grid(0), m_rand(new Rand(0.0, 1.0, seed)), m_parameters(NULL), m_statFile(NULL), m_statStream(NULL)
   {
     // This array is always the number of different sites + 2. The final two
     // rows/columns are for the source and drain site types.
@@ -19,6 +19,15 @@ namespace Langmuir {
   World::~World()
   {
    delete m_rand;
+   if ( m_statStream )
+   {
+     (*m_statStream).flush();
+     delete m_statStream;
+   }
+   if ( m_statFile )
+   {
+     delete m_statFile;
+   }
   }
 
   double World::random()
@@ -374,6 +383,31 @@ namespace Langmuir {
   {
     m_error = m_queues[0].finish();
     Q_ASSERT_X (m_error == CL_SUCCESS, "cl::CommandQueue::finish", qPrintable (clErrorString (m_error)));
+  }
+
+  void World::setParameters(SimulationParameters *parameters)
+  {
+      m_parameters = parameters;
+
+      if (m_parameters->outputStats)
+        {
+          m_statFile = new QFile ("stats");
+          if (!(m_statFile->open (QIODevice::WriteOnly | QIODevice::Text)))
+            {
+              qDebug () << "Error opening stat file:";
+            }
+          m_statStream = new QTextStream (m_statFile);
+        }
+  }
+
+  void World::statMessage( QString message )
+  {
+      (*m_statStream) << qPrintable( message );
+  }
+
+  void World::statFlush( )
+  {
+      (*m_statStream).flush();
   }
 
 }

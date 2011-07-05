@@ -777,6 +777,26 @@ namespace Langmuir
               break;
             }
 
+          case e_outputStats:
+          {
+              QString interaction = list.at (1).trimmed ().toLower ();
+              if (interaction == "true")
+              {
+                  m_parameters.outputStats = true;
+              }
+              else if (interaction == "false")
+              {
+                  m_parameters.outputStats = false;
+              }
+              else
+              {
+                  qDebug () << "output.stats is either true or false: ";
+                  qFatal ("bad input");
+              }
+              readCount += 1;
+              break;
+          }
+
           default:
             qDebug () << "Unknown key value encountered:" << qPrintable( line.trimmed() );
             break;
@@ -817,6 +837,7 @@ namespace Langmuir
     s_variables["use.opencl"] = e_useOpenCL;
     s_variables["output.grid"] = e_outputGrid;
     s_variables["output.precision"] = e_outputPrecision;
+    s_variables["output.stats"] = e_outputStats;
     s_variables["output.width"] = e_outputWidth;
     s_variables["output.xyz"] = e_outputXyz;
     s_variables["permittivity.space"] = e_permittivitySpace;
@@ -876,6 +897,7 @@ namespace Langmuir
       pairs << QString("%1=%2").arg(s_variables.key( e_useOpenCL )).arg(variables->useOpenCL);
       pairs << QString("%1=%2").arg(s_variables.key( e_outputGrid )).arg(variables->outputGrid);
       pairs << QString("%1=%2").arg(s_variables.key( e_outputPrecision )).arg(variables->outputPrecision);
+      pairs << QString("%1=%2").arg(s_variables.key( e_outputStats )).arg(variables->outputStats);
       pairs << QString("%1=%2").arg(s_variables.key( e_outputWidth )).arg(variables->outputWidth);
       pairs << QString("%1=%2").arg(s_variables.key( e_outputXyz )).arg(variables->outputXyz);
       pairs << QString("%1=%2").arg(s_variables.key( e_permittivitySpace )).arg(variables->permittivitySpace);
