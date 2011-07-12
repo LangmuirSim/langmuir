@@ -34,6 +34,7 @@ namespace Langmuir
     double gaussianStdev;
     double seedPercentage;
     double sourceBarrier;
+    double drainBarrier;
     double temperatureKelvin;
     double trapPercentage;
     double variableFinal;
@@ -90,6 +91,7 @@ namespace Langmuir
       gaussianStdev = 0.0;
       seedPercentage = 0.0;
       sourceBarrier = 0.10;
+      drainBarrier = 0.10;
       temperatureKelvin = 300.00;
       trapPercentage = 0.0;
       variableFinal = 0;
@@ -180,7 +182,8 @@ namespace Langmuir
       e_gaussianAverg,                // average of the random noise
       e_gaussianStdev,                // standard deviation of the random noise
       e_seedPercentage,                // percentage of trap seeds for heterogeneous traps
-      e_sourceBarrier,                // probability to reject charge injection when sourceType = constant
+      e_sourceBarrier,                // probability to reject transport from source when sourceType = constant
+      e_drainBarrier,                // probability to reject transport to drain when drainType = constant
       e_sourceAttempts,            // injection attempts by the source, if <= 0 then the source attempts current charges - max charges injections
       e_temperatureKelvin,        // the absolute temperature
       e_trapPercentage,                // percentage of traps in the grid

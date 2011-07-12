@@ -662,7 +662,7 @@ namespace Langmuir
                   || m_parameters.sourceBarrier > 1.00)
                 {
                   qDebug () << "Source injection probability out of range:" <<
-                    m_parameters.defectPercentage << " (0.00 -- 100.00)";
+                    m_parameters.sourceBarrier << " (0.00 -- 100.00)";
                   qFatal ("bad input");
                 }
               readCount += 1;
@@ -840,6 +840,20 @@ namespace Langmuir
               break;
             }
 
+          case e_drainBarrier:
+            {
+              m_parameters.drainBarrier = list.at (1).toDouble () / 100.0;
+              if (m_parameters.drainBarrier <= 0.00
+                  || m_parameters.drainBarrier > 1.00)
+                {
+                  qDebug () << "Drain rejection probability out of range:" <<
+                    m_parameters.drainBarrier << " (0.00 -- 100.00)";
+                  qFatal ("bad input");
+                }
+              readCount += 1;
+              break;
+            }
+
           default:
             qDebug () << "Unknown key value encountered:" << qPrintable( line.trimmed() );
             break;
@@ -858,6 +872,7 @@ namespace Langmuir
     s_variables["defect.percentage"] = e_defectPercentage;
     s_variables["delta.epsilon"] = e_deltaEpsilon;
     s_variables["dielectric.constant"] = e_dielectricConstant;
+    s_variables["drain.barrier"] = e_drainBarrier;
     s_variables["drain.type"] = e_drainType;
     s_variables["electrostatic.cutoff"] = e_electrostaticCutoff;
     s_variables["electrostatic.prefactor"] = e_electrostaticPrefactor;
@@ -920,6 +935,7 @@ namespace Langmuir
       pairs << QString("%1=%2").arg(s_variables.key( e_defectPercentage )).arg(variables->defectPercentage);
       pairs << QString("%1=%2").arg(s_variables.key( e_deltaEpsilon )).arg(variables->deltaEpsilon);
       pairs << QString("%1=%2").arg(s_variables.key( e_dielectricConstant )).arg(variables->dielectricConstant);
+      pairs << QString("%1=%2").arg(s_variables.key( e_drainBarrier )).arg(variables->drainBarrier);
       pairs << QString("%1=%2").arg(s_variables.key( e_drainType )).arg(variables->drainType);
       pairs << QString("%1=%2").arg(s_variables.key( e_electrostaticCutoff )).arg(variables->electrostaticCutoff);
       pairs << QString("%1=%2").arg(s_variables.key( e_electrostaticPrefactor )).arg(variables->electrostaticPrefactor);
