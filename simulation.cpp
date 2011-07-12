@@ -183,12 +183,22 @@ namespace Langmuir
 
   void Simulation::performInjections (int nInjections)
   {
-      unsigned int site = m_source->transport ();
-      if (site != errorValue)
-        {
-          ChargeAgent *charge = new ChargeAgent (m_world, site );
-          m_world->charges ()->push_back (charge);
-        }
+      if ( nInjections <= 0 )
+      {
+          return;
+      }
+      else
+      {
+          for ( int i = 0; i < nInjections; i++ )
+          {
+            unsigned int site = m_source->transport();
+            if (site != errorValue)
+              {
+                ChargeAgent *charge = new ChargeAgent (m_world, site );
+                m_world->charges ()->push_back (charge);
+              }
+          }
+      }
   }
 
   void Simulation::nextTick ()
