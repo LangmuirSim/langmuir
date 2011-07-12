@@ -59,6 +59,7 @@ namespace Langmuir
     int outputWidth;
     int potentialForm;
     int sourceType;
+    int drainType;
     int variableSteps;
     int variableWorking;
     int zDefect;
@@ -111,6 +112,7 @@ namespace Langmuir
       outputWidth = 20;
       potentialForm = 0;
       sourceType = 0;
+      drainType = 0;
       variableSteps = 1;
       variableWorking = -1;
       zDefect = 0;
@@ -195,7 +197,8 @@ namespace Langmuir
       e_outputPrecision,        // decimal places to show in output
       e_outputWidth,                // number of char per output field
       e_potentialForm,                // how to calculate site energies ( linear )
-      e_sourceType,                // how to determine the probability to inject charges from the source ( constant, coulomb )
+      e_sourceType,                // how to determine the probability to inject charges from the source ( constant, coulomb, image )
+      e_drainType,                // how to determine the probability to accept charges at the drain ( constant, broke )
       e_variableSteps,                // the number of steps to take from start to final
       e_variableWorking,        // the working variable that is being changed
       e_zDefect,                // charge on the defects (units e)

@@ -819,6 +819,27 @@ namespace Langmuir
               break;
           }
 
+          case e_drainType:
+            {
+              QString type = list.at (1).trimmed ().toLower ();
+              if (type == "constant")
+                {
+                  m_parameters.drainType = 0;
+                }
+              else if (type == "broke")
+                {
+                  m_parameters.drainType = 1;
+                }
+              else
+                {
+                  qDebug () <<
+                    "options for drain barrier calculation type are constant and broke";
+                  qFatal ("bad input");
+                }
+              readCount += 1;
+              break;
+            }
+
           default:
             qDebug () << "Unknown key value encountered:" << qPrintable( line.trimmed() );
             break;
@@ -837,6 +858,7 @@ namespace Langmuir
     s_variables["defect.percentage"] = e_defectPercentage;
     s_variables["delta.epsilon"] = e_deltaEpsilon;
     s_variables["dielectric.constant"] = e_dielectricConstant;
+    s_variables["drain.type"] = e_drainType;
     s_variables["electrostatic.cutoff"] = e_electrostaticCutoff;
     s_variables["electrostatic.prefactor"] = e_electrostaticPrefactor;
     s_variables["elementary.charge"] = e_elementaryCharge;
@@ -898,6 +920,7 @@ namespace Langmuir
       pairs << QString("%1=%2").arg(s_variables.key( e_defectPercentage )).arg(variables->defectPercentage);
       pairs << QString("%1=%2").arg(s_variables.key( e_deltaEpsilon )).arg(variables->deltaEpsilon);
       pairs << QString("%1=%2").arg(s_variables.key( e_dielectricConstant )).arg(variables->dielectricConstant);
+      pairs << QString("%1=%2").arg(s_variables.key( e_drainType )).arg(variables->drainType);
       pairs << QString("%1=%2").arg(s_variables.key( e_electrostaticCutoff )).arg(variables->electrostaticCutoff);
       pairs << QString("%1=%2").arg(s_variables.key( e_electrostaticPrefactor )).arg(variables->electrostaticPrefactor);
       pairs << QString("%1=%2").arg(s_variables.key( e_elementaryCharge )).arg(variables->elementaryCharge);
