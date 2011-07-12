@@ -82,8 +82,8 @@ namespace Langmuir
 
             case 1: // Broken case
             {
-                qFatal("unknown drain acceptance probability calculation type encountered");
-                return -1;
+                // The broken case allowed the potential of the drain to be used to calculate acceptance
+                // ...coulomb interactions between the carrier and the drain were also calculated (undefined)
                 break;
             }
 
