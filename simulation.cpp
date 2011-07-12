@@ -173,18 +173,22 @@ namespace Langmuir
         // Now we are done with the charge movement, move them to the next tick!
         nextTick ();
 
-        //std::cout.flush();
-        // Begin by performing charge injection at the source
-        unsigned int site = m_source->transport ();
-        if (site != errorValue)
-          {
-            ChargeAgent *charge = new ChargeAgent (m_world, site );
-            m_world->charges ()->push_back (charge);
-          }
+        // Perform charge injection at the source
+        performInjections (m_parameters->sourceAttempts);
 
         tick += 1;
 
       }
+  }
+
+  void Simulation::performInjections (int nInjections)
+  {
+      unsigned int site = m_source->transport ();
+      if (site != errorValue)
+        {
+          ChargeAgent *charge = new ChargeAgent (m_world, site );
+          m_world->charges ()->push_back (charge);
+        }
   }
 
   void Simulation::nextTick ()

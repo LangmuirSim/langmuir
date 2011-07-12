@@ -113,7 +113,20 @@ namespace Langmuir
      */
     bool turnOnOpenCL();
     bool turnOffOpenCL();
+
+    /**
+     * @brief the total steps performed
+     *
+     */
     int getTick();
+
+    /**
+     * @brief Perform injection.
+     *
+     * Allow source to perform this many injections.
+     * @param nInjections number of injections to perform.
+     */
+    void performInjections (int nInjections=1);
 
   private:
 
