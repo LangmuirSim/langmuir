@@ -58,21 +58,42 @@ namespace Langmuir
     // Check the proposed site, return unsucessful if it is the SOURCE, a DEFECT, or another CARRIER
     if ( grid->agent(m_fSite) && grid->siteID (m_fSite) != 3 ) { m_fSite = m_site; return -1; }
 
-    // If the site is the DRAIN, accept with a constant probability
+    // If the site is the DRAIN, perform drain acceptance probability calculations ( drain.type, drain.barrier )
     if ( grid->siteID(m_fSite) == 3 )
     {
-     // Do not accept 100*sourceBarrier percent of the time
-     if(m_world->random() <= m_world->parameters()->sourceBarrier)
-     {
-      m_fSite = m_site;
-      return -1;
-     }
-     // accept the charge carrier
-     else
-     {
-      m_distanceTraveled += 1.0;
-      return m_fSite;
-     }
+        switch ( m_world->parameters()->drainType )
+        {
+            case 0: // Constant case
+            {
+                // Do not accept 100*sourceBarrier percent of the time
+                if(m_world->random() <= m_world->parameters()->drainBarrier)
+                {
+                 m_fSite = m_site;
+                 return -1;
+                }
+                // accept the charge carrier
+                else
+                {
+                 m_distanceTraveled += 1.0;
+                 return m_fSite;
+                }
+                break;
+            }
+
+            case 1: // Broken case
+            {
+                qFatal("unknown drain acceptance probability calculation type encountered");
+                return -1;
+                break;
+            }
+
+            default:
+            {
+                qFatal("unknown drain acceptance probability calculation type encountered");
+                return -1;
+                break;
+            }
+        }
     }
 
     // Now to add on the background potential - from the applied field
