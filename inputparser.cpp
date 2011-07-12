@@ -797,6 +797,28 @@ namespace Langmuir
               break;
           }
 
+          case e_sourceAttempts:
+          {
+              QString type = list.at (1).trimmed ().toLower ();
+              if (type == "max")
+              {
+                  m_parameters.sourceAttempts = 0;
+              }
+              else
+              {
+                 bool ok = true;
+                 m_parameters.sourceAttempts = type.toInt(&ok);
+
+                 if ( !ok )
+                 {
+                     qDebug () << "error reading source.attempts";
+                     qFatal ("bad input");
+                 }
+              }
+              readCount += 1;
+              break;
+          }
+
           default:
             qDebug () << "Unknown key value encountered:" << qPrintable( line.trimmed() );
             break;
@@ -846,6 +868,7 @@ namespace Langmuir
     s_variables["random.seed"] = e_randomSeed;
     s_variables["seed.percentage"] = e_seedPercentage;
     s_variables["slope.z"] = e_slopeZ;
+    s_variables["source.attempts"] = e_sourceAttempts;
     s_variables["source.barrier"] = e_sourceBarrier;
     s_variables["source.type"] = e_sourceType;
     s_variables["temperature.kelvin"] = e_temperatureKelvin;
@@ -909,6 +932,7 @@ namespace Langmuir
       }
       pairs << QString("%1=%2").arg(s_variables.key( e_randomSeed )).arg(variables->randomSeed);
       pairs << QString("%1=%2").arg(s_variables.key( e_seedPercentage )).arg(variables->seedPercentage);
+      pairs << QString("%1=%2").arg(s_variables.key( e_sourceAttempts )).arg(variables->sourceAttempts);
       pairs << QString("%1=%2").arg(s_variables.key( e_sourceBarrier )).arg(variables->sourceBarrier);
       pairs << QString("%1=%2").arg(s_variables.key( e_sourceType )).arg(variables->sourceType);
       pairs << QString("%1=%2").arg(s_variables.key( e_temperatureKelvin )).arg(variables->temperatureKelvin);

@@ -66,6 +66,7 @@ namespace Langmuir
     int hoppingRange;
     int workSize;
     int randomSeed;
+    int sourceAttempts;
     QString kernelsPath;
     std::vector < PotentialPoint > potentialPoints;
 
@@ -119,6 +120,7 @@ namespace Langmuir
       globalSize = 0;
       randomSeed = -1;
       kernelsPath = ".";
+      sourceAttempts = 1;
       electrostaticPrefactor =
         elementaryCharge / (4.0 * M_PI * dielectricConstant *
                             permittivitySpace * gridFactor);
@@ -177,6 +179,7 @@ namespace Langmuir
       e_gaussianStdev,                // standard deviation of the random noise
       e_seedPercentage,                // percentage of trap seeds for heterogeneous traps
       e_sourceBarrier,                // probability to reject charge injection when sourceType = constant
+      e_sourceAttempts,            // injection attempts by the source, if <= 0 then the source attempts current charges - max charges injections
       e_temperatureKelvin,        // the absolute temperature
       e_trapPercentage,                // percentage of traps in the grid
       e_variableFinal,                // final value of the variable range
