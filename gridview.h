@@ -119,12 +119,10 @@ namespace Langmuir
             QGridLayout *gridLayout;
             QLabel *L1;
             QLabel *L2;
-            QLabel *L3;
             QLabel *L4;
             QLabel *L5;
             QLabel *L6;
             QLineEdit *LE1;
-            SSpinBox *SB1;
             SSpinBox *SB2;
             SSpinBox *SB3;
             QComboBox *CB1;
@@ -136,7 +134,6 @@ namespace Langmuir
             void setWork( QString );
             void setStub( QString );
             void setType( QString );
-            void setRate( int );
             void setCount( int );
             void setQuality( int );
 
@@ -144,7 +141,6 @@ namespace Langmuir
             void workChanged( QString value );
             void stubChanged( QString value );
             void typeChanged( QString value );
-            void rateChanged( int value );
             void countChanged( int value );
             void qualityChanged( int value );
 
@@ -152,7 +148,6 @@ namespace Langmuir
             QDir work;
             QString stub;
             QString type;
-            int rate;
             int count;
             int quality;
     };
@@ -244,6 +239,7 @@ namespace Langmuir
             SimulationParameters *pPar;
             Simulation *pSim;
             bool pause;
+            bool recording;
             QTimer *recordTimer;
             RecordDialog *recordDialog;
             unsigned int lastCount;

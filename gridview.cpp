@@ -105,6 +105,7 @@ namespace Langmuir
         thickness = 2.0;
         fov = 60.0;
         pause = true;
+        recording = false;
         updateTime = 10;
         step = 0;
         qtimer = new QTimer(this);
@@ -316,6 +317,11 @@ namespace Langmuir
             emit stepChanged( step );
         }
         updateGL();
+
+        if ( recording )
+        {
+            timerRecordShot();
+        }
     }
 
     void GridViewGL::NormalizeAngle(double &angle)
@@ -395,12 +401,12 @@ namespace Langmuir
         if ( pause )
         {
             emit pauseChanged( QString("play") );
-            emit statusMessage( "paused" );
+            //emit statusMessage( "paused" );
         }
         else
         {
             emit pauseChanged( QString("pause") );
-            emit statusMessage( "playing" );
+            //emit statusMessage( "playing" );
         }
     }
 
@@ -1434,7 +1440,6 @@ namespace Langmuir
 
         L1 = new QLabel(this);
         L2 = new QLabel(this);
-        L3 = new QLabel(this);
         L4 = new QLabel(this);
         L5 = new QLabel(this);
         L6 = new QLabel(this);
@@ -1442,13 +1447,11 @@ namespace Langmuir
         L1->setText("work directory:");
         L2->setText("filename stub:");
         L6->setText("type:");
-        L3->setText("snapshot rate (ms):");
         L4->setText("index start:");
         L5->setText("quality (1-100):");
 
         L1->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
         L2->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
-        L3->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
         L4->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
         L5->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
         L6->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
@@ -1457,15 +1460,12 @@ namespace Langmuir
         LE1->setObjectName(QString::fromUtf8("LE1"));
         LE1->setText("frame");
 
-        SB1 = new SSpinBox(this);
         SB2 = new SSpinBox(this);
         SB3 = new SSpinBox(this);
 
-        SB1->setMinimum(1);
         SB2->setMinimum(0);
         SB3->setMinimum(-1);
 
-        SB1->setMaximum(86400000);
         SB2->setMaximum(10000000);
         SB3->setMaximum(100);
 
@@ -1497,7 +1497,6 @@ namespace Langmuir
 
         connect( PB1, SIGNAL( clicked() ), this, SLOT( openFileDialog() ) );
         connect( LE1, SIGNAL( textChanged( QString ) ), this, SLOT( setStub( QString ) ) );
-        connect( SB1, SIGNAL( valueChanged( int ) ), this, SLOT( setRate( int ) ) );
         connect( SB2, SIGNAL( valueChanged( int ) ), this, SLOT( setCount( int ) ) );
         connect( SB3, SIGNAL( valueChanged( int ) ), this, SLOT( setQuality( int ) ) );
         connect( CB1, SIGNAL( currentIndexChanged( QString ) ), this, SLOT( setType( QString ) ) );
@@ -1508,12 +1507,10 @@ namespace Langmuir
         gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
         gridLayout->addWidget( L1, 0, 0, 1, 1);
         gridLayout->addWidget( L2, 2, 0, 1, 1);
-        gridLayout->addWidget( L3, 5, 0, 1, 1);
         gridLayout->addWidget( L4, 3, 0, 1, 1);
         gridLayout->addWidget( L5, 4, 0, 1, 1);
         gridLayout->addWidget( L6, 1, 0, 1, 1);
         gridLayout->addWidget(LE1, 2, 1, 1, 1);
-        gridLayout->addWidget(SB1, 5, 1, 1, 1);
         gridLayout->addWidget(SB2, 3, 1, 1, 1);
         gridLayout->addWidget(PB1, 0, 1, 1, 1);
         gridLayout->addWidget(SB3, 4, 1, 1, 1);
@@ -1523,7 +1520,6 @@ namespace Langmuir
         setWork( QDir::currentPath() );
         setStub( "frame" );
         setCount( 0 );
-        setRate( 42 );
         setType( "png" );
         setQuality( 100 );
     }
@@ -1570,13 +1566,6 @@ namespace Langmuir
             QMessageBox::warning( this, tr( "Langmuir" ), QString( "File type %1 not supported!").arg( CB1->itemText( index ) ) );
             CB1->setCurrentIndex( CB1->findText( "png" ) );
         }
-    }
-
-    void RecordDialog::setRate( int value )
-    {
-        rate = value;
-        emit rateChanged( value );
-        SB1->setValue( rate );
     }
 
     void RecordDialog::setCount( int value )
@@ -1685,6 +1674,13 @@ namespace Langmuir
 
     void GridViewGL::timerRecordShot()
     {
+        bool resume = false;
+        if ( ! pause )
+        {
+            togglePauseStatus();
+            resume = true;
+        }
+
         QString fileName = recordDialog->work.absoluteFilePath( QString("%1%2.%3").arg( recordDialog->stub ).arg( recordDialog->count ).arg( recordDialog->type ) );
         if ( !(grabFrameBuffer()).save( fileName, qPrintable( (recordDialog->type).toUpper() ), recordDialog->quality ) )
         {
@@ -1693,9 +1689,11 @@ namespace Langmuir
         }
         else
         {
-            emit statusMessage( QString("recording! frame saved to %1").arg(fileName), 10 );
+            emit statusMessage( QString("recording! frame saved to %1").arg(fileName), 100 );
             recordDialog->count += 1;
         }
+
+        if ( resume ) togglePauseStatus();
     }
 
     void GridViewGL::toggleRecording()
@@ -1708,10 +1706,9 @@ namespace Langmuir
             resume = true;
         }
 
-        if ( recordTimer )
+        if ( recording )
         {
-            delete recordTimer;
-            recordTimer = NULL;
+            recording = false;
             emit recordChanged( "record" );
             emit recordChangedColor( QColor(255,0,0,255) );
             emit statusMessage( QString("recording stopped, files saved in: %1").arg(recordDialog->work.absolutePath()) );
@@ -1721,16 +1718,13 @@ namespace Langmuir
         recordDialog->setWork( recordDialog->work.absolutePath() );
         recordDialog->setStub( recordDialog->stub );
         recordDialog->setCount( recordDialog->count );
-        recordDialog->setRate( recordDialog->rate );
         recordDialog->setType( recordDialog->type );
         recordDialog->setQuality( recordDialog->quality );
         if ( recordDialog->exec() == QDialog::Accepted )
         {
             emit recordChanged( "stop" );
             emit recordChangedColor( QColor(0,0,255,255) );
-            recordTimer = new QTimer( this );
-            connect(recordTimer, SIGNAL(timeout()), this, SLOT(timerRecordShot()));
-            recordTimer->start( recordDialog->rate );
+            recording = true;
         }
 
         if ( resume ) togglePauseStatus();
