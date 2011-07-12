@@ -802,7 +802,7 @@ namespace Langmuir
               QString type = list.at (1).trimmed ().toLower ();
               if (type == "max")
               {
-                  m_parameters.sourceAttempts = 0;
+                  m_parameters.sourceAttempts = -1;
               }
               else
               {

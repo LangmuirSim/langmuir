@@ -183,20 +183,22 @@ namespace Langmuir
 
   void Simulation::performInjections (int nInjections)
   {
-      if ( nInjections <= 0 )
+      int inject = nInjections;
+      if ( inject < 0 )
       {
-          return;
-      }
-      else
-      {
-          for ( int i = 0; i < nInjections; i++ )
+          inject = m_maxcharges - this->charges();
+          if ( inject <= 0 )
           {
-            unsigned int site = m_source->transport();
-            if (site != errorValue)
-              {
-                ChargeAgent *charge = new ChargeAgent (m_world, site );
-                m_world->charges ()->push_back (charge);
-              }
+              return;
+          }
+      }
+      for ( int i = 0; i < inject; i++ )
+      {
+        unsigned int site = m_source->transport();
+        if (site != errorValue)
+          {
+            ChargeAgent *charge = new ChargeAgent (m_world, site );
+            m_world->charges ()->push_back (charge);
           }
       }
   }
