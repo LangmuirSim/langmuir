@@ -189,8 +189,6 @@ namespace Langmuir
         ambientLight = new ColoredObject( this );
         diffuseLight = new ColoredObject( this );
         specularLight = new ColoredObject( this );
-        whiteLight = new ColoredObject( this );
-        blackLight = new ColoredObject( this );
 
         Grid *grid = pSim->world()->grid();
         pointBuffer.resize( (int(pPar->chargePercentage * grid->volume())) * 4 );

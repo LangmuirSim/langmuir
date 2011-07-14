@@ -230,8 +230,6 @@ namespace Langmuir
             ColoredObject *ambientLight;
             ColoredObject *diffuseLight;
             ColoredObject *specularLight;
-            ColoredObject *whiteLight;
-            ColoredObject *blackLight;
             QVector<float> pointBuffer;
             PointArray *carriers;
             PointArray *defects;
