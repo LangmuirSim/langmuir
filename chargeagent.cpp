@@ -5,12 +5,8 @@
 #include <QtCore/QThread>
 #include <QtCore/QDebug>
 
-#include <cstdlib>
-
 namespace Langmuir
 {
-
-  using std::vector;
   using Eigen::Vector3d;
 
     ChargeAgent::ChargeAgent (World * world, unsigned int site):Agent (Agent::Charge, world, site), 

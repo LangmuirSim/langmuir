@@ -2,7 +2,6 @@
 #define _LINEARPOTENTIAL_H
 
 #include"potential.h"
-#include<vector>
 #include<algorithm>
 
 namespace Langmuir
@@ -35,7 +34,7 @@ namespace Langmuir
      * Checks to see that points are defined only along an axis, and not arbitrarily in space.
      * @param PotentialPoints a list of potential points of the form (x,0,0,V)... (0,y,0,V)... (0,0,z,V)...
      */
-    LinearPotential( std::vector<PotentialPoint>& PotentialPoints );
+    LinearPotential( QVector<PotentialPoint>& PotentialPoints );
   
     /**
      * @brief Destructor.
@@ -150,70 +149,63 @@ namespace Langmuir
     virtual void plot( QTextStream& stream, double xstart = -10.0, double xstop = 10.0, double ystart = -10.0, double ystop = 10.0, double zvalue = 0.0, double xdelta = 1.0, double ydelta = 1.0 );
 
   protected:
-
-    /**
-      * @brief implementation of operator<< overload
-      * @param os reference to stream object
-      * @return os reference to ostream object originally passed
-      */
-    virtual std::ostream& print(std::ostream& os);
     
     /**
       * @brief points along x with defined potential
       *
       * The point is (x,y,z,V) = (x,0,0,V)
       */
-    std::vector<PotentialPoint> xx;
+    QVector<PotentialPoint> xx;
 
     /**
       * @brief points along y with defined potential
       *
       * The point is (x,y,z,V) = (0,y,0,V)
       */
-    std::vector<PotentialPoint> yy;
+    QVector<PotentialPoint> yy;
 
     /**
       * @brief points along z with defined potential
       *
       * The point is (x,y,z,V) = (0,0,z,V)
       */
-    std::vector<PotentialPoint> zz;
+    QVector<PotentialPoint> zz;
    
     /**
       * @brief slopes along x between points of defined potential 
       * @warning with N points of potential defined, there are N-1 slopes if N >= 2.
       */
-    std::vector<double> mx;
+    QVector<double> mx;
 
     /**
       * @brief slopes along y between points of defined potential 
       * @warning with N points of potential defined, there are N-1 slopes if N >= 2.
       */
-    std::vector<double> my;
+    QVector<double> my;
 
     /**
       * @brief slopes along z between points of defined potential 
       * @warning with N points of potential defined, there are N-1 slopes if N >= 2.
       */
-    std::vector<double> mz;
+    QVector<double> mz;
  
     /**
       * @brief intercepts along x between points of defined potential 
       * @warning with N points of potential defined, there are N-1 intercepts if N >= 2.
       */
-    std::vector<double> bx;
+    QVector<double> bx;
 
     /**
       * @brief intercepts along y between points of defined potential 
       * @warning with N points of potential defined, there are N-1 intercepts if N >= 2.
       */
-    std::vector<double> by;
+    QVector<double> by;
 
     /**
       * @brief intercepts along z between points of defined potential 
       * @warning with N points of potential defined, there are N-1 intercepts if N >= 2.
       */
-    std::vector<double> bz;
+    QVector<double> bz;
 
     /**
       * @brief determine which region along x a point is located in

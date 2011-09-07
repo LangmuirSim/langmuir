@@ -4,6 +4,7 @@
 #ifndef WORLD_H
 #define WORLD_H
 #define __CL_ENABLE_EXCEPTIONS
+#define __NO_STD_VECTOR
 
 #include "cl.hpp"
 #include <QtCore>
@@ -98,7 +99,7 @@ namespace Langmuir
       *
       * Array of doubles.
       */
-    std::vector<double> values;
+    QVector<double> values;
 
     /**
       * @brief member.
@@ -312,20 +313,20 @@ namespace Langmuir
     QFile                *m_statFile;             // Place to write lifetime and pathlength information
     QTextStream          *m_statStream;           // Text stream for stat file
 
-    cl_int                        m_error;       // OpenCL error code
-    std::vector<cl::Platform>     m_platforms;   // OpenCL platforms
-    std::vector<cl::Context>      m_contexts;    // OpenCL contexts
-    std::vector<cl::Device>       m_devices;     // OpenCL devices
-    std::vector<cl::CommandQueue> m_queues;      // OpenCL queues
-    std::vector<cl::Program>      m_programs;    // OpenCL programs
-    std::vector<cl::Kernel>       m_kernels;     // OpenCL kernels
-    std::vector<int>              m_iHost;       // Host site ids (initial)
-    std::vector<int>              m_fHost;       // Host site ids (final)
-    std::vector<double>           m_oHost;       // Host output vector
-    cl::Buffer                    m_iDevice;     // Device site ids (initial)
-    cl::Buffer                    m_fDevice;     // Device site ids (final)
-    cl::Buffer                    m_dDevice;     // Device site ids (for defects)
-    cl::Buffer                    m_oDevice;     // Device output vector
+    cl_int                       m_error;       // OpenCL error code
+    cl::vector<cl::Platform>     m_platforms;   // OpenCL platforms
+    cl::vector<cl::Context>      m_contexts;    // OpenCL contexts
+    cl::vector<cl::Device>       m_devices;     // OpenCL devices
+    cl::vector<cl::CommandQueue> m_queues;      // OpenCL queues
+    cl::vector<cl::Program>      m_programs;    // OpenCL programs
+    cl::vector<cl::Kernel>       m_kernels;     // OpenCL kernels
+    QVector<int>                 m_iHost;       // Host site ids (initial)
+    QVector<int>                 m_fHost;       // Host site ids (final)
+    QVector<double>              m_oHost;       // Host output vector
+    cl::Buffer                   m_iDevice;     // Device site ids (initial)
+    cl::Buffer                   m_fDevice;     // Device site ids (final)
+    cl::Buffer                   m_dDevice;     // Device site ids (for defects)
+    cl::Buffer                   m_oDevice;     // Device output vector
  };
 
  inline QList<ChargeAgent *> * World::charges()

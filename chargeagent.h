@@ -117,7 +117,7 @@ namespace Langmuir
      *
      * A list of this cells neighbors.
      */
-    std::vector<unsigned int> m_neighbors;
+    QVector<unsigned int> m_neighbors;
 
     /**
      * @brief removed status.

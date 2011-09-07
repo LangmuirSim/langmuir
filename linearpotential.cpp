@@ -1,7 +1,5 @@
 #include "linearpotential.h"
 
-using namespace std;
-
 namespace Langmuir
 {
 
@@ -9,9 +7,9 @@ namespace Langmuir
  {
  }
 
- LinearPotential::LinearPotential( vector<PotentialPoint>& PotentialPoints )
+ LinearPotential::LinearPotential( QVector<PotentialPoint>& PotentialPoints )
  {
-  for ( unsigned int i = 0; i < PotentialPoints.size(); i++ ) 
+  for ( int i = 0; i < PotentialPoints.size(); i++ )
   {
    addPoint(PotentialPoints[i]);
   }
@@ -120,14 +118,6 @@ namespace Langmuir
   return potential;
  }
 
- ostream& LinearPotential::print(ostream& os)
- {
-  for ( unsigned int i = 0; i < xx.size(); i++ ) os << xx[i] << "\n";
-  for ( unsigned int i = 0; i < yy.size(); i++ ) os << yy[i] << "\n";
-  for ( unsigned int i = 0; i < zz.size(); i++ ) os << zz[i] << "\n";
-  return os;
- }
-
  unsigned int LinearPotential::regionX( double x )
  {
   //Below the range of defined points
@@ -211,9 +201,9 @@ namespace Langmuir
     //Clear the intercepts - they need recomputed
     bx.clear();
     //Sort the points
-    sort(xx.begin(),xx.end(),PotentialPoint::less_than_by_x_value());
+    std::sort(xx.begin(),xx.end(),PotentialPoint::less_than_by_x_value());
     //Recalculate the slopes and the intercepts
-    for ( unsigned int i = 1; i < xx.size(); i++ )
+    for ( int i = 1; i < xx.size(); i++ )
     {
      deltaX = double(xx[i].x()) - double(xx[i-1].x());
      deltaY =       (xx[i].V()  -        xx[i-1].V());
@@ -302,9 +292,9 @@ namespace Langmuir
     //Clear the intercepts - they need recomputed
     by.clear();
     //Sort the points
-    sort(yy.begin(),yy.end(),PotentialPoint::less_than_by_y_value());
+    std::sort(yy.begin(),yy.end(),PotentialPoint::less_than_by_y_value());
     //Recalculate the slopes and the intercepts
-    for ( unsigned int i = 1; i < yy.size(); i++ )
+    for ( int i = 1; i < yy.size(); i++ )
     {
      deltaX = double(yy[i].y()) - double(yy[i-1].y());
      deltaY =       (yy[i].V()  -        yy[i-1].V());
@@ -393,9 +383,9 @@ namespace Langmuir
     //Clear the intercepts - they need recomputed
     bz.clear();
     //Sort the points
-    sort(zz.begin(),zz.end(),PotentialPoint::less_than_by_z_value());
+    std::sort(zz.begin(),zz.end(),PotentialPoint::less_than_by_z_value());
     //Recalculate the slopes and the intercepts
-    for ( unsigned int i = 1; i < zz.size(); i++ )
+    for ( int i = 1; i < zz.size(); i++ )
     {
      deltaX = double(zz[i].z()) - double(zz[i-1].z());
      deltaY =       (zz[i].V()  -        zz[i-1].V());

@@ -53,7 +53,7 @@ namespace Langmuir
      * @param site serial cell index.
      * @return neighbors list of serial site indices.
      */
-    std::vector<unsigned int> neighbors(unsigned int site, unsigned int hoppingRange);
+    QVector<unsigned int> neighbors(unsigned int site, unsigned int hoppingRange);
 
     /**
      * @brief rowlist.
@@ -64,7 +64,7 @@ namespace Langmuir
      * @return row list of row serial site indices.
      * @warning layer index optional.  default is layer zero.
      */
-    std::vector<unsigned int> row(unsigned int row, unsigned int layer = 0);
+    QVector<unsigned int> row(unsigned int row, unsigned int layer = 0);
 
     /**
      * @brief columnlist.
@@ -75,7 +75,7 @@ namespace Langmuir
      * @return column list of column serial site indices.
      * @warning layer index optional.  default is layer zero.
      */
-    std::vector<unsigned int> col(unsigned int col, unsigned int layer = 0);
+    QVector<unsigned int> col(unsigned int col, unsigned int layer = 0);
 
     /**
      * @brief resize the grid.

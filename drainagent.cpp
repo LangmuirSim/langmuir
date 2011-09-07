@@ -3,8 +3,6 @@
 #include "grid.h"
 #include "inputparser.h"
 
-using namespace std;
-
 namespace Langmuir
 {
 

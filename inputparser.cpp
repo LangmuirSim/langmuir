@@ -1,13 +1,10 @@
 #include "inputparser.h"
 #include "simulation.h"
-
 #include <QtCore/QFile>
 #include <QtCore/QIODevice>
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 #include <QtCore/QDebug>
-
-using namespace std;
 
 namespace Langmuir
 {
@@ -964,7 +961,7 @@ namespace Langmuir
       pairs << QString("%1=%2").arg(s_variables.key( e_outputXyz )).arg(variables->outputXyz);
       pairs << QString("%1=%2").arg(s_variables.key( e_permittivitySpace )).arg(variables->permittivitySpace);
       pairs << QString("%1=%2").arg(s_variables.key( e_potentialForm )).arg(variables->potentialForm);
-      for ( unsigned int i = 0; i < variables->potentialPoints.size(); i++ )
+      for ( int i = 0; i < variables->potentialPoints.size(); i++ )
       {
       QString s = "";
       pairs << QString("%1=%2").arg(s_variables.key( e_potentialPoint )).arg(variables->potentialPoints[i].toString());

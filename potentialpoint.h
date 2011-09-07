@@ -4,7 +4,7 @@
 #include<iostream>
 #include<cmath>
 #include<stdexcept>
-#include<QTextStream>
+#include<QtCore>
 
   /**
     * @class PotentialPoint
@@ -27,7 +27,7 @@
     * @param lay the integer z value.
     * @param potential the floating potential value
     */
-  PotentialPoint( double col, double row, double lay, double potential )
+  PotentialPoint( double col = 0, double row = 0, double lay = 0, double potential = 0 )
   {
    this->col = col;
    this->row = row;
@@ -40,35 +40,6 @@
     */
  ~PotentialPoint()
   {
-  }
-
-  /**
-    * @brief operator << overload 
-    *
-    * Allows the expression: ostream << PotentialPoint;
-    */
-  friend std::ostream& operator<<(std::ostream& os, const PotentialPoint& p)
-  {
-   os << "{ " << p.col << " " << p.row << " " << p.lay << " " << p.potential << " }";
-   return os;
-  }
-
-  /**
-    * @brief operator << overload 
-    *
-    * Allows the expression: ostream << PotentialPoint;
-    */
-  friend QTextStream& operator<<(QTextStream& qt, const PotentialPoint& p)
-  {
-   qt.setFieldWidth(1);
-   qt <<   "(";
-   qt << p.col;
-   qt <<   ",";
-   qt << p.row;
-   qt <<   ",";
-   qt << p.lay;
-   qt <<   ")";
-   return qt;
   }
 
   QString toString()

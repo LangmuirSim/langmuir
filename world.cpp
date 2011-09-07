@@ -184,7 +184,7 @@ namespace Langmuir {
           if ( m_parameters->globalSize == 0 ) {
               throw cl::Error(-1,"global work item size was set to 0!");
           }
-          std::vector<size_t> maxWorkItemSizes = m_devices[0].getInfo<CL_DEVICE_MAX_WORK_ITEM_SIZES>(&m_error);
+          cl::vector<size_t> maxWorkItemSizes = m_devices[0].getInfo<CL_DEVICE_MAX_WORK_ITEM_SIZES>(&m_error);
           if ( m_parameters->globalSize > int(maxWorkItemSizes[0]*maxWorkItemSizes[1]*maxWorkItemSizes[2]) )
           {
            throw cl::Error(-1,QString("global work item size exceeds max = %1*%2*%3 = %4,  try a smaller work size or lower charge.percentage")
@@ -203,9 +203,12 @@ namespace Langmuir {
           }
 
           //initialize Host Memory
-          m_iHost.resize( maxCharges, 0 );
-          m_fHost.resize( maxCharges, 0 );
-          m_oHost.resize( maxCharges, 0 );
+          m_iHost.clear( );
+          m_fHost.clear( );
+          m_oHost.clear( );
+          m_iHost.resize( maxCharges );
+          m_fHost.resize( maxCharges );
+          m_oHost.resize( maxCharges );
 
           //initialize Device Memory
           m_iDevice = cl::Buffer(m_contexts[0], CL_MEM_READ_ONLY, maxCharges * sizeof (int), NULL, &m_error);

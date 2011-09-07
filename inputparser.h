@@ -70,7 +70,7 @@ namespace Langmuir
     int randomSeed;
     int sourceAttempts;
     QString kernelsPath;
-    std::vector < PotentialPoint > potentialPoints;
+    QVector< PotentialPoint > potentialPoints;
 
     SimulationParameters ()
     {

@@ -8,7 +8,6 @@
 #include "drainagent.h"
 #include "inputparser.h"
 #include <iostream>
-#include <cstdlib>
 #include <QtCore/QFuture>
 #include <QtCore/QtConcurrentMap>
 #include <QtCore/QStringList>
@@ -20,10 +19,6 @@
 
 namespace Langmuir
 {
-    using std::vector;
-    using std::cout;
-    using std::endl;
-
     Simulation::Simulation (SimulationParameters * par)
     {
         // Store the address of the simulation parameters object
@@ -323,7 +318,7 @@ namespace Langmuir
         m_world->grid ()->setSiteID (m_grid->volume () + 1, 3);
 
         // Now to assign nearest neighbours for the electrodes.
-        vector < unsigned int >neighbors (0, 0);
+        QVector < unsigned int >neighbors (0, 0);
 
         switch ( m_parameters->hoppingRange )
         {
@@ -334,10 +329,10 @@ namespace Langmuir
                 for (unsigned int layer = 0; layer < m_grid->depth (); layer++)
                 {
                     // Get column in this layer that is closest to the source
-                    vector < unsigned int >column_neighbors_in_layer =
+                    QVector < unsigned int >column_neighbors_in_layer =
                         m_grid->col (0, layer);
                     // Loop over this column
-                    for (unsigned int column_site = 0;
+                    for (int column_site = 0;
                             column_site < column_neighbors_in_layer.size (); column_site++)
                     {
                         neighbors.push_back (column_neighbors_in_layer[column_site]);
@@ -351,10 +346,10 @@ namespace Langmuir
                 for (unsigned int layer = 0; layer < m_grid->depth (); layer++)
                 {
                     // Get column in this layer that is closest to the source
-                    vector < unsigned int >column_neighbors_in_layer =
+                    QVector < unsigned int >column_neighbors_in_layer =
                         m_grid->col (m_grid->width () - 1, layer);
                     // Loop over this column
-                    for (unsigned int column_site = 0;
+                    for (int column_site = 0;
                             column_site < column_neighbors_in_layer.size (); column_site++)
                     {
                         neighbors.push_back (column_neighbors_in_layer[column_site]);
@@ -446,7 +441,7 @@ namespace Langmuir
 
             // Select a random neighbor
             unsigned int newTrap;
-            vector < unsigned int >m_neighbors = m_grid->neighbors(m_world->trapSiteIDs()->at(trapSeed),1);
+            QVector < unsigned int >m_neighbors = m_grid->neighbors(m_world->trapSiteIDs()->at(trapSeed),1);
             //qDebug() << "Neighbors: " << m_neighbors.size();
             newTrap =
                 m_neighbors[int

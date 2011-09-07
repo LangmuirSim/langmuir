@@ -1,9 +1,6 @@
 #include "cubicgrid.h"
 #include <cmath>
-#include <cstdlib>
 #include <QDebug>
-
-using namespace std;
 
 namespace Langmuir
 {
@@ -26,11 +23,11 @@ namespace Langmuir
   {
   }
 
-  vector<unsigned int> CubicGrid::neighbors(unsigned int site, unsigned int hoppingRange)
+  QVector<unsigned int> CubicGrid::neighbors(unsigned int site, unsigned int hoppingRange)
   {
 
     // Return the indexes of all nearest neighbours
-    vector<unsigned int>      nList(0);
+    QVector<unsigned int>      nList(0);
     unsigned int col = getColumn(site);
     unsigned int row =    getRow(site);
     unsigned int lay =  getLayer(site);
@@ -199,18 +196,18 @@ namespace Langmuir
 
   }
 
-  vector<unsigned int> CubicGrid::row(unsigned int row, unsigned int layer)
+  QVector<unsigned int> CubicGrid::row(unsigned int row, unsigned int layer)
   {
-    vector<unsigned int> vRow;
+    QVector<unsigned int> vRow;
     for (unsigned int i = 0; i < m_width; i++) {
       vRow.push_back(getIndex(i, row, layer));
     }
     return vRow;
   }
 
-  vector<unsigned int> CubicGrid::col(unsigned int col, unsigned int layer)
+  QVector<unsigned int> CubicGrid::col(unsigned int col, unsigned int layer)
   {
-    vector<unsigned int> vCol;
+    QVector<unsigned int> vCol;
     for (unsigned int i = 0; i < m_height; i++) {
       vCol.push_back(getIndex(col, i, layer));
     }
@@ -366,7 +363,7 @@ namespace Langmuir
      }
      else
      {
-      cout << "AGENT ERROR: " << siteID(i) << "\n";
+      qDebug() << "AGENT ERROR: " << siteID(i) << "\n";
       throw(-1);
      }
     }

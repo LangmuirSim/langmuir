@@ -67,21 +67,6 @@ namespace Langmuir
     virtual double calculate( double col, double row, double lay ) = 0;
 
     /**
-      * @brief stream operator overload to print potential
-      * 
-      * The potential is printed in a way so that it may be plotted.
-      * The virtual friend function idiom is being used here.
-      * So do not alter this function, instead alter the virtual function print.
-      * @param os reference to stream object
-      * @param potential reference to potential object
-      * @return os reference to ostream object originally passed
-      */
-    friend std::ostream& operator<<(std::ostream& os, Potential& potential)
-    {
-     return potential.print(os);
-    }
-
-    /**
       * @brief print a slice of potential for plotting
       * 
       * The potential is printed in a way so that it may be plotted.
@@ -95,15 +80,6 @@ namespace Langmuir
       * @param ydelta delta value for y
       */
     virtual void plot( QTextStream& stream, double xstart = -10.0, double xstop = 10.0, double ystart = -10.0, double ystop = 10.0, double zvalue = 0.0, double xdelta = 1.0, double ydelta = 1.0 ) = 0; 
-
-  protected:
-
-    /**
-      * @brief implementation of operator<< overload
-      * @param os reference to stream object
-      * @return os reference to ostream object originally passed
-      */
-    virtual std::ostream& print(std::ostream& os) = 0;
 
   };
 

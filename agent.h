@@ -48,14 +48,14 @@ namespace Langmuir{
      *
      * Set the nearest neighbours of the agent.
      */
-    virtual void setNeighbors(std::vector<unsigned int> neighbors);
+    virtual void setNeighbors(QVector<unsigned int> neighbors);
 
     /**
      * @brief set neighbors.
      *
      * Get the nearest neighbours of the agent.
      */
-    virtual const std::vector<unsigned int>& getNeighbors() const;
+    virtual const QVector<unsigned int>& getNeighbors() const;
 
     /**
      * @brief charge.
@@ -121,7 +121,7 @@ namespace Langmuir{
       *
       * List of neighboring sites in the grid.
       */
-    std::vector<unsigned int> m_neighbors;
+    QVector<unsigned int> m_neighbors;
 
     /**
       * @brief Agent type.
@@ -136,12 +136,12 @@ namespace Langmuir{
   {
   }
 
-  inline void Agent::setNeighbors(std::vector<unsigned int> neighbors)
+  inline void Agent::setNeighbors(QVector<unsigned int> neighbors)
   {
     m_neighbors = neighbors;
   }
 
-  inline const std::vector<unsigned int>& Agent::getNeighbors() const
+  inline const QVector<unsigned int>& Agent::getNeighbors() const
   {
     return m_neighbors;
   }

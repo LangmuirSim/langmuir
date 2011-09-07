@@ -133,7 +133,7 @@ namespace Langmuir
     // Select a random injection site
     int irn = int(m_world->random() * double(m_neighbors.size() - 1.0e-20));
 
-    unsigned int tries = 1;
+    int tries = 1;
     while(m_world->grid()->agent(m_neighbors[irn]))
       {
         irn = int(m_world->random() * double(m_neighbors.size() - 1.0e-20));
