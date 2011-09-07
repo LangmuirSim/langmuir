@@ -163,11 +163,6 @@ namespace Langmuir
     void initializeOpenCL();
 
     /**
-      * @brief Turn OpenCL error code into string
-      */
-    QString clErrorString (cl_int error);
-
-    /**
       * @brief member access.
       *
       * Get the address of the grid object.
@@ -356,126 +351,6 @@ namespace Langmuir
  inline TripleIndexArray& World::interactionEnergies()
  {
   return m_interactionEnergies;
- }
-
- inline QString World::clErrorString (cl_int error)
- {
-   if (error == CL_SUCCESS)
-     return "CL_SUCCESS";
-   else if (error == CL_DEVICE_NOT_FOUND)
-     return "CL_DEVICE_NOT_FOUND";
-   else if (error == CL_DEVICE_NOT_AVAILABLE)
-     return "CL_DEVICE_NOT_AVAILABLE";
-   else if (error == CL_COMPILER_NOT_AVAILABLE)
-     return "CL_COMPILER_NOT_AVAILABLE";
-   else if (error == CL_MEM_OBJECT_ALLOCATION_FAILURE)
-     return "CL_MEM_OBJECT_ALLOCATION_FAILURE";
-   else if (error == CL_OUT_OF_RESOURCES)
-     return "CL_OUT_OF_RESOURCES";
-   else if (error == CL_OUT_OF_HOST_MEMORY)
-     return "CL_OUT_OF_HOST_MEMORY";
-   else if (error == CL_PROFILING_INFO_NOT_AVAILABLE)
-     return "CL_PROFILING_INFO_NOT_AVAILABLE";
-   else if (error == CL_MEM_COPY_OVERLAP)
-     return "CL_MEM_COPY_OVERLAP";
-   else if (error == CL_IMAGE_FORMAT_MISMATCH)
-     return "CL_IMAGE_FORMAT_MISMATCH";
-   else if (error == CL_IMAGE_FORMAT_NOT_SUPPORTED)
-     return "CL_IMAGE_FORMAT_NOT_SUPPORTED";
-   else if (error == CL_BUILD_PROGRAM_FAILURE)
-     return "CL_BUILD_PROGRAM_FAILURE";
-   else if (error == CL_MAP_FAILURE)
-     return "CL_MAP_FAILURE";
-   //else if (error == CL_MISALIGNED_SUB_BUFFER_OFFSET)
-   //  return "CL_MISALIGNED_SUB_BUFFER_OFFSET";
-   //else if (error == CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST)
-   //  return "CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST";
-   else if (error == CL_INVALID_VALUE)
-     return "CL_INVALID_VALUE";
-   else if (error == CL_INVALID_DEVICE_TYPE)
-     return "CL_INVALID_DEVICE_TYPE";
-   else if (error == CL_INVALID_PLATFORM)
-     return "CL_INVALID_PLATFORM";
-   else if (error == CL_INVALID_DEVICE)
-     return "CL_INVALID_DEVICE";
-   else if (error == CL_INVALID_CONTEXT)
-     return "CL_INVALID_CONTEXT";
-   else if (error == CL_INVALID_QUEUE_PROPERTIES)
-     return "CL_INVALID_QUEUE_PROPERTIES";
-   else if (error == CL_INVALID_COMMAND_QUEUE)
-     return "CL_INVALID_COMMAND_QUEUE";
-   else if (error == CL_INVALID_HOST_PTR)
-     return "CL_INVALID_HOST_PTR";
-   else if (error == CL_INVALID_MEM_OBJECT)
-     return "CL_INVALID_MEM_OBJECT";
-   else if (error == CL_INVALID_IMAGE_FORMAT_DESCRIPTOR)
-     return "CL_INVALID_IMAGE_FORMAT_DESCRIPTOR";
-   else if (error == CL_INVALID_IMAGE_SIZE)
-     return "CL_INVALID_IMAGE_SIZE";
-   else if (error == CL_INVALID_SAMPLER)
-     return "CL_INVALID_SAMPLER";
-   else if (error == CL_INVALID_BINARY)
-     return "CL_INVALID_BINARY";
-   else if (error == CL_INVALID_BUILD_OPTIONS)
-     return "CL_INVALID_BUILD_OPTIONS";
-   else if (error == CL_INVALID_PROGRAM)
-     return "CL_INVALID_PROGRAM";
-   else if (error == CL_INVALID_PROGRAM_EXECUTABLE)
-     return "CL_INVALID_PROGRAM_EXECUTABLE";
-   else if (error == CL_INVALID_KERNEL_NAME)
-     return "CL_INVALID_KERNEL_NAME";
-   else if (error == CL_INVALID_KERNEL_DEFINITION)
-     return "CL_INVALID_KERNEL_DEFINITION";
-   else if (error == CL_INVALID_KERNEL)
-     return "CL_INVALID_KERNEL";
-   else if (error == CL_INVALID_ARG_INDEX)
-     return "CL_INVALID_ARG_INDEX";
-   else if (error == CL_INVALID_ARG_VALUE)
-     return "CL_INVALID_ARG_VALUE";
-   else if (error == CL_INVALID_ARG_SIZE)
-     return "CL_INVALID_ARG_SIZE";
-   else if (error == CL_INVALID_KERNEL_ARGS)
-     return "CL_INVALID_KERNEL_ARGS";
-   else if (error == CL_INVALID_WORK_DIMENSION)
-     return "CL_INVALID_WORK_DIMENSION";
-   else if (error == CL_INVALID_WORK_GROUP_SIZE)
-     return "CL_INVALID_WORK_GROUP_SIZE";
-   else if (error == CL_INVALID_WORK_ITEM_SIZE)
-     return "CL_INVALID_WORK_ITEM_SIZE";
-   else if (error == CL_INVALID_GLOBAL_OFFSET)
-     return "CL_INVALID_GLOBAL_OFFSET";
-   else if (error == CL_INVALID_EVENT_WAIT_LIST)
-     return "CL_INVALID_EVENT_WAIT_LIST";
-   else if (error == CL_INVALID_EVENT)
-     return "CL_INVALID_EVENT";
-   else if (error == CL_INVALID_OPERATION)
-     return "CL_INVALID_OPERATION";
-   else if (error == CL_INVALID_GL_OBJECT)
-     return "CL_INVALID_GL_OBJECT";
-   else if (error == CL_INVALID_BUFFER_SIZE)
-     return "CL_INVALID_BUFFER_SIZE";
-   else if (error == CL_INVALID_MIP_LEVEL)
-     return "CL_INVALID_MIP_LEVEL";
-   else if (error == CL_INVALID_GLOBAL_WORK_SIZE)
-     return "CL_INVALID_GLOBAL_OFFSET";
-   else if (error == CL_INVALID_EVENT_WAIT_LIST)
-     return "CL_INVALID_EVENT_WAIT_LIST";
-   else if (error == CL_INVALID_EVENT)
-     return "CL_INVALID_EVENT";
-   else if (error == CL_INVALID_OPERATION)
-     return "CL_INVALID_OPERATION";
-   else if (error == CL_INVALID_GL_OBJECT)
-     return "CL_INVALID_GL_OBJECT";
-   else if (error == CL_INVALID_BUFFER_SIZE)
-     return "CL_INVALID_BUFFER_SIZE";
-   else if (error == CL_INVALID_MIP_LEVEL)
-     return "CL_INVALID_MIP_LEVEL";
-   else if (error == CL_INVALID_GLOBAL_WORK_SIZE)
-     return "CL_INVALID_GLOBAL_WORK_SIZE";
-   //else if (error == CL_INVALID_PROPERTY)
-   //  return "CL_INVALID_PROPERTY";
-   else
-     return "CL_UNKNOWN_ERROR";
  }
 
 }
