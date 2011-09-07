@@ -3,11 +3,12 @@
  */
 #ifndef WORLD_H
 #define WORLD_H
+#define __CL_ENABLE_EXCEPTIONS
 
+#include "cl.hpp"
+#include <QtCore>
 #include <vector>
 #include <Eigen/Core>
-#include <QtCore>
-#include "cl.hpp"
 
 namespace Langmuir
 {
