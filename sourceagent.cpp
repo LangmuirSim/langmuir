@@ -6,7 +6,7 @@
 
 namespace Langmuir
 {
-  SourceAgent::SourceAgent(World * world, unsigned int site) : 
+  SourceAgent::SourceAgent(World * world, int site) : 
     Agent(Agent::Source, world,site)
   {
     m_site = site;
@@ -18,7 +18,7 @@ namespace Langmuir
   {
   }
 
-  inline double SourceAgent::coulombInteraction(unsigned int newSite)
+  inline double SourceAgent::coulombInteraction(int newSite)
   {
     // Pointer to grid
     Grid *grid = m_world->grid();
@@ -53,7 +53,7 @@ namespace Langmuir
     return( -1.0 * m_world->parameters()->electrostaticPrefactor * potential );
   }
 
-  inline double SourceAgent::imageInteraction(unsigned int newSite)
+  inline double SourceAgent::imageInteraction(int newSite)
   {
     // Pointer to grid
     Grid *grid = m_world->grid();
@@ -88,7 +88,7 @@ namespace Langmuir
     return( -1.0 * m_world->parameters()->electrostaticPrefactor * potential );
   }
 
-  inline double SourceAgent::siteInteraction(unsigned int newSite)
+  inline double SourceAgent::siteInteraction(int newSite)
   {
     //qDebug() << QString("%1").arg( -1.0 * m_world->parameters()->elementaryCharge * m_world->grid()->potential(newSite) );
     return( -1.0 * m_world->parameters()->elementaryCharge * m_world->grid()->potential(newSite) );
@@ -118,7 +118,7 @@ namespace Langmuir
     return false;
   }
 
-  unsigned int SourceAgent::transport()
+  int SourceAgent::transport()
   {
     // Do not inject if we are under the maximum charges
     if(m_charges >= m_maxCharges)

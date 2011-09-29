@@ -159,7 +159,7 @@ namespace Langmuir
             ~GridViewGL();
             QSize minimumSizeHint() const;
             QSize sizeHint() const;
-            QImage drawEnergyLandscape( unsigned int layer = 0 );
+            QImage drawEnergyLandscape( int layer = 0 );
 
         public slots:
             void setXTranslation( double length );
@@ -240,7 +240,7 @@ namespace Langmuir
             bool recording;
             QTimer *recordTimer;
             RecordDialog *recordDialog;
-            unsigned int lastCount;
+            int lastCount;
             int updateTime;
             int step;
             GLuint trapsTexture;

@@ -36,7 +36,7 @@ namespace Langmuir
      * Get a vector pointing from the origin to the middle of a cell.
      * @param site serial cell index.
      */
-    virtual Eigen::Vector3d position(unsigned int site) = 0;
+    virtual Eigen::Vector3d position(int site) = 0;
 
     /**
      * @brief neighborlist indices.
@@ -45,7 +45,7 @@ namespace Langmuir
      * @param site serial cell index.
      * @return neighbors list of serial site indices.
      */
-    virtual QVector<unsigned int> neighbors(unsigned int site, unsigned int hoppingRange) = 0;
+    virtual QVector<int> neighbors(int site, int hoppingRange) = 0;
 
     /**
      * @brief rowlist.
@@ -56,7 +56,7 @@ namespace Langmuir
      * @return row list of row serial site indices.
      * @warning layer index optional.  default is layer zero.
      */
-    virtual QVector<unsigned int> row(unsigned int row, unsigned int layer = 0) = 0;
+    virtual QVector<int> row(int row, int layer = 0) = 0;
 
     /**
      * @brief columnlist.
@@ -67,7 +67,7 @@ namespace Langmuir
      * @return column list of column serial site indices.
      * @warning layer index optional.  default is layer zero.
      */
-    virtual QVector<unsigned int> col(unsigned int col, unsigned int layer = 0) = 0;
+    virtual QVector<int> col(int col, int layer = 0) = 0;
 
     /**
      * @brief resize the grid.
@@ -79,7 +79,7 @@ namespace Langmuir
      * @param depth the number of layers
      * @warning agents, potentials, and site serial indices are set to zero.
      */
-    virtual void setSize(unsigned int width, unsigned int height, unsigned int depth) = 0;
+    virtual void setSize(int width, int height, int depth) = 0;
 
     /**
      * @brief grid width.
@@ -87,7 +87,7 @@ namespace Langmuir
      * Data access to grid width.
      * @return width grid width.
      */
-    virtual unsigned int width() = 0;
+    virtual int width() = 0;
 
     /**
      * @brief grid height.
@@ -95,7 +95,7 @@ namespace Langmuir
      * Data access to grid height.
      * @return height grid height.
      */
-    virtual unsigned int height() = 0;
+    virtual int height() = 0;
 
     /**
      * @brief grid depth.
@@ -103,7 +103,7 @@ namespace Langmuir
      * Data access to grid depth.
      * @return depth grid depth.
      */
-    virtual unsigned int depth() = 0;
+    virtual int depth() = 0;
 
     /**
      * @brief grid area.
@@ -111,7 +111,7 @@ namespace Langmuir
      * Data access to grid area.
      * @return area grid area.
      */
-    virtual unsigned int area() = 0;
+    virtual int area() = 0;
 
     /**
      * @brief grid volume.
@@ -119,7 +119,7 @@ namespace Langmuir
      * Data access to grid volume.
      * @return volume grid volume.
      */
-    virtual unsigned int volume() = 0;
+    virtual int volume() = 0;
 
     /**
      * @brief site distance
@@ -129,7 +129,7 @@ namespace Langmuir
      * @param site2 serial cell index of site2.
      * @return distance distance value is double.
      */
-    virtual double totalDistance(unsigned int site1, unsigned int site2) = 0;
+    virtual double totalDistance(int site1, int site2) = 0;
 
     /**
      * @brief xdistance
@@ -139,7 +139,7 @@ namespace Langmuir
      * @param site2 serial cell index of site2.
      * @return distance distance value is double.
      */
-    virtual double xDistance(unsigned int site1, unsigned int site2) = 0;
+    virtual double xDistance(int site1, int site2) = 0;
 
     /**
      * @brief ydistance
@@ -149,7 +149,7 @@ namespace Langmuir
      * @param site2 serial cell index of site2.
      * @return distance distance value is double.
      */
-    virtual double yDistance(unsigned int site1, unsigned int site2) = 0;
+    virtual double yDistance(int site1, int site2) = 0;
 
     /**
      * @brief zdistance
@@ -159,7 +159,7 @@ namespace Langmuir
      * @param site2 serial cell index of site2.
      * @return distance distance value is double.
      */
-    virtual double zDistance(unsigned int site1, unsigned int site2) = 0;
+    virtual double zDistance(int site1, int site2) = 0;
 
     /**
      * @brief xdistance
@@ -170,7 +170,7 @@ namespace Langmuir
      * @param site2 serial cell index of site2.
      * @return distance distance value is double.
      */
-    virtual double xImageDistance(unsigned int site1, unsigned int site2) = 0;
+    virtual double xImageDistance(int site1, int site2) = 0;
 
     /**
      * @brief ydistance
@@ -181,7 +181,7 @@ namespace Langmuir
      * @param site2 serial cell index of site2.
      * @return distance distance value is double.
      */
-    virtual double yImageDistance(unsigned int site1, unsigned int site2) = 0;
+    virtual double yImageDistance(int site1, int site2) = 0;
 
     /**
      * @brief zdistance
@@ -192,7 +192,7 @@ namespace Langmuir
      * @param site2 serial cell index of site2.
      * @return distance distance value is double.
      */
-    virtual double zImageDistance(unsigned int site1, unsigned int site2) = 0;
+    virtual double zImageDistance(int site1, int site2) = 0;
 
    /**
      * @brief integer xdistance
@@ -202,7 +202,7 @@ namespace Langmuir
      * @param site2 serial cell index of site2.
      * @return distance distance value is int.
      */
-    virtual int xDistancei(unsigned int site1, unsigned int site2) = 0;
+    virtual int xDistancei(int site1, int site2) = 0;
 
     /**
      * @brief integer ydistance
@@ -212,7 +212,7 @@ namespace Langmuir
      * @param site2 serial cell index of site2.
      * @return distance distance value is int.
      */
-    virtual int yDistancei(unsigned int site1, unsigned int site2) = 0;
+    virtual int yDistancei(int site1, int site2) = 0;
 
     /**
      * @brief integer zdistance
@@ -222,7 +222,7 @@ namespace Langmuir
      * @param site2 serial cell index of site2.
      * @return distance distance value is int.
      */
-    virtual int zDistancei(unsigned int site1, unsigned int site2) = 0;
+    virtual int zDistancei(int site1, int site2) = 0;
 
    /**
      * @brief integer xdistance
@@ -233,7 +233,7 @@ namespace Langmuir
      * @param site2 serial cell index of site2.
      * @return distance distance value is int.
      */
-    virtual int xImageDistancei(unsigned int site1, unsigned int site2) = 0;
+    virtual int xImageDistancei(int site1, int site2) = 0;
 
     /**
      * @brief integer ydistance
@@ -244,7 +244,7 @@ namespace Langmuir
      * @param site2 serial cell index of site2.
      * @return distance distance value is int.
      */
-    virtual int yImageDistancei(unsigned int site1, unsigned int site2) = 0;
+    virtual int yImageDistancei(int site1, int site2) = 0;
 
     /**
      * @brief integer zdistance
@@ -255,7 +255,7 @@ namespace Langmuir
      * @param site2 serial cell index of site2.
      * @return distance distance value is int.
      */
-    virtual int zImageDistancei(unsigned int site1, unsigned int site2) = 0;
+    virtual int zImageDistancei(int site1, int site2) = 0;
 
     /**
      * @brief serial cell index
@@ -267,7 +267,7 @@ namespace Langmuir
      * @return integer serial cell index.
      * @warning layer index optional.  default is layer zero.
      */
-    virtual unsigned int getIndex(unsigned int column, unsigned int row, unsigned int layer = 0) = 0;
+    virtual int getIndex(int column, int row, int layer = 0) = 0;
 
     /**
      * @brief Set site agent.
@@ -277,7 +277,7 @@ namespace Langmuir
      * @param agent pointer to an agent.
      * @warning unchecked access to agent list.
      */
-    virtual void setAgent(unsigned int site, Agent *agent);
+    virtual void setAgent(int site, Agent *agent);
 
     /**
      * @brief get row.
@@ -286,7 +286,7 @@ namespace Langmuir
      * @param site serial cell index.
      * @return row row cell index.
      */
-    virtual unsigned int getRow(unsigned int site) = 0;
+    virtual int getRow(int site) = 0;
 
     /**
      * @brief get column.
@@ -295,7 +295,7 @@ namespace Langmuir
      * @param site serial cell index.
      * @return column column cell index.
      */
-    virtual unsigned int getColumn(unsigned int site) = 0;
+    virtual int getColumn(int site) = 0;
 
     /**
      * @brief get layer.
@@ -304,7 +304,7 @@ namespace Langmuir
      * @param site serial cell index.
      * @return layer layer cell index.
      */
-    virtual unsigned int getLayer(unsigned int site) = 0;
+    virtual int getLayer(int site) = 0;
 
     /**
      * @brief Get site agent.
@@ -315,7 +315,7 @@ namespace Langmuir
      * @warning unchecked access to agent list.
      */
 
-    virtual Agent * agent(unsigned int site);
+    virtual Agent * agent(int site);
 
     /**
      * @brief Set site ID.
@@ -325,7 +325,7 @@ namespace Langmuir
      * @param site ID.
      * @warning unchecked access to site ID list.
      */
-    virtual void setSiteID(unsigned int site, short id);
+    virtual void setSiteID(int site, short id);
 
     /**
      * @brief Get site ID.
@@ -335,7 +335,7 @@ namespace Langmuir
      * @return ID site ID.
      * @warning unchecked access to site ID list.
      */
-    virtual short siteID(unsigned int site);
+    virtual short siteID(int site);
 
     /**
      * @brief Set site potential.
@@ -345,7 +345,7 @@ namespace Langmuir
      * @param site potential.
      * @warning unchecked access to site ID list.
      */
-    virtual void setPotential(unsigned int site, double potential);
+    virtual void setPotential(int site, double potential);
 
     /**
      * @brief Get site potential.
@@ -355,7 +355,7 @@ namespace Langmuir
      * @return potential site potential.
      * @warning unchecked access to site potential list.
      */
-    virtual double potential(unsigned int site);
+    virtual double potential(int site);
 
     /**
      * @brief Set source potential.
@@ -406,32 +406,32 @@ namespace Langmuir
     std::vector<short> m_siteID;
   };
 
-  inline void Grid::setAgent(unsigned int site, Agent *agent)
+  inline void Grid::setAgent(int site, Agent *agent)
   {
     m_agents[site] = agent;
   }
 
-  inline Agent * Grid::agent(unsigned int site)
+  inline Agent * Grid::agent(int site)
   {
     return m_agents[site];
   }
 
-  inline void Grid::setSiteID(unsigned int site, short id)
+  inline void Grid::setSiteID(int site, short id)
   {
     m_siteID[site] = id;
   }
 
-  inline short Grid::siteID(unsigned int site)
+  inline short Grid::siteID(int site)
   {
     return m_siteID[site];
   }
 
-  inline void Grid::setPotential(unsigned int site, double potential)
+  inline void Grid::setPotential(int site, double potential)
   {
     m_potentials[site] = potential;
   }
 
-  inline double Grid::potential(unsigned int site)
+  inline double Grid::potential(int site)
   {
     return m_potentials[site];
   }

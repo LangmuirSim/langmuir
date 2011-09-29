@@ -21,6 +21,7 @@ namespace Langmuir
     bool gaussianNoise;
     bool gridCharge;
     bool outputXyz;
+    bool outputCoulomb;
     bool chargedTraps;
     bool trapsHeterogeneous;
     bool outputGrid;
@@ -49,7 +50,6 @@ namespace Langmuir
     double electrostaticPrefactor;
     double inverseKT;
     int electrostaticCutoff;
-    int globalSize;
     int gridDepth;
     int gridHeight;
     int gridWidth;
@@ -66,6 +66,9 @@ namespace Langmuir
     int zDefect;
     int zTrap;
     int hoppingRange;
+    int workWidth;
+    int workHeight;
+    int workDepth;
     int workSize;
     int randomSeed;
     int sourceAttempts;
@@ -83,6 +86,7 @@ namespace Langmuir
       trapsHeterogeneous = false;
       outputGrid = false;
       outputStats = false;
+      outputCoulomb = false;
       useOpenCL = false;
       chargePercentage = 0.01;
       defectPercentage = 0.00;
@@ -120,8 +124,10 @@ namespace Langmuir
       zDefect = 0;
       zTrap = 0;
       hoppingRange = 1;
-      workSize = 32;
-      globalSize = 0;
+      workWidth = 4;
+      workHeight = 4;
+      workDepth = 4;
+      workSize = 256;
       randomSeed = -1;
       kernelsPath = ".";
       sourceAttempts = 1;
@@ -167,61 +173,64 @@ namespace Langmuir
     {
       e_undefined,
       e_interactionCoulomb,        // should Coulomb interaction be used
-      e_chargedDefects,                // are the defects charged?
-      e_gaussianNoise,                // add random noise to energy levels?
+      e_chargedDefects,            // are the defects charged?
+      e_gaussianNoise,             // add random noise to energy levels?
       e_gridCharge,                // seed the grid with charges
-      e_outputXyz,                // should trajectory files be written
-      e_chargedTraps,                // are the traps charged?
+      e_chargedTraps,              // are the traps charged?
       e_trapsHeterogeneous,        // distrubute traps heterogeneously?
+      e_outputXyz,                 // should trajectory files be written
       e_outputGrid,                // generate a pdf image of the grid?
-      e_outputStats,                // output lifetime and pathlength to file?
-      e_chargePercentage,        // percentage of charges in the grid - sets as target
-      e_useOpenCL,                  // should OpenCL be used
-      e_defectPercentage,        // percentage of defects in the grid
-      e_deltaEpsilon,                // site energy difference for traps
-      e_gaussianAverg,                // average of the random noise
-      e_gaussianStdev,                // standard deviation of the random noise
-      e_seedPercentage,                // percentage of trap seeds for heterogeneous traps
-      e_sourceBarrier,                // probability to reject transport from source when sourceType = constant
-      e_drainBarrier,                // probability to reject transport to drain when drainType = constant
+      e_outputStats,               // output lifetime and pathlength to file?
+      e_outputCoulomb,             // output coulomb potential to file?
+      e_chargePercentage,          // percentage of charges in the grid - sets as target
+      e_useOpenCL,                 // should OpenCL be used
+      e_defectPercentage,          // percentage of defects in the grid
+      e_deltaEpsilon,              // site energy difference for traps
+      e_gaussianAverg,             // average of the random noise
+      e_gaussianStdev,             // standard deviation of the random noise
+      e_seedPercentage,            // percentage of trap seeds for heterogeneous traps
+      e_sourceBarrier,             // probability to reject transport from source when sourceType = constant
+      e_drainBarrier,              // probability to reject transport to drain when drainType = constant
       e_sourceAttempts,            // injection attempts by the source, if <= 0 then the source attempts current charges - max charges injections
-      e_temperatureKelvin,        // the absolute temperature
-      e_trapPercentage,                // percentage of traps in the grid
-      e_variableFinal,                // final value of the variable range
-      e_variableStart,                // the start of the variables range
-      e_voltageDrain,                // voltage of the drain electrode
-      e_voltageSource,                // voltage of the source electrode
-      e_gridDepth,                // the depth of the grid
+      e_temperatureKelvin,         // the absolute temperature
+      e_trapPercentage,            // percentage of traps in the grid
+      e_variableFinal,             // final value of the variable range
+      e_variableStart,             // the start of the variables range
+      e_voltageDrain,              // voltage of the drain electrode
+      e_voltageSource,             // voltage of the source electrode
+      e_gridDepth,                 // the depth of the grid
       e_gridHeight,                // the height of the grid
-      e_gridWidth,                // the width of the grid
-      e_iterationsPrint,        // number of iterations before printing state
-      e_iterationsReal,                // the number of iterations for the real run
-      e_iterationsWarmup,        // the number of warm up iterations to perform
-      e_outputPrecision,        // decimal places to show in output
-      e_outputWidth,                // number of char per output field
-      e_potentialForm,                // how to calculate site energies ( linear )
+      e_gridWidth,                 // the width of the grid
+      e_iterationsPrint,           // number of iterations before printing state
+      e_iterationsReal,            // the number of iterations for the real run
+      e_iterationsWarmup,          // the number of warm up iterations to perform
+      e_outputPrecision,           // decimal places to show in output
+      e_outputWidth,               // number of char per output field
+      e_potentialForm,             // how to calculate site energies ( linear )
       e_sourceType,                // how to determine the probability to inject charges from the source ( constant, coulomb, image )
-      e_drainType,                // how to determine the probability to accept charges at the drain ( constant, broke )
-      e_variableSteps,                // the number of steps to take from start to final
-      e_variableWorking,        // the working variable that is being changed
-      e_zDefect,                // charge on the defects (units e)
-      e_zTrap,                        // charge on traps (units e)
-      e_hoppingRange,           // number of neighbors to hop between
-      e_workSize,              // local size of OpenCL work groups
-      e_randomSeed,            // seed for random number generator
-      e_kernelsPath,            // source file containing OpenCL kernel
-      e_potentialPoint,        // A point of defined potential (x,y,z,V)
-      e_slopeZ,               // convenience: makes two potential points at (0,0,1,slope.z) and (0,0,2,2*slope.z) - ( simulates gate potential )
-      e_okCL,                // can openCL be used on this platform?
-      e_boltzmannConstant,  // thermodynamics constant - non-variable
-      e_dielectricConstant, // electrostatics constant - non-variable
-      e_electrostaticCutoff, // electrostatics constant - non-variable
-      e_electrostaticPrefactor, // collection of electrostatic constants - non-variable
-      e_elementaryCharge, // charge of electron - non-variable
-      e_globalSize, // total number of OpenCL workers - non-variable
-      e_gridFactor, // distance between centers of grid sites - non-variable
-      e_inverseKT, //  inverse average thermal energy - non-variable
-      e_permittivitySpace, // electrostatics constant - non-variable
+      e_drainType,                 // how to determine the probability to accept charges at the drain ( constant, broke )
+      e_variableSteps,             // the number of steps to take from start to final
+      e_variableWorking,           // the working variable that is being changed
+      e_zDefect,                   // charge on the defects (units e)
+      e_zTrap,                     // charge on traps (units e)
+      e_hoppingRange,              // number of neighbors to hop between
+      e_workWidth,                 // local size of OpenCL work groups
+      e_workHeight,                // local size of OpenCL work groups
+      e_workDepth,                 // local size of OpenCL work groups
+      e_workSize,                  // local size of OpenCL work groups
+      e_randomSeed,                // seed for random number generator
+      e_kernelsPath,               // source file containing OpenCL kernel
+      e_potentialPoint,            // A point of defined potential (x,y,z,V)
+      e_slopeZ,                    // convenience: makes two potential points at (0,0,1,slope.z) and (0,0,2,2*slope.z) - ( simulates gate potential )
+      e_okCL,                      // can openCL be used on this platform?
+      e_boltzmannConstant,         // thermodynamics constant - non-variable
+      e_dielectricConstant,        // electrostatics constant - non-variable
+      e_electrostaticCutoff,       // electrostatics constant - non-variable
+      e_electrostaticPrefactor,    // collection of electrostatic constants - non-variable
+      e_elementaryCharge,          // charge of electron - non-variable
+      e_gridFactor,                // distance between centers of grid sites - non-variable
+      e_inverseKT,                 // inverse average thermal energy - non-variable
+      e_permittivitySpace,         // electrostatics constant - non-variable
       e_end
     };
 

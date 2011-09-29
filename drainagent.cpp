@@ -6,7 +6,7 @@
 namespace Langmuir
 {
 
-  DrainAgent::DrainAgent(World *world, unsigned int site) : Agent(Agent::Drain, world, site), m_acceptedCharges(0)
+  DrainAgent::DrainAgent(World *world, int site) : Agent(Agent::Drain, world, site), m_acceptedCharges(0)
   {
   }
 
@@ -27,7 +27,7 @@ namespace Langmuir
     return 1;
   }
 
-  unsigned int DrainAgent::transport()
+  int DrainAgent::transport()
   {
     return 0;
   }

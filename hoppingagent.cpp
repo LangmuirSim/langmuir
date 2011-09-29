@@ -10,7 +10,7 @@ using namespace std;
 namespace Langmuir
 {
 
-HoppingAgent::HoppingAgent(unsigned int site, const Grid* grid) : Agent(site),
+HoppingAgent::HoppingAgent(int site, const Grid* grid) : Agent(site),
     m_grid(grid), m_charge(0), m_fCharge(0),
     m_rand(new Rand(0.0, 1.0)), m_pBarrier(0.4)
 {

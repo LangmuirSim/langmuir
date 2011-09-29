@@ -20,7 +20,7 @@ namespace Langmuir{
     if ( seed >= 0 )
      m_gen->seed( seed );
     else
-     m_gen->seed(static_cast<unsigned int>(std::time(0)));
+     m_gen->seed(static_cast<int>(std::time(0)));
     m_dist = new boost::uniform_real<>(0, 1);
     m_uni = new boost::variate_generator<baseGenerator&, boost::uniform_real<> >(*m_gen, *m_dist);
   }
@@ -32,7 +32,7 @@ namespace Langmuir{
     if ( seed >= 0 )
      m_gen->seed( seed );
     else
-     m_gen->seed(static_cast<unsigned int>(std::time(0)));
+     m_gen->seed(static_cast<int>(std::time(0)));
     m_dist = new boost::uniform_real<>(min, max);
     m_uni = new boost::variate_generator<baseGenerator&, boost::uniform_real<> >(*m_gen, *m_dist);
   }

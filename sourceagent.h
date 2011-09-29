@@ -17,7 +17,7 @@ namespace Langmuir
     *  Depending on the potential of the source, positive or negative charges enter the simulation be emerging from the source.
     *  @date 06/07/2010
     */
-    SourceAgent ( World * world, unsigned int site );
+    SourceAgent ( World * world, int site );
 
     /**
      * @brief virutal Destructor.
@@ -30,7 +30,7 @@ namespace Langmuir
      * Agent chooses a site and hands off to site.
      * @return site index of the site the charge carrier was moved to.  -1 if the transport was unsucessful.
      */
-    virtual unsigned int transport ( );
+    virtual int transport ( );
 
     /**
       * @bried charge of the source (cause the makes sense!)
@@ -79,7 +79,7 @@ namespace Langmuir
      * @param site serial cell index of site to interact with.
      * @return potential potential calculated.
      */
-    double siteInteraction(unsigned int newSite);
+    double siteInteraction(int newSite);
 
     /**
      * @brief coulomb interaction.
@@ -89,7 +89,7 @@ namespace Langmuir
      * @param site serial cell index of site to interact with.
      * @return potential potential calculated.
      */
-    double coulombInteraction(unsigned int newSite);
+    double coulombInteraction(int newSite);
 
     /**
      * @brief coulomb interaction.
@@ -99,7 +99,7 @@ namespace Langmuir
      * @param site serial cell index of site to interact with.
      * @return potential potential calculated.
      */
-    double imageInteraction(unsigned int newSite);
+    double imageInteraction(int newSite);
 
     /**
      * @brief Transport attempt success.

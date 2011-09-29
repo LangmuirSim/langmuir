@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
            << "," << test.getXDistance(site1, site2) << ","
            << test.getYDistance(site1, site2) << "\n";
 
-  std::vector<unsigned int> neighbors;
+  std::vector<int> neighbors;
   qDebug() << "neighbors.size()" << neighbors.size();
 
   neighbors = test.neighbors(site1);

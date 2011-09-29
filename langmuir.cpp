@@ -176,6 +176,13 @@ int main (int argc, char *argv[])
           // Perform Iterations
           sim.performIterations (par.iterationsPrint);
 
+          // Output Coulomb Energy
+          if (par.outputCoulomb)
+          {
+              sim.world()->launchCoulombKernel1();
+              sim.world()->saveOpenCLOutputVectorToFile( QString("%1-coulomb-%2.cl").arg(oFileName).arg(sim.getTick()) );
+          }
+
           // Output Trajectory
           if (par.outputXyz)
             sim.getGrid ()->print3D ((*tout));

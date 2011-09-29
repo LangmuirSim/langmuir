@@ -8,8 +8,11 @@
 
 #include "cl.hpp"
 #include <QtCore>
+#include <QtGui>
 #include <vector>
 #include <Eigen/Core>
+#include "chargeagent.h"
+
 
 namespace Langmuir
 {
@@ -40,21 +43,21 @@ namespace Langmuir
       * Sets columns, rows, layers, area, and width to indicated values. 
       * Resizes the internal vector to hold the appropriate number of values.
       */
-    TripleIndexArray (unsigned int col, unsigned int row, unsigned int lay);
+    TripleIndexArray (int col, int row, int lay);
 
     /** 
       * @brief operator overload
       *
       * Access a double at col, row, lay position.
       */
-    double& operator() (unsigned int col, unsigned int row, unsigned int lay);
+    double& operator() (int col, int row, int lay);
 
     /** 
       * @brief operator overload 
       *
       * Access a double at col, row, lay position.
       */
-    double operator() (unsigned int col, unsigned int row, unsigned int lay) const;
+    double operator() (int col, int row, int lay) const;
 
     /**
       * @brief Clear values and reallocate space.
@@ -62,35 +65,35 @@ namespace Langmuir
       * Sets columns, rows, layers, area, and width to indicated values. 
       * Resizes the internal vector to hold the appropriate number of values.
       */
-    void resize (unsigned int col, unsigned int row, unsigned int lay);
+    void resize (int col, int row, int lay);
 
     /**
       * @brief member access.
       *
       * Get the number of rows. 
       */
-    inline unsigned int rows() const { return m_row; }
+    inline int rows() const { return m_row; }
 
     /**
       * @brief member access.
       *
       * Get the number of columns.
       */
-    inline unsigned int cols() const { return m_col; }
+    inline int cols() const { return m_col; }
 
     /**
       * @brief member access.
       *
       * Get the number of layerss.
       */
-    inline unsigned int lays() const { return m_lay; }
+    inline int lays() const { return m_lay; }
 
     /**
       * @brief member access.
       *
       * Get the number of values.
       */
-    inline unsigned int size() const { return values.size(); }
+    inline int size() const { return values.size(); }
 
    private:
 
@@ -106,7 +109,7 @@ namespace Langmuir
       *
       * The number of columns.
       */
-    unsigned int m_width;
+    int m_width;
 
     /**
       * @brief member.
@@ -114,31 +117,31 @@ namespace Langmuir
       * The number of columns times the number of rows.
       * The total number of items in a layer.
       */
-    unsigned int m_area;
+    int m_area;
 
     /**
       * @brief member.
       *
       * The number of columns.
       */
-    unsigned int m_col;
+    int m_col;
 
     /**
       * @brief member.
       *
       * The number of rows.
       */
-    unsigned int m_row;
+    int m_row;
 
     /**
       * @brief member.
       *
       * The number of layers.
       */
-    unsigned int m_lay;
+    int m_lay;
   };
 
-  const unsigned int errorValue = -1;
+  const int errorValue = -1;
 
   /**
     * @class World
@@ -219,14 +222,14 @@ namespace Langmuir
       *
       * Get the address of a list of charged defects.
       */
-    QList<unsigned int> * defectSiteIDs();
+    QList<int> * defectSiteIDs();
 
     /**
       * @brief member access.
       *
       * Get the address of a list of charged traps.
       */
-    QList<unsigned int> * trapSiteIDs();
+    QList<int> * trapSiteIDs();
 
     /**
       * @brief member access.
@@ -243,28 +246,19 @@ namespace Langmuir
     TripleIndexArray& interactionEnergies();
 
     /**
-      * @brief copy n = m_charges.size() doubles from GPU to CPU
-      *
-      * these doubles are put inside m_oDevice; they should contain the results of coulomb calculations.
+      * @brief tell the GPU to perform coulomb calculations over all locations
       */
-    void copyDeviceToHost( );
+    void launchCoulombKernel1();
 
     /**
-      * @brief copy n = m_charges.size() * 2 ints from CPU to GPU
-      *
-      * the ints are the current and future(proposed) site IDs of charge carriers
+      * @brief tell the GPU to perform coulomb calculations over select locations
       */
-    void copyHostToDevice( );
+    void launchCoulombKernel2();
 
     /**
-      * @brief tell the GPU to perform coulomb calculations
+      * @brief tell the CPU to save data to a file
       */
-    void launchKernel( );
-
-    /**
-      * @brief wait for the GPU to be done
-      */
-    void clFinish( );
+    void saveOpenCLOutputVectorToFile( QString name, int layer = 0 );
 
     /**
       * @brief copy a charge carrier's current site ID to the m_iHost vector
@@ -273,32 +267,33 @@ namespace Langmuir
       * The data *needed* from each Agent object isn't closely packed.  Wish there was a
       * way around this - its an extra copying step.
       */
-    inline void setISiteHost( int index, int value ) { m_iHost[index] = value; }
-
-    /**
-      * @brief copy a charge carrier's future site ID to the m_iHost vector
-      */
-    inline void setFSiteHost( int index, int value ) { m_fHost[index] = value; }
+    inline void copySiteAndChargeToHostVector( int index, int site, int charge = -1 ) { m_sHost[index] = site; m_qHost[index] = charge; }
 
     /**
       * @brief read a value in m_oDevice - which should be the result of a coulomb calculation.
       */
-    inline const double& getOutputHost( int index ) const { return m_oHost[index]; }
+    inline const double& getOutputHost(int index) const { return m_oHost[index]; }
+
+    void compareHostAndDeviceForAllCarriers();
+    void compareHostAndDeviceAtSite(int i);
+    void compareHostAndDeviceForCarrier(int i);
 
     /**
-      * @brief if or not OpenCL could be set up correctly and used
-      */
-    const bool canUseOpenCL() const;
+     * @brief change parameters
+     *
+     * toggle openCL if valid
+     */
+    bool toggleOpenCL(bool on);
 
     /**
       * @brief write message to stat file
       */
-    void statMessage( QString message );
+    void statMessage(QString message);
 
     /**
       * @brief flush the stat file
       */
-    void statFlush( );
+    void statFlush();
 
    private:
 
@@ -306,27 +301,23 @@ namespace Langmuir
     Rand                 *m_rand;                // Random number generator
     SimulationParameters *m_parameters;          // Simulation Parameters
     QList<ChargeAgent *>  m_charges;             // Charge carriers in the system
-    QList<unsigned int>   m_defectSiteIDs;       // Site ids of defects in the system
-    QList<unsigned int>   m_trapSiteIDs;         // Site ids of traps in the system
+    QList<int>            m_defectSiteIDs;       // Site ids of defects in the system
+    QList<int>            m_trapSiteIDs;         // Site ids of traps in the system
     Eigen::MatrixXd       m_coupling;            // Enumerates coupling constants between different sites
     TripleIndexArray      m_interactionEnergies; // Interaction energies
-    QFile                *m_statFile;             // Place to write lifetime and pathlength information
-    QTextStream          *m_statStream;           // Text stream for stat file
+    QFile                *m_statFile;            // Place to write lifetime and pathlength information
+    QTextStream          *m_statStream;          // Text stream for stat file
 
-    cl_int                       m_error;       // OpenCL error code
-    cl::vector<cl::Platform>     m_platforms;   // OpenCL platforms
-    cl::vector<cl::Context>      m_contexts;    // OpenCL contexts
-    cl::vector<cl::Device>       m_devices;     // OpenCL devices
-    cl::vector<cl::CommandQueue> m_queues;      // OpenCL queues
-    cl::vector<cl::Program>      m_programs;    // OpenCL programs
-    cl::vector<cl::Kernel>       m_kernels;     // OpenCL kernels
-    QVector<int>                 m_iHost;       // Host site ids (initial)
-    QVector<int>                 m_fHost;       // Host site ids (final)
-    QVector<double>              m_oHost;       // Host output vector
-    cl::Buffer                   m_iDevice;     // Device site ids (initial)
-    cl::Buffer                   m_fDevice;     // Device site ids (final)
-    cl::Buffer                   m_dDevice;     // Device site ids (for defects)
-    cl::Buffer                   m_oDevice;     // Device output vector
+    cl::Context          m_context;
+    cl::CommandQueue     m_queue;         // OpenCl queue
+    cl::Kernel           m_coulombK1;     // Kernel for calculating Coulomb Energy everywhere
+    cl::Kernel           m_coulombK2;     // Kernel for calculating Coulomb Energy at select places
+    QVector<int>         m_sHost;         // Host site ids
+    QVector<int>         m_qHost;         // Host charges
+    QVector<double>      m_oHost;         // Host output vector
+    cl::Buffer           m_sDevice;       // Device site ids
+    cl::Buffer           m_qDevice;       // Device charges
+    cl::Buffer           m_oDevice;       // Device output vector
  };
 
  inline QList<ChargeAgent *> * World::charges()
@@ -334,12 +325,12 @@ namespace Langmuir
   return &m_charges;
  }
 
- inline QList<unsigned int> * World::defectSiteIDs()
+ inline QList<int> * World::defectSiteIDs()
  {
   return &m_defectSiteIDs;
  }
 
- inline QList<unsigned int> * World::trapSiteIDs()
+ inline QList<int> * World::trapSiteIDs()
  {
   return &m_trapSiteIDs;
  }

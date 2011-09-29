@@ -36,7 +36,7 @@ namespace Langmuir{
      * @param world address of the world object.
      * @param site serial site index.
      */
-    Agent(Type type, World *world = 0, unsigned int site = 0);
+    Agent(Type type, World *world = 0, int site = 0);
 
     /**
      * @brief virutal Destructor.
@@ -48,14 +48,14 @@ namespace Langmuir{
      *
      * Set the nearest neighbours of the agent.
      */
-    virtual void setNeighbors(QVector<unsigned int> neighbors);
+    virtual void setNeighbors(QVector<int> neighbors);
 
     /**
      * @brief set neighbors.
      *
      * Get the nearest neighbours of the agent.
      */
-    virtual const QVector<unsigned int>& getNeighbors() const;
+    virtual const QVector<int>& getNeighbors() const;
 
     /**
      * @brief charge.
@@ -71,7 +71,7 @@ namespace Langmuir{
      * Agent chooses a site and hands off to site.
      * @return site index of the site the charge carrier was moved to.  -1 if the transport was unsucessful.
      */
-    virtual unsigned int transport() = 0;
+    virtual int transport() = 0;
 
     /**
      * @brief complete the tick.
@@ -85,14 +85,14 @@ namespace Langmuir{
      *
      * Set the site number
      */
-    virtual void setSite(unsigned int site, bool future = false);
+    virtual void setSite(int site, bool future = false);
 
     /**
      * @brief Get site.
      *
      * Return the site number
      */
-    virtual unsigned int site(bool future = false);
+    virtual int site(bool future = false);
 
   protected:
     /**
@@ -100,14 +100,14 @@ namespace Langmuir{
       *
       * Serial site index for the current site.
       */
-    unsigned int m_site;
+    int m_site;
 
     /**
       * @brief future site.
       *
       * Serial site index for the future site.
       */
-    unsigned int m_fSite;
+    int m_fSite;
 
     /**
       * @brief Simulation world.
@@ -121,7 +121,7 @@ namespace Langmuir{
       *
       * List of neighboring sites in the grid.
       */
-    QVector<unsigned int> m_neighbors;
+    QVector<int> m_neighbors;
 
     /**
       * @brief Agent type.
@@ -131,17 +131,17 @@ namespace Langmuir{
     short m_type;
   };
 
-  inline Agent::Agent(Type type, World *world, unsigned int site) :
+  inline Agent::Agent(Type type, World *world, int site) :
         m_site(-1), m_fSite(site), m_world(world), m_type(type)
   {
   }
 
-  inline void Agent::setNeighbors(QVector<unsigned int> neighbors)
+  inline void Agent::setNeighbors(QVector<int> neighbors)
   {
     m_neighbors = neighbors;
   }
 
-  inline const QVector<unsigned int>& Agent::getNeighbors() const
+  inline const QVector<int>& Agent::getNeighbors() const
   {
     return m_neighbors;
   }
@@ -151,13 +151,13 @@ namespace Langmuir{
     m_site = m_fSite;
   }
 
-  inline void Agent::setSite(unsigned int site, bool future)
+  inline void Agent::setSite(int site, bool future)
   {
     if (future) m_fSite = site;
     else m_site = site;
   }
 
-  inline unsigned int Agent::site(bool future)
+  inline int Agent::site(bool future)
   {
     if (future) return m_fSite;
     else return m_site;

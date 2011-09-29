@@ -79,11 +79,11 @@ namespace Langmuir
         m_world->initializeOpenCL();
         if ( m_parameters->useOpenCL )
         {
-            turnOnOpenCL();
+            m_world->toggleOpenCL(true);
         }
         else
         {
-            turnOffOpenCL();
+            m_world->toggleOpenCL(false);
         }
 
         // tick is the global step number of this simulation
@@ -104,13 +104,13 @@ namespace Langmuir
         // We randomly place all of the charges in the grid
         Grid *grid = m_world->grid ();
 
-        unsigned int nSites = grid->width () * grid->height () * grid->depth ();
+        int nSites = grid->width () * grid->height () * grid->depth ();
         int maxCharges = m_source->maxCharges ();
 
         for (int i = 0; i < maxCharges;)
         {
             // Randomly select a site, ensure it is suitable, if so add a charge agent
-            unsigned int site =
+            int site =
                 int (m_world->random () * (double (nSites) - 1.0e-20));
             if (grid->siteID (site) == 0 && grid->agent (site) == 0)
             {
@@ -135,25 +135,18 @@ namespace Langmuir
             if ( m_parameters->useOpenCL && charges.size() > 0 )
             {
                 // first have the charge carriers propose future sites
-                for ( int j = 0; j < charges.size(); j++ ) charges[j]->chooseFuture(j);
-
-                // copy the current sites and the future sites to the GPU
-                m_world->copyHostToDevice();
+                //for ( int j = 0; j < charges.size(); j++ ) charges[j]->chooseFuture(j);
+                QFuture < void > future = QtConcurrent::map (charges, Simulation::chargeAgentChooseFuture);
+                future.waitForFinished();
 
                 // tell the GPU to perform all coulomb calculations
-                m_world->launchKernel();
-
-                // copy the results of the coulomb calculation back to the CPU ( every charge carrier gets a result )
-                m_world->copyDeviceToHost();
-
-                // make sure all the previous things finish
-                m_world->clFinish();
+                m_world->launchCoulombKernel2();
 
                 //check the answer during debugging
-                //compareHostAndDevice();
+                //m_world->compareHostAndDeviceForAllCarriers();
 
                 // now use the results of the coulomb calculations to decide if the carreirs should have moved
-                QFuture < void > future = QtConcurrent::map (charges, Simulation::chargeAgentDecideFuture);
+                future = QtConcurrent::map (charges, Simulation::chargeAgentDecideFuture);
                 future.waitForFinished();
             }
             else // Not using OpenCL
@@ -165,92 +158,90 @@ namespace Langmuir
                 future.waitForFinished ();
             }
 
-        // Now we are done with the charge movement, move them to the next tick!
-        nextTick ();
+            // Now we are done with the charge movement, move them to the next tick!
+            nextTick ();
 
-        // Perform charge injection at the source
-        performInjections (m_parameters->sourceAttempts);
+            // Perform charge injection at the source
+            performInjections (m_parameters->sourceAttempts);
 
-        tick += 1;
-
-      }
-  }
-
-  void Simulation::performInjections (int nInjections)
-  {
-      int inject = nInjections;
-      if ( inject < 0 )
-      {
-          inject = m_maxcharges - this->charges();
-          if ( inject <= 0 )
-          {
-              return;
-          }
-      }
-      for ( int i = 0; i < inject; i++ )
-      {
-        unsigned int site = m_source->transport();
-        if (site != errorValue)
-          {
-            ChargeAgent *charge = new ChargeAgent (m_world, site );
-            m_world->charges ()->push_back (charge);
-          }
-      }
-  }
-
-  void Simulation::nextTick ()
-  {
-    // Iterate over all sites to change their state
-    QList < ChargeAgent * >&charges = *m_world->charges();
-    if( m_parameters->outputStats )
-    {
-      for (int i = 0; i < charges.size (); ++i)
-      {
-        charges[i]->completeTick ();
-        // Check if the charge was removed - then we should delete it
-        if (charges[i]->removed ())
-        {
-          m_world->statMessage( QString( "%1 %2 %3\n" )
-                                   .arg(tick,m_parameters->outputWidth)
-                                   .arg(charges[i]->lifetime(),m_parameters->outputWidth)
-                                   .arg(charges[i]->distanceTraveled(),m_parameters->outputWidth) );
-          delete charges[i];
-          charges.removeAt (i);
-          m_drain->acceptCharge (-1);
-          m_source->decrementCharge ();
-          --i;
+            tick += 1;
         }
-      }
+    }
 
-      m_world->statFlush();
-    }
-    else
+    void Simulation::performInjections (int nInjections)
     {
-      for (int i = 0; i < charges.size (); ++i)
-      {
-        charges[i]->completeTick ();
-        // Check if the charge was removed - then we should delete it
-        if (charges[i]->removed ())
+        int inject = nInjections;
+        if ( inject < 0 )
         {
-          delete charges[i];
-          charges.removeAt (i);
-          m_drain->acceptCharge (-1);
-          m_source->decrementCharge ();
-          --i;
+            inject = m_maxcharges - this->charges();
+            if ( inject <= 0 )
+            {
+                return;
+            }
         }
-      }
+        for ( int i = 0; i < inject; i++ )
+        {
+          int site = m_source->transport();
+          if (site != errorValue)
+            {
+              ChargeAgent *charge = new ChargeAgent (m_world, site );
+              m_world->charges ()->push_back (charge);
+            }
+        }
     }
-  }
+
+    void Simulation::nextTick ()
+    {
+        // Iterate over all sites to change their state
+        QList < ChargeAgent * >&charges = *m_world->charges();
+        if( m_parameters->outputStats )
+        {
+          for (int i = 0; i < charges.size (); ++i)
+          {
+            charges[i]->completeTick ();
+            // Check if the charge was removed - then we should delete it
+            if (charges[i]->removed ())
+            {
+              m_world->statMessage( QString( "%1 %2 %3\n" )
+                                       .arg(tick,m_parameters->outputWidth)
+                                       .arg(charges[i]->lifetime(),m_parameters->outputWidth)
+                                       .arg(charges[i]->distanceTraveled(),m_parameters->outputWidth) );
+              delete charges[i];
+              charges.removeAt (i);
+              m_drain->acceptCharge (-1);
+              m_source->decrementCharge ();
+              --i;
+            }
+          }
+          m_world->statFlush();
+        }
+        else
+        {
+          for (int i = 0; i < charges.size (); ++i)
+          {
+            charges[i]->completeTick ();
+            // Check if the charge was removed - then we should delete it
+            if (charges[i]->removed ())
+            {
+              delete charges[i];
+              charges.removeAt (i);
+              m_drain->acceptCharge (-1);
+              m_source->decrementCharge ();
+              --i;
+            }
+          }
+        }
+    }
 
     void Simulation::printGrid ()
     {
         system ("clear");
-        unsigned int width = m_world->grid ()->width ();
-        unsigned int height = m_world->grid ()->height ();
-        for (unsigned int j = 0; j < height; ++j)
+        int width = m_world->grid ()->width ();
+        int height = m_world->grid ()->height ();
+        for (int j = 0; j < height; ++j)
         {
             std::cout << "||";
-            for (unsigned int i = 0; i < width; ++i)
+            for (int i = 0; i < width; ++i)
             {
                 int index = m_world->grid()->getIndex(i,j,0);
                 if (m_world->grid ()->agent (index))
@@ -297,7 +288,7 @@ namespace Langmuir
          */
 
         // Add the agents
-        for (unsigned int i = 0; i < m_grid->volume (); ++i)
+        for (int i = 0; i < m_grid->volume (); ++i)
         {
             if (m_world->random () < m_parameters->defectPercentage)
             {
@@ -318,7 +309,7 @@ namespace Langmuir
         m_world->grid ()->setSiteID (m_grid->volume () + 1, 3);
 
         // Now to assign nearest neighbours for the electrodes.
-        QVector < unsigned int >neighbors (0, 0);
+        QVector < int >neighbors (0, 0);
 
         switch ( m_parameters->hoppingRange )
         {
@@ -326,10 +317,10 @@ namespace Langmuir
             default:
             {
                 // Loop over layers
-                for (unsigned int layer = 0; layer < m_grid->depth (); layer++)
+                for (int layer = 0; layer < m_grid->depth (); layer++)
                 {
                     // Get column in this layer that is closest to the source
-                    QVector < unsigned int >column_neighbors_in_layer =
+                    QVector < int >column_neighbors_in_layer =
                         m_grid->col (0, layer);
                     // Loop over this column
                     for (int column_site = 0;
@@ -343,10 +334,10 @@ namespace Langmuir
                 neighbors.clear ();
 
                 // Loop over layers
-                for (unsigned int layer = 0; layer < m_grid->depth (); layer++)
+                for (int layer = 0; layer < m_grid->depth (); layer++)
                 {
                     // Get column in this layer that is closest to the source
-                    QVector < unsigned int >column_neighbors_in_layer =
+                    QVector < int >column_neighbors_in_layer =
                         m_grid->col (m_grid->width () - 1, layer);
                     // Loop over this column
                     for (int column_site = 0;
@@ -380,11 +371,11 @@ namespace Langmuir
 
         //qDebug() << "entering heteroTraps" << par->trapPercentage;
 
-        for (unsigned int x = 0; x < m_grid->width (); x++)
+        for (int x = 0; x < m_grid->width (); x++)
         {
-            for (unsigned int y = 0; y < m_grid->height (); y++)
+            for (int y = 0; y < m_grid->height (); y++)
             {
-                for (unsigned int z = 0; z < m_grid->depth (); z++)
+                for (int z = 0; z < m_grid->depth (); z++)
                 {
                     // Get the potential at this site
                     tPotential =
@@ -400,7 +391,7 @@ namespace Langmuir
                     }
 
                     // The site ID ( this is bad its specific to 3D cubic grids )
-                    unsigned int site =
+                    int site =
                         x + m_grid->width () * y + z * m_grid->area ();
 
                     // Add seeds for heterogeneous traps
@@ -435,13 +426,13 @@ namespace Langmuir
         while ((m_world->trapSiteIDs ()->size ()) < trapCount)
         {
             // Select a random trap
-            unsigned int trapSeed =
+            int trapSeed =
                 int (m_world->random () *
                      (m_world->trapSiteIDs ()->size () - 1.0e-20));
 
             // Select a random neighbor
-            unsigned int newTrap;
-            QVector < unsigned int >m_neighbors = m_grid->neighbors(m_world->trapSiteIDs()->at(trapSeed),1);
+            int newTrap;
+            QVector < int >m_neighbors = m_grid->neighbors(m_world->trapSiteIDs()->at(trapSeed),1);
             //qDebug() << "Neighbors: " << m_neighbors.size();
             newTrap =
                 m_neighbors[int
@@ -461,9 +452,9 @@ namespace Langmuir
             else
             {
                 // create a new trap site and save it
-                unsigned int x = m_grid->getColumn(newTrap);
-                unsigned int y = m_grid->getRow(newTrap);
-                unsigned int z = m_grid->getLayer(newTrap);
+                int x = m_grid->getColumn(newTrap);
+                int y = m_grid->getRow(newTrap);
+                int z = m_grid->getLayer(newTrap);
                 tPotential = m_potential->calculate (x + 0.5, y + 0.5, z + 0.5);
                 m_grid->setPotential (newTrap, (tPotential + m_parameters->deltaEpsilon));
                 m_world->trapSiteIDs ()->push_back (newTrap);
@@ -472,7 +463,7 @@ namespace Langmuir
         }
         //qDebug () << "Traps: " << m_world->chargedTraps ()->size ();
 
-        //for (unsigned int i = 0; i < m_grid->volume (); i++)
+        //for (int i = 0; i < m_grid->volume (); i++)
         //{
         //  qDebug() << i << "  " << m_grid->potential(i);
         //}
@@ -512,9 +503,9 @@ namespace Langmuir
 
             for(int i = 0; i < m_world->trapSiteIDs()->size(); i++)
             {
-                unsigned int rowCoord = m_grid->getRow(m_world->trapSiteIDs()->at(i));
+                int rowCoord = m_grid->getRow(m_world->trapSiteIDs()->at(i));
                 //qDebug() << rowCoord;
-                unsigned int colCoord = m_grid->getColumn(m_world->trapSiteIDs()->at(i));
+                int colCoord = m_grid->getColumn(m_world->trapSiteIDs()->at(i));
                 //qDebug() << colCoord;
                 painter.drawRect(colCoord,rowCoord,1,1);
             }
@@ -527,11 +518,11 @@ namespace Langmuir
         double tPotential = 0;
         double gaussianDisorder = 0.0;
 
-        for (unsigned int x = 0; x < m_grid->width (); x++)
+        for (int x = 0; x < m_grid->width (); x++)
         {
-            for (unsigned int y = 0; y < m_grid->height (); y++)
+            for (int y = 0; y < m_grid->height (); y++)
             {
-                for (unsigned int z = 0; z < m_grid->depth (); z++)
+                for (int z = 0; z < m_grid->depth (); z++)
                 {
 
                     // Get the potential at this site
@@ -548,7 +539,7 @@ namespace Langmuir
                     }
 
                     // The site ID ( this is bad its specific to 3D cubic grids )
-                    unsigned int site =
+                    int site =
                         x + m_grid->width () * y + z * m_grid->area ();
 
                     // We can randomly tweak a site energy
@@ -574,43 +565,6 @@ namespace Langmuir
 
         //Set the potential of the Drain
         m_grid->setDrainPotential (m_potential->calculate (double (m_grid->width ()), 0.0,0.0));
-
-        /*
-           // We are assuming one source, one drain that are parallel.
-           // The most efficient way to calculate this is to work out the potential
-           // for each column in our system and then assign it to each agent.
-           int width = m_grid->width();
-
-           double m = (m_drain->potential() - m_source->potential()) / double(width);
-           double c = m_source->potential();
-
-           // The source to drain distance is simply the width of the device.
-           for (int i = 0; i < width; i++) {
-            // The potential of this column
-            double tPotential = m * (double(i)+0.5) + c;
-            // Loop over layers and assign the potential to this column in layer
-            for ( unsigned int layer = 0; layer < m_grid->depth(); layer++ )
-            {
-             // All the members of this column in the given layer
-             vector<unsigned int> column_members = m_grid->col(i,layer);
-             // Loop over the members of this column in the given layer
-             for (vector<unsigned int>::iterator j = column_members.begin(); j != column_members.end(); j++)
-             {
-              // We can randomly tweak a site energy
-              if (m_world->random() < trapPercent)
-              {
-               m_grid->setPotential(*j, (tPotential + deltaEpsilon));
-               m_world->chargedTraps()->push_back(*j);
-              }
-              // Assign the potential
-              else { m_grid->setPotential(*j, tPotential); }
-             }
-            }
-            }
-            // Set the potential of the drain site
-            //tPotential = m * (double(width)+0.5) + c;
-            //m_grid->setPotential(width*m_grid->height()*m_grid->depth()+1, tPotential);
-        */
     }
 
     void Simulation::updateInteractionEnergies ()
@@ -641,7 +595,7 @@ namespace Langmuir
         }
     }
 
-    inline void Simulation::chargeAgentIterate (ChargeAgent * chargeAgent)
+    inline void Simulation::chargeAgentIterate ( ChargeAgent * chargeAgent)
     {
         // This function performs a single iteration for a charge agent, only thread
         // safe calls can be made in this function. Other threads may access the
@@ -649,62 +603,15 @@ namespace Langmuir
         chargeAgent->transport();
     }
 
+    inline void Simulation::chargeAgentChooseFuture( ChargeAgent * chargeAgent )
+    {
+        // same rules apply here as for chargeAgentIterate;
+        chargeAgent->chooseFuture();
+    }
+
     inline void Simulation::chargeAgentDecideFuture( ChargeAgent * chargeAgent )
     {
         // same rules apply here as for chargeAgentIterate;
-        // why is this called? because chargeAgent->transport()
-        // only calls chargeAgent->decideFuture() if we aren't using OpenCL
         chargeAgent->decideFuture();
     }
-
-    void Simulation::compareHostAndDevice()
-    {
-        QList < ChargeAgent * >&charges = *m_world->charges ();
-        for ( int j = 0; j < charges.size(); j++ )
-        {
-            double host = charges[j]->interaction();
-            double device = m_world->getOutputHost(j);
-            double percent = fabs( ( device - host ) / host  * 100.00 );
-            if ( percent > 1e-5 && !(qFuzzyCompare(host,-1.00)) )
-            {
-                qDebug("site: %10d; fsite: %10d; (xi,yi,zi): ( %5d, %5d, %5d ); (xf,yf,zf): ( %5d, %5d, %5d ); device: % 10.10e host: % 10.10e percent: %25.20f",
-                       charges[j]->site(),
-                       charges[j]->site(true),
-                       m_world->grid()->getColumn( charges[j]->site() ),
-                       m_world->grid()->getRow( charges[j]->site() ),
-                       m_world->grid()->getLayer( charges[j]->site() ),
-                       m_world->grid()->getColumn( charges[j]->site(true) ),
-                       m_world->grid()->getRow( charges[j]->site(true) ),
-                       m_world->grid()->getLayer( charges[j]->site(true) ),
-                       device,
-                       host,
-                       percent );
-            }
-        }
-    }
-
-    inline bool Simulation::turnOnOpenCL()
-    {
-        if ( ! ( m_world->canUseOpenCL() ) )
-        {
-            m_parameters->useOpenCL = false;
-            qDebug() << "can not use openCL on this platform - openCL has been turned off";
-            return false;
-        }
-        if ( ! ( m_parameters->interactionCoulomb ) )
-        {
-            m_parameters->useOpenCL = false;
-            qDebug() << "OpenCL is on but coulomb interactions are off - disabling openCL";
-            return false;
-        }
-        m_parameters->useOpenCL = true;
-        return true;
-    }
-
-    inline bool Simulation::turnOffOpenCL()
-    {
-        m_parameters->useOpenCL = false;
-        return false;
-    }
-
 }                                // End namespace Langmuir

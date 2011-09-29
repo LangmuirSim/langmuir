@@ -92,7 +92,7 @@ namespace Langmuir
   //Is a region even defined
   if ( xx.size() >= 2 )
   {
-   unsigned int x = regionX(col);
+   int x = regionX(col);
    potential += mx[x]*col+bx[x];
    defined = true;
   }
@@ -100,7 +100,7 @@ namespace Langmuir
   //Is a region even defined
   if ( yy.size() >= 2 )
   {
-  unsigned int y = regionY(row);
+  int y = regionY(row);
   potential += my[y]*row+by[y];
   defined = true;
   }
@@ -108,7 +108,7 @@ namespace Langmuir
   //Is a region even defined
   if ( zz.size() >= 2 )
   {
-  unsigned int z = regionZ(lay);
+  int z = regionZ(lay);
   potential += mz[z]*lay+bz[z];
   defined = true;
   }
@@ -118,7 +118,7 @@ namespace Langmuir
   return potential;
  }
 
- unsigned int LinearPotential::regionX( double x )
+ int LinearPotential::regionX( double x )
  {
   //Below the range of defined points
   if ( x < xx[0].x() ) return 0;
@@ -127,13 +127,13 @@ namespace Langmuir
   if ( x > xx[xx.size()-1].x() ) return mx.size()-1;
 
   //In the range of defined points
-  unsigned int region = 0;
+  int region = 0;
   while ( x > xx[region+1].x() ) region += 1;
 
   return region;
  }
 
- unsigned int LinearPotential::regionY( double y )
+ int LinearPotential::regionY( double y )
  {
   //Below the range of defined points
   if ( y < yy[0].y() ) return 0;
@@ -142,13 +142,13 @@ namespace Langmuir
   if ( y > yy[yy.size()-1].y() ) return my.size()-1;
 
   //In the range of defined points
-  unsigned int region = 0;
+  int region = 0;
   while ( y > yy[region+1].y() ) region += 1;
 
   return region;
  }
 
- unsigned int LinearPotential::regionZ( double z )
+ int LinearPotential::regionZ( double z )
  {
   //Below the range of defined points
   if ( z < zz[0].z() ) return 0;
@@ -157,7 +157,7 @@ namespace Langmuir
   if ( z > zz[zz.size()-1].z() ) return mz.size()-1;
 
   //In the range of defined points
-  unsigned int region = 0;
+  int region = 0;
   while ( z > zz[region+1].z() ) region += 1;
 
   return region;

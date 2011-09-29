@@ -20,7 +20,7 @@ namespace Langmuir
   {
 
   public:
-    HoppingAgent(unsigned int site, const Grid* grid);
+    HoppingAgent(int site, const Grid* grid);
     virtual ~HoppingAgent();
 
     /**

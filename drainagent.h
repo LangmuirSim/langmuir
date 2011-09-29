@@ -29,7 +29,7 @@ namespace Langmuir
      * @param potential potential of the drain.
      * @warning default potential is set to zero.
      */
-    DrainAgent(World *world, unsigned int site);
+    DrainAgent(World *world, int site);
 
     /**
      * @brief virutal Destructor.
@@ -61,7 +61,7 @@ namespace Langmuir
      * Agent chooses a site and hands off to site.
      * @return site index of the site the charge carrier was moved to.  -1 if the transport was unsucessful.
      */
-    virtual unsigned int transport();
+    virtual int transport();
 
     /**
      * @brief total charges.

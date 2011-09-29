@@ -3,7 +3,7 @@
 namespace Langmuir
 {
 
-    QImage GridViewGL::drawEnergyLandscape( unsigned int layer )
+    QImage GridViewGL::drawEnergyLandscape( int layer )
     {
         //Create an empty image of the appropriate size
         QImage img( pPar->gridWidth, pPar->gridHeight, QImage::Format_ARGB32_Premultiplied );
@@ -203,7 +203,7 @@ namespace Langmuir
         QList< ChargeAgent* > *charges = pSim->world()->charges();
         for ( int i = 0; i < charges->size(); i++ )
         {
-            unsigned int site = charges->at(i)->site();
+            int site = charges->at(i)->site();
             Eigen::Vector3d position = grid->position( site );
             pointBuffer[ i * 4 + 0 ] = position.x();
             pointBuffer[ i * 4 + 1 ] = position.y();
@@ -211,7 +211,7 @@ namespace Langmuir
         }
         carriers = new PointArray(this,pointBuffer);
 
-        QList< unsigned int > *defectList = pSim->world()->defectSiteIDs();
+        QList< int > *defectList = pSim->world()->defectSiteIDs();
         QVector< float > xyz( defectList->size() * 4, 1 );
         for ( int i = 0; i < defectList->size(); i++ )
         {
@@ -303,7 +303,7 @@ namespace Langmuir
 
             for ( int i = 0; i < charges->size(); i++ )
             {
-                unsigned int site = charges->at(i)->site();
+                int site = charges->at(i)->site();
                 Eigen::Vector3d position = grid->position( site );
                 pointBuffer[ i * 4 + 0 ] = position.x();
                 pointBuffer[ i * 4 + 1 ] = position.y();
@@ -456,7 +456,7 @@ namespace Langmuir
             default :
             {
                 pPar->interactionCoulomb = false;
-                pSim->turnOffOpenCL();
+                pSim->world()->toggleOpenCL(false);
                 emit openCLStatusChanged( Qt::Unchecked );
                 emit coulombStatusChanged( Qt::Unchecked );
                 break;
@@ -489,7 +489,7 @@ namespace Langmuir
         {
             case Qt::Checked :
             {
-                if ( ! ( pSim->turnOnOpenCL() ) )
+                if ( ! ( pSim->world()->toggleOpenCL(true) ) )
                 {
                     bool resume = false;
                     if ( ! pause )
@@ -497,7 +497,7 @@ namespace Langmuir
                         togglePauseStatus();
                         resume = true;
                     }
-                    if ( ! pSim->world()->canUseOpenCL() )
+                    if ( ! pPar->okCL )
                     {
                         QMessageBox::warning( this, tr( "Langmuir" ), QString("Can not turn OpenCL.  This platform does not allow openCL."));
                     }
@@ -523,7 +523,7 @@ namespace Langmuir
             }
             default :
             {
-                pSim->turnOffOpenCL();
+                pSim->world()->toggleOpenCL(false);
                 emit openCLStatusChanged( Qt::Unchecked );
                 break;
             }

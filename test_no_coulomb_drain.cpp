@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
     }
 
     // Now for the real work
-    unsigned int startCount = lastCount;
+    int startCount = lastCount;
     for (int j = 0; j < 50; ++j) {
       sim->performIterations(5000);
       qDebug() << "Real:\t" << j << sim->totalChargesAccepted() - lastCount

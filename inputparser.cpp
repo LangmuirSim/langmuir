@@ -515,6 +515,26 @@ namespace Langmuir
               break;
           }
 
+          case e_outputCoulomb:
+          {
+              QString interaction = list.at (1).trimmed ().toLower ();
+              if (interaction == "true")
+              {
+                  m_parameters.outputCoulomb = true;
+              }
+              else if (interaction == "false")
+              {
+                  m_parameters.outputCoulomb = false;
+              }
+              else
+              {
+                  qDebug () << "output.coulomb is either true or false: ";
+                  qFatal ("bad input");
+              }
+              readCount += 1;
+              break;
+          }
+
           case e_potentialPoint:
             {
               QStringList q =
@@ -748,6 +768,42 @@ namespace Langmuir
               break;
             }
 
+          case e_workWidth:
+            {
+              m_parameters.workWidth = list.at (1).toInt ();
+              if (m_parameters.workWidth <= 0)
+                {
+                  qDebug () << "Local work group size width be larger than 0.";
+                  qFatal ("bad input");
+                }
+              readCount += 1;
+              break;
+            }
+
+          case e_workHeight:
+            {
+              m_parameters.workHeight = list.at (1).toInt ();
+              if (m_parameters.workHeight <= 0)
+                {
+                  qDebug () << "Local work group height must be larger than 0.";
+                  qFatal ("bad input");
+                }
+              readCount += 1;
+              break;
+            }
+
+          case e_workDepth:
+            {
+              m_parameters.workDepth = list.at (1).toInt ();
+              if (m_parameters.workDepth <= 0)
+                {
+                  qDebug () << "Local work group depth must be larger than 0.";
+                  qFatal ("bad input");
+                }
+              readCount += 1;
+              break;
+            }
+
           case e_workSize:
             {
               m_parameters.workSize = list.at (1).toInt ();
@@ -877,7 +933,6 @@ namespace Langmuir
     s_variables["gaussian.averg"] = e_gaussianAverg;
     s_variables["gaussian.noise"] = e_gaussianNoise;
     s_variables["gaussian.stdev"] = e_gaussianStdev;
-    s_variables["global.size"] = e_globalSize;
     s_variables["grid.charge"] = e_gridCharge;
     s_variables["grid.depth"] = e_gridDepth;
     s_variables["grid.factor"] = e_gridFactor;
@@ -896,6 +951,7 @@ namespace Langmuir
     s_variables["output.stats"] = e_outputStats;
     s_variables["output.width"] = e_outputWidth;
     s_variables["output.xyz"] = e_outputXyz;
+    s_variables["output.coulomb"] = e_outputCoulomb;
     s_variables["permittivity.space"] = e_permittivitySpace;
     s_variables["potential.form"] = e_potentialForm;
     s_variables["potential.point"] = e_potentialPoint;
@@ -914,6 +970,9 @@ namespace Langmuir
     s_variables["variable.working"] = e_variableWorking;
     s_variables["voltage.drain"] = e_voltageDrain;
     s_variables["voltage.source"] = e_voltageSource;
+    s_variables["work.width"] = e_workWidth;
+    s_variables["work.height"] = e_workHeight;
+    s_variables["work.depth"] = e_workDepth;
     s_variables["work.size"] = e_workSize;
     s_variables["z.defect"] = e_zDefect;
     s_variables["z.trap"] = e_zTrap;
@@ -940,7 +999,6 @@ namespace Langmuir
       pairs << QString("%1=%2").arg(s_variables.key( e_gaussianAverg )).arg(variables->gaussianAverg);
       pairs << QString("%1=%2").arg(s_variables.key( e_gaussianNoise )).arg(variables->gaussianNoise);
       pairs << QString("%1=%2").arg(s_variables.key( e_gaussianStdev )).arg(variables->gaussianStdev);
-      pairs << QString("%1=%2").arg(s_variables.key( e_globalSize )).arg(variables->globalSize);
       pairs << QString("%1=%2").arg(s_variables.key( e_gridCharge )).arg(variables->gridCharge);
       pairs << QString("%1=%2").arg(s_variables.key( e_gridDepth )).arg(variables->gridDepth);
       pairs << QString("%1=%2").arg(s_variables.key( e_gridFactor )).arg(variables->gridFactor);
@@ -959,6 +1017,7 @@ namespace Langmuir
       pairs << QString("%1=%2").arg(s_variables.key( e_outputStats )).arg(variables->outputStats);
       pairs << QString("%1=%2").arg(s_variables.key( e_outputWidth )).arg(variables->outputWidth);
       pairs << QString("%1=%2").arg(s_variables.key( e_outputXyz )).arg(variables->outputXyz);
+      pairs << QString("%1=%2").arg(s_variables.key( e_outputXyz )).arg(variables->outputCoulomb);
       pairs << QString("%1=%2").arg(s_variables.key( e_permittivitySpace )).arg(variables->permittivitySpace);
       pairs << QString("%1=%2").arg(s_variables.key( e_potentialForm )).arg(variables->potentialForm);
       for ( int i = 0; i < variables->potentialPoints.size(); i++ )
@@ -980,7 +1039,10 @@ namespace Langmuir
       pairs << QString("%1=%2").arg(s_variables.key( e_variableWorking )).arg(variables->variableWorking);
       pairs << QString("%1=%2").arg(s_variables.key( e_voltageDrain )).arg(variables->voltageDrain);
       pairs << QString("%1=%2").arg(s_variables.key( e_voltageSource )).arg(variables->voltageSource);
-      pairs << QString("%1=%2").arg(s_variables.key( e_workSize )).arg(variables->workSize);
+      pairs << QString("%1=%2").arg(s_variables.key( e_workWidth )).arg(variables->workWidth);
+      pairs << QString("%1=%2").arg(s_variables.key( e_workHeight )).arg(variables->workHeight);
+      pairs << QString("%1=%2").arg(s_variables.key( e_workDepth )).arg(variables->workDepth);
+      pairs << QString("%1=%2").arg(s_variables.key( e_workDepth )).arg(variables->workSize);
       pairs << QString("%1=%2").arg(s_variables.key( e_zDefect )).arg(variables->zDefect);
       pairs << QString("%1=%2").arg(s_variables.key( e_zTrap )).arg(variables->zTrap);
       return pairs.join("\n");

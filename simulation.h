@@ -58,21 +58,19 @@ namespace Langmuir
     void performIterations (int nIterations);
 
     /**
+     * @brief Perform injection.
+     *
+     * Allow source to perform this many injections.
+     * @param nInjections number of injections to perform.
+     */
+    void performInjections (int nInjections=1);
+
+    /**
      * @brief 2D visualize
      *
      * Used to print an ASCII grid to the terminal - low tech visualization.
      */
     void printGrid ();
-
-    /**
-     * @brief Access the Grid
-     *
-     * Get the address of the Simulation Grid.
-     */
-    Grid *getGrid ()
-    {
-      return m_grid;
-    }
 
     /**
      * @brief Drain Count.
@@ -107,26 +105,20 @@ namespace Langmuir
     World *world ();
 
     /**
-     * @brief change parameters
+     * @brief Access the Grid
      *
-     * toggle openCL if valid
+     * Get the address of the Simulation Grid.
      */
-    bool turnOnOpenCL();
-    bool turnOffOpenCL();
+    Grid *getGrid ()
+    {
+      return m_grid;
+    }
 
     /**
      * @brief the total steps performed
      *
      */
     int getTick();
-
-    /**
-     * @brief Perform injection.
-     *
-     * Allow source to perform this many injections.
-     * @param nInjections number of injections to perform.
-     */
-    void performInjections (int nInjections=1);
 
   private:
 
@@ -178,6 +170,8 @@ namespace Langmuir
      * Address of the drain object used for the simulation.
      */
     DrainAgent *m_drain;
+
+    int tick;
 
     /**
      * @brief Generate Agents.
@@ -233,6 +227,8 @@ namespace Langmuir
      */
     static void chargeAgentIterate (ChargeAgent * chargeAgent);
 
+    static void chargeAgentChooseFuture( ChargeAgent * chargeAgent );
+
     /**
       * @brief finishes what chargeAgentIterate fails to do when OpenCL is used
       *
@@ -242,9 +238,6 @@ namespace Langmuir
       * before deciding the outcome.
       */
     static void chargeAgentDecideFuture( ChargeAgent * chargeAgent );
-
-    void compareHostAndDevice();
-    int tick;
 
   };
 

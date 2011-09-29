@@ -7,7 +7,7 @@ namespace Langmuir
 
   using Eigen::Vector3d;
 
-  CubicGrid::CubicGrid( unsigned int width, unsigned int height, unsigned int depth ) :
+  CubicGrid::CubicGrid( int width, int height, int depth ) :
       m_width  ( width              ), 
       m_height ( height             ), 
       m_depth  ( depth              ), 
@@ -23,14 +23,14 @@ namespace Langmuir
   {
   }
 
-  QVector<unsigned int> CubicGrid::neighbors(unsigned int site, unsigned int hoppingRange)
+  QVector<int> CubicGrid::neighbors(int site, int hoppingRange)
   {
 
     // Return the indexes of all nearest neighbours
-    QVector<unsigned int>      nList(0);
-    unsigned int col = getColumn(site);
-    unsigned int row =    getRow(site);
-    unsigned int lay =  getLayer(site);
+    QVector<int>      nList(0);
+    int col = getColumn(site);
+    int row =    getRow(site);
+    int lay =  getLayer(site);
 
     switch ( hoppingRange )
     {
@@ -196,25 +196,25 @@ namespace Langmuir
 
   }
 
-  QVector<unsigned int> CubicGrid::row(unsigned int row, unsigned int layer)
+  QVector<int> CubicGrid::row(int row, int layer)
   {
-    QVector<unsigned int> vRow;
-    for (unsigned int i = 0; i < m_width; i++) {
+    QVector<int> vRow;
+    for (int i = 0; i < m_width; i++) {
       vRow.push_back(getIndex(i, row, layer));
     }
     return vRow;
   }
 
-  QVector<unsigned int> CubicGrid::col(unsigned int col, unsigned int layer)
+  QVector<int> CubicGrid::col(int col, int layer)
   {
-    QVector<unsigned int> vCol;
-    for (unsigned int i = 0; i < m_height; i++) {
+    QVector<int> vCol;
+    for (int i = 0; i < m_height; i++) {
       vCol.push_back(getIndex(col, i, layer));
     }
     return vCol;
   }
 
-  void CubicGrid::setSize(unsigned int width, unsigned int height, unsigned int depth)
+  void CubicGrid::setSize(int width, int height, int depth)
   {
     m_width  =  width;
     m_height = height;
@@ -226,32 +226,32 @@ namespace Langmuir
     m_siteID.resize( width*height*depth+2, 0);
   }
 
-  unsigned int CubicGrid::width()
+  int CubicGrid::width()
   {
     return m_width;
   }
 
-  unsigned int CubicGrid::height()
+  int CubicGrid::height()
   {
     return m_height;
   }
 
-  unsigned int CubicGrid::depth()
+  int CubicGrid::depth()
   {
     return m_depth;
   }
 
-  unsigned int CubicGrid::area()
+  int CubicGrid::area()
   {
     return m_area;
   }
 
-  unsigned int CubicGrid::volume()
+  int CubicGrid::volume()
   {
     return m_volume;
   }
 
-  double CubicGrid::totalDistance(unsigned int site1, unsigned int site2)
+  double CubicGrid::totalDistance(int site1, int site2)
   {
     return sqrt(    (    getRow(site1) -    getRow(site2) ) * (    getRow(site1) -    getRow(site2) ) +
                     ( getColumn(site1) - getColumn(site2) ) * ( getColumn(site1) - getColumn(site2) ) +
@@ -259,87 +259,87 @@ namespace Langmuir
                );
   }
 
-  double CubicGrid::xDistance(unsigned int site1, unsigned int site2)
+  double CubicGrid::xDistance(int site1, int site2)
   {
     return fabs(int(getColumn(site1)) - int(getColumn(site2)));
   }
 
-  double CubicGrid::yDistance(unsigned int site1, unsigned int site2)
+  double CubicGrid::yDistance(int site1, int site2)
   {
     return fabs(int(getRow(site1)) - int(getRow(site2)));
   }
 
-  double CubicGrid::zDistance(unsigned int site1, unsigned int site2)
+  double CubicGrid::zDistance(int site1, int site2)
   {
     return fabs(int(getLayer(site1)) - int(getLayer(site2)));
   }
 
-  double CubicGrid::xImageDistance(unsigned int site1, unsigned int site2)
+  double CubicGrid::xImageDistance(int site1, int site2)
   {
     return fabs(int(getColumn(site1)) + int(getColumn(site2)))+1;
   }
 
-  double CubicGrid::yImageDistance(unsigned int site1, unsigned int site2)
+  double CubicGrid::yImageDistance(int site1, int site2)
   {
     return fabs(int(getRow(site1)) + int(getRow(site2)))+1;
   }
 
-  double CubicGrid::zImageDistance(unsigned int site1, unsigned int site2)
+  double CubicGrid::zImageDistance(int site1, int site2)
   {
     return fabs(int(getLayer(site1)) + int(getLayer(site2)))+1;
   }
 
-  int CubicGrid::xDistancei(unsigned int site1, unsigned int site2)
+  int CubicGrid::xDistancei(int site1, int site2)
   {
     return abs(int(getColumn(site1)) - int(getColumn(site2)));
   }
 
-  int CubicGrid::yDistancei(unsigned int site1, unsigned int site2)
+  int CubicGrid::yDistancei(int site1, int site2)
   {
     return abs(int(getRow(site1)) - int(getRow(site2)));
   }
 
-  int CubicGrid::zDistancei(unsigned int site1, unsigned int site2)
+  int CubicGrid::zDistancei(int site1, int site2)
   {
     return abs(int(getLayer(site1)) - int(getLayer(site2)));
   }
 
-  int CubicGrid::xImageDistancei(unsigned int site1, unsigned int site2)
+  int CubicGrid::xImageDistancei(int site1, int site2)
   {
     return abs(int(getColumn(site1)) + int(getColumn(site2)))+1;
   }
 
-  int CubicGrid::yImageDistancei(unsigned int site1, unsigned int site2)
+  int CubicGrid::yImageDistancei(int site1, int site2)
   {
     return abs(int(getRow(site1)) + int(getRow(site2)))+1;
   }
 
-  int CubicGrid::zImageDistancei(unsigned int site1, unsigned int site2)
+  int CubicGrid::zImageDistancei(int site1, int site2)
   {
     return abs(int(getLayer(site1)) + int(getLayer(site2)))+1;
   }
 
-  unsigned int CubicGrid::getRow(unsigned int site)
+  int CubicGrid::getRow(int site)
   {
    return ( site / m_width - ( site / m_area ) * m_height );
   }
 
-  unsigned int CubicGrid::getColumn(unsigned int site)
+  int CubicGrid::getColumn(int site)
   {
     return site % m_width;
   }
 
-  unsigned int CubicGrid::getLayer(unsigned int site)
+  int CubicGrid::getLayer(int site)
   {
     return site / ( m_area );
   }
 
-  unsigned int CubicGrid::getIndex(unsigned int column, unsigned int row, unsigned int layer )
+  int CubicGrid::getIndex(int column, int row, int layer )
   {
    return ( m_width * ( row + layer*m_height ) + column );
   }
 
-  void CubicGrid::setAgent(unsigned int site, Agent *agent)
+  void CubicGrid::setAgent(int site, Agent *agent)
   {
    m_agents[site] = agent;
   }
@@ -347,7 +347,7 @@ namespace Langmuir
   void CubicGrid::print3D( QTextStream& stream )
   {
    stream << m_agents.size()-2+2*m_height*m_depth << "\n\n";
-   for ( unsigned int i = 0; i < m_agents.size()-2; i++ )
+   for ( int i = 0; i < m_agents.size()-2; i++ )
    {
     if ( m_agents[i] )
     {
@@ -373,9 +373,9 @@ namespace Langmuir
     }
   }
 
-  for ( unsigned int i = 0; i < m_depth; i++ )
+  for ( int i = 0; i < m_depth; i++ )
   {
-   for ( unsigned int j = 0; j < m_height; j++ )
+   for ( int j = 0; j < m_height; j++ )
    {
     stream << "S " << -0.5 << " " << 0.5+j << " " << 0.5+i << "\n";
     stream << "D " << 0.5+m_width << " " << 0.5+j << " " << 0.5+i << "\n";

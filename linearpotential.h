@@ -215,7 +215,7 @@ namespace Langmuir
       * @param x a given value of x
       * @return i index of slope and intercept array corresponding to the region bounded by the two points containing x
       */
-    unsigned int regionX( double x );
+    int regionX( double x );
 
     /**
       * @brief determine which region along y a point is located in
@@ -225,7 +225,7 @@ namespace Langmuir
       * @param y a given value of y
       * @return i index of slope and intercept array corresponding to the region bounded by the two points containing y
       */
-    unsigned int regionY( double y );
+    int regionY( double y );
 
     /**
       * @brief determine which region along z a point is located in
@@ -235,7 +235,7 @@ namespace Langmuir
       * @param z a given value of z
       * @return i index of slope and intercept array corresponding to the region bounded by the two points containing z
       */
-    unsigned int regionZ( double z );
+    int regionZ( double z );
 
   };
 }

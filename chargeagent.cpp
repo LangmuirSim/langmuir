@@ -9,8 +9,8 @@ namespace Langmuir
 {
   using Eigen::Vector3d;
 
-    ChargeAgent::ChargeAgent (World * world, unsigned int site):Agent (Agent::Charge, world, site), 
-     m_charge (-1), m_removed (false), m_lifetime(0), m_distanceTraveled(0.0), clID(0)
+    ChargeAgent::ChargeAgent (World * world, int site):Agent (Agent::Charge, world, site), 
+     m_charge (-1), m_removed (false), m_lifetime(0), m_distanceTraveled(0.0), OpenCLID(0)
   {
     //current site and future site are the same
     m_site = m_fSite;
@@ -26,7 +26,7 @@ namespace Langmuir
   {
   }
 
-  void ChargeAgent::chooseFuture( int clID )
+  void ChargeAgent::chooseFuture()
   {
     // Select a proposed transport site at random, but ensure that it is not the source
     do
@@ -34,16 +34,9 @@ namespace Langmuir
         m_fSite = m_neighbors[int(m_world->random() * (m_neighbors.size() - 1.0e-20))];
       }
     while (m_world->grid()->siteID(m_fSite) == 2); // source siteID
-
-    if ( m_world->parameters()->useOpenCL )
-     {
-      this->clID = clID;
-      m_world->setISiteHost( clID, m_site );
-      m_world->setFSiteHost( clID, m_fSite );
-     }
   }
 
-  unsigned int ChargeAgent::decideFuture()
+  int ChargeAgent::decideFuture()
   {
     // Increase lifetime in existance
     m_lifetime += 1;
@@ -104,7 +97,8 @@ namespace Langmuir
         if (m_world->parameters()->useOpenCL)
           {
             //obtain coulomb interactions from OpenCL ( defects and carrier interactions )
-            pd += m_world->getOutputHost( clID );
+            //pd += m_world->getOutputHost( clID );
+              pd += ( ( m_world->getOutputHost(m_fSite) - m_world->getOutputHost(m_site) - m_charge ) * m_charge * m_world->parameters()->electrostaticPrefactor * m_world->parameters()->elementaryCharge );
           }
         // or calculate it on the CPU
         else
@@ -140,7 +134,7 @@ namespace Langmuir
     return -1;
   }
 
-  unsigned int ChargeAgent::transport ()
+  int ChargeAgent::transport ()
   {
     // Select a proposed transport site
     chooseFuture();
@@ -184,7 +178,7 @@ namespace Langmuir
       }
   }
 
-  inline double ChargeAgent::coulombInteraction (unsigned int newSite)
+  inline double ChargeAgent::coulombInteraction (int newSite)
   {
     // Pointer to grid
     Grid *grid = m_world->grid ();
@@ -253,13 +247,13 @@ namespace Langmuir
       (potential2 - potential1);
   }
 
-  inline double ChargeAgent::chargedDefects (unsigned int newSite)
+  inline double ChargeAgent::chargedDefects (int newSite)
   {
     // Pointer to grid
     Grid *grid = m_world->grid ();
 
     // Reference to charged defects in the system
-    QList < unsigned int >&chargedDefects = *m_world->defectSiteIDs ();
+    QList < int >&chargedDefects = *m_world->defectSiteIDs ();
 
     // Potential before
     double potential1 = 0.0;
@@ -305,13 +299,13 @@ namespace Langmuir
                                                         potential1);
   }
 
-  inline double ChargeAgent::chargedTraps (unsigned int newSite)
+  inline double ChargeAgent::chargedTraps (int newSite)
   {
     // Pointer to grid
     Grid *grid = m_world->grid ();
 
     // Reference to charged traps
-    QList < unsigned int >&chargedTraps = *m_world->trapSiteIDs ();
+    QList < int >&chargedTraps = *m_world->trapSiteIDs ();
 
     // Potential before
     double potential1 = 0.0;

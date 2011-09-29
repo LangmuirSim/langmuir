@@ -25,7 +25,7 @@ namespace Langmuir
      * @param world address of the world object.
      * @param site serial site index.
      */
-    ChargeAgent(World *world, unsigned int site);
+    ChargeAgent(World *world, int site);
 
     /**
      * @brief virutal Destructor.
@@ -46,17 +46,17 @@ namespace Langmuir
      * calls chooseFuture, and then decideFuture
      * @return site index of the site the charge carrier was moved to.  -1 if the transport was unsucessful.
      */
-    virtual unsigned int transport();
+    virtual int transport();
 
     /**
       * @brief choose future site
       */
-    virtual void chooseFuture( int clID = 0 );
+    virtual void chooseFuture();
 
     /**
       * @brief decide if future chosen site is ok
       */
-    virtual unsigned int decideFuture();
+    virtual int decideFuture();
 
     /**
      * @brief complete the tick.
@@ -90,9 +90,9 @@ namespace Langmuir
     double distanceTraveled();
 
     /**
-      * @brief access clID
+      * @brief set OpenCLID
       */
-    inline int id() { return clID; }
+    inline void setOpenCLID( int id ) { OpenCLID = id; }
 
     /**
       * @brief calculate coulomb energy difference between
@@ -117,7 +117,7 @@ namespace Langmuir
      *
      * A list of this cells neighbors.
      */
-    QVector<unsigned int> m_neighbors;
+    QVector<int> m_neighbors;
 
     /**
      * @brief removed status.
@@ -147,7 +147,7 @@ namespace Langmuir
      * In particular, its used to write site IDS to m_iHost, m_fHost,
      * and read Coulomb energies from m_oHost. ( all OpenCL stuff )
      */
-    int clID;
+    int OpenCLID;
 
     /**
      * @brief coulomb interaction.
@@ -157,7 +157,7 @@ namespace Langmuir
      * @param site serial cell index of site to interact with.
      * @return potential potential difference calculated.
      */
-    double coulombInteraction(unsigned int newSite);
+    double coulombInteraction(int newSite);
 
     /**
      * @brief defect interaction.
@@ -167,7 +167,7 @@ namespace Langmuir
      * @param site serial cell index of site to interact with.
      * @return potential potential difference calculated.
      */
-    double chargedDefects(unsigned int newSite);
+    double chargedDefects(int newSite);
 
     /**
      * @brief defect interaction.
@@ -177,7 +177,7 @@ namespace Langmuir
      * @param site serial cell index of site to interact with.
      * @return potential potential difference calculated.
      */
-    double chargedTraps(unsigned int newSite);
+    double chargedTraps(int newSite);
 
     /**
      * @brief coupling constant.
