@@ -33,7 +33,7 @@ namespace Langmuir
      * Set up the basic parameters of the simulation.
      * @param par parameter struct
      */
-    Simulation (SimulationParameters * par);
+    Simulation (SimulationParameters * par, int id = 0);
 
     /**
      * @brief Destructor.
@@ -123,6 +123,11 @@ namespace Langmuir
   private:
 
     /**
+      * @brief a unique id for this simulation
+      */
+    int m_id;
+
+    /**
      * @brief Charge Defect charge.
      *
      * The charge on traps in the simulation.
@@ -171,7 +176,7 @@ namespace Langmuir
      */
     DrainAgent *m_drain;
 
-    int tick;
+    int m_tick;
 
     /**
      * @brief Generate Agents.
@@ -248,7 +253,7 @@ namespace Langmuir
 
   inline int Simulation::getTick()
   {
-      return tick;
+      return m_tick;
   }
 }                                // End namespace Langmuir
 

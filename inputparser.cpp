@@ -515,20 +515,100 @@ namespace Langmuir
               break;
           }
 
-          case e_outputCoulomb:
+          case e_outputCoulombPotential:
           {
               QString interaction = list.at (1).trimmed ().toLower ();
               if (interaction == "true")
               {
-                  m_parameters.outputCoulomb = true;
+                  m_parameters.outputCoulombPotential = true;
               }
               else if (interaction == "false")
               {
-                  m_parameters.outputCoulomb = false;
+                  m_parameters.outputCoulombPotential = false;
               }
               else
               {
-                  qDebug () << "output.coulomb is either true or false: ";
+                  qDebug () << "output.coulombPotential is either true or false: ";
+                  qFatal ("bad input");
+              }
+              readCount += 1;
+              break;
+          }
+
+          case e_outputTrapPotential:
+          {
+              QString interaction = list.at (1).trimmed ().toLower ();
+              if (interaction == "true")
+              {
+                  m_parameters.outputTrapsPotential = true;
+              }
+              else if (interaction == "false")
+              {
+                  m_parameters.outputTrapsPotential = false;
+              }
+              else
+              {
+                  qDebug () << "output.trapPotential is either true or false: ";
+                  qFatal ("bad input");
+              }
+              readCount += 1;
+              break;
+          }
+
+          case e_outputFieldPotential:
+          {
+              QString interaction = list.at (1).trimmed ().toLower ();
+              if (interaction == "true")
+              {
+                  m_parameters.outputFieldPotential = true;
+              }
+              else if (interaction == "false")
+              {
+                  m_parameters.outputFieldPotential = false;
+              }
+              else
+              {
+                  qDebug () << "output.fieldPotential is either true or false: ";
+                  qFatal ("bad input");
+              }
+              readCount += 1;
+              break;
+          }
+
+          case e_outputTrapIDs:
+          {
+              QString interaction = list.at (1).trimmed ().toLower ();
+              if (interaction == "true")
+              {
+                  m_parameters.outputTrapIDs = true;
+              }
+              else if (interaction == "false")
+              {
+                  m_parameters.outputTrapIDs = false;
+              }
+              else
+              {
+                  qDebug () << "output.trapIDs is either true or false: ";
+                  qFatal ("bad input");
+              }
+              readCount += 1;
+              break;
+          }
+
+          case e_outputDefectIDs:
+          {
+              QString interaction = list.at (1).trimmed ().toLower ();
+              if (interaction == "true")
+              {
+                  m_parameters.outputDefectIDs = true;
+              }
+              else if (interaction == "false")
+              {
+                  m_parameters.outputDefectIDs = false;
+              }
+              else
+              {
+                  qDebug () << "output.defectIDs is either true or false: ";
                   qFatal ("bad input");
               }
               readCount += 1;
@@ -951,7 +1031,11 @@ namespace Langmuir
     s_variables["output.stats"] = e_outputStats;
     s_variables["output.width"] = e_outputWidth;
     s_variables["output.xyz"] = e_outputXyz;
-    s_variables["output.coulomb"] = e_outputCoulomb;
+    s_variables["output.coulombpotential"] = e_outputCoulombPotential;
+    s_variables["output.fieldpotential"] = e_outputFieldPotential;
+    s_variables["output.trappotential"] = e_outputTrapPotential;
+    s_variables["output.trapids"] = e_outputTrapIDs;
+    s_variables["output.defectids"] = e_outputDefectIDs;
     s_variables["permittivity.space"] = e_permittivitySpace;
     s_variables["potential.form"] = e_potentialForm;
     s_variables["potential.point"] = e_potentialPoint;
@@ -1017,7 +1101,7 @@ namespace Langmuir
       pairs << QString("%1=%2").arg(s_variables.key( e_outputStats )).arg(variables->outputStats);
       pairs << QString("%1=%2").arg(s_variables.key( e_outputWidth )).arg(variables->outputWidth);
       pairs << QString("%1=%2").arg(s_variables.key( e_outputXyz )).arg(variables->outputXyz);
-      pairs << QString("%1=%2").arg(s_variables.key( e_outputXyz )).arg(variables->outputCoulomb);
+      pairs << QString("%1=%2").arg(s_variables.key( e_outputXyz )).arg(variables->outputCoulombPotential);
       pairs << QString("%1=%2").arg(s_variables.key( e_permittivitySpace )).arg(variables->permittivitySpace);
       pairs << QString("%1=%2").arg(s_variables.key( e_potentialForm )).arg(variables->potentialForm);
       for ( int i = 0; i < variables->potentialPoints.size(); i++ )

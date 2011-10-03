@@ -258,13 +258,13 @@ namespace Langmuir {
                   qFatal("work group volume of coulomb kernel 2 exceeds maxiumum for device");
               }
 
-              if ( wv1 > wv1_d && m_parameters->outputCoulomb )
+              if ( wv1 > wv1_d && m_parameters->outputCoulombPotential )
               {
                   qDebug() << qPrintable(deviceQuery);
                   qFatal("work group volume of coulomb kernel 1 exceeds maxiumum for device");
               }
 
-              if ( gv1 > gv_d && m_parameters->outputCoulomb )
+              if ( gv1 > gv_d && m_parameters->outputCoulombPotential )
               {
                   qDebug() << qPrintable(deviceQuery);
                   qFatal("global work item count of coulomb kernel 1 exceeds maximum for device");
@@ -503,7 +503,128 @@ namespace Langmuir {
       }
   }
 
-  void World::saveOpenCLOutputVectorToFile( QString name, int layer )
+  void World::saveCarrierIDsToFile( QString name )
+  {
+      QFile out(name);
+      int w = m_parameters->outputWidth;
+      if ( !(out.open(QIODevice::WriteOnly | QIODevice::Text)) )
+      {
+          qFatal("can not open file %s",qPrintable(name));
+      }
+      for ( int i = 0; i < m_charges.size(); i++ )
+      {
+          int s = m_charges[i]->site(false);
+          int x = m_grid->getColumn(s);
+          int y = m_grid->getRow(s);
+          int z = m_grid->getLayer(s);
+          out.write( qPrintable( QString("%1 %2 %3 %4\n").arg(x,w).arg(y,w).arg(z,w).arg(s,w) ) );
+      }
+  }
+
+  void World::saveTrapIDsToFile( QString name )
+  {
+      if ( m_trapSiteIDs.size() == 0 ) return;
+      QFile out(name);
+      int w = m_parameters->outputWidth;
+      if ( !(out.open(QIODevice::WriteOnly | QIODevice::Text)) )
+      {
+          qFatal("can not open file %s",qPrintable(name));
+      }
+      for ( int i = 0; i < m_defectSiteIDs.size(); i++ )
+      {
+          int s = m_defectSiteIDs[i];
+          int x = m_grid->getColumn(s);
+          int y = m_grid->getRow(s);
+          int z = m_grid->getLayer(s);
+          out.write( qPrintable( QString("%1 %2 %3 %4\n").arg(x,w).arg(y,w).arg(z,w).arg(s,w) ) );
+      }
+      out.close();
+  }
+
+  void World::saveDefectIDsToFile( QString name )
+  {
+      if ( m_defectSiteIDs.size() == 0 ) return;
+      QFile out(name);
+      int w = m_parameters->outputWidth;
+      if ( !(out.open(QIODevice::WriteOnly | QIODevice::Text)) )
+      {
+          qFatal("can not open file %s",qPrintable(name));
+      }
+      for ( int i = 0; i < m_trapSiteIDs.size(); i++ )
+      {
+          int s = m_trapSiteIDs[i];
+          int x = m_grid->getColumn(s);
+          int y = m_grid->getRow(s);
+          int z = m_grid->getLayer(s);
+          out.write( qPrintable( QString("%1 %2 %3 %4\n").arg(x,w).arg(y,w).arg(z,w).arg(s,w) ) );
+      }
+      out.close();
+  }
+
+  void World::saveFieldEnergyToFile( QString name )
+  {
+      QFile out(name);
+      int p = m_parameters->outputPrecision;
+      int w = m_parameters->outputWidth;
+      double te = 0;
+      if ( m_trapSiteIDs.size() > 0 ) { te = m_parameters->deltaEpsilon; }
+      if ( !(out.open(QIODevice::WriteOnly | QIODevice::Text)) )
+      {
+          qFatal("can not open file %s",qPrintable(name));
+      }
+      for ( int i = 0; i < m_grid->width(); i++ )
+      {
+          for ( int j = 0; j < m_grid->height(); j++ )
+          {
+              for ( int k = 0; k < m_grid->depth(); k++ )
+              {
+                  int s = m_grid->getIndex(i,j,k);
+                  if ( m_trapSiteIDs.contains(s) )
+                  {
+                      out.write( qPrintable( QString("%1 %2 %3 %4\n").arg(i,w).arg(j,w).arg(k,w).arg(m_grid->potential(s)-te,w,'e',p) ) );
+                  }
+                  else
+                  {
+                      out.write( qPrintable( QString("%1 %2 %3 %4\n").arg(i,w).arg(j,w).arg(k,w).arg(m_grid->potential(s),w,'e',p) ) );
+                  }
+              }
+          }
+      }
+      out.close();
+  }
+
+  void World::saveTrapEnergyToFile( QString name )
+  {
+      if ( m_trapSiteIDs.size() == 0 ) return;
+      QFile out(name);
+      int p = m_parameters->outputPrecision;
+      int w = m_parameters->outputWidth;
+      if ( !(out.open(QIODevice::WriteOnly | QIODevice::Text)) )
+      {
+          qFatal("can not open file %s",qPrintable(name));
+      }
+      for ( int i = 0; i < m_grid->width(); i++ )
+      {
+          for ( int j = 0; j < m_grid->height(); j++ )
+          {
+              for ( int k = 0; k < m_grid->depth(); k++ )
+              {
+                  int s = m_grid->getIndex(i,j,k);
+                  if ( m_trapSiteIDs.contains(s) )
+                  {
+                      out.write( qPrintable( QString("%1 %2 %3 %4\n").arg(i,w).arg(j,w).arg(k,w).arg(m_parameters->deltaEpsilon,w,'e',p) ) );
+                  }
+                  else
+                  {
+                      out.write( qPrintable( QString("%1 %2 %3 %4\n").arg(i,w).arg(j,w).arg(k,w).arg(0.0,w,'e',p) ) );
+                  }
+              }
+          }
+      }
+      out.close();
+  }
+
+  void World::saveCoulombEnergyToFile( QString name )
   {
       QFile out(name);
       int p = m_parameters->outputPrecision;
@@ -516,8 +637,11 @@ namespace Langmuir {
       {
           for ( int j = 0; j < m_grid->height(); j++ )
           {
-              int s = m_grid->getIndex(i,j,layer);
-              out.write( qPrintable( QString("%1 %2 %3\n").arg(i,w).arg(j,w).arg(m_oHost[s],w,'e',p) ) );
+              for ( int k = 0; k < m_grid->depth(); k++ )
+              {
+                  int s = m_grid->getIndex(i,j,k);
+                  out.write( qPrintable( QString("%1 %2 %3 %4\n").arg(i,w).arg(j,w).arg(k,w).arg(m_oHost[s]*m_parameters->electrostaticPrefactor,w,'e',p) ) );
+              }
           }
       }
       out.close();

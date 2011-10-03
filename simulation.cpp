@@ -19,7 +19,7 @@
 
 namespace Langmuir
 {
-    Simulation::Simulation (SimulationParameters * par)
+    Simulation::Simulation (SimulationParameters * par, int id) : m_id(id)
     {
         // Store the address of the simulation parameters object
         m_parameters = par;
@@ -75,6 +75,18 @@ namespace Langmuir
         // Generate grid image
         if (m_parameters->outputGrid) gridImage();
 
+        // Output Field Energy
+        if (m_parameters->outputFieldPotential) m_world->saveFieldEnergyToFile(QString("field-%1.dat").arg(m_id));
+
+        // Output Traps Energy
+        if (m_parameters->outputTrapsPotential) m_world->saveTrapEnergyToFile(QString("trap-%1.dat").arg(m_id));
+
+        // Output Defect IDs
+        if (m_parameters->outputDefectIDs) m_world->saveDefectIDsToFile(QString("defectIDs-%1.dat").arg(m_id));
+
+        // Output Trap IDs
+        if (m_parameters->outputTrapIDs) m_world->saveTrapIDsToFile(QString("trapIDs-%1.dat").arg(m_id));
+
         // Initialize OpenCL
         m_world->initializeOpenCL();
         if ( m_parameters->useOpenCL )
@@ -87,7 +99,7 @@ namespace Langmuir
         }
 
         // tick is the global step number of this simulation
-        tick = 0;
+        m_tick = 0;
     }
 
     Simulation::~Simulation ()
@@ -164,7 +176,7 @@ namespace Langmuir
             // Perform charge injection at the source
             performInjections (m_parameters->sourceAttempts);
 
-            tick += 1;
+            m_tick += 1;
         }
     }
 
@@ -203,7 +215,7 @@ namespace Langmuir
             if (charges[i]->removed ())
             {
               m_world->statMessage( QString( "%1 %2 %3\n" )
-                                       .arg(tick,m_parameters->outputWidth)
+                                       .arg(m_tick,m_parameters->outputWidth)
                                        .arg(charges[i]->lifetime(),m_parameters->outputWidth)
                                        .arg(charges[i]->distanceTraveled(),m_parameters->outputWidth) );
               delete charges[i];
@@ -231,6 +243,14 @@ namespace Langmuir
             }
           }
         }
+
+        // Output Coulomb Energy
+        if (m_parameters->outputCoulombPotential)
+        {
+            m_world->launchCoulombKernel1();
+            m_world->saveCoulombEnergyToFile( QString("coulomb-%1-%2.dat").arg(m_id).arg(m_tick) );
+        }
+        qFatal("done");
     }
 
     void Simulation::printGrid ()

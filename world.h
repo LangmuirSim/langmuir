@@ -256,9 +256,34 @@ namespace Langmuir
     void launchCoulombKernel2();
 
     /**
-      * @brief tell the CPU to save data to a file
+      * @brief save carrier ids to a file
       */
-    void saveOpenCLOutputVectorToFile( QString name, int layer = 0 );
+    void saveCarrierIDsToFile( QString name );
+
+    /**
+      * @brief save trap ids to a file
+      */
+    void saveTrapIDsToFile( QString name );
+
+    /**
+      * @brief save defect ids to a file
+      */
+    void saveDefectIDsToFile( QString name );
+
+    /**
+      * @brief save field energy to a file
+      */
+    void saveFieldEnergyToFile( QString name );
+
+    /**
+      * @brief save trap energy to a file
+      */
+    void saveTrapEnergyToFile( QString name );
+
+    /**
+      * @brief save coulomb energy to a file
+      */
+    void saveCoulombEnergyToFile( QString name );
 
     /**
       * @brief copy a charge carrier's current site ID to the m_iHost vector
@@ -274,8 +299,19 @@ namespace Langmuir
       */
     inline const double& getOutputHost(int index) const { return m_oHost[index]; }
 
+    /**
+      * @brief compare GPU answer (delta energy) to CPU answer for all charges
+      */
     void compareHostAndDeviceForAllCarriers();
+
+    /**
+      * @brief compare GPU answer to CPU answer (at single point)
+      */
     void compareHostAndDeviceAtSite(int i);
+
+    /**
+      * @brief compare GPU answer (delta energy) to CPU answer for a single charge
+      */
     void compareHostAndDeviceForCarrier(int i);
 
     /**

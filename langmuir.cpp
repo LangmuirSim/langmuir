@@ -99,7 +99,7 @@ int main (int argc, char *argv[])
       input.simulationParameters (&par, i);
 
       // Set up a simulation
-      Simulation sim (&par);
+      Simulation sim (&par,i);
 
       // Open iteration file for this simulation
       iFile = new QFile (oFileName + "-i-" + QString::number (i) + ".dat");
@@ -175,13 +175,6 @@ int main (int argc, char *argv[])
 
           // Perform Iterations
           sim.performIterations (par.iterationsPrint);
-
-          // Output Coulomb Energy
-          if (par.outputCoulomb)
-          {
-              sim.world()->launchCoulombKernel1();
-              sim.world()->saveOpenCLOutputVectorToFile( QString("%1-coulomb-%2.cl").arg(oFileName).arg(sim.getTick()) );
-          }
 
           // Output Trajectory
           if (par.outputXyz)

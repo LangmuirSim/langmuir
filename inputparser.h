@@ -21,7 +21,11 @@ namespace Langmuir
     bool gaussianNoise;
     bool gridCharge;
     bool outputXyz;
-    bool outputCoulomb;
+    bool outputCoulombPotential;
+    bool outputFieldPotential;
+    bool outputTrapsPotential;
+    bool outputDefectIDs;
+    bool outputTrapIDs;
     bool chargedTraps;
     bool trapsHeterogeneous;
     bool outputGrid;
@@ -86,8 +90,12 @@ namespace Langmuir
       trapsHeterogeneous = false;
       outputGrid = false;
       outputStats = false;
-      outputCoulomb = false;
+      outputCoulombPotential = false;
       useOpenCL = false;
+      outputFieldPotential = false;
+      outputTrapsPotential = false;
+      outputDefectIDs = false;
+      outputTrapIDs = false;
       chargePercentage = 0.01;
       defectPercentage = 0.00;
       deltaEpsilon = -0.10;
@@ -181,7 +189,11 @@ namespace Langmuir
       e_outputXyz,                 // should trajectory files be written
       e_outputGrid,                // generate a pdf image of the grid?
       e_outputStats,               // output lifetime and pathlength to file?
-      e_outputCoulomb,             // output coulomb potential to file?
+      e_outputCoulombPotential,    // output coulomb potential to file?
+      e_outputFieldPotential,      // output field potential to file?
+      e_outputTrapPotential,       // output trap potential to file?
+      e_outputDefectIDs,           // output defect ids to file?
+      e_outputTrapIDs,             // output trap ids to file?
       e_chargePercentage,          // percentage of charges in the grid - sets as target
       e_useOpenCL,                 // should OpenCL be used
       e_defectPercentage,          // percentage of defects in the grid
