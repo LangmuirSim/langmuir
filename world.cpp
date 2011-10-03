@@ -530,9 +530,9 @@ namespace Langmuir {
       {
           qFatal("can not open file %s",qPrintable(name));
       }
-      for ( int i = 0; i < m_defectSiteIDs.size(); i++ )
+      for ( int i = 0; i < m_trapSiteIDs.size(); i++ )
       {
-          int s = m_defectSiteIDs[i];
+          int s = m_trapSiteIDs[i];
           int x = m_grid->getColumn(s);
           int y = m_grid->getRow(s);
           int z = m_grid->getLayer(s);
@@ -550,9 +550,9 @@ namespace Langmuir {
       {
           qFatal("can not open file %s",qPrintable(name));
       }
-      for ( int i = 0; i < m_trapSiteIDs.size(); i++ )
+      for ( int i = 0; i < m_defectSiteIDs.size(); i++ )
       {
-          int s = m_trapSiteIDs[i];
+          int s = m_defectSiteIDs[i];
           int x = m_grid->getColumn(s);
           int y = m_grid->getRow(s);
           int z = m_grid->getLayer(s);

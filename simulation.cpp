@@ -178,6 +178,12 @@ namespace Langmuir
 
             m_tick += 1;
         }
+        // Output Coulomb Energy
+        if (m_parameters->outputCoulombPotential)
+        {
+            m_world->launchCoulombKernel1();
+            m_world->saveCoulombEnergyToFile( QString("coulomb-%1-%2.dat").arg(m_id).arg(m_tick) );
+        }
     }
 
     void Simulation::performInjections (int nInjections)
@@ -243,14 +249,6 @@ namespace Langmuir
             }
           }
         }
-
-        // Output Coulomb Energy
-        if (m_parameters->outputCoulombPotential)
-        {
-            m_world->launchCoulombKernel1();
-            m_world->saveCoulombEnergyToFile( QString("coulomb-%1-%2.dat").arg(m_id).arg(m_tick) );
-        }
-        qFatal("done");
     }
 
     void Simulation::printGrid ()
