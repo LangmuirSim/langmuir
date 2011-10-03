@@ -918,15 +918,15 @@ namespace Langmuir
 
         if ( !program.addShaderFromSourceCode( QGLShader::Vertex, vsource ) )
         {
-            qFatal("could not add vertex shader");
+            qWarning("could not add vertex shader");
         }
         if ( !program.addShaderFromSourceCode( QGLShader::Fragment, fsource ) )
         {
-            qFatal("could not add fragment shader");
+            qWarning("could not add fragment shader");
         }
         if ( !program.link() )
         {
-            qFatal("could not link shaders");
+            qWarning("could not link shaders");
         }
 
         vBuffer.setUsagePattern( QGLBuffer::DynamicDraw );
@@ -940,7 +940,7 @@ namespace Langmuir
 
         setColor( QColor(0,0,0,255) );
         setPointSize( 0.0f );
-        setSpheres( Qt::Checked );
+        setSpheres( Qt::Unchecked );
     }
 
     PointArray::~PointArray()
