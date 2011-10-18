@@ -347,7 +347,7 @@ namespace Langmuir
   void CubicGrid::print3D( QTextStream& stream )
   {
    stream << m_agents.size()-2+2*m_height*m_depth << "\n\n";
-   for ( int i = 0; i < m_agents.size()-2; i++ )
+   for ( unsigned int i = 0; i < m_agents.size()-2; i++ )
    {
     if ( m_agents[i] )
     {

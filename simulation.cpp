@@ -184,6 +184,11 @@ namespace Langmuir
             m_world->launchCoulombKernel1();
             m_world->saveCoulombEnergyToFile( QString("coulomb-%1-%2.dat").arg(m_id).arg(m_tick) );
         }
+        // Output Carrier Positions and IDs
+        if (m_parameters->outputCarriers)
+        {
+            m_world->saveCarrierIDsToFile( QString("carriers-%1-%2.dat").arg(m_id).arg(m_tick) );
+        }
     }
 
     void Simulation::performInjections (int nInjections)

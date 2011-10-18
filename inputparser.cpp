@@ -535,6 +535,26 @@ namespace Langmuir
               break;
           }
 
+          case e_outputCarriers:
+          {
+              QString interaction = list.at (1).trimmed ().toLower ();
+              if (interaction == "true")
+              {
+                  m_parameters.outputCarriers = true;
+              }
+              else if (interaction == "false")
+              {
+                  m_parameters.outputCarriers = false;
+              }
+              else
+              {
+                  qDebug () << "output.carriers is either true or false: ";
+                  qFatal ("bad input");
+              }
+              readCount += 1;
+              break;
+          }
+
           case e_outputTrapPotential:
           {
               QString interaction = list.at (1).trimmed ().toLower ();
@@ -1031,6 +1051,7 @@ namespace Langmuir
     s_variables["output.stats"] = e_outputStats;
     s_variables["output.width"] = e_outputWidth;
     s_variables["output.xyz"] = e_outputXyz;
+    s_variables["output.carriers"] = e_outputCarriers;
     s_variables["output.coulombpotential"] = e_outputCoulombPotential;
     s_variables["output.fieldpotential"] = e_outputFieldPotential;
     s_variables["output.trappotential"] = e_outputTrapPotential;

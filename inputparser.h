@@ -21,6 +21,7 @@ namespace Langmuir
     bool gaussianNoise;
     bool gridCharge;
     bool outputXyz;
+    bool outputCarriers;
     bool outputCoulombPotential;
     bool outputFieldPotential;
     bool outputTrapsPotential;
@@ -90,6 +91,7 @@ namespace Langmuir
       trapsHeterogeneous = false;
       outputGrid = false;
       outputStats = false;
+      outputCarriers = false;
       outputCoulombPotential = false;
       useOpenCL = false;
       outputFieldPotential = false;
@@ -189,6 +191,7 @@ namespace Langmuir
       e_outputXyz,                 // should trajectory files be written
       e_outputGrid,                // generate a pdf image of the grid?
       e_outputStats,               // output lifetime and pathlength to file?
+      e_outputCarriers,            // output carrier positions to a file?
       e_outputCoulombPotential,    // output coulomb potential to file?
       e_outputFieldPotential,      // output field potential to file?
       e_outputTrapPotential,       // output trap potential to file?
