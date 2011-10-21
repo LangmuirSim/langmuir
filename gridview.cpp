@@ -204,10 +204,9 @@ namespace Langmuir
         for ( int i = 0; i < charges->size(); i++ )
         {
             int site = charges->at(i)->site();
-            Eigen::Vector3d position = grid->position( site );
-            pointBuffer[ i * 4 + 0 ] = position.x();
-            pointBuffer[ i * 4 + 1 ] = position.y();
-            pointBuffer[ i * 4 + 2 ] = position.z() * thickness;
+            pointBuffer[ i * 4 + 0 ] = grid->getColumn(site) + 0.5;
+            pointBuffer[ i * 4 + 1 ] = grid->getRow(site) + 0.5;
+            pointBuffer[ i * 4 + 2 ] = (grid->getLayer(site) + 0.5) * thickness;
         }
         carriers = new PointArray(this,pointBuffer);
 
@@ -215,10 +214,9 @@ namespace Langmuir
         QVector< float > xyz( defectList->size() * 4, 1 );
         for ( int i = 0; i < defectList->size(); i++ )
         {
-            Eigen::Vector3d position = grid->position( defectList->at(i) );
-            xyz[ i * 4 + 0 ] = position.x();
-            xyz[ i * 4 + 1 ] = position.y();
-            xyz[ i * 4 + 2 ] = position.z() * thickness;
+            xyz[ i * 4 + 0 ] = grid->getColumn(defectList->at(i)) + 0.5;
+            xyz[ i * 4 + 1 ] = grid->getRow(defectList->at(i)) + 0.5;
+            xyz[ i * 4 + 2 ] = (grid->getLayer(defectList->at(i)) + 0.5) * thickness;
             xyz[ i * 4 + 3 ] = 1;
         }
         defects  = new PointArray(this,xyz);
@@ -304,10 +302,9 @@ namespace Langmuir
             for ( int i = 0; i < charges->size(); i++ )
             {
                 int site = charges->at(i)->site();
-                Eigen::Vector3d position = grid->position( site );
-                pointBuffer[ i * 4 + 0 ] = position.x();
-                pointBuffer[ i * 4 + 1 ] = position.y();
-                pointBuffer[ i * 4 + 2 ] = position.z() * thickness;
+                pointBuffer[ i * 4 + 0 ] = grid->getColumn(site) + 0.5;
+                pointBuffer[ i * 4 + 1 ] = grid->getRow(site) + 0.5;
+                pointBuffer[ i * 4 + 2 ] = (grid->getLayer(site) + 0.5) * thickness;
             }
 
             carriers->update( pointBuffer, charges->size() * 4 );
@@ -1361,8 +1358,8 @@ namespace Langmuir
         checkBoxes[10]->setText("hide");
         checkBoxes[11]->setText("hide");
 
-        checkBoxes[6]->setChecked(Qt::Checked);
-        checkBoxes[7]->setChecked(Qt::Checked);
+        checkBoxes[6]->setChecked(Qt::Unchecked);
+        checkBoxes[7]->setChecked(Qt::Unchecked);
         checkBoxes[11]->setChecked(Qt::Checked);
 
         spinBoxes.push_back( new DSpinBox( this ) );

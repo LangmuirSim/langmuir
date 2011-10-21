@@ -31,14 +31,6 @@ namespace Langmuir
     }
 
     /**
-     * @brief position vector.
-     *
-     * Get a vector pointing from the origin to the middle of a cell.
-     * @param site serial cell index.
-     */
-    virtual Eigen::Vector3d position(int site) = 0;
-
-    /**
      * @brief neighborlist indices.
      *
      * Get a list of site indices for sites immediatly next to the given site.

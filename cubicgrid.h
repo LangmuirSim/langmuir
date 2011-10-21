@@ -39,14 +39,6 @@ namespace Langmuir
     ~CubicGrid();
 
     /**
-     * @brief position vector.
-     *
-     * Get a vector pointing from the origin to the middle of a cell.
-     * @param site serial cell index.
-     */
-    Eigen::Vector3d position(int site);
-
-    /**
      * @brief neighborlist indices.
      *
      * Get a list of site indices for sites immediatly next to the given site.
@@ -351,12 +343,5 @@ namespace Langmuir
      */
     int m_volume;
   };
-
-  inline Eigen::Vector3d CubicGrid::position(int site)
-  {
-    if (site == static_cast<int>(-1)) return Eigen::Vector3d(-1,-1,-1);
-    return Eigen::Vector3d(0.5 + (site % m_width), 0.5 + int( site / m_width - ( site / m_area ) * m_height ), 0.5 + getLayer(site) );
-  }
-
 } // End namespace Langmuir
 #endif

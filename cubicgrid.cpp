@@ -4,9 +4,6 @@
 
 namespace Langmuir
 {
-
-  using Eigen::Vector3d;
-
   CubicGrid::CubicGrid( int width, int height, int depth ) :
       m_width  ( width              ), 
       m_height ( height             ), 
