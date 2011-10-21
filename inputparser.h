@@ -20,7 +20,6 @@ namespace Langmuir
     bool chargedDefects;
     bool gaussianNoise;
     bool gridCharge;
-    bool outputXyz;
     bool outputCarriers;
     bool outputCoulombPotential;
     bool outputFieldPotential;
@@ -86,7 +85,6 @@ namespace Langmuir
       chargedDefects = false;
       gaussianNoise = false;
       gridCharge = false;
-      outputXyz = false;
       chargedTraps = false;
       trapsHeterogeneous = false;
       outputGrid = false;

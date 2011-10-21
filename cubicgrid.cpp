@@ -343,44 +343,4 @@ namespace Langmuir
   {
    m_agents[site] = agent;
   }
-
-  void CubicGrid::print3D( QTextStream& stream )
-  {
-   stream << m_agents.size()-2+2*m_height*m_depth << "\n\n";
-   for ( unsigned int i = 0; i < m_agents.size()-2; i++ )
-   {
-    if ( m_agents[i] )
-    {
-     if ( siteID(i) == 0 )//A Charge
-     {
-      Eigen::Vector3d pos = position(i);
-      stream << "A " << pos[0] << " " << pos[1] << " " << pos[2] << "\n";
-     }
-     else if ( siteID(i) == 1 )//A Defect or Trap
-     {
-      Eigen::Vector3d pos = position(i);
-      stream << "B " << pos[0] << " " << pos[1] << " " << pos[2] << "\n";
-     }
-     else
-     {
-      qDebug() << "AGENT ERROR: " << siteID(i) << "\n";
-      throw(-1);
-     }
-    }
-    else
-    {
-     stream << "A -0.5 -0.5 -0.5" << "\n";
-    }
-  }
-
-  for ( int i = 0; i < m_depth; i++ )
-  {
-   for ( int j = 0; j < m_height; j++ )
-   {
-    stream << "S " << -0.5 << " " << 0.5+j << " " << 0.5+i << "\n";
-    stream << "D " << 0.5+m_width << " " << 0.5+j << " " << 0.5+i << "\n";
-   }
-  }
-  stream.flush();
-  }
 } // End namespace Langmuir

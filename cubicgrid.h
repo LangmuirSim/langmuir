@@ -315,13 +315,6 @@ namespace Langmuir
      */
     int getLayer(int site);
 
-    /**
-     * @brief print XYZ.
-     *
-     * Write out positions of agent.
-     */
-    void print3D( QTextStream& stream );
-
   protected:
     /**
      * @brief grid width.

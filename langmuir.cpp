@@ -48,10 +48,8 @@ int main (int argc, char *argv[])
   // Declare output pointers
   QFile *oFile;                        //summary
   QFile *iFile;                        //iteration
-  QFile *tFile;                        //trajectory
   QTextStream *oout;
   QTextStream *iout;
-  QTextStream *tout;
 
   // Open and read input file
   InputParser input (iFileName);
@@ -114,19 +112,6 @@ int main (int argc, char *argv[])
       iout->setFieldWidth (par.outputWidth);
       (*iout) << scientific;
 
-      // Open trajectoryFile for this simulation
-      if (par.outputXyz)
-        {
-          tFile = new QFile (oFileName + QString::number (i) + ".xyz");
-          if (!(tFile->open (QIODevice::WriteOnly | QIODevice::Text)))
-            {
-              qDebug () << "Error opening trajectory file:" << oFileName +
-                "-i-" + QString::number (i) + ".xyz";
-              app.exit (1);
-            }
-          tout = new QTextStream (tFile);
-        }
-
       // Output iteration file column titles
       (*iout) << "move(n)";
       (*iout) << "temperature(K)";
@@ -146,10 +131,6 @@ int main (int argc, char *argv[])
 
           // Perform Iterations
           sim.performIterations (par.iterationsPrint);
-
-          // Output Trajectory
-          if (par.outputXyz)
-            sim.getGrid ()->print3D ((*tout));
 
           // Output Iteration Information
           (*iout) << j
@@ -175,10 +156,6 @@ int main (int argc, char *argv[])
 
           // Perform Iterations
           sim.performIterations (par.iterationsPrint);
-
-          // Output Trajectory
-          if (par.outputXyz)
-            sim.getGrid ()->print3D ((*tout));
 
           // Output Iteration
           (*iout) << j
@@ -214,14 +191,6 @@ int main (int argc, char *argv[])
       iFile->close ();
       delete iFile;
       delete iout;
-
-      if (par.outputXyz)
-        {
-          tFile->close ();
-          delete tFile;
-          delete tout;
-        }
-
     }
   //output time
   (*oout) << reset << "\n" << "approxTime(s): " << timer.elapsed ();

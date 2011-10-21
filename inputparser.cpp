@@ -475,26 +475,6 @@ namespace Langmuir
               break;
             }
 
-          case e_outputXyz:
-            {
-              QString interaction = list.at (1).trimmed ().toLower ();
-              if (interaction == "true")
-                {
-                  m_parameters.outputXyz = true;
-                }
-              else if (interaction == "false")
-                {
-                  m_parameters.outputXyz = false;
-                }
-              else
-                {
-                  qDebug () << "output.xyz is either true or false: ";
-                  qFatal ("bad input");
-                }
-              readCount += 1;
-              break;
-            }
-
           case e_outputGrid:
           {
               QString interaction = list.at (1).trimmed ().toLower ();
@@ -1121,7 +1101,6 @@ namespace Langmuir
       pairs << QString("%1=%2").arg(s_variables.key( e_outputPrecision )).arg(variables->outputPrecision);
       pairs << QString("%1=%2").arg(s_variables.key( e_outputStats )).arg(variables->outputStats);
       pairs << QString("%1=%2").arg(s_variables.key( e_outputWidth )).arg(variables->outputWidth);
-      pairs << QString("%1=%2").arg(s_variables.key( e_outputXyz )).arg(variables->outputXyz);
       pairs << QString("%1=%2").arg(s_variables.key( e_outputXyz )).arg(variables->outputCoulombPotential);
       pairs << QString("%1=%2").arg(s_variables.key( e_permittivitySpace )).arg(variables->permittivitySpace);
       pairs << QString("%1=%2").arg(s_variables.key( e_potentialForm )).arg(variables->potentialForm);

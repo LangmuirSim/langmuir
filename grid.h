@@ -373,14 +373,7 @@ namespace Langmuir
      * The location in the potential array is the number of grid sites + 1.
      * @param site potential.
      */
-    virtual void setDrainPotential(double potential);
-
-    /**
-     * @brief print XYZ.
-     *
-     * Write out positions of agent.
-     */
-    virtual void print3D( QTextStream& stream ) = 0;    
+    virtual void setDrainPotential(double potential);   
 
   protected:
 
