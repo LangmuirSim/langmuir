@@ -163,7 +163,7 @@ namespace Langmuir
             return;
           }
 
-        if (m_site != errorValue)
+        if (m_site != -1)
           // Vacate the old site
           m_world->grid ()->setAgent (m_site, 0);
 
@@ -215,7 +215,7 @@ namespace Langmuir
                 dz < m_world->parameters ()->electrostaticCutoff)
               {
                 potential1 +=
-                  m_world->interactionEnergies()(dx, dy, dz) * charges[i]->charge();
+                        m_world->interactionEnergies()[dx][dy][dz] * charges[i]->charge();
                   //qDebug("NOW i = %d, array = %e, q1 = %d, q2 = %d, prefactor = %e",i,m_world->interactionEnergies()(dx, dy, dz),charges[i]->charge(),m_charge,m_world->parameters()->electrostaticPrefactor);
               }
 
@@ -230,7 +230,7 @@ namespace Langmuir
                     dy < m_world->parameters ()->electrostaticCutoff &&
                     dz < m_world->parameters ()->electrostaticCutoff)
                   {
-                    potential2 += m_world->interactionEnergies()(dx, dy, dz) * charges[i]->charge();
+                    potential2 += m_world->interactionEnergies()[dx][dy][dz] * charges[i]->charge();
                     //qDebug("FUTURE i = %d, array = %e, q1 = %d, q2 = %d, prefactor = %e",i,m_world->interactionEnergies()(dx, dy, dz),charges[i]->charge(),m_charge,m_world->parameters()->electrostaticPrefactor);
                   }
               }
@@ -272,7 +272,7 @@ namespace Langmuir
             dy < m_world->parameters ()->electrostaticCutoff &&
             dz < m_world->parameters ()->electrostaticCutoff)
           {
-            potential1 += m_world->interactionEnergies ()(dx, dy, dz);
+            potential1 += m_world->interactionEnergies ()[dx][dy][dz];
           }
         // Potential at new site from charged defects
         if (newSite != chargedDefects[i])
@@ -284,7 +284,7 @@ namespace Langmuir
                 dy < m_world->parameters ()->electrostaticCutoff &&
                 dz < m_world->parameters ()->electrostaticCutoff)
               {
-                potential2 += m_world->interactionEnergies ()(dx, dy, dz);
+                potential2 += m_world->interactionEnergies ()[dx][dy][dz];
               }
           }
         else
@@ -325,7 +325,7 @@ namespace Langmuir
             dz < m_world->parameters ()->electrostaticCutoff &&
             dx != 0 && dy != 0 && dz != 0)
           {
-            potential1 += m_world->interactionEnergies ()(dx, dy, dz);
+            potential1 += m_world->interactionEnergies ()[dx][dy][dz];
           }
         // Potential at new site from charged traps
         if (newSite != chargedTraps[i])
@@ -338,7 +338,7 @@ namespace Langmuir
                 dz < m_world->parameters ()->electrostaticCutoff &&
                 dx != 0 && dy != 0 && dz != 0)
               {
-                potential2 += m_world->interactionEnergies ()(dx, dy, dz);
+                potential2 += m_world->interactionEnergies ()[dx][dy][dz];
               }
           }
         else

@@ -22,128 +22,6 @@ namespace Langmuir
   struct SimulationParameters;
 
   /**
-    * @class Triple Index Array
-    * @brief Three dimensional matrix
-    *
-    * For storing doubles to be accessed by col, row, and lay indices.
-    */
-  class TripleIndexArray
-  {
-   public:
-    /**
-      * @brief Default constructor.
-      *
-      * Sets everything to zero.
-      */
-    TripleIndexArray ();
-
-    /**
-      * @brief Alternate constructor.
-      *
-      * Sets columns, rows, layers, area, and width to indicated values. 
-      * Resizes the internal vector to hold the appropriate number of values.
-      */
-    TripleIndexArray (int col, int row, int lay);
-
-    /** 
-      * @brief operator overload
-      *
-      * Access a double at col, row, lay position.
-      */
-    double& operator() (int col, int row, int lay);
-
-    /** 
-      * @brief operator overload 
-      *
-      * Access a double at col, row, lay position.
-      */
-    double operator() (int col, int row, int lay) const;
-
-    /**
-      * @brief Clear values and reallocate space.
-      *
-      * Sets columns, rows, layers, area, and width to indicated values. 
-      * Resizes the internal vector to hold the appropriate number of values.
-      */
-    void resize (int col, int row, int lay);
-
-    /**
-      * @brief member access.
-      *
-      * Get the number of rows. 
-      */
-    inline int rows() const { return m_row; }
-
-    /**
-      * @brief member access.
-      *
-      * Get the number of columns.
-      */
-    inline int cols() const { return m_col; }
-
-    /**
-      * @brief member access.
-      *
-      * Get the number of layerss.
-      */
-    inline int lays() const { return m_lay; }
-
-    /**
-      * @brief member access.
-      *
-      * Get the number of values.
-      */
-    inline int size() const { return values.size(); }
-
-   private:
-
-    /**
-      * @brief member.
-      *
-      * Array of doubles.
-      */
-    QVector<double> values;
-
-    /**
-      * @brief member.
-      *
-      * The number of columns.
-      */
-    int m_width;
-
-    /**
-      * @brief member.
-      *
-      * The number of columns times the number of rows.
-      * The total number of items in a layer.
-      */
-    int m_area;
-
-    /**
-      * @brief member.
-      *
-      * The number of columns.
-      */
-    int m_col;
-
-    /**
-      * @brief member.
-      *
-      * The number of rows.
-      */
-    int m_row;
-
-    /**
-      * @brief member.
-      *
-      * The number of layers.
-      */
-    int m_lay;
-  };
-
-  const int errorValue = -1;
-
-  /**
     * @class World
     *
     * Holds information for simulation.
@@ -243,7 +121,7 @@ namespace Langmuir
       *
       * Get a reference to a distance matrix. 
       */
-    TripleIndexArray& interactionEnergies();
+    boost::multi_array<double,3>& interactionEnergies();
 
     /**
       * @brief tell the GPU to perform coulomb calculations over all locations
@@ -340,11 +218,9 @@ namespace Langmuir
     QList<int>                   m_defectSiteIDs;       // Site ids of defects in the system
     QList<int>                   m_trapSiteIDs;         // Site ids of traps in the system
     boost::multi_array<double,2> m_coupling;            // Matrix of coupling constants
-
-    TripleIndexArray             m_interactionEnergies; // Interaction energies
+    boost::multi_array<double,3> m_interactionEnergies; // Interaction energies
     QFile                       *m_statFile;            // Place to write lifetime and pathlength information
     QTextStream                 *m_statStream;          // Text stream for stat file
-
     cl::Context                  m_context;             // OpenCl context
     cl::CommandQueue             m_queue;               // OpenCl queue
     cl::Kernel                   m_coulombK1;           // Kernel for calculating Coulomb Energy everywhere
@@ -377,7 +253,7 @@ namespace Langmuir
   return m_coupling;
  }
 
- inline TripleIndexArray& World::interactionEnergies()
+ inline boost::multi_array<double,3>& World::interactionEnergies()
  {
   return m_interactionEnergies;
  }

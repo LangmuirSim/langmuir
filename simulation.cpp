@@ -205,7 +205,7 @@ namespace Langmuir
         for ( int i = 0; i < inject; i++ )
         {
           int site = m_source->transport();
-          if (site != errorValue)
+          if (site != -1)
             {
               ChargeAgent *charge = new ChargeAgent (m_world, site );
               m_world->charges ()->push_back (charge);
@@ -592,9 +592,9 @@ namespace Langmuir
     void Simulation::updateInteractionEnergies ()
     {
         //These values are used in Coulomb interaction calculations.
-        TripleIndexArray & energies = m_world->interactionEnergies ();
+        boost::multi_array<double,3>& energies = m_world->interactionEnergies ();
 
-        energies.resize (m_parameters->electrostaticCutoff, m_parameters->electrostaticCutoff, m_parameters->electrostaticCutoff);
+        energies.resize (boost::extents[m_parameters->electrostaticCutoff][m_parameters->electrostaticCutoff][m_parameters->electrostaticCutoff]);
         //matrix.resize(m_parameters->electrostaticCutoff, m_parameters->electrostaticCutoff, m_parameters->electrostaticCutoff);
 
         // Now calculate the numbers we need
@@ -607,11 +607,11 @@ namespace Langmuir
                     double r = sqrt (col * col + row * row + lay * lay);
                     if ( r > 0 && r < m_parameters->electrostaticCutoff )
                     {
-                        energies (col, row, lay) = m_parameters->elementaryCharge / r;
+                        energies[col][row][lay] = m_parameters->elementaryCharge / r;
                     }
                     else
                     {
-                        energies (col, row, lay) = 0.0;
+                        energies[col][row][lay] = 0.0;
                     }
                 }
             }

@@ -45,7 +45,7 @@ namespace Langmuir
             dz < m_world->parameters()->electrostaticCutoff)
           {
             potential +=
-              m_world->interactionEnergies()(dx,dy,dz) * charges[i]->charge();
+              m_world->interactionEnergies()[dx][dy][dz] * charges[i]->charge();
               //count += 1;
           }
       }
@@ -80,7 +80,7 @@ namespace Langmuir
             dz < m_world->parameters()->electrostaticCutoff)
           {
             potential +=
-              -1.0 * m_world->interactionEnergies()(dx,dy,dz) * charges[i]->charge();
+              -1.0 * m_world->interactionEnergies()[dx][dy][dz] * charges[i]->charge();
             //count += 1;
           }
       }

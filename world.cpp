@@ -40,48 +40,6 @@ namespace Langmuir {
    return m_rand->normalNumber(average,stdev);
   }
 
-  TripleIndexArray::TripleIndexArray()
-  {
-   values.clear();
-   m_width = 0;
-   m_area = 0;
-   m_col = 0;
-   m_row = 0;
-   m_lay = 0;
-  }
-
-  TripleIndexArray::TripleIndexArray(int col, int row, int lay)
-  {
-   values.clear();
-   values.resize(col*row*lay);
-   m_width = col;
-   m_area = col*row;
-   m_col = col;
-   m_row = row;
-   m_lay = lay;
-  }
-
-  void TripleIndexArray::resize(int col, int row, int lay)
-  {
-   values.clear();
-   values.resize(col*row*lay);
-   m_width = col;
-   m_area = col*row;
-   m_col = col;
-   m_row = row;
-   m_lay = lay;
-  }
-
-  double& TripleIndexArray::operator() (int col, int row, int lay)
-  {
-   return values[col+m_width*row+lay*m_area];
-  }
-
-  double TripleIndexArray::operator() (int col, int row, int lay) const
-  {
-   return values[col+m_width*row+lay*m_area];
-  }
-
   void World::initializeOpenCL( )
   {
       //can't use openCL yet
