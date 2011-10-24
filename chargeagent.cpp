@@ -7,8 +7,6 @@
 
 namespace Langmuir
 {
-  using Eigen::Vector3d;
-
     ChargeAgent::ChargeAgent (World * world, int site):Agent (Agent::Charge, world, site), 
      m_charge (-1), m_removed (false), m_lifetime(0), m_distanceTraveled(0.0), OpenCLID(0)
   {

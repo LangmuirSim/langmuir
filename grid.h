@@ -2,7 +2,6 @@
 #define GRID_H
 
 #include <vector>
-#include <Eigen/Core>
 #include <QtCore/QFile>
 #include <QtCore/QTextStream>
 
