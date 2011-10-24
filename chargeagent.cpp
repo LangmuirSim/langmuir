@@ -355,7 +355,7 @@ namespace Langmuir
 
   inline double ChargeAgent::couplingConstant (short id1, short id2)
   {
-    return (*m_world->coupling ())(id1, id2);
+    return m_world->coupling()[id1][id2];
   }
 
   inline bool ChargeAgent::attemptTransport (double pd, double coupling)

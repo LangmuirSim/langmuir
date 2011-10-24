@@ -515,7 +515,6 @@ namespace Langmuir
             QPainter painter;
             if (! painter.begin(&printer)) //Failed to open the file
             {
-
                 qWarning("failed to open file, is it writable?");
                 return ;
             }
@@ -596,6 +595,7 @@ namespace Langmuir
         TripleIndexArray & energies = m_world->interactionEnergies ();
 
         energies.resize (m_parameters->electrostaticCutoff, m_parameters->electrostaticCutoff, m_parameters->electrostaticCutoff);
+        //matrix.resize(m_parameters->electrostaticCutoff, m_parameters->electrostaticCutoff, m_parameters->electrostaticCutoff);
 
         // Now calculate the numbers we need
         for (int col = 0; col < m_parameters->electrostaticCutoff; ++col)

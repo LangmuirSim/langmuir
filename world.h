@@ -3,6 +3,7 @@
  */
 #ifndef WORLD_H
 #define WORLD_H
+#define BOOST_DISABLE_ASSERTS
 #define __CL_ENABLE_EXCEPTIONS
 #define __NO_STD_VECTOR
 
@@ -12,7 +13,7 @@
 #include <vector>
 #include <Eigen/Core>
 #include "chargeagent.h"
-
+#include "boost/multi_array.hpp"
 
 namespace Langmuir
 {
@@ -236,7 +237,7 @@ namespace Langmuir
       *
       * Get the address of a list of coupling constants.
       */
-    Eigen::MatrixXd * coupling();
+    boost::multi_array<double,2>& coupling();
 
     /**
       * @brief member access.
@@ -333,27 +334,28 @@ namespace Langmuir
 
    private:
 
-    Grid                 *m_grid;                // The grid in use in the world
-    Rand                 *m_rand;                // Random number generator
-    SimulationParameters *m_parameters;          // Simulation Parameters
-    QList<ChargeAgent *>  m_charges;             // Charge carriers in the system
-    QList<int>            m_defectSiteIDs;       // Site ids of defects in the system
-    QList<int>            m_trapSiteIDs;         // Site ids of traps in the system
-    Eigen::MatrixXd       m_coupling;            // Enumerates coupling constants between different sites
-    TripleIndexArray      m_interactionEnergies; // Interaction energies
-    QFile                *m_statFile;            // Place to write lifetime and pathlength information
-    QTextStream          *m_statStream;          // Text stream for stat file
+    Grid                        *m_grid;                // The grid in use in the world
+    Rand                        *m_rand;                // Random number generator
+    SimulationParameters        *m_parameters;          // Simulation Parameters
+    QList<ChargeAgent *>         m_charges;             // Charge carriers in the system
+    QList<int>                   m_defectSiteIDs;       // Site ids of defects in the system
+    QList<int>                   m_trapSiteIDs;         // Site ids of traps in the system
+    boost::multi_array<double,2> m_coupling;            // Matrix of coupling constants
 
-    cl::Context          m_context;
-    cl::CommandQueue     m_queue;         // OpenCl queue
-    cl::Kernel           m_coulombK1;     // Kernel for calculating Coulomb Energy everywhere
-    cl::Kernel           m_coulombK2;     // Kernel for calculating Coulomb Energy at select places
-    QVector<int>         m_sHost;         // Host site ids
-    QVector<int>         m_qHost;         // Host charges
-    QVector<double>      m_oHost;         // Host output vector
-    cl::Buffer           m_sDevice;       // Device site ids
-    cl::Buffer           m_qDevice;       // Device charges
-    cl::Buffer           m_oDevice;       // Device output vector
+    TripleIndexArray             m_interactionEnergies; // Interaction energies
+    QFile                       *m_statFile;            // Place to write lifetime and pathlength information
+    QTextStream                 *m_statStream;          // Text stream for stat file
+
+    cl::Context                  m_context;             // OpenCl context
+    cl::CommandQueue             m_queue;               // OpenCl queue
+    cl::Kernel                   m_coulombK1;           // Kernel for calculating Coulomb Energy everywhere
+    cl::Kernel                   m_coulombK2;           // Kernel for calculating Coulomb Energy at select places
+    QVector<int>                 m_sHost;               // Host site ids
+    QVector<int>                 m_qHost;               // Host charges
+    QVector<double>              m_oHost;               // Host output vector
+    cl::Buffer                   m_sDevice;             // Device site ids
+    cl::Buffer                   m_qDevice;             // Device charges
+    cl::Buffer                   m_oDevice;             // Device output vector
  };
 
  inline QList<ChargeAgent *> * World::charges()
@@ -371,9 +373,9 @@ namespace Langmuir
   return &m_trapSiteIDs;
  }
 
- inline Eigen::MatrixXd * World::coupling()
+ inline boost::multi_array<double,2>& World::coupling()
  {
-  return &m_coupling;
+  return m_coupling;
  }
 
  inline TripleIndexArray& World::interactionEnergies()
@@ -382,5 +384,4 @@ namespace Langmuir
  }
 
 }
-
 #endif // WORLD_H

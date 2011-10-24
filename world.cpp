@@ -9,11 +9,11 @@ namespace Langmuir {
   {
     // This array is always the number of different sites + 2. The final two
     // rows/columns are for the source and drain site types.
-    m_coupling.resize(4, 4);
-    m_coupling << 0.333, 0.000, 0.333, 0.333,
-                  0.000, 0.000, 0.000, 0.000,
-                  0.333, 0.000, 0.002, 0.002,
-                  0.333, 0.000, 0.002, 0.002;
+    m_coupling.resize(boost::extents[4][4]);
+    m_coupling[0][0] = 0.333;  m_coupling[0][1] = 0.000;  m_coupling[0][2] = 0.333;  m_coupling[0][3] = 0.333;
+    m_coupling[1][0] = 0.000;  m_coupling[1][1] = 0.000;  m_coupling[1][2] = 0.000;  m_coupling[1][3] = 0.000;
+    m_coupling[2][0] = 0.333;  m_coupling[2][1] = 0.000;  m_coupling[2][2] = 0.002;  m_coupling[2][3] = 0.002;
+    m_coupling[3][0] = 0.333;  m_coupling[3][1] = 0.000;  m_coupling[3][2] = 0.002;  m_coupling[3][3] = 0.002;
   }
 
   World::~World()
