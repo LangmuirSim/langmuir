@@ -9,10 +9,9 @@ class QIODevice;
 
 namespace Langmuir
 {
-
   /**
-   * @struct All pertinent simulation parameters are stored in here. This can
-   * easily be serialized and sent over MPI etc.
+   * @struct SimulationParameters
+   * @brief All pertinent simulation parameters are stored in here.
    */
   struct SimulationParameters
   {
@@ -144,18 +143,8 @@ namespace Langmuir
                             permittivitySpace * gridFactor);
       inverseKT = 1.0 / (boltzmannConstant * temperatureKelvin);
     }
-
   };
 
-  /**
-    *  @class InputParser
-    *  @brief Input reading class.
-    *
-    *  InputParser parses an input file line by line, and sets up a simulation run
-    *  based upon the text input. This class operates on an instantiated Simulation
-    *  object, as well as provinding the variable that should be changed.
-    *  @date 06/07/2010
-    */
   class InputParser
   {
   public:
@@ -248,8 +237,9 @@ namespace Langmuir
     };
 
     /**
-     * Get the simulation parameters for the supplied step.
-     * @param par The SimulationParameters @struct that will be set up.
+     * @brief Get the simulation parameters for the supplied step.
+     *
+     * @param par The SimulationParameters that will be set up.
      * @param step The step
      * @param step Save the parameter pointer to m_parameters
      */
@@ -269,9 +259,9 @@ namespace Langmuir
     int getReadCount();
 
   private:
-    /** 
+    /**
      * @brief The values of parameters.
-     * 
+     *
      * Struct of variable parameters.
      */
       SimulationParameters m_parameters;
@@ -305,6 +295,5 @@ namespace Langmuir
     int readCount;
 
   };
-
 }
 #endif // INPUTPARSER_H

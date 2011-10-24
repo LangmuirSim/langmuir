@@ -11,7 +11,6 @@ namespace Langmuir
 
   public:
   /**
-    *  @class SourceAgent
     *  @brief A agent acting as a source for charges.
     *
     *  Depending on the potential of the source, positive or negative charges enter the simulation be emerging from the source.

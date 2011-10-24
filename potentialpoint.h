@@ -5,15 +5,8 @@
 #include<cmath>
 #include<stdexcept>
 #include<QtCore>
-
-  /**
-    * @class PotentialPoint
-    * @brief container for potential values
-    *
-    * Assumes integer (non continuous) x, y, and z values.
-    * Potential itself is stored as a double.
-    * @date 06/15/2010
-    */
+namespace Langmuir
+{
  class PotentialPoint
  {
  public:
@@ -21,7 +14,7 @@
   /**
     * @brief default constructor
     *
-    * Initializes a 4 dimensional vector (x,y,z,V) 
+    * Initializes a 4 dimensional vector (x,y,z,V)
     * @param col the integer x value.
     * @param row the integer y value.
     * @param lay the integer z value.
@@ -47,11 +40,6 @@
     return QString( "(%1,%2,%3,%4)" ).arg(col).arg(row).arg(lay).arg(potential);
   }
 
-  /**
-    * @struct comparison functor
-    *
-    * Used for sorting points with standard library.
-    */
   struct less_than_by_x_value
   {
    /**
@@ -60,16 +48,11 @@
      * compare two points by x value and less than operator.
      */
    bool operator()(const PotentialPoint& lhs, const PotentialPoint& rhs) const
-   { 
-    return lhs.x() < rhs.x(); 
+   {
+    return lhs.x() < rhs.x();
    }
   };
 
-  /**
-    * @struct comparison functor
-    *
-    * Used for sorting points with standard library.
-    */
   struct less_than_by_y_value
   {
    /**
@@ -78,16 +61,11 @@
      * compare two points by y value and less than operator.
      */
    bool operator()(const PotentialPoint& lhs, const PotentialPoint& rhs) const
-   { 
-    return lhs.y() < rhs.y(); 
+   {
+    return lhs.y() < rhs.y();
    }
   };
 
-  /**
-    * @struct comparison functor
-    *
-    * Used for sorting points with standard library.
-    */
   struct less_than_by_z_value
   {
    /**
@@ -96,8 +74,8 @@
      * compare two points by z value and less than operator.
      */
    bool operator()(const PotentialPoint& lhs, const PotentialPoint& rhs) const
-   { 
-    return lhs.z() < rhs.z(); 
+   {
+    return lhs.z() < rhs.z();
    }
   };
 
@@ -129,8 +107,8 @@
    * @brief decide if this point lies on the x axis
    * @return boolean true of false
    */
- inline bool onXAxis() const 
- { 
+ inline bool onXAxis() const
+ {
   if ( std::abs(row) > 10e-10 ) return false;
   if ( std::abs(lay) > 10e-10 ) return false;
              return  true;
@@ -140,8 +118,8 @@
    * @brief decide if this point lies on the y axis
    * @return boolean true of false
    */
- inline bool onYAxis() const 
- { 
+ inline bool onYAxis() const
+ {
   if ( std::abs(col) > 10e-10 ) return false;
   if ( std::abs(lay) > 10e-10 ) return false;
              return  true;
@@ -151,8 +129,8 @@
    * @brief decide if this point lies on the z axis
    * @return boolean true of false
    */
- inline bool onZAxis() const 
- { 
+ inline bool onZAxis() const
+ {
   if ( std::abs(row) > 10e-10 ) return false;
   if ( std::abs(col) > 10e-10 ) return false;
              return  true;
@@ -162,8 +140,8 @@
    * @brief decide if this point is the origin
    * @return boolean true of false
    */
- inline bool onOrigin() const 
- { 
+ inline bool onOrigin() const
+ {
   if ( std::abs(row) > 10e-10 ) return false;
   if ( std::abs(col) > 10e-10 ) return false;
   if ( std::abs(lay) > 10e-10 ) return false;
@@ -172,11 +150,11 @@
 
  protected:
   /**
-    * @brief value of x coordinate 
+    * @brief value of x coordinate
     */
   double col;
 
-  /** 
+  /**
     * @brief value of y coordinate
     */
   double row;
@@ -191,4 +169,5 @@
     */
   double potential;
  };
+}
 #endif

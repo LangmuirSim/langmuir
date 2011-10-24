@@ -7,17 +7,8 @@
 
 namespace Langmuir
 {
-
-  /**
-    *  @class Cubicgrid
-    *  @brief A grid to do simulations on.
-    *
-    *  Three dimensional cubic grid implementation of the Grid base class.
-    *  @date 06/07/2010
-    */
   class CubicGrid : public Grid
   {
-
   public:
     /**
      * @brief Default Constructor.
