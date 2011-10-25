@@ -1,4 +1,4 @@
-#include "potentialnew.h"
+#include "potential.h"
 #include "inputparser.h"
 #include "cubicgrid.h"
 #include "world.h"

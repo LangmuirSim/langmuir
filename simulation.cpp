@@ -6,7 +6,7 @@
 #include "sourceagent.h"
 #include "drainagent.h"
 #include "inputparser.h"
-#include "potentialnew.h"
+#include "potential.h"
 
 namespace Langmuir
 {
