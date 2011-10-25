@@ -1,0 +1,130 @@
+#include "potentialnew.h"
+#include "inputparser.h"
+#include "cubicgrid.h"
+#include "world.h"
+#include "rand.h"
+
+using namespace Langmuir;
+
+PotentialNew::PotentialNew( World* world ) : m_world( world ) {}
+
+void PotentialNew::setPotentialZero()
+{
+    for ( int i = 0; i < m_world->grid()->volume(); i++ )
+    {
+        m_world->grid()->setPotential( i, 0 );
+    }
+}
+
+void PotentialNew::setPotentialLinear()
+{
+    double  m = ( m_world->parameters()->voltageDrain - m_world->parameters()->voltageSource ) / double( m_world->grid()->width() );
+    double  b = m_world->parameters()->voltageSource;
+    for ( int i = 0; i < m_world->grid()->width(); i++ )
+    {
+        for ( int j = 0; j < m_world->grid()->height(); j++ )
+        {
+            for ( int k = 0; k < m_world->grid()->depth(); k++ )
+            {
+                int s = m_world->grid()->getIndex(i,j,k);
+                double v = m * ( i + 0.5 ) + b;
+                m_world->grid()->addToPotential(s,v);
+            }
+        }
+    }
+    m_world->grid()->setDrainPotential(m_world->parameters()->voltageDrain);
+    m_world->grid()->setSourcePotential(m_world->parameters()->voltageSource);
+}
+
+void PotentialNew::setPotentialTraps()
+{
+    // Do nothing if we shouldn't have traps
+    if ( m_world->parameters()->trapPercentage <= 0 ) return;
+    if ( m_world->parameters()->seedPercentage <= 0 ) return;
+
+    // Seed traps, if seed.percentage=100% then this is just placing traps normally
+    int progress = int( m_world->grid()->volume() * m_world->parameters()->trapPercentage * m_world->parameters()->seedPercentage );
+    while ( progress >= m_world->trapSiteIDs()->size() )
+    {
+        int s = int (m_world->randomNumberGenerator()->random() * (double(m_world->grid()->volume())-1.0e-20));
+
+        if ( ! m_world->trapSiteIDs()->contains(s) )
+        {
+            m_world->grid()->addToPotential(s,m_world->parameters()->deltaEpsilon);
+            m_world->trapSiteIDs()->push_back(s);
+        }
+    }
+
+    // Do not grow traps if we aren't growing hetergeneous traps.
+    if ( m_world->parameters()->trapPercentage <= 0 ) return;
+    if ( m_world->parameters()->seedPercentage <= 0 ||
+         m_world->parameters()->seedPercentage == 1 ) return;
+
+    progress = int( m_world->grid()->volume() * m_world->parameters()->trapPercentage );
+    while ( progress >= m_world->trapSiteIDs()->size() )
+    {
+        int trapSeedIndex               = int (m_world->randomNumberGenerator()->random() * (double(m_world->trapSiteIDs ()->size())-1.0e-20));
+        int trapSeedSite                = m_world->trapSiteIDs()->at(trapSeedIndex);
+        QVector<int> trapSeedNeighbors  = m_world->grid()->neighbors(trapSeedSite,1);
+
+        int newTrapIndex                = int (m_world->randomNumberGenerator()->random() * (double(trapSeedNeighbors.size())-1.0e-20));
+        int newTrapSite                 = trapSeedNeighbors[newTrapIndex];
+
+        if ( m_world->grid()->siteID(newTrapSite) != 2 &&
+             m_world->grid()->siteID(newTrapSite) != 3 &&
+           ! m_world->trapSiteIDs()->contains(newTrapSite) )
+        {
+            m_world->grid()->addToPotential(newTrapSite,m_world->parameters()->deltaEpsilon);
+            m_world->trapSiteIDs()->push_back(newTrapSite);
+        }
+    }
+
+    if ( abs(m_world->parameters()->gaussianStdev) > 0 )
+    {
+        for ( int i = 0; i < m_world->trapSiteIDs()->size(); i++ )
+        {
+            int s = m_world->trapSiteIDs()->at(i);
+            double v = m_world->randomNumberGenerator()->normal(m_world->parameters()->gaussianAverg,m_world->parameters()->gaussianStdev);
+            m_world->grid()->addToPotential(s,v);
+        }
+    }
+}
+
+void PotentialNew::setPotentialFromFile( QString filename )
+{
+
+}
+
+void PotentialNew::setPotentialFromScript( QString filename )
+{
+
+}
+
+void PotentialNew::updateInteractionEnergies()
+{
+    //These values are used in Coulomb interaction calculations.
+    boost::multi_array<double,3>& energies = m_world->interactionEnergies();
+
+    energies.resize (boost::extents[m_world->parameters()->electrostaticCutoff][m_world->parameters()->electrostaticCutoff][m_world->parameters()->electrostaticCutoff]);
+    //matrix.resize(m_parameters->electrostaticCutoff, m_parameters->electrostaticCutoff, m_parameters->electrostaticCutoff);
+
+    // Now calculate the numbers we need
+    for (int col = 0; col < m_world->parameters()->electrostaticCutoff; ++col)
+    {
+        for (int row = 0; row < m_world->parameters()->electrostaticCutoff; ++row)
+        {
+            for (int lay = 0; lay < m_world->parameters()->electrostaticCutoff; ++lay)
+            {
+                double r = sqrt (col * col + row * row + lay * lay);
+                if ( r > 0 && r < m_world->parameters()->electrostaticCutoff )
+                {
+                    energies[col][row][lay] = m_world->parameters()->elementaryCharge / r;
+                }
+                else
+                {
+                    energies[col][row][lay] = 0.0;
+                }
+            }
+        }
+    }
+}
