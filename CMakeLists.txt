@@ -15,7 +15,7 @@ set( sources
       simulation.cpp
       world.cpp
       inputparser.cpp
-      potentialnew.cpp )
+      potential.cpp )
 
 set( meta_object_headers
       gridview.h )
