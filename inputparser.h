@@ -1,11 +1,7 @@
 #ifndef INPUTPARSER_H
 #define INPUTPARSER_H
 
-#include <QMap>
-#include <vector>
-#include "potential.h"
-class QString;
-class QIODevice;
+#include <QtCore>
 
 namespace Langmuir
 {
@@ -17,7 +13,6 @@ namespace Langmuir
   {
     bool interactionCoulomb;
     bool chargedDefects;
-    bool gaussianNoise;
     bool gridCharge;
     bool outputCarriers;
     bool outputCoulombPotential;
@@ -26,7 +21,6 @@ namespace Langmuir
     bool outputDefectIDs;
     bool outputTrapIDs;
     bool chargedTraps;
-    bool trapsHeterogeneous;
     bool outputGrid;
     bool outputStats;
     bool useOpenCL;
@@ -76,16 +70,13 @@ namespace Langmuir
     int randomSeed;
     int sourceAttempts;
     QString kernelsPath;
-    QVector< PotentialPoint > potentialPoints;
 
     SimulationParameters ()
     {
       interactionCoulomb = false;
       chargedDefects = false;
-      gaussianNoise = false;
       gridCharge = false;
       chargedTraps = false;
-      trapsHeterogeneous = false;
       outputGrid = false;
       outputStats = false;
       outputCarriers = false;
@@ -100,7 +91,7 @@ namespace Langmuir
       deltaEpsilon = -0.10;
       gaussianAverg = 0.0;
       gaussianStdev = 0.0;
-      seedPercentage = 0.0;
+      seedPercentage = 1.0;
       sourceBarrier = 0.10;
       drainBarrier = 0.10;
       temperatureKelvin = 300.00;
@@ -171,10 +162,8 @@ namespace Langmuir
       e_undefined,
       e_interactionCoulomb,        // should Coulomb interaction be used
       e_chargedDefects,            // are the defects charged?
-      e_gaussianNoise,             // add random noise to energy levels?
       e_gridCharge,                // seed the grid with charges
       e_chargedTraps,              // are the traps charged?
-      e_trapsHeterogeneous,        // distrubute traps heterogeneously?
       e_outputXyz,                 // should trajectory files be written
       e_outputGrid,                // generate a pdf image of the grid?
       e_outputStats,               // output lifetime and pathlength to file?
@@ -222,8 +211,6 @@ namespace Langmuir
       e_workSize,                  // local size of OpenCL work groups
       e_randomSeed,                // seed for random number generator
       e_kernelsPath,               // source file containing OpenCL kernel
-      e_potentialPoint,            // A point of defined potential (x,y,z,V)
-      e_slopeZ,                    // convenience: makes two potential points at (0,0,1,slope.z) and (0,0,2,2*slope.z) - ( simulates gate potential )
       e_okCL,                      // can openCL be used on this platform?
       e_boltzmannConstant,         // thermodynamics constant - non-variable
       e_dielectricConstant,        // electrostatics constant - non-variable

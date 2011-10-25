@@ -1,6 +1,5 @@
 #include "cubicgrid.h"
 #include <cmath>
-#include <QDebug>
 
 namespace Langmuir
 {

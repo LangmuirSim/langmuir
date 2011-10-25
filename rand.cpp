@@ -1,62 +1,55 @@
 #include "rand.h"
 
-#include <cstdlib>
-#include <cmath>
-#include <ctime>
-#include <vector>
+using namespace Langmuir;
 
-#include <boost/random/uniform_int.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/random/normal_distribution.hpp>
-#include <boost/random/variate_generator.hpp>
-
-using namespace std;
-
-namespace Langmuir{
-
-  Rand::Rand( int seed )
-  {
-    m_gen = new baseGenerator(42u);
-    if ( seed >= 0 )
-     m_gen->seed( seed );
+Random::Random (unsigned int seed)
+{
+    if (seed == 0)
+    {
+        twister = new boost::mt19937 (static_cast < unsigned int >(time (0)));
+    }
     else
-     m_gen->seed(static_cast<int>(std::time(0)));
-    m_dist = new boost::uniform_real<>(0, 1);
-    m_uni = new boost::variate_generator<baseGenerator&, boost::uniform_real<> >(*m_gen, *m_dist);
-  }
+    {
+        twister = new boost::mt19937 (static_cast < unsigned int >(seed));
+    }
 
-  Rand::Rand(double min, double max, int seed )
-  {
-    // Produce a random number distribution between min and max inclusive
-    m_gen = new baseGenerator(42u);
-    if ( seed >= 0 )
-     m_gen->seed( seed );
-    else
-     m_gen->seed(static_cast<int>(std::time(0)));
-    m_dist = new boost::uniform_real<>(min, max);
-    m_uni = new boost::variate_generator<baseGenerator&, boost::uniform_real<> >(*m_gen, *m_dist);
-  }
+    boost::uniform_01< double > distribution;
+    generator01 = new boost::variate_generator < boost::mt19937 &, boost::uniform_01 < double > >(*twister, distribution);
+}
 
-  Rand::~Rand()
-  {
-    delete m_uni;
-    delete m_dist;
-    delete m_gen;
-  }
+Random::~Random ()
+{
+    delete twister;
+    delete generator01;
+}
 
-  double Rand::number()
-  {
-    // Generate a random number between min and max...
-    return (*m_uni)();
-  }
+void Random::seed (unsigned int seed)
+{
+    twister->seed (static_cast < unsigned int >(seed));
+}
 
-  double Rand::normalNumber(double mean, double sigma)
-  {
-    boost::normal_distribution<double> norm_dist(mean, sigma);
-    boost::variate_generator<baseGenerator&, boost::normal_distribution<double> >  normal_sampler(*m_gen, norm_dist);
+double Random::random ()
+{
+    return (*generator01) ();
+}
 
-    // sample from the distribution
-    return normal_sampler();
-  }
+double Random::range (const double low, const double high)
+{
+    boost::uniform_real < double > distribution(low, high);
+    boost::variate_generator < boost::mt19937 &, boost::uniform_real < double > >generator (*twister, distribution);
+    return generator ();
+}
 
-} // End namespace Langmuir
+double Random::normal(const double mean, const double sigma)
+{
+    boost::normal_distribution<double> distribution(mean, sigma);
+    boost::variate_generator < boost::mt19937 &, boost::normal_distribution < double > >  generator(*twister, distribution);
+    return generator();
+}
+
+int Random::integer (const int low, const int high)
+{
+    boost::uniform_int < int > distribution(low, high);
+    boost::variate_generator < boost::mt19937 &, boost::uniform_int < int > >generator (*twister, distribution);
+    return generator();
+}

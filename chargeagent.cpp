@@ -1,9 +1,8 @@
 #include "chargeagent.h"
 #include "world.h"
 #include "grid.h"
+#include "rand.h"
 #include "inputparser.h"
-#include <QtCore/QThread>
-#include <QtCore/QDebug>
 
 namespace Langmuir
 {
@@ -29,7 +28,7 @@ namespace Langmuir
     // Select a proposed transport site at random, but ensure that it is not the source
     do
       {
-        m_fSite = m_neighbors[int(m_world->random() * (m_neighbors.size() - 1.0e-20))];
+        m_fSite = m_neighbors[int(m_world->randomNumberGenerator()->random() * (m_neighbors.size() - 1.0e-20))];
       }
     while (m_world->grid()->siteID(m_fSite) == 2); // source siteID
   }
@@ -53,7 +52,7 @@ namespace Langmuir
             case 0: // Constant case
             {
                 // Do not accept 100*sourceBarrier percent of the time
-                if(m_world->random() <= m_world->parameters()->drainBarrier)
+                if(m_world->randomNumberGenerator()->random() <= m_world->parameters()->drainBarrier)
                 {
                  m_fSite = m_site;
                  return -1;
@@ -358,7 +357,7 @@ namespace Langmuir
 
   inline bool ChargeAgent::attemptTransport (double pd, double coupling)
   {
-    double randNumber = m_world->random();
+    double randNumber =m_world->randomNumberGenerator()->random();
     if (pd > 0.0)
       {
         if ((coupling * exp (-pd * m_world->parameters ()->inverseKT)) >

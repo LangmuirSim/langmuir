@@ -3,7 +3,7 @@
 
 extern int globalstep;
 
-#include <QList>
+#include <QtCore>
 
 namespace Langmuir
 {
@@ -15,6 +15,7 @@ namespace Langmuir
   class DrainAgent;
   class ChargeAgent;
   class Potential;
+  class PotentialNew;
   struct SimulationParameters;
   /**
     *  @class Simulation
@@ -64,13 +65,6 @@ namespace Langmuir
      * @param nInjections number of injections to perform.
      */
     void performInjections (int nInjections=1);
-
-    /**
-     * @brief 2D visualize
-     *
-     * Used to print an ASCII grid to the terminal - low tech visualization.
-     */
-    void printGrid ();
 
     /**
      * @brief Drain Count.
@@ -160,7 +154,7 @@ namespace Langmuir
      *
      * Address of the potential object for the simulation.
      */
-    Potential *m_potential;
+    PotentialNew *m_potentialNew;
 
     /**
      * @brief Source pointer.
@@ -185,35 +179,8 @@ namespace Langmuir
      */
     void createAgents ();
 
-    /**
-     * @brief Release agent memory.
-     *
-     * Destroy the agents once we are done with them.
-     */
-    void destroyAgents ();
-
-    /**
-     * @brief update the potential at each site.
-     *
-     * This only needs to be done when initializing the system or when the source and/or drain potential is modified.
-     * Right now we are assuming that there is one source, one drain and that they are parallel.
-     * This is a good assumption as it simplifies many things in the simulation and also applies to many different real world devices.
-     * Making a more generic implementation would be more difficult and slower.
-     */
-    void updatePotentials ();
-    void heteroTraps ();
-
     // Prints grid sites
     void gridImage();
-
-    /**
-     * @brief Precalculate interaction energies.
-     * 
-     * precalculate the interaction energies of charges at different sites. 
-     * This is a vector of size width + length + depth denoting the x, y displacement of the two sites under consideration. 
-     * These values reduce necessary calculations in tight loops when considering Coulomb interactions.
-     */
-    void updateInteractionEnergies ();
 
     /**
      * @brief Next simulation Tick.
@@ -230,7 +197,7 @@ namespace Langmuir
      * threads and then any joining necessary is done at the end.
      * @param chargeAgent pointer to charge agent.
      */
-    static void chargeAgentIterate (ChargeAgent * chargeAgent);
+    static void chargeAgentIterate( ChargeAgent * chargeAgent );
 
     static void chargeAgentChooseFuture( ChargeAgent * chargeAgent );
 

@@ -1,40 +1,80 @@
-/*
- *  Rand - our random number generator. Simple interface to the Boost random
- *  number library functions.
- */
+#ifndef _RAND_H
+#define _RAND_H
 
-#ifndef __RAND_H
-#define __RAND_H
-
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/linear_congruential.hpp>
-#include <boost/random/variate_generator.hpp>
-#include <boost/random/uniform_real.hpp>
-
-//typedef boost::minstd_rand baseGenerator;
-typedef boost::mt19937 baseGenerator;
+#include<ctime>
+#include<boost/random.hpp>
 
 namespace Langmuir
 {
+class Random
+{
+    public:
 
-  class Rand
-  {
-  public:
-    Rand( int seed = -1 );
-    Rand(double min, double max, int seed = -1 );
-    ~Rand();
-    double number();
-    double normalNumber(double mean, double stdDeviation); // Random number from a normal distribution about the mean
-//    double number(double min, double max);
+        /**
+          * @brief Create Mersenne Twister
+          *
+          * Random number generator based on the boost library Mersenne Twister
+          * @param seed the random number generator; if seed is 0 then use the current time
+          */
+        Random( unsigned int seed=0 );
 
-  private:
-    double m_min;
-    double m_range;
-    baseGenerator *m_gen;
-    boost::uniform_real<> *m_dist;
-    boost::variate_generator<baseGenerator&, boost::uniform_real<> > *m_uni;
-  };
+        /**
+         * @brief Destructor.
+         *
+         * Release the random number generator.
+         */
+       ~Random();
 
-} // End namespace Langmuir
+        /**
+          * @brief Set random seed
+          *
+          * Seed or reseed the random number generator; if seed is 0 then use the current time
+          */
+        void seed( unsigned int );
 
+        /**
+          * @brief Sample random number generator
+          *
+          * Sample the uniform distribution between 0 and 1
+          * @return number
+          */
+        double random();
+
+        /**
+          * @brief Sample random number generator
+          *
+          * Sample the uniform distribution between low and high for doubles
+          * @return number
+          */
+        double range(const double low=0.0, const double high=1.0);
+
+        /**
+          * @brief Sample random number generator
+          *
+          * Sample the gaussian distribution with a certain mean and standard deviation
+          * @return number
+          */
+        double normal(const double mean, const double sigma);
+
+        /**
+          * @brief Sample random number generator
+          *
+          * Sample the uniform distribution between low and high for integers
+          * @return number
+          */
+        int integer(const int low=0, const int high=1);
+
+    private:
+
+        /**
+          * @brief Mersenne Twister
+          */
+        boost::mt19937 *twister;
+
+        /**
+          * @brief Uniform distribution between 0 and 1
+          */
+        boost::variate_generator<boost::mt19937&, boost::uniform_01<double> >* generator01;
+};
+}
 #endif

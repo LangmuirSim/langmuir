@@ -2,7 +2,6 @@
 #define CHARGEAGENT_H
 
 #include "agent.h"
-#include <vector>
 
 namespace Langmuir
 {

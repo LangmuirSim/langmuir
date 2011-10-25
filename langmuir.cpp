@@ -13,6 +13,7 @@
 #include <QtCore/QTextStream>
 #include <QtCore/QDateTime>
 #include <QtCore/QDebug>
+#include <iostream>
 
 using namespace Langmuir;
 

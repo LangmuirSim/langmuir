@@ -1,10 +1,9 @@
 grid.width=256
 grid.height=256
 grid.depth=1
-traps.heterogeneous=true
-trap.percentage=5.0
+trap.percentage=10.0
 seed.percentage=1.0
-delta.epsilon=1.0
+delta.epsilon=0.50
 charge.percentage=1.0
 voltage.drain=100.0
 iterations.print=10

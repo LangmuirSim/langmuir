@@ -2,8 +2,6 @@
 #define CUBICGRID_H
 
 #include "grid.h"
-#include <QtCore/QFile>
-#include <QtCore/QTextStream>
 
 namespace Langmuir
 {

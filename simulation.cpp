@@ -1,21 +1,12 @@
 #include "simulation.h"
 #include "rand.h"
 #include "world.h"
-#include "linearpotential.h"
 #include "cubicgrid.h"
 #include "chargeagent.h"
 #include "sourceagent.h"
 #include "drainagent.h"
 #include "inputparser.h"
-#include <iostream>
-#include <QtCore/QFuture>
-#include <QtCore/QtConcurrentMap>
-#include <QtCore/QStringList>
-#include <QtCore/QFile>
-#include <QtCore/QTextStream>
-#include <QPrinter>
-#include <QPainter>
-#include <QColor>
+#include "potentialnew.h"
 
 namespace Langmuir
 {
@@ -25,10 +16,13 @@ namespace Langmuir
         m_parameters = par;
 
         // Create the world object
-        m_world = new World( par->randomSeed );
+        m_world = new World(par->randomSeed);
 
         // Create the grid object
-        m_grid = new CubicGrid (m_parameters->gridWidth, m_parameters->gridHeight, m_parameters->gridDepth);
+        m_grid = new CubicGrid(m_parameters->gridWidth, m_parameters->gridHeight, m_parameters->gridDepth);
+
+        // Create the potential object
+        m_potentialNew = new PotentialNew(m_world);
 
         // Let the world know about the grid
         m_world->setGrid (m_grid);
@@ -37,40 +31,27 @@ namespace Langmuir
         m_world->setParameters (m_parameters);
 
         // Create the agents
-        createAgents ();
+        this->createAgents();
 
         // Calculate the number of charge carriers
         int nCharges = m_parameters->chargePercentage * double (m_grid->volume ());
         m_source->setMaxCharges (nCharges);
         m_maxcharges = nCharges;
 
-        // Set up and Calculate potential due to electrodes
-        if (m_parameters->potentialForm == 0)
-        {
-            m_potential = new LinearPotential (m_parameters->potentialPoints);
-            //Add the source to the linear potential
-            m_potential->
-            addSourcePoint (PotentialPoint (0, 0, 0, m_parameters->voltageSource));
-            //Add the drain to the linear potential
-            m_potential->
-            addDrainPoint (PotentialPoint
-                           (m_parameters->gridWidth, 0, 0, m_parameters->voltageDrain));
-        }
-        else
-        {
-            qDebug () << "Can not set up the external potential!";
-            throw (std::logic_error ("unknown potential"));
-        }
+        // Setup Grid Potential (Zero it out)
+        m_potentialNew->setPotentialZero();
 
-        // precalculate and store site energies
-        if (m_parameters->trapsHeterogeneous) heteroTraps ();
-        else updatePotentials ();
+        // Add Linear Potential
+        m_potentialNew->setPotentialLinear();
+
+        // Add Trap Potential
+        m_potentialNew->setPotentialTraps();
 
         // precalculate and store coulomb interaction energies
-        updateInteractionEnergies ();
+        m_potentialNew->updateInteractionEnergies();
 
         // place charges on the grid randomly
-        if (m_parameters->gridCharge) seedCharges ();
+        if (m_parameters->gridCharge) seedCharges();
 
         // Generate grid image
         if (m_parameters->outputGrid) gridImage();
@@ -106,9 +87,9 @@ namespace Langmuir
     {
         delete m_world;
         delete m_grid;
-        delete m_potential;
-        m_world = 0;
-        m_grid = 0;
+        delete m_potentialNew;
+        delete m_source;
+        delete m_drain;
     }
 
     bool Simulation::seedCharges ()
@@ -123,7 +104,7 @@ namespace Langmuir
         {
             // Randomly select a site, ensure it is suitable, if so add a charge agent
             int site =
-                int (m_world->random () * (double (nSites) - 1.0e-20));
+                int (m_world->randomNumberGenerator()->random() * (double (nSites) - 1.0e-20));
             if (grid->siteID (site) == 0 && grid->agent (site) == 0)
             {
                 ChargeAgent *charge = new ChargeAgent (m_world, site);
@@ -256,34 +237,6 @@ namespace Langmuir
         }
     }
 
-    void Simulation::printGrid ()
-    {
-        system ("clear");
-        int width = m_world->grid ()->width ();
-        int height = m_world->grid ()->height ();
-        for (int j = 0; j < height; ++j)
-        {
-            std::cout << "||";
-            for (int i = 0; i < width; ++i)
-            {
-                int index = m_world->grid()->getIndex(i,j,0);
-                if (m_world->grid ()->agent (index))
-                {
-                    if (m_world->grid ()->siteID(index) == 0)
-                    {
-                        std::cout << "*";
-                    }
-                    else
-                    {
-                        std::cout << m_world->grid()->siteID(index);
-                    }
-                }
-                else std::cout << " ";
-            }
-            std::cout << "||\n";
-        }
-    }
-
     unsigned long Simulation::totalChargesAccepted ()
     {
         return m_drain->acceptedCharges ();
@@ -313,10 +266,10 @@ namespace Langmuir
         // Add the agents
         for (int i = 0; i < m_grid->volume (); ++i)
         {
-            if (m_world->random () < m_parameters->defectPercentage)
+            if (m_world->randomNumberGenerator()->random() < m_parameters->defectPercentage)
             {
-                m_world->grid ()->setSiteID (i, 1);        //defect
-                m_world->defectSiteIDs ()->push_back (i);        //Add defect to list - for charged defects
+                m_world->grid()->setSiteID(i, 1);        //defect
+                m_world->defectSiteIDs()->push_back (i);        //Add defect to list - for charged defects
             }
             else
             {
@@ -379,131 +332,6 @@ namespace Langmuir
 
     }
 
-    void Simulation::destroyAgents ()
-    {
-        delete m_source;
-        m_source = 0;
-        delete m_drain;
-        m_drain = 0;
-    }
-
-    void Simulation::heteroTraps ()
-    {
-        double tPotential = 0;
-        double gaussianDisorder = 0.0;
-
-        //qDebug() << "entering heteroTraps" << par->trapPercentage;
-
-        for (int x = 0; x < m_grid->width (); x++)
-        {
-            for (int y = 0; y < m_grid->height (); y++)
-            {
-                for (int z = 0; z < m_grid->depth (); z++)
-                {
-                    // Get the potential at this site
-                    tPotential =
-                        m_potential->calculate (x + 0.5, y + 0.5, z + 0.5);
-
-                    // Randomly add some noise
-                    if (m_parameters->gaussianNoise)
-                    {
-                        gaussianDisorder =
-                            m_world->random (m_parameters->gaussianAverg,
-                                             m_parameters->gaussianStdev);
-                        tPotential += gaussianDisorder;
-                    }
-
-                    // The site ID ( this is bad its specific to 3D cubic grids )
-                    int site =
-                        x + m_grid->width () * y + z * m_grid->area ();
-
-                    // Add seeds for heterogeneous traps
-                    if (m_world->random () <
-                            ((m_parameters->seedPercentage) * (m_parameters->trapPercentage)))
-                    {
-                        m_grid->setPotential (site,
-                                              (tPotential + m_parameters->deltaEpsilon));
-                        m_world->trapSiteIDs ()->push_back (site);
-                    }
-
-                    // Assign the potential
-                    else
-                    {
-                        m_grid->setPotential (site, tPotential);
-                    }
-                }
-            }
-        }
-
-        int trapCount =
-            (m_parameters->trapPercentage) * (m_parameters->gridWidth) * (m_parameters->gridHeight) *
-            (m_parameters->gridDepth);
-
-        //qDebug() << "Trap Seeds: " << m_world->chargedTraps()->size();
-        //for (int i = 0; i < m_world->chargedTraps()->size(); i++)
-        //{
-        //      qDebug() << (*m_world->chargedTraps())[i];
-        //}
-
-        //Now loop over our seeds
-        while ((m_world->trapSiteIDs ()->size ()) < trapCount)
-        {
-            // Select a random trap
-            int trapSeed =
-                int (m_world->random () *
-                     (m_world->trapSiteIDs ()->size () - 1.0e-20));
-
-            // Select a random neighbor
-            int newTrap;
-            QVector < int >m_neighbors = m_grid->neighbors(m_world->trapSiteIDs()->at(trapSeed),1);
-            //qDebug() << "Neighbors: " << m_neighbors.size();
-            newTrap =
-                m_neighbors[int
-                            (m_world->random () * (m_neighbors.size () - 1.0e-20))];
-
-            // Check to make sure the newTrap isn't the source or drain...
-            if ((m_world->grid()->siteID(newTrap)) == 2 ||
-                    (m_world->grid()->siteID(newTrap)) == 3)
-                continue;
-
-            //qDebug() << "newTrap: " << newTrap;
-            // Make sure it is not already a trap site
-
-            if (m_world->trapSiteIDs ()->contains (newTrap))
-                continue;
-
-            else
-            {
-                // create a new trap site and save it
-                int x = m_grid->getColumn(newTrap);
-                int y = m_grid->getRow(newTrap);
-                int z = m_grid->getLayer(newTrap);
-                tPotential = m_potential->calculate (x + 0.5, y + 0.5, z + 0.5);
-                m_grid->setPotential (newTrap, (tPotential + m_parameters->deltaEpsilon));
-                m_world->trapSiteIDs ()->push_back (newTrap);
-                //qDebug() << "Traps: " << m_world->chargedTraps()->size();
-            }
-        }
-        //qDebug () << "Traps: " << m_world->chargedTraps ()->size ();
-
-        //for (int i = 0; i < m_grid->volume (); i++)
-        //{
-        //  qDebug() << i << "  " << m_grid->potential(i);
-        //}
-
-
-        //Set the potential of the Source
-        m_grid->setSourcePotential (m_potential->calculate (0.0, 0.0, 0.0));
-
-        //qDebug() << "Source Potential: " << m_grid->potential(m_grid->volume());
-
-        //Set the potential of the Drain
-        m_grid->setDrainPotential (m_potential->
-                                   calculate (double (m_grid->width ()), 0.0,
-                                              0.0));
-        //qDebug() << "Drain Potential: " << m_grid->potential(m_grid->volume() + 1);
-    }
-
     void Simulation::gridImage()
     {
         {
@@ -532,89 +360,6 @@ namespace Langmuir
                 painter.drawRect(colCoord,rowCoord,1,1);
             }
             painter.end();
-        }
-    }
-
-    void Simulation::updatePotentials ()
-    {
-        double tPotential = 0;
-        double gaussianDisorder = 0.0;
-
-        for (int x = 0; x < m_grid->width (); x++)
-        {
-            for (int y = 0; y < m_grid->height (); y++)
-            {
-                for (int z = 0; z < m_grid->depth (); z++)
-                {
-
-                    // Get the potential at this site
-                    tPotential =
-                        m_potential->calculate (x + 0.5, y + 0.5, z + 0.5);
-
-                    // Randomly add some noise
-                    if (m_parameters->gaussianNoise)
-                    {
-                        gaussianDisorder =
-                            m_world->random (m_parameters->gaussianAverg,
-                                             m_parameters->gaussianStdev);
-                        tPotential += gaussianDisorder;
-                    }
-
-                    // The site ID ( this is bad its specific to 3D cubic grids )
-                    int site =
-                        x + m_grid->width () * y + z * m_grid->area ();
-
-                    // We can randomly tweak a site energy
-                    if (m_world->random () < m_parameters->trapPercentage)
-                    {
-                        m_grid->setPotential (site,
-                                              (tPotential + m_parameters->deltaEpsilon));
-                        m_world->trapSiteIDs ()->push_back (site);
-                    }
-
-                    // Assign the potential
-                    else
-                    {
-                        m_grid->setPotential (site, tPotential);
-                    }
-
-                }
-            }
-        }
-
-        //Set the potential of the Source
-        m_grid->setSourcePotential (m_potential->calculate (0.0, 0.0, 0.0));
-
-        //Set the potential of the Drain
-        m_grid->setDrainPotential (m_potential->calculate (double (m_grid->width ()), 0.0,0.0));
-    }
-
-    void Simulation::updateInteractionEnergies ()
-    {
-        //These values are used in Coulomb interaction calculations.
-        boost::multi_array<double,3>& energies = m_world->interactionEnergies ();
-
-        energies.resize (boost::extents[m_parameters->electrostaticCutoff][m_parameters->electrostaticCutoff][m_parameters->electrostaticCutoff]);
-        //matrix.resize(m_parameters->electrostaticCutoff, m_parameters->electrostaticCutoff, m_parameters->electrostaticCutoff);
-
-        // Now calculate the numbers we need
-        for (int col = 0; col < m_parameters->electrostaticCutoff; ++col)
-        {
-            for (int row = 0; row < m_parameters->electrostaticCutoff; ++row)
-            {
-                for (int lay = 0; lay < m_parameters->electrostaticCutoff; ++lay)
-                {
-                    double r = sqrt (col * col + row * row + lay * lay);
-                    if ( r > 0 && r < m_parameters->electrostaticCutoff )
-                    {
-                        energies[col][row][lay] = m_parameters->elementaryCharge / r;
-                    }
-                    else
-                    {
-                        energies[col][row][lay] = 0.0;
-                    }
-                }
-            }
         }
     }
 

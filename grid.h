@@ -1,9 +1,7 @@
 #ifndef GRID_H
 #define GRID_H
 
-#include <vector>
-#include <QtCore/QFile>
-#include <QtCore/QTextStream>
+#include <QtCore>
 
 namespace Langmuir
 {
@@ -336,6 +334,16 @@ namespace Langmuir
      * @param site potential.
      * @warning unchecked access to site ID list.
      */
+    virtual void addToPotential(int site, double potential);
+
+    /**
+     * @brief Add a value to the existing potential at site
+     *
+     * Store this sites potential in a list.
+     * @param site serial cell index.
+     * @param site potential.
+     * @warning unchecked access to site ID list.
+     */
     virtual void setPotential(int site, double potential);
 
     /**
@@ -413,6 +421,11 @@ namespace Langmuir
   inline void Grid::setPotential(int site, double potential)
   {
     m_potentials[site] = potential;
+  }
+
+  inline void Grid::addToPotential(int site, double potential)
+  {
+      m_potentials[site] = m_potentials[site] + potential;
   }
 
   inline double Grid::potential(int site)

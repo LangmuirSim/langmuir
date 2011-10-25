@@ -2,6 +2,7 @@
 #include "chargeagent.h"
 #include "world.h"
 #include "grid.h"
+#include "rand.h"
 #include "inputparser.h"
 
 namespace Langmuir
@@ -98,7 +99,7 @@ namespace Langmuir
   {
     if(pd > 0)
       {
-        if(exp(-pd*m_world->parameters()->inverseKT) > m_world->random())
+        if(exp(-pd*m_world->parameters()->inverseKT) > m_world->randomNumberGenerator()->random())
           {
            //qDebug() << 1;
            return true;
@@ -131,12 +132,12 @@ namespace Langmuir
       }
 
     // Select a random injection site
-    int irn = int(m_world->random() * double(m_neighbors.size() - 1.0e-20));
+    int irn = int(m_world->randomNumberGenerator()->random() * double(m_neighbors.size() - 1.0e-20));
 
     int tries = 1;
     while(m_world->grid()->agent(m_neighbors[irn]))
       {
-        irn = int(m_world->random() * double(m_neighbors.size() - 1.0e-20));
+        irn = int(m_world->randomNumberGenerator()->random() * double(m_neighbors.size() - 1.0e-20));
         tries += 1;
         if(tries >= m_neighbors.size())
           return -1;
@@ -151,7 +152,7 @@ namespace Langmuir
           //coulombInteraction(m_neighbors[irn]);
           //imageInteraction(m_neighbors[irn]);
           // Do not inject 100*sourceBarrier percent of the time
-          if(m_world->random() <= m_world->parameters()->sourceBarrier)
+          if(m_world->randomNumberGenerator()->random() <= m_world->parameters()->sourceBarrier)
             {
               //qDebug() << 5;
               return -1;

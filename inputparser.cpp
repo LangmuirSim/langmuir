@@ -1,10 +1,6 @@
 #include "inputparser.h"
 #include "simulation.h"
-#include <QtCore/QFile>
-#include <QtCore/QIODevice>
-#include <QtCore/QString>
-#include <QtCore/QStringList>
-#include <QtCore/QDebug>
+#include <QtCore>
 
 namespace Langmuir
 {
@@ -615,65 +611,6 @@ namespace Langmuir
               break;
           }
 
-          case e_potentialPoint:
-            {
-              QStringList q =
-                list.at (1).trimmed ().toLower ().remove ("(").remove (")").
-                split (",");
-              if (q.length () != 4)
-                {
-                  qDebug () << "Invalid potential.point specified: " << q;
-                  qFatal ("bad input");
-                }
-              bool ok = true;
-              double x = q[0].toDouble (&ok);
-              if (!ok)
-                {
-                  qDebug () << "0 Invalid potential.point specified: " << q <<
-                    ok;
-                  qFatal ("bad input");
-                }
-              double y = q[1].toDouble (&ok);
-              if (!ok)
-                {
-                  qDebug () << "1 Invalid potential.point specified: " << q <<
-                    ok;
-                  qFatal ("bad input");
-                }
-              double z = q[2].toDouble (&ok);
-              if (!ok)
-                {
-                  qDebug () << "2 Invalid potential.point specified: " << q <<
-                    ok;
-                  qFatal ("bad input");
-                }
-              double V = q[3].toDouble (&ok);
-              if (!ok)
-                {
-                  qDebug () << "3 Invalid potential.point specified: " << q <<
-                    ok;
-                  qFatal ("bad input");
-                }
-              m_parameters.potentialPoints.
-                push_back (PotentialPoint (x, y, z, V));
-              readCount += 1;
-              break;
-            }
-
-          case e_slopeZ:
-            {
-              double slopeZ = list.at (1).toDouble ();
-              if (slopeZ != 0.00)
-                {
-                  m_parameters.potentialPoints.
-                    push_back(PotentialPoint (0,0,1,slopeZ));
-                  m_parameters.potentialPoints.
-                    push_back(PotentialPoint (0,0,2,2*slopeZ));
-                }
-              readCount += 1;
-              break;
-            }
-
           case e_gaussianStdev:
             {
               m_parameters.gaussianStdev = list.at (1).toDouble ();
@@ -694,47 +631,6 @@ namespace Langmuir
               break;
             }
 
-          case e_gaussianNoise:
-            {
-              QString choice = list.at (1).trimmed ().toLower ();
-              if (choice == "true")
-                {
-                  m_parameters.gaussianNoise = true;
-                }
-              else if (choice == "false")
-                {
-                  m_parameters.gaussianNoise = false;
-                }
-              else
-                {
-                  qDebug () << "potential.noise is either true or false: ";
-                  qFatal ("bad input");
-                }
-              readCount += 1;
-              break;
-            }
-
-          case e_trapsHeterogeneous:
-            {
-              QString trapsHeterogeneous = list.at (1).trimmed ().toLower ();
-              if (trapsHeterogeneous == "true")
-                {
-                  m_parameters.trapsHeterogeneous = true;
-                }
-              else if (trapsHeterogeneous == "false")
-                {
-                  m_parameters.trapsHeterogeneous = false;
-                }
-              else
-                {
-                  qDebug () <<
-                    "Heterogeneous Traps are either true or false: ";
-                  qFatal ("bad input");
-                }
-              readCount += 1;
-              break;
-            }
-
           case e_seedPercentage:
             {
               m_parameters.seedPercentage = list.at (1).toDouble () / 100.0;
@@ -750,7 +646,6 @@ namespace Langmuir
               readCount += 1;
               break;
             }
-
 
           case e_sourceBarrier:
             {
@@ -1011,7 +906,6 @@ namespace Langmuir
     s_variables["electrostatic.prefactor"] = e_electrostaticPrefactor;
     s_variables["elementary.charge"] = e_elementaryCharge;
     s_variables["gaussian.averg"] = e_gaussianAverg;
-    s_variables["gaussian.noise"] = e_gaussianNoise;
     s_variables["gaussian.stdev"] = e_gaussianStdev;
     s_variables["grid.charge"] = e_gridCharge;
     s_variables["grid.depth"] = e_gridDepth;
@@ -1039,16 +933,13 @@ namespace Langmuir
     s_variables["output.defectids"] = e_outputDefectIDs;
     s_variables["permittivity.space"] = e_permittivitySpace;
     s_variables["potential.form"] = e_potentialForm;
-    s_variables["potential.point"] = e_potentialPoint;
     s_variables["random.seed"] = e_randomSeed;
     s_variables["seed.percentage"] = e_seedPercentage;
-    s_variables["slope.z"] = e_slopeZ;
     s_variables["source.attempts"] = e_sourceAttempts;
     s_variables["source.barrier"] = e_sourceBarrier;
     s_variables["source.type"] = e_sourceType;
     s_variables["temperature.kelvin"] = e_temperatureKelvin;
     s_variables["trap.percentage"] = e_trapPercentage;
-    s_variables["traps.heterogeneous"] = e_trapsHeterogeneous;
     s_variables["variable.final"] = e_variableFinal;
     s_variables["variable.start"] = e_variableStart;
     s_variables["variable.steps"] = e_variableSteps;
@@ -1082,7 +973,6 @@ namespace Langmuir
       pairs << QString("%1=%2").arg(s_variables.key( e_electrostaticPrefactor )).arg(variables->electrostaticPrefactor);
       pairs << QString("%1=%2").arg(s_variables.key( e_elementaryCharge )).arg(variables->elementaryCharge);
       pairs << QString("%1=%2").arg(s_variables.key( e_gaussianAverg )).arg(variables->gaussianAverg);
-      pairs << QString("%1=%2").arg(s_variables.key( e_gaussianNoise )).arg(variables->gaussianNoise);
       pairs << QString("%1=%2").arg(s_variables.key( e_gaussianStdev )).arg(variables->gaussianStdev);
       pairs << QString("%1=%2").arg(s_variables.key( e_gridCharge )).arg(variables->gridCharge);
       pairs << QString("%1=%2").arg(s_variables.key( e_gridDepth )).arg(variables->gridDepth);
@@ -1104,11 +994,6 @@ namespace Langmuir
       pairs << QString("%1=%2").arg(s_variables.key( e_outputXyz )).arg(variables->outputCoulombPotential);
       pairs << QString("%1=%2").arg(s_variables.key( e_permittivitySpace )).arg(variables->permittivitySpace);
       pairs << QString("%1=%2").arg(s_variables.key( e_potentialForm )).arg(variables->potentialForm);
-      for ( int i = 0; i < variables->potentialPoints.size(); i++ )
-      {
-      QString s = "";
-      pairs << QString("%1=%2").arg(s_variables.key( e_potentialPoint )).arg(variables->potentialPoints[i].toString());
-      }
       pairs << QString("%1=%2").arg(s_variables.key( e_randomSeed )).arg(variables->randomSeed);
       pairs << QString("%1=%2").arg(s_variables.key( e_seedPercentage )).arg(variables->seedPercentage);
       pairs << QString("%1=%2").arg(s_variables.key( e_sourceAttempts )).arg(variables->sourceAttempts);
@@ -1116,7 +1001,6 @@ namespace Langmuir
       pairs << QString("%1=%2").arg(s_variables.key( e_sourceType )).arg(variables->sourceType);
       pairs << QString("%1=%2").arg(s_variables.key( e_temperatureKelvin )).arg(variables->temperatureKelvin);
       pairs << QString("%1=%2").arg(s_variables.key( e_trapPercentage )).arg(variables->trapPercentage);
-      pairs << QString("%1=%2").arg(s_variables.key( e_trapsHeterogeneous )).arg(variables->trapsHeterogeneous);
       pairs << QString("%1=%2").arg(s_variables.key( e_variableFinal )).arg(variables->variableFinal);
       pairs << QString("%1=%2").arg(s_variables.key( e_variableStart )).arg(variables->variableStart);
       pairs << QString("%1=%2").arg(s_variables.key( e_variableSteps )).arg(variables->variableSteps);

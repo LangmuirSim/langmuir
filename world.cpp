@@ -2,10 +2,11 @@
 #include "rand.h"
 #include "inputparser.h"
 #include "cubicgrid.h"
+#include "chargeagent.h"
 
 namespace Langmuir {
 
-  World::World( int seed ) : m_grid(0), m_rand(new Rand(0.0, 1.0, seed)), m_parameters(NULL), m_statFile(NULL), m_statStream(NULL)
+  World::World( int seed ) : m_grid(0), m_rand(new Random(seed)), m_parameters(NULL), m_statFile(NULL), m_statStream(NULL)
   {
     // This array is always the number of different sites + 2. The final two
     // rows/columns are for the source and drain site types.
@@ -28,16 +29,6 @@ namespace Langmuir {
    {
      delete m_statFile;
    }
-  }
-
-  double World::random()
-  {
-   return m_rand->number();
-  }
-
-  double World::random( double average, double stdev )
-  {
-   return m_rand->normalNumber(average,stdev);
   }
 
   void World::initializeOpenCL( )

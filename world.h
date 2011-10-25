@@ -10,14 +10,12 @@
 #include "cl.hpp"
 #include <QtCore>
 #include <QtGui>
-#include <vector>
-#include "chargeagent.h"
 #include "boost/multi_array.hpp"
 
 namespace Langmuir
 {
   class Grid;
-  class Rand;
+  class Random;
   class ChargeAgent;
   struct SimulationParameters;
 
@@ -73,20 +71,11 @@ namespace Langmuir
     void setParameters(SimulationParameters *parameters);
 
     /**
-      * @brief random number generation.
+      * @brief member access.
       *
-      * Get a random number between 0 and 1.
+      * Get the address of the Random Number Generator object.
       */
-    double random();
-
-    /**
-      * @brief random number generation.
-      *
-      * Get a random number with average and standard deviation of gaussian.
-      * @param average average of gaussian
-      * @param stdev standard deviation of gaussian
-      */
-    double random( double average, double stdev );
+    Random* randomNumberGenerator() { return m_rand; }
 
     /**
       * @brief member access.
@@ -212,7 +201,7 @@ namespace Langmuir
    private:
 
     Grid                        *m_grid;                // The grid in use in the world
-    Rand                        *m_rand;                // Random number generator
+    Random                      *m_rand;                // Random number generator
     SimulationParameters        *m_parameters;          // Simulation Parameters
     QList<ChargeAgent *>         m_charges;             // Charge carriers in the system
     QList<int>                   m_defectSiteIDs;       // Site ids of defects in the system
