@@ -12,7 +12,7 @@ In order to build the Langmuir engine the following dependencies are required,
 
 Qt4
 OpenCL
-Eigen
+Boost
 OpenGL ( optional )
 CMake
 
@@ -26,3 +26,4 @@ cmake -DCMAKE_OSX_ARCHITECTURES=i386 ../
 
 When using OpenCL to accelerate charge calculations:
  make sure a copy of or symbolic link to the file "kernel.cl" is in the work directory
+ or make sure to set the variable kernels.path=/path/to/kernel.cl
