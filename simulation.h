@@ -11,11 +11,10 @@ namespace Langmuir
   class World;
   class Grid;
   class Agent;
-  class SourceAgent;
+  class Potential;
   class DrainAgent;
+  class SourceAgent;
   class ChargeAgent;
-  class Potential;
-  class Potential;
   struct SimulationParameters;
   /**
     *  @class Simulation
@@ -96,17 +95,7 @@ namespace Langmuir
      *
      * Retrieve the world object - can be used alter world properties.
      */
-    World *world ();
-
-    /**
-     * @brief Access the Grid
-     *
-     * Get the address of the Simulation Grid.
-     */
-    Grid *getGrid ()
-    {
-      return m_grid;
-    }
+    World *world();
 
     /**
      * @brief the total steps performed

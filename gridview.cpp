@@ -26,10 +26,10 @@ namespace Langmuir
             //Index of a trap site
             int ndx = pSim->world()->trapSiteIDs()->at( i );
             //If this trap is in the Layer we are drawing...
-            if ( pSim->getGrid()->getLayer( ndx ) == layer )
+            if ( pSim->world()->grid()->getLayer( ndx ) == layer )
             {
                 //Draw the trap as a point at (x,y) = (col,row)
-                painter.drawPoint( QPoint( pSim->getGrid()->getColumn( ndx ), pSim->getGrid()->getRow( ndx ) ) );
+                painter.drawPoint( QPoint( pSim->world()->grid()->getColumn( ndx ), pSim->world()->grid()->getRow( ndx ) ) );
             }
         }
         //return the new image ( its not copied on return because of how Qt stores images )
