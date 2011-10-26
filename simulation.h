@@ -7,7 +7,6 @@ extern int globalstep;
 
 namespace Langmuir
 {
-
   class World;
   class Grid;
   class Agent;
@@ -33,21 +32,21 @@ namespace Langmuir
      * Set up the basic parameters of the simulation.
      * @param par parameter struct
      */
-    Simulation (SimulationParameters * par, int id = 0);
+    Simulation(SimulationParameters * par, int id = 0);
 
     /**
      * @brief Destructor.
      *
      * Releases the random number generator.
      */
-    ~Simulation ();
+    ~Simulation();
 
     /**
      * @brief Place charges on grid.
      *
      * Seed the grid with the number of charges specified by setMaxCharges.
      */
-    bool seedCharges ();
+    bool seedCharges();
 
     /**
      * @brief Perform Iterations. 
@@ -56,39 +55,6 @@ namespace Langmuir
      * @param nIterations number of iterations to perform.
      */
     void performIterations (int nIterations);
-
-    /**
-     * @brief Perform injection.
-     *
-     * Allow source to perform this many injections.
-     * @param nInjections number of injections to perform.
-     */
-    void performInjections (int nInjections=1);
-
-    /**
-     * @brief Drain Count.
-     *
-     * Retrieve a charge drain count - total number of charges the drain has
-     * received since the simulation started.
-     */
-    unsigned long totalChargesAccepted ();
-
-    /**
-     * @brief ncharges
-     *
-     * Retrieve the current number of charges in the system.
-     */
-    unsigned long charges ();
-
-    /**
-     * @brief ncharges
-     *
-     * Retrieve the current number of charges in the system.
-     */
-    int getMaxCharges ()
-    {
-      return m_maxcharges;
-    }
 
     /**
      * @brief World access.
@@ -106,100 +72,50 @@ namespace Langmuir
   private:
 
     /**
+     * @brief World pointer.
+     */
+    World *m_world;
+
+    /**
       * @brief a unique id for this simulation
       */
     int m_id;
 
     /**
-     * @brief Charge Defect charge.
-     *
-     * The charge on traps in the simulation.
+     * @brief Number of iterations performed
      */
-    int m_maxcharges;
-
-    /**
-     * @brief World pointer.
-     *
-     * Address of the world object used for the simulation.
-     */
-    World *m_world;
-
-    /**
-     * @brief Grid pointer.
-     *
-     * Address of the grid object used for the simulation.
-     */
-    Grid *m_grid;
-
-    /**
-     * @brief Parameter pointer.
-     *
-     * Address of the parameter object used for the simulation.
-     */
-    SimulationParameters *m_parameters;
-
-    /**
-     * @brief Potential calculator
-     *
-     * Address of the potential object for the simulation.
-     */
-    Potential *m_potential;
-
-    /**
-     * @brief Source pointer.
-     *
-     * Address of the source object used for the simulation.
-     */
-    SourceAgent *m_source;
-
-    /**
-     * @brief Drain pointer.
-     *
-     * Address of the drain object used for the simulation.
-     */
-    DrainAgent *m_drain;
-
     int m_tick;
 
     /**
-     * @brief Generate Agents.
-     *
-     * Create all the agents in the simulation and set up their initial state.
+     * @brief save grid image to a file
      */
-    void createAgents ();
-
-    // Prints grid sites
     void gridImage();
 
     /**
-     * @brief Next simulation Tick.
-     *
-     * Move on to the next time tick - change to the future states, clean up.
+     * @brief inject charges into the system
+     * @param nInjections number of injections to perform.
+     */
+    void performInjections (int nInjections=1);
+
+    /**
+     * @brief next simulation Tick.
      */
     void nextTick ( );
 
     /**
-     * @brief charge agent iterations.
-     *
-     * Private static member function - this function performs the majority of
-     * calculations for each iteration. These calculations are performed in
-     * threads and then any joining necessary is done at the end.
-     * @param chargeAgent pointer to charge agent.
+     * @brief charge agent transport for QtConcurrent.
      */
     static void chargeAgentIterate( ChargeAgent * chargeAgent );
 
+    /**
+     * @brief charge agent transport (choose future site) for QtConcurrent.
+     */
     static void chargeAgentChooseFuture( ChargeAgent * chargeAgent );
 
     /**
-      * @brief finishes what chargeAgentIterate fails to do when OpenCL is used
-      *
-      * In between generating future sites, and deciding if those future sites
-      * can be moved to, we calculate coulomb interactions.  We need to gather
-      * ALL the future sites before sending them to a compute device before
-      * before deciding the outcome.
-      */
+     * @brief charge agent transport (apply metropolis) for QtConcurrent.
+     */
     static void chargeAgentDecideFuture( ChargeAgent * chargeAgent );
-
   };
 
   inline World *Simulation::world ()

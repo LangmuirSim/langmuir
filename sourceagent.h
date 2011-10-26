@@ -51,7 +51,7 @@ namespace Langmuir
      * Get the max number of possible charges.
      * @return The maximum number of charges in the system.
      */
-    int maxCharges ();
+    int maxCharges();
 
     /**
      * @brief remove a charge.

@@ -1,20 +1,43 @@
+#include "inputparser.h"
+#include "chargeagent.h"
+#include "sourceagent.h"
+#include "drainagent.h"
+#include "potential.h"
+#include "cubicgrid.h"
 #include "world.h"
 #include "rand.h"
-#include "inputparser.h"
-#include "cubicgrid.h"
-#include "chargeagent.h"
 
 namespace Langmuir {
 
-  World::World( int seed ) : m_grid(0), m_rand(new Random(seed)), m_parameters(NULL), m_statFile(NULL), m_statStream(NULL)
+  World::World( SimulationParameters *par ) : m_statFile(NULL), m_statStream(NULL)
   {
-    // This array is always the number of different sites + 2. The final two
-    // rows/columns are for the source and drain site types.
     m_coupling.resize(boost::extents[4][4]);
     m_coupling[0][0] = 0.333;  m_coupling[0][1] = 0.000;  m_coupling[0][2] = 0.333;  m_coupling[0][3] = 0.333;
     m_coupling[1][0] = 0.000;  m_coupling[1][1] = 0.000;  m_coupling[1][2] = 0.000;  m_coupling[1][3] = 0.000;
     m_coupling[2][0] = 0.333;  m_coupling[2][1] = 0.000;  m_coupling[2][2] = 0.002;  m_coupling[2][3] = 0.002;
     m_coupling[3][0] = 0.333;  m_coupling[3][1] = 0.000;  m_coupling[3][2] = 0.002;  m_coupling[3][3] = 0.002;
+
+    m_parameters = par;
+    m_rand = new Random(m_parameters->randomSeed);
+    m_grid = new CubicGrid(m_parameters->gridWidth, m_parameters->gridHeight, m_parameters->gridDepth);
+    m_potential = new Potential(this);
+
+    createDefects();
+    createSource();
+    createDrain();
+
+    if (m_parameters->outputStats)
+      {
+        m_statFile = new QFile ("stats");
+        if (!(m_statFile->open (QIODevice::WriteOnly | QIODevice::Text)))
+          {
+            qDebug () << "Error opening stat file:";
+          }
+        m_statStream = new QTextStream (m_statFile);
+        m_statStream->setRealNumberPrecision (m_parameters->outputPrecision);
+        m_statStream->setFieldWidth (m_parameters->outputWidth);
+      *(m_statStream) << scientific;
+      }
   }
 
   World::~World()
@@ -29,6 +52,91 @@ namespace Langmuir {
    {
      delete m_statFile;
    }
+   delete m_potential;
+   delete m_source;
+   delete m_drain;
+   delete m_grid;
+  }
+
+  void World::createDefects()
+  {
+      for (int i = 0; i < m_grid->volume (); ++i)
+      {
+          if (m_rand->random() < m_parameters->defectPercentage)
+          {
+              m_grid->setSiteID(i, 1);        //defect
+              m_defectSiteIDs.push_back (i);        //Add defect to list - for charged defects
+          }
+          else
+          {
+              m_grid->setSiteID (i, 0);        //Charge carrier site
+          }
+      }
+  }
+
+  void World::createDrain()
+  {
+      m_drain = new DrainAgent(this, m_grid->volume () + 1);
+      m_grid->setAgent (m_grid->volume () + 1, m_drain);
+      m_grid->setSiteID (m_grid->volume () + 1, 3);
+      // Now to assign nearest neighbours
+      QVector < int >neighbors (0, 0);
+      // Loop over layers
+      for (int layer = 0; layer < m_grid->depth (); layer++)
+      {
+          // Get column in this layer that is closest to the source
+          QVector < int >column_neighbors_in_layer =
+              m_grid->col (m_grid->width () - 1, layer);
+          // Loop over this column
+          for (int column_site = 0;
+                  column_site < column_neighbors_in_layer.size (); column_site++)
+          {
+              neighbors.push_back (column_neighbors_in_layer[column_site]);
+          }
+      }
+      // Remove defects as possible neighbors
+      for ( int i = 0; i < m_defectSiteIDs.size(); i++ )
+      {
+          int j = m_defectSiteIDs[i];
+          int k = neighbors.indexOf(j);
+          if ( k != -1 ) { neighbors.remove(k); }
+      }
+      // Set the neighbors of the drain
+      m_drain->setNeighbors (neighbors);
+      neighbors.clear ();
+  }
+
+  void World::createSource()
+  {
+      // Add the source and the drain
+      m_source = new SourceAgent (this, m_grid->volume ());
+      m_grid->setAgent (m_grid->volume (), m_source);
+      m_grid->setSiteID (m_grid->volume (), 2);
+      // Now to assign nearest neighbours
+      QVector < int >neighbors (0, 0);
+      // Loop over layers
+      for (int layer = 0; layer < m_grid->depth (); layer++)
+      {
+          // Get column in this layer that is closest to the source
+          QVector < int >column_neighbors_in_layer =
+              m_grid->col (0, layer);
+          // Loop over this column
+          for (int column_site = 0;
+                  column_site < column_neighbors_in_layer.size (); column_site++)
+          {
+              neighbors.push_back (column_neighbors_in_layer[column_site]);
+          }
+      }
+      // Remove defects as possible neighbors
+      for ( int i = 0; i < m_defectSiteIDs.size(); i++ )
+      {
+          int j = m_defectSiteIDs[i];
+          int k = neighbors.indexOf(j);
+          if ( k != -1 ) { neighbors.remove(k); }
+      }
+      // Set the neighbors of the source
+      m_source->setNeighbors(neighbors);
+      m_source->setMaxCharges( m_parameters->chargePercentage * double (m_grid->volume()) );
   }
 
   void World::initializeOpenCL( )
@@ -232,7 +340,6 @@ namespace Langmuir {
                  qWarning(" may exceed device memory - expecting crash");
               }
           }
-
           //force queues to finish
           err = m_queue.finish();
 
@@ -594,24 +701,6 @@ namespace Langmuir {
           }
       }
       out.close();
-  }
-
-  void World::setParameters(SimulationParameters *parameters)
-  {
-      m_parameters = parameters;
-
-      if (m_parameters->outputStats)
-        {
-          m_statFile = new QFile ("stats");
-          if (!(m_statFile->open (QIODevice::WriteOnly | QIODevice::Text)))
-            {
-              qDebug () << "Error opening stat file:";
-            }
-          m_statStream = new QTextStream (m_statFile);
-          m_statStream->setRealNumberPrecision (m_parameters->outputPrecision);
-          m_statStream->setFieldWidth (m_parameters->outputWidth);
-        *(m_statStream) << scientific;
-        }
   }
 
   void World::statMessage( QString message )

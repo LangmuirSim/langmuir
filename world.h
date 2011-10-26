@@ -15,10 +15,13 @@
 namespace Langmuir
 {
   class Grid;
+  class Agent;
   class Random;
+  class Potential;
+  class DrainAgent;
+  class SourceAgent;
   class ChargeAgent;
   struct SimulationParameters;
-
   /**
     * @class World
     *
@@ -30,7 +33,7 @@ namespace Langmuir
     /**
       * Default Constructor.
       */
-    World( int seed = -1 );
+    World( SimulationParameters *par );
 
     /**
       * Default Destructor.
@@ -43,72 +46,57 @@ namespace Langmuir
     void initializeOpenCL();
 
     /**
-      * @brief member access.
-      *
-      * Get the address of the grid object.
+      * @brief grid pointer
       */
-    Grid * grid() const { return m_grid; }
+    Grid * grid() { return m_grid; }
 
     /**
-      * @brief member access.
-      *
-      * Set the address of the grid object.
+      * @brief potential pointer
       */
-    void setGrid(Grid *grid) { m_grid = grid; }
+    Potential * potential() { return m_potential; }
 
     /**
-      * @brief member access.
-      *
-      * Get the address of the parameters object.
+      * @brief parameters pointer
       */
-    SimulationParameters * parameters() const { return m_parameters; }
+    SimulationParameters * parameters() { return m_parameters; }
 
     /**
-      * @brief member access.
-      *
-      * Set the address of the parameters object.  Initialize stat file if necessary.
-      */
-    void setParameters(SimulationParameters *parameters);
-
-    /**
-      * @brief member access.
-      *
-      * Get the address of the Random Number Generator object.
+      * @brief random number generator pointer
       */
     Random* randomNumberGenerator() { return m_rand; }
 
     /**
-      * @brief member access.
-      *
-      * Get the address of a list of charge agents.
+      * @brief random number generator pointer
+      */
+    SourceAgent* source() { return m_source; }
+
+    /**
+      * @brief random number generator pointer
+      */
+    DrainAgent* drain() { return m_drain; }
+
+    /**
+      * @brief charge agent pointer
       */
     QList<ChargeAgent *> * charges();
 
     /**
-      * @brief member access.
-      *
-      * Get the address of a list of charged defects.
+      * @brief defect site id list pointer
       */
     QList<int> * defectSiteIDs();
 
     /**
-      * @brief member access.
-      *
-      * Get the address of a list of charged traps.
+      * @brief trap site id list pointer
       */
     QList<int> * trapSiteIDs();
 
     /**
-      * @brief member access.
-      *
-      * Get the address of a list of coupling constants.
+      * @brief coupling matrix reference
       */
     boost::multi_array<double,2>& coupling();
 
     /**
-      * @brief member access.
-      *
-      * Get a reference to a distance matrix. 
+      * @brief interaction energy matrix reference
       */
     boost::multi_array<double,3>& interactionEnergies();
 
@@ -154,10 +142,6 @@ namespace Langmuir
 
     /**
       * @brief copy a charge carrier's current site ID to the m_iHost vector
-      *
-      * had to do this because to copy to the GPU we need a closely packed array of values.
-      * The data *needed* from each Agent object isn't closely packed.  Wish there was a
-      * way around this - its an extra copying step.
       */
     inline void copySiteAndChargeToHostVector( int index, int site, int charge = -1 ) { m_sHost[index] = site; m_qHost[index] = charge; }
 
@@ -183,8 +167,6 @@ namespace Langmuir
 
     /**
      * @brief change parameters
-     *
-     * toggle openCL if valid
      */
     bool toggleOpenCL(bool on);
 
@@ -198,16 +180,25 @@ namespace Langmuir
       */
     void statFlush();
 
+    void createDefects();
+    void createSource();
+    void createDrain();
+
    private:
 
     Grid                        *m_grid;                // The grid in use in the world
     Random                      *m_rand;                // Random number generator
+    DrainAgent                  *m_drain;               // Drain Agent
+    SourceAgent                 *m_source;              // Source Agent
+    Potential                   *m_potential;           // Potential Calculator
     SimulationParameters        *m_parameters;          // Simulation Parameters
+
     QList<ChargeAgent *>         m_charges;             // Charge carriers in the system
     QList<int>                   m_defectSiteIDs;       // Site ids of defects in the system
     QList<int>                   m_trapSiteIDs;         // Site ids of traps in the system
     boost::multi_array<double,2> m_coupling;            // Matrix of coupling constants
     boost::multi_array<double,3> m_interactionEnergies; // Interaction energies
+
     QFile                       *m_statFile;            // Place to write lifetime and pathlength information
     QTextStream                 *m_statStream;          // Text stream for stat file
     cl::Context                  m_context;             // OpenCl context

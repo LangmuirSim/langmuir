@@ -1,3 +1,4 @@
+#include "drainagent.h"
 #include "gridview.h"
 
 namespace Langmuir
@@ -293,7 +294,7 @@ namespace Langmuir
         {
             pSim->performIterations( pPar->iterationsPrint );
             //double current = ( pSim->totalChargesAccepted() - lastCount ) / ( double( pPar->iterationsPrint ) );
-            lastCount = pSim->totalChargesAccepted();
+            lastCount = pSim->world()->drain()->acceptedCharges();
             step += pPar->iterationsPrint;
 
             QList< ChargeAgent* > *charges = pSim->world()->charges();

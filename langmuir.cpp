@@ -1,7 +1,9 @@
 #include "inputparser.h"
+#include "sourceagent.h"
+#include "simulation.h"
+#include "drainagent.h"
 #include "cubicgrid.h"
 #include "world.h"
-#include "simulation.h"
 #include "timer.h"
 
 #include <QApplication>
@@ -141,11 +143,11 @@ int main (int argc, char *argv[])
             << par.defectPercentage * 100.00
             << par.trapPercentage * 100.0
             << par.chargePercentage * 100.0
-            << double (sim.charges ()) / double (sim.getMaxCharges ()) * 100.0
-            << double (sim.totalChargesAccepted () -
+            << double (sim.world()->charges()->size()) / double (sim.world()->source()->maxCharges()) * 100.0
+            << double (sim.world()->drain()->acceptedCharges() -
                        lastCount) / double (par.iterationsPrint) << "\n";
           iout->flush ();
-          lastCount = sim.totalChargesAccepted ();
+          lastCount = sim.world()->drain()->acceptedCharges();
 
           progress( i, j, 0, total, timer.elapsed(timeStepStart) );
         }
@@ -166,11 +168,11 @@ int main (int argc, char *argv[])
             << par.defectPercentage * 100.0
             << par.trapPercentage * 100.0
             << par.chargePercentage * 100.0
-            << double (sim.charges ()) / double (sim.getMaxCharges ()) * 100.0
-            << double (sim.totalChargesAccepted () -
+            << double (sim.world()->charges()->size()) / double (sim.world()->source()->maxCharges()) * 100.0
+            << double (sim.world()->drain()->acceptedCharges() -
                        lastCount) / double (par.iterationsPrint) << "\n";
           iout->flush ();
-          lastCount = sim.totalChargesAccepted ();
+          lastCount = sim.world()->drain()->acceptedCharges();
 
           progress( i, par.iterationsWarmup, j, total, timer.elapsed(timeStepStart) );
         }
@@ -184,7 +186,7 @@ int main (int argc, char *argv[])
         << par.defectPercentage * 100.0
         << par.trapPercentage * 100.0
         << par.chargePercentage * 100.0
-        << double (sim.charges ()) / double (sim.getMaxCharges ()) * 100.0
+        << double (sim.world()->charges()->size()) / double (sim.world()->source()->maxCharges()) * 100.0
         << double (lastCount - startCount) / double (par.iterationsReal)
         << timer.elapsed (timeStepStart) << "\n";
       oout->flush ();
