@@ -22,7 +22,7 @@ namespace Langmuir
         m_grid = new CubicGrid(m_parameters->gridWidth, m_parameters->gridHeight, m_parameters->gridDepth);
 
         // Create the potential object
-        m_potentialNew = new PotentialNew(m_world);
+        m_potential = new Potential(m_world);
 
         // Let the world know about the grid
         m_world->setGrid (m_grid);
@@ -39,16 +39,17 @@ namespace Langmuir
         m_maxcharges = nCharges;
 
         // Setup Grid Potential (Zero it out)
-        m_potentialNew->setPotentialZero();
+        m_potential->setPotentialZero();
 
         // Add Linear Potential
-        m_potentialNew->setPotentialLinear();
+        m_potential->setPotentialLinear();
 
         // Add Trap Potential
-        m_potentialNew->setPotentialTraps();
+        m_potential->setPotentialTraps();
+        m_potential->setPotentialFromFile("TEST");
 
         // precalculate and store coulomb interaction energies
-        m_potentialNew->updateInteractionEnergies();
+        m_potential->updateInteractionEnergies();
 
         // place charges on the grid randomly
         if (m_parameters->gridCharge) seedCharges();
@@ -87,7 +88,7 @@ namespace Langmuir
     {
         delete m_world;
         delete m_grid;
-        delete m_potentialNew;
+        delete m_potential;
         delete m_source;
         delete m_drain;
     }
@@ -305,6 +306,15 @@ namespace Langmuir
                         neighbors.push_back (column_neighbors_in_layer[column_site]);
                     }
                 }
+
+                // Remove defects as possible neighbors
+                for ( int i = 0; i < m_world->defectSiteIDs()->size(); i++ )
+                {
+                    int j = m_world->defectSiteIDs()->at(i);
+                    int k = neighbors.indexOf(j);
+                    if ( k != -1 ) { neighbors.remove(k); }
+                }
+
                 // Set the neighbors of the source
                 m_source->setNeighbors (neighbors);
                 neighbors.clear ();
@@ -322,6 +332,15 @@ namespace Langmuir
                         neighbors.push_back (column_neighbors_in_layer[column_site]);
                     }
                 }
+
+                // Remove defects as possible neighbors
+                for ( int i = 0; i < m_world->defectSiteIDs()->size(); i++ )
+                {
+                    int j = m_world->defectSiteIDs()->at(i);
+                    int k = neighbors.indexOf(j);
+                    if ( k != -1 ) { neighbors.remove(k); }
+                }
+
                 // Set the neighbors of the drain
                 m_drain->setNeighbors (neighbors);
                 neighbors.clear ();

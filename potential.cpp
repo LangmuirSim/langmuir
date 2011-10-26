@@ -6,9 +6,9 @@
 
 using namespace Langmuir;
 
-PotentialNew::PotentialNew( World* world ) : m_world( world ) {}
+Potential::Potential( World* world ) : m_world( world ) {}
 
-void PotentialNew::setPotentialZero()
+void Potential::setPotentialZero()
 {
     for ( int i = 0; i < m_world->grid()->volume(); i++ )
     {
@@ -16,7 +16,7 @@ void PotentialNew::setPotentialZero()
     }
 }
 
-void PotentialNew::setPotentialLinear()
+void Potential::setPotentialLinear()
 {
     double  m = ( m_world->parameters()->voltageDrain - m_world->parameters()->voltageSource ) / double( m_world->grid()->width() );
     double  b = m_world->parameters()->voltageSource;
@@ -36,7 +36,7 @@ void PotentialNew::setPotentialLinear()
     m_world->grid()->setSourcePotential(m_world->parameters()->voltageSource);
 }
 
-void PotentialNew::setPotentialTraps()
+void Potential::setPotentialTraps()
 {
     // Do nothing if we shouldn't have traps
     if ( m_world->parameters()->trapPercentage <= 0 ) return;
@@ -90,23 +90,52 @@ void PotentialNew::setPotentialTraps()
     }
 }
 
-void PotentialNew::setPotentialFromFile( QString filename )
+void Potential::setPotentialFromFile( QString filename )
 {
+    QFile in(filename);
+    if ( !(in.open(QIODevice::ReadOnly | QIODevice::Text)) )
+    {
+        qFatal("can not open file %s",qPrintable(filename));
+    }
+    QString contents = in.readAll();
+    QStringList tokens = contents.split(QRegExp("[\\s\n]"),QString::SkipEmptyParts);
 
+    if ( tokens.size() % 2 != 0 ) { qFatal("setPotentialFromFile does not give an even number of values (site,energy)"); }
+
+    for ( int i = 0; i < tokens.size(); i+= 2 )
+    {
+        bool ok1 = true;
+        bool ok2 = true;
+        int site = tokens[i].toInt(&ok1);
+        double energy = tokens[i+1].toFloat(&ok2);
+        if ( !ok1 || !ok2 )
+        {
+            qDebug("setPotentialFromFile can not convert set %d (site,energy) to number: (%s,%s)",i,qPrintable(tokens[i]),qPrintable(tokens[i+1]));
+            if ( !ok1 ) { qDebug("site is not int"); }
+            if ( !ok2 ) { qDebug("energy is not float"); }
+            qFatal("simulation terminated");
+        }
+        if ( site < 0 || site > m_world->grid()->volume() )
+        {
+            qFatal("setPotentialFromFile can not set site energy for set %d (site,energy): (%d,%f); site is out of range",i,site,energy);
+        }
+        m_world->grid()->addToPotential(site,energy);
+    }
 }
 
-void PotentialNew::setPotentialFromScript( QString filename )
+void Potential::setPotentialFromScript( QString filename )
 {
-
+    qFatal("setPotentialFromScript not implemented!");
 }
 
-void PotentialNew::updateInteractionEnergies()
+void Potential::updateInteractionEnergies()
 {
     //These values are used in Coulomb interaction calculations.
     boost::multi_array<double,3>& energies = m_world->interactionEnergies();
-
-    energies.resize (boost::extents[m_world->parameters()->electrostaticCutoff][m_world->parameters()->electrostaticCutoff][m_world->parameters()->electrostaticCutoff]);
-    //matrix.resize(m_parameters->electrostaticCutoff, m_parameters->electrostaticCutoff, m_parameters->electrostaticCutoff);
+    energies.resize(boost::extents
+                     [m_world->parameters()->electrostaticCutoff]
+                     [m_world->parameters()->electrostaticCutoff]
+                     [m_world->parameters()->electrostaticCutoff]);
 
     // Now calculate the numbers we need
     for (int col = 0; col < m_world->parameters()->electrostaticCutoff; ++col)

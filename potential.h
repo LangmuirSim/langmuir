@@ -6,10 +6,10 @@
 namespace Langmuir
 {
   class World;
-  class PotentialNew
+  class Potential
   {
   public:
-      PotentialNew( World *world );
+      Potential( World *world );
       void setPotentialZero();
       void setPotentialLinear();
       void setPotentialTraps();

@@ -15,7 +15,7 @@ namespace Langmuir
   class DrainAgent;
   class ChargeAgent;
   class Potential;
-  class PotentialNew;
+  class Potential;
   struct SimulationParameters;
   /**
     *  @class Simulation
@@ -154,7 +154,7 @@ namespace Langmuir
      *
      * Address of the potential object for the simulation.
      */
-    PotentialNew *m_potentialNew;
+    Potential *m_potential;
 
     /**
      * @brief Source pointer.
