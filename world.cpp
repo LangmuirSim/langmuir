@@ -9,7 +9,7 @@
 
 namespace Langmuir {
 
-  World::World( SimulationParameters *par ) : m_statFile(NULL), m_statStream(NULL)
+  World::World( SimulationParameters *par )
   {
     m_coupling.resize(boost::extents[4][4]);
     m_coupling[0][0] = 0.333;  m_coupling[0][1] = 0.000;  m_coupling[0][2] = 0.333;  m_coupling[0][3] = 0.333;
@@ -28,30 +28,21 @@ namespace Langmuir {
 
     if (m_parameters->outputStats)
       {
-        m_statFile = new QFile ("stats");
-        if (!(m_statFile->open (QIODevice::WriteOnly | QIODevice::Text)))
-          {
-            qDebug () << "Error opening stat file:";
-          }
-        m_statStream = new QTextStream (m_statFile);
-        m_statStream->setRealNumberPrecision (m_parameters->outputPrecision);
-        m_statStream->setFieldWidth (m_parameters->outputWidth);
-      *(m_statStream) << scientific;
+        m_statFile.setFileName("carrier-lifetime-pathlength.dat");
+        if (! m_statFile.open(QIODevice::Text|QIODevice::WriteOnly) )
+        {
+            qFatal("error opening stat file");
+        }
+        m_statStream.setDevice(&m_statFile);
+        m_statStream.setRealNumberPrecision(m_parameters->outputPrecision);
+        m_statStream.setFieldWidth(m_parameters->outputWidth);
+        m_statStream << scientific;
       }
   }
 
   World::~World()
   {
    delete m_rand;
-   if ( m_statStream )
-   {
-     (*m_statStream).flush();
-     delete m_statStream;
-   }
-   if ( m_statFile )
-   {
-     delete m_statFile;
-   }
    delete m_potential;
    delete m_source;
    delete m_drain;
@@ -705,12 +696,12 @@ namespace Langmuir {
 
   void World::statMessage( QString message )
   {
-      (*m_statStream) << qPrintable( message );
+      m_statStream << qPrintable( message );
   }
 
   void World::statFlush( )
   {
-      (*m_statStream).flush();
+      m_statStream.flush();
   }
 
 }

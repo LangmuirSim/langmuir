@@ -199,8 +199,8 @@ namespace Langmuir
     boost::multi_array<double,2> m_coupling;            // Matrix of coupling constants
     boost::multi_array<double,3> m_interactionEnergies; // Interaction energies
 
-    QFile                       *m_statFile;            // Place to write lifetime and pathlength information
-    QTextStream                 *m_statStream;          // Text stream for stat file
+    QFile                        m_statFile;            // Place to write lifetime and pathlength information
+    QTextStream                  m_statStream;          // Text stream for stat file
     cl::Context                  m_context;             // OpenCl context
     cl::CommandQueue             m_queue;               // OpenCl queue
     cl::Kernel                   m_coulombK1;           // Kernel for calculating Coulomb Energy everywhere
