@@ -10,6 +10,7 @@ class Logger
 {
 public:
     Logger( World *world );
+   ~Logger();
 
     /**
       * @brief Save \b current carrier site ids

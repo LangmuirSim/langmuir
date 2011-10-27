@@ -36,6 +36,7 @@ namespace Langmuir {
    delete m_source;
    delete m_drain;
    delete m_grid;
+   delete m_logger;
   }
 
   void World::createDefects()

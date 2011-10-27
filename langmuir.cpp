@@ -59,11 +59,14 @@ int main (int argc, char *argv[])
   SimulationParameters par;
   input.simulationParameters (&par);
 
-  // Open summary file 
-  oFile = new QFile (oFileName + ".dat");
+  // Open summary file
+  QDir dir(par.outputPath);
+  if (!dir.exists()) { qFatal("output directory %s does not exist",qPrintable(dir.path()));}
+
+  oFile = new QFile (dir.absoluteFilePath(oFileName + ".dat"));
   if (!(oFile->open (QIODevice::WriteOnly | QIODevice::Text)))
     {
-      qDebug () << "Error opening summary file:" << oFileName + ".dat";
+      qDebug () << "Error opening summary file:" << dir.absoluteFilePath(oFileName + ".dat");
       app.exit (1);
     }
   oout = new QTextStream (oFile);
@@ -103,11 +106,10 @@ int main (int argc, char *argv[])
       Simulation sim (&par,i);
 
       // Open iteration file for this simulation
-      iFile = new QFile (oFileName + "-i-" + QString::number (i) + ".dat");
+      iFile = new QFile (dir.absoluteFilePath(oFileName + "-i-" + QString::number (i) + ".dat"));
       if (!(iFile->open (QIODevice::WriteOnly | QIODevice::Text)))
         {
-          qDebug () << "Error opening output file:" << oFileName + "-i-" +
-            QString::number (i) + ".dat";
+          qDebug () << "Error opening output file:" << dir.absoluteFilePath(oFileName + "-i-" + QString::number (i) + ".dat");
           app.exit (1);
         }
       iout = new QTextStream (iFile);

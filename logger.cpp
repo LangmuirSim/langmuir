@@ -29,6 +29,11 @@ Logger::Logger( World * world ) : m_world( world )
       }
 }
 
+Logger::~Logger()
+{
+    if ( m_world->parameters()->outputStats ) { carrierStreamFlush(); }
+}
+
 void Logger::saveCarrierIDsToFile( QString name )
 {
     QFile out(name);
