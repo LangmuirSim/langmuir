@@ -17,7 +17,6 @@ namespace Langmuir
     bool outputCarriers;
     bool outputCoulombPotential;
     bool outputFieldPotential;
-    bool outputTrapsPotential;
     bool outputDefectIDs;
     bool outputTrapIDs;
     bool chargedTraps;
@@ -70,6 +69,7 @@ namespace Langmuir
     int randomSeed;
     int sourceAttempts;
     QString kernelsPath;
+    QString outputPath;
 
     SimulationParameters ()
     {
@@ -83,7 +83,6 @@ namespace Langmuir
       outputCoulombPotential = false;
       useOpenCL = false;
       outputFieldPotential = false;
-      outputTrapsPotential = false;
       outputDefectIDs = false;
       outputTrapIDs = false;
       potentialLinear = true;
@@ -128,6 +127,7 @@ namespace Langmuir
       workSize = 256;
       randomSeed = -1;
       kernelsPath = ".";
+      outputPath = ".";
       sourceAttempts = 1;
       electrostaticPrefactor =
         elementaryCharge / (4.0 * M_PI * dielectricConstant *

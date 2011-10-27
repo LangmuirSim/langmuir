@@ -17,6 +17,7 @@ namespace Langmuir
   class Grid;
   class Agent;
   class Random;
+  class Logger;
   class Potential;
   class DrainAgent;
   class SourceAgent;
@@ -74,6 +75,11 @@ namespace Langmuir
       * @brief random number generator pointer
       */
     DrainAgent* drain() { return m_drain; }
+
+    /**
+      * @brief random number generator pointer
+      */
+    Logger* logger() { return m_logger; }
 
     /**
       * @brief charge agent pointer
@@ -206,8 +212,9 @@ namespace Langmuir
     Random                      *m_rand;                // Random number generator
     DrainAgent                  *m_drain;               // Drain Agent
     SourceAgent                 *m_source;              // Source Agent
-    Potential                   *m_potential;           // Potential Calculator
-    SimulationParameters        *m_parameters;          // Simulation Parameters
+    Potential                   *m_potential;           // For Setting Potential
+    SimulationParameters        *m_parameters;          // For Storing Simulation Parameters
+    Logger                      *m_logger;              // For Saving Information to Files
 
     QList<ChargeAgent *>         m_charges;             // Charge carriers in the system
     QList<int>                   m_defectSiteIDs;       // Site ids of defects in the system
@@ -215,8 +222,6 @@ namespace Langmuir
     boost::multi_array<double,2> m_coupling;            // Matrix of coupling constants
     boost::multi_array<double,3> m_interactionEnergies; // Interaction energies
 
-    QFile                        m_statFile;            // Place to write lifetime and pathlength information
-    QTextStream                  m_statStream;          // Text stream for stat file
     cl::Context                  m_context;             // OpenCl context
     cl::CommandQueue             m_queue;               // OpenCl queue
     cl::Kernel                   m_coulombK1;           // Kernel for calculating Coulomb Energy everywhere

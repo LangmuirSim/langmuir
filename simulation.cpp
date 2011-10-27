@@ -5,6 +5,7 @@
 #include "drainagent.h"
 #include "potential.h"
 #include "cubicgrid.h"
+#include "logger.h"
 #include "world.h"
 #include "rand.h"
 namespace Langmuir
@@ -30,22 +31,31 @@ namespace Langmuir
         if (m_world->parameters()->gridCharge) seedCharges();
 
         // Generate grid image
-        if (m_world->parameters()->outputGrid) m_world->saveTrapImageToFile(QString("trap-%1-%2-%3.png")
+        if (m_world->parameters()->outputGrid)
+        {
+            m_world->logger()->saveTrapImageToFile(QString("trap-%1-%2-%3.png")
                    .arg(m_world->parameters()->trapPercentage*100.0)
                    .arg(m_world->parameters()->seedPercentage*100.0)
                    .arg(m_id));
+        }
 
         // Output Field Energy
-        if (m_world->parameters()->outputFieldPotential) m_world->saveFieldEnergyToFile(QString("field-%1.dat").arg(m_id));
-
-        // Output Traps Energy
-        if (m_world->parameters()->outputTrapsPotential) m_world->saveTrapEnergyToFile(QString("trap-%1.dat").arg(m_id));
+        if (m_world->parameters()->outputFieldPotential)
+        {
+            m_world->logger()->saveFieldEnergyToFile(QString("field-%1.dat").arg(m_id));
+        }
 
         // Output Defect IDs
-        if (m_world->parameters()->outputDefectIDs) m_world->saveDefectIDsToFile(QString("defectIDs-%1.dat").arg(m_id));
+        if (m_world->parameters()->outputDefectIDs)
+        {
+            m_world->logger()->saveDefectIDsToFile(QString("defectIDs-%1.dat").arg(m_id));
+        }
 
         // Output Trap IDs
-        if (m_world->parameters()->outputTrapIDs) m_world->saveTrapIDsToFile(QString("trapIDs-%1.dat").arg(m_id));
+        if (m_world->parameters()->outputTrapIDs)
+        {
+            m_world->logger()->saveTrapIDsToFile(QString("trapIDs-%1.dat").arg(m_id));
+        }
 
         // Initialize OpenCL
         m_world->initializeOpenCL();
@@ -138,12 +148,12 @@ namespace Langmuir
         if (m_world->parameters()->outputCoulombPotential)
         {
             m_world->launchCoulombKernel1();
-            m_world->saveCoulombEnergyToFile( QString("coulomb-%1-%2.dat").arg(m_id).arg(m_tick) );
+            m_world->logger()->saveCoulombEnergyToFile( QString("coulomb-%1-%2.dat").arg(m_id).arg(m_tick) );
         }
         // Output Carrier Positions and IDs
         if (m_world->parameters()->outputCarriers)
         {
-            m_world->saveCarrierIDsToFile( QString("carriers-%1-%2.dat").arg(m_id).arg(m_tick) );
+            m_world->logger()->saveCarrierIDsToFile( QString("carriers-%1-%2.dat").arg(m_id).arg(m_tick) );
         }
     }
 
@@ -181,10 +191,7 @@ namespace Langmuir
             // Check if the charge was removed - then we should delete it
             if (charges[i]->removed ())
             {
-              m_world->statMessage( QString( "%1 %2 %3\n" )
-                                       .arg(m_tick,m_world->parameters()->outputWidth)
-                                       .arg(charges[i]->lifetime(),m_world->parameters()->outputWidth)
-                                       .arg(charges[i]->distanceTraveled(),m_world->parameters()->outputWidth) );
+              m_world->logger()->carrierReportLifetimeAndPathlength(i,m_tick);
               delete charges[i];
               charges.removeAt (i);
               m_world->drain()->acceptCharge (-1);
@@ -192,7 +199,7 @@ namespace Langmuir
               --i;
             }
           }
-          m_world->statFlush();
+          m_world->logger()->carrierStreamFlush();
         }
         else
         {

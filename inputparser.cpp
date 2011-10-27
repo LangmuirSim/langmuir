@@ -514,26 +514,6 @@ namespace Langmuir
               break;
           }
 
-          case e_outputTrapPotential:
-          {
-              QString interaction = list.at (1).trimmed ().toLower ();
-              if (interaction == "true")
-              {
-                  m_parameters.outputTrapsPotential = true;
-              }
-              else if (interaction == "false")
-              {
-                  m_parameters.outputTrapsPotential = false;
-              }
-              else
-              {
-                  qDebug () << "output.trapPotential is either true or false: ";
-                  qFatal ("bad input");
-              }
-              readCount += 1;
-              break;
-          }
-
           case e_outputFieldPotential:
           {
               QString interaction = list.at (1).trimmed ().toLower ();

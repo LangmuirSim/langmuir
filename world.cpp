@@ -4,6 +4,7 @@
 #include "drainagent.h"
 #include "potential.h"
 #include "cubicgrid.h"
+#include "logger.h"
 #include "world.h"
 #include "rand.h"
 
@@ -21,23 +22,11 @@ namespace Langmuir {
     m_rand = new Random(m_parameters->randomSeed);
     m_grid = new CubicGrid(m_parameters->gridWidth, m_parameters->gridHeight, m_parameters->gridDepth);
     m_potential = new Potential(this);
+    m_logger = new Logger(this);
 
     createDefects();
     createSource();
     createDrain();
-
-    if (m_parameters->outputStats)
-      {
-        m_statFile.setFileName("carrier-lifetime-pathlength.dat");
-        if (! m_statFile.open(QIODevice::Text|QIODevice::WriteOnly) )
-        {
-            qFatal("error opening stat file");
-        }
-        m_statStream.setDevice(&m_statFile);
-        m_statStream.setRealNumberPrecision(m_parameters->outputPrecision);
-        m_statStream.setFieldWidth(m_parameters->outputWidth);
-        m_statStream << scientific;
-      }
   }
 
   World::~World()
@@ -162,6 +151,7 @@ namespace Langmuir {
 
           //obtain kernel source
           QDir dir(m_parameters->kernelsPath);
+          if (!dir.exists()) { qFatal("%s does not exist",qPrintable(dir.path()));}
           QFile file (dir.absoluteFilePath("kernel.cl"));
           if ( ! ( file.open (QIODevice::ReadOnly | QIODevice::Text) ) ) {
                throw cl::Error(-1,QString("error opening kernel file: %1").arg(dir.absoluteFilePath("kernel.cl")).toLatin1());
@@ -549,196 +539,4 @@ namespace Langmuir {
           compareHostAndDeviceForCarrier(j);
       }
   }
-
-  void World::saveCarrierIDsToFile( QString name )
-  {
-      QFile out(name);
-      int w = m_parameters->outputWidth;
-      if ( !(out.open(QIODevice::WriteOnly | QIODevice::Text)) )
-      {
-          qFatal("can not open file %s",qPrintable(name));
-      }
-      for ( int i = 0; i < m_charges.size(); i++ )
-      {
-          int s = m_charges[i]->site(false);
-          int x = m_grid->getColumn(s);
-          int y = m_grid->getRow(s);
-          int z = m_grid->getLayer(s);
-          out.write( qPrintable( QString("%1 %2 %3 %4\n").arg(x,w).arg(y,w).arg(z,w).arg(s,w) ) );
-      }
-  }
-
-  void World::saveTrapIDsToFile( QString name )
-  {
-      if ( m_trapSiteIDs.size() == 0 ) return;
-      QFile out(name);
-      int w = m_parameters->outputWidth;
-      if ( !(out.open(QIODevice::WriteOnly | QIODevice::Text)) )
-      {
-          qFatal("can not open file %s",qPrintable(name));
-      }
-      for ( int i = 0; i < m_trapSiteIDs.size(); i++ )
-      {
-          int s = m_trapSiteIDs[i];
-          int x = m_grid->getColumn(s);
-          int y = m_grid->getRow(s);
-          int z = m_grid->getLayer(s);
-          out.write( qPrintable( QString("%1 %2 %3 %4\n").arg(x,w).arg(y,w).arg(z,w).arg(s,w) ) );
-      }
-      out.close();
-  }
-
-  void World::saveDefectIDsToFile( QString name )
-  {
-      if ( m_defectSiteIDs.size() == 0 ) return;
-      QFile out(name);
-      int w = m_parameters->outputWidth;
-      if ( !(out.open(QIODevice::WriteOnly | QIODevice::Text)) )
-      {
-          qFatal("can not open file %s",qPrintable(name));
-      }
-      for ( int i = 0; i < m_defectSiteIDs.size(); i++ )
-      {
-          int s = m_defectSiteIDs[i];
-          int x = m_grid->getColumn(s);
-          int y = m_grid->getRow(s);
-          int z = m_grid->getLayer(s);
-          out.write( qPrintable( QString("%1 %2 %3 %4\n").arg(x,w).arg(y,w).arg(z,w).arg(s,w) ) );
-      }
-      out.close();
-  }
-
-  void World::saveFieldEnergyToFile( QString name )
-  {
-      QFile out(name);
-      int p = m_parameters->outputPrecision;
-      int w = m_parameters->outputWidth;
-      double te = 0;
-      if ( m_trapSiteIDs.size() > 0 ) { te = m_parameters->deltaEpsilon; }
-      if ( !(out.open(QIODevice::WriteOnly | QIODevice::Text)) )
-      {
-          qFatal("can not open file %s",qPrintable(name));
-      }
-      for ( int i = 0; i < m_grid->width(); i++ )
-      {
-          for ( int j = 0; j < m_grid->height(); j++ )
-          {
-              for ( int k = 0; k < m_grid->depth(); k++ )
-              {
-                  int s = m_grid->getIndex(i,j,k);
-                  if ( m_trapSiteIDs.contains(s) )
-                  {
-                      out.write( qPrintable( QString("%1 %2 %3 %4\n").arg(i,w).arg(j,w).arg(k,w).arg(m_grid->potential(s)-te,w,'e',p) ) );
-                  }
-                  else
-                  {
-                      out.write( qPrintable( QString("%1 %2 %3 %4\n").arg(i,w).arg(j,w).arg(k,w).arg(m_grid->potential(s),w,'e',p) ) );
-                  }
-              }
-          }
-      }
-      out.close();
-  }
-
-  void World::saveTrapEnergyToFile( QString name )
-  {
-      if ( m_trapSiteIDs.size() == 0 ) return;
-      QFile out(name);
-      int p = m_parameters->outputPrecision;
-      int w = m_parameters->outputWidth;
-      if ( !(out.open(QIODevice::WriteOnly | QIODevice::Text)) )
-      {
-          qFatal("can not open file %s",qPrintable(name));
-      }
-      for ( int i = 0; i < m_grid->width(); i++ )
-      {
-          for ( int j = 0; j < m_grid->height(); j++ )
-          {
-              for ( int k = 0; k < m_grid->depth(); k++ )
-              {
-                  int s = m_grid->getIndex(i,j,k);
-                  if ( m_trapSiteIDs.contains(s) )
-                  {
-                      out.write( qPrintable( QString("%1 %2 %3 %4\n").arg(i,w).arg(j,w).arg(k,w).arg(m_parameters->deltaEpsilon,w,'e',p) ) );
-                  }
-                  else
-                  {
-                      out.write( qPrintable( QString("%1 %2 %3 %4\n").arg(i,w).arg(j,w).arg(k,w).arg(0.0,w,'e',p) ) );
-                  }
-              }
-          }
-      }
-      out.close();
-  }
-
-  void World::saveCoulombEnergyToFile( QString name )
-  {
-      QFile out(name);
-      int p = m_parameters->outputPrecision;
-      int w = m_parameters->outputWidth;
-      if ( !(out.open(QIODevice::WriteOnly | QIODevice::Text)) )
-      {
-          qFatal("can not open file %s",qPrintable(name));
-      }
-      for ( int i = 0; i < m_grid->width(); i++ )
-      {
-          for ( int j = 0; j < m_grid->height(); j++ )
-          {
-              for ( int k = 0; k < m_grid->depth(); k++ )
-              {
-                  int s = m_grid->getIndex(i,j,k);
-                  out.write( qPrintable( QString("%1 %2 %3 %4\n").arg(i,w).arg(j,w).arg(k,w).arg(m_oHost[s]*m_parameters->electrostaticPrefactor,w,'e',p) ) );
-              }
-          }
-      }
-      out.close();
-  }
-
-  void World::saveTrapImageToFile( QString name )
-  {
-      //Create an empty image of the appropriate size
-      QImage img( m_parameters->gridWidth, m_parameters->gridHeight, QImage::Format_ARGB32_Premultiplied );
-      img.fill( 0 );
-
-      //Create a painter to draw the image
-      QPainter painter( &img );
-      //Move the origin from top left to bottom right
-      painter.scale( 1.0, -1.0 );
-      painter.translate( 0.0, -m_parameters->gridHeight );
-      //Resize the painter window to the grid dimensions
-      painter.setWindow( QRect( 0, 0, m_parameters->gridWidth, m_parameters->gridHeight ) );
-      //Set the background to be white
-      painter.fillRect ( QRect( 0, 0, m_parameters->gridWidth, m_parameters->gridHeight ), Qt::white );
-      //Set the trap color to a light gray
-      painter.setPen( QColor( 100, 100, 100, 255 ) );
-
-      painter.setBrush(Qt::blue);
-      painter.setPen(Qt::darkBlue);
-      //Draw the traps as dots
-      for ( int i = 0; i < m_trapSiteIDs.size(); i++ )
-      {
-          //Index of a trap site
-          int ndx = m_trapSiteIDs[i];
-          //If this trap is in the Layer we are drawing...
-          if ( m_grid->getLayer( ndx ) == 0 )
-          {
-              //Draw the trap as a point at (x,y) = (col,row)
-              painter.drawPoint( QPoint( m_grid->getColumn( ndx ), m_grid->getRow( ndx ) ) );
-          }
-      }
-      //return the new image ( its not copied on return because of how Qt stores images )
-      img = img.scaled( 5*img.width(), 5*img.height(), Qt::KeepAspectRatioByExpanding );
-      img.save(name,"png",100);
-  }
-
-  void World::statMessage( QString message )
-  {
-      m_statStream << qPrintable( message );
-  }
-
-  void World::statFlush( )
-  {
-      m_statStream.flush();
-  }
-
 }
