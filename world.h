@@ -141,6 +141,11 @@ namespace Langmuir
     void saveCoulombEnergyToFile( QString name );
 
     /**
+      * @brief save image of traps on the grid to a file
+      */
+    void saveTrapImageToFile( QString name );
+
+    /**
       * @brief copy a charge carrier's current site ID to the m_iHost vector
       */
     inline void copySiteAndChargeToHostVector( int index, int site, int charge = -1 ) { m_sHost[index] = site; m_qHost[index] = charge; }
@@ -180,8 +185,19 @@ namespace Langmuir
       */
     void statFlush();
 
+    /**
+      * @brief create sites that can't be transported to
+      */
     void createDefects();
+
+    /**
+      * @brief create source electrode
+      */
     void createSource();
+
+    /**
+      * @brief create drain electrode
+      */
     void createDrain();
 
    private:

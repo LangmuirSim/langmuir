@@ -18,7 +18,7 @@ namespace Langmuir
         m_world->potential()->setPotentialZero();
 
         // Add Linear Potential
-        m_world->potential()->setPotentialLinear();
+        if ( m_world->parameters()->potentialLinear ) { m_world->potential()->setPotentialLinear(); }
 
         // Add Trap Potential
         m_world->potential()->setPotentialTraps();
@@ -30,7 +30,10 @@ namespace Langmuir
         if (m_world->parameters()->gridCharge) seedCharges();
 
         // Generate grid image
-        if (m_world->parameters()->outputGrid) gridImage();
+        if (m_world->parameters()->outputGrid) m_world->saveTrapImageToFile(QString("trap-%1-%2-%3.png")
+                   .arg(m_world->parameters()->trapPercentage*100.0)
+                   .arg(m_world->parameters()->seedPercentage*100.0)
+                   .arg(m_id));
 
         // Output Field Energy
         if (m_world->parameters()->outputFieldPotential) m_world->saveFieldEnergyToFile(QString("field-%1.dat").arg(m_id));
@@ -206,37 +209,6 @@ namespace Langmuir
               --i;
             }
           }
-        }
-    }
-
-    void Simulation::gridImage()
-    {
-        {
-            QPrinter printer;
-            printer.setOutputFormat(QPrinter::PdfFormat);
-            printer.setOrientation(QPrinter::Landscape);
-            printer.setOutputFileName("grid" + QString::number(m_world->parameters()->trapPercentage * 100) + ".pdf");
-
-            QPainter painter;
-            if (! painter.begin(&printer)) //Failed to open the file
-            {
-                qWarning("failed to open file, is it writable?");
-                return ;
-            }
-
-            painter.setWindow(QRect(0,0,1024,1024));
-            painter.setBrush(Qt::blue);
-            painter.setPen(Qt::darkBlue);
-
-            for(int i = 0; i < m_world->trapSiteIDs()->size(); i++)
-            {
-                int rowCoord = m_world->grid()->getRow(m_world->trapSiteIDs()->at(i));
-                //qDebug() << rowCoord;
-                int colCoord = m_world->grid()->getColumn(m_world->trapSiteIDs()->at(i));
-                //qDebug() << colCoord;
-                painter.drawRect(colCoord,rowCoord,1,1);
-            }
-            painter.end();
         }
     }
 

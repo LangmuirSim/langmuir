@@ -356,23 +356,6 @@ namespace Langmuir
               break;
             }
 
-          case e_potentialForm:
-            {
-              QString potentialForm = list.at (1).trimmed ().toLower ();
-              if (potentialForm == "linear")
-                {
-                  m_parameters.potentialForm = 0;
-                }
-              else
-                {
-                  qDebug () << "potential.form must be linear:" <<
-                    m_parameters.potentialForm;
-                  qFatal ("bad input");
-                }
-              readCount += 1;
-              break;
-            }
-
           case e_iterationsWarmup:
             {
               m_parameters.iterationsWarmup = list.at (1).toInt ();
@@ -605,6 +588,26 @@ namespace Langmuir
               else
               {
                   qDebug () << "output.defectIDs is either true or false: ";
+                  qFatal ("bad input");
+              }
+              readCount += 1;
+              break;
+          }
+
+          case e_potentialLinear:
+          {
+              QString interaction = list.at (1).trimmed ().toLower ();
+              if (interaction == "true")
+              {
+                  m_parameters.potentialLinear = true;
+              }
+              else if (interaction == "false")
+              {
+                  m_parameters.potentialLinear = false;
+              }
+              else
+              {
+                  qDebug () << "output.potentialLinear is either true or false: ";
                   qFatal ("bad input");
               }
               readCount += 1;
@@ -932,7 +935,6 @@ namespace Langmuir
     s_variables["output.trapids"] = e_outputTrapIDs;
     s_variables["output.defectids"] = e_outputDefectIDs;
     s_variables["permittivity.space"] = e_permittivitySpace;
-    s_variables["potential.form"] = e_potentialForm;
     s_variables["random.seed"] = e_randomSeed;
     s_variables["seed.percentage"] = e_seedPercentage;
     s_variables["source.attempts"] = e_sourceAttempts;
@@ -952,68 +954,7 @@ namespace Langmuir
     s_variables["work.size"] = e_workSize;
     s_variables["z.defect"] = e_zDefect;
     s_variables["z.trap"] = e_zTrap;
-  }
-
-  QString InputParser::printParameters ( SimulationParameters * par )
-  {
-      SimulationParameters *variables;
-      if ( par == NULL ) { variables = & m_parameters; }
-      else { variables = par; }
-      QStringList pairs;
-      pairs << QString("%1=%2").arg(s_variables.key( e_boltzmannConstant )).arg(variables->boltzmannConstant);
-      pairs << QString("%1=%2").arg(s_variables.key( e_chargePercentage )).arg(variables->chargePercentage);
-      pairs << QString("%1=%2").arg(s_variables.key( e_chargedDefects )).arg(variables->chargedDefects);
-      pairs << QString("%1=%2").arg(s_variables.key( e_chargedTraps )).arg(variables->chargedTraps);
-      pairs << QString("%1=%2").arg(s_variables.key( e_defectPercentage )).arg(variables->defectPercentage);
-      pairs << QString("%1=%2").arg(s_variables.key( e_deltaEpsilon )).arg(variables->deltaEpsilon);
-      pairs << QString("%1=%2").arg(s_variables.key( e_dielectricConstant )).arg(variables->dielectricConstant);
-      pairs << QString("%1=%2").arg(s_variables.key( e_drainBarrier )).arg(variables->drainBarrier);
-      pairs << QString("%1=%2").arg(s_variables.key( e_drainType )).arg(variables->drainType);
-      pairs << QString("%1=%2").arg(s_variables.key( e_electrostaticCutoff )).arg(variables->electrostaticCutoff);
-      pairs << QString("%1=%2").arg(s_variables.key( e_electrostaticPrefactor )).arg(variables->electrostaticPrefactor);
-      pairs << QString("%1=%2").arg(s_variables.key( e_elementaryCharge )).arg(variables->elementaryCharge);
-      pairs << QString("%1=%2").arg(s_variables.key( e_gaussianAverg )).arg(variables->gaussianAverg);
-      pairs << QString("%1=%2").arg(s_variables.key( e_gaussianStdev )).arg(variables->gaussianStdev);
-      pairs << QString("%1=%2").arg(s_variables.key( e_gridCharge )).arg(variables->gridCharge);
-      pairs << QString("%1=%2").arg(s_variables.key( e_gridDepth )).arg(variables->gridDepth);
-      pairs << QString("%1=%2").arg(s_variables.key( e_gridFactor )).arg(variables->gridFactor);
-      pairs << QString("%1=%2").arg(s_variables.key( e_gridHeight )).arg(variables->gridHeight);
-      pairs << QString("%1=%2").arg(s_variables.key( e_gridWidth )).arg(variables->gridWidth);
-      pairs << QString("%1=%2").arg(s_variables.key( e_hoppingRange )).arg(variables->hoppingRange);
-      pairs << QString("%1=%2").arg(s_variables.key( e_interactionCoulomb )).arg(variables->interactionCoulomb);
-      pairs << QString("%1=%2").arg(s_variables.key( e_inverseKT )).arg(variables->inverseKT);
-      pairs << QString("%1=%2").arg(s_variables.key( e_iterationsPrint )).arg(variables->iterationsPrint);
-      pairs << QString("%1=%2").arg(s_variables.key( e_iterationsReal )).arg(variables->iterationsReal);
-      pairs << QString("%1=%2").arg(s_variables.key( e_iterationsWarmup )).arg(variables->iterationsWarmup);
-      pairs << QString("%1=%2").arg(s_variables.key( e_kernelsPath )).arg(variables->kernelsPath);
-      pairs << QString("%1=%2").arg(s_variables.key( e_useOpenCL )).arg(variables->useOpenCL);
-      pairs << QString("%1=%2").arg(s_variables.key( e_outputGrid )).arg(variables->outputGrid);
-      pairs << QString("%1=%2").arg(s_variables.key( e_outputPrecision )).arg(variables->outputPrecision);
-      pairs << QString("%1=%2").arg(s_variables.key( e_outputStats )).arg(variables->outputStats);
-      pairs << QString("%1=%2").arg(s_variables.key( e_outputWidth )).arg(variables->outputWidth);
-      pairs << QString("%1=%2").arg(s_variables.key( e_outputXyz )).arg(variables->outputCoulombPotential);
-      pairs << QString("%1=%2").arg(s_variables.key( e_permittivitySpace )).arg(variables->permittivitySpace);
-      pairs << QString("%1=%2").arg(s_variables.key( e_potentialForm )).arg(variables->potentialForm);
-      pairs << QString("%1=%2").arg(s_variables.key( e_randomSeed )).arg(variables->randomSeed);
-      pairs << QString("%1=%2").arg(s_variables.key( e_seedPercentage )).arg(variables->seedPercentage);
-      pairs << QString("%1=%2").arg(s_variables.key( e_sourceAttempts )).arg(variables->sourceAttempts);
-      pairs << QString("%1=%2").arg(s_variables.key( e_sourceBarrier )).arg(variables->sourceBarrier);
-      pairs << QString("%1=%2").arg(s_variables.key( e_sourceType )).arg(variables->sourceType);
-      pairs << QString("%1=%2").arg(s_variables.key( e_temperatureKelvin )).arg(variables->temperatureKelvin);
-      pairs << QString("%1=%2").arg(s_variables.key( e_trapPercentage )).arg(variables->trapPercentage);
-      pairs << QString("%1=%2").arg(s_variables.key( e_variableFinal )).arg(variables->variableFinal);
-      pairs << QString("%1=%2").arg(s_variables.key( e_variableStart )).arg(variables->variableStart);
-      pairs << QString("%1=%2").arg(s_variables.key( e_variableSteps )).arg(variables->variableSteps);
-      pairs << QString("%1=%2").arg(s_variables.key( e_variableWorking )).arg(variables->variableWorking);
-      pairs << QString("%1=%2").arg(s_variables.key( e_voltageDrain )).arg(variables->voltageDrain);
-      pairs << QString("%1=%2").arg(s_variables.key( e_voltageSource )).arg(variables->voltageSource);
-      pairs << QString("%1=%2").arg(s_variables.key( e_workWidth )).arg(variables->workWidth);
-      pairs << QString("%1=%2").arg(s_variables.key( e_workHeight )).arg(variables->workHeight);
-      pairs << QString("%1=%2").arg(s_variables.key( e_workDepth )).arg(variables->workDepth);
-      pairs << QString("%1=%2").arg(s_variables.key( e_workDepth )).arg(variables->workSize);
-      pairs << QString("%1=%2").arg(s_variables.key( e_zDefect )).arg(variables->zDefect);
-      pairs << QString("%1=%2").arg(s_variables.key( e_zTrap )).arg(variables->zTrap);
-      return pairs.join("\n");
+    s_variables["potential.linear"] = e_potentialLinear;
   }
 
   int InputParser::getReadCount()

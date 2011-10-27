@@ -37,6 +37,14 @@ namespace Langmuir
      * Data access to this charge carriers charge in units of electronic charge.
      * @return charge charge in units of the elementary charge.
      */
+    virtual void setCharge( int value );
+
+    /**
+     * @brief charge.
+     *
+     * Data access to this charge carriers charge in units of electronic charge.
+     * @return charge charge in units of the elementary charge.
+     */
     virtual int charge();
 
     /**
@@ -205,6 +213,11 @@ namespace Langmuir
     return m_charge;
   }
 
+  inline void ChargeAgent::setCharge( int value )
+  {
+    m_charge = value;
+  }
+
   inline bool ChargeAgent::removed()
   {
     return m_removed;
@@ -219,8 +232,6 @@ namespace Langmuir
   {
    return m_distanceTraveled;
   }
-
-
 
 } // End namespace Langmuir
 

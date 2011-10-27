@@ -25,6 +25,7 @@ namespace Langmuir
     bool outputStats;
     bool useOpenCL;
     bool okCL;
+    bool potentialLinear;
     double chargePercentage;
     double defectPercentage;
     double deltaEpsilon;
@@ -55,7 +56,6 @@ namespace Langmuir
     int iterationsWarmup;
     int outputPrecision;
     int outputWidth;
-    int potentialForm;
     int sourceType;
     int drainType;
     int variableSteps;
@@ -86,6 +86,7 @@ namespace Langmuir
       outputTrapsPotential = false;
       outputDefectIDs = false;
       outputTrapIDs = false;
+      potentialLinear = true;
       chargePercentage = 0.01;
       defectPercentage = 0.00;
       deltaEpsilon = -0.10;
@@ -114,7 +115,6 @@ namespace Langmuir
       iterationsWarmup = 1000;
       outputPrecision = 5;
       outputWidth = 20;
-      potentialForm = 0;
       sourceType = 0;
       drainType = 0;
       variableSteps = 1;
@@ -197,7 +197,6 @@ namespace Langmuir
       e_iterationsWarmup,          // the number of warm up iterations to perform
       e_outputPrecision,           // decimal places to show in output
       e_outputWidth,               // number of char per output field
-      e_potentialForm,             // how to calculate site energies ( linear )
       e_sourceType,                // how to determine the probability to inject charges from the source ( constant, coulomb, image )
       e_drainType,                 // how to determine the probability to accept charges at the drain ( constant, broke )
       e_variableSteps,             // the number of steps to take from start to final
@@ -220,6 +219,7 @@ namespace Langmuir
       e_gridFactor,                // distance between centers of grid sites - non-variable
       e_inverseKT,                 // inverse average thermal energy - non-variable
       e_permittivitySpace,         // electrostatics constant - non-variable
+      e_potentialLinear,           // number of char per output field
       e_end
     };
 
@@ -231,12 +231,6 @@ namespace Langmuir
      * @param step Save the parameter pointer to m_parameters
      */
     bool simulationParameters ( SimulationParameters * par, int step = 0 );
-
-    /**
-     * Show the names and current values stored in par.
-     * Shows current values in m_parameters if par = NULL.
-     */
-    QString printParameters ( SimulationParameters * par = NULL );
 
     /**
      * @brief access lines read.

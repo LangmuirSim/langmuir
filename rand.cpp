@@ -2,9 +2,9 @@
 
 using namespace Langmuir;
 
-Random::Random (unsigned int seed)
+Random::Random (int seed)
 {
-    if (seed == 0)
+    if (seed <= 0)
     {
         twister = new boost::mt19937 (static_cast < unsigned int >(time (0)));
     }
@@ -23,7 +23,7 @@ Random::~Random ()
     delete generator01;
 }
 
-void Random::seed (unsigned int seed)
+void Random::seed (int seed)
 {
     twister->seed (static_cast < unsigned int >(seed));
 }

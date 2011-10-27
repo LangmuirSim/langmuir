@@ -694,6 +694,43 @@ namespace Langmuir {
       out.close();
   }
 
+  void World::saveTrapImageToFile( QString name )
+  {
+      //Create an empty image of the appropriate size
+      QImage img( m_parameters->gridWidth, m_parameters->gridHeight, QImage::Format_ARGB32_Premultiplied );
+      img.fill( 0 );
+
+      //Create a painter to draw the image
+      QPainter painter( &img );
+      //Move the origin from top left to bottom right
+      painter.scale( 1.0, -1.0 );
+      painter.translate( 0.0, -m_parameters->gridHeight );
+      //Resize the painter window to the grid dimensions
+      painter.setWindow( QRect( 0, 0, m_parameters->gridWidth, m_parameters->gridHeight ) );
+      //Set the background to be white
+      painter.fillRect ( QRect( 0, 0, m_parameters->gridWidth, m_parameters->gridHeight ), Qt::white );
+      //Set the trap color to a light gray
+      painter.setPen( QColor( 100, 100, 100, 255 ) );
+
+      painter.setBrush(Qt::blue);
+      painter.setPen(Qt::darkBlue);
+      //Draw the traps as dots
+      for ( int i = 0; i < m_trapSiteIDs.size(); i++ )
+      {
+          //Index of a trap site
+          int ndx = m_trapSiteIDs[i];
+          //If this trap is in the Layer we are drawing...
+          if ( m_grid->getLayer( ndx ) == 0 )
+          {
+              //Draw the trap as a point at (x,y) = (col,row)
+              painter.drawPoint( QPoint( m_grid->getColumn( ndx ), m_grid->getRow( ndx ) ) );
+          }
+      }
+      //return the new image ( its not copied on return because of how Qt stores images )
+      img = img.scaled( 5*img.width(), 5*img.height(), Qt::KeepAspectRatioByExpanding );
+      img.save(name,"png",100);
+  }
+
   void World::statMessage( QString message )
   {
       m_statStream << qPrintable( message );

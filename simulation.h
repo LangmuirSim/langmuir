@@ -87,11 +87,6 @@ namespace Langmuir
     int m_tick;
 
     /**
-     * @brief save grid image to a file
-     */
-    void gridImage();
-
-    /**
      * @brief inject charges into the system
      * @param nInjections number of injections to perform.
      */

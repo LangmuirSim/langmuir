@@ -16,7 +16,7 @@ class Random
           * Random number generator based on the boost library Mersenne Twister
           * @param seed the random number generator; if seed is 0 then use the current time
           */
-        Random( unsigned int seed=0 );
+        Random( int seed=0 );
 
         /**
          * @brief Destructor.
@@ -30,7 +30,7 @@ class Random
           *
           * Seed or reseed the random number generator; if seed is 0 then use the current time
           */
-        void seed( unsigned int );
+        void seed( int );
 
         /**
           * @brief Sample random number generator
