@@ -41,12 +41,16 @@ namespace Langmuir
      */
     ~Simulation();
 
+    void createDefects();
+    void createSource();
+    void createDrain();
+
     /**
      * @brief Place charges on grid.
      *
      * Seed the grid with the number of charges specified by setMaxCharges.
      */
-    bool seedCharges();
+    void seedCharges();
 
     /**
      * @brief Perform Iterations. 

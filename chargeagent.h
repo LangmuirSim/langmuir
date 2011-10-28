@@ -99,7 +99,7 @@ namespace Langmuir
     /**
       * @brief set OpenCLID
       */
-    inline void setOpenCLID( int id ) { OpenCLID = id; }
+    inline void setOpenCLID( int id ) { m_openClID = id; }
 
     /**
       * @brief calculate coulomb energy difference between
@@ -154,7 +154,7 @@ namespace Langmuir
      * In particular, its used to write site IDS to m_iHost, m_fHost,
      * and read Coulomb energies from m_oHost. ( all OpenCL stuff )
      */
-    int OpenCLID;
+    int m_openClID;
 
     /**
      * @brief coulomb interaction.

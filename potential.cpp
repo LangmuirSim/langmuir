@@ -46,7 +46,7 @@ void Potential::setPotentialTraps()
     int progress = int( m_world->grid()->volume() * m_world->parameters()->trapPercentage * m_world->parameters()->seedPercentage );
     while ( progress >= m_world->trapSiteIDs()->size() )
     {
-        int s = int (m_world->randomNumberGenerator()->random() * (double(m_world->grid()->volume())-1.0e-20));
+        int s = m_world->randomNumberGenerator()->integer(0,m_world->grid()->volume()-1);
 
         if ( ! m_world->trapSiteIDs()->contains(s) )
         {
@@ -59,17 +59,15 @@ void Potential::setPotentialTraps()
     if ( m_world->parameters()->trapPercentage <= 0 ) return;
     if ( m_world->parameters()->seedPercentage <= 0 ||
          m_world->parameters()->seedPercentage == 1 ) return;
-
     progress = int( m_world->grid()->volume() * m_world->parameters()->trapPercentage );
     while ( progress >= m_world->trapSiteIDs()->size() )
     {
-        int trapSeedIndex               = int (m_world->randomNumberGenerator()->random() * (double(m_world->trapSiteIDs ()->size())-1.0e-20));
+        int trapSeedIndex               = m_world->randomNumberGenerator()->integer(0,m_world->trapSiteIDs()->size()-1);
         int trapSeedSite                = m_world->trapSiteIDs()->at(trapSeedIndex);
         QVector<int> trapSeedNeighbors  = m_world->grid()->neighbors(trapSeedSite,1);
 
-        int newTrapIndex                = int (m_world->randomNumberGenerator()->random() * (double(trapSeedNeighbors.size())-1.0e-20));
+        int newTrapIndex                = m_world->randomNumberGenerator()->integer(0,trapSeedNeighbors.size()-1);
         int newTrapSite                 = trapSeedNeighbors[newTrapIndex];
-
         if ( m_world->grid()->siteID(newTrapSite) != 2 &&
              m_world->grid()->siteID(newTrapSite) != 3 &&
            ! m_world->trapSiteIDs()->contains(newTrapSite) )
@@ -78,7 +76,6 @@ void Potential::setPotentialTraps()
             m_world->trapSiteIDs()->push_back(newTrapSite);
         }
     }
-
     if ( abs(m_world->parameters()->gaussianStdev) > 0 )
     {
         for ( int i = 0; i < m_world->trapSiteIDs()->size(); i++ )

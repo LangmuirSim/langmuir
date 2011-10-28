@@ -4,10 +4,7 @@
 #ifndef WORLD_H
 #define WORLD_H
 #define BOOST_DISABLE_ASSERTS
-#define __CL_ENABLE_EXCEPTIONS
-#define __NO_STD_VECTOR
 
-#include "cl.hpp"
 #include <QtCore>
 #include <QtGui>
 #include "boost/multi_array.hpp"
@@ -22,11 +19,12 @@ namespace Langmuir
   class DrainAgent;
   class SourceAgent;
   class ChargeAgent;
+  class OpenClHelper;
   struct SimulationParameters;
   /**
     * @class World
     *
-    * Holds information for simulation.
+    * Stores the objects used in the simulation
     */
   class World
   {
@@ -40,11 +38,6 @@ namespace Langmuir
       * Default Destructor.
       */
    ~World();
-
-    /**
-      * @brief Set up OpenCL enviroment
-      */
-    void initializeOpenCL();
 
     /**
       * @brief grid pointer
@@ -82,114 +75,34 @@ namespace Langmuir
     Logger* logger() { return m_logger; }
 
     /**
+      * @brief random number generator pointer
+      */
+    OpenClHelper* opencl() { return m_ocl; }
+
+    /**
       * @brief charge agent pointer
       */
-    QList<ChargeAgent *> * charges();
+    QList<ChargeAgent *> * charges() { return &m_charges; }
 
     /**
       * @brief defect site id list pointer
       */
-    QList<int> * defectSiteIDs();
+    QList<int> * defectSiteIDs() { return &m_defectSiteIDs; }
 
     /**
       * @brief trap site id list pointer
       */
-    QList<int> * trapSiteIDs();
+    QList<int> * trapSiteIDs() { return &m_trapSiteIDs; }
 
     /**
       * @brief coupling matrix reference
       */
-    boost::multi_array<double,2>& coupling();
+    boost::multi_array<double,2>& coupling() { return m_coupling; }
 
     /**
       * @brief interaction energy matrix reference
       */
-    boost::multi_array<double,3>& interactionEnergies();
-
-    /**
-      * @brief tell the GPU to perform coulomb calculations over all locations
-      */
-    void launchCoulombKernel1();
-
-    /**
-      * @brief tell the GPU to perform coulomb calculations over select locations
-      */
-    void launchCoulombKernel2();
-
-    /**
-      * @brief save carrier ids to a file
-      */
-    void saveCarrierIDsToFile( QString name );
-
-    /**
-      * @brief save trap ids to a file
-      */
-    void saveTrapIDsToFile( QString name );
-
-    /**
-      * @brief save defect ids to a file
-      */
-    void saveDefectIDsToFile( QString name );
-
-    /**
-      * @brief save field energy to a file
-      */
-    void saveFieldEnergyToFile( QString name );
-
-    /**
-      * @brief save trap energy to a file
-      */
-    void saveTrapEnergyToFile( QString name );
-
-    /**
-      * @brief save coulomb energy to a file
-      */
-    void saveCoulombEnergyToFile( QString name );
-
-    /**
-      * @brief save image of traps on the grid to a file
-      */
-    void saveTrapImageToFile( QString name );
-
-    /**
-      * @brief copy a charge carrier's current site ID to the m_iHost vector
-      */
-    inline void copySiteAndChargeToHostVector( int index, int site, int charge = -1 ) { m_sHost[index] = site; m_qHost[index] = charge; }
-
-    /**
-      * @brief read a value in m_oDevice - which should be the result of a coulomb calculation.
-      */
-    inline const double& getOutputHost(int index) const { return m_oHost[index]; }
-
-    /**
-      * @brief compare GPU answer (delta energy) to CPU answer for all charges
-      */
-    void compareHostAndDeviceForAllCarriers();
-
-    /**
-      * @brief compare GPU answer to CPU answer (at single point)
-      */
-    void compareHostAndDeviceAtSite(int i);
-
-    /**
-      * @brief compare GPU answer (delta energy) to CPU answer for a single charge
-      */
-    void compareHostAndDeviceForCarrier(int i);
-
-    /**
-     * @brief change parameters
-     */
-    bool toggleOpenCL(bool on);
-
-    /**
-      * @brief write message to stat file
-      */
-    void statMessage(QString message);
-
-    /**
-      * @brief flush the stat file
-      */
-    void statFlush();
+    boost::multi_array<double,3>& interactionEnergies() { return m_interactionEnergies; }
 
     /**
       * @brief create sites that can't be transported to
@@ -208,56 +121,72 @@ namespace Langmuir
 
    private:
 
-    Grid                        *m_grid;                // The grid in use in the world
-    Random                      *m_rand;                // Random number generator
-    DrainAgent                  *m_drain;               // Drain Agent
-    SourceAgent                 *m_source;              // Source Agent
-    Potential                   *m_potential;           // For Setting Potential
-    SimulationParameters        *m_parameters;          // For Storing Simulation Parameters
-    Logger                      *m_logger;              // For Saving Information to Files
+    /**
+      * @brief Holds site potentials and site ids
+      */
+    Grid *m_grid;
 
-    QList<ChargeAgent *>         m_charges;             // Charge carriers in the system
-    QList<int>                   m_defectSiteIDs;       // Site ids of defects in the system
-    QList<int>                   m_trapSiteIDs;         // Site ids of traps in the system
-    boost::multi_array<double,2> m_coupling;            // Matrix of coupling constants
-    boost::multi_array<double,3> m_interactionEnergies; // Interaction energies
+    /**
+      * @brief Creates random doubles and ints
+      */
+    Random *m_rand;
 
-    cl::Context                  m_context;             // OpenCl context
-    cl::CommandQueue             m_queue;               // OpenCl queue
-    cl::Kernel                   m_coulombK1;           // Kernel for calculating Coulomb Energy everywhere
-    cl::Kernel                   m_coulombK2;           // Kernel for calculating Coulomb Energy at select places
-    QVector<int>                 m_sHost;               // Host site ids
-    QVector<int>                 m_qHost;               // Host charges
-    QVector<double>              m_oHost;               // Host output vector
-    cl::Buffer                   m_sDevice;             // Device site ids
-    cl::Buffer                   m_qDevice;             // Device charges
-    cl::Buffer                   m_oDevice;             // Device output vector
+    /**
+      * @brief Accepts charge carriers
+      */
+    DrainAgent *m_drain;
+
+    /**
+      * @brief Injects charge carriers
+      */
+    SourceAgent *m_source;
+
+    /**
+      * @brief Calculates and sets potentials to be stored in the Grid
+      */
+    Potential *m_potential;
+
+    /**
+      * @brief All simple simulation parameters (ints,bools,doubles,strings) read by InputParser
+      * @warning World does not allocate or destroy SimulationParameters
+      */
+    SimulationParameters *m_parameters;
+
+    /**
+      * @brief Writes various simulation information to files
+      */
+    Logger *m_logger;
+
+    /**
+      * @brief Handles initialization and usage of OpenCL for Coulomb calculations
+      */
+    OpenClHelper *m_ocl;
+
+    /**
+      * @brief A list of all the charge carriers for the system
+      */
+    QList<ChargeAgent *> m_charges;
+
+    /**
+      * @brief A list of all the defect site ids for the system
+      */
+    QList<int> m_defectSiteIDs;
+
+    /**
+      * @brief A list of all the trap site ids for the system
+      */
+    QList<int> m_trapSiteIDs;
+
+    /**
+      * @brief A list of coupling constants for transport between sites
+      * The transport probability gets multiplied by these constants
+      */
+    boost::multi_array<double,2> m_coupling;
+
+    /**
+      * @brief Precomputed Coulomb interaction energies for CPU calculations
+      */
+    boost::multi_array<double,3> m_interactionEnergies;
  };
-
- inline QList<ChargeAgent *> * World::charges()
- {
-  return &m_charges;
- }
-
- inline QList<int> * World::defectSiteIDs()
- {
-  return &m_defectSiteIDs;
- }
-
- inline QList<int> * World::trapSiteIDs()
- {
-  return &m_trapSiteIDs;
- }
-
- inline boost::multi_array<double,2>& World::coupling()
- {
-  return m_coupling;
- }
-
- inline boost::multi_array<double,3>& World::interactionEnergies()
- {
-  return m_interactionEnergies;
- }
-
 }
 #endif // WORLD_H

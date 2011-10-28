@@ -1,3 +1,4 @@
+#include "openclhelper.h"
 #include "drainagent.h"
 #include "gridview.h"
 
@@ -454,7 +455,7 @@ namespace Langmuir
             default :
             {
                 pPar->interactionCoulomb = false;
-                pSim->world()->toggleOpenCL(false);
+                pSim->world()->opencl()->toggleOpenCL(false);
                 emit openCLStatusChanged( Qt::Unchecked );
                 emit coulombStatusChanged( Qt::Unchecked );
                 break;
@@ -487,7 +488,7 @@ namespace Langmuir
         {
             case Qt::Checked :
             {
-                if ( ! ( pSim->world()->toggleOpenCL(true) ) )
+                if ( ! ( pSim->world()->opencl()->toggleOpenCL(true) ) )
                 {
                     bool resume = false;
                     if ( ! pause )
@@ -521,7 +522,7 @@ namespace Langmuir
             }
             default :
             {
-                pSim->world()->toggleOpenCL(false);
+                pSim->world()->opencl()->toggleOpenCL(false);
                 emit openCLStatusChanged( Qt::Unchecked );
                 break;
             }

@@ -6,6 +6,11 @@
 namespace Langmuir
 {
 class World;
+
+/**
+  *  @class Logger
+  *  @brief For writing simulation information to Files
+  */
 class Logger
 {
 public:

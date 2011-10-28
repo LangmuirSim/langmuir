@@ -6,6 +6,11 @@
 namespace Langmuir
 {
   class World;
+
+  /**
+    *  @class Potential
+    *  @brief For calculating the potential at various points
+    */
   class Potential
   {
   public:

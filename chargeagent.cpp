@@ -1,13 +1,15 @@
+#include "openclhelper.h"
 #include "chargeagent.h"
+#include "inputparser.h"
 #include "world.h"
 #include "grid.h"
 #include "rand.h"
-#include "inputparser.h"
+
 
 namespace Langmuir
 {
     ChargeAgent::ChargeAgent (World * world, int site):Agent (Agent::Charge, world, site), 
-     m_charge (-1), m_removed (false), m_lifetime(0), m_distanceTraveled(0.0), OpenCLID(0)
+     m_charge (-1), m_removed (false), m_lifetime(0), m_distanceTraveled(0.0), m_openClID(0)
   {
     //current site and future site are the same
     m_site = m_fSite;
@@ -28,7 +30,7 @@ namespace Langmuir
     // Select a proposed transport site at random, but ensure that it is not the source
     do
       {
-        m_fSite = m_neighbors[int(m_world->randomNumberGenerator()->random() * (m_neighbors.size() - 1.0e-20))];
+        m_fSite = m_neighbors[ m_world->randomNumberGenerator()->integer(0,m_neighbors.size()-1) ];
       }
     while (m_world->grid()->siteID(m_fSite) == 2); // source siteID
   }
@@ -95,7 +97,7 @@ namespace Langmuir
           {
             //obtain coulomb interactions from OpenCL ( defects and carrier interactions )
             //pd += m_world->getOutputHost( clID );
-              pd += ( ( m_world->getOutputHost(m_fSite) - m_world->getOutputHost(m_site) - m_charge ) * m_charge * m_world->parameters()->electrostaticPrefactor * m_world->parameters()->elementaryCharge );
+              pd += ( ( m_world->opencl()->getOutputHost(m_fSite) - m_world->opencl()->getOutputHost(m_site) - m_charge ) * m_charge * m_world->parameters()->electrostaticPrefactor * m_world->parameters()->elementaryCharge );
           }
         // or calculate it on the CPU
         else

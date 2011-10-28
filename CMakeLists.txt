@@ -16,7 +16,8 @@ set( sources
       world.cpp
       inputparser.cpp
       potential.cpp
-      logger.cpp )
+      logger.cpp
+      openclhelper.cpp )
 
 set( meta_object_headers
       gridview.h )

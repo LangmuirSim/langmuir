@@ -1,4 +1,5 @@
 #include "simulation.h"
+#include "openclhelper.h"
 #include "inputparser.h"
 #include "chargeagent.h"
 #include "sourceagent.h"
@@ -12,22 +13,35 @@ namespace Langmuir
 {
     Simulation::Simulation (SimulationParameters * par, int id) : m_id(id)
     {
+        // Careful changing the order of these function calls; you can cause memory problems
+        // For example, setPotentialTraps assumes the source and drain have already been created
+
         // Create the world object
         m_world = new World(par);
 
-        // Setup Grid Potential (Zero it out)
+        // Place Defects
+        this->createDefects();
+
+        // Create Source ( assumes defects were placed because source neighbors can't be defects )
+        this->createSource();
+
+        // Create Drain ( assumes defects were placed because drain neighbors can't be defects )
+        this->createDrain();
+
+        // Setup Grid Potential
+        // Zero potential
         m_world->potential()->setPotentialZero();
 
         // Add Linear Potential
         if ( m_world->parameters()->potentialLinear ) { m_world->potential()->setPotentialLinear(); }
 
-        // Add Trap Potential
+        // Add Trap Potential ( assumes source and drain were created so that hetero traps don't start growing on the source / drain )
         m_world->potential()->setPotentialTraps();
 
         // precalculate and store coulomb interaction energies
         m_world->potential()->updateInteractionEnergies();
 
-        // place charges on the grid randomly
+        // place charges on the grid randomly ( assumes source / drain were created )
         if (m_world->parameters()->gridCharge) seedCharges();
 
         // Generate grid image
@@ -58,14 +72,14 @@ namespace Langmuir
         }
 
         // Initialize OpenCL
-        m_world->initializeOpenCL();
+        m_world->opencl()->initializeOpenCL();
         if ( m_world->parameters()->useOpenCL )
         {
-            m_world->toggleOpenCL(true);
+            m_world->opencl()->toggleOpenCL(true);
         }
         else
         {
-            m_world->toggleOpenCL(false);
+            m_world->opencl()->toggleOpenCL(false);
         }
 
         // tick is the global step number of this simulation
@@ -76,29 +90,99 @@ namespace Langmuir
     {
         delete m_world;
     }
-
-    bool Simulation::seedCharges ()
+    void Simulation::createDefects()
     {
-        // We randomly place all of the charges in the grid
-        Grid *grid = m_world->grid ();
+        for (int i = 0; i < m_world->grid()->volume (); ++i)
+        {
+            if (m_world->randomNumberGenerator()->random() < m_world->parameters()->defectPercentage)
+            {
+                m_world->grid()->setSiteID(i, 1);
+                m_world->defectSiteIDs()->push_back(i);
+            }
+            else
+            {
+                m_world->grid()->setSiteID(i, 0);
+            }
+        }
+    }
 
-        int nSites = grid->width () * grid->height () * grid->depth ();
-        int maxCharges = m_world->source()->maxCharges ();
+    void Simulation::createDrain()
+    {
+        m_world->drain()->setSite(m_world->grid()->volume () + 1);
+        m_world->grid()->setAgent(m_world->grid()->volume () + 1, m_world->drain());
+        m_world->grid()->setSiteID(m_world->grid()->volume () + 1, 3);
+        // Now to assign nearest neighbours
+        QVector < int >neighbors (0, 0);
+        // Loop over layers
+        for (int layer = 0; layer < m_world->grid()->depth (); layer++)
+        {
+            // Get column in this layer that is closest to the source
+            QVector < int >column_neighbors_in_layer =
+                m_world->grid()->col (m_world->grid()->width () - 1, layer);
+            // Loop over this column
+            for (int column_site = 0;
+                    column_site < column_neighbors_in_layer.size (); column_site++)
+            {
+                neighbors.push_back (column_neighbors_in_layer[column_site]);
+            }
+        }
+        // Remove defects as possible neighbors
+        for ( int i = 0; i < m_world->defectSiteIDs()->size(); i++ )
+        {
+            int j = m_world->defectSiteIDs()->at(i);
+            int k = neighbors.indexOf(j);
+            if ( k != -1 ) { neighbors.remove(k); }
+        }
+        // Set the neighbors of the drain
+        m_world->drain()->setNeighbors (neighbors);
+    }
 
-        for (int i = 0; i < maxCharges;)
+    void Simulation::createSource()
+    {
+        m_world->source()->setSite(m_world->grid()->volume ());
+        m_world->grid()->setAgent(m_world->grid()->volume (), m_world->source());
+        m_world->grid()->setSiteID(m_world->grid()->volume (), 2);
+        // Now to assign nearest neighbours
+        QVector < int >neighbors (0, 0);
+        // Loop over layers
+        for (int layer = 0; layer < m_world->grid()->depth (); layer++)
+        {
+            // Get column in this layer that is closest to the source
+            QVector < int >column_neighbors_in_layer =
+                m_world->grid()->col (0, layer);
+            // Loop over this column
+            for (int column_site = 0;
+                    column_site < column_neighbors_in_layer.size (); column_site++)
+            {
+                neighbors.push_back (column_neighbors_in_layer[column_site]);
+            }
+        }
+        // Remove defects as possible neighbors
+        for ( int i = 0; i < m_world->defectSiteIDs()->size(); i++ )
+        {
+            int j = m_world->defectSiteIDs()->at(i);
+            int k = neighbors.indexOf(j);
+            if ( k != -1 ) { neighbors.remove(k); }
+        }
+        // Set the neighbors of the source
+        m_world->source()->setNeighbors(neighbors);
+        m_world->source()->setMaxCharges( m_world->parameters()->chargePercentage * double (m_world->grid()->volume()) );
+    }
+
+    void Simulation::seedCharges ()
+    {
+        for (int i = 0; i < m_world->source()->maxCharges();)
         {
             // Randomly select a site, ensure it is suitable, if so add a charge agent
-            int site =
-                int (m_world->randomNumberGenerator()->random() * (double (nSites) - 1.0e-20));
-            if (grid->siteID (site) == 0 && grid->agent (site) == 0)
+            int site = m_world->randomNumberGenerator()->integer(0,m_world->grid()->volume()-1);
+            if (m_world->grid()->siteID (site) == 0 && m_world->grid()->agent (site) == 0)
             {
                 ChargeAgent *charge = new ChargeAgent (m_world, site);
-                m_world->charges ()->push_back (charge);
+                m_world->charges()->push_back (charge);
                 m_world->source()->incrementCharge ();
                 ++i;
             }
         }
-        return true;
     }
 
     void Simulation::performIterations (int nIterations)
@@ -118,10 +202,10 @@ namespace Langmuir
                 future.waitForFinished();
 
                 // tell the GPU to perform all coulomb calculations
-                m_world->launchCoulombKernel2();
+                m_world->opencl()->launchCoulombKernel2();
 
                 //check the answer during debugging
-                //m_world->compareHostAndDeviceForAllCarriers();
+                //m_world->opencl()->compareHostAndDeviceForAllCarriers();
 
                 // now use the results of the coulomb calculations to decide if the carreirs should have moved
                 future = QtConcurrent::map (charges, Simulation::chargeAgentDecideFuture);
@@ -147,7 +231,7 @@ namespace Langmuir
         // Output Coulomb Energy
         if (m_world->parameters()->outputCoulombPotential)
         {
-            m_world->launchCoulombKernel1();
+            m_world->opencl()->launchCoulombKernel1();
             m_world->logger()->saveCoulombEnergyToFile( QString("coulomb-%1-%2.dat").arg(m_id).arg(m_tick) );
         }
         // Output Carrier Positions and IDs

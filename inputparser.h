@@ -136,6 +136,10 @@ namespace Langmuir
     }
   };
 
+  /**
+    *  @class InputParser
+    *  @brief For reading input parameters
+    */
   class InputParser
   {
   public:

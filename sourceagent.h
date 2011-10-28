@@ -5,7 +5,10 @@
 
 namespace Langmuir
 {
-
+  /**
+    *  @class SourceAgent
+    *  @brief For injectiing charges
+    */
   class SourceAgent:public Agent
   {
 

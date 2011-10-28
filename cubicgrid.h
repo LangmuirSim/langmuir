@@ -5,6 +5,10 @@
 
 namespace Langmuir
 {
+  /**
+    *  @class CubicGrid
+    *  @brief A Grid to hold site types and site potentials
+    */
   class CubicGrid : public Grid
   {
   public:
