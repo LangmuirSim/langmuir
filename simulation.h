@@ -41,8 +41,25 @@ namespace Langmuir
      */
     ~Simulation();
 
+    /**
+     * @brief Add Defects
+     *
+     * Defects are sites that carriers can not transport to
+     */
     void createDefects();
+
+    /**
+     * @brief Add Source
+     *
+     * The source injects carriers
+     */
     void createSource();
+
+    /**
+     * @brief Add Drain
+     *
+     * The drain acccepts carriers
+     */
     void createDrain();
 
     /**
