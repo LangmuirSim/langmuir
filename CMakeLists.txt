@@ -7,17 +7,33 @@ set( QT_MIN_VERSION "4.7.0" )
 set( QT_USE_QTOPENGL TRUE )
 
 set( sources
-      rand.cpp
-      cubicgrid.cpp
-      sourceagent.cpp
-      drainagent.cpp
       chargeagent.cpp
-      simulation.cpp
-      world.cpp
+      cubicgrid.cpp
+      drainagent.cpp
       inputparser.cpp
+      openclhelper.cpp
       potential.cpp
       logger.cpp
-      openclhelper.cpp )
+      rand.cpp
+      simulation.cpp
+      sourceagent.cpp
+      world.cpp )
+
+set( headers
+      agent.h
+      chargeagent.h
+      cubicgrid.h
+      drainagent.h
+      grid.h
+      inputparser.h
+      logger.h
+      openclhelper.h
+      potential.h
+      rand.h
+      simulation.h
+      sourceagent.h
+      timer.h
+      world.h )
 
 set( meta_object_headers
       gridview.h )
@@ -36,7 +52,7 @@ include_directories( ${OPENCL_INCLUDE_DIRS} )
 add_definitions( -Wall )
 add_definitions( ${QT_DEFINITIONS} )
 
-add_executable( langmuir langmuir.cpp ${sources} ) 
+add_executable( langmuir langmuir.cpp ${sources} )
 target_link_libraries( langmuir ${Boost_LIBRARIES} )
 target_link_libraries( langmuir ${QT_LIBRARIES} )
 target_link_libraries( langmuir ${OPENCL_LIBRARIES} )
