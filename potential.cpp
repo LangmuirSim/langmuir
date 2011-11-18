@@ -1,4 +1,5 @@
 #include "potential.h"
+#include "chargeagent.h"
 #include "inputparser.h"
 #include "cubicgrid.h"
 #include "world.h"
@@ -153,4 +154,80 @@ void Potential::updateInteractionEnergies()
             }
         }
     }
+}
+
+double Potential::coulombPotentialCarriers( int site )
+{
+    double potential = 0.0;
+    for(int i = 0; i < m_world->charges()->size(); ++i)
+      {
+        // Potential at proposed site from other charges
+        int dx = m_world->grid()->xDistancei(site, m_world->charges()->at(i)->site());
+        int dy = m_world->grid()->yDistancei(site, m_world->charges()->at(i)->site());
+        int dz = m_world->grid()->zDistancei(site, m_world->charges()->at(i)->site());
+        if( dx < m_world->parameters()->electrostaticCutoff &&
+            dy < m_world->parameters()->electrostaticCutoff &&
+            dz < m_world->parameters()->electrostaticCutoff)
+          {
+            potential += m_world->interactionEnergies()[dx][dy][dz] * m_world->charges()->at(i)->charge();
+          }
+      }
+    return( m_world->parameters()->electrostaticPrefactor * potential );
+}
+
+double Potential::coulombImageXPotentialCarriers( int site )
+{
+    double potential = 0.0;
+    for(int i = 0; i < m_world->charges()->size(); ++i)
+      {
+        // Potential at proposed site from other charges
+        int dx = m_world->grid()->xImageDistancei(site, m_world->charges()->at(i)->site());
+        int dy = m_world->grid()->yDistancei(site, m_world->charges()->at(i)->site());
+        int dz = m_world->grid()->zDistancei(site, m_world->charges()->at(i)->site());
+        if( dx < m_world->parameters()->electrostaticCutoff &&
+            dy < m_world->parameters()->electrostaticCutoff &&
+            dz < m_world->parameters()->electrostaticCutoff)
+          {
+            potential += m_world->interactionEnergies()[dx][dy][dz] * m_world->charges()->at(i)->charge();
+          }
+      }
+    return( m_world->parameters()->electrostaticPrefactor * potential );
+}
+
+double Potential::coulombPotentialDefects( int site )
+{
+    double potential = 0.0;
+    for(int i = 0; i < m_world->defectSiteIDs()->size(); ++i)
+      {
+        // Potential at proposed site from other charges
+        int dx = m_world->grid()->xDistancei(site, m_world->defectSiteIDs()->at(i));
+        int dy = m_world->grid()->yDistancei(site, m_world->defectSiteIDs()->at(i));
+        int dz = m_world->grid()->zDistancei(site, m_world->defectSiteIDs()->at(i));
+        if( dx < m_world->parameters()->electrostaticCutoff &&
+            dy < m_world->parameters()->electrostaticCutoff &&
+            dz < m_world->parameters()->electrostaticCutoff)
+          {
+            potential += m_world->interactionEnergies()[dx][dy][dz];
+          }
+      }
+    return( m_world->parameters()->electrostaticPrefactor * m_world->parameters ()->zDefect * potential );
+}
+
+double Potential::coulombImageXPotentialDefects( int site )
+{
+    double potential = 0.0;
+    for(int i = 0; i < m_world->defectSiteIDs()->size(); ++i)
+      {
+        // Potential at proposed site from other charges
+        int dx = m_world->grid()->xImageDistancei(site, m_world->defectSiteIDs()->at(i));
+        int dy = m_world->grid()->yDistancei(site, m_world->defectSiteIDs()->at(i));
+        int dz = m_world->grid()->zDistancei(site, m_world->defectSiteIDs()->at(i));
+        if( dx < m_world->parameters()->electrostaticCutoff &&
+            dy < m_world->parameters()->electrostaticCutoff &&
+            dz < m_world->parameters()->electrostaticCutoff)
+          {
+            potential += m_world->interactionEnergies()[dx][dy][dz];
+          }
+      }
+    return( m_world->parameters()->electrostaticPrefactor * m_world->parameters ()->zDefect * potential );
 }

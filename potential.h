@@ -82,6 +82,26 @@ namespace Langmuir
        */
       void updateInteractionEnergies();
 
+      /**
+        * @brief compute the coulomb energy from carriers at site
+        */
+      double coulombPotentialCarriers( int site );
+
+      /**
+        * @brief compute the coulomb energy from carriers at site
+        */
+      double coulombImageXPotentialCarriers( int site );
+
+      /**
+        * @brief compute the coulomb energy from carriers at site
+        */
+      double coulombPotentialDefects( int site );
+
+      /**
+        * @brief compute the coulomb energy from carriers at site
+        */
+      double coulombImageXPotentialDefects( int site );
+
   private:
 
       /**

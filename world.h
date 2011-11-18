@@ -104,21 +104,6 @@ namespace Langmuir
       */
     boost::multi_array<double,3>& interactionEnergies() { return m_interactionEnergies; }
 
-    /**
-      * @brief create sites that can't be transported to
-      */
-    void createDefects();
-
-    /**
-      * @brief create source electrode
-      */
-    void createSource();
-
-    /**
-      * @brief create drain electrode
-      */
-    void createDrain();
-
    private:
 
     /**
