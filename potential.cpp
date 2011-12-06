@@ -1,4 +1,5 @@
 #include "potential.h"
+#include "simulation.h"
 #include "chargeagent.h"
 #include "inputparser.h"
 #include "cubicgrid.h"
@@ -65,7 +66,7 @@ void Potential::setPotentialTraps()
     {
         int trapSeedIndex               = m_world->randomNumberGenerator()->integer(0,m_world->trapSiteIDs()->size()-1);
         int trapSeedSite                = m_world->trapSiteIDs()->at(trapSeedIndex);
-        QVector<int> trapSeedNeighbors  = m_world->grid()->neighbors(trapSeedSite,1);
+        QVector<int> trapSeedNeighbors  = m_world->simulation()->neighborsSite(trapSeedSite);
 
         int newTrapIndex                = m_world->randomNumberGenerator()->integer(0,trapSeedNeighbors.size()-1);
         int newTrapSite                 = trapSeedNeighbors[newTrapIndex];

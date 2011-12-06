@@ -1,6 +1,7 @@
 #include "openclhelper.h"
 #include "chargeagent.h"
 #include "inputparser.h"
+#include "simulation.h"
 #include "world.h"
 #include "grid.h"
 #include "rand.h"
@@ -18,7 +19,7 @@ namespace Langmuir
     m_world->grid ()->setAgent (m_site, this);
 
     //figure out the neighbors of this site
-    m_neighbors = m_world->grid ()->neighbors (m_site,m_world->parameters()->hoppingRange);
+    m_neighbors = m_world->simulation()->neighborsSite(m_site);
   }
 
   ChargeAgent::~ChargeAgent ()
@@ -173,7 +174,7 @@ namespace Langmuir
         m_world->grid ()->setAgent (m_site, this);
 
         // Update our neighbors
-        m_neighbors = m_world->grid ()->neighbors (m_site,m_world->parameters()->hoppingRange);
+        m_neighbors = m_world->simulation()->neighborsSite(m_site);
       }
   }
 

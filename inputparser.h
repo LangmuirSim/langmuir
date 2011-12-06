@@ -136,6 +136,17 @@ namespace Langmuir
     }
   };
 
+  class InputParserTemp
+  {
+  public:
+      InputParserTemp(const QString &fileName);
+
+  private:
+      QMap<QString, QVector<QString> > m_map;
+      void parseFile(const QString &fileName);
+      void printMap();
+  };
+
   /**
     *  @class InputParser
     *  @brief For reading input parameters

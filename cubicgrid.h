@@ -32,15 +32,6 @@ namespace Langmuir
     ~CubicGrid();
 
     /**
-     * @brief neighborlist indices.
-     *
-     * Get a list of site indices for sites immediatly next to the given site.
-     * @param site serial cell index.
-     * @return neighbors list of serial site indices.
-     */
-    QVector<int> neighbors(int site, int hoppingRange);
-
-    /**
      * @brief rowlist.
      *
      * Get a list of site indices for all sites in a row of some given layer.

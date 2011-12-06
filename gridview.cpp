@@ -91,7 +91,7 @@ namespace Langmuir
         }
 
         //Create the simulation with the parameters chosen
-        pSim = new Simulation(pPar);
+        pSim = new SolarCell(pPar);
 
         //Set default values
         lastCount = 0;

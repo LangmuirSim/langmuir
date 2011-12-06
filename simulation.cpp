@@ -11,13 +11,16 @@
 #include "rand.h"
 namespace Langmuir
 {
-    Simulation::Simulation (SimulationParameters * par, int id) : m_id(id)
+    Simulation::Simulation (SimulationParameters * par, int id) :  m_world(0), m_tick(0), m_id(id)
     {
         // Careful changing the order of these function calls; you can cause memory problems
         // For example, setPotentialTraps assumes the source and drain have already been created
 
-        // Create the world object
+        // Create the World Object
         m_world = new World(par);
+
+        // Tell World about this simulation
+        m_world->setSimulation(this);
 
         // Place Defects
         this->createDefects();
@@ -81,15 +84,16 @@ namespace Langmuir
         {
             m_world->opencl()->toggleOpenCL(false);
         }
-
-        // tick is the global step number of this simulation
-        m_tick = 0;
     }
 
     Simulation::~Simulation ()
     {
-        delete m_world;
+        if ( m_world != 0 )
+        {
+            delete m_world;
+        }
     }
+
     void Simulation::createDefects()
     {
         for (int i = 0; i < m_world->grid()->volume (); ++i)
@@ -106,13 +110,43 @@ namespace Langmuir
         }
     }
 
+    void Simulation::createSource()
+    {
+        m_world->source()->setSite(m_world->grid()->volume());
+        m_world->grid()->setAgent(m_world->grid()->volume(), m_world->source());
+        m_world->grid()->setSiteID(m_world->grid()->volume(), 2);
+        m_world->source()->setNeighbors(neighborsSource());
+        m_world->source()->setMaxCharges( m_world->parameters()->chargePercentage * double (m_world->grid()->volume()) );
+    }
+
     void Simulation::createDrain()
     {
-        m_world->drain()->setSite(m_world->grid()->volume () + 1);
-        m_world->grid()->setAgent(m_world->grid()->volume () + 1, m_world->drain());
-        m_world->grid()->setSiteID(m_world->grid()->volume () + 1, 3);
+        m_world->drain()->setSite(m_world->grid()->volume() + 1);
+        m_world->grid()->setAgent(m_world->grid()->volume() + 1, m_world->drain());
+        m_world->grid()->setSiteID(m_world->grid()->volume() + 1, 3);
+        m_world->drain()->setNeighbors(neighborsDrain());
+    }
+
+    void Simulation::seedCharges()
+    {
+        for (int i = 0; i < m_world->source()->maxCharges();)
+        {
+            // Randomly select a site, ensure it is suitable, if so add a charge agent
+            int site = m_world->randomNumberGenerator()->integer(0,m_world->grid()->volume()-1);
+            if (m_world->grid()->siteID (site) == 0 && m_world->grid()->agent (site) == 0)
+            {
+                ChargeAgent *charge = new ChargeAgent (m_world, site);
+                m_world->charges()->push_back (charge);
+                m_world->source()->incrementCharge ();
+                ++i;
+            }
+        }
+    }
+
+    QVector<int> Simulation::neighborsDrain()
+    {
         // Now to assign nearest neighbours
-        QVector < int >neighbors (0, 0);
+        QVector<int>neighbors(0, 0);
         // Loop over layers
         for (int layer = 0; layer < m_world->grid()->depth (); layer++)
         {
@@ -133,17 +167,13 @@ namespace Langmuir
             int k = neighbors.indexOf(j);
             if ( k != -1 ) { neighbors.remove(k); }
         }
-        // Set the neighbors of the drain
-        m_world->drain()->setNeighbors (neighbors);
+        return neighbors;
     }
 
-    void Simulation::createSource()
+    QVector<int> Simulation::neighborsSource()
     {
-        m_world->source()->setSite(m_world->grid()->volume ());
-        m_world->grid()->setAgent(m_world->grid()->volume (), m_world->source());
-        m_world->grid()->setSiteID(m_world->grid()->volume (), 2);
         // Now to assign nearest neighbours
-        QVector < int >neighbors (0, 0);
+        QVector < int >neighbors(0, 0);
         // Loop over layers
         for (int layer = 0; layer < m_world->grid()->depth (); layer++)
         {
@@ -164,162 +194,179 @@ namespace Langmuir
             int k = neighbors.indexOf(j);
             if ( k != -1 ) { neighbors.remove(k); }
         }
-        // Set the neighbors of the source
-        m_world->source()->setNeighbors(neighbors);
-        m_world->source()->setMaxCharges( m_world->parameters()->chargePercentage * double (m_world->grid()->volume()) );
+        return neighbors;
     }
 
-    void Simulation::seedCharges ()
+    QVector<int> Simulation::neighborsSite(int site)
     {
-        for (int i = 0; i < m_world->source()->maxCharges();)
+        // Return the indexes of all nearest neighbours
+        QVector<int>     nList(0);
+        int col = m_world->grid()->getColumn(site);
+        int row = m_world->grid()->getRow(site);
+        int lay = m_world->grid()->getLayer(site);
+        int hoppingRange = 1;
+
+        switch ( hoppingRange )
         {
-            // Randomly select a site, ensure it is suitable, if so add a charge agent
-            int site = m_world->randomNumberGenerator()->integer(0,m_world->grid()->volume()-1);
-            if (m_world->grid()->siteID (site) == 0 && m_world->grid()->agent (site) == 0)
+         case 1:
+         {
+          // To the west
+          if (col > 0)
+            nList.push_back(m_world->grid()->getIndex(col-1,row,lay));
+          // To the east
+          if (col < m_world->grid()->width() - 1)
+            nList.push_back(m_world->grid()->getIndex(col+1,row,lay));
+          // To the south
+          if (row > 0)
+            nList.push_back(m_world->grid()->getIndex(col,row-1,lay));
+          // To the north
+          if (row < m_world->grid()->height() - 1)
+            nList.push_back(m_world->grid()->getIndex(col,row+1,lay));
+          // Below
+          if (lay > 0)
+            nList.push_back(m_world->grid()->getIndex(col,row,lay-1));
+          // Above
+          if (lay < m_world->grid()->depth() - 1)
+            nList.push_back(m_world->grid()->getIndex(col,row,lay+1));
+          // Now for the source and the drain....
+          if (col == 0)
+            nList.push_back(m_world->grid()->getIndex(m_world->grid()->width()-1,m_world->grid()->height()-1,m_world->grid()->depth()-1) + 1);
+          if (col == m_world->grid()->width() - 1)
+            nList.push_back(m_world->grid()->getIndex(m_world->grid()->width()-1,m_world->grid()->height()-1,m_world->grid()->depth()-1) + 2);
+          // Now we have all the nearest neighbours - between 4 and 6 in this case
+          return nList;
+          break;
+         }
+         case 2:
+         {
+           if (col > 0)
             {
-                ChargeAgent *charge = new ChargeAgent (m_world, site);
-                m_world->charges()->push_back (charge);
-                m_world->source()->incrementCharge ();
-                ++i;
+             nList.push_back( m_world->grid()->getIndex(col-1,row,lay));
+             if (row < m_world->grid()->height() -1)
+              nList.push_back( m_world->grid()->getIndex(col-1,row+1,lay));
+             if (row > 0)
+              nList.push_back( m_world->grid()->getIndex(col-1,row-1,lay));
+             if (col > 1)
+              nList.push_back( m_world->grid()->getIndex(col-2,row,lay));
             }
-        }
-    }
-
-    void Simulation::performIterations (int nIterations)
-    {
-        //  cout << "Entered performIterations function.\n";
-        for (int i = 0; i < nIterations; ++i)
-        {
-            // Attempt to transport the charges through the film
-            QList < ChargeAgent * >&charges = *m_world->charges ();
-
-            // If using OpenCL, launch the Kernel to calculate Coulomb Interactions
-            if ( m_world->parameters()->useOpenCL && charges.size() > 0 )
+           if (col < m_world->grid()->width() - 1)
             {
-                // first have the charge carriers propose future sites
-                //for ( int j = 0; j < charges.size(); j++ ) charges[j]->chooseFuture(j);
-                QFuture < void > future = QtConcurrent::map (charges, Simulation::chargeAgentChooseFuture);
-                future.waitForFinished();
-
-                // tell the GPU to perform all coulomb calculations
-                m_world->opencl()->launchCoulombKernel2();
-
-                //check the answer during debugging
-                //m_world->opencl()->compareHostAndDeviceForAllCarriers();
-
-                // now use the results of the coulomb calculations to decide if the carreirs should have moved
-                future = QtConcurrent::map (charges, Simulation::chargeAgentDecideFuture);
-                future.waitForFinished();
+             nList.push_back( m_world->grid()->getIndex(col+1,row,lay));
+             if (row < m_world->grid()->height() - 1)
+              nList.push_back( m_world->grid()->getIndex(col+1,row+1,lay));
+             if (row > 0)
+              nList.push_back( m_world->grid()->getIndex(col+1,row-1,lay));
+             if (col < m_world->grid()->width() - 2)
+              nList.push_back( m_world->grid()->getIndex(col+2,row,lay));
             }
-            else // Not using OpenCL
+           if (row > 0)
             {
-                // Use QtConcurrnet to parallelise the charge calculations
-                QFuture < void >future = QtConcurrent::map (charges, Simulation::chargeAgentIterate);
-
-                // We want to wait for it to finish before continuing on
-                future.waitForFinished ();
+             nList.push_back( m_world->grid()->getIndex(col,row-1,lay));
+             if (row > 1)
+              nList.push_back( m_world->grid()->getIndex(col,row-2,lay));
             }
-
-            // Now we are done with the charge movement, move them to the next tick!
-            nextTick ();
-
-            // Perform charge injection at the source
-            performInjections (m_world->parameters()->sourceAttempts);
-
-            m_tick += 1;
-        }
-        // Output Coulomb Energy
-        if (m_world->parameters()->outputCoulombPotential)
-        {
-            m_world->opencl()->launchCoulombKernel1();
-            m_world->logger()->saveCoulombEnergyToFile( QString("coulomb-%1-%2.dat").arg(m_id).arg(m_tick) );
-        }
-        // Output Carrier Positions and IDs
-        if (m_world->parameters()->outputCarriers)
-        {
-            m_world->logger()->saveCarrierIDsToFile( QString("carriers-%1-%2.dat").arg(m_id).arg(m_tick) );
-        }
-    }
-
-    void Simulation::performInjections (int nInjections)
-    {
-        int inject = nInjections;
-        if ( inject < 0 )
-        {
-            inject = m_world->source()->maxCharges() - m_world->charges()->size();
-            if ( inject <= 0 )
+           if (row < m_world->grid()->height() - 1)
             {
-                return;
+             nList.push_back( m_world->grid()->getIndex(col,row+1,lay));
+             if (row < m_world->grid()->height() - 2)
+              nList.push_back( m_world->grid()->getIndex(col,row+2,lay));
             }
-        }
-        for ( int i = 0; i < inject; i++ )
-        {
-          int site = m_world->source()->transport();
-          if (site != -1)
+           if (lay > 0)
             {
-              ChargeAgent *charge = new ChargeAgent (m_world, site );
-              m_world->charges ()->push_back (charge);
+             nList.push_back( m_world->grid()->getIndex(col,row,lay-1));
+             if (lay > 1)
+              nList.push_back( m_world->grid()->getIndex(col,row,lay-2));
+             if (col > 0)
+              {
+               nList.push_back( m_world->grid()->getIndex(col-1,row,lay-1));
+               if (row < m_world->grid()->height() -1)
+                nList.push_back( m_world->grid()->getIndex(col-1,row+1,lay-1));
+               if (row > 0)
+                nList.push_back( m_world->grid()->getIndex(col-1,row-1,lay-1));
+              }
+             if (col < m_world->grid()->width() - 1)
+              {
+               nList.push_back( m_world->grid()->getIndex(col+1,row,lay-1));
+               if (row < m_world->grid()->height() - 1)
+                nList.push_back( m_world->grid()->getIndex(col+1,row+1,lay-1));
+               if (row > 0)
+                nList.push_back( m_world->grid()->getIndex(col+1,row-1,lay-1));
+              }
+             if (row > 0)
+              nList.push_back( m_world->grid()->getIndex(col,row-1,lay-1));
+             if (row < m_world->grid()->height() - 1)
+              nList.push_back( m_world->grid()->getIndex(col,row+1,lay-1));
             }
-        }
-    }
-
-    void Simulation::nextTick ()
-    {
-        // Iterate over all sites to change their state
-        QList < ChargeAgent * >&charges = *m_world->charges();
-        if( m_world->parameters()->outputStats )
-        {
-          for (int i = 0; i < charges.size (); ++i)
+           if (lay < m_world->grid()->depth()-1)
+            {
+             nList.push_back( m_world->grid()->getIndex(col,row,lay+1));
+             if (lay < m_world->grid()->depth()-2)
+              nList.push_back( m_world->grid()->getIndex(col,row,lay+2));
+             if (col > 0)
+              {
+               nList.push_back( m_world->grid()->getIndex(col-1,row,lay+1));
+               if (row < m_world->grid()->height() -1)
+                nList.push_back( m_world->grid()->getIndex(col-1,row+1,lay+1));
+               if (row > 0)
+                nList.push_back( m_world->grid()->getIndex(col-1,row-1,lay+1));
+              }
+             if (col < m_world->grid()->width() - 1)
+              {
+               nList.push_back( m_world->grid()->getIndex(col+1,row,lay+1));
+               if (row < m_world->grid()->height() - 1)
+                nList.push_back( m_world->grid()->getIndex(col+1,row+1,lay+1));
+               if (row > 0)
+                nList.push_back( m_world->grid()->getIndex(col+1,row-1,lay+1));
+              }
+             if (row > 0)
+              nList.push_back( m_world->grid()->getIndex(col,row-1,lay+1));
+             if (row < m_world->grid()->height() - 1)
+              nList.push_back( m_world->grid()->getIndex(col,row+1,lay+1));
+            }
+          if (col == 0)
+            nList.push_back(m_world->grid()->getIndex(m_world->grid()->width()-1,m_world->grid()->height()-1,m_world->grid()->depth()-1) + 1);
+          if (col == m_world->grid()->width() - 1)
+            nList.push_back(m_world->grid()->getIndex(m_world->grid()->width()-1,m_world->grid()->height()-1,m_world->grid()->depth()-1) + 2);
+          return nList;
+          break;
+         }
+         default:
+         {
+          int cutoff = hoppingRange * hoppingRange;
+          for ( int z = (lay - hoppingRange); z < int(lay + hoppingRange + 1); z += 1 )
           {
-            charges[i]->completeTick ();
-            // Check if the charge was removed - then we should delete it
-            if (charges[i]->removed ())
+           if ( z >= 0 && z < int(m_world->grid()->depth()) )
+           {
+            for ( int x = (col - hoppingRange); x < int(col + hoppingRange + 1); x += 1 )
             {
-              m_world->logger()->carrierReportLifetimeAndPathlength(i,m_tick);
-              delete charges[i];
-              charges.removeAt (i);
-              m_world->drain()->acceptCharge (-1);
-              m_world->source()->decrementCharge ();
-              --i;
+             if ( x >= 0 && x < int(m_world->grid()->width()) )
+             {
+              for ( int y = (row - hoppingRange); y < int(row + hoppingRange + 1); y += 1 )
+              {
+               if ( y >= 0 && y < int(m_world->grid()->height()) )
+               {
+                if ( !(x == int(col) && y == int(row) && z == int(lay)) )
+                {
+                 int r2 = ( col - x ) * ( col - x ) + ( row - y ) * ( row - y ) + ( lay - z ) * ( lay - z );
+                 if ( r2 <= cutoff )
+                 {
+                  nList.push_back(m_world->grid()->getIndex(x,y,z));
+                 }
+                }
+               }
+              }
+             }
             }
+           }
           }
-          m_world->logger()->carrierStreamFlush();
-        }
-        else
-        {
-          for (int i = 0; i < charges.size (); ++i)
-          {
-            charges[i]->completeTick ();
-            // Check if the charge was removed - then we should delete it
-            if (charges[i]->removed ())
-            {
-              delete charges[i];
-              charges.removeAt (i);
-              m_world->drain()->acceptCharge (-1);
-              m_world->source()->decrementCharge ();
-              --i;
-            }
-          }
+          if (col == 0)
+            nList.push_back(m_world->grid()->getIndex(m_world->grid()->width()-1,m_world->grid()->height()-1,m_world->grid()->depth()-1) + 1);
+          if (col == m_world->grid()->width() - 1)
+            nList.push_back(m_world->grid()->getIndex(m_world->grid()->width()-1,m_world->grid()->height()-1,m_world->grid()->depth()-1) + 2);
+          return nList;
+          break;
+         }
         }
     }
 
-    inline void Simulation::chargeAgentIterate ( ChargeAgent * chargeAgent)
-    {
-        // This function performs a single iteration for a charge agent, only thread
-        // safe calls can be made in this function. Other threads may access the
-        // current state of the chargeAgent, but will not attempt to modify it.
-        chargeAgent->transport();
-    }
-
-    inline void Simulation::chargeAgentChooseFuture( ChargeAgent * chargeAgent )
-    {
-        // same rules apply here as for chargeAgentIterate;
-        chargeAgent->chooseFuture();
-    }
-
-    inline void Simulation::chargeAgentDecideFuture( ChargeAgent * chargeAgent )
-    {
-        // same rules apply here as for chargeAgentIterate;
-        chargeAgent->decideFuture();
-    }
-}                                // End namespace Langmuir
+} // End namespace Langmuir

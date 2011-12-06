@@ -1,8 +1,6 @@
 #ifndef SIMULATION_H
 #define SIMULATION_H
 
-extern int globalstep;
-
 #include <QtCore>
 
 namespace Langmuir
@@ -26,6 +24,7 @@ namespace Langmuir
   {
 
   public:
+
     /**
      * @brief Constructor.
      *
@@ -37,37 +36,9 @@ namespace Langmuir
     /**
      * @brief Destructor.
      *
-     * Releases the random number generator.
+     * Releases the world object.
      */
-    ~Simulation();
-
-    /**
-     * @brief Add Defects
-     *
-     * Defects are sites that carriers can not transport to
-     */
-    void createDefects();
-
-    /**
-     * @brief Add Source
-     *
-     * The source injects carriers
-     */
-    void createSource();
-
-    /**
-     * @brief Add Drain
-     *
-     * The drain acccepts carriers
-     */
-    void createDrain();
-
-    /**
-     * @brief Place charges on grid.
-     *
-     * Seed the grid with the number of charges specified by setMaxCharges.
-     */
-    void seedCharges();
+    virtual ~Simulation();
 
     /**
      * @brief Perform Iterations. 
@@ -75,7 +46,28 @@ namespace Langmuir
      * Perform so many iterations of the simulation.
      * @param nIterations number of iterations to perform.
      */
-    void performIterations (int nIterations);
+    virtual void performIterations(int nIterations) = 0;
+
+    /**
+     * @brief Create a list of site ids.
+     *
+     * Generate the neighbors of the drain electrode
+     */
+    virtual QVector<int> neighborsDrain();
+
+    /**
+     * @brief Create a list of site ids.
+     *
+     * Generate the neighbors of the source electrode
+     */
+    virtual QVector<int> neighborsSource();
+
+    /**
+     * @brief Create a list of site ids.
+     *
+     * Generate the neighbors of a given site
+     */
+    virtual QVector<int> neighborsSite(int site);
 
     /**
      * @brief World access.
@@ -84,13 +76,35 @@ namespace Langmuir
      */
     World *world();
 
-    /**
-     * @brief the total steps performed
-     *
-     */
-    int getTick();
+  protected:
 
-  private:
+    /**
+     * @brief Add Defects
+     *
+     * Defects are sites that carriers can not transport to
+     */
+    virtual void createDefects();
+
+    /**
+     * @brief Add Source
+     *
+     * The source injects carriers
+     */
+    virtual void createSource();
+
+    /**
+     * @brief Add Drain
+     *
+     * The drain acccepts carriers
+     */
+    virtual void createDrain();
+
+    /**
+     * @brief Place charges on grid.
+     *
+     * Seed the grid with the number of charges specified by setMaxCharges.
+     */
+    virtual void seedCharges();
 
     /**
      * @brief World pointer.
@@ -98,51 +112,20 @@ namespace Langmuir
     World *m_world;
 
     /**
-      * @brief a unique id for this simulation
-      */
-    int m_id;
-
-    /**
      * @brief Number of iterations performed
      */
     int m_tick;
 
     /**
-     * @brief inject charges into the system
-     * @param nInjections number of injections to perform.
-     */
-    void performInjections (int nInjections=1);
-
-    /**
-     * @brief next simulation Tick.
-     */
-    void nextTick ( );
-
-    /**
-     * @brief charge agent transport for QtConcurrent.
-     */
-    static void chargeAgentIterate( ChargeAgent * chargeAgent );
-
-    /**
-     * @brief charge agent transport (choose future site) for QtConcurrent.
-     */
-    static void chargeAgentChooseFuture( ChargeAgent * chargeAgent );
-
-    /**
-     * @brief charge agent transport (apply metropolis) for QtConcurrent.
-     */
-    static void chargeAgentDecideFuture( ChargeAgent * chargeAgent );
+      * @brief a unique id for this simulation
+      */
+    int m_id;
   };
 
-  inline World *Simulation::world ()
+  inline World* Simulation::world ()
   {
-    return m_world;
+      return m_world;
   }
-
-  inline int Simulation::getTick()
-  {
-      return m_tick;
-  }
-}                                // End namespace Langmuir
+} // End namespace Langmuir
 
 #endif

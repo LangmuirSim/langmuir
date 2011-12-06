@@ -20,6 +20,7 @@ namespace Langmuir
   class SourceAgent;
   class ChargeAgent;
   class OpenClHelper;
+  class Simulation;
   struct SimulationParameters;
   /**
     * @class World
@@ -80,6 +81,16 @@ namespace Langmuir
     OpenClHelper* opencl() { return m_ocl; }
 
     /**
+      * @brief simulation pointer
+      */
+    Simulation* simulation() { return m_simulation; }
+
+    /**
+      * @brief simulation pointer
+      */
+    void setSimulation( Simulation *sim ) { m_simulation =  sim; }
+
+    /**
       * @brief charge agent pointer
       */
     QList<ChargeAgent *> * charges() { return &m_charges; }
@@ -136,6 +147,11 @@ namespace Langmuir
       * @warning World does not allocate or destroy SimulationParameters
       */
     SimulationParameters *m_parameters;
+
+    /**
+      * @brief orchestrates simulation
+      */
+    Simulation *m_simulation;
 
     /**
       * @brief Writes various simulation information to files

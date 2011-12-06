@@ -5,6 +5,8 @@
 #include "cubicgrid.h"
 #include "world.h"
 #include "simulation.h"
+#include "transistor.h"
+#include "solar.h"
 #include "chargeagent.h"
 #include "cubicgrid.h"
 

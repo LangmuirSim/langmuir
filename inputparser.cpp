@@ -942,4 +942,140 @@ namespace Langmuir
       return readCount;
   }
 
+  InputParserTemp::InputParserTemp(const QString &fileName)
+  {
+      parseFile(fileName);
+  }
+
+  void InputParserTemp::parseFile(const QString &fileName)
+  {
+      m_map.clear( );
+      QFile     handle( fileName );
+      QFileInfo   info( fileName );
+
+      if ( ! handle.open ( QIODevice::ReadOnly | QIODevice::Text ) )
+          qFatal ( "can not open input file: %s", qPrintable ( fileName ) );
+
+      QRegExp regex1("\\s*=\\s*"  );
+      QRegExp regex2("\\s*,\\s*"  );
+      QRegExp regex3("\\s*\\[\\s*");
+      QRegExp regex4("\\s*\\]\\s*");
+      QRegExp regex5("#.*$"       );
+
+      int lineNumber = 0;
+      while ( !handle.atEnd() )
+      {
+          QString unaltered = handle.readLine( ).trimmed();
+          QString line = unaltered;
+          line = line.replace( regex1, "=" );
+          line = line.replace( regex2, "," );
+          line = line.replace( regex3,  "" );
+          line = line.replace( regex4,  "" );
+          line = line.replace( regex5,  "" );
+          line = line.toLower( );
+          line = line.trimmed( );
+
+          if ( line.length() > 0 )
+          {
+              if ( line.count("=") != 1 )
+              {
+                  qFatal("InputParser syntax error:\n"
+                         " file: %s\n"
+                         " line: %d\n"
+                         " text: %s\n"
+                         " what: line must contain 1 equal sign.",
+                         qPrintable(info.fileName()),lineNumber,qPrintable(unaltered));
+              }
+
+              QStringList tokens = line.split ("=",QString::SkipEmptyParts);
+
+              if ( tokens.size() != 2 )
+              {
+                  qFatal("InputParser syntax error:\n"
+                         " file: %s\n"
+                         " line: %d\n"
+                         " text: %s\n"
+                         " what: line does not split into 2 sections at the equal sign.",
+                         qPrintable(info.fileName()),lineNumber,qPrintable(unaltered));
+              }
+
+              QString key = tokens[0].trimmed();
+
+              if ( key.isEmpty() )
+              {
+                  qFatal("InputParser syntax error:\n"
+                         " file: %s\n"
+                         " line: %d\n"
+                         " text: %s\n"
+                         " what: key is an empty string",
+                         qPrintable(info.fileName()),lineNumber,qPrintable(unaltered));
+              }
+
+              QStringList values = tokens[1].split(",",QString::SkipEmptyParts);
+
+              if ( values.size() == 0 )
+              {
+                  qFatal("InputParser syntax error:\n"
+                         " file: %s\n"
+                         " line: %d\n"
+                         " text: %s\n"
+                         "  key: %s\n"
+                         " what: key specifies no values",
+                         qPrintable(info.fileName()),lineNumber,qPrintable(unaltered),qPrintable(key));
+              }
+
+              for ( int i = 0; i < values.size(); i++ )
+              {
+                  QString value = values[i].trimmed();
+
+                  if ( value.isEmpty() )
+                  {
+                      qFatal("InputParser syntax error:\n"
+                             " file: %s\n"
+                             " line: %d\n"
+                             " text: %s\n"
+                             "  key: %s\n"
+                             " what: key value %d is an empty string",
+                             qPrintable(info.fileName()),lineNumber,qPrintable(unaltered),qPrintable(key),i);
+                  }
+
+                  if ( ! m_map.contains(key) )
+                  {
+                      m_map[key] = QVector< QString >();
+                  }
+
+                  if ( m_map[key].contains( value ) )
+                  {
+                      qFatal("InputParser syntax error:\n"
+                             " file: %s\n"
+                             " line: %d\n"
+                             " text: %s\n"
+                             "  key: %s\n"
+                             " what: duplicate value found",
+                             qPrintable(info.fileName()),lineNumber,qPrintable(unaltered),qPrintable(key));
+                  }
+                  else
+                  {
+                      m_map[key].push_back(value);
+                  }
+              }
+          }
+          lineNumber += 1;
+      }
+      printMap();
+  }
+
+  void InputParserTemp::printMap()
+  {
+      for ( QMap<QString, QVector<QString> >::iterator i = m_map.begin();
+            i != m_map.end(); i++ )
+      {
+          qDebug("%s",qPrintable( i.key() ) );
+          for ( int j = 0; j < i.value().size(); j++ )
+          {
+              qDebug(" %s",qPrintable( i.value().at(j) ) );
+          }
+      }
+  }
+
 }

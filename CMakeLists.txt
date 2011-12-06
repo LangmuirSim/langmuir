@@ -17,7 +17,9 @@ set( sources
       rand.cpp
       simulation.cpp
       sourceagent.cpp
-      world.cpp )
+      world.cpp
+      transistor.cpp
+      solar.cpp )
 
 set( headers
       agent.h
@@ -33,7 +35,9 @@ set( headers
       simulation.h
       sourceagent.h
       timer.h
-      world.h )
+      world.h
+      transistor.h
+      solar.h )
 
 set( meta_object_headers
       gridview.h )
@@ -53,20 +57,20 @@ add_definitions( -Wall )
 add_definitions( ${QT_DEFINITIONS} )
 
 #add_executable( langmuir langmuir.cpp ${sources} )
-#target_link_libraries( langmuir ${Boost_LIBRARIES} )
+#arget_link_libraries( langmuir ${Boost_LIBRARIES} )
 #target_link_libraries( langmuir ${QT_LIBRARIES} )
 #target_link_libraries( langmuir ${OPENCL_LIBRARIES} )
 
-#QT4_WRAP_CPP( moc_output ${meta_object_headers} )
-#include_directories( ${OPENGL_INCLUDE_DIRS} )
-#add_executable( langmuirView langmuirview.cpp gridview.cpp ${sources} ${moc_output} )
-#target_link_libraries( langmuirView ${Boost_LIBRARIES} )
-#target_link_libraries( langmuirView ${QT_LIBRARIES} )
-#target_link_libraries( langmuirView ${OPENCL_LIBRARIES} )
-#target_link_libraries( langmuirView ${OPENGL_LIBRARIES} )
+QT4_WRAP_CPP( moc_output ${meta_object_headers} )
+include_directories( ${OPENGL_INCLUDE_DIRS} )
+add_executable( langmuirView langmuirview.cpp gridview.cpp ${sources} ${moc_output} )
+target_link_libraries( langmuirView ${Boost_LIBRARIES} )
+target_link_libraries( langmuirView ${QT_LIBRARIES} )
+target_link_libraries( langmuirView ${OPENCL_LIBRARIES} )
+target_link_libraries( langmuirView ${OPENGL_LIBRARIES} )
 
-add_executable( test test.cpp ${sources} )
-target_link_libraries( test ${Boost_LIBRARIES} )
-target_link_libraries( test ${QT_LIBRARIES} )
-target_link_libraries( test ${OPENCL_LIBRARIES} )
+#add_executable( test test.cpp ${sources} )
+#target_link_libraries( test ${Boost_LIBRARIES} )
+#target_link_libraries( test ${QT_LIBRARIES} )
+#target_link_libraries( test ${OPENCL_LIBRARIES} )
 

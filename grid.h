@@ -28,15 +28,6 @@ namespace Langmuir
     }
 
     /**
-     * @brief neighborlist indices.
-     *
-     * Get a list of site indices for sites immediatly next to the given site.
-     * @param site serial cell index.
-     * @return neighbors list of serial site indices.
-     */
-    virtual QVector<int> neighbors(int site, int hoppingRange) = 0;
-
-    /**
      * @brief rowlist.
      *
      * Get a list of site indices for all sites in a row of some given layer.

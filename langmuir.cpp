@@ -1,6 +1,8 @@
 #include "inputparser.h"
 #include "sourceagent.h"
 #include "simulation.h"
+#include "transistor.h"
+#include "solar.h"
 #include "drainagent.h"
 #include "cubicgrid.h"
 #include "world.h"
@@ -103,7 +105,7 @@ int main (int argc, char *argv[])
       input.simulationParameters (&par, i);
 
       // Set up a simulation
-      Simulation sim (&par,i);
+      Transistor sim(&par,i);
 
       // Open iteration file for this simulation
       iFile = new QFile (dir.absoluteFilePath(oFileName + "-i-" + QString::number (i) + ".dat"));
