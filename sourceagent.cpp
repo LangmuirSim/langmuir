@@ -10,9 +10,11 @@ namespace Langmuir
   SourceAgent::SourceAgent(World * world, int site) : 
     Agent(Agent::Source, world,site)
   {
-    m_site = site;
     m_charges = 0;
-    m_maxCharges = 100;
+    m_site = m_world->grid()->volume();
+    m_world->grid()->setAgent(m_world->grid()->volume(),this);
+    m_world->grid()->setSiteID(m_world->grid()->volume(),2);
+    m_maxCharges = m_world->parameters()->chargePercentage * double(m_world->grid()->volume());
   }
 
   SourceAgent::~SourceAgent()

@@ -13,9 +13,6 @@ namespace Langmuir
 {
     Simulation::Simulation (SimulationParameters * par, int id) :  m_world(0), m_tick(0), m_id(id)
     {
-        // Careful changing the order of these function calls; you can cause memory problems
-        // For example, setPotentialTraps assumes the source and drain have already been created
-
         // Create the World Object
         m_world = new World(par);
 
@@ -24,12 +21,6 @@ namespace Langmuir
 
         // Place Defects
         this->createDefects();
-
-        // Create Source ( assumes defects were placed because source neighbors can't be defects )
-        this->createSource();
-
-        // Create Drain ( assumes defects were placed because drain neighbors can't be defects )
-        this->createDrain();
 
         // Setup Grid Potential
         // Zero potential
@@ -110,23 +101,6 @@ namespace Langmuir
         }
     }
 
-    void Simulation::createSource()
-    {
-        m_world->source()->setSite(m_world->grid()->volume());
-        m_world->grid()->setAgent(m_world->grid()->volume(), m_world->source());
-        m_world->grid()->setSiteID(m_world->grid()->volume(), 2);
-        m_world->source()->setNeighbors(neighborsSource());
-        m_world->source()->setMaxCharges( m_world->parameters()->chargePercentage * double (m_world->grid()->volume()) );
-    }
-
-    void Simulation::createDrain()
-    {
-        m_world->drain()->setSite(m_world->grid()->volume() + 1);
-        m_world->grid()->setAgent(m_world->grid()->volume() + 1, m_world->drain());
-        m_world->grid()->setSiteID(m_world->grid()->volume() + 1, 3);
-        m_world->drain()->setNeighbors(neighborsDrain());
-    }
-
     void Simulation::seedCharges()
     {
         for (int i = 0; i < m_world->source()->maxCharges();)
@@ -136,6 +110,9 @@ namespace Langmuir
             if (m_world->grid()->siteID (site) == 0 && m_world->grid()->agent (site) == 0)
             {
                 ChargeAgent *charge = new ChargeAgent (m_world, site);
+
+                if ( m_world->grid()->getLayer(site) == 1 ) { charge->setCharge(1); }
+
                 m_world->charges()->push_back (charge);
                 m_world->source()->incrementCharge ();
                 ++i;
@@ -204,39 +181,33 @@ namespace Langmuir
         int col = m_world->grid()->getColumn(site);
         int row = m_world->grid()->getRow(site);
         int lay = m_world->grid()->getLayer(site);
-        int hoppingRange = 1;
-
-        switch ( hoppingRange )
-        {
-         case 1:
-         {
-          // To the west
-          if (col > 0)
-            nList.push_back(m_world->grid()->getIndex(col-1,row,lay));
-          // To the east
-          if (col < m_world->grid()->width() - 1)
-            nList.push_back(m_world->grid()->getIndex(col+1,row,lay));
-          // To the south
-          if (row > 0)
-            nList.push_back(m_world->grid()->getIndex(col,row-1,lay));
-          // To the north
-          if (row < m_world->grid()->height() - 1)
-            nList.push_back(m_world->grid()->getIndex(col,row+1,lay));
-          // Below
-          if (lay > 0)
-            nList.push_back(m_world->grid()->getIndex(col,row,lay-1));
-          // Above
-          if (lay < m_world->grid()->depth() - 1)
-            nList.push_back(m_world->grid()->getIndex(col,row,lay+1));
-          // Now for the source and the drain....
-          if (col == 0)
-            nList.push_back(m_world->grid()->getIndex(m_world->grid()->width()-1,m_world->grid()->height()-1,m_world->grid()->depth()-1) + 1);
-          if (col == m_world->grid()->width() - 1)
-            nList.push_back(m_world->grid()->getIndex(m_world->grid()->width()-1,m_world->grid()->height()-1,m_world->grid()->depth()-1) + 2);
-          // Now we have all the nearest neighbours - between 4 and 6 in this case
-          return nList;
-          break;
-         }
+        // To the west
+        if (col > 0)
+          nList.push_back(m_world->grid()->getIndex(col-1,row,lay));
+        // To the east
+        if (col < m_world->grid()->width() - 1)
+          nList.push_back(m_world->grid()->getIndex(col+1,row,lay));
+        // To the south
+        if (row > 0)
+          nList.push_back(m_world->grid()->getIndex(col,row-1,lay));
+        // To the north
+        if (row < m_world->grid()->height() - 1)
+          nList.push_back(m_world->grid()->getIndex(col,row+1,lay));
+        // Below
+        if (lay > 0)
+          nList.push_back(m_world->grid()->getIndex(col,row,lay-1));
+        // Above
+        if (lay < m_world->grid()->depth() - 1)
+          nList.push_back(m_world->grid()->getIndex(col,row,lay+1));
+        // Now for the source and the drain....
+        if (col == 0)
+          nList.push_back(m_world->grid()->getIndex(m_world->grid()->width()-1,m_world->grid()->height()-1,m_world->grid()->depth()-1) + 1);
+        if (col == m_world->grid()->width() - 1)
+          nList.push_back(m_world->grid()->getIndex(m_world->grid()->width()-1,m_world->grid()->height()-1,m_world->grid()->depth()-1) + 2);
+        // Now we have all the nearest neighbours - between 4 and 6 in this case
+        return nList;
+    }
+/*
          case 2:
          {
            if (col > 0)
@@ -368,5 +339,6 @@ namespace Langmuir
          }
         }
     }
+*/
 
 } // End namespace Langmuir

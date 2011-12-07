@@ -45,6 +45,10 @@ namespace Langmuir
                                        m_parameters.permittivitySpace *
                                        m_parameters.gridFactor);
 
+    if (m_parameters.simulationType != 0)
+    {
+        m_parameters.gridDepth = m_parameters.gridDepth * 2;
+    }
   }
 
   bool InputParser::simulationParameters (SimulationParameters * par,
@@ -851,6 +855,27 @@ namespace Langmuir
               break;
             }
 
+          case e_simulationType:
+            {
+              QString type = list.at (1).trimmed ().toLower ();
+              if (type == "transistor")
+                {
+                  m_parameters.simulationType = 0;
+                }
+              else if (type == "solarcell")
+                {
+                  m_parameters.simulationType = 1;
+                }
+              else
+                {
+                  qDebug () <<
+                    "options for simulation type are transistor and solarcell";
+                  qFatal ("bad input");
+                }
+              readCount += 1;
+              break;
+            }
+
           case e_drainBarrier:
             {
               m_parameters.drainBarrier = list.at (1).toDouble () / 100.0;
@@ -935,6 +960,7 @@ namespace Langmuir
     s_variables["z.defect"] = e_zDefect;
     s_variables["z.trap"] = e_zTrap;
     s_variables["potential.linear"] = e_potentialLinear;
+    s_variables["simulation.type"] = e_simulationType;
   }
 
   int InputParser::getReadCount()

@@ -8,6 +8,9 @@ namespace Langmuir
 
   DrainAgent::DrainAgent(World *world, int site) : Agent(Agent::Drain, world, site), m_acceptedCharges(0)
   {
+      m_site = m_world->grid()->volume() + 1;
+      m_world->grid()->setAgent(m_world->grid()->volume() + 1,this);
+      m_world->grid()->setSiteID(m_world->grid()->volume() + 1, 3);
   }
 
   DrainAgent::~DrainAgent()

@@ -104,8 +104,16 @@ int main (int argc, char *argv[])
       // Get simulation parameters for the current step and set up a new object
       input.simulationParameters (&par, i);
 
+      Simulation *sim;
       // Set up a simulation
-      Transistor sim(&par,i);
+      if ( par.simulationType == 0 )
+      {
+          sim = new Transistor(&par,i);
+      }
+      else
+      {
+          sim = new SolarCell(&par,i);
+      }
 
       // Open iteration file for this simulation
       iFile = new QFile (dir.absoluteFilePath(oFileName + "-i-" + QString::number (i) + ".dat"));
@@ -137,7 +145,7 @@ int main (int argc, char *argv[])
         {
 
           // Perform Iterations
-          sim.performIterations (par.iterationsPrint);
+          sim->performIterations (par.iterationsPrint);
 
           // Output Iteration Information
           (*iout) << j
@@ -147,11 +155,11 @@ int main (int argc, char *argv[])
             << par.defectPercentage * 100.00
             << par.trapPercentage * 100.0
             << par.chargePercentage * 100.0
-            << double (sim.world()->charges()->size()) / double (sim.world()->source()->maxCharges()) * 100.0
-            << double (sim.world()->drain()->acceptedCharges() -
+            << double (sim->world()->charges()->size()) / double (sim->world()->source()->maxCharges()) * 100.0
+            << double (sim->world()->drain()->acceptedCharges() -
                        lastCount) / double (par.iterationsPrint) << "\n";
           iout->flush ();
-          lastCount = sim.world()->drain()->acceptedCharges();
+          lastCount = sim->world()->drain()->acceptedCharges();
 
           progress( i, j, 0, total, timer.elapsed(timeStepStart) );
         }
@@ -162,7 +170,7 @@ int main (int argc, char *argv[])
         {
 
           // Perform Iterations
-          sim.performIterations (par.iterationsPrint);
+          sim->performIterations (par.iterationsPrint);
 
           // Output Iteration
           (*iout) << j
@@ -172,11 +180,11 @@ int main (int argc, char *argv[])
             << par.defectPercentage * 100.0
             << par.trapPercentage * 100.0
             << par.chargePercentage * 100.0
-            << double (sim.world()->charges()->size()) / double (sim.world()->source()->maxCharges()) * 100.0
-            << double (sim.world()->drain()->acceptedCharges() -
+            << double (sim->world()->charges()->size()) / double (sim->world()->source()->maxCharges()) * 100.0
+            << double (sim->world()->drain()->acceptedCharges() -
                        lastCount) / double (par.iterationsPrint) << "\n";
           iout->flush ();
-          lastCount = sim.world()->drain()->acceptedCharges();
+          lastCount = sim->world()->drain()->acceptedCharges();
 
           progress( i, par.iterationsWarmup, j, total, timer.elapsed(timeStepStart) );
         }
@@ -190,7 +198,7 @@ int main (int argc, char *argv[])
         << par.defectPercentage * 100.0
         << par.trapPercentage * 100.0
         << par.chargePercentage * 100.0
-        << double (sim.world()->charges()->size()) / double (sim.world()->source()->maxCharges()) * 100.0
+        << double (sim->world()->charges()->size()) / double (sim->world()->source()->maxCharges()) * 100.0
         << double (lastCount - startCount) / double (par.iterationsReal)
         << timer.elapsed (timeStepStart) << "\n";
       oout->flush ();
@@ -198,6 +206,7 @@ int main (int argc, char *argv[])
       iFile->close ();
       delete iFile;
       delete iout;
+      delete sim;
     }
   //output time
   (*oout) << reset << "\n" << "approxTime(s): " << timer.elapsed ();

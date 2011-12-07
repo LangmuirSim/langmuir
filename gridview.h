@@ -232,8 +232,11 @@ namespace Langmuir
             ColoredObject *ambientLight;
             ColoredObject *diffuseLight;
             ColoredObject *specularLight;
-            QVector<float> pointBuffer;
-            PointArray *carriers;
+            QVector<float> pointBuffer1;
+            QVector<float> pointBuffer2;
+            int currentCount;
+            PointArray *carriersMinus;
+            PointArray *carriersPlus;
             PointArray *defects;
             InputParser *pInput;
             SimulationParameters *pPar;

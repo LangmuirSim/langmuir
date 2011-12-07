@@ -13,6 +13,8 @@ namespace Langmuir
 {
     Transistor::Transistor( SimulationParameters * par, int id ) : Simulation(par,id)
     {
+        m_world->source()->setNeighbors(neighborsSource());
+        m_world->drain()->setNeighbors(neighborsDrain());
     }
 
     void Transistor::performIterations(int nIterations)

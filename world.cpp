@@ -25,7 +25,7 @@ namespace Langmuir {
     m_potential = new Potential(this);
     m_logger = new Logger(this);
     m_ocl = new OpenClHelper(this);
-    m_source = new SourceAgent (this,0);
+    m_source = new SourceAgent(this,0);
     m_drain = new DrainAgent(this,0);
   }
 

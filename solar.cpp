@@ -14,6 +14,8 @@ namespace Langmuir
 {
     SolarCell::SolarCell( SimulationParameters * par, int id ) : Simulation(par,id)
     {
+        m_world->source()->setNeighbors(neighborsSource());
+        m_world->drain()->setNeighbors(neighborsDrain());
     }
 
     void SolarCell::performIterations(int nIterations)
@@ -72,6 +74,28 @@ namespace Langmuir
         }
     }
 
+    void SolarCell::performInjections(int nInjections)
+    {
+        int inject = nInjections;
+        if ( inject < 0 )
+        {
+            inject = m_world->source()->maxCharges() - m_world->charges()->size();
+            if ( inject <= 0 )
+            {
+                return;
+            }
+        }
+        for ( int i = 0; i < inject; i++ )
+        {
+          int site = m_world->source()->transport();
+          if (site != -1)
+            {
+              ChargeAgent *charge = new ChargeAgent (m_world, site );
+              m_world->charges ()->push_back (charge);
+            }
+        }
+    }
+
     void SolarCell::nextTick()
     {
         // Iterate over all sites to change their state
@@ -110,6 +134,40 @@ namespace Langmuir
             }
           }
         }
+    }
+
+    QVector<int> SolarCell::neighborsSite(int site)
+    {
+        // Return the indexes of all nearest neighbours
+        QVector<int>     nList(0);
+        int col = m_world->grid()->getColumn(site);
+        int row = m_world->grid()->getRow(site);
+        int lay = m_world->grid()->getLayer(site);
+        // To the west
+        if (col > 0)
+          nList.push_back(m_world->grid()->getIndex(col-1,row,lay));
+        // To the east
+        if (col < m_world->grid()->width() - 1)
+          nList.push_back(m_world->grid()->getIndex(col+1,row,lay));
+        // To the south
+        if (row > 0)
+          nList.push_back(m_world->grid()->getIndex(col,row-1,lay));
+        // To the north
+        if (row < m_world->grid()->height() - 1)
+          nList.push_back(m_world->grid()->getIndex(col,row+1,lay));
+        // Below
+        if (lay > 0)
+          nList.push_back(m_world->grid()->getIndex(col,row,lay-1));
+        // Above
+        if (lay < m_world->grid()->depth() - 1)
+          nList.push_back(m_world->grid()->getIndex(col,row,lay+1));
+        // Now for the source and the drain....
+        //if (col == 0)
+        //  nList.push_back(m_world->grid()->getIndex(m_world->grid()->width()-1,m_world->grid()->height()-1,m_world->grid()->depth()-1) + 1);
+        //if (col == m_world->grid()->width() - 1)
+        //  nList.push_back(m_world->grid()->getIndex(m_world->grid()->width()-1,m_world->grid()->height()-1,m_world->grid()->depth()-1) + 2);
+        // Now we have all the nearest neighbours - between 4 and 6 in this case
+        return nList;
     }
 
     inline void SolarCell::chargeAgentIterate ( ChargeAgent * chargeAgent)

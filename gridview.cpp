@@ -91,7 +91,14 @@ namespace Langmuir
         }
 
         //Create the simulation with the parameters chosen
-        pSim = new SolarCell(pPar);
+        if ( pPar->simulationType == 0 )
+        {
+            pSim = new Transistor(pPar);
+        }
+        else
+        {
+            pSim = new SolarCell(pPar);
+        }
 
         //Set default values
         lastCount = 0;
@@ -113,6 +120,7 @@ namespace Langmuir
         qtimer = new QTimer(this);
         recordTimer = NULL;
         trapsTexture = 0;
+        currentCount = 0;
 
         //Connect: make sure updateGL is called every updateTime ms
         connect(qtimer, SIGNAL(timeout()), this, SLOT(timerUpdateGL()));
@@ -193,24 +201,43 @@ namespace Langmuir
         specularLight = new ColoredObject( this );
 
         Grid *grid = pSim->world()->grid();
-        pointBuffer.resize( (int(pPar->chargePercentage * grid->volume())) * 4 );
-        for ( int i = 0; i < pointBuffer.size(); i+= 4 )
+        pointBuffer1.resize( (int(pPar->chargePercentage * grid->volume())) * 4 );
+        pointBuffer2.resize( (int(pPar->chargePercentage * grid->volume())) * 4 );
+        for ( int i = 0; i < pointBuffer1.size(); i+= 4 )
         {
-            pointBuffer[i]   = 0;
-            pointBuffer[i+1] = 0;
-            pointBuffer[i+2] = 0;
-            pointBuffer[i+3] = 1;
+            pointBuffer1[i]   = 0;
+            pointBuffer1[i+1] = 0;
+            pointBuffer1[i+2] = 0;
+            pointBuffer1[i+3] = 1;
+            pointBuffer2[i]   = 0;
+            pointBuffer2[i+1] = 0;
+            pointBuffer2[i+2] = 0;
+            pointBuffer2[i+3] = 1;
         }
+        carriersMinus = new PointArray(this,pointBuffer1);
+        carriersPlus = new PointArray(this,pointBuffer2);
 
         QList< ChargeAgent* > *charges = pSim->world()->charges();
+        currentCount = 0;
         for ( int i = 0; i < charges->size(); i++ )
         {
             int site = charges->at(i)->site();
-            pointBuffer[ i * 4 + 0 ] = grid->getColumn(site) + 0.5;
-            pointBuffer[ i * 4 + 1 ] = grid->getRow(site) + 0.5;
-            pointBuffer[ i * 4 + 2 ] = (grid->getLayer(site) + 0.5) * thickness;
+            if ( charges->at(i)->charge() < 0 )
+            {
+                pointBuffer1[ i * 4 + 0 ] = grid->getColumn(site) + 0.5;
+                pointBuffer1[ i * 4 + 1 ] = grid->getRow(site) + 0.5;
+                pointBuffer1[ i * 4 + 2 ] = (grid->getLayer(site) + 0.5) * thickness;
+                currentCount += 1;
+            }
+            else
+            {
+                pointBuffer2[ i * 4 + 0 ] = grid->getColumn(site) + 0.5;
+                pointBuffer2[ i * 4 + 1 ] = grid->getRow(site) + 0.5;
+                pointBuffer2[ i * 4 + 2 ] = (grid->getLayer(site) + 0.5) * thickness;
+            }
         }
-        carriers = new PointArray(this,pointBuffer);
+        carriersMinus->update(pointBuffer1,currentCount * 4);
+        carriersPlus->update(pointBuffer2, (charges->size() - currentCount) * 4 );
 
         QList< int > *defectList = pSim->world()->defectSiteIDs();
         QVector< float > xyz( defectList->size() * 4, 1 );
@@ -250,7 +277,8 @@ namespace Langmuir
         side5->setColor(QColor(255,255,255,255));
         side6->setColor(QColor(255,255,255,255));
         background->setColor(QColor(28,164,255,255));
-        carriers->setColor(QColor(255,0,0,255));
+        carriersMinus->setColor(QColor(255,0,0,255));
+        carriersPlus->setColor(QColor(0,255,255,255));
         defects->setColor(QColor(0,0,0,255));
         ambientLight->setColor(QColor(85,85,85,255));
         diffuseLight->setColor(QColor(170,170,170,255));
@@ -262,7 +290,8 @@ namespace Langmuir
         glLightfv(GL_LIGHT0,GL_DIFFUSE,diffuseLight->getLight());
         glLightfv(GL_LIGHT0,GL_SPECULAR,specularLight->getLight());
 
-        carriers->setPointSize(0.5f);
+        carriersMinus->setPointSize(0.5f);
+        carriersPlus->setPointSize(0.5f);
         defects->setPointSize(0.5f);
 
         if ( pPar->interactionCoulomb )
@@ -300,17 +329,26 @@ namespace Langmuir
 
             QList< ChargeAgent* > *charges = pSim->world()->charges();
             Grid *grid = pSim->world()->grid();
-
+            currentCount = 0;
             for ( int i = 0; i < charges->size(); i++ )
             {
                 int site = charges->at(i)->site();
-                pointBuffer[ i * 4 + 0 ] = grid->getColumn(site) + 0.5;
-                pointBuffer[ i * 4 + 1 ] = grid->getRow(site) + 0.5;
-                pointBuffer[ i * 4 + 2 ] = (grid->getLayer(site) + 0.5) * thickness;
+                if ( charges->at(i)->charge() < 0 )
+                {
+                    pointBuffer1[ i * 4 + 0 ] = grid->getColumn(site) + 0.5;
+                    pointBuffer1[ i * 4 + 1 ] = grid->getRow(site) + 0.5;
+                    pointBuffer1[ i * 4 + 2 ] = (grid->getLayer(site) + 0.5) * thickness;
+                    currentCount += 1;
+                }
+                else
+                {
+                    pointBuffer2[ i * 4 + 0 ] = grid->getColumn(site) + 0.5;
+                    pointBuffer2[ i * 4 + 1 ] = grid->getRow(site) + 0.5;
+                    pointBuffer2[ i * 4 + 2 ] = (grid->getLayer(site) + 0.5) * thickness;
+                }
             }
-
-            carriers->update( pointBuffer, charges->size() * 4 );
-
+            carriersMinus->update(pointBuffer1,currentCount * 4);
+            carriersPlus->update(pointBuffer2, (charges->size() - currentCount) * 4 );
             emit stepChanged( step );
         }
         updateGL();
@@ -643,7 +681,8 @@ namespace Langmuir
         side4->draw();
         side5->draw();
         side6->draw();
-        carriers->draw( pSim->world()->charges()->size(), this->height(), fov );
+        carriersMinus->draw( currentCount, this->height(), fov );
+        carriersPlus->draw( ( pSim->world()->charges()->size() - currentCount ), this->height(), fov );
         defects->draw( pSim->world()->defectSiteIDs()->size(), this->height(), fov );
         glPopMatrix();
     }
@@ -1112,7 +1151,8 @@ namespace Langmuir
         connect( glWidget, SIGNAL( coulombStatusChanged( int ) ), controls->checkBoxes[1], SLOT( setValueSlot( int ) ) );
         connect( glWidget, SIGNAL( stepChanged( int ) ), controls->lcdNumbers[0], SLOT( display( int ) ) );
         connect( glWidget, SIGNAL( statusMessage( QString, int ) ), statusBar(), SLOT( showMessage( QString, int ) ) );
-        glWidget->carriers->setColorDialog( sceneOptions->colorDialog );
+        glWidget->carriersMinus->setColorDialog( sceneOptions->colorDialog );
+        glWidget->carriersPlus->setColorDialog( sceneOptions->colorDialog );
         glWidget->defects->setColorDialog( sceneOptions->colorDialog );
         glWidget->source->setColorDialog( sceneOptions->colorDialog );
         glWidget->drain->setColorDialog( sceneOptions->colorDialog );
@@ -1127,7 +1167,7 @@ namespace Langmuir
         glWidget->side4->setColorDialog( sceneOptions->colorDialog );
         glWidget->side5->setColorDialog( sceneOptions->colorDialog );
         glWidget->side6->setColorDialog( sceneOptions->colorDialog );
-        connect( sceneOptions->buttons[0], SIGNAL( clicked() ), glWidget->carriers, SLOT( openColorDialog() ) );
+        connect( sceneOptions->buttons[0], SIGNAL( clicked() ), glWidget->carriersMinus, SLOT( openColorDialog() ) );
         connect( sceneOptions->buttons[1], SIGNAL( clicked() ), glWidget->defects, SLOT( openColorDialog() ) );
         connect( sceneOptions->buttons[2], SIGNAL( clicked() ), glWidget->source, SLOT( openColorDialog() ) );
         connect( sceneOptions->buttons[3], SIGNAL( clicked() ), glWidget->drain, SLOT( openColorDialog() ) );
@@ -1137,12 +1177,14 @@ namespace Langmuir
         connect( sceneOptions->buttons[7], SIGNAL( clicked() ), glWidget->ambientLight, SLOT( openColorDialog() ) );
         connect( sceneOptions->buttons[8], SIGNAL( clicked() ), glWidget->diffuseLight, SLOT( openColorDialog() ) );
         connect( sceneOptions->buttons[9], SIGNAL( clicked() ), glWidget->specularLight, SLOT( openColorDialog() ) );
+        connect( sceneOptions->buttons[10], SIGNAL( clicked() ), glWidget->carriersPlus, SLOT( openColorDialog() ) );
         connect( glWidget->side1, SIGNAL( colorChanged( QColor ) ), glWidget->side2, SLOT( setColor( QColor ) ) );
         connect( glWidget->side1, SIGNAL( colorChanged( QColor ) ), glWidget->side3, SLOT( setColor( QColor ) ) );
         connect( glWidget->side1, SIGNAL( colorChanged( QColor ) ), glWidget->side4, SLOT( setColor( QColor ) ) );
         connect( glWidget->side1, SIGNAL( colorChanged( QColor ) ), glWidget->side5, SLOT( setColor( QColor ) ) );
         connect( glWidget->side1, SIGNAL( colorChanged( QColor ) ), glWidget->side6, SLOT( setColor( QColor ) ) );
-        connect( glWidget->carriers, SIGNAL( colorChanged( QColor ) ), sceneOptions->buttons[0], SLOT( setColorSlot( QColor ) ) );
+        connect( glWidget->carriersMinus, SIGNAL( colorChanged( QColor ) ), sceneOptions->buttons[0], SLOT( setColorSlot( QColor ) ) );
+        connect( glWidget->carriersPlus, SIGNAL( colorChanged( QColor ) ), sceneOptions->buttons[10], SLOT( setColorSlot( QColor ) ) );
         connect( glWidget->defects, SIGNAL( colorChanged( QColor ) ), sceneOptions->buttons[1], SLOT( setColorSlot( QColor ) ) );
         connect( glWidget->source, SIGNAL( colorChanged( QColor ) ), sceneOptions->buttons[2], SLOT( setColorSlot( QColor ) ) );
         connect( glWidget->drain, SIGNAL( colorChanged( QColor ) ), sceneOptions->buttons[3], SLOT( setColorSlot( QColor ) ) );
@@ -1157,7 +1199,7 @@ namespace Langmuir
         connect( glWidget->ambientLight, SIGNAL( colorChanged( QColor ) ), sceneOptions->buttons[7], SLOT( setColorSlot( QColor ) ) );
         connect( glWidget->diffuseLight, SIGNAL( colorChanged( QColor ) ), sceneOptions->buttons[8], SLOT( setColorSlot( QColor ) ) );
         connect( glWidget->specularLight, SIGNAL( colorChanged( QColor ) ), sceneOptions->buttons[9], SLOT( setColorSlot( QColor ) ) );
-        connect( sceneOptions->checkBoxes[0], SIGNAL( stateChanged(int) ), glWidget->carriers, SLOT( setInvisible(int) ) );
+        connect( sceneOptions->checkBoxes[0], SIGNAL( stateChanged(int) ), glWidget->carriersMinus, SLOT( setInvisible(int) ) );
         connect( sceneOptions->checkBoxes[1], SIGNAL( stateChanged(int) ), glWidget->defects, SLOT( setInvisible(int) ) );
         connect( sceneOptions->checkBoxes[2], SIGNAL( stateChanged(int) ), glWidget->source, SLOT( setInvisible(int) ) );
         connect( sceneOptions->checkBoxes[3], SIGNAL( stateChanged(int) ), glWidget->drain, SLOT( setInvisible(int) ) );
@@ -1168,14 +1210,17 @@ namespace Langmuir
         connect( sceneOptions->checkBoxes[5], SIGNAL( stateChanged(int) ), glWidget->side4, SLOT( setInvisible(int) ) );
         connect( sceneOptions->checkBoxes[5], SIGNAL( stateChanged(int) ), glWidget->side5, SLOT( setInvisible(int) ) );
         connect( sceneOptions->checkBoxes[5], SIGNAL( stateChanged(int) ), glWidget->side6, SLOT( setInvisible(int) ) );
-        connect( sceneOptions->checkBoxes[6], SIGNAL( stateChanged(int) ), glWidget->carriers, SLOT( setSpheres(int) ) );
+        connect( sceneOptions->checkBoxes[6], SIGNAL( stateChanged(int) ), glWidget->carriersMinus, SLOT( setSpheres(int) ) );
         connect( sceneOptions->checkBoxes[7], SIGNAL( stateChanged(int) ), glWidget->defects, SLOT( setSpheres(int) ) );
         connect( sceneOptions->checkBoxes[8], SIGNAL( stateChanged(int) ), glWidget->ambientLight, SLOT( setInvisible(int) ) );
         connect( sceneOptions->checkBoxes[9], SIGNAL( stateChanged(int) ), glWidget->diffuseLight, SLOT( setInvisible(int) ) );
         connect( sceneOptions->checkBoxes[10], SIGNAL( stateChanged(int) ), glWidget->specularLight, SLOT( setInvisible(int) ) );
         connect( sceneOptions->checkBoxes[11], SIGNAL( stateChanged(int) ), glWidget, SLOT( toggleTrapsTexture(int) ) );
-        connect( sceneOptions->spinBoxes[0], SIGNAL( valueChanged(double) ), glWidget->carriers, SLOT( setPointSize(double) ) );
+        connect( sceneOptions->checkBoxes[12], SIGNAL( stateChanged(int) ), glWidget->carriersPlus, SLOT( setInvisible(int) ) );
+        connect( sceneOptions->checkBoxes[13], SIGNAL( stateChanged(int) ), glWidget->carriersPlus, SLOT( setSpheres(int) ) );
+        connect( sceneOptions->spinBoxes[0], SIGNAL( valueChanged(double) ), glWidget->carriersMinus, SLOT( setPointSize(double) ) );
         connect( sceneOptions->spinBoxes[1], SIGNAL( valueChanged(double) ), glWidget->defects, SLOT( setPointSize(double) ) );
+        connect( sceneOptions->spinBoxes[2], SIGNAL( valueChanged(double) ), glWidget->carriersPlus, SLOT( setPointSize(double) ) );
     }
 
     Navigator::Navigator( QWidget *parent ) : QWidget( parent )
@@ -1283,8 +1328,10 @@ namespace Langmuir
         labels.push_back( new QLabel( this ) );
         labels.push_back( new QLabel( this ) );
         labels.push_back( new QLabel( this ) );
+        labels.push_back( new QLabel( this ) );
+        labels.push_back( new QLabel( this ) );
 
-        labels[0]->setText("carriers");
+        labels[0]->setText("electrons");
         labels[1]->setText("defects");
         labels[2]->setText("source");
         labels[3]->setText("drain");
@@ -1297,6 +1344,8 @@ namespace Langmuir
         labels[10]->setText("diffuse");
         labels[11]->setText("specular");
         labels[12]->setText("traps");
+        labels[13]->setText("holes");
+        labels[14]->setText("size");
 
         labels[0]->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
         labels[1]->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
@@ -1311,7 +1360,10 @@ namespace Langmuir
         labels[10]->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
         labels[11]->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
         labels[12]->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
+        labels[13]->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
+        labels[14]->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
 
+        buttons.push_back( new Button( this ) );
         buttons.push_back( new Button( this ) );
         buttons.push_back( new Button( this ) );
         buttons.push_back( new Button( this ) );
@@ -1333,7 +1385,10 @@ namespace Langmuir
         buttons[7]->setText( "" );
         buttons[8]->setText( "" );
         buttons[9]->setText( "" );
+        buttons[10]->setText( "" ); //
 
+        checkBoxes.push_back( new CheckBox( this ) );
+        checkBoxes.push_back( new CheckBox( this ) );
         checkBoxes.push_back( new CheckBox( this ) );
         checkBoxes.push_back( new CheckBox( this ) );
         checkBoxes.push_back( new CheckBox( this ) );
@@ -1359,6 +1414,8 @@ namespace Langmuir
         checkBoxes[9]->setText("hide");
         checkBoxes[10]->setText("hide");
         checkBoxes[11]->setText("hide");
+        checkBoxes[12]->setText("hide");
+        checkBoxes[13]->setText("spheres");
 
         checkBoxes[6]->setChecked(Qt::Unchecked);
         checkBoxes[7]->setChecked(Qt::Unchecked);
@@ -1366,64 +1423,76 @@ namespace Langmuir
 
         spinBoxes.push_back( new DSpinBox( this ) );
         spinBoxes.push_back( new DSpinBox( this ) );
+        spinBoxes.push_back( new DSpinBox( this ) );
 
         spinBoxes[0]->setDecimals(2);
         spinBoxes[1]->setDecimals(2);
+        spinBoxes[2]->setDecimals(2);
 
         spinBoxes[0]->setMinimum(0);
         spinBoxes[1]->setMinimum(0);
+        spinBoxes[2]->setMinimum(0);
 
         spinBoxes[0]->setMaximum(100.0);
         spinBoxes[1]->setMaximum(100.0);
+        spinBoxes[2]->setMaximum(100.0);
 
         spinBoxes[0]->setSingleStep(0.1);
         spinBoxes[1]->setSingleStep(0.1);
+        spinBoxes[2]->setSingleStep(0.1);
 
         spinBoxes[0]->setValue(0.5);
         spinBoxes[1]->setValue(0.5);
+        spinBoxes[2]->setValue(0.5);
 
         spinBoxes[0]->setWrapping(true);
         spinBoxes[1]->setWrapping(true);
+        spinBoxes[2]->setWrapping(true);
 
         layout = new QGridLayout( this );
         layout->addWidget(     labels[0],  0,  0 );
-        layout->addWidget(     labels[1],  1,  0 );
-        layout->addWidget(     labels[2],  2,  0 );
-        layout->addWidget(     labels[3],  3,  0 );
-        layout->addWidget(     labels[4],  4,  0 );
-        layout->addWidget(     labels[5],  6,  0 );
-        layout->addWidget(     labels[6],  5,  0 );
+        layout->addWidget(     labels[1],  2,  0 );
+        layout->addWidget(     labels[2],  3,  0 );
+        layout->addWidget(     labels[3],  4,  0 );
+        layout->addWidget(     labels[4],  5,  0 );
+        layout->addWidget(     labels[5],  7,  0 );
+        layout->addWidget(     labels[6],  6,  0 );
         layout->addWidget(     labels[7],  0,  4 );
-        layout->addWidget(     labels[8],  1,  4 );
-        layout->addWidget(     labels[9],  7,  0 );
-        layout->addWidget(    labels[10],  8,  0 );
-        layout->addWidget(    labels[11],  9,  0 );
-        layout->addWidget(    labels[12], 10,  0 );
+        layout->addWidget(     labels[8],  2,  4 );
+        layout->addWidget(     labels[9],  8,  0 );
+        layout->addWidget(    labels[10],  9,  0 );
+        layout->addWidget(    labels[11], 10,  0 );
+        layout->addWidget(    labels[12], 11,  0 );
+        layout->addWidget(    labels[13],  1,  0 ); //
+        layout->addWidget(    labels[14],  1,  4 );
         layout->addWidget(    buttons[0],  0,  1 );
-        layout->addWidget(    buttons[1],  1,  1 );
-        layout->addWidget(    buttons[2],  2,  1 );
-        layout->addWidget(    buttons[3],  3,  1 );
-        layout->addWidget(    buttons[4],  4,  1 );
-        layout->addWidget(    buttons[6],  5,  1 );
-        layout->addWidget(    buttons[5],  6,  1 );
-        layout->addWidget(    buttons[7],  7,  1 );
-        layout->addWidget(    buttons[8],  8,  1 );
-        layout->addWidget(    buttons[9],  9,  1 );
+        layout->addWidget(    buttons[1],  2,  1 );
+        layout->addWidget(    buttons[2],  3,  1 );
+        layout->addWidget(    buttons[3],  4,  1 );
+        layout->addWidget(    buttons[4],  5,  1 );
+        layout->addWidget(    buttons[6],  6,  1 );
+        layout->addWidget(    buttons[5],  7,  1 );
+        layout->addWidget(    buttons[7],  8,  1 );
+        layout->addWidget(    buttons[8],  9,  1 );
+        layout->addWidget(    buttons[9], 10,  1 );
+        layout->addWidget(   buttons[10],  1,  1 ); //
         layout->addWidget( checkBoxes[0],  0,  2 );
-        layout->addWidget( checkBoxes[1],  1,  2 );
-        layout->addWidget( checkBoxes[2],  2,  2 );
-        layout->addWidget( checkBoxes[3],  3,  2 );
-        layout->addWidget( checkBoxes[4],  4,  2 );
-        layout->addWidget( checkBoxes[5],  5,  2 );
-        layout->addWidget( checkBoxes[8],  7,  2 );
-        layout->addWidget( checkBoxes[9],  8,  2 );
-        layout->addWidget(checkBoxes[10],  9,  2 );
-        layout->addWidget(checkBoxes[11], 10,  2 );
+        layout->addWidget( checkBoxes[1],  2,  2 );
+        layout->addWidget( checkBoxes[2],  3,  2 );
+        layout->addWidget( checkBoxes[3],  4,  2 );
+        layout->addWidget( checkBoxes[4],  5,  2 );
+        layout->addWidget( checkBoxes[5],  6,  2 );
+        layout->addWidget( checkBoxes[8],  8,  2 );
+        layout->addWidget( checkBoxes[9],  9,  2 );
+        layout->addWidget(checkBoxes[10], 10,  2 );
+        layout->addWidget(checkBoxes[11], 11,  2 );
+        layout->addWidget(checkBoxes[12],  1,  2 ); //
         layout->addWidget( checkBoxes[6],  0,  3 );
-        layout->addWidget( checkBoxes[7],  1,  3 );
+        layout->addWidget( checkBoxes[7],  2,  3 );
+        layout->addWidget(checkBoxes[13],  1,  3 ); //
         layout->addWidget(  spinBoxes[0],  0,  5 );
-        layout->addWidget(  spinBoxes[1],  1,  5 );
-
+        layout->addWidget(  spinBoxes[1],  2,  5 );
+        layout->addWidget(  spinBoxes[2],  1,  5 ); //
         adjustSize();
 
     }

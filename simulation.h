@@ -86,20 +86,6 @@ namespace Langmuir
     virtual void createDefects();
 
     /**
-     * @brief Add Source
-     *
-     * The source injects carriers
-     */
-    virtual void createSource();
-
-    /**
-     * @brief Add Drain
-     *
-     * The drain acccepts carriers
-     */
-    virtual void createDrain();
-
-    /**
      * @brief Place charges on grid.
      *
      * Seed the grid with the number of charges specified by setMaxCharges.

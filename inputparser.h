@@ -67,6 +67,7 @@ namespace Langmuir
     int workDepth;
     int workSize;
     int randomSeed;
+    int simulationType;
     int sourceAttempts;
     QString kernelsPath;
     QString outputPath;
@@ -129,6 +130,7 @@ namespace Langmuir
       kernelsPath = ".";
       outputPath = ".";
       sourceAttempts = 1;
+      simulationType = 0;
       electrostaticPrefactor =
         elementaryCharge / (4.0 * M_PI * dielectricConstant *
                             permittivitySpace * gridFactor);
@@ -235,6 +237,7 @@ namespace Langmuir
       e_inverseKT,                 // inverse average thermal energy - non-variable
       e_permittivitySpace,         // electrostatics constant - non-variable
       e_potentialLinear,           // number of char per output field
+      e_simulationType,            // simtype = 0 is transistor and simtype != 0 is solar cell
       e_end
     };
 

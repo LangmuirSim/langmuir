@@ -19,7 +19,20 @@ namespace Langmuir
              */
             void performIterations(int nIterations);
 
+            /**
+             * @brief Create a list of site ids.
+             *
+             * Generate the neighbors of a given site
+             */
+            QVector<int> neighborsSite(int site);
+
         private:
+
+            /**
+             * @brief inject charges into the system
+             * @param nInjections number of injections to perform.
+             */
+            void performInjections(int nInjections=1);
 
             /**
              * @brief next simulation Tick.
