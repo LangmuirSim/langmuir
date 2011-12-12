@@ -363,7 +363,21 @@ namespace Langmuir
      * The location in the potential array is the number of grid sites + 1.
      * @param site potential.
      */
-    virtual void setDrainPotential(double potential);   
+    virtual void setDrainPotential(double potential);
+
+    /**
+     * @brief Create a list of site ids.
+     *
+     * Generate the neighbors of a given site
+     */
+    virtual QVector<int> neighborsSite(int site) = 0;
+
+    /**
+     * @brief Create a list of site ids.
+     *
+     * Generate the site ids of a slice of the grid
+     */
+    virtual QVector<int> slice(int xi, int xf, int yi, int yf, int zi, int zf) = 0;
 
   protected:
 

@@ -43,7 +43,12 @@ namespace Langmuir
     /**
       * @brief grid pointer
       */
-    Grid * grid() { return m_grid; }
+    Grid * electronGrid() { return m_electronGrid; }
+
+    /**
+      * @brief grid pointer
+      */
+    Grid * holeGrid() { return m_holeGrid; }
 
     /**
       * @brief potential pointer
@@ -93,7 +98,12 @@ namespace Langmuir
     /**
       * @brief charge agent pointer
       */
-    QList<ChargeAgent *> * charges() { return &m_charges; }
+    QList<ChargeAgent *> * electrons() { return &m_electrons; }
+
+    /**
+      * @brief charge agent pointer
+      */
+    QList<ChargeAgent *> * holes() { return &m_holes; }
 
     /**
       * @brief defect site id list pointer
@@ -120,7 +130,12 @@ namespace Langmuir
     /**
       * @brief Holds site potentials and site ids
       */
-    Grid *m_grid;
+    Grid *m_electronGrid;
+
+    /**
+      * @brief Holds site potentials and site ids
+      */
+    Grid *m_holeGrid;
 
     /**
       * @brief Creates random doubles and ints
@@ -166,7 +181,12 @@ namespace Langmuir
     /**
       * @brief A list of all the charge carriers for the system
       */
-    QList<ChargeAgent *> m_charges;
+    QList<ChargeAgent *> m_electrons;
+
+    /**
+      * @brief A list of all the charge carriers for the system
+      */
+    QList<ChargeAgent *> m_holes;
 
     /**
       * @brief A list of all the defect site ids for the system

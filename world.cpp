@@ -21,7 +21,8 @@ namespace Langmuir {
 
     m_parameters = par;
     m_rand = new Random(m_parameters->randomSeed);
-    m_grid = new CubicGrid(m_parameters->gridWidth, m_parameters->gridHeight, m_parameters->gridDepth);
+    m_electronGrid = new CubicGrid(m_parameters->gridWidth, m_parameters->gridHeight, m_parameters->gridDepth);
+    m_holeGrid = new CubicGrid(m_parameters->gridWidth, m_parameters->gridHeight, m_parameters->gridDepth);
     m_potential = new Potential(this);
     m_logger = new Logger(this);
     m_ocl = new OpenClHelper(this);
@@ -35,7 +36,8 @@ namespace Langmuir {
    delete m_potential;
    delete m_source;
    delete m_drain;
-   delete m_grid;
+   delete m_electronGrid;
+   delete m_holeGrid;
    delete m_logger;
    delete m_ocl;
   }

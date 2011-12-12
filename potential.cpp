@@ -12,30 +12,34 @@ Potential::Potential( World* world ) : m_world( world ) {}
 
 void Potential::setPotentialZero()
 {
-    for ( int i = 0; i < m_world->grid()->volume(); i++ )
+    for ( int i = 0; i < m_world->electronGrid()->volume(); i++ )
     {
-        m_world->grid()->setPotential( i, 0 );
+        m_world->electronGrid()->setPotential( i, 0 );
+        m_world->holeGrid()->setPotential( i, 0 );
     }
 }
 
 void Potential::setPotentialLinear()
 {
-    double  m = ( m_world->parameters()->voltageDrain - m_world->parameters()->voltageSource ) / double( m_world->grid()->width() );
+    double  m = ( m_world->parameters()->voltageDrain - m_world->parameters()->voltageSource ) / double( m_world->electronGrid()->width() );
     double  b = m_world->parameters()->voltageSource;
-    for ( int i = 0; i < m_world->grid()->width(); i++ )
+    for ( int i = 0; i < m_world->electronGrid()->width(); i++ )
     {
-        for ( int j = 0; j < m_world->grid()->height(); j++ )
+        for ( int j = 0; j < m_world->electronGrid()->height(); j++ )
         {
-            for ( int k = 0; k < m_world->grid()->depth(); k++ )
+            for ( int k = 0; k < m_world->electronGrid()->depth(); k++ )
             {
-                int s = m_world->grid()->getIndex(i,j,k);
+                int s = m_world->electronGrid()->getIndex(i,j,k);
                 double v = m * ( i + 0.5 ) + b;
-                m_world->grid()->addToPotential(s,v);
+                m_world->electronGrid()->addToPotential(s,v);
+                m_world->holeGrid()->addToPotential(s,v);
             }
         }
     }
-    m_world->grid()->setDrainPotential(m_world->parameters()->voltageDrain);
-    m_world->grid()->setSourcePotential(m_world->parameters()->voltageSource);
+    m_world->electronGrid()->setDrainPotential(m_world->parameters()->voltageDrain);
+    m_world->electronGrid()->setSourcePotential(m_world->parameters()->voltageSource);
+    m_world->holeGrid()->setDrainPotential(m_world->parameters()->voltageDrain);
+    m_world->holeGrid()->setSourcePotential(m_world->parameters()->voltageSource);
 }
 
 void Potential::setPotentialTraps()
@@ -45,14 +49,15 @@ void Potential::setPotentialTraps()
     if ( m_world->parameters()->seedPercentage <= 0 ) return;
 
     // Seed traps, if seed.percentage=100% then this is just placing traps normally
-    int progress = int( m_world->grid()->volume() * m_world->parameters()->trapPercentage * m_world->parameters()->seedPercentage );
+    int progress = int( m_world->electronGrid()->volume() * m_world->parameters()->trapPercentage * m_world->parameters()->seedPercentage );
     while ( progress >= m_world->trapSiteIDs()->size() )
     {
-        int s = m_world->randomNumberGenerator()->integer(0,m_world->grid()->volume()-1);
+        int s = m_world->randomNumberGenerator()->integer(0,m_world->electronGrid()->volume()-1);
 
         if ( ! m_world->trapSiteIDs()->contains(s) )
         {
-            m_world->grid()->addToPotential(s,m_world->parameters()->deltaEpsilon);
+            m_world->electronGrid()->addToPotential(s,m_world->parameters()->deltaEpsilon);
+            m_world->holeGrid()->addToPotential(s,m_world->parameters()->deltaEpsilon);
             m_world->trapSiteIDs()->push_back(s);
         }
     }
@@ -61,20 +66,21 @@ void Potential::setPotentialTraps()
     if ( m_world->parameters()->trapPercentage <= 0 ) return;
     if ( m_world->parameters()->seedPercentage <= 0 ||
          m_world->parameters()->seedPercentage == 1 ) return;
-    progress = int( m_world->grid()->volume() * m_world->parameters()->trapPercentage );
+    progress = int( m_world->electronGrid()->volume() * m_world->parameters()->trapPercentage );
     while ( progress >= m_world->trapSiteIDs()->size() )
     {
         int trapSeedIndex               = m_world->randomNumberGenerator()->integer(0,m_world->trapSiteIDs()->size()-1);
         int trapSeedSite                = m_world->trapSiteIDs()->at(trapSeedIndex);
-        QVector<int> trapSeedNeighbors  = m_world->simulation()->neighborsSite(trapSeedSite);
+        QVector<int> trapSeedNeighbors  = m_world->electronGrid()->neighborsSite(trapSeedSite);
 
         int newTrapIndex                = m_world->randomNumberGenerator()->integer(0,trapSeedNeighbors.size()-1);
         int newTrapSite                 = trapSeedNeighbors[newTrapIndex];
-        if ( m_world->grid()->siteID(newTrapSite) != 2 &&
-             m_world->grid()->siteID(newTrapSite) != 3 &&
+        if ( m_world->electronGrid()->siteID(newTrapSite) != 2 &&
+             m_world->electronGrid()->siteID(newTrapSite) != 3 &&
            ! m_world->trapSiteIDs()->contains(newTrapSite) )
         {
-            m_world->grid()->addToPotential(newTrapSite,m_world->parameters()->deltaEpsilon);
+            m_world->electronGrid()->addToPotential(newTrapSite,m_world->parameters()->deltaEpsilon);
+            m_world->holeGrid()->addToPotential(newTrapSite,m_world->parameters()->deltaEpsilon);
             m_world->trapSiteIDs()->push_back(newTrapSite);
         }
     }
@@ -84,7 +90,8 @@ void Potential::setPotentialTraps()
         {
             int s = m_world->trapSiteIDs()->at(i);
             double v = m_world->randomNumberGenerator()->normal(m_world->parameters()->gaussianAverg,m_world->parameters()->gaussianStdev);
-            m_world->grid()->addToPotential(s,v);
+            m_world->electronGrid()->addToPotential(s,v);
+            m_world->holeGrid()->addToPotential(s,v);
         }
     }
 }
@@ -114,11 +121,12 @@ void Potential::setPotentialFromFile( QString filename )
             if ( !ok2 ) { qDebug("energy is not float"); }
             qFatal("simulation terminated");
         }
-        if ( site < 0 || site > m_world->grid()->volume() )
+        if ( site < 0 || site > m_world->electronGrid()->volume() )
         {
             qFatal("setPotentialFromFile can not set site energy for set %d (site,energy): (%d,%f); site is out of range",i,site,energy);
         }
-        m_world->grid()->addToPotential(site,energy);
+        m_world->electronGrid()->addToPotential(site,energy);
+        m_world->holeGrid()->addToPotential(site,energy);
     }
 }
 
@@ -146,7 +154,7 @@ void Potential::updateInteractionEnergies()
                 double r = sqrt (col * col + row * row + lay * lay);
                 if ( r > 0 && r < m_world->parameters()->electrostaticCutoff )
                 {
-                    energies[col][row][lay] = m_world->parameters()->elementaryCharge / r;
+                    energies[col][row][lay] = m_world->parameters()->electrostaticPrefactor / r;
                 }
                 else
                 {
@@ -157,53 +165,91 @@ void Potential::updateInteractionEnergies()
     }
 }
 
-double Potential::coulombPotentialCarriers( int site )
+double Potential::coulombEnergyElectrons( int site )
 {
     double potential = 0.0;
-    for(int i = 0; i < m_world->charges()->size(); ++i)
+    for(int i = 0; i < m_world->electrons()->size(); ++i)
       {
         // Potential at proposed site from other charges
-        int dx = m_world->grid()->xDistancei(site, m_world->charges()->at(i)->site());
-        int dy = m_world->grid()->yDistancei(site, m_world->charges()->at(i)->site());
-        int dz = m_world->grid()->zDistancei(site, m_world->charges()->at(i)->site());
+        int dx = m_world->electronGrid()->xDistancei(site, m_world->electrons()->at(i)->site());
+        int dy = m_world->electronGrid()->yDistancei(site, m_world->electrons()->at(i)->site());
+        int dz = m_world->electronGrid()->zDistancei(site, m_world->electrons()->at(i)->site());
         if( dx < m_world->parameters()->electrostaticCutoff &&
             dy < m_world->parameters()->electrostaticCutoff &&
             dz < m_world->parameters()->electrostaticCutoff)
           {
-            potential += m_world->interactionEnergies()[dx][dy][dz] * m_world->charges()->at(i)->charge();
+            potential += m_world->interactionEnergies()[dx][dy][dz] * m_world->electrons()->at(i)->charge();
           }
       }
-    return( m_world->parameters()->electrostaticPrefactor * potential );
+    return( potential );
 }
 
-double Potential::coulombImageXPotentialCarriers( int site )
+double Potential::coulombImageXEnergyElectrons( int site )
 {
     double potential = 0.0;
-    for(int i = 0; i < m_world->charges()->size(); ++i)
+    for(int i = 0; i < m_world->electrons()->size(); ++i)
       {
         // Potential at proposed site from other charges
-        int dx = m_world->grid()->xImageDistancei(site, m_world->charges()->at(i)->site());
-        int dy = m_world->grid()->yDistancei(site, m_world->charges()->at(i)->site());
-        int dz = m_world->grid()->zDistancei(site, m_world->charges()->at(i)->site());
+        int dx = m_world->electronGrid()->xImageDistancei(site, m_world->electrons()->at(i)->site());
+        int dy = m_world->electronGrid()->yDistancei(site, m_world->electrons()->at(i)->site());
+        int dz = m_world->electronGrid()->zDistancei(site, m_world->electrons()->at(i)->site());
         if( dx < m_world->parameters()->electrostaticCutoff &&
             dy < m_world->parameters()->electrostaticCutoff &&
             dz < m_world->parameters()->electrostaticCutoff)
           {
-            potential += m_world->interactionEnergies()[dx][dy][dz] * m_world->charges()->at(i)->charge();
+            potential += m_world->interactionEnergies()[dx][dy][dz] * m_world->electrons()->at(i)->charge();
           }
       }
-    return( m_world->parameters()->electrostaticPrefactor * potential );
+    return( potential );
 }
 
-double Potential::coulombPotentialDefects( int site )
+double Potential::coulombEnergyHoles( int site )
+{
+    double potential = 0.0;
+    for(int i = 0; i < m_world->holes()->size(); ++i)
+      {
+        // Potential at proposed site from other charges
+        int dx = m_world->holeGrid()->xDistancei(site, m_world->holes()->at(i)->site());
+        int dy = m_world->holeGrid()->yDistancei(site, m_world->holes()->at(i)->site());
+        int dz = m_world->holeGrid()->zDistancei(site, m_world->holes()->at(i)->site());
+        if( dx < m_world->parameters()->electrostaticCutoff &&
+            dy < m_world->parameters()->electrostaticCutoff &&
+            dz < m_world->parameters()->electrostaticCutoff)
+          {
+            potential += m_world->interactionEnergies()[dx][dy][dz] * m_world->holes()->at(i)->charge();
+          }
+      }
+    return( potential );
+}
+
+double Potential::coulombImageXEnergyHoles( int site )
+{
+    double potential = 0.0;
+    for(int i = 0; i < m_world->holes()->size(); ++i)
+      {
+        // Potential at proposed site from other charges
+        int dx = m_world->holeGrid()->xImageDistancei(site, m_world->holes()->at(i)->site());
+        int dy = m_world->holeGrid()->yDistancei(site, m_world->holes()->at(i)->site());
+        int dz = m_world->holeGrid()->zDistancei(site, m_world->holes()->at(i)->site());
+        if( dx < m_world->parameters()->electrostaticCutoff &&
+            dy < m_world->parameters()->electrostaticCutoff &&
+            dz < m_world->parameters()->electrostaticCutoff)
+          {
+            potential += m_world->interactionEnergies()[dx][dy][dz] * m_world->holes()->at(i)->charge();
+          }
+      }
+    return( potential );
+}
+
+double Potential::coulombEnergyDefects( int site )
 {
     double potential = 0.0;
     for(int i = 0; i < m_world->defectSiteIDs()->size(); ++i)
       {
         // Potential at proposed site from other charges
-        int dx = m_world->grid()->xDistancei(site, m_world->defectSiteIDs()->at(i));
-        int dy = m_world->grid()->yDistancei(site, m_world->defectSiteIDs()->at(i));
-        int dz = m_world->grid()->zDistancei(site, m_world->defectSiteIDs()->at(i));
+        int dx = m_world->electronGrid()->xDistancei(site, m_world->defectSiteIDs()->at(i));
+        int dy = m_world->electronGrid()->yDistancei(site, m_world->defectSiteIDs()->at(i));
+        int dz = m_world->electronGrid()->zDistancei(site, m_world->defectSiteIDs()->at(i));
         if( dx < m_world->parameters()->electrostaticCutoff &&
             dy < m_world->parameters()->electrostaticCutoff &&
             dz < m_world->parameters()->electrostaticCutoff)
@@ -211,18 +257,18 @@ double Potential::coulombPotentialDefects( int site )
             potential += m_world->interactionEnergies()[dx][dy][dz];
           }
       }
-    return( m_world->parameters()->electrostaticPrefactor * m_world->parameters ()->zDefect * potential );
+    return( m_world->parameters ()->zDefect * potential );
 }
 
-double Potential::coulombImageXPotentialDefects( int site )
+double Potential::coulombImageXEnergyDefects( int site )
 {
     double potential = 0.0;
     for(int i = 0; i < m_world->defectSiteIDs()->size(); ++i)
       {
         // Potential at proposed site from other charges
-        int dx = m_world->grid()->xImageDistancei(site, m_world->defectSiteIDs()->at(i));
-        int dy = m_world->grid()->yDistancei(site, m_world->defectSiteIDs()->at(i));
-        int dz = m_world->grid()->zDistancei(site, m_world->defectSiteIDs()->at(i));
+        int dx = m_world->electronGrid()->xImageDistancei(site, m_world->defectSiteIDs()->at(i));
+        int dy = m_world->electronGrid()->yDistancei(site, m_world->defectSiteIDs()->at(i));
+        int dz = m_world->electronGrid()->zDistancei(site, m_world->defectSiteIDs()->at(i));
         if( dx < m_world->parameters()->electrostaticCutoff &&
             dy < m_world->parameters()->electrostaticCutoff &&
             dz < m_world->parameters()->electrostaticCutoff)
@@ -230,5 +276,5 @@ double Potential::coulombImageXPotentialDefects( int site )
             potential += m_world->interactionEnergies()[dx][dy][dz];
           }
       }
-    return( m_world->parameters()->electrostaticPrefactor * m_world->parameters ()->zDefect * potential );
+    return( m_world->parameters ()->zDefect * potential );
 }

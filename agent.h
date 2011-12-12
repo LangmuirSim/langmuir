@@ -21,9 +21,10 @@ namespace Langmuir{
      * @enum Different Agent types
      */
     enum Type {
+      Charge,
+      Defect,
       Source,
       Drain,
-      Charge
     };
 
     /**
@@ -93,6 +94,13 @@ namespace Langmuir{
      */
     virtual int site(bool future = false);
 
+    /**
+     * @brief Get type.
+     *
+     * Return the type number
+     */
+    virtual short type();
+
   protected:
     /**
       * @brief current site.
@@ -160,6 +168,11 @@ namespace Langmuir{
   {
     if (future) return m_fSite;
     else return m_site;
+  }
+
+  inline short Agent::type()
+  {
+      return m_type;
   }
 
 } // End namespace Langmuir

@@ -19,13 +19,6 @@ namespace Langmuir
              */
             void performIterations(int nIterations);
 
-            /**
-             * @brief Create a list of site ids.
-             *
-             * Generate the neighbors of a given site
-             */
-            QVector<int> neighborsSite(int site);
-
         private:
 
             /**

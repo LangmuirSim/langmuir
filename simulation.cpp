@@ -87,18 +87,27 @@ namespace Langmuir
 
     void Simulation::createDefects()
     {
-        for (int i = 0; i < m_world->grid()->volume (); ++i)
+        QVector<int> sourceNeighbors = m_world->source()->getNeighbors();
+        QVector<int> drainNeighnors = m_world->drain()->getNeighbors();
+        for (int i = 0; i < m_world->electronGrid()->volume (); ++i)
         {
             if (m_world->randomNumberGenerator()->random() < m_world->parameters()->defectPercentage)
             {
-                m_world->grid()->setSiteID(i, 1);
+                m_world->electronGrid()->setSiteID(i,1);
+                m_world->holeGrid()->setSiteID(i,1);
                 m_world->defectSiteIDs()->push_back(i);
+                int sourceNeighborsHasDefect = sourceNeighbors.indexOf(i);
+                int drainNeighnorsHasDefect = drainNeighnors.indexOf(i);
+                if ( sourceNeighborsHasDefect != -1 ) { sourceNeighbors.remove(sourceNeighborsHasDefect); }
+                if ( drainNeighnorsHasDefect != -1 ) { drainNeighnors.remove(drainNeighnorsHasDefect); }
             }
             else
             {
-                m_world->grid()->setSiteID(i, 0);
+                m_world->electronGrid()->setSiteID(i, 0);
             }
         }
+        m_world->source()->setNeighbors(sourceNeighbors);
+        m_world->drain()->setNeighbors(drainNeighnors);
     }
 
     void Simulation::seedCharges()
@@ -106,239 +115,27 @@ namespace Langmuir
         for (int i = 0; i < m_world->source()->maxCharges();)
         {
             // Randomly select a site, ensure it is suitable, if so add a charge agent
-            int site = m_world->randomNumberGenerator()->integer(0,m_world->grid()->volume()-1);
-            if (m_world->grid()->siteID (site) == 0 && m_world->grid()->agent (site) == 0)
+            int site = m_world->randomNumberGenerator()->integer(0,m_world->electronGrid()->volume()-1);
+            if (m_world->electronGrid()->siteID (site) == 0 && m_world->electronGrid()->agent (site) == 0)
             {
-                ChargeAgent *charge = new ChargeAgent (m_world, site);
-
-                if ( m_world->grid()->getLayer(site) == 1 ) { charge->setCharge(1); }
-
-                m_world->charges()->push_back (charge);
+                ChargeAgent *charge = new ChargeAgent(m_world, site, false);
+                m_world->electrons()->push_back (charge);
                 m_world->source()->incrementCharge ();
                 ++i;
             }
         }
-    }
-
-    QVector<int> Simulation::neighborsDrain()
-    {
-        // Now to assign nearest neighbours
-        QVector<int>neighbors(0, 0);
-        // Loop over layers
-        for (int layer = 0; layer < m_world->grid()->depth (); layer++)
+        for (int i = 0; i < m_world->source()->maxCharges();)
         {
-            // Get column in this layer that is closest to the source
-            QVector < int >column_neighbors_in_layer =
-                m_world->grid()->col (m_world->grid()->width () - 1, layer);
-            // Loop over this column
-            for (int column_site = 0;
-                    column_site < column_neighbors_in_layer.size (); column_site++)
+            // Randomly select a site, ensure it is suitable, if so add a charge agent
+            int site = m_world->randomNumberGenerator()->integer(0,m_world->electronGrid()->volume()-1);
+            if (m_world->holeGrid()->siteID (site) == 0 && m_world->holeGrid()->agent(site) == 0)
             {
-                neighbors.push_back (column_neighbors_in_layer[column_site]);
+                ChargeAgent *charge = new ChargeAgent(m_world, site, true);
+                charge->setCharge(1);
+                m_world->holes()->push_back (charge);
+                m_world->source()->incrementCharge (); //IS THIS RIGHT??????
+                ++i;
             }
-        }
-        // Remove defects as possible neighbors
-        for ( int i = 0; i < m_world->defectSiteIDs()->size(); i++ )
-        {
-            int j = m_world->defectSiteIDs()->at(i);
-            int k = neighbors.indexOf(j);
-            if ( k != -1 ) { neighbors.remove(k); }
-        }
-        return neighbors;
-    }
-
-    QVector<int> Simulation::neighborsSource()
-    {
-        // Now to assign nearest neighbours
-        QVector < int >neighbors(0, 0);
-        // Loop over layers
-        for (int layer = 0; layer < m_world->grid()->depth (); layer++)
-        {
-            // Get column in this layer that is closest to the source
-            QVector < int >column_neighbors_in_layer =
-                m_world->grid()->col (0, layer);
-            // Loop over this column
-            for (int column_site = 0;
-                    column_site < column_neighbors_in_layer.size (); column_site++)
-            {
-                neighbors.push_back (column_neighbors_in_layer[column_site]);
-            }
-        }
-        // Remove defects as possible neighbors
-        for ( int i = 0; i < m_world->defectSiteIDs()->size(); i++ )
-        {
-            int j = m_world->defectSiteIDs()->at(i);
-            int k = neighbors.indexOf(j);
-            if ( k != -1 ) { neighbors.remove(k); }
-        }
-        return neighbors;
-    }
-
-    QVector<int> Simulation::neighborsSite(int site)
-    {
-        // Return the indexes of all nearest neighbours
-        QVector<int>     nList(0);
-        int col = m_world->grid()->getColumn(site);
-        int row = m_world->grid()->getRow(site);
-        int lay = m_world->grid()->getLayer(site);
-        // To the west
-        if (col > 0)
-          nList.push_back(m_world->grid()->getIndex(col-1,row,lay));
-        // To the east
-        if (col < m_world->grid()->width() - 1)
-          nList.push_back(m_world->grid()->getIndex(col+1,row,lay));
-        // To the south
-        if (row > 0)
-          nList.push_back(m_world->grid()->getIndex(col,row-1,lay));
-        // To the north
-        if (row < m_world->grid()->height() - 1)
-          nList.push_back(m_world->grid()->getIndex(col,row+1,lay));
-        // Below
-        if (lay > 0)
-          nList.push_back(m_world->grid()->getIndex(col,row,lay-1));
-        // Above
-        if (lay < m_world->grid()->depth() - 1)
-          nList.push_back(m_world->grid()->getIndex(col,row,lay+1));
-        // Now for the source and the drain....
-        if (col == 0)
-          nList.push_back(m_world->grid()->getIndex(m_world->grid()->width()-1,m_world->grid()->height()-1,m_world->grid()->depth()-1) + 1);
-        if (col == m_world->grid()->width() - 1)
-          nList.push_back(m_world->grid()->getIndex(m_world->grid()->width()-1,m_world->grid()->height()-1,m_world->grid()->depth()-1) + 2);
-        // Now we have all the nearest neighbours - between 4 and 6 in this case
-        return nList;
-    }
-/*
-         case 2:
-         {
-           if (col > 0)
-            {
-             nList.push_back( m_world->grid()->getIndex(col-1,row,lay));
-             if (row < m_world->grid()->height() -1)
-              nList.push_back( m_world->grid()->getIndex(col-1,row+1,lay));
-             if (row > 0)
-              nList.push_back( m_world->grid()->getIndex(col-1,row-1,lay));
-             if (col > 1)
-              nList.push_back( m_world->grid()->getIndex(col-2,row,lay));
-            }
-           if (col < m_world->grid()->width() - 1)
-            {
-             nList.push_back( m_world->grid()->getIndex(col+1,row,lay));
-             if (row < m_world->grid()->height() - 1)
-              nList.push_back( m_world->grid()->getIndex(col+1,row+1,lay));
-             if (row > 0)
-              nList.push_back( m_world->grid()->getIndex(col+1,row-1,lay));
-             if (col < m_world->grid()->width() - 2)
-              nList.push_back( m_world->grid()->getIndex(col+2,row,lay));
-            }
-           if (row > 0)
-            {
-             nList.push_back( m_world->grid()->getIndex(col,row-1,lay));
-             if (row > 1)
-              nList.push_back( m_world->grid()->getIndex(col,row-2,lay));
-            }
-           if (row < m_world->grid()->height() - 1)
-            {
-             nList.push_back( m_world->grid()->getIndex(col,row+1,lay));
-             if (row < m_world->grid()->height() - 2)
-              nList.push_back( m_world->grid()->getIndex(col,row+2,lay));
-            }
-           if (lay > 0)
-            {
-             nList.push_back( m_world->grid()->getIndex(col,row,lay-1));
-             if (lay > 1)
-              nList.push_back( m_world->grid()->getIndex(col,row,lay-2));
-             if (col > 0)
-              {
-               nList.push_back( m_world->grid()->getIndex(col-1,row,lay-1));
-               if (row < m_world->grid()->height() -1)
-                nList.push_back( m_world->grid()->getIndex(col-1,row+1,lay-1));
-               if (row > 0)
-                nList.push_back( m_world->grid()->getIndex(col-1,row-1,lay-1));
-              }
-             if (col < m_world->grid()->width() - 1)
-              {
-               nList.push_back( m_world->grid()->getIndex(col+1,row,lay-1));
-               if (row < m_world->grid()->height() - 1)
-                nList.push_back( m_world->grid()->getIndex(col+1,row+1,lay-1));
-               if (row > 0)
-                nList.push_back( m_world->grid()->getIndex(col+1,row-1,lay-1));
-              }
-             if (row > 0)
-              nList.push_back( m_world->grid()->getIndex(col,row-1,lay-1));
-             if (row < m_world->grid()->height() - 1)
-              nList.push_back( m_world->grid()->getIndex(col,row+1,lay-1));
-            }
-           if (lay < m_world->grid()->depth()-1)
-            {
-             nList.push_back( m_world->grid()->getIndex(col,row,lay+1));
-             if (lay < m_world->grid()->depth()-2)
-              nList.push_back( m_world->grid()->getIndex(col,row,lay+2));
-             if (col > 0)
-              {
-               nList.push_back( m_world->grid()->getIndex(col-1,row,lay+1));
-               if (row < m_world->grid()->height() -1)
-                nList.push_back( m_world->grid()->getIndex(col-1,row+1,lay+1));
-               if (row > 0)
-                nList.push_back( m_world->grid()->getIndex(col-1,row-1,lay+1));
-              }
-             if (col < m_world->grid()->width() - 1)
-              {
-               nList.push_back( m_world->grid()->getIndex(col+1,row,lay+1));
-               if (row < m_world->grid()->height() - 1)
-                nList.push_back( m_world->grid()->getIndex(col+1,row+1,lay+1));
-               if (row > 0)
-                nList.push_back( m_world->grid()->getIndex(col+1,row-1,lay+1));
-              }
-             if (row > 0)
-              nList.push_back( m_world->grid()->getIndex(col,row-1,lay+1));
-             if (row < m_world->grid()->height() - 1)
-              nList.push_back( m_world->grid()->getIndex(col,row+1,lay+1));
-            }
-          if (col == 0)
-            nList.push_back(m_world->grid()->getIndex(m_world->grid()->width()-1,m_world->grid()->height()-1,m_world->grid()->depth()-1) + 1);
-          if (col == m_world->grid()->width() - 1)
-            nList.push_back(m_world->grid()->getIndex(m_world->grid()->width()-1,m_world->grid()->height()-1,m_world->grid()->depth()-1) + 2);
-          return nList;
-          break;
-         }
-         default:
-         {
-          int cutoff = hoppingRange * hoppingRange;
-          for ( int z = (lay - hoppingRange); z < int(lay + hoppingRange + 1); z += 1 )
-          {
-           if ( z >= 0 && z < int(m_world->grid()->depth()) )
-           {
-            for ( int x = (col - hoppingRange); x < int(col + hoppingRange + 1); x += 1 )
-            {
-             if ( x >= 0 && x < int(m_world->grid()->width()) )
-             {
-              for ( int y = (row - hoppingRange); y < int(row + hoppingRange + 1); y += 1 )
-              {
-               if ( y >= 0 && y < int(m_world->grid()->height()) )
-               {
-                if ( !(x == int(col) && y == int(row) && z == int(lay)) )
-                {
-                 int r2 = ( col - x ) * ( col - x ) + ( row - y ) * ( row - y ) + ( lay - z ) * ( lay - z );
-                 if ( r2 <= cutoff )
-                 {
-                  nList.push_back(m_world->grid()->getIndex(x,y,z));
-                 }
-                }
-               }
-              }
-             }
-            }
-           }
-          }
-          if (col == 0)
-            nList.push_back(m_world->grid()->getIndex(m_world->grid()->width()-1,m_world->grid()->height()-1,m_world->grid()->depth()-1) + 1);
-          if (col == m_world->grid()->width() - 1)
-            nList.push_back(m_world->grid()->getIndex(m_world->grid()->width()-1,m_world->grid()->height()-1,m_world->grid()->depth()-1) + 2);
-          return nList;
-          break;
-         }
         }
     }
-*/
-
 } // End namespace Langmuir

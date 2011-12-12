@@ -136,24 +136,31 @@ __kernel void coulomb1( __global double *o, __global int *s, __global int *q, in
 
 __kernel void coulomb2( __global double *o, __global int *s, __global int *q, int n, int c2, __global int *w, int xsize, int ysize )
 {
+    // each worker of work group loads the same charge and site, using the "work group id"
     int qi = q[ get_group_id(0) ];
     int si = w[ get_group_id(0) ];
 
+    // extract position from site using the grid dimensions
     int zi = ( si ) / ( xsize * ysize );
     int yi = ( si ) / ( xsize ) - ( zi * ysize );
     int xi = ( si ) % ( xsize );
 
+    // allocate local memory for this work group
     __local int    slocal[1024];
     __local int    qlocal[1024];
     __local double vlocal[1024];
 
+    // each worker sets a different index of the local memory to zero and waits
     vlocal[ get_local_id(0) ] = 0;
     barrier(CLK_LOCAL_MEM_FENCE);
 
+    // calculate how many pieces we can divide the total list of charges/positions into
     int num_loads = n / ( get_local_size(0) ) + 1;
 
+    // start loading chunks of charges to calculate on
     for ( int load_number = 0; load_number < num_loads; load_number++ )
     {
+        // each worker loads a different charge
         int load_id = get_local_size(0) * load_number + get_local_id(0);
         if ( load_id < n ) //number of charges
         {
@@ -167,6 +174,7 @@ __kernel void coulomb2( __global double *o, __global int *s, __global int *q, in
         }
         barrier(CLK_LOCAL_MEM_FENCE);
 
+        // each worker perfroms a different q/r calculation
         int sj = slocal[ get_local_id(0) ];
         if ( sj >= 0 )
         {
@@ -189,7 +197,8 @@ __kernel void coulomb2( __global double *o, __global int *s, __global int *q, in
         {
             v = v + vlocal[l];
         }
-        o[si] = v;
+        //o[si] = v;
+        o[ get_group_id(0) ] = v;
     }
 }
 

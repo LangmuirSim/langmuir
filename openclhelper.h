@@ -9,7 +9,7 @@
 namespace Langmuir
 {
 class World;
-
+class ChargeAgent;
 /**
   *  @class OpenClHelper
   *  @brief For handling all OpenCl related tasks
@@ -45,6 +45,11 @@ public:
     inline const double& getOutputHost(int index) const { return m_oHost[index]; }
 
     /**
+      * @brief read a value in m_oDevice - which should be the result of a coulomb calculation.
+      */
+    inline const double& getOutputHostFuture(int index) const { return m_oHost[index+m_offset]; }
+
+    /**
       * @brief compare GPU answer (delta energy) to CPU answer for all charges
       */
     void compareHostAndDeviceForAllCarriers();
@@ -57,7 +62,7 @@ public:
     /**
       * @brief compare GPU answer (delta energy) to CPU answer for a single charge
       */
-    void compareHostAndDeviceForCarrier(int i);
+    void compareHostAndDeviceForCarrier(int i,QList< ChargeAgent * > &charges);
 
     /**
      * @brief change parameters
@@ -76,6 +81,7 @@ private:
     cl::Buffer                   m_sDevice;             // Device site ids
     cl::Buffer                   m_qDevice;             // Device charges
     cl::Buffer                   m_oDevice;             // Device output vector
+    int                          m_offset;              // Offset between current and future energies in m_oHost;
 };
 }
 

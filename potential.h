@@ -83,24 +83,37 @@ namespace Langmuir
       void updateInteractionEnergies();
 
       /**
-        * @brief compute the coulomb energy from carriers at site
+        * @brief compute the coulomb potential from electrons at site - multiply it be \f$q_{j}\f$ in reduced units
+        *
         */
-      double coulombPotentialCarriers( int site );
+      double coulombEnergyElectrons( int site );
 
       /**
-        * @brief compute the coulomb energy from carriers at site
+        * @brief compute the image coulomb potential from carriers at site - multiply it be \f$q_{j}\f$ in reduced units
         */
-      double coulombImageXPotentialCarriers( int site );
+      double coulombImageXEnergyElectrons( int site );
 
       /**
-        * @brief compute the coulomb energy from carriers at site
+        * @brief compute the coulomb potential from electrons at site - multiply it be \f$q_{j}\f$ in reduced units
         */
-      double coulombPotentialDefects( int site );
+      double coulombEnergyHoles( int site );
 
       /**
-        * @brief compute the coulomb energy from carriers at site
+        * @brief compute the image coulomb potential from carriers at site - multiply it be \f$q_{j}\f$ in reduced units
         */
-      double coulombImageXPotentialDefects( int site );
+      double coulombImageXEnergyHoles( int site );
+
+      /**
+        * @brief compute the coulomb potential from defects at site - multiply it be \f$q_{j}\f$ in reduced units
+        */
+      double coulombEnergyDefects( int site );
+
+      /**
+        * @brief compute the image coulomb potential from defects at site - multiply it be \f$q_{j}\f$ in reduced units
+        *
+        * Calculates
+        */
+      double coulombImageXEnergyDefects( int site );
 
   private:
 

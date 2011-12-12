@@ -11,10 +11,13 @@ namespace Langmuir
     Agent(Agent::Source, world,site)
   {
     m_charges = 0;
-    m_site = m_world->grid()->volume();
-    m_world->grid()->setAgent(m_world->grid()->volume(),this);
-    m_world->grid()->setSiteID(m_world->grid()->volume(),2);
-    m_maxCharges = m_world->parameters()->chargePercentage * double(m_world->grid()->volume());
+    m_site = m_world->electronGrid()->volume();
+    m_world->electronGrid()->setAgent(m_world->electronGrid()->volume(),this);
+    m_world->electronGrid()->setSiteID(m_world->electronGrid()->volume(),2);
+    m_world->holeGrid()->setAgent(m_world->electronGrid()->volume(),this);
+    m_world->holeGrid()->setSiteID(m_world->electronGrid()->volume(),2);
+    m_maxCharges = m_world->parameters()->chargePercentage * double(m_world->electronGrid()->volume());
+    m_neighbors = m_world->electronGrid()->slice(0,1,0,m_world->electronGrid()->height(),0,m_world->electronGrid()->depth());
   }
 
   SourceAgent::~SourceAgent()
@@ -24,10 +27,10 @@ namespace Langmuir
   inline double SourceAgent::coulombInteraction(int newSite)
   {
     // Pointer to grid
-    Grid *grid = m_world->grid();
+    Grid *grid = m_world->electronGrid();
 
     // Reference to charges in simulation
-    QList < ChargeAgent * >&charges = *m_world->charges();
+    QList < ChargeAgent * >&charges = *m_world->electrons();
 
     // Number of charges in simulation
     int chargeSize = charges.size();
@@ -53,16 +56,16 @@ namespace Langmuir
           }
       }
     //qDebug() << QString("%1 %2 %3").arg(count).arg(chargeSize).arg(-1.0 * m_world->parameters()->electrostaticPrefactor*potential);
-    return( -1.0 * m_world->parameters()->electrostaticPrefactor * potential );
+    return( -1.0 * potential );
   }
 
   inline double SourceAgent::imageInteraction(int newSite)
   {
     // Pointer to grid
-    Grid *grid = m_world->grid();
+    Grid *grid = m_world->electronGrid();
 
     // Reference to charges in simulation
-    QList < ChargeAgent * >&charges = *m_world->charges();
+    QList < ChargeAgent * >&charges = *m_world->electrons();
 
     // Number of charges in simulation
     int chargeSize = charges.size();
@@ -88,13 +91,13 @@ namespace Langmuir
           }
       }
     //qDebug() << QString("%1 %2 %3").arg(count).arg(chargeSize).arg(-1.0 * m_world->parameters()->electrostaticPrefactor*potential);
-    return( -1.0 * m_world->parameters()->electrostaticPrefactor * potential );
+    return( -1.0 * potential );
   }
 
   inline double SourceAgent::siteInteraction(int newSite)
   {
     //qDebug() << QString("%1").arg( -1.0 * m_world->parameters()->elementaryCharge * m_world->grid()->potential(newSite) );
-    return( -1.0 * m_world->parameters()->elementaryCharge * m_world->grid()->potential(newSite) );
+    return( -1.0 * m_world->parameters()->elementaryCharge * m_world->electronGrid()->potential(newSite) );
   }
 
   inline bool SourceAgent::attemptTransport(double pd)
@@ -137,7 +140,7 @@ namespace Langmuir
     int irn = m_world->randomNumberGenerator()->integer(0,m_neighbors.size()-1);
 
     int tries = 1;
-    while(m_world->grid()->agent(m_neighbors[irn]))
+    while(m_world->electronGrid()->agent(m_neighbors[irn]))
       {
         irn = m_world->randomNumberGenerator()->integer(0,m_neighbors.size()-1);
         tries += 1;

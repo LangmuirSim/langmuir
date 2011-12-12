@@ -49,27 +49,6 @@ namespace Langmuir
     virtual void performIterations(int nIterations) = 0;
 
     /**
-     * @brief Create a list of site ids.
-     *
-     * Generate the neighbors of the drain electrode
-     */
-    virtual QVector<int> neighborsDrain();
-
-    /**
-     * @brief Create a list of site ids.
-     *
-     * Generate the neighbors of the source electrode
-     */
-    virtual QVector<int> neighborsSource();
-
-    /**
-     * @brief Create a list of site ids.
-     *
-     * Generate the neighbors of a given site
-     */
-    virtual QVector<int> neighborsSite(int site);
-
-    /**
      * @brief World access.
      *
      * Retrieve the world object - can be used alter world properties.

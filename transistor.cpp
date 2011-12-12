@@ -13,8 +13,6 @@ namespace Langmuir
 {
     Transistor::Transistor( SimulationParameters * par, int id ) : Simulation(par,id)
     {
-        m_world->source()->setNeighbors(neighborsSource());
-        m_world->drain()->setNeighbors(neighborsDrain());
     }
 
     void Transistor::performIterations(int nIterations)
@@ -23,7 +21,7 @@ namespace Langmuir
         for (int i = 0; i < nIterations; ++i)
         {
             // Attempt to transport the charges through the film
-            QList < ChargeAgent * >&charges = *m_world->charges ();
+            QList < ChargeAgent * >&charges = *m_world->electrons ();
 
             // If using OpenCL, launch the Kernel to calculate Coulomb Interactions
             if ( m_world->parameters()->useOpenCL && charges.size() > 0 )
@@ -78,7 +76,7 @@ namespace Langmuir
         int inject = nInjections;
         if ( inject < 0 )
         {
-            inject = m_world->source()->maxCharges() - m_world->charges()->size();
+            inject = m_world->source()->maxCharges() - m_world->electrons()->size();
             if ( inject <= 0 )
             {
                 return;
@@ -90,7 +88,7 @@ namespace Langmuir
           if (site != -1)
             {
               ChargeAgent *charge = new ChargeAgent (m_world, site );
-              m_world->charges ()->push_back (charge);
+              m_world->electrons ()->push_back (charge);
             }
         }
     }
@@ -98,7 +96,7 @@ namespace Langmuir
     void Transistor::nextTick()
     {
         // Iterate over all sites to change their state
-        QList < ChargeAgent * >&charges = *m_world->charges();
+        QList < ChargeAgent * >&charges = *m_world->electrons();
         if( m_world->parameters()->outputStats )
         {
           for (int i = 0; i < charges.size (); ++i)

@@ -155,7 +155,7 @@ int main (int argc, char *argv[])
             << par.defectPercentage * 100.00
             << par.trapPercentage * 100.0
             << par.chargePercentage * 100.0
-            << double (sim->world()->charges()->size()) / double (sim->world()->source()->maxCharges()) * 100.0
+            << double (sim->world()->electrons()->size()) / double (sim->world()->source()->maxCharges()) * 100.0
             << double (sim->world()->drain()->acceptedCharges() -
                        lastCount) / double (par.iterationsPrint) << "\n";
           iout->flush ();
@@ -180,7 +180,7 @@ int main (int argc, char *argv[])
             << par.defectPercentage * 100.0
             << par.trapPercentage * 100.0
             << par.chargePercentage * 100.0
-            << double (sim->world()->charges()->size()) / double (sim->world()->source()->maxCharges()) * 100.0
+            << double (sim->world()->electrons()->size()) / double (sim->world()->source()->maxCharges()) * 100.0
             << double (sim->world()->drain()->acceptedCharges() -
                        lastCount) / double (par.iterationsPrint) << "\n";
           iout->flush ();
@@ -198,7 +198,7 @@ int main (int argc, char *argv[])
         << par.defectPercentage * 100.0
         << par.trapPercentage * 100.0
         << par.chargePercentage * 100.0
-        << double (sim->world()->charges()->size()) / double (sim->world()->source()->maxCharges()) * 100.0
+        << double (sim->world()->electrons()->size()) / double (sim->world()->source()->maxCharges()) * 100.0
         << double (lastCount - startCount) / double (par.iterationsReal)
         << timer.elapsed (timeStepStart) << "\n";
       oout->flush ();

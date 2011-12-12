@@ -28,10 +28,10 @@ namespace Langmuir
             //Index of a trap site
             int ndx = pSim->world()->trapSiteIDs()->at( i );
             //If this trap is in the Layer we are drawing...
-            if ( pSim->world()->grid()->getLayer( ndx ) == layer )
+            if ( pSim->world()->electronGrid()->getLayer( ndx ) == layer )
             {
                 //Draw the trap as a point at (x,y) = (col,row)
-                painter.drawPoint( QPoint( pSim->world()->grid()->getColumn( ndx ), pSim->world()->grid()->getRow( ndx ) ) );
+                painter.drawPoint( QPoint( pSim->world()->electronGrid()->getColumn( ndx ), pSim->world()->electronGrid()->getRow( ndx ) ) );
             }
         }
         //return the new image ( its not copied on return because of how Qt stores images )
@@ -120,7 +120,6 @@ namespace Langmuir
         qtimer = new QTimer(this);
         recordTimer = NULL;
         trapsTexture = 0;
-        currentCount = 0;
 
         //Connect: make sure updateGL is called every updateTime ms
         connect(qtimer, SIGNAL(timeout()), this, SLOT(timerUpdateGL()));
@@ -200,7 +199,7 @@ namespace Langmuir
         diffuseLight = new ColoredObject( this );
         specularLight = new ColoredObject( this );
 
-        Grid *grid = pSim->world()->grid();
+        Grid *grid = pSim->world()->electronGrid();
         pointBuffer1.resize( (int(pPar->chargePercentage * grid->volume())) * 4 );
         pointBuffer2.resize( (int(pPar->chargePercentage * grid->volume())) * 4 );
         for ( int i = 0; i < pointBuffer1.size(); i+= 4 )
@@ -216,28 +215,7 @@ namespace Langmuir
         }
         carriersMinus = new PointArray(this,pointBuffer1);
         carriersPlus = new PointArray(this,pointBuffer2);
-
-        QList< ChargeAgent* > *charges = pSim->world()->charges();
-        currentCount = 0;
-        for ( int i = 0; i < charges->size(); i++ )
-        {
-            int site = charges->at(i)->site();
-            if ( charges->at(i)->charge() < 0 )
-            {
-                pointBuffer1[ i * 4 + 0 ] = grid->getColumn(site) + 0.5;
-                pointBuffer1[ i * 4 + 1 ] = grid->getRow(site) + 0.5;
-                pointBuffer1[ i * 4 + 2 ] = (grid->getLayer(site) + 0.5) * thickness;
-                currentCount += 1;
-            }
-            else
-            {
-                pointBuffer2[ i * 4 + 0 ] = grid->getColumn(site) + 0.5;
-                pointBuffer2[ i * 4 + 1 ] = grid->getRow(site) + 0.5;
-                pointBuffer2[ i * 4 + 2 ] = (grid->getLayer(site) + 0.5) * thickness;
-            }
-        }
-        carriersMinus->update(pointBuffer1,currentCount * 4);
-        carriersPlus->update(pointBuffer2, (charges->size() - currentCount) * 4 );
+        updatePointBuffers();
 
         QList< int > *defectList = pSim->world()->defectSiteIDs();
         QVector< float > xyz( defectList->size() * 4, 1 );
@@ -267,7 +245,7 @@ namespace Langmuir
         emit yRotationChanged( rotation.y() );
         emit zRotationChanged( rotation.z() );
 
-        base->setColor(QColor(107,221,89,255));
+        base->setColor(QColor(0,0,0,255));
         source->setColor(QColor(0,0,255,255));
         drain->setColor(QColor(255,0,0,255));
         side1->setColor(QColor(255,255,255,255));
@@ -276,10 +254,10 @@ namespace Langmuir
         side4->setColor(QColor(255,255,255,255));
         side5->setColor(QColor(255,255,255,255));
         side6->setColor(QColor(255,255,255,255));
-        background->setColor(QColor(28,164,255,255));
+        background->setColor(QColor(85,255,157,255));
         carriersMinus->setColor(QColor(255,0,0,255));
         carriersPlus->setColor(QColor(0,255,255,255));
-        defects->setColor(QColor(0,0,0,255));
+        defects->setColor(QColor(255,255,255,255));
         ambientLight->setColor(QColor(85,85,85,255));
         diffuseLight->setColor(QColor(170,170,170,255));
         specularLight->setColor(QColor(255,255,255,255));
@@ -318,6 +296,29 @@ namespace Langmuir
         qtimer->start(updateTime);
     }
 
+    void GridViewGL::updatePointBuffers()
+    {
+        Grid *grid = pSim->world()->electronGrid();
+        QList< ChargeAgent* > *charges = pSim->world()->electrons();
+        for ( int i = 0; i < charges->size(); i++ )
+        {
+            int site = charges->at(i)->site();
+            pointBuffer1[ i * 4 + 0 ] = grid->getColumn(site) + 0.5;
+            pointBuffer1[ i * 4 + 1 ] = grid->getRow(site) + 0.5;
+            pointBuffer1[ i * 4 + 2 ] = (grid->getLayer(site) + 0.5) * thickness;
+        }
+        QList< ChargeAgent* > *holes = pSim->world()->holes();
+        for ( int i = 0; i < holes->size(); i++ )
+        {
+            int site = holes->at(i)->site();
+            pointBuffer2[ i * 4 + 0 ] = grid->getColumn(site) + 0.5;
+            pointBuffer2[ i * 4 + 1 ] = grid->getRow(site) + 0.5;
+            pointBuffer2[ i * 4 + 2 ] = (grid->getLayer(site) + 0.5) * thickness;
+        }
+        carriersMinus->update(pointBuffer1,charges->size() * 4);
+        carriersPlus->update(pointBuffer2,holes->size() * 4);
+    }
+
     void GridViewGL::timerUpdateGL()
     {
         if ( ! pause )
@@ -326,29 +327,7 @@ namespace Langmuir
             //double current = ( pSim->totalChargesAccepted() - lastCount ) / ( double( pPar->iterationsPrint ) );
             lastCount = pSim->world()->drain()->acceptedCharges();
             step += pPar->iterationsPrint;
-
-            QList< ChargeAgent* > *charges = pSim->world()->charges();
-            Grid *grid = pSim->world()->grid();
-            currentCount = 0;
-            for ( int i = 0; i < charges->size(); i++ )
-            {
-                int site = charges->at(i)->site();
-                if ( charges->at(i)->charge() < 0 )
-                {
-                    pointBuffer1[ i * 4 + 0 ] = grid->getColumn(site) + 0.5;
-                    pointBuffer1[ i * 4 + 1 ] = grid->getRow(site) + 0.5;
-                    pointBuffer1[ i * 4 + 2 ] = (grid->getLayer(site) + 0.5) * thickness;
-                    currentCount += 1;
-                }
-                else
-                {
-                    pointBuffer2[ i * 4 + 0 ] = grid->getColumn(site) + 0.5;
-                    pointBuffer2[ i * 4 + 1 ] = grid->getRow(site) + 0.5;
-                    pointBuffer2[ i * 4 + 2 ] = (grid->getLayer(site) + 0.5) * thickness;
-                }
-            }
-            carriersMinus->update(pointBuffer1,currentCount * 4);
-            carriersPlus->update(pointBuffer2, (charges->size() - currentCount) * 4 );
+            updatePointBuffers();
             emit stepChanged( step );
         }
         updateGL();
@@ -681,8 +660,8 @@ namespace Langmuir
         side4->draw();
         side5->draw();
         side6->draw();
-        carriersMinus->draw( currentCount, this->height(), fov );
-        carriersPlus->draw( ( pSim->world()->charges()->size() - currentCount ), this->height(), fov );
+        carriersMinus->draw( pSim->world()->electrons()->size(), this->height(), fov );
+        carriersPlus->draw( pSim->world()->holes()->size(), this->height(), fov );
         defects->draw( pSim->world()->defectSiteIDs()->size(), this->height(), fov );
         glPopMatrix();
     }
@@ -978,7 +957,7 @@ namespace Langmuir
 
         setColor( QColor(0,0,0,255) );
         setPointSize( 0.0f );
-        setSpheres( Qt::Unchecked );
+        setSpheres( Qt::Checked );
     }
 
     PointArray::~PointArray()

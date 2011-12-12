@@ -14,43 +14,51 @@ namespace Langmuir
 {
     SolarCell::SolarCell( SimulationParameters * par, int id ) : Simulation(par,id)
     {
-        m_world->source()->setNeighbors(neighborsSource());
-        m_world->drain()->setNeighbors(neighborsDrain());
     }
 
     void SolarCell::performIterations(int nIterations)
     {
+        //m_world->electrons()->at(0)->coulombInteraction( m_world->electrons()->at(0)->site(true) );
+
         //  cout << "Entered performIterations function.\n";
         for (int i = 0; i < nIterations; ++i)
         {
             // Attempt to transport the charges through the film
-            QList < ChargeAgent * >&charges = *m_world->charges ();
+            QList < ChargeAgent * >&electrons = *m_world->electrons ();
+            QList < ChargeAgent * >&holes = *m_world->holes ();
 
             // If using OpenCL, launch the Kernel to calculate Coulomb Interactions
-            if ( m_world->parameters()->useOpenCL && charges.size() > 0 )
+            if ( m_world->parameters()->useOpenCL && ( electrons.size() > 0 || holes.size() > 0 ) )
             {
                 // first have the charge carriers propose future sites
                 //for ( int j = 0; j < charges.size(); j++ ) charges[j]->chooseFuture(j);
-                QFuture < void > future = QtConcurrent::map (charges, SolarCell::chargeAgentChooseFuture);
-                future.waitForFinished();
+                QFuture < void > future1 = QtConcurrent::map (electrons, SolarCell::chargeAgentChooseFuture);
+                QFuture < void > future2 = QtConcurrent::map (holes, SolarCell::chargeAgentChooseFuture);
+                future1.waitForFinished();
+                future2.waitForFinished();
 
                 // tell the GPU to perform all coulomb calculations
                 m_world->opencl()->launchCoulombKernel2();
 
                 //check the answer during debugging
                 //m_world->opencl()->compareHostAndDeviceForAllCarriers();
+                //qFatal("done");
 
                 // now use the results of the coulomb calculations to decide if the carreirs should have moved
-                future = QtConcurrent::map (charges, SolarCell::chargeAgentDecideFuture);
-                future.waitForFinished();
+                future1 = QtConcurrent::map (electrons, SolarCell::chargeAgentDecideFuture);
+                future2 = QtConcurrent::map (holes, SolarCell::chargeAgentDecideFuture);
+                future1.waitForFinished();
+                future2.waitForFinished();
             }
             else // Not using OpenCL
             {
                 // Use QtConcurrnet to parallelise the charge calculations
-                QFuture < void >future = QtConcurrent::map (charges, SolarCell::chargeAgentIterate);
+                QFuture < void > future1 = QtConcurrent::map (electrons, SolarCell::chargeAgentIterate);
+                QFuture < void > future2 = QtConcurrent::map (holes, SolarCell::chargeAgentIterate);
 
                 // We want to wait for it to finish before continuing on
-                future.waitForFinished ();
+                future1.waitForFinished();
+                future2.waitForFinished();
             }
 
             // Now we are done with the charge movement, move them to the next tick!
@@ -79,7 +87,7 @@ namespace Langmuir
         int inject = nInjections;
         if ( inject < 0 )
         {
-            inject = m_world->source()->maxCharges() - m_world->charges()->size();
+            inject = m_world->source()->maxCharges() - m_world->electrons()->size();
             if ( inject <= 0 )
             {
                 return;
@@ -91,7 +99,7 @@ namespace Langmuir
           if (site != -1)
             {
               ChargeAgent *charge = new ChargeAgent (m_world, site );
-              m_world->charges ()->push_back (charge);
+              m_world->electrons ()->push_back (charge);
             }
         }
     }
@@ -99,75 +107,69 @@ namespace Langmuir
     void SolarCell::nextTick()
     {
         // Iterate over all sites to change their state
-        QList < ChargeAgent * >&charges = *m_world->charges();
-        if( m_world->parameters()->outputStats )
+        QList < ChargeAgent * >&charges = *m_world->electrons();
+        QList < ChargeAgent * >&holes = *m_world->holes();
+        if (m_world->parameters()->outputStats)
         {
-          for (int i = 0; i < charges.size (); ++i)
-          {
-            charges[i]->completeTick ();
-            // Check if the charge was removed - then we should delete it
-            if (charges[i]->removed ())
+            for (int i = 0; i < charges.size (); ++i)
             {
-              m_world->logger()->carrierReportLifetimeAndPathlength(i,m_tick);
-              delete charges[i];
-              charges.removeAt (i);
-              m_world->drain()->acceptCharge (-1);
-              m_world->source()->decrementCharge ();
-              --i;
+              charges[i]->completeTick();
+              // Check if the charge was removed - then we should delete it
+              if (charges[i]->removed ())
+              {
+                m_world->logger()->carrierReportLifetimeAndPathlength(i,m_tick);
+                delete charges[i];
+                charges.removeAt (i);
+                m_world->drain()->acceptCharge (-1);
+                m_world->source()->decrementCharge ();
+                --i;
+              }
             }
-          }
-          m_world->logger()->carrierStreamFlush();
+            for (int i = 0; i < holes.size (); ++i)
+            {
+              holes[i]->completeTick ();
+              // Check if the charge was removed - then we should delete it
+              if (holes[i]->removed ())
+              {
+                m_world->logger()->carrierReportLifetimeAndPathlength(i,m_tick);
+                delete holes[i];
+                holes.removeAt (i);
+                m_world->drain()->acceptCharge (-1);
+                m_world->source()->decrementCharge ();
+                --i;
+              }
+            }
+            m_world->logger()->carrierStreamFlush();
         }
         else
         {
-          for (int i = 0; i < charges.size (); ++i)
-          {
-            charges[i]->completeTick ();
-            // Check if the charge was removed - then we should delete it
-            if (charges[i]->removed ())
+            for (int i = 0; i < charges.size (); ++i)
             {
-              delete charges[i];
-              charges.removeAt (i);
-              m_world->drain()->acceptCharge (-1);
-              m_world->source()->decrementCharge ();
-              --i;
+              charges[i]->completeTick();
+              // Check if the charge was removed - then we should delete it
+              if (charges[i]->removed ())
+              {
+                delete charges[i];
+                charges.removeAt (i);
+                m_world->drain()->acceptCharge (-1);
+                m_world->source()->decrementCharge();
+                --i;
+              }
             }
-          }
+            for (int i = 0; i < holes.size (); ++i)
+            {
+              holes[i]->completeTick ();
+              // Check if the charge was removed - then we should delete it
+              if (holes[i]->removed ())
+              {
+                delete holes[i];
+                holes.removeAt (i);
+                m_world->drain()->acceptCharge (-1);
+                m_world->source()->decrementCharge ();
+                --i;
+              }
+            }
         }
-    }
-
-    QVector<int> SolarCell::neighborsSite(int site)
-    {
-        // Return the indexes of all nearest neighbours
-        QVector<int>     nList(0);
-        int col = m_world->grid()->getColumn(site);
-        int row = m_world->grid()->getRow(site);
-        int lay = m_world->grid()->getLayer(site);
-        // To the west
-        if (col > 0)
-          nList.push_back(m_world->grid()->getIndex(col-1,row,lay));
-        // To the east
-        if (col < m_world->grid()->width() - 1)
-          nList.push_back(m_world->grid()->getIndex(col+1,row,lay));
-        // To the south
-        if (row > 0)
-          nList.push_back(m_world->grid()->getIndex(col,row-1,lay));
-        // To the north
-        if (row < m_world->grid()->height() - 1)
-          nList.push_back(m_world->grid()->getIndex(col,row+1,lay));
-        // Below
-        if (lay > 0)
-          nList.push_back(m_world->grid()->getIndex(col,row,lay-1));
-        // Above
-        if (lay < m_world->grid()->depth() - 1)
-          nList.push_back(m_world->grid()->getIndex(col,row,lay+1));
-        // Now for the source and the drain....
-        //if (col == 0)
-        //  nList.push_back(m_world->grid()->getIndex(m_world->grid()->width()-1,m_world->grid()->height()-1,m_world->grid()->depth()-1) + 1);
-        //if (col == m_world->grid()->width() - 1)
-        //  nList.push_back(m_world->grid()->getIndex(m_world->grid()->width()-1,m_world->grid()->height()-1,m_world->grid()->depth()-1) + 2);
-        // Now we have all the nearest neighbours - between 4 and 6 in this case
-        return nList;
     }
 
     inline void SolarCell::chargeAgentIterate ( ChargeAgent * chargeAgent)

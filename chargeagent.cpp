@@ -2,6 +2,7 @@
 #include "chargeagent.h"
 #include "inputparser.h"
 #include "simulation.h"
+#include "potential.h"
 #include "world.h"
 #include "grid.h"
 #include "rand.h"
@@ -9,17 +10,25 @@
 
 namespace Langmuir
 {
-    ChargeAgent::ChargeAgent (World * world, int site):Agent (Agent::Charge, world, site), 
+    ChargeAgent::ChargeAgent (World * world, int site, bool isHole):Agent (Agent::Charge, world, site),
      m_charge (-1), m_removed (false), m_lifetime(0), m_distanceTraveled(0.0), m_openClID(0)
   {
     //current site and future site are the same
     m_site = m_fSite;
 
+    if ( isHole )
+    {
+        m_grid = m_world->holeGrid();
+    }
+    else
+    {
+        m_grid = m_world->electronGrid();
+    }
     //make sure this agent is somewhere on the grid
-    m_world->grid ()->setAgent (m_site, this);
+    m_grid->setAgent (m_site, this);
 
     //figure out the neighbors of this site
-    m_neighbors = m_world->simulation()->neighborsSite(m_site);
+    m_neighbors = m_grid->neighborsSite(m_site);
   }
 
   ChargeAgent::~ChargeAgent ()
@@ -33,7 +42,7 @@ namespace Langmuir
       {
         m_fSite = m_neighbors[ m_world->randomNumberGenerator()->integer(0,m_neighbors.size()-1) ];
       }
-    while (m_world->grid()->siteID(m_fSite) == 2); // source siteID
+    while (m_grid->siteID(m_fSite) == 2); // source siteID
   }
 
   int ChargeAgent::decideFuture()
@@ -41,14 +50,11 @@ namespace Langmuir
     // Increase lifetime in existance
     m_lifetime += 1;
 
-    // Get a pointer to the grid for easy access
-    Grid *grid = m_world->grid ();
-
     // Check the proposed site, return unsucessful if it is the SOURCE, a DEFECT, or another CARRIER
-    if ( grid->agent(m_fSite) && grid->siteID (m_fSite) != 3 ) { m_fSite = m_site; return -1; }
+    if ( m_grid->agent(m_fSite) && m_grid->siteID (m_fSite) != 3 ) { m_fSite = m_site; return -1; }
 
     // If the site is the DRAIN, perform drain acceptance probability calculations ( drain.type, drain.barrier )
-    if ( grid->siteID(m_fSite) == 3 )
+    if ( m_grid->siteID(m_fSite) == 3 )
     {
         switch ( m_world->parameters()->drainType )
         {
@@ -87,42 +93,17 @@ namespace Langmuir
 
     // Now to add on the background potential - from the applied field
     // A few electrons only perturb the potential by ~1e-20 or so.
-    double pd = grid->potential(m_fSite) - grid->potential (m_site);
-    pd *= m_charge * m_world->parameters()->elementaryCharge;
+    double pd = m_grid->potential(m_fSite) - m_grid->potential (m_site);
+    pd *= m_charge;// * m_world->parameters()->elementaryCharge;
 
-    // Add on the Coulomb interaction if it is being included
+    // Add on the Coulomb interaction if it is being included    
     if ( m_world->parameters()->interactionCoulomb )
       {
-        // get the answer from OpenCL output vector
-        if (m_world->parameters()->useOpenCL)
-          {
-            //obtain coulomb interactions from OpenCL ( defects and carrier interactions )
-            //pd += m_world->getOutputHost( clID );
-              pd += ( ( m_world->opencl()->getOutputHost(m_fSite) - m_world->opencl()->getOutputHost(m_site) - m_charge ) * m_charge * m_world->parameters()->electrostaticPrefactor * m_world->parameters()->elementaryCharge );
-          }
-        // or calculate it on the CPU
-        else
-          {
-            //obtain coulomb interactions on Host
             pd += this->coulombInteraction (m_fSite);
-
-            //add the interactions from charged defects ( on CPU )
-            if (m_world->parameters()->chargedDefects)
-            {
-             pd += chargedDefects (m_fSite);
-            }
-
-           }
-
-        // Add the interactions from charged traps ( this part hasn't been implemented in OpenCL yet )
-        if (m_world->parameters()->chargedTraps)
-          {
-            pd += chargedTraps(m_fSite);
-          }
       }
 
     // Apply metropolis criterion
-    if (attemptTransport (pd, couplingConstant(grid->siteID(m_site), grid->siteID(m_fSite)) ))
+    if (attemptTransport (pd, couplingConstant(m_grid->siteID(m_site), m_grid->siteID(m_fSite)) ))
       {
         // Set the future site is sucessful
         m_distanceTraveled += 1.0;
@@ -150,15 +131,15 @@ namespace Langmuir
 
         // Are we on a drain site? If so then we have been removed.
         // Apparently charge carriers are people too.
-        if (m_world->grid ()->siteID (m_fSite) == 3)
+        if (m_grid->siteID (m_fSite) == 3)
           {
-            m_world->grid ()->setAgent (m_site, 0);
+            m_grid->setAgent (m_site, 0);
             m_removed = true;
             return;
           }
 
         // Check if another charge snuck into this site before us.
-        else if (m_world->grid ()->agent (m_fSite))
+        else if (m_grid->agent (m_fSite))
           {
             // Abort the move - site is now occupied
             m_fSite = m_site;
@@ -167,190 +148,56 @@ namespace Langmuir
 
         if (m_site != -1)
           // Vacate the old site
-          m_world->grid ()->setAgent (m_site, 0);
+          m_grid->setAgent (m_site, 0);
 
         // Everything looks good - set this agent to the new site.
         m_site = m_fSite;
-        m_world->grid ()->setAgent (m_site, this);
+        m_grid->setAgent (m_site, this);
 
         // Update our neighbors
-        m_neighbors = m_world->simulation()->neighborsSite(m_site);
+        m_neighbors = m_grid->neighborsSite(m_site);
       }
   }
 
   inline double ChargeAgent::coulombInteraction (int newSite)
   {
-    // Pointer to grid
-    Grid *grid = m_world->grid ();
+      double p1 = 0;
+      double p2 = 0;
 
-    // Reference to charges in simulation
-    QList < ChargeAgent * >&charges = *m_world->charges ();
-
-    // Number of charges in simulation
-    int chargeSize = charges.size ();
-
-    // Potential before
-    double potential1 = 0.0;
-
-    // Potential after
-    double potential2 = 0.0;
-
-    //qDebug("size = %5d",chargeSize);
-    //qDebug("site = %5d",this->site());
-    //qDebug("fsite= %5d",newSite);
-    for (int i = 0; i < chargeSize; ++i)
+      if (m_world->parameters()->useOpenCL)
       {
-        //qDebug("on i = %5d",i);
-        //qDebug("size = %5d",chargeSize);
-        //qDebug("site = %5d",this->site());
-        //qDebug("fsite= %5d",newSite);
-        if (charges[i] != this)
-          {
+          // Assuming the GPU calculation output was copied to the CPU already
+          p1 = m_world->opencl()->getOutputHost(m_openClID);
+          p2 = m_world->opencl()->getOutputHostFuture(m_openClID);
 
-            // Potential at current site from other charges
-            int dx = grid->xDistancei (m_site, charges[i]->site ());
-            int dy = grid->yDistancei (m_site, charges[i]->site ());
-            int dz = grid->zDistancei (m_site, charges[i]->site ());
-            //qDebug("i: %5d dx1: %5d dy1: %5d dz1: %5d",i,dx,dy,dz);
-            if (dx < m_world->parameters ()->electrostaticCutoff &&
-                dy < m_world->parameters ()->electrostaticCutoff &&
-                dz < m_world->parameters ()->electrostaticCutoff)
-              {
-                potential1 +=
-                        m_world->interactionEnergies()[dx][dy][dz] * charges[i]->charge();
-                  //qDebug("NOW i = %d, array = %e, q1 = %d, q2 = %d, prefactor = %e",i,m_world->interactionEnergies()(dx, dy, dz),charges[i]->charge(),m_charge,m_world->parameters()->electrostaticPrefactor);
-              }
+          // Remove self interaction
+          p2 -= m_charge;
 
-            // Potential at new site from other charges
-            if (newSite != charges[i]->site ())
-              {
-                dx = grid->xDistancei (newSite, charges[i]->site ());
-                dy = grid->yDistancei (newSite, charges[i]->site ());
-                dz = grid->zDistancei (newSite, charges[i]->site ());
-                //qDebug("i: %5d dx2: %5d dy2: %5d dz2: %5d",i,dx,dy,dz);
-                if (dx < m_world->parameters ()->electrostaticCutoff &&
-                    dy < m_world->parameters ()->electrostaticCutoff &&
-                    dz < m_world->parameters ()->electrostaticCutoff)
-                  {
-                    potential2 += m_world->interactionEnergies()[dx][dy][dz] * charges[i]->charge();
-                    //qDebug("FUTURE i = %d, array = %e, q1 = %d, q2 = %d, prefactor = %e",i,m_world->interactionEnergies()(dx, dy, dz),charges[i]->charge(),m_charge,m_world->parameters()->electrostaticPrefactor);
-                  }
-              }
-             else
-               {
-                 // NOTE: this else case should never happen if decideFuture did its job correctly
-                 return -1;
-               }
-          } //else{ qDebug("charge[i]==this"); }
+          // Convert to Joules
+          p1 = p1 * m_world->parameters()->electrostaticPrefactor;
+          p2 = p2 * m_world->parameters()->electrostaticPrefactor;
       }
-    return m_charge * m_world->parameters ()->electrostaticPrefactor *
-      (potential2 - potential1);
-  }
-
-  inline double ChargeAgent::chargedDefects (int newSite)
-  {
-    // Pointer to grid
-    Grid *grid = m_world->grid ();
-
-    // Reference to charged defects in the system
-    QList < int >&chargedDefects = *m_world->defectSiteIDs ();
-
-    // Potential before
-    double potential1 = 0.0;
-
-    // Potential after
-    double potential2 = 0.0;
-
-    // Number of defects in the system
-    int defectSize (chargedDefects.size ());
-
-    for (int i = 0; i < defectSize; ++i)
+      else
       {
-        // Potential at current site from charged defects
-        int dx = grid->xDistancei (m_site, chargedDefects[i]);
-        int dy = grid->yDistancei (m_site, chargedDefects[i]);
-        int dz = grid->zDistancei (m_site, chargedDefects[i]);
-        if (dx < m_world->parameters ()->electrostaticCutoff &&
-            dy < m_world->parameters ()->electrostaticCutoff &&
-            dz < m_world->parameters ()->electrostaticCutoff)
+          // Electrons
+          p1 += m_world->potential()->coulombEnergyElectrons( m_site  );
+          p2 += m_world->potential()->coulombEnergyElectrons( newSite );
+
+          // Holes
+          p1 += m_world->potential()->coulombEnergyHoles( m_site  );
+          p2 += m_world->potential()->coulombEnergyHoles( newSite );
+
+          // Remove self interaction
+          p2 -= m_world->interactionEnergies()[1][0][0] * m_charge;
+
+          // Charged defects
+          if ( m_world->parameters()->chargedDefects )
           {
-            potential1 += m_world->interactionEnergies ()[dx][dy][dz];
-          }
-        // Potential at new site from charged defects
-        if (newSite != chargedDefects[i])
-          {
-            dx = grid->xDistancei (newSite, chargedDefects[i]);
-            dy = grid->yDistancei (newSite, chargedDefects[i]);
-            dz = grid->zDistancei (newSite, chargedDefects[i]);
-            if (dx < m_world->parameters ()->electrostaticCutoff &&
-                dy < m_world->parameters ()->electrostaticCutoff &&
-                dz < m_world->parameters ()->electrostaticCutoff)
-              {
-                potential2 += m_world->interactionEnergies ()[dx][dy][dz];
-              }
-          }
-        else
-          {
-            return -1;
+              p1 += m_world->potential()->coulombEnergyDefects( m_site  );
+              p2 += m_world->potential()->coulombEnergyDefects( newSite );
           }
       }
-    return m_charge * m_world->parameters ()->zDefect *
-      m_world->parameters ()->electrostaticPrefactor * (potential2 -
-                                                        potential1);
-  }
-
-  inline double ChargeAgent::chargedTraps (int newSite)
-  {
-    // Pointer to grid
-    Grid *grid = m_world->grid ();
-
-    // Reference to charged traps
-    QList < int >&chargedTraps = *m_world->trapSiteIDs ();
-
-    // Potential before
-    double potential1 = 0.0;
-
-    // Potential after
-    double potential2 = 0.0;
-
-    // Number of charged traps
-    int trapSize (chargedTraps.size ());
-
-    for (int i = 0; i < trapSize; ++i)
-      {
-        // Potential at current site from charged traps
-        int dx = grid->xDistancei (m_site, chargedTraps[i]);
-        int dy = grid->yDistancei (m_site, chargedTraps[i]);
-        int dz = grid->zDistancei (m_site, chargedTraps[i]);
-        if (dx < m_world->parameters ()->electrostaticCutoff &&
-            dy < m_world->parameters ()->electrostaticCutoff &&
-            dz < m_world->parameters ()->electrostaticCutoff &&
-            dx != 0 && dy != 0 && dz != 0)
-          {
-            potential1 += m_world->interactionEnergies ()[dx][dy][dz];
-          }
-        // Potential at new site from charged traps
-        if (newSite != chargedTraps[i])
-          {
-            dx = grid->xDistancei (newSite, chargedTraps[i]);
-            dy = grid->yDistancei (newSite, chargedTraps[i]);
-            dz = grid->zDistancei (newSite, chargedTraps[i]);
-            if (dx < m_world->parameters ()->electrostaticCutoff &&
-                dy < m_world->parameters ()->electrostaticCutoff &&
-                dz < m_world->parameters ()->electrostaticCutoff &&
-                dx != 0 && dy != 0 && dz != 0)
-              {
-                potential2 += m_world->interactionEnergies ()[dx][dy][dz];
-              }
-          }
-        else
-          {
-            return -1;
-          }
-      }
-    return m_charge * m_world->parameters ()->zTrap *
-      m_world->parameters ()->electrostaticPrefactor * (potential2 -
-                                                        potential1);
+      return m_charge * (p2 - p1);
   }
 
   inline double ChargeAgent::couplingConstant (short id1, short id2)
@@ -378,14 +225,6 @@ namespace Langmuir
 
   double ChargeAgent::interaction()
   {
-      if ( m_world->parameters()->chargedDefects )
-      {
-          if ( m_world->parameters()->chargedTraps )
-          {
-              return coulombInteraction(m_fSite) + chargedDefects(m_fSite) + chargedTraps(m_fSite);
-          }
-          return coulombInteraction(m_fSite) + chargedDefects(m_fSite);
-      }
       return coulombInteraction(m_fSite);
   }
 

@@ -37,18 +37,13 @@ namespace Langmuir
       qFatal ("percent defects + percent traps > 100 percent");
 
     m_parameters.inverseKT =
-      1.0 / (m_parameters.boltzmannConstant * m_parameters.temperatureKelvin);
+      m_parameters.elementaryCharge / (m_parameters.boltzmannConstant * m_parameters.temperatureKelvin);
 
     m_parameters.electrostaticPrefactor =
       m_parameters.elementaryCharge / (4.0 * M_PI *
                                        m_parameters.dielectricConstant *
                                        m_parameters.permittivitySpace *
                                        m_parameters.gridFactor);
-
-    if (m_parameters.simulationType != 0)
-    {
-        m_parameters.gridDepth = m_parameters.gridDepth * 2;
-    }
   }
 
   bool InputParser::simulationParameters (SimulationParameters * par,

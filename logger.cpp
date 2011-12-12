@@ -42,12 +42,12 @@ void Logger::saveCarrierIDsToFile( QString name )
     {
         qFatal("can not open file %s",qPrintable(name));
     }
-    for ( int i = 0; i < m_world->charges()->size(); i++ )
+    for ( int i = 0; i < m_world->electrons()->size(); i++ )
     {
-        int s = m_world->charges()->at(i)->site(false);
-        int x = m_world->grid()->getColumn(s);
-        int y = m_world->grid()->getRow(s);
-        int z = m_world->grid()->getLayer(s);
+        int s = m_world->electrons()->at(i)->site(false);
+        int x = m_world->electronGrid()->getColumn(s);
+        int y = m_world->electronGrid()->getRow(s);
+        int z = m_world->electronGrid()->getLayer(s);
         out.write( qPrintable( QString("%1 %2 %3 %4\n").arg(x,w).arg(y,w).arg(z,w).arg(s,w) ) );
     }
 }
@@ -64,9 +64,9 @@ void Logger::saveTrapIDsToFile( QString name )
     for ( int i = 0; i < m_world->trapSiteIDs()->size(); i++ )
     {
         int s = m_world->trapSiteIDs()->at(i);
-        int x = m_world->grid()->getColumn(s);
-        int y = m_world->grid()->getRow(s);
-        int z = m_world->grid()->getLayer(s);
+        int x = m_world->electronGrid()->getColumn(s);
+        int y = m_world->electronGrid()->getRow(s);
+        int z = m_world->electronGrid()->getLayer(s);
         out.write( qPrintable( QString("%1 %2 %3 %4\n").arg(x,w).arg(y,w).arg(z,w).arg(s,w) ) );
     }
     out.close();
@@ -84,9 +84,9 @@ void Logger::saveDefectIDsToFile( QString name )
     for ( int i = 0; i < m_world->defectSiteIDs()->size(); i++ )
     {
         int s = m_world->defectSiteIDs()->at(i);
-        int x = m_world->grid()->getColumn(s);
-        int y = m_world->grid()->getRow(s);
-        int z = m_world->grid()->getLayer(s);
+        int x = m_world->electronGrid()->getColumn(s);
+        int y = m_world->electronGrid()->getRow(s);
+        int z = m_world->electronGrid()->getLayer(s);
         out.write( qPrintable( QString("%1 %2 %3 %4\n").arg(x,w).arg(y,w).arg(z,w).arg(s,w) ) );
     }
     out.close();
@@ -101,14 +101,14 @@ void Logger::saveFieldEnergyToFile( QString name )
     {
         qFatal("can not open file %s",qPrintable(name));
     }
-    for ( int i = 0; i < m_world->grid()->width(); i++ )
+    for ( int i = 0; i < m_world->electronGrid()->width(); i++ )
     {
-        for ( int j = 0; j < m_world->grid()->height(); j++ )
+        for ( int j = 0; j < m_world->electronGrid()->height(); j++ )
         {
-            for ( int k = 0; k < m_world->grid()->depth(); k++ )
+            for ( int k = 0; k < m_world->electronGrid()->depth(); k++ )
             {
-                int s = m_world->grid()->getIndex(i,j,k);
-                out.write( qPrintable( QString("%1 %2 %3 %4\n").arg(i,w).arg(j,w).arg(k,w).arg(m_world->grid()->potential(s),w,'e',p) ) );
+                int s = m_world->electronGrid()->getIndex(i,j,k);
+                out.write( qPrintable( QString("%1 %2 %3 %4\n").arg(i,w).arg(j,w).arg(k,w).arg(m_world->electronGrid()->potential(s),w,'e',p) ) );
             }
         }
     }
@@ -163,10 +163,10 @@ void Logger::saveTrapImageToFile( QString name )
         //Index of a trap site
         int ndx = m_world->trapSiteIDs()->at(i);
         //If this trap is in the Layer we are drawing...
-        if ( m_world->grid()->getLayer( ndx ) == 0 )
+        if ( m_world->electronGrid()->getLayer( ndx ) == 0 )
         {
             //Draw the trap as a point at (x,y) = (col,row)
-            painter.drawPoint( QPoint( m_world->grid()->getColumn( ndx ), m_world->grid()->getRow( ndx ) ) );
+            painter.drawPoint( QPoint( m_world->electronGrid()->getColumn( ndx ), m_world->electronGrid()->getRow( ndx ) ) );
         }
     }
     painter.end();
@@ -184,6 +184,6 @@ void Logger::carrierReportLifetimeAndPathlength( int i, int tick )
 {
     m_carrierStream << QString( "%1 %2 %3\n" )
      .arg(tick,m_world->parameters()->outputWidth)
-     .arg(m_world->charges()->at(i)->lifetime(),m_world->parameters()->outputWidth)
-     .arg(m_world->charges()->at(i)->distanceTraveled(),m_world->parameters()->outputWidth);
+     .arg(m_world->electrons()->at(i)->lifetime(),m_world->parameters()->outputWidth)
+     .arg(m_world->electrons()->at(i)->distanceTraveled(),m_world->parameters()->outputWidth);
 }

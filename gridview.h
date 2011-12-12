@@ -181,6 +181,7 @@ namespace Langmuir
             void timerRecordShot();
             void screenShot();
             void resetView();
+            void updatePointBuffers();
 
         signals:
             void xTranslationChanged( double angle );
@@ -234,7 +235,6 @@ namespace Langmuir
             ColoredObject *specularLight;
             QVector<float> pointBuffer1;
             QVector<float> pointBuffer2;
-            int currentCount;
             PointArray *carriersMinus;
             PointArray *carriersPlus;
             PointArray *defects;

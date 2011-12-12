@@ -6,6 +6,7 @@
 namespace Langmuir
 {
 
+  class Grid;
   /**
     *  @class ChargeAgent
     *  @brief A agent representing a charge carrier.
@@ -24,7 +25,7 @@ namespace Langmuir
      * @param world address of the world object.
      * @param site serial site index.
      */
-    ChargeAgent(World *world, int site);
+    ChargeAgent(World *world, int site, bool isHole = false);
 
     /**
      * @brief virutal Destructor.
@@ -102,6 +103,11 @@ namespace Langmuir
     inline void setOpenCLID( int id ) { m_openClID = id; }
 
     /**
+      * @brief get OpenCLID
+      */
+    inline int getOpenCLID( ) { return m_openClID; }
+
+    /**
       * @brief calculate coulomb energy difference between
       * initial state = m_site
       * final state = m_fSite
@@ -109,6 +115,16 @@ namespace Langmuir
       * are assumed to be in initial state. Interacts with defects
       */
     double interaction();
+
+    /**
+     * @brief coulomb interaction.
+     *
+     * Calculate the potential difference arising from the Coulomb interaction
+     * between the two proposed sites.
+     * @param site serial cell index of site to interact with.
+     * @return potential potential difference calculated.
+     */
+    double coulombInteraction(int newSite);
 
   protected:
 
@@ -148,43 +164,20 @@ namespace Langmuir
     double m_distanceTraveled;
 
    /**
+     *  @brief grid pointer
+     *
+     *  points to holeGrid or electronGrid depending upon what grid the carrier is in
+     */
+    Grid *m_grid;
+
+   /**
      * @brief Host memory array index ~ constantly changing...
-     * this is an index used to read and write information 
+     * this is an index used to read and write information
      * about this charge carrier to and from a global array(s).
      * In particular, its used to write site IDS to m_iHost, m_fHost,
      * and read Coulomb energies from m_oHost. ( all OpenCL stuff )
      */
     int m_openClID;
-
-    /**
-     * @brief coulomb interaction.
-     *
-     * Calculate the potential difference arising from the Coulomb interaction
-     * between the two proposed sites.
-     * @param site serial cell index of site to interact with.
-     * @return potential potential difference calculated.
-     */
-    double coulombInteraction(int newSite);
-
-    /**
-     * @brief defect interaction.
-     *
-     * Calculate the potential difference arising from the Coulomb interaction
-     * between the carrier and all charged defect.
-     * @param site serial cell index of site to interact with.
-     * @return potential potential difference calculated.
-     */
-    double chargedDefects(int newSite);
-
-    /**
-     * @brief defect interaction.
-     *
-     * Calculate the potential difference arising from the Coulomb interaction
-     * between the carrier and all charged traps.
-     * @param site serial cell index of site to interact with.
-     * @return potential potential difference calculated.
-     */
-    double chargedTraps(int newSite);
 
     /**
      * @brief coupling constant.

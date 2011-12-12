@@ -291,6 +291,20 @@ namespace Langmuir
      */
     int getLayer(int site);
 
+    /**
+     * @brief Create a list of site ids.
+     *
+     * Generate the neighbors of a given site
+     */
+    QVector<int> neighborsSite(int site);
+
+    /**
+     * @brief Create a list of site ids.
+     *
+     * Generate the site ids of a slice of the grid
+     */
+    QVector<int> slice(int xi, int xf, int yi, int yf, int zi, int zf);
+
   protected:
     /**
      * @brief grid width.
