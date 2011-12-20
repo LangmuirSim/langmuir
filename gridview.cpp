@@ -313,7 +313,7 @@ namespace Langmuir
             int site = holes->at(i)->site();
             pointBuffer2[ i * 4 + 0 ] = grid->getColumn(site) + 0.5;
             pointBuffer2[ i * 4 + 1 ] = grid->getRow(site) + 0.5;
-            pointBuffer2[ i * 4 + 2 ] = (grid->getLayer(site) + 0.5) * thickness;
+            pointBuffer2[ i * 4 + 2 ] = (grid->getLayer(site) + 0.75) * thickness;
         }
         carriersMinus->update(pointBuffer1,charges->size() * 4);
         carriersPlus->update(pointBuffer2,holes->size() * 4);
@@ -325,7 +325,7 @@ namespace Langmuir
         {
             pSim->performIterations( pPar->iterationsPrint );
             //double current = ( pSim->totalChargesAccepted() - lastCount ) / ( double( pPar->iterationsPrint ) );
-            lastCount = pSim->world()->drain()->acceptedCharges();
+            lastCount = pSim->world()->drainR()->acceptedElectrons();
             step += pPar->iterationsPrint;
             updatePointBuffers();
             emit stepChanged( step );

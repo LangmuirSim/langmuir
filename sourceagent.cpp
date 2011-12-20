@@ -7,23 +7,124 @@
 
 namespace Langmuir
 {
-  SourceAgent::SourceAgent(World * world, int site) : 
-    Agent(Agent::Source, world,site)
+  int SourceAgent::m_maxElectrons = 0;
+  int SourceAgent::m_maxHoles = 0;
+
+  SourceAgent::SourceAgent(Agent::Type type, World * world, int site) :
+    Agent(type,world,site)
   {
-    m_charges = 0;
-    m_site = m_world->electronGrid()->volume();
-    m_world->electronGrid()->setAgent(m_world->electronGrid()->volume(),this);
-    m_world->electronGrid()->setSiteID(m_world->electronGrid()->volume(),2);
-    m_world->holeGrid()->setAgent(m_world->electronGrid()->volume(),this);
-    m_world->holeGrid()->setSiteID(m_world->electronGrid()->volume(),2);
-    m_maxCharges = m_world->parameters()->chargePercentage * double(m_world->electronGrid()->volume());
-    m_neighbors = m_world->electronGrid()->slice(0,1,0,m_world->electronGrid()->height(),0,m_world->electronGrid()->depth());
+    if ( type != Agent::SourceL && type != Agent::SourceR )
+    {
+        qFatal("SourceAgent must have Agent:Type equal to Agent::SourceL or Agent::SourceR");
+    }
+    m_site = 0;
+    m_neighbors.clear();
+    m_maxElectrons = m_world->parameters()->chargePercentage*double(m_world->electronGrid()->volume());
+    m_maxHoles = m_world->parameters()->chargePercentage*double(m_world->electronGrid()->volume());
   }
 
   SourceAgent::~SourceAgent()
   {
+      qDebug() << m_type;
   }
 
+  int SourceAgent::carrierCount()
+  {
+      return m_world->electrons()->size() + m_world->holes()->size();
+  }
+
+  int SourceAgent::electronCount()
+  {
+      return m_world->electrons()->size();
+  }
+
+  int SourceAgent::holeCount()
+  {
+      return m_world->holes()->size();
+  }
+
+  int SourceAgent::maxCharges()
+  {
+      return maxElectrons() + maxHoles();
+  }
+
+  int SourceAgent::maxElectrons()
+  {
+      return m_maxElectrons;
+  }
+
+  int SourceAgent::maxHoles()
+  {
+      return m_maxHoles;
+  }
+
+  bool SourceAgent::validToInjectHoleAtSite(int site)
+  {
+      if ( m_world->holeGrid()->agentType(site) != Agent::Empty ||
+           m_world->holeGrid()->agentAddress(site) != 0 ||
+           site >= m_world->holeGrid()->volume() )
+      {
+          return false;
+      }
+      return true;
+  }
+
+  bool SourceAgent::validToInjectElectronAtSite(int site)
+  {
+      if ( m_world->electronGrid()->agentType(site) != Agent::Empty ||
+           m_world->electronGrid()->agentAddress(site) != 0 ||
+           site >= m_world->electronGrid()->volume() )
+      {
+          return false;
+      }
+      return true;
+  }
+
+  void SourceAgent::injectHoleAtSite(int site)
+  {
+      ChargeAgent *charge = new ChargeAgent(Agent::Hole,m_world,site);
+      m_world->holes()->push_back(charge);
+  }
+
+  void SourceAgent::injectElectronAtSite(int site)
+  {
+      ChargeAgent *charge = new ChargeAgent(Agent::Electron,m_world,site);
+      m_world->electrons()->push_back(charge);
+  }
+
+  void SourceAgent::shouldInject(Agent::Type type, int site)
+  {
+
+  }
+
+  int SourceAgent::randomSiteID()
+  {
+      return m_world->randomNumberGenerator()->integer(0,m_world->electronGrid()->volume()-1);
+  }
+
+  bool SourceAgent::seedHole()
+  {
+      int site = randomSiteID();
+      if ( validToInjectHoleAtSite(site) )
+      {
+          injectHoleAtSite(site);
+          return true;
+      }
+      return false;
+  }
+
+  bool SourceAgent::seedElectron()
+  {
+      int site = randomSiteID();
+      if ( validToInjectElectronAtSite(site) )
+      {
+          injectElectronAtSite(site);
+          return true;
+      }
+      return false;
+  }
+
+  /*
   inline double SourceAgent::coulombInteraction(int newSite)
   {
     // Pointer to grid
@@ -97,7 +198,7 @@ namespace Langmuir
   inline double SourceAgent::siteInteraction(int newSite)
   {
     //qDebug() << QString("%1").arg( -1.0 * m_world->parameters()->elementaryCharge * m_world->grid()->potential(newSite) );
-    return( -1.0 * m_world->parameters()->elementaryCharge * m_world->electronGrid()->potential(newSite) );
+    return( -1.0 * m_world->electronGrid()->potential(newSite) );
   }
 
   inline bool SourceAgent::attemptTransport(double pd)
@@ -123,7 +224,6 @@ namespace Langmuir
     //qDebug() << 4;
     return false;
   }
-
   int SourceAgent::transport()
   {
     // Do not inject if we are under the maximum charges
@@ -140,7 +240,7 @@ namespace Langmuir
     int irn = m_world->randomNumberGenerator()->integer(0,m_neighbors.size()-1);
 
     int tries = 1;
-    while(m_world->electronGrid()->agent(m_neighbors[irn]))
+    while(m_world->electronGrid()->agentAddress(m_neighbors[irn]))
       {
         irn = m_world->randomNumberGenerator()->integer(0,m_neighbors.size()-1);
         tries += 1;
@@ -205,4 +305,5 @@ namespace Langmuir
         }
       }
   }
+  */
 }

@@ -5,7 +5,7 @@
 
 namespace Langmuir
 {
-
+  class ChargeAgent;
   /**
     *  @class DrainAgent
     *  @brief A agent acting as a sink for charges.
@@ -29,7 +29,7 @@ namespace Langmuir
      * @param potential potential of the drain.
      * @warning default potential is set to zero.
      */
-    DrainAgent(World *world, int site);
+    DrainAgent(Agent::Type type, World *world, int site);
 
     /**
      * @brief virutal Destructor.
@@ -37,54 +37,61 @@ namespace Langmuir
    ~DrainAgent();
 
     /**
+     * @brief increment charge counters
+     *
+     * Accept charge carrier
+     * @param type is hole or electron
+     */
+    virtual void acceptCharge(Agent::Type type);
+
+    /**
      * @brief attept charge move.
      *
-     * Attempt to move a charge to this agent. If the charge is accepted then
-     * this agent will store that charge in its future state, otherwise the
-     * attempted transfer failed and the charge will not be stored.
-     * @param charge charge value in elementary units.
-     * @return true if accepted, false if not.
+     * Try to accept a charge carrier
+     * @param charge is hole or electron
      */
-    virtual bool acceptCharge(int charge);
-
-    /**
-     * @brief charge of agent.
-     *
-     * Get the charge of this agent.  What does that even mean for a drain?
-     * @return charge the charge of this agent.
-     */
-    virtual int charge();
-
-    /**
-     * @brief transport the drain. What does that even mean?
-     *
-     * Agent chooses a site and hands off to site.
-     * @return site index of the site the charge carrier was moved to.  -1 if the transport was unsucessful.
-     */
-    virtual int transport();
+    virtual bool attemptTransport(ChargeAgent *charge);
 
     /**
      * @brief total charges.
      *
-     * Total number of charges the drain has accepted.
-     * @return count the number of charges accepted.
+     * Total number of electrons the drain has accepted.
      */
-    unsigned long acceptedCharges();
+    unsigned long acceptedElectrons();
+
+    /**
+     * @brief total charges.
+     *
+     * Total number of holes the drain has accepted.
+     */
+    unsigned long acceptedHoles();
 
   private:
+
     /**
       * @brief total charges.
       *
       * Total number of charges accepted by the drain.
       */
-    unsigned long m_acceptedCharges; // Counter - number of accepted charges
+    unsigned long m_acceptedElectrons; // Counter - number of accepted electrons
+
+    /**
+      * @brief total charges.
+      *
+      * Total number of charges accepted by the drain.
+      */
+    unsigned long m_acceptedHoles; // Counter - number of accepted electrons
   };
 
-  inline unsigned long DrainAgent::acceptedCharges()
+  inline unsigned long DrainAgent::acceptedElectrons()
   {
-    return m_acceptedCharges;
+    return m_acceptedElectrons;
   }
 
+  inline unsigned long DrainAgent::acceptedHoles()
+  {
+    return m_acceptedHoles;
+  }
 } // End namespace Langmuir
 
 #endif

@@ -64,3 +64,77 @@ void Random::testInteger(const int low, const int high, int tries)
         Q_ASSERT_X( generated >= low && generated <= high, "testInteger", qPrintable( QString("low: %1 high: %2 generated: %3").arg(low).arg(high).arg(generated) ) );
     }
 }
+
+bool Random::randomlyChooseYesWithMetropolis(double energyChange, double inversekT)
+{
+  double randNumber = this->random();
+  return randomlyChooseYesWithMetropolis(energyChange,inversekT,randNumber);
+}
+
+bool Random::randomlyChooseYesWithMetropolis(double energyChange, double inversekT, double randNumber)
+{
+  if (energyChange > 0.0)
+    {
+      if (exp(-energyChange * inversekT) > randNumber)
+        {
+          return true;
+        }
+    }
+  else
+    {
+      return true;
+    }
+  return false;
+}
+
+bool Random::randomlyChooseYesWithMetropolisAndCoupling(double energyChange, double inversekT, double coupling)
+{
+  double randNumber = this->random();
+  return randomlyChooseYesWithMetropolisAndCoupling(energyChange,inversekT,coupling,randNumber);
+}
+
+bool Random::randomlyChooseYesWithMetropolisAndCoupling(double energyChange, double inversekT, double coupling, double randNumber)
+{
+  if (energyChange > 0.0)
+    {
+      if (coupling * exp(-energyChange * inversekT) > randNumber)
+        {
+          return true;
+        }
+    }
+  else if (coupling > randNumber)
+    {
+      return true;
+    }
+  return false;
+}
+
+bool Random::randomlyChooseNoWithPercent(double percent)
+{
+  double randNumber = this->random();
+  return randomlyChooseNoWithPercent(percent,randNumber);
+}
+
+bool Random::randomlyChooseNoWithPercent(double percent, double randNumber)
+{
+  if (percent < randNumber)
+    {
+      return true;
+    }
+  return false;
+}
+
+bool Random::randomlyChooseYesWithPercent(double percent)
+{
+  double randNumber = this->random();
+  return randomlyChooseYesWithPercent(percent,randNumber);
+}
+
+bool Random::randomlyChooseYesWithPercent(double percent, double randNumber)
+{
+  if (percent > randNumber)
+    {
+      return true;
+    }
+  return false;
+}

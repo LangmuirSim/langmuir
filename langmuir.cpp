@@ -155,11 +155,11 @@ int main (int argc, char *argv[])
             << par.defectPercentage * 100.00
             << par.trapPercentage * 100.0
             << par.chargePercentage * 100.0
-            << double (sim->world()->electrons()->size()) / double (sim->world()->source()->maxCharges()) * 100.0
-            << double (sim->world()->drain()->acceptedCharges() -
+            << double (sim->world()->electrons()->size()) / double (sim->world()->sourceL()->maxCharges()) * 100.0
+            << double (sim->world()->drainR()->acceptedElectrons() -
                        lastCount) / double (par.iterationsPrint) << "\n";
           iout->flush ();
-          lastCount = sim->world()->drain()->acceptedCharges();
+          lastCount = sim->world()->drainR()->acceptedElectrons();
 
           progress( i, j, 0, total, timer.elapsed(timeStepStart) );
         }
@@ -180,11 +180,11 @@ int main (int argc, char *argv[])
             << par.defectPercentage * 100.0
             << par.trapPercentage * 100.0
             << par.chargePercentage * 100.0
-            << double (sim->world()->electrons()->size()) / double (sim->world()->source()->maxCharges()) * 100.0
-            << double (sim->world()->drain()->acceptedCharges() -
+            << double (sim->world()->electrons()->size()) / double (sim->world()->sourceL()->maxCharges()) * 100.0
+            << double (sim->world()->drainR()->acceptedElectrons() -
                        lastCount) / double (par.iterationsPrint) << "\n";
           iout->flush ();
-          lastCount = sim->world()->drain()->acceptedCharges();
+          lastCount = sim->world()->drainR()->acceptedElectrons();
 
           progress( i, par.iterationsWarmup, j, total, timer.elapsed(timeStepStart) );
         }
@@ -198,7 +198,7 @@ int main (int argc, char *argv[])
         << par.defectPercentage * 100.0
         << par.trapPercentage * 100.0
         << par.chargePercentage * 100.0
-        << double (sim->world()->electrons()->size()) / double (sim->world()->source()->maxCharges()) * 100.0
+        << double (sim->world()->electrons()->size()) / double (sim->world()->sourceL()->maxCharges()) * 100.0
         << double (lastCount - startCount) / double (par.iterationsReal)
         << timer.elapsed (timeStepStart) << "\n";
       oout->flush ();

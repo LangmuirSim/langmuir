@@ -25,7 +25,7 @@ namespace Langmuir
      * @param world address of the world object.
      * @param site serial site index.
      */
-    ChargeAgent(World *world, int site, bool isHole = false);
+    ChargeAgent(Agent::Type type, World *world, int site);
 
     /**
      * @brief virutal Destructor.
@@ -49,14 +49,6 @@ namespace Langmuir
     virtual int charge();
 
     /**
-     * @brief transport the carrier.
-     *
-     * calls chooseFuture, and then decideFuture
-     * @return site index of the site the charge carrier was moved to.  -1 if the transport was unsucessful.
-     */
-    virtual int transport();
-
-    /**
       * @brief choose future site
       */
     virtual void chooseFuture();
@@ -64,7 +56,7 @@ namespace Langmuir
     /**
       * @brief decide if future chosen site is ok
       */
-    virtual int decideFuture();
+    virtual void decideFuture();
 
     /**
      * @brief complete the tick.
@@ -100,21 +92,12 @@ namespace Langmuir
     /**
       * @brief set OpenCLID
       */
-    inline void setOpenCLID( int id ) { m_openClID = id; }
+    void setOpenCLID( int id );
 
     /**
       * @brief get OpenCLID
       */
-    inline int getOpenCLID( ) { return m_openClID; }
-
-    /**
-      * @brief calculate coulomb energy difference between
-      * initial state = m_site
-      * final state = m_fSite
-      * interacts with all other charge carriers, all of which
-      * are assumed to be in initial state. Interacts with defects
-      */
-    double interaction();
+    int getOpenCLID();
 
     /**
      * @brief coulomb interaction.
@@ -178,27 +161,6 @@ namespace Langmuir
      * and read Coulomb energies from m_oHost. ( all OpenCL stuff )
      */
     int m_openClID;
-
-    /**
-     * @brief coupling constant.
-     *
-     * Access the coupling constant for two sites.
-     * @param type1 type of site 1.
-     * @param type2 type of site 2.
-     * @return coupling coupling constant between these two site types.
-     */
-    double couplingConstant(short id1, short id2);
-
-    /**
-     * @brief Transport attempt success.
-     *
-     * Apply the metropolis criterion for a transport attempt.
-     *
-     * @param pd potential difference between old and new site.
-     * @param coupling coupling constant between old and new site types.
-     * @return success Boolean.  True if transported, False if rejected.
-     */
-    bool attemptTransport(double pd, double coupling);
   };
 
   inline int ChargeAgent::charge()
@@ -224,6 +186,16 @@ namespace Langmuir
   inline double ChargeAgent::distanceTraveled()
   {
    return m_distanceTraveled;
+  }
+
+  inline void ChargeAgent::setOpenCLID( int id )
+  {
+      m_openClID = id;
+  }
+
+  inline int ChargeAgent::getOpenCLID( )
+  {
+      return m_openClID;
   }
 
 } // End namespace Langmuir

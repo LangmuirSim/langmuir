@@ -19,6 +19,12 @@ namespace Langmuir
         // Tell World about this simulation
         m_world->setSimulation(this);
 
+        // Set up Drains on left and right of the grid
+        this->setUpSources();
+
+        // Set up Sources on left and right of the grid
+        this->setUpDrains();
+
         // Place Defects
         this->createDefects();
 
@@ -87,14 +93,14 @@ namespace Langmuir
 
     void Simulation::createDefects()
     {
-        QVector<int> sourceNeighbors = m_world->source()->getNeighbors();
-        QVector<int> drainNeighnors = m_world->drain()->getNeighbors();
+        QVector<int> sourceNeighbors = m_world->sourceL()->getNeighbors();
+        QVector<int> drainNeighnors = m_world->drainR()->getNeighbors();
         for (int i = 0; i < m_world->electronGrid()->volume (); ++i)
         {
             if (m_world->randomNumberGenerator()->random() < m_world->parameters()->defectPercentage)
             {
-                m_world->electronGrid()->setSiteID(i,1);
-                m_world->holeGrid()->setSiteID(i,1);
+                m_world->electronGrid()->setAgentType(i,Agent::Defect);
+                m_world->holeGrid()->setAgentType(i,Agent::Defect);
                 m_world->defectSiteIDs()->push_back(i);
                 int sourceNeighborsHasDefect = sourceNeighbors.indexOf(i);
                 int drainNeighnorsHasDefect = drainNeighnors.indexOf(i);
@@ -103,39 +109,87 @@ namespace Langmuir
             }
             else
             {
-                m_world->electronGrid()->setSiteID(i, 0);
+                m_world->electronGrid()->setAgentType(i,Agent::Empty);
             }
         }
-        m_world->source()->setNeighbors(sourceNeighbors);
-        m_world->drain()->setNeighbors(drainNeighnors);
+        m_world->sourceL()->setNeighbors(sourceNeighbors);
+        m_world->drainR()->setNeighbors(drainNeighnors);
     }
 
     void Simulation::seedCharges()
     {
-        for (int i = 0; i < m_world->source()->maxCharges();)
+        for (int i = 0; i < m_world->sourceL()->maxHoles();)
         {
-            // Randomly select a site, ensure it is suitable, if so add a charge agent
-            int site = m_world->randomNumberGenerator()->integer(0,m_world->electronGrid()->volume()-1);
-            if (m_world->electronGrid()->siteID (site) == 0 && m_world->electronGrid()->agent (site) == 0)
+            if (m_world->sourceL()->seedHole())
             {
-                ChargeAgent *charge = new ChargeAgent(m_world, site, false);
-                m_world->electrons()->push_back (charge);
-                m_world->source()->incrementCharge ();
                 ++i;
             }
         }
-        for (int i = 0; i < m_world->source()->maxCharges();)
+        for (int i = 0; i < m_world->sourceL()->maxElectrons();)
         {
-            // Randomly select a site, ensure it is suitable, if so add a charge agent
-            int site = m_world->randomNumberGenerator()->integer(0,m_world->electronGrid()->volume()-1);
-            if (m_world->holeGrid()->siteID (site) == 0 && m_world->holeGrid()->agent(site) == 0)
+            if (m_world->sourceL()->seedElectron())
             {
-                ChargeAgent *charge = new ChargeAgent(m_world, site, true);
-                charge->setCharge(1);
-                m_world->holes()->push_back (charge);
-                m_world->source()->incrementCharge (); //IS THIS RIGHT??????
                 ++i;
             }
         }
     }
+
+    void Simulation::setUpDrains()
+    {
+        Grid &EGrid = *m_world->electronGrid();
+        Grid &HGrid = *m_world->holeGrid();
+
+        int IDLeft  = EGrid.getIndexDrainL();
+        int IDRight = EGrid.getIndexDrainR();
+
+        DrainAgent *DrainLeft  = m_world->drainL();
+        DrainAgent *DrainRight = m_world->drainR();
+
+        QVector<int> leftNeighbors = EGrid.sliceIndex(0,1,0,EGrid.height(),0,EGrid.depth());
+        QVector<int> rightNeighbors = EGrid.sliceIndex(EGrid.width()-1,EGrid.width(),0,EGrid.height(),0,EGrid.depth());
+
+        DrainLeft->setSite(IDLeft);
+        EGrid.setAgentAddress(IDLeft,DrainLeft);
+        EGrid.setAgentType(IDLeft,Agent::DrainL);
+        HGrid.setAgentAddress(IDLeft,DrainLeft);
+        HGrid.setAgentType(IDLeft,Agent::DrainL);
+        DrainLeft->setNeighbors(leftNeighbors);
+
+        DrainRight->setSite(IDRight);
+        EGrid.setAgentAddress(IDRight,DrainRight);
+        EGrid.setAgentType(IDRight,Agent::DrainR);
+        HGrid.setAgentAddress(IDRight,DrainRight);
+        HGrid.setAgentType(IDRight,Agent::DrainR);
+        DrainRight->setNeighbors(rightNeighbors);
+    }
+
+    void Simulation::setUpSources()
+    {
+        Grid &EGrid = *m_world->electronGrid();
+        Grid &HGrid = *m_world->holeGrid();
+
+        int IDLeft  = EGrid.getIndexSourceL();
+        int IDRight = EGrid.getIndexSourceR();
+
+        SourceAgent *SourceLeft  = m_world->sourceL();
+        SourceAgent *SourceRight = m_world->sourceR();
+
+        QVector<int> leftNeighbors = EGrid.sliceIndex(0,1,0,EGrid.height(),0,EGrid.depth());
+        QVector<int> rightNeighbors = EGrid.sliceIndex(EGrid.width()-1,EGrid.width(),0,EGrid.height(),0,EGrid.depth());
+
+        SourceLeft->setSite(IDLeft);
+        EGrid.setAgentAddress(IDLeft,SourceLeft);
+        EGrid.setAgentType(IDLeft,Agent::SourceL);
+        HGrid.setAgentAddress(IDLeft,SourceLeft);
+        HGrid.setAgentType(IDLeft,Agent::SourceL);
+        SourceLeft->setNeighbors(leftNeighbors);
+
+        SourceRight->setSite(IDRight);
+        EGrid.setAgentAddress(IDRight,SourceRight);
+        EGrid.setAgentType(IDRight,Agent::SourceR);
+        HGrid.setAgentAddress(IDRight,SourceRight);
+        HGrid.setAgentType(IDRight,Agent::SourceR);
+        SourceRight->setNeighbors(rightNeighbors);
+    }
+
 } // End namespace Langmuir

@@ -73,6 +73,88 @@ class Random
           */
         void testInteger(const int low=0, const int high=1, const int tries=100000);
 
+        /**
+         * @brief Basic Monte Carlo acceptance criterion
+         *
+         * Apply the metropolis criterion.
+         * @param energyChange energy difference for change
+         * @param inversekT one over Boltzmann constant
+         * @param randNumber an already generated random number
+         * @return success
+         */
+        bool randomlyChooseYesWithMetropolis(double energyChange, double inversekT, double randNumber);
+
+        /**
+         * @brief Basic Monte Carlo acceptance criterion
+         *
+         * this is an overloaded function that generates a random number for you
+         * @param energyChange energy difference for change
+         * @param inversekT one over Boltzmann constant
+         * @return success
+         */
+        bool randomlyChooseYesWithMetropolis(double energyChange, double inversekT);
+
+        /**
+         * @brief Basic Monte Carlo acceptance criterion
+         *
+         * Apply the metropolis criterion with coupling.
+         * @param energyChange energy difference for change
+         * @param inversekT one over Boltzmann constant
+         * @param coupling coupling constant between old and new site types.
+         * @param randNumber an already generated random number
+         * @return success
+         */
+        bool randomlyChooseYesWithMetropolisAndCoupling(double energyChange, double inversekT, double coupling, double randNumber);
+
+        /**
+         * @brief Basic Monte Carlo acceptance criterion with coupling
+         *
+         * this is an overloaded function that generates a random number for you
+         * @param energyChange energy difference for change
+         * @param inversekT one over Boltzmann constant
+         * @param coupling coupling constant between old and new site types.
+         * @return success
+         */
+        bool randomlyChooseYesWithMetropolisAndCoupling(double energyChange, double inversekT, double coupling);
+
+        /**
+         * @brief Basic Random Yes Choice
+         *
+         * returns true about 100*percent times out of every 100 calls
+         * @param percent fraction less than or equal to one of the time to return true
+         * @param randNumber an already generated random number
+         * @return success
+         */
+        bool randomlyChooseYesWithPercent(double percent, double randNumber);
+
+        /**
+         * @brief Basic Random Yes Choice
+         *
+         * this is an overloaded function for a already generated random number
+         * @param percent fraction less than or equal to one of the time to return true
+         * @return success
+         */
+        bool randomlyChooseYesWithPercent(double percent);
+
+        /**
+         * @brief Basic Random No Choice
+         *
+         * returns false about 100*percent times out of every 100 calls
+         * @param percent fraction less than or equal to one of the time to return false
+         * @param randNumber an already generated random number
+         * @return success
+         */
+        bool randomlyChooseNoWithPercent(double percent, double randNumber);
+
+        /**
+         * @brief Basic Random No Choice
+         *
+         * this is an overloaded function for a already generated random number
+         * @param percent fraction less than or equal to one of the time to return false
+         * @return success
+         */
+        bool randomlyChooseNoWithPercent(double percent);
+
     private:
 
         /**

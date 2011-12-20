@@ -73,10 +73,11 @@ namespace Langmuir
 
     void Transistor::performInjections(int nInjections)
     {
+        /*
         int inject = nInjections;
         if ( inject < 0 )
         {
-            inject = m_world->source()->maxCharges() - m_world->electrons()->size();
+            inject = m_world->sourceL()->maxCharges() - m_world->electrons()->size();
             if ( inject <= 0 )
             {
                 return;
@@ -84,13 +85,14 @@ namespace Langmuir
         }
         for ( int i = 0; i < inject; i++ )
         {
-          int site = m_world->source()->transport();
+          int site = m_world->sourceL()->transport();
           if (site != -1)
             {
-              ChargeAgent *charge = new ChargeAgent (m_world, site );
+              ChargeAgent *charge = new ChargeAgent (Agent::Electron,m_world, site );
               m_world->electrons ()->push_back (charge);
             }
         }
+        */
     }
 
     void Transistor::nextTick()
@@ -108,8 +110,6 @@ namespace Langmuir
               m_world->logger()->carrierReportLifetimeAndPathlength(i,m_tick);
               delete charges[i];
               charges.removeAt (i);
-              m_world->drain()->acceptCharge (-1);
-              m_world->source()->decrementCharge ();
               --i;
             }
           }
@@ -125,8 +125,6 @@ namespace Langmuir
             {
               delete charges[i];
               charges.removeAt (i);
-              m_world->drain()->acceptCharge (-1);
-              m_world->source()->decrementCharge ();
               --i;
             }
           }
@@ -138,7 +136,8 @@ namespace Langmuir
         // This function performs a single iteration for a charge agent, only thread
         // safe calls can be made in this function. Other threads may access the
         // current state of the chargeAgent, but will not attempt to modify it.
-        chargeAgent->transport();
+        chargeAgent->chooseFuture();
+        chargeAgent->decideFuture();
     }
 
     inline void Transistor::chargeAgentChooseFuture( ChargeAgent * chargeAgent )

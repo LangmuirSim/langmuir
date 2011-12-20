@@ -54,19 +54,6 @@ namespace Langmuir
     QVector<int> col(int col, int layer = 0);
 
     /**
-     * @brief resize the grid.
-     *
-     * Creates a cubic grid of dimensions width x height x depth.
-     * Sets the values for width, depth, height, area, and volume.
-     * Allocates memory for agents, potentials, and site serial indices.
-     * @param width the number of columns
-     * @param height the number of rows
-     * @param depth the number of layers
-     * @warning agents, potentials, and site serial indices are set to zero.
-     */
-    void setSize(int width, int height, int depth);
-
-    /**
      * @brief grid width.
      *
      * Data access to grid width.
@@ -262,7 +249,7 @@ namespace Langmuir
      * @param agent pointer to an agent.
      * @warning unchecked access to agent list.
      */
-    void setAgent(int site, Agent *agent);
+    void setAgentAddress(int site, Agent *agentAddress);
 
     /**
      * @brief get row.
@@ -303,7 +290,7 @@ namespace Langmuir
      *
      * Generate the site ids of a slice of the grid
      */
-    QVector<int> slice(int xi, int xf, int yi, int yf, int zi, int zf);
+    QVector<int> sliceIndex(int xi, int xf, int yi, int yf, int zi, int zf);
 
   protected:
     /**

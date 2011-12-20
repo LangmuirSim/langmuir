@@ -19,13 +19,21 @@ namespace Langmuir{
   public:
     /**
      * @enum Different Agent types
+     *
      */
+    // The numbers are used as an index to access a matrix of coupling constants - so be careful changing things
     enum Type {
-      Charge,
-      Defect,
-      Source,
-      Drain,
+      Empty = 0,
+      Electron = 1,
+      Hole = 2,
+      Defect = 3,
+      SourceL = 4,
+      SourceR = 5,
+      DrainL = 6,
+      DrainR = 7,
+      SIZE = 8
     };
+    static QString typeToQString(const Agent::Type &t);
 
     /**
      * @brief Default Constructor.
@@ -58,29 +66,6 @@ namespace Langmuir{
     virtual const QVector<int>& getNeighbors() const;
 
     /**
-     * @brief charge.
-     *
-     * Data access to this charge carriers charge in units of electronic charge.
-     * @return charge charge in units of the elementary charge.
-     */
-    virtual int charge() = 0;
-
-    /**
-     * @brief transport the carrier.
-     *
-     * Agent chooses a site and hands off to site.
-     * @return site index of the site the charge carrier was moved to.  -1 if the transport was unsucessful.
-     */
-    virtual int transport() = 0;
-
-    /**
-     * @brief complete the tick.
-     *
-     * Update the simulation by accepting or rejecting a Monte Carlor move.
-     */
-    virtual void completeTick();
-
-    /**
      * @brief Set site.
      *
      * Set the site number
@@ -99,7 +84,7 @@ namespace Langmuir{
      *
      * Return the type number
      */
-    virtual short type();
+    virtual Type type() const;
 
   protected:
     /**
@@ -135,7 +120,7 @@ namespace Langmuir{
       *
       * Number identifying the agent type. 0 = charge carrier, 1 = defect, 2 = source, 3 = drain.
       */
-    short m_type;
+    Type m_type;
   };
 
   inline Agent::Agent(Type type, World *world, int site) :
@@ -153,11 +138,6 @@ namespace Langmuir{
     return m_neighbors;
   }
 
-  inline void Agent::completeTick()
-  {
-    m_site = m_fSite;
-  }
-
   inline void Agent::setSite(int site, bool future)
   {
     if (future) m_fSite = site;
@@ -170,9 +150,75 @@ namespace Langmuir{
     else return m_site;
   }
 
-  inline short Agent::type()
+  inline Agent::Type Agent::type() const
   {
-      return m_type;
+    return m_type;
+  }
+
+  inline QDebug operator<<(QDebug dbg, const Agent::Type &t)
+  {
+      return dbg << qPrintable(Agent::typeToQString(t));
+  }
+
+  inline QString Agent::typeToQString(const Agent::Type &t)
+  {
+      switch(t)
+      {
+          case Agent::Empty:
+          {
+              return QString("Agent::Type(%1):Empty").arg(int(t));
+              break;
+          }
+
+          case Agent::Hole:
+          {
+              return QString("Agent::Type(%1):Hole").arg(int(t));
+              break;
+          }
+
+          case Agent::Electron:
+          {
+              return QString("Agent::Type(%1):Electron").arg(int(t));
+              break;
+          }
+
+          case Agent::Defect:
+          {
+              return QString("Agent::Type(%1):Defect").arg(int(t));
+              break;
+          }
+
+          case Agent::SourceL:
+          {
+              return QString("Agent::Type(%1):SourceL").arg(int(t));
+              break;
+          }
+
+          case Agent::SourceR:
+          {
+              return QString("Agent::Type(%1):SourceR").arg(int(t));
+              break;
+          }
+
+          case Agent::DrainL:
+          {
+              return QString("Agent::Type(%1):DrainL").arg(int(t));
+              break;
+          }
+
+          case Agent::DrainR:
+          {
+              return QString("Agent::Type(%1):DrainR").arg(int(t));
+              break;
+          }
+
+          default:
+          {
+              return QString("Agent::Type(%1):UnknownType").arg(int(t));
+              break;
+          }
+      }
+      return QString("Agent::Type(?):UnknownType");
   }
 
 } // End namespace Langmuir

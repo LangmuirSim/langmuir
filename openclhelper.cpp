@@ -62,9 +62,9 @@ void OpenClHelper::initializeOpenCL( )
         m_sHost.clear( );
         m_qHost.clear( );
         m_oHost.clear( );
-        m_sHost.resize( m_world->electronGrid()->volume() );
-        m_qHost.resize( m_world->electronGrid()->volume() );
-        m_oHost.resize( m_world->electronGrid()->volume() + 2 ); // +2 for drain and source
+        m_sHost.resize( m_world->electronGrid()->volume() + m_world->electronGrid()->extraAgentCount() );
+        m_qHost.resize( m_world->electronGrid()->volume() + m_world->electronGrid()->extraAgentCount() );
+        m_oHost.resize( m_world->electronGrid()->volume() + m_world->electronGrid()->extraAgentCount() );
 
         //initialize Device Memory
         m_sDevice = cl::Buffer(m_context, CL_MEM_READ_ONLY, m_sHost.size() * sizeof (int), NULL, &err);
@@ -81,6 +81,7 @@ void OpenClHelper::initializeOpenCL( )
         err = m_coulombK1.setArg (1, m_sDevice);
         err = m_coulombK1.setArg (2, m_qDevice);
         err = m_coulombK1.setArg (4, m_world->parameters()->electrostaticCutoff * m_world->parameters()->electrostaticCutoff);
+        err = m_coulombK1.setArg (5, m_world->parameters()->electrostaticPrefactor);
 
         err = m_coulombK2.setArg (0, m_oDevice);
         err = m_coulombK2.setArg (1, m_sDevice);
@@ -89,6 +90,7 @@ void OpenClHelper::initializeOpenCL( )
         err = m_coulombK2.setArg (5, m_sDevice);
         err = m_coulombK2.setArg (6, m_world->parameters()->gridWidth);
         err = m_coulombK2.setArg (7, m_world->parameters()->gridHeight);
+        err = m_coulombK2.setArg (8, m_world->parameters()->electrostaticPrefactor);
 
         //check for errors
         {
@@ -410,8 +412,8 @@ void OpenClHelper::compareHostAndDeviceForCarrier( int i, QList< ChargeAgent * >
     double P1CPU  = PE1CPU + PH1CPU + PD1CPU;
     double P2CPU  = PE2CPU + PH2CPU + PD2CPU - PSI;
 
-    double P1GPU  = getOutputHost(CL) * m_world->parameters()->electrostaticPrefactor;
-    double P2GPU  = getOutputHostFuture(CL) * m_world->parameters()->electrostaticPrefactor - PSI;
+    double P1GPU  = getOutputHost(CL);
+    double P2GPU  = getOutputHostFuture(CL) - PSI;
 
     double PDIFF1 = fabs( P1CPU - P1GPU ) / ( 0.5 * ( fabs( P1CPU ) + fabs( P1GPU ) ) ) * 100.0;
     double PDIFF2 = fabs( P2CPU - P2GPU ) / ( 0.5 * ( fabs( P2CPU ) + fabs( P2GPU ) ) ) * 100.0;
@@ -507,7 +509,7 @@ void OpenClHelper::compareHostAndDeviceAtSite(int i)
     double PH1CPU = potential.coulombEnergyHoles(i);
     double PD1CPU = potential.coulombEnergyDefects(i);
     double P1CPU  = PE1CPU + PH1CPU + PD1CPU;
-    double P1GPU  = getOutputHost(i) * m_world->parameters()->electrostaticPrefactor;
+    double P1GPU  = getOutputHost(i);
     double PDIFF1 = fabs( P1CPU - P1GPU ) / ( 0.5 * ( fabs( P1CPU ) + fabs( P1GPU ) ) ) * 100.0;
 
     QString SS = QString("     I[%1](    (%2)   (%3)   (%4)     %5  )")

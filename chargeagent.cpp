@@ -1,5 +1,6 @@
 #include "openclhelper.h"
 #include "chargeagent.h"
+#include "drainagent.h"
 #include "inputparser.h"
 #include "simulation.h"
 #include "potential.h"
@@ -10,23 +11,44 @@
 
 namespace Langmuir
 {
-    ChargeAgent::ChargeAgent (World * world, int site, bool isHole):Agent (Agent::Charge, world, site),
-     m_charge (-1), m_removed (false), m_lifetime(0), m_distanceTraveled(0.0), m_openClID(0)
+    ChargeAgent::ChargeAgent (Agent::Type type, World * world, int site):Agent (type, world, site),
+     m_charge (0), m_removed (false), m_lifetime(0), m_distanceTraveled(0.0), m_openClID(0)
   {
     //current site and future site are the same
     m_site = m_fSite;
 
-    if ( isHole )
+    switch ( m_type )
     {
-        m_grid = m_world->holeGrid();
+        case Agent::Electron:
+        {
+            m_grid = m_world->electronGrid();
+            m_charge = -1;
+            break;
+        }
+        case Agent::Hole:
+        {
+            m_grid = m_world->holeGrid();
+            m_charge = +1;
+            break;
+        }
+        default:
+        {
+            qFatal("ChargeAgent has invalid Agent:Type: %s",
+                   qPrintable(Agent::typeToQString(m_grid->agentType(m_fSite))));
+            break;
+        }
+    }
+
+    if ( m_grid->agentAddress(m_site) == 0 && m_grid->agentType(m_site) == Agent::Empty )
+    {
+        //make sure this agent is somewhere on the grid
+        m_grid->setAgentAddress(m_site,this);
+        m_grid->setAgentType(m_site,m_type);
     }
     else
     {
-        m_grid = m_world->electronGrid();
+        qFatal("chargeAgent can not be placed at site, site is already occupied");
     }
-    //make sure this agent is somewhere on the grid
-    m_grid->setAgent (m_site, this);
-
     //figure out the neighbors of this site
     m_neighbors = m_grid->neighborsSite(m_site);
   }
@@ -37,122 +59,130 @@ namespace Langmuir
 
   void ChargeAgent::chooseFuture()
   {
-    // Select a proposed transport site at random, but ensure that it is not the source
-    do
-      {
-        m_fSite = m_neighbors[ m_world->randomNumberGenerator()->integer(0,m_neighbors.size()-1) ];
-      }
-    while (m_grid->siteID(m_fSite) == 2); // source siteID
+    // Select a proposed transport site at random
+    m_fSite = m_neighbors[ m_world->randomNumberGenerator()->integer(0,m_neighbors.size()-1) ];
   }
 
-  int ChargeAgent::decideFuture()
+  void ChargeAgent::decideFuture()
   {
     // Increase lifetime in existance
     m_lifetime += 1;
 
-    // Check the proposed site, return unsucessful if it is the SOURCE, a DEFECT, or another CARRIER
-    if ( m_grid->agent(m_fSite) && m_grid->siteID (m_fSite) != 3 ) { m_fSite = m_site; return -1; }
-
-    // If the site is the DRAIN, perform drain acceptance probability calculations ( drain.type, drain.barrier )
-    if ( m_grid->siteID(m_fSite) == 3 )
+    switch ( m_grid->agentType(m_fSite) )
     {
-        switch ( m_world->parameters()->drainType )
+        case Agent::Empty:
         {
-            case 0: // Constant case
+            // Potential difference between sites
+            double pd = m_grid->potential(m_fSite) - m_grid->potential (m_site);
+            pd *= m_charge;
+
+            // Coulomb interactions
+            if ( m_world->parameters()->interactionCoulomb )
             {
-                // Do not accept 100*sourceBarrier percent of the time
-                if(m_world->randomNumberGenerator()->random() <= m_world->parameters()->drainBarrier)
-                {
-                 m_fSite = m_site;
-                 return -1;
-                }
-                // accept the charge carrier
-                else
-                {
-                 m_distanceTraveled += 1.0;
-                 return m_fSite;
-                }
-                break;
+                pd += this->coulombInteraction (m_fSite);
             }
 
-            case 1: // Broken case
+            // Metropolis criterion
+            if ( m_world->randomNumberGenerator()->randomlyChooseYesWithMetropolisAndCoupling(
+                        pd,
+                        m_world->parameters()->inverseKT,
+                        m_world->coupling()[m_grid->agentType(m_site)][m_grid->agentType(m_fSite)]) )
             {
-                // The broken case allowed the potential of the drain to be used to calculate acceptance
-                // ...coulomb interactions between the carrier and the drain were also calculated (undefined)
-                break;
+                // Accept move - increase distance traveled
+                m_distanceTraveled += 1.0;
+                return;
             }
+            else
+            {
+                // Reject move
+                m_fSite = m_site;
+            }
+            return;
+            break;
+        }
 
-            default:
+        case Agent::DrainL: case Agent::DrainR:
+        {
+            // Move to drain with a constant probability ( see coupling constants )
+            if ( m_world->drainL()->attemptTransport(this) )
             {
-                qFatal("unknown drain acceptance probability calculation type encountered");
-                return -1;
-                break;
+                // Accept move - increase distance traveled
+                m_distanceTraveled += 1.0;
             }
+            else
+            {
+                // Reject move
+                m_fSite = m_site;
+            }
+            break;
+        }
+
+        case Agent::Electron: case Agent::Hole: case Agent::Defect:
+        {
+            // Reject move - do not move to where there are Electrons, Holes, or Defects
+            m_fSite = m_site;
+            break;
+        }
+
+        case Agent::SourceL: case Agent::SourceR:
+        {
+            // Kill program - this should never happen
+            qFatal("ChargeAgent::decideFuture transport to a Source agent: %s",
+                   qPrintable(Agent::typeToQString(m_grid->agentType(m_fSite))));
+            m_fSite = m_site;
+            break;
+        }
+
+        default:
+        {
+            // Kill program - this should never happen
+            qFatal("ChargeAgent::decideFuture transport to unhandled site type: %s",
+                   qPrintable(Agent::typeToQString(m_grid->agentType(m_fSite))));
+            break;
         }
     }
-
-    // Now to add on the background potential - from the applied field
-    // A few electrons only perturb the potential by ~1e-20 or so.
-    double pd = m_grid->potential(m_fSite) - m_grid->potential (m_site);
-    pd *= m_charge;// * m_world->parameters()->elementaryCharge;
-
-    // Add on the Coulomb interaction if it is being included    
-    if ( m_world->parameters()->interactionCoulomb )
-      {
-            pd += this->coulombInteraction (m_fSite);
-      }
-
-    // Apply metropolis criterion
-    if (attemptTransport (pd, couplingConstant(m_grid->siteID(m_site), m_grid->siteID(m_fSite)) ))
-      {
-        // Set the future site is sucessful
-        m_distanceTraveled += 1.0;
-        return m_fSite;
-      }
-
-    // Return -1 if transport unsucessful
-    m_fSite = m_site;
-    return -1;
-  }
-
-  int ChargeAgent::transport ()
-  {
-    // Select a proposed transport site
-    chooseFuture();
-
-    // decide if the future site is ok to transport to
-    return decideFuture();
+    return;
   }
 
   void ChargeAgent::completeTick ()
   {
     if (m_site != m_fSite)
       {
-
         // Are we on a drain site? If so then we have been removed.
-        // Apparently charge carriers are people too.
-        if (m_grid->siteID (m_fSite) == 3)
+        if (m_grid->agentType (m_fSite) == Agent::DrainL)
           {
-            m_grid->setAgent (m_site, 0);
+            m_grid->setAgentAddress(m_site,0);
+            m_grid->setAgentType(m_site,Agent::Empty);
+            m_world->drainL()->acceptCharge(m_type);
+            m_removed = true;
+            return;
+          }
+        if (m_grid->agentType (m_fSite) == Agent::DrainR)
+          {
+            m_grid->setAgentAddress (m_site,0);
+            m_grid->setAgentType(m_site,Agent::Empty);
+            m_world->drainR()->acceptCharge(m_type);
             m_removed = true;
             return;
           }
 
         // Check if another charge snuck into this site before us.
-        else if (m_grid->agent (m_fSite))
+        else if (m_grid->agentAddress(m_fSite))
           {
             // Abort the move - site is now occupied
             m_fSite = m_site;
             return;
           }
 
-        if (m_site != -1)
-          // Vacate the old site
-          m_grid->setAgent (m_site, 0);
+        //if (m_site != -1)
+        //Vacate the old site
+        m_grid->setAgentAddress(m_site,0);
+        m_grid->setAgentType(m_site,Agent::Empty);
 
         // Everything looks good - set this agent to the new site.
         m_site = m_fSite;
-        m_grid->setAgent (m_site, this);
+        m_grid->setAgentAddress (m_site,this);
+        m_grid->setAgentType(m_site,m_type);
 
         // Update our neighbors
         m_neighbors = m_grid->neighborsSite(m_site);
@@ -167,15 +197,11 @@ namespace Langmuir
       if (m_world->parameters()->useOpenCL)
       {
           // Assuming the GPU calculation output was copied to the CPU already
-          p1 = m_world->opencl()->getOutputHost(m_openClID);
-          p2 = m_world->opencl()->getOutputHostFuture(m_openClID);
+          p1 += m_world->opencl()->getOutputHost(m_openClID);
+          p2 += m_world->opencl()->getOutputHostFuture(m_openClID);
 
           // Remove self interaction
-          p2 -= m_charge;
-
-          // Convert to Joules
-          p1 = p1 * m_world->parameters()->electrostaticPrefactor;
-          p2 = p2 * m_world->parameters()->electrostaticPrefactor;
+          p2 -= m_world->interactionEnergies()[1][0][0] * m_charge;
       }
       else
       {
@@ -197,35 +223,14 @@ namespace Langmuir
               p2 += m_world->potential()->coulombEnergyDefects( newSite );
           }
       }
-      return m_charge * (p2 - p1);
-  }
 
-  inline double ChargeAgent::couplingConstant (short id1, short id2)
-  {
-    return m_world->coupling()[id1][id2];
-  }
-
-  inline bool ChargeAgent::attemptTransport (double pd, double coupling)
-  {
-    double randNumber =m_world->randomNumberGenerator()->random();
-    if (pd > 0.0)
+      if ( m_type == Agent::Electron )
       {
-        if ((coupling * exp (-pd * m_world->parameters ()->inverseKT)) >
-            randNumber)
+          if ( m_world->holeGrid()->agentType(newSite) == Agent::Hole )
           {
-            return true;
+              p2 += 0.5;
           }
       }
-    else if (coupling > randNumber)
-      {
-        return true;
-      }
-    return false;
+      return m_charge * (p2 - p1);
   }
-
-  double ChargeAgent::interaction()
-  {
-      return coulombInteraction(m_fSite);
-  }
-
 }

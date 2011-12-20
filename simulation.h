@@ -72,6 +72,20 @@ namespace Langmuir
     virtual void seedCharges();
 
     /**
+     * @brief Place drains (left and right) on grid.
+     *
+     * Drains accept charges based on probability parameters
+     */
+    virtual void setUpDrains();
+
+    /**
+     * @brief Place sources (left and right) on grid.
+     *
+     * Sources inject charges based on probability parameters
+     */
+    virtual void setUpSources();
+
+    /**
      * @brief World pointer.
      */
     World *m_world;

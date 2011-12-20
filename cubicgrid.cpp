@@ -10,9 +10,14 @@ namespace Langmuir
       m_area   ( height*width       ), 
       m_volume ( height*width*depth )
   {
-        m_agents.resize( width*height*depth+2,   0);
-    m_potentials.resize( width*height*depth+2, 0.0);
-        m_siteID.resize( width*height*depth+2,   0);
+    m_agents.resize( width*height*depth+extraAgentCount(),0);
+    m_potentials.resize( width*height*depth+extraAgentCount(),0.0);
+    m_agentType.resize( width*height*depth+extraAgentCount(),Agent::Empty);
+    //The 4 extra sites are for:
+    // +0: Agent::Type::SourceL
+    // +1: Agent::Type::DrainL
+    // +2: Agent::Type::SourceR
+    // +3: Agent::Type::DrainR
   }
 
   CubicGrid::~CubicGrid()
@@ -35,18 +40,6 @@ namespace Langmuir
       vCol.push_back(getIndex(col, i, layer));
     }
     return vCol;
-  }
-
-  void CubicGrid::setSize(int width, int height, int depth)
-  {
-    m_width  =  width;
-    m_height = height;
-    m_depth  =  depth;
-    m_area   = width * depth;
-    m_volume = width * depth * height;
-    m_agents.resize( width*height*depth+2, 0);
-    m_potentials.resize( width*height*depth+2, 0.0);
-    m_siteID.resize( width*height*depth+2, 0);
   }
 
   int CubicGrid::width()
@@ -162,12 +155,12 @@ namespace Langmuir
    return ( m_width * ( row + layer*m_height ) + column );
   }
 
-  void CubicGrid::setAgent(int site, Agent *agent)
+  void CubicGrid::setAgentAddress(int site, Agent *agent)
   {
    m_agents[site] = agent;
   }
 
-  QVector<int> CubicGrid::slice(int xi, int xf, int yi, int yf, int zi, int zf)
+  QVector<int> CubicGrid::sliceIndex(int xi, int xf, int yi, int yf, int zi, int zf)
   {
       int ndx_rev = 0;
       if ( xf < xi )
@@ -235,11 +228,11 @@ namespace Langmuir
       // Above
       if (lay < m_depth - 1)
         nList.push_back(getIndex(col,row,lay+1));
-      // Now for the source and the drain....
-      //if (col == 0)
-      //  nList.push_back(getIndex(m_width-1,m_height-1,m_depth-1) + 1);
-      //if (col == m_width - 1)
-      //  nList.push_back(getIndex(m_width-1,m_height-1,m_depth-1) + 2);
+      // Now for the drains....
+      if (col == 0)
+        nList.push_back(getIndexDrainL()); //left drain
+      if (col == m_width - 1)
+        nList.push_back(getIndexDrainR()); //right right
       // Now we have all the nearest neighbours - between 4 and 6 in this case
       return nList;
   } 

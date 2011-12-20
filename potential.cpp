@@ -6,7 +6,8 @@
 #include "world.h"
 #include "rand.h"
 
-using namespace Langmuir;
+namespace Langmuir
+{
 
 Potential::Potential( World* world ) : m_world( world ) {}
 
@@ -36,10 +37,15 @@ void Potential::setPotentialLinear()
             }
         }
     }
-    m_world->electronGrid()->setDrainPotential(m_world->parameters()->voltageDrain);
-    m_world->electronGrid()->setSourcePotential(m_world->parameters()->voltageSource);
-    m_world->holeGrid()->setDrainPotential(m_world->parameters()->voltageDrain);
-    m_world->holeGrid()->setSourcePotential(m_world->parameters()->voltageSource);
+    m_world->electronGrid()->setPotential( m_world->electronGrid()->volume()+0, m_world->parameters()->voltageSource );
+    m_world->electronGrid()->setPotential( m_world->electronGrid()->volume()+1, m_world->parameters()->voltageDrain  );
+    m_world->electronGrid()->setPotential( m_world->electronGrid()->volume()+2, m_world->parameters()->voltageSource );
+    m_world->electronGrid()->setPotential( m_world->electronGrid()->volume()+3, m_world->parameters()->voltageDrain  );
+
+    m_world->holeGrid()->setPotential( m_world->holeGrid()->volume()+0, m_world->parameters()->voltageSource );
+    m_world->holeGrid()->setPotential( m_world->holeGrid()->volume()+1, m_world->parameters()->voltageDrain  );
+    m_world->holeGrid()->setPotential( m_world->holeGrid()->volume()+2, m_world->parameters()->voltageSource );
+    m_world->holeGrid()->setPotential( m_world->holeGrid()->volume()+3, m_world->parameters()->voltageDrain  );
 }
 
 void Potential::setPotentialTraps()
@@ -75,8 +81,10 @@ void Potential::setPotentialTraps()
 
         int newTrapIndex                = m_world->randomNumberGenerator()->integer(0,trapSeedNeighbors.size()-1);
         int newTrapSite                 = trapSeedNeighbors[newTrapIndex];
-        if ( m_world->electronGrid()->siteID(newTrapSite) != 2 &&
-             m_world->electronGrid()->siteID(newTrapSite) != 3 &&
+        if ( m_world->electronGrid()->agentType(newTrapSite) != Agent::SourceL &&
+             m_world->electronGrid()->agentType(newTrapSite) != Agent::SourceR &&
+             m_world->electronGrid()->agentType(newTrapSite) != Agent::DrainL  &&
+             m_world->electronGrid()->agentType(newTrapSite) != Agent::DrainR  &&
            ! m_world->trapSiteIDs()->contains(newTrapSite) )
         {
             m_world->electronGrid()->addToPotential(newTrapSite,m_world->parameters()->deltaEpsilon);
@@ -278,3 +286,5 @@ double Potential::coulombImageXEnergyDefects( int site )
       }
     return( m_world->parameters ()->zDefect * potential );
 }
+
+} // End namespace Langmuir

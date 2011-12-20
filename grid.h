@@ -1,13 +1,11 @@
 #ifndef GRID_H
 #define GRID_H
 
+#include "agent.h"
 #include <QtCore>
 
 namespace Langmuir
 {
-
-  class Agent;
-
   /**
     *  @class Grid.
     *  @brief A grid to do simulations on.
@@ -48,18 +46,6 @@ namespace Langmuir
      * @warning layer index optional.  default is layer zero.
      */
     virtual QVector<int> col(int col, int layer = 0) = 0;
-
-    /**
-     * @brief resize the grid.
-     *
-     * Sets the values for width, depth, height, area, and volume.
-     * Allocates memory for agents, potentials, and site serial indices.
-     * @param width the number of columns
-     * @param height the number of rows
-     * @param depth the number of layers
-     * @warning agents, potentials, and site serial indices are set to zero.
-     */
-    virtual void setSize(int width, int height, int depth) = 0;
 
     /**
      * @brief grid width.
@@ -257,7 +243,7 @@ namespace Langmuir
      * @param agent pointer to an agent.
      * @warning unchecked access to agent list.
      */
-    virtual void setAgent(int site, Agent *agent);
+    virtual void setAgentAddress(int site, Agent *agentAddress);
 
     /**
      * @brief get row.
@@ -295,7 +281,7 @@ namespace Langmuir
      * @warning unchecked access to agent list.
      */
 
-    virtual Agent * agent(int site);
+    virtual Agent * agentAddress(int site);
 
     /**
      * @brief Set site ID.
@@ -305,7 +291,7 @@ namespace Langmuir
      * @param site ID.
      * @warning unchecked access to site ID list.
      */
-    virtual void setSiteID(int site, short id);
+    virtual void setAgentType(int site, Agent::Type id);
 
     /**
      * @brief Get site ID.
@@ -315,7 +301,7 @@ namespace Langmuir
      * @return ID site ID.
      * @warning unchecked access to site ID list.
      */
-    virtual short siteID(int site);
+    virtual Agent::Type agentType(int site);
 
     /**
      * @brief Set site potential.
@@ -348,24 +334,6 @@ namespace Langmuir
     virtual double potential(int site);
 
     /**
-     * @brief Set source potential.
-     *
-     * Store the source potential in the potential array.
-     * The location in the potential array is the number of grid sites.
-     * @param site potential.
-     */
-    virtual void setSourcePotential(double potential);
-
-    /**
-     * @brief Set drain potential.
-     *
-     * Store the drain potential in the potential array.
-     * The location in the potential array is the number of grid sites + 1.
-     * @param site potential.
-     */
-    virtual void setDrainPotential(double potential);
-
-    /**
      * @brief Create a list of site ids.
      *
      * Generate the neighbors of a given site
@@ -377,7 +345,47 @@ namespace Langmuir
      *
      * Generate the site ids of a slice of the grid
      */
-    virtual QVector<int> slice(int xi, int xf, int yi, int yf, int zi, int zf) = 0;
+    virtual QVector<int> sliceIndex(int xi, int xf, int yi, int yf, int zi, int zf) = 0;
+
+    /**
+     * @brief serial cell index
+     *
+     * Get the serial index of a site represented the Drain on the left side (x=width-1) of the grid
+     * @return integer serial cell index.
+     */
+    virtual int getIndexDrainL();
+
+    /**
+     * @brief serial cell index
+     *
+     * Get the serial index of a site represented the Drain on the right side (x=0) of the grid
+     * @return integer serial cell index.
+     */
+    virtual int getIndexDrainR();
+
+     /**
+     * @brief serial cell index
+     *
+     * Get the serial index of a site represented the Source on the left side (x=width-1) of the grid
+     * @return integer serial cell index.
+     */
+    virtual int getIndexSourceL();
+
+    /**
+     * @brief serial cell index
+     *
+     * Get the serial index of a site represented the Source on the left side (x=0) of the grid
+     * @return integer serial cell index.
+     */
+    virtual int getIndexSourceR();
+
+    /**
+     * @brief extra site count
+     *
+     * The number of sites that need to be reserved for those extra special Agents like the Source and Drain
+     * @return integer number of extra sites
+     */
+    virtual int extraAgentCount();
 
   protected:
 
@@ -398,29 +406,29 @@ namespace Langmuir
     /**
      * @brief Site type list.
      *
-     * List of site IDs, i.e. the type of site.  Size is the same as the total number of sites.
+     * List of site types defined in agent.h
      */
-    std::vector<short> m_siteID;
+    std::vector<Agent::Type> m_agentType;
   };
 
-  inline void Grid::setAgent(int site, Agent *agent)
+  inline void Grid::setAgentAddress(int site, Agent *agent)
   {
     m_agents[site] = agent;
   }
 
-  inline Agent * Grid::agent(int site)
+  inline Agent * Grid::agentAddress(int site)
   {
     return m_agents[site];
   }
 
-  inline void Grid::setSiteID(int site, short id)
+  inline void Grid::setAgentType(int site, Agent::Type id)
   {
-    m_siteID[site] = id;
+    m_agentType[site] = id;
   }
 
-  inline short Grid::siteID(int site)
+  inline Agent::Type Grid::agentType(int site)
   {
-    return m_siteID[site];
+    return m_agentType[site];
   }
 
   inline void Grid::setPotential(int site, double potential)
@@ -438,14 +446,29 @@ namespace Langmuir
     return m_potentials[site];
   }
 
-  inline void Grid::setSourcePotential(double potential)
+  inline int Grid::getIndexDrainL()
   {
-    m_potentials[m_potentials.size()-2] = potential;
+      return this->volume() + 0;
   }
 
-  inline void Grid::setDrainPotential(double potential)
+  inline int Grid::getIndexDrainR()
   {
-    m_potentials[m_potentials.size()-1] = potential;
+      return this->volume() + 1;
+  }
+
+  inline int Grid::getIndexSourceL()
+  {
+      return this->volume() + 2;
+  }
+
+  inline int Grid::getIndexSourceR()
+  {
+      return this->volume() + 3;
+  }
+
+  inline int Grid::extraAgentCount()
+  {
+      return 4;
   }
 
 } // End namespace Langmuir

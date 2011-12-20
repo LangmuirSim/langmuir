@@ -68,12 +68,22 @@ namespace Langmuir
     /**
       * @brief random number generator pointer
       */
-    SourceAgent* source() { return m_source; }
+    SourceAgent* sourceL() { return m_sourceL; }
 
     /**
       * @brief random number generator pointer
       */
-    DrainAgent* drain() { return m_drain; }
+    SourceAgent* sourceR() { return m_sourceR; }
+
+    /**
+      * @brief random number generator pointer
+      */
+    DrainAgent* drainL() { return m_drainL; }
+
+    /**
+      * @brief random number generator pointer
+      */
+    DrainAgent* drainR() { return m_drainR; }
 
     /**
       * @brief random number generator pointer
@@ -143,14 +153,24 @@ namespace Langmuir
     Random *m_rand;
 
     /**
-      * @brief Accepts charge carriers
+      * @brief Accepts charge carriers at x = grid.width
       */
-    DrainAgent *m_drain;
+    DrainAgent *m_drainR;
 
     /**
-      * @brief Injects charge carriers
+      * @brief Accepts charge carriers at x = 0
       */
-    SourceAgent *m_source;
+    DrainAgent *m_drainL;
+
+    /**
+      * @brief Injects charge carriers at x = grid.width
+      */
+    SourceAgent *m_sourceR;
+
+    /**
+      * @brief Injects charge carriers at x = 0
+      */
+    SourceAgent *m_sourceL;
 
     /**
       * @brief Calculates and sets potentials to be stored in the Grid
@@ -201,6 +221,9 @@ namespace Langmuir
     /**
       * @brief A list of coupling constants for transport between sites
       * The transport probability gets multiplied by these constants
+      * Somtimes the transport probabilty is the boltzmann factor,
+      * other times it is 1; when it is 1 the coupling constant is
+      * essentially the probability
       */
     boost::multi_array<double,2> m_coupling;
 

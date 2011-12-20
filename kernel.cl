@@ -1,6 +1,6 @@
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-__kernel void coulomb1( __global double *o, __global int *s, __global int *q, int n, int c2 )
+__kernel void coulomb1( __global double *o, __global int *s, __global int *q, int n, int c2, double prefactor )
 {
     //
     // The kernel calculates the coulomb potential at every point on a 3D rectangular grid of size ( Wx * Wy * Wz ).
@@ -129,12 +129,12 @@ __kernel void coulomb1( __global double *o, __global int *s, __global int *q, in
         {
             v = v + vlocal[l];
         }
-        o[k] = v;
+        o[k] = prefactor * v;
     }
 
 }
 
-__kernel void coulomb2( __global double *o, __global int *s, __global int *q, int n, int c2, __global int *w, int xsize, int ysize )
+__kernel void coulomb2( __global double *o, __global int *s, __global int *q, int n, int c2, __global int *w, int xsize, int ysize, double prefactor )
 {
     // each worker of work group loads the same charge and site, using the "work group id"
     int qi = q[ get_group_id(0) ];
@@ -198,7 +198,7 @@ __kernel void coulomb2( __global double *o, __global int *s, __global int *q, in
             v = v + vlocal[l];
         }
         //o[si] = v;
-        o[ get_group_id(0) ] = v;
+        o[ get_group_id(0) ] = prefactor * v;
     }
 }
 
