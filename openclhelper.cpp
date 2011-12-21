@@ -399,13 +399,13 @@ void OpenClHelper::compareHostAndDeviceForCarrier( int i, QList< ChargeAgent * >
     int CL = charge.getOpenCLID();
     int OF = m_offset;
 
-    double PE1CPU = potential.coulombEnergyElectrons(S);
-    double PH1CPU = potential.coulombEnergyHoles(S);
-    double PD1CPU = potential.coulombEnergyDefects(S);
+    double PE1CPU = potential.coulombPotentialElectrons(S);
+    double PH1CPU = potential.coulombPotentialHoles(S);
+    double PD1CPU = potential.coulombPotentialDefects(S);
 
-    double PE2CPU = potential.coulombEnergyElectrons(F);
-    double PH2CPU = potential.coulombEnergyHoles(F);
-    double PD2CPU = potential.coulombEnergyDefects(F);
+    double PE2CPU = potential.coulombPotentialElectrons(F);
+    double PH2CPU = potential.coulombPotentialHoles(F);
+    double PD2CPU = potential.coulombPotentialDefects(F);
 
     double PSI    = Q * m_world->interactionEnergies()[1][0][0];
 
@@ -505,9 +505,9 @@ void OpenClHelper::compareHostAndDeviceAtSite(int i)
     int DW = 13;
     int DP =  5;
 
-    double PE1CPU = potential.coulombEnergyElectrons(i);
-    double PH1CPU = potential.coulombEnergyHoles(i);
-    double PD1CPU = potential.coulombEnergyDefects(i);
+    double PE1CPU = potential.coulombPotentialElectrons(i);
+    double PH1CPU = potential.coulombPotentialHoles(i);
+    double PD1CPU = potential.coulombPotentialDefects(i);
     double P1CPU  = PE1CPU + PH1CPU + PD1CPU;
     double P1GPU  = getOutputHost(i);
     double PDIFF1 = fabs( P1CPU - P1GPU ) / ( 0.5 * ( fabs( P1CPU ) + fabs( P1GPU ) ) ) * 100.0;

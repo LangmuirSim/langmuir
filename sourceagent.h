@@ -5,110 +5,112 @@
 
 namespace Langmuir
 {
-  /**
-    *  @class SourceAgent
-    *  @brief For injectiing charges
-    */
   class SourceAgent:public Agent
   {
-
   public:
-   /**
-    *  @brief A agent acting as a source for charges.
-    *
-    *  Depending on the potential of the source, positive or negative charges enter the simulation be emerging from the source.
-    *  @date 06/07/2010
-    */
+
+    SourceAgent(World * world);
+   ~SourceAgent();
+
+    int maxCarriers() const;
+    int maxElectrons() const;
+    int maxHoles() const;
+    int carrierCount() const;
+    int electronCount() const;
+    int holeCount() const;
+
+    virtual bool tryRandom();
+    virtual bool tryLeft();
+    virtual bool tryRight();
+
+  protected:
+
+    virtual void inject(int site) = 0;
+    virtual bool validToInject(int site) = 0;
+
+    int randomSiteID();
+    int randomNeighborSiteID();
+    int randomRightSiteID();
+    int randomLeftSiteID();
+
+    static int m_maxHoles;
+    static int m_maxElectrons;
+    unsigned int m_attempts;
+    unsigned int m_successes;
+
+    QVector<int> m_neighborsL;
+    QVector<int> m_neighborsR;
+  };
+
+  class ElectronSourceAgent : public SourceAgent
+  {
+  public:
+      ElectronSourceAgent(World * world);
+  protected:
+      void inject(int site);
+      bool validToInject(int site);
+  };
+
+  class HoleSourceAgent : public SourceAgent
+  {
+  public:
+      HoleSourceAgent(World * world);
+  protected:
+      void inject(int site);
+      bool validToInject(int site);
+  };
+
+  class ExcitonSourceAgent : public SourceAgent
+  {
+  public:
+      ExcitonSourceAgent(World * world);
+  protected:
+      void inject(int site);
+      bool validToInject(int site);
+  };
+}
+/*
+  class SourceAgent:public Agent
+  {
+  public:
     SourceAgent(Agent::Type type, World * world, int site);
+    ~SourceAgent();
 
-    /**
-     * @brief virutal Destructor.
-     */
-    virtual ~SourceAgent();
-
-    /**
-     * @brief max charges.
-     * 
-     * Get the max number of charges possible.
-     */
-    int maxCharges();
-
-    /**
-     * @brief max electrons.
-     *
-     * Get the max number of electrons possible.
-     */
+    int maxCarriers();
     int maxElectrons();
-
-    /**
-     * @brief max holes.
-     *
-     * Get the max number of holes possible.
-     */
     int maxHoles();
-
-    /**
-     * @brief max charges.
-     *
-     * Get the number of carriers.
-     */
     int carrierCount();
-
-    /**
-     * @brief max electrons.
-     *
-     * Get the number of electrons.
-     */
     int electronCount();
-
-    /**
-     * @brief max holes.
-     *
-     * Get the number of holes.
-     */
     int holeCount();
 
-    void shouldInject(Agent::Type type, int site);
-    void injectHoleAtSite(int site);
-    void injectElectronAtSite(int site);
-    bool validToInjectHoleAtSite(int site);
-    bool validToInjectElectronAtSite(int site);
-    bool seedHole();
-    bool seedElectron();
-    int randomSiteID();
+    bool tryToPlaceHoleAtRandomSite();
+    bool tryToPlaceElectronAtRandomSite();
+    bool tryToPlaceHoleAtNeighbor();
+    bool tryToPlaceElectronAtNeighbor();
+    bool tryToPlaceExcitonAtRandomSite();
 
   private:
 
-    /**
-      * @brief Attempted injections
-      *
-      * Number of times this source tried to inject charges
-      */
     unsigned int m_attempts;
-
-    /**
-      * @brief Successful injections
-      *
-      * Number of times this source injected charges
-      */
     unsigned int m_successes;
-
-    /**
-      * @brief Maximum number of carriers
-      *
-      * Number of electrons allowed
-      */
     static int m_maxElectrons;
-
-    /**
-      * @brief Maximum number of carriers
-      *
-      * Number of holes allowed
-      */
     static int m_maxHoles;
 
+    void injectHole(int site);
+    void injectElectron(int site);
+
+    bool shouldInjectHole(int site);
+    bool shouldInjectElectron(int site);
+    bool shouldInjectHoleUsingCoupling();
+    bool shouldInjectElectronUsingCoupling();
+    bool shouldInjectHoleUsingMetropolis(int site);
+    bool shouldInjectElectronUsingMetropolis(int site);
+
+    bool validToInjectHoleAtSite(int site);
+    bool validToInjectElectronAtSite(int site);
+
+    int randomSiteID();
+    int randomNeighborSiteID();
   };
-
-}                                // End namespace Langmuir
-
+  */
 #endif

@@ -124,7 +124,7 @@ namespace Langmuir
             break;
         }
 
-        case Agent::SourceL: case Agent::SourceR:
+        case Agent::HoleSource: case Agent::ElectronSource:
         {
             // Kill program - this should never happen
             qFatal("ChargeAgent::decideFuture transport to a Source agent: %s",
@@ -206,12 +206,12 @@ namespace Langmuir
       else
       {
           // Electrons
-          p1 += m_world->potential()->coulombEnergyElectrons( m_site  );
-          p2 += m_world->potential()->coulombEnergyElectrons( newSite );
+          p1 += m_world->potential()->coulombPotentialElectrons( m_site  );
+          p2 += m_world->potential()->coulombPotentialElectrons( newSite );
 
           // Holes
-          p1 += m_world->potential()->coulombEnergyHoles( m_site  );
-          p2 += m_world->potential()->coulombEnergyHoles( newSite );
+          p1 += m_world->potential()->coulombPotentialHoles( m_site  );
+          p2 += m_world->potential()->coulombPotentialHoles( newSite );
 
           // Remove self interaction
           p2 -= m_world->interactionEnergies()[1][0][0] * m_charge;
@@ -219,8 +219,8 @@ namespace Langmuir
           // Charged defects
           if ( m_world->parameters()->chargedDefects )
           {
-              p1 += m_world->potential()->coulombEnergyDefects( m_site  );
-              p2 += m_world->potential()->coulombEnergyDefects( newSite );
+              p1 += m_world->potential()->coulombPotentialDefects( m_site  );
+              p2 += m_world->potential()->coulombPotentialDefects( newSite );
           }
       }
 

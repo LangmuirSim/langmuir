@@ -93,7 +93,7 @@ namespace Langmuir
 
     void Simulation::createDefects()
     {
-        QVector<int> sourceNeighbors = m_world->sourceL()->getNeighbors();
+        QVector<int> sourceNeighbors = m_world->holeSource()->getNeighbors();
         QVector<int> drainNeighnors = m_world->drainR()->getNeighbors();
         for (int i = 0; i < m_world->electronGrid()->volume (); ++i)
         {
@@ -112,25 +112,25 @@ namespace Langmuir
                 m_world->electronGrid()->setAgentType(i,Agent::Empty);
             }
         }
-        m_world->sourceL()->setNeighbors(sourceNeighbors);
+        m_world->holeSource()->setNeighbors(sourceNeighbors);
         m_world->drainR()->setNeighbors(drainNeighnors);
     }
 
     void Simulation::seedCharges()
     {
-        for (int i = 0; i < m_world->sourceL()->maxHoles();)
+        for (int i = 0; i < m_world->holeSource()->maxCarriers();)
         {
-            if (m_world->sourceL()->seedHole())
-            {
+            //if (m_world->sourceL()->tryToPlaceHoleAtRandomSite())
+            //{
                 ++i;
-            }
+            //}
         }
-        for (int i = 0; i < m_world->sourceL()->maxElectrons();)
+        for (int i = 0; i < m_world->holeSource()->maxCarriers();)
         {
-            if (m_world->sourceL()->seedElectron())
-            {
+            //if (m_world->sourceL()->tryToPlaceElectronAtRandomSite())
+            //{
                 ++i;
-            }
+            //}
         }
     }
 
@@ -165,31 +165,6 @@ namespace Langmuir
 
     void Simulation::setUpSources()
     {
-        Grid &EGrid = *m_world->electronGrid();
-        Grid &HGrid = *m_world->holeGrid();
-
-        int IDLeft  = EGrid.getIndexSourceL();
-        int IDRight = EGrid.getIndexSourceR();
-
-        SourceAgent *SourceLeft  = m_world->sourceL();
-        SourceAgent *SourceRight = m_world->sourceR();
-
-        QVector<int> leftNeighbors = EGrid.sliceIndex(0,1,0,EGrid.height(),0,EGrid.depth());
-        QVector<int> rightNeighbors = EGrid.sliceIndex(EGrid.width()-1,EGrid.width(),0,EGrid.height(),0,EGrid.depth());
-
-        SourceLeft->setSite(IDLeft);
-        EGrid.setAgentAddress(IDLeft,SourceLeft);
-        EGrid.setAgentType(IDLeft,Agent::SourceL);
-        HGrid.setAgentAddress(IDLeft,SourceLeft);
-        HGrid.setAgentType(IDLeft,Agent::SourceL);
-        SourceLeft->setNeighbors(leftNeighbors);
-
-        SourceRight->setSite(IDRight);
-        EGrid.setAgentAddress(IDRight,SourceRight);
-        EGrid.setAgentType(IDRight,Agent::SourceR);
-        HGrid.setAgentAddress(IDRight,SourceRight);
-        HGrid.setAgentType(IDRight,Agent::SourceR);
-        SourceRight->setNeighbors(rightNeighbors);
     }
 
 } // End namespace Langmuir

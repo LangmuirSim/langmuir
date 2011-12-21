@@ -65,7 +65,7 @@ namespace Langmuir
             nextTick ();
 
             // Perform charge injection at the source
-            //performInjections (m_world->parameters()->sourceAttempts);
+            performInjections (m_world->parameters()->sourceAttempts);
 
             m_tick += 1;
         }
@@ -84,6 +84,13 @@ namespace Langmuir
 
     void SolarCell::performInjections(int nInjections)
     {
+        //m_world->sourceL()->tryToPlaceElectronAtNeighbor();
+        //m_world->sourceR()->tryToPlaceElectronAtNeighbor();
+
+        //m_world->sourceL()->tryToPlaceHoleAtNeighbor();
+        //m_world->sourceR()->tryToPlaceHoleAtNeighbor();
+
+        //m_world->sourceL()->tryToPlaceExcitonAtRandomSite();
         /*
         int inject = nInjections;
         if ( inject < 0 )

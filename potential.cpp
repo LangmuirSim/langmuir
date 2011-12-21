@@ -81,8 +81,8 @@ void Potential::setPotentialTraps()
 
         int newTrapIndex                = m_world->randomNumberGenerator()->integer(0,trapSeedNeighbors.size()-1);
         int newTrapSite                 = trapSeedNeighbors[newTrapIndex];
-        if ( m_world->electronGrid()->agentType(newTrapSite) != Agent::SourceL &&
-             m_world->electronGrid()->agentType(newTrapSite) != Agent::SourceR &&
+        if ( m_world->electronGrid()->agentType(newTrapSite) != Agent::HoleSource &&
+             m_world->electronGrid()->agentType(newTrapSite) != Agent::ElectronSource &&
              m_world->electronGrid()->agentType(newTrapSite) != Agent::DrainL  &&
              m_world->electronGrid()->agentType(newTrapSite) != Agent::DrainR  &&
            ! m_world->trapSiteIDs()->contains(newTrapSite) )
@@ -173,7 +173,7 @@ void Potential::updateInteractionEnergies()
     }
 }
 
-double Potential::coulombEnergyElectrons( int site )
+double Potential::coulombPotentialElectrons( int site )
 {
     double potential = 0.0;
     for(int i = 0; i < m_world->electrons()->size(); ++i)
@@ -192,7 +192,7 @@ double Potential::coulombEnergyElectrons( int site )
     return( potential );
 }
 
-double Potential::coulombImageXEnergyElectrons( int site )
+double Potential::coulombImageXPotentialElectrons( int site )
 {
     double potential = 0.0;
     for(int i = 0; i < m_world->electrons()->size(); ++i)
@@ -211,7 +211,7 @@ double Potential::coulombImageXEnergyElectrons( int site )
     return( potential );
 }
 
-double Potential::coulombEnergyHoles( int site )
+double Potential::coulombPotentialHoles( int site )
 {
     double potential = 0.0;
     for(int i = 0; i < m_world->holes()->size(); ++i)
@@ -230,7 +230,7 @@ double Potential::coulombEnergyHoles( int site )
     return( potential );
 }
 
-double Potential::coulombImageXEnergyHoles( int site )
+double Potential::coulombImageXPotentialHoles( int site )
 {
     double potential = 0.0;
     for(int i = 0; i < m_world->holes()->size(); ++i)
@@ -249,7 +249,7 @@ double Potential::coulombImageXEnergyHoles( int site )
     return( potential );
 }
 
-double Potential::coulombEnergyDefects( int site )
+double Potential::coulombPotentialDefects( int site )
 {
     double potential = 0.0;
     for(int i = 0; i < m_world->defectSiteIDs()->size(); ++i)
@@ -268,7 +268,7 @@ double Potential::coulombEnergyDefects( int site )
     return( m_world->parameters ()->zDefect * potential );
 }
 
-double Potential::coulombImageXEnergyDefects( int site )
+double Potential::coulombImageXPotentialDefects( int site )
 {
     double potential = 0.0;
     for(int i = 0; i < m_world->defectSiteIDs()->size(); ++i)
@@ -285,6 +285,34 @@ double Potential::coulombImageXEnergyDefects( int site )
           }
       }
     return( m_world->parameters ()->zDefect * potential );
+}
+
+double Potential::potentialAtSite(int site, Grid *grid, bool useCoulomb, bool useImage )
+{
+    double p1 = 0;
+    if ( grid )
+    {
+        p1 += grid->potential(site);
+    }
+    if ( useCoulomb )
+    {
+        p1 += coulombPotentialElectrons(site);
+        p1 += coulombPotentialHoles(site);
+        if ( m_world->parameters()->chargedDefects )
+        {
+            p1 += coulombPotentialDefects(site);
+        }
+    }
+    if ( useImage )
+    {
+        p1 += coulombImageXPotentialElectrons(site);
+        p1 += coulombImageXPotentialHoles(site);
+        if ( m_world->parameters()->chargedDefects )
+        {
+            p1 += coulombImageXPotentialDefects(site);
+        }
+    }
+    return p1;
 }
 
 } // End namespace Langmuir

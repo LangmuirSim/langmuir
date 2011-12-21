@@ -6,6 +6,7 @@
 namespace Langmuir
 {
   class World;
+  class Grid;
 
   /**
     *  @class Potential
@@ -84,36 +85,38 @@ namespace Langmuir
 
       /**
         * @brief compute the coulomb potential from electrons at site - multiply it be \f$q_{j}\f$ in reduced units
-        *
         */
-      double coulombEnergyElectrons( int site );
+      double coulombPotentialElectrons( int site );
 
       /**
         * @brief compute the image coulomb potential from carriers at site - multiply it be \f$q_{j}\f$ in reduced units
         */
-      double coulombImageXEnergyElectrons( int site );
+      double coulombImageXPotentialElectrons( int site );
 
       /**
         * @brief compute the coulomb potential from electrons at site - multiply it be \f$q_{j}\f$ in reduced units
         */
-      double coulombEnergyHoles( int site );
+      double coulombPotentialHoles( int site );
 
       /**
         * @brief compute the image coulomb potential from carriers at site - multiply it be \f$q_{j}\f$ in reduced units
         */
-      double coulombImageXEnergyHoles( int site );
+      double coulombImageXPotentialHoles( int site );
 
       /**
         * @brief compute the coulomb potential from defects at site - multiply it be \f$q_{j}\f$ in reduced units
         */
-      double coulombEnergyDefects( int site );
+      double coulombPotentialDefects( int site );
 
       /**
         * @brief compute the image coulomb potential from defects at site - multiply it be \f$q_{j}\f$ in reduced units
-        *
-        * Calculates
         */
-      double coulombImageXEnergyDefects( int site );
+      double coulombImageXPotentialDefects( int site );
+
+      /**
+        * @brief convienence function for potential at a site
+        */
+      double potentialAtSite(int site, Grid *grid = 0, bool useCoulomb = false, bool useImage = false );
 
   private:
 

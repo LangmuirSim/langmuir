@@ -14,12 +14,19 @@ namespace Langmuir {
   World::World( SimulationParameters *par )
   {
     m_coupling.resize(boost::extents[Agent::SIZE][Agent::SIZE]);
-    m_coupling[ Agent::Electron ][ Agent::Empty  ] = 0.333;
-    m_coupling[ Agent::Hole     ][ Agent::Empty  ] = 0.333;
-    m_coupling[ Agent::Electron ][ Agent::DrainL ] = 0.900;
-    m_coupling[ Agent::Electron ][ Agent::DrainR ] = 0.900;
-    m_coupling[ Agent::Hole     ][ Agent::DrainL ] = 0.900;
-    m_coupling[ Agent::Hole     ][ Agent::DrainR ] = 0.900;
+    m_coupling[ Agent::Electron ][ Agent::Empty    ] = 0.333;
+    m_coupling[ Agent::Hole     ][ Agent::Empty    ] = 0.333;
+    m_coupling[ Agent::Electron ][ Agent::DrainL   ] = 0.900;
+    m_coupling[ Agent::Electron ][ Agent::DrainR   ] = 0.900;
+    m_coupling[ Agent::Hole     ][ Agent::DrainL   ] = 0.900;
+    m_coupling[ Agent::Hole     ][ Agent::DrainR   ] = 0.900;
+
+    //m_coupling[ Agent::HoleSource  ][ Agent::Electron ] = 0.900;
+    //m_coupling[ Agent::ElectronSource  ][ Agent::Electron ] = 0;
+    //m_coupling[ Agent::ExcitonSource    ][ Agent::Electron ] = 0.1;
+    //m_coupling[ Agent::HoleSource  ][ Agent::Hole     ] = 0;
+    //m_coupling[ Agent::ElectronSource  ][ Agent::Hole     ] = 0;
+    //m_coupling[ Agent::ExcitonSource    ][ Agent::Hole     ] = 0.1;
 
     m_parameters = par;
     m_rand = new Random(m_parameters->randomSeed);
@@ -28,18 +35,20 @@ namespace Langmuir {
     m_potential = new Potential(this);
     m_logger = new Logger(this);
     m_ocl = new OpenClHelper(this);
-    m_sourceL = new SourceAgent(Agent::SourceL,this,0);
-    m_sourceR = new SourceAgent(Agent::SourceR,this,0);
+    m_holeSource = new HoleSourceAgent(this);
+    m_electronSource = new ElectronSourceAgent(this);
+    m_excitonSource = new ExcitonSourceAgent(this);
     m_drainL = new DrainAgent(Agent::DrainL,this,0);
     m_drainR = new DrainAgent(Agent::DrainR,this,0);
+
   }
 
   World::~World()
   {
    delete m_rand;
    delete m_potential;
-   delete m_sourceL;
-   delete m_sourceR;
+   delete m_holeSource;
+   delete m_electronSource;
    delete m_drainL;
    delete m_drainR;
    delete m_electronGrid;

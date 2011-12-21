@@ -17,10 +17,13 @@ namespace Langmuir
   class Logger;
   class Potential;
   class DrainAgent;
-  class SourceAgent;
-  class ChargeAgent;
-  class OpenClHelper;
   class Simulation;
+  class ChargeAgent;
+  class SourceAgent;
+  class OpenClHelper;
+  class HoleSourceAgent;
+  class ExcitonSourceAgent;
+  class ElectronSourceAgent;
   struct SimulationParameters;
   /**
     * @class World
@@ -68,12 +71,17 @@ namespace Langmuir
     /**
       * @brief random number generator pointer
       */
-    SourceAgent* sourceL() { return m_sourceL; }
+    SourceAgent* holeSource() { return m_holeSource; }
 
     /**
       * @brief random number generator pointer
       */
-    SourceAgent* sourceR() { return m_sourceR; }
+    SourceAgent* electronSource() { return m_electronSource; }
+
+    /**
+      * @brief random number generator pointer
+      */
+    SourceAgent* excitonSource() { return m_excitonSource; }
 
     /**
       * @brief random number generator pointer
@@ -165,12 +173,17 @@ namespace Langmuir
     /**
       * @brief Injects charge carriers at x = grid.width
       */
-    SourceAgent *m_sourceR;
+    SourceAgent *m_electronSource;
 
     /**
       * @brief Injects charge carriers at x = 0
       */
-    SourceAgent *m_sourceL;
+    SourceAgent *m_holeSource;
+
+    /**
+      * @brief Injects excitons at random sites
+      */
+    SourceAgent *m_excitonSource;
 
     /**
       * @brief Calculates and sets potentials to be stored in the Grid

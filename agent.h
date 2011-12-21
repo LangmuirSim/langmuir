@@ -27,11 +27,12 @@ namespace Langmuir{
       Electron = 1,
       Hole = 2,
       Defect = 3,
-      SourceL = 4,
-      SourceR = 5,
-      DrainL = 6,
-      DrainR = 7,
-      SIZE = 8
+      HoleSource = 4,
+      ElectronSource = 5,
+      ExcitonSource = 6,
+      DrainL = 7,
+      DrainR = 8,
+      SIZE = 9
     };
     static QString typeToQString(const Agent::Type &t);
 
@@ -188,13 +189,13 @@ namespace Langmuir{
               break;
           }
 
-          case Agent::SourceL:
+          case Agent::HoleSource:
           {
               return QString("Agent::Type(%1):SourceL").arg(int(t));
               break;
           }
 
-          case Agent::SourceR:
+          case Agent::ElectronSource:
           {
               return QString("Agent::Type(%1):SourceR").arg(int(t));
               break;

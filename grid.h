@@ -369,7 +369,7 @@ namespace Langmuir
      * Get the serial index of a site represented the Source on the left side (x=width-1) of the grid
      * @return integer serial cell index.
      */
-    virtual int getIndexSourceL();
+    virtual int getIndexHoleSource();
 
     /**
      * @brief serial cell index
@@ -377,7 +377,15 @@ namespace Langmuir
      * Get the serial index of a site represented the Source on the left side (x=0) of the grid
      * @return integer serial cell index.
      */
-    virtual int getIndexSourceR();
+    virtual int getIndexElectronSource();
+
+    /**
+     * @brief serial cell index
+     *
+     * Get the serial index of a site represented the Source on the left side (x=0) of the grid
+     * @return integer serial cell index.
+     */
+    virtual int getIndexExcitonSource();
 
     /**
      * @brief extra site count
@@ -456,19 +464,24 @@ namespace Langmuir
       return this->volume() + 1;
   }
 
-  inline int Grid::getIndexSourceL()
+  inline int Grid::getIndexHoleSource()
   {
       return this->volume() + 2;
   }
 
-  inline int Grid::getIndexSourceR()
+  inline int Grid::getIndexElectronSource()
   {
       return this->volume() + 3;
   }
 
+  inline int Grid::getIndexExcitonSource()
+  {
+      return this->volume() + 4;
+  }
+
   inline int Grid::extraAgentCount()
   {
-      return 4;
+      return 5;
   }
 
 } // End namespace Langmuir

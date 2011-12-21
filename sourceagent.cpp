@@ -1,100 +1,284 @@
 #include "sourceagent.h"
 #include "chargeagent.h"
+#include "potential.h"
+#include "inputparser.h"
 #include "world.h"
 #include "grid.h"
 #include "rand.h"
-#include "inputparser.h"
 
 namespace Langmuir
 {
-  int SourceAgent::m_maxElectrons = 0;
-  int SourceAgent::m_maxHoles = 0;
 
-  SourceAgent::SourceAgent(Agent::Type type, World * world, int site) :
-    Agent(type,world,site)
+int SourceAgent::m_maxHoles     = 0;
+int SourceAgent::m_maxElectrons = 0;
+
+SourceAgent::SourceAgent(World * world) : Agent(Agent::Empty,world)
+{
+  m_maxHoles     = m_world->parameters()->chargePercentage*double(m_world->electronGrid()->volume());
+  m_maxElectrons = m_world->parameters()->chargePercentage*double(m_world->electronGrid()->volume());
+  m_attempts     = 0;
+  m_successes    = 0;
+  m_site         = 0;
+  m_fSite        = 0;
+  m_neighbors.clear();
+  if ( m_world->electronGrid() )
   {
-    if ( type != Agent::SourceL && type != Agent::SourceR )
+      Grid &grid = *m_world->electronGrid();
+      m_neighborsL = grid.sliceIndex(0,1,0,grid.height(),0,grid.depth());
+      m_neighborsR = grid.sliceIndex(grid.width()-1,grid.width(),0,grid.height(),0,grid.depth());
+  }
+  else
+  {
+      qFatal("SourceAgent allocation requires the Grid to exist");
+  }
+}
+
+SourceAgent::~SourceAgent()
+{
+}
+
+int SourceAgent::maxCarriers() const
+{
+    return maxElectrons() + maxHoles();
+}
+
+int SourceAgent::maxElectrons() const
+{
+    return m_maxElectrons;
+}
+
+int SourceAgent::maxHoles() const
+{
+    return m_maxHoles;
+}
+
+int SourceAgent::carrierCount() const
+{
+    return m_world->electrons()->size() + m_world->holes()->size();
+}
+
+int SourceAgent::electronCount() const
+{
+    return m_world->electrons()->size();
+}
+
+int SourceAgent::holeCount() const
+{
+    return m_world->holes()->size();
+}
+
+int SourceAgent::randomSiteID()
+{
+    return m_world->randomNumberGenerator()->integer(0,m_world->electronGrid()->volume()-1);
+}
+
+int SourceAgent::randomNeighborSiteID()
+{
+    return m_neighbors[m_world->randomNumberGenerator()->integer(0,m_neighbors.size()-1)];
+}
+
+int SourceAgent::randomLeftSiteID()
+{
+    return m_neighbors[m_world->randomNumberGenerator()->integer(0,m_neighborsL.size()-1)];
+}
+
+int SourceAgent::randomRightSiteID()
+{
+    return m_neighbors[m_world->randomNumberGenerator()->integer(0,m_neighborsR.size()-1)];
+}
+
+bool SourceAgent::tryRandom()
+{
+    m_attempts += 1;
+    int site = randomNeighborSiteID();
+    if ( validToInject(site) )
     {
-        qFatal("SourceAgent must have Agent:Type equal to Agent::SourceL or Agent::SourceR");
+        inject(site);
+        m_successes += 1;
+        return true;
     }
-    m_site = 0;
-    m_neighbors.clear();
-    m_maxElectrons = m_world->parameters()->chargePercentage*double(m_world->electronGrid()->volume());
-    m_maxHoles = m_world->parameters()->chargePercentage*double(m_world->electronGrid()->volume());
+    return false;
+}
+
+bool SourceAgent::tryLeft()
+{
+    m_attempts += 1;
+    int site = randomLeftSiteID();
+    if ( validToInject(site) )
+    {
+        inject(site);
+        m_successes += 1;
+        return true;
+    }
+    return false;
+}
+
+bool SourceAgent::tryRight()
+{
+    m_attempts += 1;
+    int site = randomRightSiteID();
+    if ( validToInject(site) )
+    {
+        inject(site);
+        m_successes += 1;
+        return true;
+    }
+    return false;
+}
+
+ElectronSourceAgent::ElectronSourceAgent(World *world) : SourceAgent(world)
+{
+    m_type = Agent::ElectronSource;
+    Grid &EGrid = *m_world->electronGrid();
+    Grid &HGrid = *m_world->holeGrid();
+    m_site  = EGrid.getIndexElectronSource();
+    m_fSite = m_site;
+    EGrid.setAgentAddress(m_site,this);
+    EGrid.setAgentType(m_site,Agent::ElectronSource);
+    HGrid.setAgentAddress(m_site,this);
+    HGrid.setAgentType(m_site,Agent::ElectronSource);
+}
+
+HoleSourceAgent::HoleSourceAgent(World *world) : SourceAgent(world)
+{
+    m_type = Agent::HoleSource;
+    Grid &EGrid = *m_world->electronGrid();
+    Grid &HGrid = *m_world->holeGrid();
+    m_site  = EGrid.getIndexHoleSource();
+    m_fSite = m_site;
+    EGrid.setAgentAddress(m_site,this);
+    EGrid.setAgentType(m_site,Agent::HoleSource);
+    HGrid.setAgentAddress(m_site,this);
+    HGrid.setAgentType(m_site,Agent::HoleSource);
+}
+
+ExcitonSourceAgent::ExcitonSourceAgent(World *world) : SourceAgent(world)
+{
+    m_type = Agent::ExcitonSource;
+    Grid &EGrid = *m_world->electronGrid();
+    Grid &HGrid = *m_world->holeGrid();
+    m_site  = EGrid.getIndexExcitonSource();
+    m_fSite = m_site;
+    EGrid.setAgentAddress(m_site,this);
+    EGrid.setAgentType(m_site,Agent::ExcitonSource);
+    HGrid.setAgentAddress(m_site,this);
+    HGrid.setAgentType(m_site,Agent::ExcitonSource);
+}
+
+void ElectronSourceAgent::inject(int site)
+{
+    ChargeAgent *electron = new ChargeAgent(Agent::Electron,m_world,site);
+    m_world->electrons()->push_back(electron);
+}
+
+void HoleSourceAgent::inject(int site)
+{
+    ChargeAgent *hole = new ChargeAgent(Agent::Hole,m_world,site);
+    m_world->holes()->push_back(hole);
+}
+
+void ExcitonSourceAgent::inject(int site)
+{
+    ChargeAgent *electron = new ChargeAgent(Agent::Electron,m_world,site);
+    m_world->electrons()->push_back(electron);
+
+    ChargeAgent *hole = new ChargeAgent(Agent::Hole,m_world,site);
+    m_world->holes()->push_back(hole);
+}
+
+bool ElectronSourceAgent::validToInject(int site)
+{
+    if ( electronCount() >= maxElectrons() ||
+         //m_world->coupling()[m_type][Agent::Electron] <= 0 ||
+         m_world->electronGrid()->agentType(site) != Agent::Empty ||
+         m_world->electronGrid()->agentAddress(site) != 0 ||
+         site >= m_world->electronGrid()->volume() ||
+         m_world->defectSiteIDs()->contains(site) )
+    {
+        return false;
+    }
+    return true;
+}
+
+bool HoleSourceAgent::validToInject(int site)
+{
+    if ( holeCount() >= maxHoles() ||
+         //m_world->coupling()[m_type][Agent::Hole] <= 0 ||
+         m_world->holeGrid()->agentType(site) != Agent::Empty ||
+         m_world->holeGrid()->agentAddress(site) != 0 ||
+         site >= m_world->holeGrid()->volume() ||
+         m_world->defectSiteIDs()->contains(site) )
+    {
+        return false;
+    }
+    return true;
+}
+
+bool ExcitonSourceAgent::validToInject(int site)
+{
+    if ( electronCount() >= maxElectrons() ||
+         holeCount() >= maxHoles() ||
+
+         //m_world->coupling()[m_type][Agent::Electron] <= 0 ||
+         //m_world->coupling()[m_type][Agent::Hole] <= 0 ||
+
+         m_world->electronGrid()->agentType(site) != Agent::Empty ||
+         m_world->holeGrid()->agentType(site) != Agent::Empty ||
+
+         m_world->electronGrid()->agentAddress(site) != 0 ||
+         m_world->holeGrid()->agentAddress(site) != 0 ||
+
+         site >= m_world->electronGrid()->volume() ||
+         m_world->defectSiteIDs()->contains(site) )
+    {
+        return false;
+    }
+    return true;
+}
+
+/*
+
+  bool SourceAgent::shouldInjectHole(int site)
+  {
+      return shouldInjectHoleUsingCoupling();
   }
 
-  SourceAgent::~SourceAgent()
+  bool SourceAgent::shouldInjectElectron(int site)
   {
-      qDebug() << m_type;
+      return shouldInjectElectronUsingCoupling();
   }
 
-  int SourceAgent::carrierCount()
+  bool SourceAgent::shouldInjectHoleUsingCoupling()
   {
-      return m_world->electrons()->size() + m_world->holes()->size();
+      return m_world->randomNumberGenerator()->randomlyChooseYesWithPercent(m_world->coupling()[m_type][Agent::Hole]);
   }
 
-  int SourceAgent::electronCount()
+  bool SourceAgent::shouldInjectElectronUsingCoupling()
   {
-      return m_world->electrons()->size();
+      return m_world->randomNumberGenerator()->randomlyChooseYesWithPercent(m_world->coupling()[m_type][Agent::Electron]);
   }
 
-  int SourceAgent::holeCount()
+  bool SourceAgent::shouldInjectHoleUsingMetropolis(int site)
   {
-      return m_world->holes()->size();
+      double p1 = m_world->holeGrid()->potential(m_site);
+      double p2 = m_world->holeGrid()->potential(site);
+      double dE = p2-p1;
+      return m_world->randomNumberGenerator()->randomlyChooseYesWithMetropolisAndCoupling(
+              dE,m_world->parameters()->inverseKT,m_world->coupling()[Agent::Hole][m_type] );
   }
 
-  int SourceAgent::maxCharges()
+  bool SourceAgent::shouldInjectElectronUsingMetropolis(int site)
   {
-      return maxElectrons() + maxHoles();
+      double p1 = m_world->electronGrid()->potential(m_site);
+      double p2 = m_world->electronGrid()->potential(site);
+      double dE = -1*(p2-p1);
+      return m_world->randomNumberGenerator()->randomlyChooseYesWithMetropolisAndCoupling(
+              dE,m_world->parameters()->inverseKT,m_world->coupling()[Agent::Electron][m_type] );
   }
 
-  int SourceAgent::maxElectrons()
+  int SourceAgent::randomNeighborSiteID()
   {
-      return m_maxElectrons;
-  }
-
-  int SourceAgent::maxHoles()
-  {
-      return m_maxHoles;
-  }
-
-  bool SourceAgent::validToInjectHoleAtSite(int site)
-  {
-      if ( m_world->holeGrid()->agentType(site) != Agent::Empty ||
-           m_world->holeGrid()->agentAddress(site) != 0 ||
-           site >= m_world->holeGrid()->volume() )
-      {
-          return false;
-      }
-      return true;
-  }
-
-  bool SourceAgent::validToInjectElectronAtSite(int site)
-  {
-      if ( m_world->electronGrid()->agentType(site) != Agent::Empty ||
-           m_world->electronGrid()->agentAddress(site) != 0 ||
-           site >= m_world->electronGrid()->volume() )
-      {
-          return false;
-      }
-      return true;
-  }
-
-  void SourceAgent::injectHoleAtSite(int site)
-  {
-      ChargeAgent *charge = new ChargeAgent(Agent::Hole,m_world,site);
-      m_world->holes()->push_back(charge);
-  }
-
-  void SourceAgent::injectElectronAtSite(int site)
-  {
-      ChargeAgent *charge = new ChargeAgent(Agent::Electron,m_world,site);
-      m_world->electrons()->push_back(charge);
-  }
-
-  void SourceAgent::shouldInject(Agent::Type type, int site)
-  {
-
+      return m_neighbors[m_world->randomNumberGenerator()->integer(0,m_neighbors.size()-1)];
   }
 
   int SourceAgent::randomSiteID()
@@ -102,208 +286,60 @@ namespace Langmuir
       return m_world->randomNumberGenerator()->integer(0,m_world->electronGrid()->volume()-1);
   }
 
-  bool SourceAgent::seedHole()
+  bool SourceAgent::tryToPlaceHoleAtRandomSite()
   {
       int site = randomSiteID();
       if ( validToInjectHoleAtSite(site) )
       {
-          injectHoleAtSite(site);
+          injectHole(site);
           return true;
       }
       return false;
   }
 
-  bool SourceAgent::seedElectron()
+  bool SourceAgent::tryToPlaceElectronAtRandomSite()
   {
       int site = randomSiteID();
       if ( validToInjectElectronAtSite(site) )
       {
-          injectElectronAtSite(site);
+          injectElectron(site);
           return true;
       }
       return false;
   }
 
-  /*
-  inline double SourceAgent::coulombInteraction(int newSite)
+  bool SourceAgent::tryToPlaceHoleAtNeighbor()
   {
-    // Pointer to grid
-    Grid *grid = m_world->electronGrid();
-
-    // Reference to charges in simulation
-    QList < ChargeAgent * >&charges = *m_world->electrons();
-
-    // Number of charges in simulation
-    int chargeSize = charges.size();
-
-    // Coulomb Potential
-    double potential = 0.0;
-
-    //int count = 0;
-
-    for(int i = 0; i < chargeSize; ++i)
+      int site = randomNeighborSiteID();
+      if ( validToInjectHoleAtSite(site) && shouldInjectHole(site) )
       {
-        // Potential at proposed site from other charges
-        int dx = grid->xDistancei(newSite, charges[i]->site());
-        int dy = grid->yDistancei(newSite, charges[i]->site());
-        int dz = grid->zDistancei(newSite, charges[i]->site());
-        if( dx < m_world->parameters()->electrostaticCutoff &&
-            dy < m_world->parameters()->electrostaticCutoff &&
-            dz < m_world->parameters()->electrostaticCutoff)
-          {
-            potential +=
-              m_world->interactionEnergies()[dx][dy][dz] * charges[i]->charge();
-              //count += 1;
-          }
+          injectHole(site);
+          return true;
       }
-    //qDebug() << QString("%1 %2 %3").arg(count).arg(chargeSize).arg(-1.0 * m_world->parameters()->electrostaticPrefactor*potential);
-    return( -1.0 * potential );
+      return false;
   }
 
-  inline double SourceAgent::imageInteraction(int newSite)
+  bool SourceAgent::tryToPlaceElectronAtNeighbor()
   {
-    // Pointer to grid
-    Grid *grid = m_world->electronGrid();
-
-    // Reference to charges in simulation
-    QList < ChargeAgent * >&charges = *m_world->electrons();
-
-    // Number of charges in simulation
-    int chargeSize = charges.size();
-
-    // Coulomb Potential
-    double potential = 0.0;
-
-    //int count = 0;
-
-    for(int i = 0; i < chargeSize; ++i)
+      int site = randomNeighborSiteID();
+      if ( validToInjectElectronAtSite(site) && shouldInjectElectron(site) )
       {
-        // Potential at proposed site from other charges
-        int dx = grid->xImageDistancei(newSite, charges[i]->site());
-        int dy = grid->yDistancei(newSite, charges[i]->site());
-        int dz = grid->zDistancei(newSite, charges[i]->site());
-        if( dx < m_world->parameters()->electrostaticCutoff &&
-            dy < m_world->parameters()->electrostaticCutoff &&
-            dz < m_world->parameters()->electrostaticCutoff)
-          {
-            potential +=
-              -1.0 * m_world->interactionEnergies()[dx][dy][dz] * charges[i]->charge();
-            //count += 1;
-          }
+          injectElectron(site);
+          return true;
       }
-    //qDebug() << QString("%1 %2 %3").arg(count).arg(chargeSize).arg(-1.0 * m_world->parameters()->electrostaticPrefactor*potential);
-    return( -1.0 * potential );
+      return false;
   }
 
-  inline double SourceAgent::siteInteraction(int newSite)
+  bool SourceAgent::tryToPlaceExcitonAtRandomSite()
   {
-    //qDebug() << QString("%1").arg( -1.0 * m_world->parameters()->elementaryCharge * m_world->grid()->potential(newSite) );
-    return( -1.0 * m_world->electronGrid()->potential(newSite) );
-  }
-
-  inline bool SourceAgent::attemptTransport(double pd)
-  {
-    if(pd > 0)
+      int site = randomSiteID();
+      if ( validToInjectHoleAtSite(site) && validToInjectElectronAtSite(site) )
       {
-        if(exp(-pd*m_world->parameters()->inverseKT) > m_world->randomNumberGenerator()->random())
-          {
-           //qDebug() << 1;
-           return true;
-          }
-        else
-          {
-           //qDebug() << 2;
-           return false;
-          }
+          injectElectron(site);
+          injectHole(site);
+          return true;
       }
-    else
-      {
-        //qDebug() << 3;
-        return true;
-      }
-    //qDebug() << 4;
-    return false;
-  }
-  int SourceAgent::transport()
-  {
-    // Do not inject if we are under the maximum charges
-    if(m_charges >= m_maxCharges)
-      {
-        //qDebug() << "-";
-        //qDebug() << QString("- %1 -").arg( m_world->charges()->size() );
-        //qDebug() << QString("- %1 -").arg( m_world->charges()->size() );
-        //qDebug() << 0;
-        return -1;
-      }
-
-    // Select a random injection site
-    int irn = m_world->randomNumberGenerator()->integer(0,m_neighbors.size()-1);
-
-    int tries = 1;
-    while(m_world->electronGrid()->agentAddress(m_neighbors[irn]))
-      {
-        irn = m_world->randomNumberGenerator()->integer(0,m_neighbors.size()-1);
-        tries += 1;
-        if(tries >= m_neighbors.size())
-          return -1;
-      }
-
-    switch(m_world->parameters()->sourceType)
-      {
-
-      case 0:                        //constant case
-        {
-          //siteInteraction(m_neighbors[irn]);
-          //coulombInteraction(m_neighbors[irn]);
-          //imageInteraction(m_neighbors[irn]);
-          // Do not inject 100*sourceBarrier percent of the time
-          if(m_world->randomNumberGenerator()->random() <= m_world->parameters()->sourceBarrier)
-            {
-              //qDebug() << 5;
-              return -1;
-            }
-          // Inject a charge carrier
-          else
-            {
-              //qDebug() << 6;
-              ++m_charges;
-              return m_neighbors[irn];
-            }
-          break;
-        }
-
-      case 1:                        //coulomb loop case
-        {
-          double potential = siteInteraction(m_neighbors[irn]) + coulombInteraction(m_neighbors[irn]);
-          //imageInteraction(m_neighbors[irn]);
-          if ( attemptTransport(potential) )
-            {
-              ++m_charges;
-              return m_neighbors[irn];
-            }
-          return -1;
-          break;
-        }
-
-      case 2:                        //image charge case
-        {
-          double potential = siteInteraction(m_neighbors[irn]) + coulombInteraction(m_neighbors[irn]) + imageInteraction(m_neighbors[irn]);
-          if ( attemptTransport(potential) )
-            {
-              ++m_charges;
-              return m_neighbors[irn];
-            }
-          return -1;
-          break;
-        }
-
-      default:                        //unknown case
-        {
-          qFatal("unknown injection probability calculation type encountered");
-          return -1;
-          break;
-        }
-      }
+      return false;
   }
   */
 }

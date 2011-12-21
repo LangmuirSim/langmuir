@@ -50,11 +50,7 @@ namespace Langmuir
 
   bool DrainAgent::attemptTransport(ChargeAgent *charge)
   {
-      if(m_world->randomNumberGenerator()->random() <= m_world->coupling()[charge->type()][m_type])
-      {
-          return true;
-      }
-      return false;
+      return m_world->randomNumberGenerator()->randomlyChooseYesWithPercent( m_world->coupling()[charge->type()][m_type] );
   }
 
 } // End Langmuir namespace
