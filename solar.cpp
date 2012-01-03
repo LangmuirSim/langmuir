@@ -84,13 +84,11 @@ namespace Langmuir
 
     void SolarCell::performInjections(int nInjections)
     {
-        //m_world->sourceL()->tryToPlaceElectronAtNeighbor();
-        //m_world->sourceR()->tryToPlaceElectronAtNeighbor();
-
-        //m_world->sourceL()->tryToPlaceHoleAtNeighbor();
-        //m_world->sourceR()->tryToPlaceHoleAtNeighbor();
-
-        //m_world->sourceL()->tryToPlaceExcitonAtRandomSite();
+        m_world->holeSourceL()->tryToInject();
+        m_world->holeSourceR()->tryToInject();
+        m_world->electronSourceL()->tryToInject();
+        m_world->electronSourceR()->tryToInject();
+        m_world->excitonSource()->tryToInject();
         /*
         int inject = nInjections;
         if ( inject < 0 )

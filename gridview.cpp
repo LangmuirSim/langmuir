@@ -325,7 +325,7 @@ namespace Langmuir
         {
             pSim->performIterations( pPar->iterationsPrint );
             //double current = ( pSim->totalChargesAccepted() - lastCount ) / ( double( pPar->iterationsPrint ) );
-            lastCount = pSim->world()->drainR()->acceptedElectrons();
+            lastCount = pSim->world()->holeDrainR()->acceptedElectrons();
             step += pPar->iterationsPrint;
             updatePointBuffers();
             emit stepChanged( step );

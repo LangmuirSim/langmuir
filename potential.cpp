@@ -81,10 +81,10 @@ void Potential::setPotentialTraps()
 
         int newTrapIndex                = m_world->randomNumberGenerator()->integer(0,trapSeedNeighbors.size()-1);
         int newTrapSite                 = trapSeedNeighbors[newTrapIndex];
-        if ( m_world->electronGrid()->agentType(newTrapSite) != Agent::HoleSource &&
-             m_world->electronGrid()->agentType(newTrapSite) != Agent::ElectronSource &&
-             m_world->electronGrid()->agentType(newTrapSite) != Agent::DrainL  &&
-             m_world->electronGrid()->agentType(newTrapSite) != Agent::DrainR  &&
+        if ( m_world->electronGrid()->agentType(newTrapSite) != Agent::HoleSourceL &&
+             m_world->electronGrid()->agentType(newTrapSite) != Agent::ElectronSourceL &&
+             m_world->electronGrid()->agentType(newTrapSite) != Agent::HoleDrainL  &&
+             m_world->electronGrid()->agentType(newTrapSite) != Agent::HoleDrainR  &&
            ! m_world->trapSiteIDs()->contains(newTrapSite) )
         {
             m_world->electronGrid()->addToPotential(newTrapSite,m_world->parameters()->deltaEpsilon);

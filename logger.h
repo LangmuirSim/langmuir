@@ -6,6 +6,7 @@
 namespace Langmuir
 {
 class World;
+class Agent;
 
 /**
   *  @class Logger
@@ -68,6 +69,11 @@ public:
       * @note called in destructor of logger to make sure this is done at least once
       */
     void carrierStreamFlush();
+
+    /**
+      * @brief get information about a particular coupling constant as strings
+      */
+    QStringList couplingStringList(Agent::Type t1, Agent::Type t2);
 
 private:
 

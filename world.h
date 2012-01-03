@@ -21,9 +21,6 @@ namespace Langmuir
   class ChargeAgent;
   class SourceAgent;
   class OpenClHelper;
-  class HoleSourceAgent;
-  class ExcitonSourceAgent;
-  class ElectronSourceAgent;
   struct SimulationParameters;
   /**
     * @class World
@@ -69,37 +66,57 @@ namespace Langmuir
     Random* randomNumberGenerator() { return m_rand; }
 
     /**
-      * @brief random number generator pointer
+      * @brief source pointer
       */
-    SourceAgent* holeSource() { return m_holeSource; }
+    SourceAgent* holeSourceL() { return m_holeSourceL; }
 
     /**
-      * @brief random number generator pointer
+      * @brief source pointer
       */
-    SourceAgent* electronSource() { return m_electronSource; }
+    SourceAgent* holeSourceR() { return m_holeSourceR; }
 
     /**
-      * @brief random number generator pointer
+      * @brief source pointer
+      */
+    SourceAgent* electronSourceL() { return m_electronSourceL; }
+
+    /**
+      * @brief source pointer
+      */
+    SourceAgent* electronSourceR() { return m_electronSourceR; }
+
+    /**
+      * @brief source pointer
       */
     SourceAgent* excitonSource() { return m_excitonSource; }
 
     /**
-      * @brief random number generator pointer
+      * @brief drain pointer
       */
-    DrainAgent* drainL() { return m_drainL; }
+    DrainAgent* holeDrainL() { return m_holeDrainL; }
 
     /**
-      * @brief random number generator pointer
+      * @brief drain pointer
       */
-    DrainAgent* drainR() { return m_drainR; }
+    DrainAgent* holeDrainR() { return m_holeDrainR; }
 
     /**
-      * @brief random number generator pointer
+      * @brief drain pointer
+      */
+    DrainAgent* electronDrainL() { return m_electronDrainL; }
+
+    /**
+      * @brief drain pointer
+      */
+    DrainAgent* electronDrainR() { return m_electronDrainR; }
+
+    /**
+      * @brief logger pointer
       */
     Logger* logger() { return m_logger; }
 
     /**
-      * @brief random number generator pointer
+      * @brief openCL pointer
       */
     OpenClHelper* opencl() { return m_ocl; }
 
@@ -161,24 +178,44 @@ namespace Langmuir
     Random *m_rand;
 
     /**
-      * @brief Accepts charge carriers at x = grid.width
+      * @brief Accepts holes at x = grid.width
       */
-    DrainAgent *m_drainR;
+    DrainAgent *m_holeDrainR;
 
     /**
-      * @brief Accepts charge carriers at x = 0
+      * @brief Accepts holes at x = 0
       */
-    DrainAgent *m_drainL;
+    DrainAgent *m_holeDrainL;
 
     /**
-      * @brief Injects charge carriers at x = grid.width
+      * @brief Accepts electrons at x = grid.width
       */
-    SourceAgent *m_electronSource;
+    DrainAgent *m_electronDrainR;
 
     /**
-      * @brief Injects charge carriers at x = 0
+      * @brief Accepts electrons at x = 0
       */
-    SourceAgent *m_holeSource;
+    DrainAgent *m_electronDrainL;
+
+    /**
+      * @brief Injects electrons at x = 0
+      */
+    SourceAgent *m_electronSourceL;
+
+    /**
+      * @brief Injects electrons at x = grid.width
+      */
+    SourceAgent *m_electronSourceR;
+
+    /**
+      * @brief Injects holes at x = 0
+      */
+    SourceAgent *m_holeSourceL;
+
+    /**
+      * @brief Injects holes at x = grid.width
+      */
+    SourceAgent *m_holeSourceR;
 
     /**
       * @brief Injects excitons at random sites

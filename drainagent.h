@@ -6,92 +6,73 @@
 namespace Langmuir
 {
   class ChargeAgent;
-  /**
-    *  @class DrainAgent
-    *  @brief A agent acting as a sink for charges.
-    *
-    *  Depending on the potential of the drain, positive or negative charges leave the simulation be traveling to the drain.
-    *  @date 06/07/2010
-    */
+
   class DrainAgent : public Agent
   {
 
   public:
-    /**
-     * @brief Default Constructor.
-     *
-     * Creates a charge agent.
-     * Assigns the agent a serial site index.
-     * Points the agent to the world, where simulation parameters may be accessed.
-     * Sets the potential of the drain agent.
-     * @param world address of the world object.
-     * @param site serial site index.
-     * @param potential potential of the drain.
-     * @warning default potential is set to zero.
-     */
-    DrainAgent(Agent::Type type, World *world, int site);
 
-    /**
-     * @brief virutal Destructor.
-     */
+    DrainAgent(World * world);
    ~DrainAgent();
 
-    /**
-     * @brief increment charge counters
-     *
-     * Accept charge carrier
-     * @param type is hole or electron
-     */
     virtual void acceptCharge(Agent::Type type);
+    virtual bool tryToAccept(ChargeAgent *charge);
 
-    /**
-     * @brief attept charge move.
-     *
-     * Try to accept a charge carrier
-     * @param charge is hole or electron
-     */
-    virtual bool attemptTransport(ChargeAgent *charge);
+    virtual unsigned long int acceptedCarriers() const;
+    virtual unsigned long int acceptedElectrons() const;
+    virtual unsigned long int acceptedHoles() const;
+    virtual unsigned long int attempts() const;
+    virtual unsigned long int successes() const;
+    virtual double successRate() const;
 
-    /**
-     * @brief total charges.
-     *
-     * Total number of electrons the drain has accepted.
-     */
-    unsigned long acceptedElectrons();
-
-    /**
-     * @brief total charges.
-     *
-     * Total number of holes the drain has accepted.
-     */
-    unsigned long acceptedHoles();
+    virtual QString toQString() const;
 
   private:
 
-    /**
-      * @brief total charges.
-      *
-      * Total number of charges accepted by the drain.
-      */
-    unsigned long m_acceptedElectrons; // Counter - number of accepted electrons
+    virtual double energyChange(ChargeAgent *charge);
+    virtual bool shouldAccept(ChargeAgent *charge);
 
-    /**
-      * @brief total charges.
-      *
-      * Total number of charges accepted by the drain.
-      */
-    unsigned long m_acceptedHoles; // Counter - number of accepted electrons
+    unsigned long int m_acceptedElectrons;
+    unsigned long int m_acceptedHoles;
+    unsigned long int m_attempts;
+    unsigned long int m_successes;
   };
 
-  inline unsigned long DrainAgent::acceptedElectrons()
+  class ElectronDrainAgent : public DrainAgent
   {
-    return m_acceptedElectrons;
-  }
+  public:
+      ElectronDrainAgent(World *world) : DrainAgent(world) {}
+  };
 
-  inline unsigned long DrainAgent::acceptedHoles()
+  class ElectronDrainAgentLeft : public ElectronDrainAgent
   {
-    return m_acceptedHoles;
-  }
-} // End namespace Langmuir
+  public:
+      ElectronDrainAgentLeft(World *world);
+  };
+
+  class ElectronDrainAgentRight : public ElectronDrainAgent
+  {
+  public:
+      ElectronDrainAgentRight(World *world);
+  };
+
+  class HoleDrainAgent : public DrainAgent
+  {
+  public:
+      HoleDrainAgent(World *world) : DrainAgent(world) {}
+  };
+
+  class HoleDrainAgentLeft : public HoleDrainAgent
+  {
+  public:
+      HoleDrainAgentLeft(World *world);
+  };
+
+  class HoleDrainAgentRight : public HoleDrainAgent
+  {
+  public:
+      HoleDrainAgentRight(World *world);
+  };
+}
 
 #endif

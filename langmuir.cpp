@@ -155,11 +155,11 @@ int main (int argc, char *argv[])
             << par.defectPercentage * 100.00
             << par.trapPercentage * 100.0
             << par.chargePercentage * 100.0
-            << double (sim->world()->electrons()->size()) / double (sim->world()->holeSource()->maxCarriers()) * 100.0
-            << double (sim->world()->drainR()->acceptedElectrons() -
+            << double (sim->world()->electrons()->size()) / double (sim->world()->holeSourceL()->maxCarriers()) * 100.0
+            << double (sim->world()->holeDrainR()->acceptedElectrons() -
                        lastCount) / double (par.iterationsPrint) << "\n";
           iout->flush ();
-          lastCount = sim->world()->drainR()->acceptedElectrons();
+          lastCount = sim->world()->holeDrainR()->acceptedElectrons();
 
           progress( i, j, 0, total, timer.elapsed(timeStepStart) );
         }
@@ -180,11 +180,11 @@ int main (int argc, char *argv[])
             << par.defectPercentage * 100.0
             << par.trapPercentage * 100.0
             << par.chargePercentage * 100.0
-            << double (sim->world()->electrons()->size()) / double (sim->world()->holeSource()->maxCarriers()) * 100.0
-            << double (sim->world()->drainR()->acceptedElectrons() -
+            << double (sim->world()->electrons()->size()) / double (sim->world()->holeSourceL()->maxCarriers()) * 100.0
+            << double (sim->world()->holeDrainR()->acceptedElectrons() -
                        lastCount) / double (par.iterationsPrint) << "\n";
           iout->flush ();
-          lastCount = sim->world()->drainR()->acceptedElectrons();
+          lastCount = sim->world()->holeDrainR()->acceptedElectrons();
 
           progress( i, par.iterationsWarmup, j, total, timer.elapsed(timeStepStart) );
         }
@@ -198,7 +198,7 @@ int main (int argc, char *argv[])
         << par.defectPercentage * 100.0
         << par.trapPercentage * 100.0
         << par.chargePercentage * 100.0
-        << double (sim->world()->electrons()->size()) / double (sim->world()->holeSource()->maxCarriers()) * 100.0
+        << double (sim->world()->electrons()->size()) / double (sim->world()->holeSourceL()->maxCarriers()) * 100.0
         << double (lastCount - startCount) / double (par.iterationsReal)
         << timer.elapsed (timeStepStart) << "\n";
       oout->flush ();

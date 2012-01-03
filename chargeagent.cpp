@@ -57,6 +57,41 @@ namespace Langmuir
   {
   }
 
+  int ChargeAgent::charge()
+  {
+    return m_charge;
+  }
+
+  void ChargeAgent::setCharge( int value )
+  {
+    m_charge = value;
+  }
+
+  bool ChargeAgent::removed()
+  {
+    return m_removed;
+  }
+
+  int ChargeAgent::lifetime()
+  {
+   return m_lifetime;
+  }
+
+  double ChargeAgent::distanceTraveled()
+  {
+   return m_distanceTraveled;
+  }
+
+  void ChargeAgent::setOpenCLID( int id )
+  {
+      m_openClID = id;
+  }
+
+  int ChargeAgent::getOpenCLID( )
+  {
+      return m_openClID;
+  }
+
   void ChargeAgent::chooseFuture()
   {
     // Select a proposed transport site at random
@@ -101,10 +136,10 @@ namespace Langmuir
             break;
         }
 
-        case Agent::DrainL: case Agent::DrainR:
+        case Agent::HoleDrainL: case Agent::HoleDrainR:
         {
             // Move to drain with a constant probability ( see coupling constants )
-            if ( m_world->drainL()->attemptTransport(this) )
+            if ( m_world->holeDrainL()->tryToAccept(this) )
             {
                 // Accept move - increase distance traveled
                 m_distanceTraveled += 1.0;
@@ -124,7 +159,7 @@ namespace Langmuir
             break;
         }
 
-        case Agent::HoleSource: case Agent::ElectronSource:
+        case Agent::HoleSourceL: case Agent::HoleSourceR: case Agent::ElectronSourceL: case Agent::ElectronSourceR:
         {
             // Kill program - this should never happen
             qFatal("ChargeAgent::decideFuture transport to a Source agent: %s",
@@ -149,19 +184,19 @@ namespace Langmuir
     if (m_site != m_fSite)
       {
         // Are we on a drain site? If so then we have been removed.
-        if (m_grid->agentType (m_fSite) == Agent::DrainL)
+        if (m_grid->agentType (m_fSite) == Agent::HoleDrainL)
           {
             m_grid->setAgentAddress(m_site,0);
             m_grid->setAgentType(m_site,Agent::Empty);
-            m_world->drainL()->acceptCharge(m_type);
+            m_world->holeDrainL()->acceptCharge(m_type);
             m_removed = true;
             return;
           }
-        if (m_grid->agentType (m_fSite) == Agent::DrainR)
+        if (m_grid->agentType (m_fSite) == Agent::HoleDrainR)
           {
             m_grid->setAgentAddress (m_site,0);
             m_grid->setAgentType(m_site,Agent::Empty);
-            m_world->drainR()->acceptCharge(m_type);
+            m_world->holeDrainR()->acceptCharge(m_type);
             m_removed = true;
             return;
           }

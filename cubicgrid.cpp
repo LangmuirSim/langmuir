@@ -230,10 +230,10 @@ namespace Langmuir
       if (lay < m_depth - 1)
         nList.push_back(getIndex(col,row,lay+1));
       // Now for the drains....
-      if (col == 0)
-        nList.push_back(getIndexDrainL()); //left drain
-      if (col == m_width - 1)
-        nList.push_back(getIndexDrainR()); //right right
+      //if (col == 0)
+      //  nList.push_back(getIndexDrainL()); //left drain
+      //if (col == m_width - 1)
+      //  nList.push_back(getIndexDrainR()); //right right
       // Now we have all the nearest neighbours - between 4 and 6 in this case
       return nList;
   } 

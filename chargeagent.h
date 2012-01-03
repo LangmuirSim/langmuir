@@ -163,41 +163,6 @@ namespace Langmuir
     int m_openClID;
   };
 
-  inline int ChargeAgent::charge()
-  {
-    return m_charge;
-  }
-
-  inline void ChargeAgent::setCharge( int value )
-  {
-    m_charge = value;
-  }
-
-  inline bool ChargeAgent::removed()
-  {
-    return m_removed;
-  }
-
-  inline int ChargeAgent::lifetime()
-  {
-   return m_lifetime;
-  }
-
-  inline double ChargeAgent::distanceTraveled()
-  {
-   return m_distanceTraveled;
-  }
-
-  inline void ChargeAgent::setOpenCLID( int id )
-  {
-      m_openClID = id;
-  }
-
-  inline int ChargeAgent::getOpenCLID( )
-  {
-      return m_openClID;
-  }
-
 } // End namespace Langmuir
 
 #endif // CHARGEAGENT_H

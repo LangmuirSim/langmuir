@@ -350,7 +350,7 @@ namespace Langmuir
     /**
      * @brief serial cell index
      *
-     * Get the serial index of a site represented the Drain on the left side (x=width-1) of the grid
+     * Get the serial index of a site representing a Drain for electrons on the left side of the grid
      * @return integer serial cell index.
      */
     virtual int getIndexDrainL();
@@ -358,31 +358,31 @@ namespace Langmuir
     /**
      * @brief serial cell index
      *
-     * Get the serial index of a site represented the Drain on the right side (x=0) of the grid
+     * Get the serial index of a site representing a Drain for electrons on the right side of the grid
      * @return integer serial cell index.
      */
     virtual int getIndexDrainR();
 
-     /**
+    /**
      * @brief serial cell index
      *
-     * Get the serial index of a site represented the Source on the left side (x=width-1) of the grid
+     * Get the serial index of a site representing a Source of electrons on the left side of the grid
      * @return integer serial cell index.
      */
-    virtual int getIndexHoleSource();
+    virtual int getIndexSourceL();
 
     /**
      * @brief serial cell index
      *
-     * Get the serial index of a site represented the Source on the left side (x=0) of the grid
+     * Get the serial index of a site representing a Source of electrons on the right side of the grid
      * @return integer serial cell index.
      */
-    virtual int getIndexElectronSource();
+    virtual int getIndexSourceR();
 
     /**
      * @brief serial cell index
      *
-     * Get the serial index of a site represented the Source on the left side (x=0) of the grid
+     * Get the serial index of a site representing a Source of excitons
      * @return integer serial cell index.
      */
     virtual int getIndexExcitonSource();
@@ -464,12 +464,12 @@ namespace Langmuir
       return this->volume() + 1;
   }
 
-  inline int Grid::getIndexHoleSource()
+  inline int Grid::getIndexSourceL()
   {
       return this->volume() + 2;
   }
 
-  inline int Grid::getIndexElectronSource()
+  inline int Grid::getIndexSourceR()
   {
       return this->volume() + 3;
   }
