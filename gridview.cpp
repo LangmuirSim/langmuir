@@ -101,7 +101,6 @@ namespace Langmuir
         }
 
         //Set default values
-        lastCount = 0;
         translation.setX( 0 );
         translation.setY( 0 );
         translation.setZ( 0 );
@@ -325,7 +324,6 @@ namespace Langmuir
         {
             pSim->performIterations( pPar->iterationsPrint );
             //double current = ( pSim->totalChargesAccepted() - lastCount ) / ( double( pPar->iterationsPrint ) );
-            lastCount = pSim->world()->holeDrainR()->acceptedElectrons();
             step += pPar->iterationsPrint;
             updatePointBuffers();
             emit stepChanged( step );

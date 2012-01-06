@@ -91,6 +91,6 @@ namespace Langmuir
   {
       return m_world;
   }
-} // End namespace Langmuir
+}
 
 #endif

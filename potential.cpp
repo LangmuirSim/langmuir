@@ -37,15 +37,6 @@ void Potential::setPotentialLinear()
             }
         }
     }
-    m_world->electronGrid()->setPotential( m_world->electronGrid()->volume()+0, m_world->parameters()->voltageSource );
-    m_world->electronGrid()->setPotential( m_world->electronGrid()->volume()+1, m_world->parameters()->voltageDrain  );
-    m_world->electronGrid()->setPotential( m_world->electronGrid()->volume()+2, m_world->parameters()->voltageSource );
-    m_world->electronGrid()->setPotential( m_world->electronGrid()->volume()+3, m_world->parameters()->voltageDrain  );
-
-    m_world->holeGrid()->setPotential( m_world->holeGrid()->volume()+0, m_world->parameters()->voltageSource );
-    m_world->holeGrid()->setPotential( m_world->holeGrid()->volume()+1, m_world->parameters()->voltageDrain  );
-    m_world->holeGrid()->setPotential( m_world->holeGrid()->volume()+2, m_world->parameters()->voltageSource );
-    m_world->holeGrid()->setPotential( m_world->holeGrid()->volume()+3, m_world->parameters()->voltageDrain  );
 }
 
 void Potential::setPotentialTraps()
@@ -81,10 +72,10 @@ void Potential::setPotentialTraps()
 
         int newTrapIndex                = m_world->randomNumberGenerator()->integer(0,trapSeedNeighbors.size()-1);
         int newTrapSite                 = trapSeedNeighbors[newTrapIndex];
-        if ( m_world->electronGrid()->agentType(newTrapSite) != Agent::HoleSourceL &&
-             m_world->electronGrid()->agentType(newTrapSite) != Agent::ElectronSourceL &&
-             m_world->electronGrid()->agentType(newTrapSite) != Agent::HoleDrainL  &&
-             m_world->electronGrid()->agentType(newTrapSite) != Agent::HoleDrainR  &&
+        if ( m_world->electronGrid()->agentType(newTrapSite) != Agent::Source  &&
+             m_world->electronGrid()->agentType(newTrapSite) != Agent::Source  &&
+             m_world->electronGrid()->agentType(newTrapSite) != Agent::Drain   &&
+             m_world->electronGrid()->agentType(newTrapSite) != Agent::Drain   &&
            ! m_world->trapSiteIDs()->contains(newTrapSite) )
         {
             m_world->electronGrid()->addToPotential(newTrapSite,m_world->parameters()->deltaEpsilon);
@@ -315,4 +306,4 @@ double Potential::potentialAtSite(int site, Grid *grid, bool useCoulomb, bool us
     return p1;
 }
 
-} // End namespace Langmuir
+}

@@ -10,6 +10,7 @@ set( sources
       chargeagent.cpp
       cubicgrid.cpp
       drainagent.cpp
+      fluxagent.cpp
       inputparser.cpp
       openclhelper.cpp
       potential.cpp
@@ -26,7 +27,7 @@ set( headers
       chargeagent.h
       cubicgrid.h
       drainagent.h
-      grid.h
+      fluxagent.h
       inputparser.h
       logger.h
       openclhelper.h
@@ -56,10 +57,10 @@ include_directories( ${OPENCL_INCLUDE_DIRS} )
 add_definitions( -Wall )
 add_definitions( ${QT_DEFINITIONS} )
 
-add_executable( langmuir langmuir.cpp ${sources} )
-target_link_libraries( langmuir ${Boost_LIBRARIES} )
-target_link_libraries( langmuir ${QT_LIBRARIES} )
-target_link_libraries( langmuir ${OPENCL_LIBRARIES} )
+#add_executable( langmuir langmuir.cpp ${sources} )
+#target_link_libraries( langmuir ${Boost_LIBRARIES} )
+#target_link_libraries( langmuir ${QT_LIBRARIES} )
+#target_link_libraries( langmuir ${OPENCL_LIBRARIES} )
 
 QT4_WRAP_CPP( moc_output ${meta_object_headers} )
 include_directories( ${OPENGL_INCLUDE_DIRS} )

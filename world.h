@@ -66,51 +66,6 @@ namespace Langmuir
     Random* randomNumberGenerator() { return m_rand; }
 
     /**
-      * @brief source pointer
-      */
-    SourceAgent* holeSourceL() { return m_holeSourceL; }
-
-    /**
-      * @brief source pointer
-      */
-    SourceAgent* holeSourceR() { return m_holeSourceR; }
-
-    /**
-      * @brief source pointer
-      */
-    SourceAgent* electronSourceL() { return m_electronSourceL; }
-
-    /**
-      * @brief source pointer
-      */
-    SourceAgent* electronSourceR() { return m_electronSourceR; }
-
-    /**
-      * @brief source pointer
-      */
-    SourceAgent* excitonSource() { return m_excitonSource; }
-
-    /**
-      * @brief drain pointer
-      */
-    DrainAgent* holeDrainL() { return m_holeDrainL; }
-
-    /**
-      * @brief drain pointer
-      */
-    DrainAgent* holeDrainR() { return m_holeDrainR; }
-
-    /**
-      * @brief drain pointer
-      */
-    DrainAgent* electronDrainL() { return m_electronDrainL; }
-
-    /**
-      * @brief drain pointer
-      */
-    DrainAgent* electronDrainR() { return m_electronDrainR; }
-
-    /**
       * @brief logger pointer
       */
     Logger* logger() { return m_logger; }
@@ -129,6 +84,16 @@ namespace Langmuir
       * @brief simulation pointer
       */
     void setSimulation( Simulation *sim ) { m_simulation =  sim; }
+
+    /**
+      * @brief source agent pointer
+      */
+    QList<SourceAgent *> * sources() { return &m_sources; }
+
+    /**
+      * @brief drain agent pointer
+      */
+    QList<DrainAgent *> * drains() { return &m_drains; }
 
     /**
       * @brief charge agent pointer
@@ -178,51 +143,6 @@ namespace Langmuir
     Random *m_rand;
 
     /**
-      * @brief Accepts holes at x = grid.width
-      */
-    DrainAgent *m_holeDrainR;
-
-    /**
-      * @brief Accepts holes at x = 0
-      */
-    DrainAgent *m_holeDrainL;
-
-    /**
-      * @brief Accepts electrons at x = grid.width
-      */
-    DrainAgent *m_electronDrainR;
-
-    /**
-      * @brief Accepts electrons at x = 0
-      */
-    DrainAgent *m_electronDrainL;
-
-    /**
-      * @brief Injects electrons at x = 0
-      */
-    SourceAgent *m_electronSourceL;
-
-    /**
-      * @brief Injects electrons at x = grid.width
-      */
-    SourceAgent *m_electronSourceR;
-
-    /**
-      * @brief Injects holes at x = 0
-      */
-    SourceAgent *m_holeSourceL;
-
-    /**
-      * @brief Injects holes at x = grid.width
-      */
-    SourceAgent *m_holeSourceR;
-
-    /**
-      * @brief Injects excitons at random sites
-      */
-    SourceAgent *m_excitonSource;
-
-    /**
       * @brief Calculates and sets potentials to be stored in the Grid
       */
     Potential *m_potential;
@@ -247,6 +167,16 @@ namespace Langmuir
       * @brief Handles initialization and usage of OpenCL for Coulomb calculations
       */
     OpenClHelper *m_ocl;
+
+    /**
+      * @brief A list of all the sources for the system
+      */
+    QList<SourceAgent *> m_sources;
+
+    /**
+      * @brief A list of all the drains for the system
+      */
+    QList<DrainAgent *> m_drains;
 
     /**
       * @brief A list of all the charge carriers for the system

@@ -22,23 +22,17 @@ namespace Langmuir{
      *
      */
     // The numbers are used as an index to access a matrix of coupling constants - so be careful changing things
-    enum Type {
-      Empty = 0,
-      Electron = 1,
-      Hole = 2,
-      Defect = 3,
-      HoleSourceL = 4,
-      HoleSourceR = 5,
-      ElectronSourceL = 6,
-      ElectronSourceR = 7,
-      ExcitonSource = 8,
-      HoleDrainL = 9,
-      HoleDrainR = 10,
-      ElectronDrainL = 11,
-      ElectronDrainR = 12,
-      SIZE = 13
-    };
-    static QString typeToQString(const Agent::Type &t);
+      enum Type
+      {
+          Empty         =   0,
+          Electron      =   1,
+          Hole          =   2,
+          Defect        =   3,
+          Source        =   4,
+          Drain         =   5,
+          SIZE          =   6
+      };
+      static QString typeToQString(const Agent::Type &type);
 
     /**
      * @brief Default Constructor.
@@ -61,40 +55,35 @@ namespace Langmuir{
      *
      * Set the nearest neighbours of the agent.
      */
-    virtual void setNeighbors(QVector<int> neighbors);
+    void setNeighbors(QVector<int> neighbors);
 
     /**
      * @brief set neighbors.
      *
      * Get the nearest neighbours of the agent.
      */
-    virtual const QVector<int>& getNeighbors() const;
+    const QVector<int>& getNeighbors() const;
 
     /**
      * @brief Set site.
      *
      * Set the site number
      */
-    virtual void setSite(int site, bool future = false);
+    void setSite(int site, bool future = false);
 
     /**
      * @brief Get site.
      *
      * Return the site number
      */
-    virtual int site(bool future = false);
+    int site(bool future = false);
 
     /**
      * @brief Get type.
      *
      * Return the type number
      */
-    virtual Type type() const;
-
-    /**
-      * @brief Human Readable
-      */
-    virtual QString toQString() const;
+    Type type() const;
 
   protected:
     /**
@@ -134,7 +123,7 @@ namespace Langmuir{
   };
 
   inline Agent::Agent(Type type, World *world, int site) :
-        m_site(-1), m_fSite(site), m_world(world), m_type(type)
+      m_site(-1), m_fSite(site), m_world(world), m_type(type)
   {
   }
 
@@ -165,112 +154,79 @@ namespace Langmuir{
     return m_type;
   }
 
-  inline QDebug operator<<(QDebug dbg, const Agent::Type &t)
+  inline QDebug operator<<(QDebug dbg, const Agent::Type &type)
   {
-      return dbg << qPrintable(Agent::typeToQString(t));
+      return dbg << qPrintable(Agent::typeToQString(type));
   }
 
-  inline QDebug operator<<(QDebug dbg, const Agent &agent)
+  inline QString Agent::typeToQString(const Agent::Type &type)
   {
-      return dbg << qPrintable(agent.toQString());
-  }
-
-  inline QString Agent::typeToQString(const Agent::Type &t)
-  {
-      switch(t)
+      switch(type)
       {
           case Agent::Empty:
           {
-              return QString("Empty(%1)").arg(t);
-              break;
-          }
-
-          case Agent::Hole:
-          {
-              return QString("Hole(%1)").arg(t);
+              return QString("Empty");
               break;
           }
 
           case Agent::Electron:
           {
-              return QString("Electron(%1)").arg(t);
+              return QString("Electron");
+              break;
+          }
+
+          case Agent::Hole:
+          {
+              return QString("Hole");
               break;
           }
 
           case Agent::Defect:
           {
-              return QString("Defect(%1)").arg(t);
+              return QString("Defect");
               break;
           }
 
-          case Agent::HoleSourceL:
+          case Agent::Source:
           {
-              return QString("HoleSourceL(%1)").arg(t);
+              return QString("Source");
               break;
           }
 
-          case Agent::HoleSourceR:
+          case Agent::Drain:
           {
-              return QString("HoleSourceR(%1)").arg(t);
+              return QString("Drain");
               break;
           }
 
-          case Agent::ElectronSourceL:
+          case Agent::SIZE:
           {
-              return QString("ElectronSourceL(%1)").arg(t);
-              break;
-          }
-
-          case Agent::ElectronSourceR:
-          {
-              return QString("ElectronSourceR(%1)").arg(t);
-              break;
-          }
-
-          case Agent::ExcitonSource:
-          {
-              return QString("ExcitonSource(%1)").arg(t);
-              break;
-          }
-
-          case Agent::HoleDrainL:
-          {
-              return QString("HoleDrainL(%1)").arg(t);
-              break;
-          }
-
-          case Agent::HoleDrainR:
-          {
-              return QString("HoleDrainR(%1)").arg(t);
-              break;
-          }
-
-          case Agent::ElectronDrainL:
-          {
-              return QString("ElectronDrainL(%1)").arg(t);
-              break;
-          }
-
-          case Agent::ElectronDrainR:
-          {
-              return QString("ElectronDrainR(%1)").arg(t);
+              return QString("SIZE");
               break;
           }
 
           default:
           {
-              return QString("UnknownType(?)");
+              return QString("UnknownType");
               break;
           }
       }
-      return QString("UnknownType(?)");
+      return QString("UnknownType");
   }
 
-  inline QString Agent::toQString() const
+  /*
+  inline QString Agent::toQStringStart() const
   {
       QString result;
       QTextStream stream(&result);
       stream << "[ " << Agent::typeToQString(m_type) << "\n";
+      return result;
+  }
+
+  inline QString Agent::toQStringMiddle() const
+  {
+      QString result;
+      QTextStream stream(&result);
 
       int w = 20;
       stream << QString("%1 %2 %3 %4 %5")
@@ -300,10 +256,51 @@ namespace Langmuir{
                 .arg(                "", w )
                 .arg(                "", w )
                 .arg(           address, w )
-                .arg(']',1);
+                .arg('\n');
+
+      if ( m_neighbors.size() == 0 )
+      {
+          stream << QString("%1 %2 %3 %4 %5")
+                    .arg(      "neighbors:", w        )
+                    .arg(               "-", w        )
+                    .arg(               "-", w        )
+                    .arg(               "-", w        )
+                    .arg('\n');
+      }
+      for ( int i = 0; i < m_neighbors.size(); i+=3 )
+      {
+          QString a = "-";
+          QString b = "-";
+          QString c = "-";
+          QString n = ":";
+          if ( i == 0 ) n = "neighbors:";
+          if ( i + 0 < m_neighbors.size() ) { a = QString("%1").arg(m_neighbors[i+0]); }
+          if ( i + 1 < m_neighbors.size() ) { b = QString("%1").arg(m_neighbors[i+1]); }
+          if ( i + 2 < m_neighbors.size() ) { c = QString("%1").arg(m_neighbors[i+2]); }
+          stream << QString("%1 %2 %3 %4 %5")
+                    .arg(                 n, w        )
+                    .arg(                 a, w        )
+                    .arg(                 b, w        )
+                    .arg(                 c, w        )
+                    .arg('\n',1);
+      }
 
       return result;
   }
+
+  inline QString Agent::toQStringEnd() const
+  {
+      QString result;
+      QTextStream stream(&result);
+      stream << " ]";
+      return result;
+  }
+
+  inline QString Agent::toQString() const
+  {
+      return toQStringStart() + toQStringMiddle() + toQStringEnd();
+  }
+  */
 } // End namespace Langmuir
 
 #endif

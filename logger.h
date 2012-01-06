@@ -70,11 +70,6 @@ public:
       */
     void carrierStreamFlush();
 
-    /**
-      * @brief get information about a particular coupling constant as strings
-      */
-    QStringList couplingStringList(Agent::Type t1, Agent::Type t2);
-
 private:
 
     /**

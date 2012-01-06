@@ -185,14 +185,5 @@ void Logger::carrierReportLifetimeAndPathlength( int i, int tick )
     m_carrierStream << QString( "%1 %2 %3\n" )
      .arg(tick,m_world->parameters()->outputWidth)
      .arg(m_world->electrons()->at(i)->lifetime(),m_world->parameters()->outputWidth)
-     .arg(m_world->electrons()->at(i)->distanceTraveled(),m_world->parameters()->outputWidth);
-}
-
-QStringList Logger::couplingStringList(Agent::Type t1, Agent::Type t2)
-{
-    QStringList result;
-    result << Agent::typeToQString(t1);
-    result << Agent::typeToQString(t2);
-    result << QString("%1").arg(m_world->coupling()[t1][t2],0,'f',2);
-    return result;
+     .arg(m_world->electrons()->at(i)->pathlength(),m_world->parameters()->outputWidth);
 }

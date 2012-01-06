@@ -47,6 +47,6 @@ namespace Langmuir
              */
             static void chargeAgentDecideFuture( ChargeAgent * chargeAgent );
     };
-} // End namespace Langmuir
+}
 
 #endif // SOLAR_H

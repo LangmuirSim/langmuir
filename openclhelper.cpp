@@ -62,9 +62,9 @@ void OpenClHelper::initializeOpenCL( )
         m_sHost.clear( );
         m_qHost.clear( );
         m_oHost.clear( );
-        m_sHost.resize( m_world->electronGrid()->volume() + m_world->electronGrid()->extraAgentCount() );
-        m_qHost.resize( m_world->electronGrid()->volume() + m_world->electronGrid()->extraAgentCount() );
-        m_oHost.resize( m_world->electronGrid()->volume() + m_world->electronGrid()->extraAgentCount() );
+        m_sHost.resize( m_world->electronGrid()->volume() );
+        m_qHost.resize( m_world->electronGrid()->volume() );
+        m_oHost.resize( m_world->electronGrid()->volume() );
 
         //initialize Device Memory
         m_sDevice = cl::Buffer(m_context, CL_MEM_READ_ONLY, m_sHost.size() * sizeof (int), NULL, &err);

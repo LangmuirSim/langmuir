@@ -151,4 +151,4 @@ namespace Langmuir
         // same rules apply here as for chargeAgentIterate;
         chargeAgent->decideFuture();
     }
-} // End namespace Langmuir
+}

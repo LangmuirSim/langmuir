@@ -27,6 +27,7 @@ void progress( int sim, int warm, int real, int total, double time, bool flush =
 int main (int argc, char *argv[])
 {
   QApplication app (argc, argv);
+  /*
 
   // Read command line arguments
   QStringList args = app.arguments ();
@@ -215,6 +216,7 @@ int main (int argc, char *argv[])
   oFile->close ();
   delete oFile;
   delete oout;
+  */
 
 }
 

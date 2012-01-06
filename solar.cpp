@@ -19,7 +19,6 @@ namespace Langmuir
     void SolarCell::performIterations(int nIterations)
     {
         //m_world->electrons()->at(0)->coulombInteraction( m_world->electrons()->at(0)->site(true) );
-
         //  cout << "Entered performIterations function.\n";
         for (int i = 0; i < nIterations; ++i)
         {
@@ -62,7 +61,7 @@ namespace Langmuir
             }
 
             // Now we are done with the charge movement, move them to the next tick!
-            nextTick ();
+            nextTick();
 
             // Perform charge injection at the source
             performInjections (m_world->parameters()->sourceAttempts);
@@ -84,11 +83,10 @@ namespace Langmuir
 
     void SolarCell::performInjections(int nInjections)
     {
-        m_world->holeSourceL()->tryToInject();
-        m_world->holeSourceR()->tryToInject();
-        m_world->electronSourceL()->tryToInject();
-        m_world->electronSourceR()->tryToInject();
-        m_world->excitonSource()->tryToInject();
+        for ( int i = 0; i < m_world->sources()->size(); i++ )
+        {
+            m_world->sources()->at(i)->tryToInject();
+        }
         /*
         int inject = nInjections;
         if ( inject < 0 )
@@ -191,4 +189,4 @@ namespace Langmuir
         // same rules apply here as for chargeAgentIterate;
         chargeAgent->decideFuture();
     }
-} // End namespace Langmuir
+}

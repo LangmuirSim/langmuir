@@ -245,7 +245,6 @@ namespace Langmuir
             bool recording;
             QTimer *recordTimer;
             RecordDialog *recordDialog;
-            int lastCount;
             int updateTime;
             int step;
             GLuint trapsTexture;

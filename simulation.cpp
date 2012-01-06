@@ -87,6 +87,7 @@ namespace Langmuir
 
     void Simulation::createDefects()
     {
+        /*
         QVector<int> sourceNeighbors = m_world->holeSourceL()->getNeighbors();
         QVector<int> drainNeighnors = m_world->holeDrainR()->getNeighbors();
         for (int i = 0; i < m_world->electronGrid()->volume (); ++i)
@@ -108,18 +109,21 @@ namespace Langmuir
         }
         m_world->holeSourceL()->setNeighbors(sourceNeighbors);
         m_world->holeDrainR()->setNeighbors(drainNeighnors);
+        */
     }
 
     void Simulation::seedCharges()
     {
+        /*
         for (int i = 0; i < m_world->holeSourceL()->maxHoles();)
         {
             if ( m_world->holeSourceL()->seed() ) { ++i; }
         }
-        for (int i = 0; i < m_world->holeSourceL()->maxElectrons();)
+        for (int i = 0; i < m_world->electronSourceL()->maxElectrons();)
         {
             if ( m_world->electronSourceL()->seed() ) { ++i; }
         }
+        */
     }
 
-} // End namespace Langmuir
+}
