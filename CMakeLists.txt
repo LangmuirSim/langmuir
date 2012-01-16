@@ -1,12 +1,12 @@
-project( langmuir )
-set( CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules )
-cmake_minimum_required( VERSION 2.8.2 )
+project(langmuir)
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
+cmake_minimum_required(VERSION 2.8.2)
 
-set( CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG" )
-set( QT_MIN_VERSION "4.7.0" )
-set( QT_USE_QTOPENGL TRUE )
+set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
+set(QT_MIN_VERSION "4.7.0")
+set(QT_USE_QTOPENGL TRUE)
 
-set( sources
+set(sources
       chargeagent.cpp
       cubicgrid.cpp
       drainagent.cpp
@@ -17,12 +17,10 @@ set( sources
       logger.cpp
       rand.cpp
       simulation.cpp
-      solar.cpp
       sourceagent.cpp
-      transistor.cpp
-      world.cpp )
+      world.cpp)
 
-set( headers
+set(headers
       agent.h
       chargeagent.h
       cubicgrid.h
@@ -34,44 +32,57 @@ set( headers
       potential.h
       rand.h
       simulation.h
-      solar.h
       sourceagent.h
       timer.h
-      transistor.h
-      world.h )
+      world.h)
 
-set( meta_object_headers
-      gridview.h )
+set(meta_object_headers_1
+      agent.h
+      cubicgrid.h
+      inputparser.h
+      logger.h
+      openclhelper.h
+      potential.h
+      simulation.h
+      world.h
+      rand.h
+)
 
-find_package( Boost REQUIRED )
-find_package( Qt4 REQUIRED )
-find_package( OpenCL REQUIRED )
-find_package( OpenGL REQUIRED )
+set(meta_object_headers_2
+      gridview.h
+)
 
-include( ${QT_USE_FILE} )
-include_directories( ${Boost_INCLUDE_DIRS} )
-include_directories( ${BOOST_PYTHON_INCLUDES} )
-include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
-include_directories( ${OPENCL_INCLUDE_DIRS} )
+find_package(Boost REQUIRED)
+find_package(Qt4 REQUIRED)
+find_package(OpenCL REQUIRED)
+find_package(OpenGL REQUIRED)
 
-add_definitions( -Wall )
-add_definitions( ${QT_DEFINITIONS} )
+include(${QT_USE_FILE})
+include_directories(${Boost_INCLUDE_DIRS})
+include_directories(${BOOST_PYTHON_INCLUDES})
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${OPENCL_INCLUDE_DIRS})
 
-#add_executable( langmuir langmuir.cpp ${sources} )
-#target_link_libraries( langmuir ${Boost_LIBRARIES} )
-#target_link_libraries( langmuir ${QT_LIBRARIES} )
-#target_link_libraries( langmuir ${OPENCL_LIBRARIES} )
+add_definitions(-Wall)
+add_definitions(${QT_DEFINITIONS})
 
-QT4_WRAP_CPP( moc_output ${meta_object_headers} )
-include_directories( ${OPENGL_INCLUDE_DIRS} )
-add_executable( langmuirView langmuirview.cpp gridview.cpp ${sources} ${moc_output} )
-target_link_libraries( langmuirView ${Boost_LIBRARIES} )
-target_link_libraries( langmuirView ${QT_LIBRARIES} )
-target_link_libraries( langmuirView ${OPENCL_LIBRARIES} )
-target_link_libraries( langmuirView ${OPENGL_LIBRARIES} )
+QT4_WRAP_CPP(moc_output_1 ${meta_object_headers_1})
+QT4_WRAP_CPP(moc_output_2 ${meta_object_headers_2})
 
-#add_executable( test test.cpp ${sources} )
-#target_link_libraries( test ${Boost_LIBRARIES} )
-#target_link_libraries( test ${QT_LIBRARIES} )
-#target_link_libraries( test ${OPENCL_LIBRARIES} )
+add_executable(langmuir langmuir.cpp ${sources} ${moc_output_1})
+target_link_libraries(langmuir ${Boost_LIBRARIES})
+target_link_libraries(langmuir ${QT_LIBRARIES})
+target_link_libraries(langmuir ${OPENCL_LIBRARIES})
+
+include_directories(${OPENGL_INCLUDE_DIRS})
+add_executable(langmuirView langmuirview.cpp gridview.cpp ${sources} ${moc_output_1} ${moc_output_2})
+target_link_libraries(langmuirView ${Boost_LIBRARIES})
+target_link_libraries(langmuirView ${QT_LIBRARIES})
+target_link_libraries(langmuirView ${OPENCL_LIBRARIES})
+target_link_libraries(langmuirView ${OPENGL_LIBRARIES})
+
+#add_executable(test test.cpp ${sources})
+#target_link_libraries(test ${Boost_LIBRARIES})
+#target_link_libraries(test ${QT_LIBRARIES})
+#target_link_libraries(test ${OPENCL_LIBRARIES})
 

@@ -5,25 +5,24 @@
 
 namespace Langmuir
 {
-  class World;
-  class Grid;
-  class Agent;
-  class Potential;
-  class DrainAgent;
-  class SourceAgent;
-  class ChargeAgent;
-  struct SimulationParameters;
-  /**
+class World;
+class Grid;
+class Agent;
+class Potential;
+class DrainAgent;
+class SourceAgent;
+class ChargeAgent;
+struct SimulationParameters;
+/**
     *  @class Simulation
     *  @brief Simulation management.
     *
     *  Organizes simulation and performs relevent tasks.
     *  @date 06/07/2010
     */
-  class Simulation
-  {
-
-  public:
+class Simulation : public QObject
+{
+Q_OBJECT public:
 
     /**
      * @brief Constructor.
@@ -31,7 +30,7 @@ namespace Langmuir
      * Set up the basic parameters of the simulation.
      * @param par parameter struct
      */
-    Simulation(SimulationParameters * par, int id = 0);
+    Simulation(SimulationParameters * par, int id = 0, QObject *parent = 0);
 
     /**
      * @brief Destructor.
@@ -46,7 +45,7 @@ namespace Langmuir
      * Perform so many iterations of the simulation.
      * @param nIterations number of iterations to perform.
      */
-    virtual void performIterations(int nIterations) = 0;
+    virtual void performIterations(int nIterations);
 
     /**
      * @brief World access.
@@ -55,7 +54,7 @@ namespace Langmuir
      */
     World *world();
 
-  protected:
+protected:
 
     /**
      * @brief Add Defects
@@ -72,6 +71,17 @@ namespace Langmuir
     virtual void seedCharges();
 
     /**
+     * @brief inject charges into the system
+     * @param nInjections number of injections to perform.
+     */
+    void performInjections();
+
+    /**
+     * @brief next simulation Tick.
+     */
+    void nextTick();
+
+    /**
      * @brief World pointer.
      */
     World *m_world;
@@ -85,12 +95,28 @@ namespace Langmuir
       * @brief a unique id for this simulation
       */
     int m_id;
-  };
 
-  inline World* Simulation::world ()
-  {
-      return m_world;
-  }
+    /**
+             * @brief charge agent transport for QtConcurrent.
+             */
+    static void chargeAgentIterate(ChargeAgent * chargeAgent);
+
+    /**
+             * @brief charge agent transport(choose future site)for QtConcurrent.
+             */
+    static void chargeAgentChooseFuture(ChargeAgent * chargeAgent);
+
+    /**
+             * @brief charge agent transport(apply metropolis)for QtConcurrent.
+             */
+    static void chargeAgentDecideFuture(ChargeAgent * chargeAgent);
+
+};
+
+inline World* Simulation::world()
+{
+    return m_world;
+}
 }
 
 #endif

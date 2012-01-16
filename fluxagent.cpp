@@ -13,7 +13,7 @@ namespace Langmuir
 int FluxAgent::m_maxHoles     = 0;
 int FluxAgent::m_maxElectrons = 0;
 
-FluxAgent::FluxAgent(Agent::Type type, World * world, double potential, double rate, int tries) : Agent(type,world)
+FluxAgent::FluxAgent(Agent::Type type, World * world, double potential, double rate, int tries, QObject *parent): Agent(type, world,-1,parent)
 {
     m_attempts     = 0;
     m_successes    = 0;
@@ -35,51 +35,51 @@ void FluxAgent::initializeSite(int site)
 
 void FluxAgent::initializeSite(Grid::CubeFace cubeFace)
 {
-    m_grid->registerSpecialAgent(this,cubeFace);
+    m_grid->registerSpecialAgent(this, cubeFace);
     m_face = cubeFace;
 }
 
 FluxAgent::~FluxAgent()
 {
-    if ( m_grid )
+    if(m_grid)
     {
-        m_grid->unregisterSpecialAgent(this,m_face);
+        m_grid->unregisterSpecialAgent(this, m_face);
     }
 }
 
-int FluxAgent::maxCarriers() const
+int FluxAgent::maxCarriers()const
 {
-    return maxElectrons() + maxHoles();
+    return maxElectrons()+ maxHoles();
 }
 
-int FluxAgent::maxElectrons() const
+int FluxAgent::maxElectrons()const
 {
     return m_maxElectrons;
 }
 
-int FluxAgent::maxHoles() const
+int FluxAgent::maxHoles()const
 {
     return m_maxHoles;
 }
 
-int FluxAgent::carrierCount() const
+int FluxAgent::carrierCount()const
 {
-    return m_world->electrons()->size() + m_world->holes()->size();
+    return m_world->electrons()->size()+ m_world->holes()->size();
 }
 
-int FluxAgent::electronCount() const
+int FluxAgent::electronCount()const
 {
     return m_world->electrons()->size();
 }
 
-int FluxAgent::holeCount() const
+int FluxAgent::holeCount()const
 {
     return m_world->holes()->size();
 }
 
-double FluxAgent::percentCarriers() const
+double FluxAgent::percentCarriers()const
 {
-    if ( maxCarriers() > 0 )
+    if(maxCarriers()> 0)
     {
         return double(carrierCount())/double(maxCarriers())*100.0;
     }
@@ -89,9 +89,9 @@ double FluxAgent::percentCarriers() const
     }
 }
 
-double FluxAgent::percentHoles() const
+double FluxAgent::percentHoles()const
 {
-    if ( maxHoles() > 0 )
+    if(maxHoles()> 0)
     {
         return double(holeCount())/double(maxHoles())*100.0;
     }
@@ -101,9 +101,9 @@ double FluxAgent::percentHoles() const
     }
 }
 
-double FluxAgent::percentElectrons() const
+double FluxAgent::percentElectrons()const
 {
-    if ( maxElectrons() > 0 )
+    if(maxElectrons()> 0)
     {
         return double(electronCount())/double(maxElectrons())*100.0;
     }
@@ -113,19 +113,19 @@ double FluxAgent::percentElectrons() const
     }
 }
 
-unsigned long int FluxAgent::attempts() const
+unsigned long int FluxAgent::attempts()const
 {
     return m_attempts;
 }
 
-unsigned long int FluxAgent::successes() const
+unsigned long int FluxAgent::successes()const
 {
     return m_successes;
 }
 
-double FluxAgent::successRate() const
+double FluxAgent::successRate()const
 {
-    if ( m_attempts > 0 )
+    if(m_attempts > 0)
     {
         return double(m_successes)/double(m_attempts)*100.0;
     }
@@ -145,7 +145,7 @@ bool FluxAgent::shouldTransport(int site)
 {
     return m_world->randomNumberGenerator()->randomlyChooseYesWithPercent(m_rate);
     //return m_world->randomNumberGenerator()->randomlyChooseYesWithMetropolisAndCoupling(
-    //        energyChange(site),m_world->parameters()->inverseKT,m_rate );
+    //        energyChange(site), m_world->parameters()->inverseKT, m_rate);
 }
 
 double FluxAgent::energyChange(int site)

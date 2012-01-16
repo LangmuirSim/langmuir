@@ -9,20 +9,20 @@ namespace Langmuir
 class FluxAgent : public Agent
 {
 public:
-    FluxAgent(Agent::Type type, World * world, double potential = 0.0, double rate = 0.0, int tries = 1);
+    FluxAgent(Agent::Type type, World * world, double potential = 0.0, double rate = 0.0, int tries = 1, QObject *parent = 0);
     ~FluxAgent();
-    int maxCarriers() const;
-    int maxElectrons() const;
-    int maxHoles() const;
-    int carrierCount() const;
-    int electronCount() const;
-    int holeCount() const;
-    double percentCarriers() const;
-    double percentElectrons() const;
-    double percentHoles() const;
-    unsigned long int attempts() const;
-    unsigned long int successes() const;
-    double successRate() const;
+    int maxCarriers()const;
+    int maxElectrons()const;
+    int maxHoles()const;
+    int carrierCount()const;
+    int electronCount()const;
+    int holeCount()const;
+    double percentCarriers()const;
+    double percentElectrons()const;
+    double percentHoles()const;
+    unsigned long int attempts()const;
+    unsigned long int successes()const;
+    double successRate()const;
     void resetCounters();
 
 protected:

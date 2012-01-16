@@ -11,34 +11,58 @@
 
 namespace Langmuir {
 
-World::World( SimulationParameters *par )
+World::World(SimulationParameters *par, QObject *parent) : QObject(parent)
 {
-    m_coupling.resize(boost::extents[Agent::SIZE][Agent::SIZE]);
-
-    m_coupling[ Agent::Electron        ][ Agent::Empty    ] = 0.333;
-    m_coupling[ Agent::Hole            ][ Agent::Empty    ] = 0.333;
-
     m_parameters = par;
     m_rand = new Random(m_parameters->randomSeed);
-    m_electronGrid = new Grid(m_parameters->gridWidth, m_parameters->gridHeight, m_parameters->gridDepth);
-    m_holeGrid = new Grid(m_parameters->gridWidth, m_parameters->gridHeight, m_parameters->gridDepth);
-    m_potential = new Potential(this);
-    m_logger = new Logger(this);
-    m_ocl = new OpenClHelper(this);
+    m_electronGrid = new Grid(m_parameters->xSize, m_parameters->ySize, m_parameters->zSize, this);
+    m_holeGrid = new Grid(m_parameters->xSize, m_parameters->ySize, m_parameters->zSize, this);
+    m_potential = new Potential(this, this);
+    m_logger = new Logger(this, this);
+    m_ocl = new OpenClHelper(this, this);
 
-    ElectronSourceAgent *p1 = new ElectronSourceAgent(this,Grid::Left,0,0.9,1);
-    m_sources.push_back( p1 );
+    //transistor sources
+    //m_sources.push_back( new ElectronSourceAgent(this, Grid::Left, 0, 0.9, 1, this) );
 
-    ElectronDrainAgent *p2 = new ElectronDrainAgent(this,Grid::Right,0,0.9,1);
-    m_drains.push_back( p2 );
+    //transistor drains
+    //m_drains.push_back( new ElectronDrainAgent(this, Grid::Right, 0, 0.9, 1, this) );
+
+    //solar cell sources
+    m_sources.push_back(new ExcitonSourceAgent(this, 0.9, 1, this));
+
+    //solar cell drains
+    m_drains.push_back(new ElectronDrainAgent(this, Grid::Left, 0, 0.9, 1, this));
+    m_drains.push_back(new ElectronDrainAgent(this, Grid::Right, 0, 0.9, 1, this));
+    m_drains.push_back(new HoleDrainAgent(this, Grid::Left, 0, 0.9, 1, this));
+    m_drains.push_back(new HoleDrainAgent(this, Grid::Right, 0, 0.9, 1, this));
 }
 
 World::~World()
 {
-    for ( int i = 0; i < m_sources.size(); i++ )
+    for(int i = 0; i < m_sources.size(); i++)
     {
         delete m_sources[i];
     }
+    m_sources.clear();
+
+    for(int i = 0; i < m_drains.size(); i++)
+    {
+        delete m_drains[i];
+    }
+    m_drains.clear();
+
+    for(int i = 0; i < m_electrons.size(); i++)
+    {
+        delete m_electrons[i];
+    }
+    m_electrons.clear();
+
+    for(int i = 0; i < m_holes.size(); i++)
+    {
+        delete m_holes[i];
+    }
+    m_holes.clear();
+
     delete m_rand;
     delete m_potential;
     delete m_electronGrid;

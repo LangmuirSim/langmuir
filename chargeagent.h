@@ -5,11 +5,11 @@
 
 namespace Langmuir
 {
-  class Grid;
-  class ChargeAgent : public Agent
-  {
-  public:
-    ChargeAgent(Agent::Type type, World *world, int site);
+class Grid;
+class ChargeAgent : public Agent
+{
+public:
+    ChargeAgent(Agent::Type type, World *world, int site, QObject *parent=0);
     virtual ~ChargeAgent();
     int charge();
     void chooseFuture();
@@ -18,34 +18,34 @@ namespace Langmuir
     bool removed();
     int lifetime();
     double pathlength();
-    void setOpenCLID( int id );
+    void setOpenCLID(int id);
     int getOpenCLID();
     double coulombInteraction(int newSite);
 
-  protected:
-    virtual double bindingPotential(int site) = 0;
+protected:
+    virtual double bindingPotential(int site)= 0;
     int m_charge;
     bool m_removed;
     int m_lifetime;
     double m_pathlength;
     Grid *m_grid;
     int m_openClID;
-  };
+};
 
-  class ElectronAgent : public ChargeAgent
-  {
-  public:
-      ElectronAgent(World *world,int site);
-  protected:
-      virtual double bindingPotential(int site);
-  };
+class ElectronAgent : public ChargeAgent
+{
+public:
+    ElectronAgent(World *world, int site, QObject *parent=0);
+protected:
+    virtual double bindingPotential(int site);
+};
 
-  class HoleAgent : public ChargeAgent
-  {
-  public:
-      HoleAgent(World *world,int site);
-  protected:
-      virtual double bindingPotential(int site);
-  };
+class HoleAgent : public ChargeAgent
+{
+public:
+    HoleAgent(World *world, int site, QObject *parent=0);
+protected:
+    virtual double bindingPotential(int site);
+};
 }
 #endif

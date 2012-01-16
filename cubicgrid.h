@@ -7,27 +7,27 @@
 namespace Langmuir
 {
 
-class Grid
+class Grid : public QObject
 {
-public:   
+Q_OBJECT public:
     enum CubeFace
     {
-        Left       =   0,
-        Right      =   1,
-        Top        =   2,
-        Bottom     =   3,
-        Front      =   4,
-        Back       =   5,
-        NoFace     =   6,
+        Left       =   0, // x =  0, yz plane
+        Right      =   1, // x = lx, yz plane
+        Top        =   2, // z =  0, xy plane
+        Bottom     =   3, // z = lz, xy plane
+        Front      =   4, // y =  0, xz plane
+        Back       =   5, // y = ly, xz plane
+        NoFace     =   6, 
         SIZE       =   7
     };
     static QString cubeFaceToQString(const Grid::CubeFace &cubeFace);
-    Grid( int width = 0, int height = 0, int depth = 1 );
+    Grid(int xSize = 0, int ySize = 0, int zSize = 1, QObject *parent = 0);
     ~Grid();
-    int width();
-    int height();
-    int depth();
-    int area();
+    int xSize();
+    int ySize();
+    int zSize();
+    int xyPlaneArea();
     int volume();
     double totalDistance(int site1, int site2);
     double xDistance(int site1, int site2);
@@ -42,13 +42,14 @@ public:
     int xImageDistancei(int site1, int site2);
     int yImageDistancei(int site1, int site2);
     int zImageDistancei(int site1, int site2);
-    int getIndex(int column, int row, int layer = 0);
-    void setAgentAddress(int site, Agent *agentAddress);
-    int getRow(int site);
-    int getColumn(int site);
-    int getLayer(int site);
+    int getIndexS(int xIndex, int yIndex, int zIndex = 0);
+    int getIndexY(int site);
+    int getIndexX(int site);
+    int getIndexZ(int site);
+    double getPositionY(int site);
+    double getPositionX(int site);
+    double getPositionZ(int site);
     Agent * agentAddress(int site);
-    void setAgentType(int site, Agent::Type id);
     Agent::Type agentType(int site);
     void addToPotential(int site, double potential);
     void setPotential(int site, double potential);
@@ -56,11 +57,12 @@ public:
     QVector<int> neighborsSite(int site);
     QVector<int> neighborsFace(Grid::CubeFace cubeFace);
     QVector<int> sliceIndex(int xi, int xf, int yi, int yf, int zi, int zf);
-
     void registerAgent(Agent *agent);
     void registerSpecialAgent(Agent *agent, Grid::CubeFace cubeFace);
     void unregisterAgent(Agent *agent);
     void unregisterSpecialAgent(Agent *agent, Grid::CubeFace cubeFace);
+    void unregisterDefect(int site);
+    void registerDefect(int site);
     int specialAgentCount();
     QList<Agent *>& getSpecialAgentList(Grid::CubeFace cubeFace);
 
@@ -71,10 +73,12 @@ protected:
     QList< QList<Agent *> > m_specialAgents;
     int m_specialAgentReserve;
     int m_specialAgentCount;
-    int m_width;
-    int m_height;
-    int m_depth;
-    int m_area;
+    int m_xSize;
+    int m_ySize;
+    int m_zSize;
+    int m_xyPlaneArea;
+    int m_yzPlaneArea;
+    int m_xzPlaneArea;
     int m_volume;
 };
 inline QDebug operator<<(QDebug dbg, const Grid::CubeFace &cubeFace)

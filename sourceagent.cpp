@@ -10,52 +10,50 @@
 namespace Langmuir
 {
 
-SourceAgent::SourceAgent(World * world, double potential, double rate, int tries)
-    : FluxAgent(Agent::Source,world,potential,rate,tries)
+SourceAgent::SourceAgent(World * world, double potential, double rate, int tries, QObject *parent)
+    : FluxAgent(Agent::Source, world, potential, rate, tries, parent)
 {
 }
 
-ElectronSourceAgent::ElectronSourceAgent(World * world, int site, double potential, double rate, int tries)
-    : SourceAgent(world, potential, rate, tries)
+ElectronSourceAgent::ElectronSourceAgent(World * world, int site, double potential, double rate, int tries, QObject *parent)
+    : SourceAgent(world, potential, rate, tries, parent)
 {
     m_grid  = m_world->electronGrid();
     initializeSite(site);
 }
 
-ElectronSourceAgent::ElectronSourceAgent(World * world, Grid::CubeFace cubeFace, double potential, double rate, int tries)
-    : SourceAgent(world, potential, rate, tries)
+ElectronSourceAgent::ElectronSourceAgent(World * world, Grid::CubeFace cubeFace, double potential, double rate, int tries, QObject *parent)
+    : SourceAgent(world, potential, rate, tries, parent)
 {
     m_grid  = m_world->electronGrid();
     initializeSite(cubeFace);
 }
 
-HoleSourceAgent::HoleSourceAgent(World * world, int site, double potential, double rate, int tries)
-    : SourceAgent(world, potential, rate, tries)
+HoleSourceAgent::HoleSourceAgent(World * world, int site, double potential, double rate, int tries, QObject *parent)
+    : SourceAgent(world, potential, rate, tries, parent)
 {
     m_grid  = m_world->holeGrid();
     initializeSite(site);
 }
 
-HoleSourceAgent::HoleSourceAgent(World * world, Grid::CubeFace cubeFace, double potential, double rate, int tries)
-    : SourceAgent(world, potential, rate, tries)
+HoleSourceAgent::HoleSourceAgent(World * world, Grid::CubeFace cubeFace, double potential, double rate, int tries, QObject *parent)
+    : SourceAgent(world, potential, rate, tries, parent)
 {
     m_grid  = m_world->holeGrid();
     initializeSite(cubeFace);
 }
 
-ExcitonSourceAgent::ExcitonSourceAgent(World * world, double rate, int tries)
-    : SourceAgent(world, 0.0, rate, tries)
+ExcitonSourceAgent::ExcitonSourceAgent(World * world, double rate, int tries, QObject *parent)
+    : SourceAgent(world, 0.0, rate, tries, parent)
 {
     m_grid = m_world->electronGrid();
-    m_site = -1;
-    m_fSite = m_site;
-    m_neighbors.clear();
+    initializeSite(Grid::NoFace);
 }
 
 bool SourceAgent::seed()
 {
     int site = randomSiteID();
-    if ( validToInject(site) )
+    if(validToInject(site))
     {
         inject(site);
         return true;
@@ -67,7 +65,7 @@ bool SourceAgent::tryToInject()
 {
     m_attempts += 1;
     int site = chooseSite();
-    if ( validToInject(site) && shouldTransport(site) )
+    if(validToInject(site)&& shouldTransport(site))
     {
         inject(site);
         m_successes += 1;
@@ -78,12 +76,12 @@ bool SourceAgent::tryToInject()
 
 int SourceAgent::randomSiteID()
 {
-    return m_world->randomNumberGenerator()->integer(0,m_grid->volume()-1);
+    return m_world->randomNumberGenerator()->integer(0, m_grid->volume()-1);
 }
 
 int SourceAgent::randomNeighborSiteID()
 {
-    return m_neighbors[m_world->randomNumberGenerator()->integer(0,m_neighbors.size()-1)];
+    return m_neighbors[m_world->randomNumberGenerator()->integer(0, m_neighbors.size()-1)];
 }
 
 int SourceAgent::chooseSite()
@@ -100,7 +98,7 @@ double ElectronSourceAgent::energyChange(int site)
 {
     double p1 = m_potential;
     double p2 = m_grid->potential(site);
-    return p1-p2; // its backwards because q=-1 and dE = q*(p2-p1) = p1-p2
+    return p1-p2; // its backwards because q=-1 and dE = q*(p2-p1)= p1-p2
 }
 
 double HoleSourceAgent::energyChange(int site)
@@ -117,35 +115,35 @@ double ExcitonSourceAgent::energyChange(int site)
 
 void ElectronSourceAgent::inject(int site)
 {
-    ElectronAgent *electron = new ElectronAgent(m_world,site);
+    ElectronAgent *electron = new ElectronAgent(m_world, site);
     m_world->electrons()->push_back(electron);
 }
 
 void HoleSourceAgent::inject(int site)
 {
-    HoleAgent *hole = new HoleAgent(m_world,site);
+    HoleAgent *hole = new HoleAgent(m_world, site);
     m_world->holes()->push_back(hole);
 }
 
 void ExcitonSourceAgent::inject(int site)
 {
-    ElectronAgent *electron = new ElectronAgent(m_world,site);
+    ElectronAgent *electron = new ElectronAgent(m_world, site);
     m_world->electrons()->push_back(electron);
 
-    HoleAgent *hole = new HoleAgent(m_world,site);
+    HoleAgent *hole = new HoleAgent(m_world, site);
     m_world->holes()->push_back(hole);
 }
 
 bool ElectronSourceAgent::validToInject(int site)
 {
-    if ( electronCount() >= maxElectrons() ||
+    if(electronCount()>= maxElectrons()||
          m_rate <= 0 ||
          m_tries <= 0 ||
          site < 0 ||
-         site >= m_grid->volume() ||
-         m_grid->agentType(site) != Agent::Empty ||
-         m_grid->agentAddress(site) != 0 ||
-         m_world->defectSiteIDs()->contains(site) )
+         site >= m_grid->volume()||
+         m_grid->agentType(site)!= Agent::Empty ||
+         m_grid->agentAddress(site)!= 0 ||
+         m_world->defectSiteIDs()->contains(site))
     {
         return false;
     }
@@ -154,14 +152,14 @@ bool ElectronSourceAgent::validToInject(int site)
 
 bool HoleSourceAgent::validToInject(int site)
 {
-    if ( holeCount() >= maxHoles() ||
+    if(holeCount()>= maxHoles()||
          m_rate <= 0 ||
          m_tries <= 0 ||
          site < 0 ||
-         site >= m_grid->volume() ||
-         m_grid->agentType(site) != Agent::Empty ||
-         m_grid->agentAddress(site) != 0 ||
-         m_world->defectSiteIDs()->contains(site) )
+         site >= m_grid->volume()||
+         m_grid->agentType(site)!= Agent::Empty ||
+         m_grid->agentAddress(site)!= 0 ||
+         m_world->defectSiteIDs()->contains(site))
     {
         return false;
     }
@@ -170,17 +168,17 @@ bool HoleSourceAgent::validToInject(int site)
 
 bool ExcitonSourceAgent::validToInject(int site)
 {
-    if ( electronCount() >= maxElectrons() ||
-         holeCount() >= maxHoles() ||
+    if(electronCount()>= maxElectrons()||
+         holeCount()>= maxHoles()||
          m_rate <= 0 ||
          m_tries <= 0 ||
          site < 0 ||
-         site >= m_world->electronGrid()->volume() ||
-         m_world->electronGrid()->agentType(site) != Agent::Empty ||
-         m_world->holeGrid()->agentType(site) != Agent::Empty ||
-         m_world->electronGrid()->agentAddress(site) != 0 ||
-         m_world->holeGrid()->agentAddress(site) != 0 ||
-         m_world->defectSiteIDs()->contains(site) )
+         site >= m_world->electronGrid()->volume()||
+         m_world->electronGrid()->agentType(site)!= Agent::Empty ||
+         m_world->holeGrid()->agentType(site)!= Agent::Empty ||
+         m_world->electronGrid()->agentAddress(site)!= 0 ||
+         m_world->holeGrid()->agentAddress(site)!= 0 ||
+         m_world->defectSiteIDs()->contains(site))
     {
         return false;
     }

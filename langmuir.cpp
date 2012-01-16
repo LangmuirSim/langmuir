@@ -1,8 +1,6 @@
 #include "inputparser.h"
 #include "sourceagent.h"
 #include "simulation.h"
-#include "transistor.h"
-#include "solar.h"
 #include "drainagent.h"
 #include "cubicgrid.h"
 #include "world.h"
@@ -27,7 +25,6 @@ void progress( int sim, int warm, int real, int total, double time, bool flush =
 int main (int argc, char *argv[])
 {
   QApplication app (argc, argv);
-  /*
 
   // Read command line arguments
   QStringList args = app.arguments ();
@@ -51,11 +48,37 @@ int main (int argc, char *argv[])
       qFatal("bad input");
     }
 
+  InputParser input(iFileName);
+  SimulationParameters par;
+  input.simulationParameters(&par);
+  Timer timer;
+
+  int total = par.iterationsWarmup + par.iterationsReal;
+  for (int i = 0; i < par.variableSteps; ++i)
+  {
+      double timeStepStart = timer.now();
+      input.simulationParameters (&par, i);
+      Simulation sim(&par,i);
+
+      for (int j = 0; j < par.iterationsWarmup; j += par.iterationsPrint)
+      {
+          sim.performIterations (par.iterationsPrint);
+          progress( i, j, 0, total, timer.elapsed(timeStepStart) );
+      }
+
+      for (int j = 0; j < par.iterationsReal; j += par.iterationsPrint)
+      {
+          sim.performIterations (par.iterationsPrint);
+          progress( i, par.iterationsWarmup, j, total, timer.elapsed(timeStepStart) );
+      }
+      progress( i, par.iterationsWarmup, par.iterationsReal, total, timer.elapsed(timeStepStart) ); std::cout << "\n";
+  }
+/*
   // Declare output pointers
-  QFile *oFile;                        //summary
-  QFile *iFile;                        //iteration
-  QTextStream *oout;
-  QTextStream *iout;
+  // QFile *oFile;                        //summary
+  // QFile *iFile;                        //iteration
+  // QTextStream *oout;
+  // QTextStream *iout;
 
   // Open and read input file
   InputParser input (iFileName);
@@ -63,36 +86,36 @@ int main (int argc, char *argv[])
   input.simulationParameters (&par);
 
   // Open summary file
-  QDir dir(par.outputPath);
-  if (!dir.exists()) { qFatal("output directory %s does not exist",qPrintable(dir.path()));}
+  // QDir dir(par.outputPath);
+  // if (!dir.exists()) { qFatal("output directory %s does not exist",qPrintable(dir.path()));}
 
-  oFile = new QFile (dir.absoluteFilePath(oFileName + ".dat"));
-  if (!(oFile->open (QIODevice::WriteOnly | QIODevice::Text)))
-    {
-      qDebug () << "Error opening summary file:" << dir.absoluteFilePath(oFileName + ".dat");
-      app.exit (1);
-    }
-  oout = new QTextStream (oFile);
-  oout->setRealNumberPrecision (par.outputPrecision);
-  oout->setFieldWidth (par.outputWidth);
-  (*oout) << scientific;
+  // oFile = new QFile (dir.absoluteFilePath(oFileName + ".dat"));
+  // if (!(oFile->open (QIODevice::WriteOnly | QIODevice::Text)))
+  //  {
+  //    qDebug () << "Error opening summary file:" << dir.absoluteFilePath(oFileName + ".dat");
+  //    app.exit (1);
+  //  }
+  // oout = new QTextStream (oFile);
+  // oout->setRealNumberPrecision (par.outputPrecision);
+  // oout->setFieldWidth (par.outputWidth);
+  // (*oout) << scientific;
 
   // Start timer
   Timer timer;
 
   // Output summary file column titles
-  (*oout) << "working(n)";
-  (*oout) << "temperature(K)";
-  (*oout) << "source(eV)";
-  (*oout) << "drain(eV)";
-  (*oout) << "defects(%)";
-  (*oout) << "trap(%)";
-  (*oout) << "carriers(%)";
-  (*oout) << "reached(%)";
-  (*oout) << "accepted(#/step)";
-  (*oout) << "approxTime(s/step)";
-  (*oout) << "\n";
-  oout->flush ();
+  // (*oout) << "working(n)";
+  // (*oout) << "temperature(K)";
+  // (*oout) << "source(eV)";
+  // (*oout) << "drain(eV)";
+  // (*oout) << "defects(%)";
+  // (*oout) << "trap(%)";
+  // (*oout) << "carriers(%)";
+  // (*oout) << "reached(%)";
+  // (*oout) << "accepted(#/step)";
+  // (*oout) << "approxTime(s/step)";
+  // (*oout) << "\n";
+  // oout->flush ();
 
   // Total steps per simulation
   int total = par.iterationsWarmup + par.iterationsReal;
@@ -105,119 +128,108 @@ int main (int argc, char *argv[])
       // Get simulation parameters for the current step and set up a new object
       input.simulationParameters (&par, i);
 
-      Simulation *sim;
-      // Set up a simulation
-      if ( par.simulationType == 0 )
-      {
-          sim = new Transistor(&par,i);
-      }
-      else
-      {
-          sim = new SolarCell(&par,i);
-      }
+      // Set up Simulation
+      Simulation *sim = new Simulation(&par,i);
 
       // Open iteration file for this simulation
-      iFile = new QFile (dir.absoluteFilePath(oFileName + "-i-" + QString::number (i) + ".dat"));
-      if (!(iFile->open (QIODevice::WriteOnly | QIODevice::Text)))
-        {
-          qDebug () << "Error opening output file:" << dir.absoluteFilePath(oFileName + "-i-" + QString::number (i) + ".dat");
-          app.exit (1);
-        }
-      iout = new QTextStream (iFile);
-      iout->setRealNumberPrecision (par.outputPrecision);
-      iout->setFieldWidth (par.outputWidth);
-      (*iout) << scientific;
+      // iFile = new QFile (dir.absoluteFilePath(oFileName + "-i-" + QString::number (i) + ".dat"));
+      // if (!(iFile->open (QIODevice::WriteOnly | QIODevice::Text)))
+      //   {
+      //     qDebug () << "Error opening output file:" << dir.absoluteFilePath(oFileName + "-i-" + QString::number (i) + ".dat");
+      //     app.exit (1);
+      //   }
+      // iout = new QTextStream (iFile);
+      // iout->setRealNumberPrecision (par.outputPrecision);
+      // iout->setFieldWidth (par.outputWidth);
+      // (*iout) << scientific;
 
       // Output iteration file column titles
-      (*iout) << "move(n)";
-      (*iout) << "temperature(K)";
-      (*iout) << "source(eV)";
-      (*iout) << "drain(eV)";
-      (*iout) << "defects(%)";
-      (*iout) << "trap(%)";
-      (*iout) << "carriers(%)";
-      (*iout) << "reached(%)";
-      (*iout) << "accepted(#/step)";
-      (*iout) << "\n";
+      // (*iout) << "move(n)";
+      // (*iout) << "temperature(K)";
+      // (*iout) << "source(eV)";
+      // (*iout) << "drain(eV)";
+      // (*iout) << "defects(%)";
+      // (*iout) << "trap(%)";
+      // (*iout) << "carriers(%)";
+      // (*iout) << "reached(%)";
+      // (*iout) << "accepted(#/step)";
+      // (*iout) << "\n";
 
       // Perform Warmup
-      unsigned long lastCount = 0;
+      //unsigned long lastCount = 0;
       for (int j = 0; j < par.iterationsWarmup; j += par.iterationsPrint)
         {
-
           // Perform Iterations
           sim->performIterations (par.iterationsPrint);
 
           // Output Iteration Information
-          (*iout) << j
-            << par.temperatureKelvin
-            << par.voltageSource
-            << par.voltageDrain
-            << par.defectPercentage * 100.00
-            << par.trapPercentage * 100.0
-            << par.chargePercentage * 100.0
-            << double (sim->world()->electrons()->size()) / double (sim->world()->holeSourceL()->maxCarriers()) * 100.0
-            << double (sim->world()->holeDrainR()->acceptedElectrons() -
-                       lastCount) / double (par.iterationsPrint) << "\n";
-          iout->flush ();
-          lastCount = sim->world()->holeDrainR()->acceptedElectrons();
+          // (*iout) << j
+          //  << par.temperatureKelvin
+          //  << par.voltageSource
+          //  << par.voltageDrain
+          //  << par.defectPercentage * 100.00
+          //  << par.trapPercentage * 100.0
+          //  << par.chargePercentage * 100.0
+          //  << double (sim->world()->electrons()->size()) / double (sim->world()->holeSourceL()->maxCarriers()) * 100.0
+          //  << double (sim->world()->holeDrainR()->acceptedElectrons() -
+          //             lastCount) / double (par.iterationsPrint) << "\n";
+          //iout->flush ();
+          //lastCount = sim->world()->holeDrainR()->acceptedElectrons();
 
           progress( i, j, 0, total, timer.elapsed(timeStepStart) );
         }
 
       // Perform production
-      unsigned long startCount = lastCount;
+      //unsigned long startCount = lastCount;
       for (int j = 0; j < par.iterationsReal; j += par.iterationsPrint)
         {
-
           // Perform Iterations
           sim->performIterations (par.iterationsPrint);
 
           // Output Iteration
-          (*iout) << j
-            << par.temperatureKelvin
-            << par.voltageSource
-            << par.voltageDrain
-            << par.defectPercentage * 100.0
-            << par.trapPercentage * 100.0
-            << par.chargePercentage * 100.0
-            << double (sim->world()->electrons()->size()) / double (sim->world()->holeSourceL()->maxCarriers()) * 100.0
-            << double (sim->world()->holeDrainR()->acceptedElectrons() -
-                       lastCount) / double (par.iterationsPrint) << "\n";
-          iout->flush ();
-          lastCount = sim->world()->holeDrainR()->acceptedElectrons();
+          //(*iout) << j
+          //  << par.temperatureKelvin
+          //  << par.voltageSource
+          //  << par.voltageDrain
+          //  << par.defectPercentage * 100.0
+          //  << par.trapPercentage * 100.0
+          //  << par.chargePercentage * 100.0
+          //  << double (sim->world()->electrons()->size()) / double (sim->world()->holeSourceL()->maxCarriers()) * 100.0
+          //  << double (sim->world()->holeDrainR()->acceptedElectrons() -
+          //             lastCount) / double (par.iterationsPrint) << "\n";
+          //iout->flush ();
+          //lastCount = sim->world()->holeDrainR()->acceptedElectrons();
 
           progress( i, par.iterationsWarmup, j, total, timer.elapsed(timeStepStart) );
         }
         progress( i, par.iterationsWarmup, par.iterationsReal, total, timer.elapsed(timeStepStart) ); std::cout << "\n";
 
       // Now to output the result of the simulation at this data point
-      (*oout) << i
-        << par.temperatureKelvin
-        << par.voltageSource
-        << par.voltageDrain
-        << par.defectPercentage * 100.0
-        << par.trapPercentage * 100.0
-        << par.chargePercentage * 100.0
-        << double (sim->world()->electrons()->size()) / double (sim->world()->holeSourceL()->maxCarriers()) * 100.0
-        << double (lastCount - startCount) / double (par.iterationsReal)
-        << timer.elapsed (timeStepStart) << "\n";
-      oout->flush ();
+      //(*oout) << i
+      //  << par.temperatureKelvin
+      //  << par.voltageSource
+      //  << par.voltageDrain
+      //  << par.defectPercentage * 100.0
+      //  << par.trapPercentage * 100.0
+      //  << par.chargePercentage * 100.0
+      //  << double (sim->world()->electrons()->size()) / double (sim->world()->holeSourceL()->maxCarriers()) * 100.0
+      //  << double (lastCount - startCount) / double (par.iterationsReal)
+      //  << timer.elapsed (timeStepStart) << "\n";
+      //oout->flush ();
 
-      iFile->close ();
-      delete iFile;
-      delete iout;
-      delete sim;
+      //iFile->close ();
+      //delete iFile;
+      //delete iout;
+      //delete sim;
     }
   //output time
-  (*oout) << reset << "\n" << "approxTime(s): " << timer.elapsed ();
+  //(*oout) << reset << "\n" << "approxTime(s): " << timer.elapsed ();
 
   // Close summary file
-  oFile->close ();
-  delete oFile;
-  delete oout;
+  //oFile->close ();
+  //delete oFile;
+  //delete oout;
   */
-
 }
 
 void progress( int sim, int warm, int real, int total, double time, bool flush )

@@ -12,49 +12,49 @@ class Agent;
   *  @class Logger
   *  @brief For writing simulation information to Files
   */
-class Logger
+class Logger : public QObject
 {
-public:
-    Logger( World *world );
-   ~Logger();
+Q_OBJECT public:
+    Logger(World *world, QObject *parent=0);
+    ~Logger();
 
     /**
       * @brief Save \b current carrier site ids
       * @param name name of file
       */
-    void saveCarrierIDsToFile( QString name );
+    void saveCarrierIDsToFile(QString name);
 
     /**
       * @brief Save trap site ids
       * @param name name of file
       */
-    void saveTrapIDsToFile( QString name );
+    void saveTrapIDsToFile(QString name);
 
     /**
       * @brief Save defect site ids
       * @param name name of file
       */
-    void saveDefectIDsToFile( QString name );
+    void saveDefectIDsToFile(QString name);
 
     /**
       * @brief Save potential value at every site
       * @param name name of file
       */
-    void saveFieldEnergyToFile( QString name );
+    void saveFieldEnergyToFile(QString name);
 
     /**
       * @brief Save \b current coulomb energy
       * @param name name of file
       * @note it is saving whatever is in m_oHost vector
       */
-    void saveCoulombEnergyToFile( QString name );
+    void saveCoulombEnergyToFile(QString name);
 
     /**
       * @brief Save image of trape sites
       * @param name name of file
       * @note uses trap IDs
       */
-    void saveTrapImageToFile( QString name );
+    void saveTrapImageToFile(QString name);
 
     /**
       * @brief Save carrier pathlength and lifetime to carrier output stream
@@ -62,7 +62,7 @@ public:
       * @param tick number identifing when output is written, for example the simulation step
       * @warning doesn't not check if \b i is in range
       */
-    void carrierReportLifetimeAndPathlength( int i, int tick );
+    void carrierReportLifetimeAndPathlength(int i, int tick);
 
     /**
       * @brief flush the carrier stream file

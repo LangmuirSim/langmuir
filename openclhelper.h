@@ -14,10 +14,10 @@ class ChargeAgent;
   *  @class OpenClHelper
   *  @brief For handling all OpenCl related tasks
   */
-class OpenClHelper
+class OpenClHelper : public QObject
 {
-public:
-    OpenClHelper( World * world );
+Q_OBJECT public:
+    OpenClHelper(World * world, QObject *parent=0);
 
     /**
       * @brief Set up OpenCL enviroment
@@ -37,32 +37,32 @@ public:
     /**
       * @brief copy a charge carrier's current site ID to the m_iHost vector
       */
-    inline void copySiteAndChargeToHostVector( int index, int site, int charge = -1 ) { m_sHost[index] = site; m_qHost[index] = charge; }
+    inline void copySiteAndChargeToHostVector(int index, int site, int charge = -1){ m_sHost[index] = site; m_qHost[index] = charge; }
 
     /**
       * @brief read a value in m_oDevice - which should be the result of a coulomb calculation.
       */
-    inline const double& getOutputHost(int index) const { return m_oHost[index]; }
+    inline const double& getOutputHost(int index)const { return m_oHost[index]; }
 
     /**
       * @brief read a value in m_oDevice - which should be the result of a coulomb calculation.
       */
-    inline const double& getOutputHostFuture(int index) const { return m_oHost[index+m_offset]; }
+    inline const double& getOutputHostFuture(int index)const { return m_oHost[index+m_offset]; }
 
     /**
-      * @brief compare GPU answer (delta energy) to CPU answer for all charges
+      * @brief compare GPU answer(delta energy)to CPU answer for all charges
       */
     void compareHostAndDeviceForAllCarriers();
 
     /**
-      * @brief compare GPU answer to CPU answer (at single point)
+      * @brief compare GPU answer to CPU answer(at single point)
       */
     void compareHostAndDeviceAtSite(int i);
 
     /**
-      * @brief compare GPU answer (delta energy) to CPU answer for a single charge
+      * @brief compare GPU answer(delta energy)to CPU answer for a single charge
       */
-    void compareHostAndDeviceForCarrier(int i,QList< ChargeAgent * > &charges);
+    void compareHostAndDeviceForCarrier(int i, QList< ChargeAgent * > &charges);
 
     /**
      * @brief change parameters

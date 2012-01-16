@@ -5,12 +5,12 @@
 
 namespace Langmuir
 {
-  /**
+/**
    * @struct SimulationParameters
    * @brief All pertinent simulation parameters are stored in here.
    */
-  struct SimulationParameters
-  {
+struct SimulationParameters
+{
     bool interactionCoulomb;
     bool chargedDefects;
     bool gridCharge;
@@ -24,15 +24,12 @@ namespace Langmuir
     bool outputStats;
     bool useOpenCL;
     bool okCL;
-    bool potentialLinear;
     double chargePercentage;
     double defectPercentage;
     double deltaEpsilon;
     double gaussianAverg;
     double gaussianStdev;
     double seedPercentage;
-    double sourceBarrier;
-    double drainBarrier;
     double temperatureKelvin;
     double trapPercentage;
     double variableFinal;
@@ -47,127 +44,112 @@ namespace Langmuir
     double electrostaticPrefactor;
     double inverseKT;
     int electrostaticCutoff;
-    int gridDepth;
-    int gridHeight;
-    int gridWidth;
+    int zSize;
+    int ySize;
+    int xSize;
     int iterationsPrint;
     int iterationsReal;
     int iterationsWarmup;
     int outputPrecision;
     int outputWidth;
-    int sourceType;
-    int drainType;
     int variableSteps;
     int variableWorking;
     int zDefect;
-    int zTrap;
-    int hoppingRange;
     int workWidth;
     int workHeight;
     int workDepth;
     int workSize;
     int randomSeed;
-    int simulationType;
-    int sourceAttempts;
     QString kernelsPath;
     QString outputPath;
 
-    SimulationParameters ()
+    SimulationParameters()
     {
-      interactionCoulomb = false;
-      chargedDefects = false;
-      gridCharge = false;
-      chargedTraps = false;
-      outputGrid = false;
-      outputStats = false;
-      outputCarriers = false;
-      outputCoulombPotential = false;
-      useOpenCL = false;
-      outputFieldPotential = false;
-      outputDefectIDs = false;
-      outputTrapIDs = false;
-      potentialLinear = true;
-      chargePercentage = 0.01;
-      defectPercentage = 0.00;
-      deltaEpsilon = -0.10;
-      gaussianAverg = 0.0;
-      gaussianStdev = 0.0;
-      seedPercentage = 1.0;
-      sourceBarrier = 0.10;
-      drainBarrier = 0.10;
-      temperatureKelvin = 300.00;
-      trapPercentage = 0.0;
-      variableFinal = 0;
-      variableStart = 0;
-      voltageDrain = 0.00;
-      voltageSource = 0.00;
-      boltzmannConstant = 1.3806504e-23;
-      dielectricConstant = 3.5;
-      elementaryCharge = 1.60217646e-19;
-      permittivitySpace = 8.854187817e-12;
-      gridFactor = 1e-9;
-      electrostaticCutoff = 50;
-      gridDepth = 1;
-      gridHeight = 256;
-      gridWidth = 256;
-      iterationsPrint = 1000;
-      iterationsReal = 10000;
-      iterationsWarmup = 1000;
-      outputPrecision = 5;
-      outputWidth = 20;
-      sourceType = 0;
-      drainType = 0;
-      variableSteps = 1;
-      variableWorking = -1;
-      zDefect = 0;
-      zTrap = 0;
-      hoppingRange = 1;
-      workWidth = 4;
-      workHeight = 4;
-      workDepth = 4;
-      workSize = 256;
-      randomSeed = -1;
-      kernelsPath = ".";
-      outputPath = ".";
-      sourceAttempts = 1;
-      simulationType = 0;
-      electrostaticPrefactor =
-        elementaryCharge / (4.0 * M_PI * dielectricConstant *
-                            permittivitySpace * gridFactor);
-      inverseKT = 1.0 / (boltzmannConstant * temperatureKelvin);
+        interactionCoulomb = false;
+        chargedDefects = false;
+        gridCharge = false;
+        chargedTraps = false;
+        outputGrid = false;
+        outputStats = false;
+        outputCarriers = false;
+        outputCoulombPotential = false;
+        useOpenCL = false;
+        outputFieldPotential = false;
+        outputDefectIDs = false;
+        outputTrapIDs = false;
+        chargePercentage = 0.01;
+        defectPercentage = 0.00;
+        deltaEpsilon = -0.10;
+        gaussianAverg = 0.0;
+        gaussianStdev = 0.0;
+        seedPercentage = 1.0;
+        temperatureKelvin = 300.00;
+        trapPercentage = 0.0;
+        variableFinal = 0;
+        variableStart = 0;
+        voltageDrain = 0.00;
+        voltageSource = 0.00;
+        boltzmannConstant = 1.3806504e-23;
+        dielectricConstant = 3.5;
+        elementaryCharge = 1.60217646e-19;
+        permittivitySpace = 8.854187817e-12;
+        gridFactor = 1e-9;
+        electrostaticCutoff = 50;
+        zSize = 1;
+        ySize = 256;
+        xSize = 256;
+        iterationsPrint = 1000;
+        iterationsReal = 10000;
+        iterationsWarmup = 1000;
+        outputPrecision = 5;
+        outputWidth = 20;
+        variableSteps = 1;
+        variableWorking = -1;
+        zDefect = 0;
+        workWidth = 4;
+        workHeight = 4;
+        workDepth = 4;
+        workSize = 256;
+        randomSeed = -1;
+        kernelsPath = ".";
+        outputPath = ".";
+        electrostaticPrefactor =
+                elementaryCharge /(4.0 * M_PI * dielectricConstant *
+                                    permittivitySpace * gridFactor);
+        inverseKT = 1.0 /(boltzmannConstant * temperatureKelvin);
     }
-  };
+};
 
-  class InputParserTemp
-  {
-  public:
-      InputParserTemp(const QString &fileName);
+class InputParserTemp
+{
+public:
+    InputParserTemp(const QString &fileName);
 
-  private:
-      QMap<QString, QVector<QString> > m_map;
-      void parseFile(const QString &fileName);
-      void printMap();
-  };
+private:
+    QMap<QString, QVector<QString> > m_map;
+    void parseFile(const QString &fileName);
+    void printMap();
+};
 
-  /**
+/**
     *  @class InputParser
     *  @brief For reading input parameters
     */
-  class InputParser
-  {
-  public:
+class InputParser : public QObject
+{
+Q_OBJECT public:
     /**
      * @brief Constructor.
      *
      * Constructor. This is used to set up the Simulation instance, and saves
      * the parameters that should be varied in the simulation instance. These
-     * parameters may be varied in serial fashion, or (TBC) distributed over the
+     * parameters may be varied in serial fashion, or(TBC)distributed over the
      * cluster using MPI.
      *
      * @param fileName The name of the file to parse for simulation parameters.
      * parameters in the input file.
      */
-    InputParser (const QString & fileName);
+    InputParser(const QString & fileName, QObject *parent=0);
 
     /**
      * @enum The supported variables that can be varied - only one may be varied
@@ -176,69 +158,68 @@ namespace Langmuir
      */
     enum VariableType
     {
-      e_undefined,
-      e_interactionCoulomb,        // should Coulomb interaction be used
-      e_chargedDefects,            // are the defects charged?
-      e_gridCharge,                // seed the grid with charges
-      e_chargedTraps,              // are the traps charged?
-      e_outputXyz,                 // should trajectory files be written
-      e_outputGrid,                // generate a pdf image of the grid?
-      e_outputStats,               // output lifetime and pathlength to file?
-      e_outputCarriers,            // output carrier positions to a file?
-      e_outputCoulombPotential,    // output coulomb potential to file?
-      e_outputFieldPotential,      // output field potential to file?
-      e_outputTrapPotential,       // output trap potential to file?
-      e_outputDefectIDs,           // output defect ids to file?
-      e_outputTrapIDs,             // output trap ids to file?
-      e_chargePercentage,          // percentage of charges in the grid - sets as target
-      e_useOpenCL,                 // should OpenCL be used
-      e_defectPercentage,          // percentage of defects in the grid
-      e_deltaEpsilon,              // site energy difference for traps
-      e_gaussianAverg,             // average of the random noise
-      e_gaussianStdev,             // standard deviation of the random noise
-      e_seedPercentage,            // percentage of trap seeds for heterogeneous traps
-      e_sourceBarrier,             // probability to reject transport from source when sourceType = constant
-      e_drainBarrier,              // probability to reject transport to drain when drainType = constant
-      e_sourceAttempts,            // injection attempts by the source, if <= 0 then the source attempts current charges - max charges injections
-      e_temperatureKelvin,         // the absolute temperature
-      e_trapPercentage,            // percentage of traps in the grid
-      e_variableFinal,             // final value of the variable range
-      e_variableStart,             // the start of the variables range
-      e_voltageDrain,              // voltage of the drain electrode
-      e_voltageSource,             // voltage of the source electrode
-      e_gridDepth,                 // the depth of the grid
-      e_gridHeight,                // the height of the grid
-      e_gridWidth,                 // the width of the grid
-      e_iterationsPrint,           // number of iterations before printing state
-      e_iterationsReal,            // the number of iterations for the real run
-      e_iterationsWarmup,          // the number of warm up iterations to perform
-      e_outputPrecision,           // decimal places to show in output
-      e_outputWidth,               // number of char per output field
-      e_sourceType,                // how to determine the probability to inject charges from the source ( constant, coulomb, image )
-      e_drainType,                 // how to determine the probability to accept charges at the drain ( constant, broke )
-      e_variableSteps,             // the number of steps to take from start to final
-      e_variableWorking,           // the working variable that is being changed
-      e_zDefect,                   // charge on the defects (units e)
-      e_zTrap,                     // charge on traps (units e)
-      e_hoppingRange,              // number of neighbors to hop between
-      e_workWidth,                 // local size of OpenCL work groups
-      e_workHeight,                // local size of OpenCL work groups
-      e_workDepth,                 // local size of OpenCL work groups
-      e_workSize,                  // local size of OpenCL work groups
-      e_randomSeed,                // seed for random number generator
-      e_kernelsPath,               // source file containing OpenCL kernel
-      e_okCL,                      // can openCL be used on this platform?
-      e_boltzmannConstant,         // thermodynamics constant - non-variable
-      e_dielectricConstant,        // electrostatics constant - non-variable
-      e_electrostaticCutoff,       // electrostatics constant - non-variable
-      e_electrostaticPrefactor,    // collection of electrostatic constants - non-variable
-      e_elementaryCharge,          // charge of electron - non-variable
-      e_gridFactor,                // distance between centers of grid sites - non-variable
-      e_inverseKT,                 // inverse average thermal energy - non-variable
-      e_permittivitySpace,         // electrostatics constant - non-variable
-      e_potentialLinear,           // number of char per output field
-      e_simulationType,            // simtype = 0 is transistor and simtype != 0 is solar cell
-      e_end
+        e_undefined, 
+        e_interactionCoulomb, // should Coulomb interaction be used
+        e_chargedDefects, // are the defects charged?
+        e_gridCharge, // seed the grid with charges
+        e_chargedTraps, // are the traps charged?
+        e_outputXyz, // should trajectory files be written
+        e_outputGrid, // generate a pdf image of the grid?
+        e_outputStats, // output lifetime and pathlength to file?
+        e_outputCarriers, // output carrier positions to a file?
+        e_outputCoulombPotential, // output coulomb potential to file?
+        e_outputFieldPotential, // output field potential to file?
+        e_outputTrapPotential, // output trap potential to file?
+        e_outputDefectIDs, // output defect ids to file?
+        e_outputTrapIDs, // output trap ids to file?
+        e_chargePercentage, // percentage of charges in the grid - sets as target
+        e_useOpenCL, // should OpenCL be used
+        e_defectPercentage, // percentage of defects in the grid
+        e_deltaEpsilon, // site energy difference for traps
+        e_gaussianAverg, // average of the random noise
+        e_gaussianStdev, // standard deviation of the random noise
+        e_seedPercentage, // percentage of trap seeds for heterogeneous traps
+        e_sourceBarrier, // probability to reject transport from source when sourceType = constant
+        e_drainBarrier, // probability to reject transport to drain when drainType = constant
+        e_sourceAttempts, // injection attempts by the source, if <= 0 then the source attempts current charges - max charges injections
+        e_temperatureKelvin, // the absolute temperature
+        e_trapPercentage, // percentage of traps in the grid
+        e_variableFinal, // final value of the variable range
+        e_variableStart, // the start of the variables range
+        e_voltageDrain, // voltage of the drain electrode
+        e_voltageSource, // voltage of the source electrode
+        e_zSize, // the depth of the grid
+        e_ySize, // the height of the grid
+        e_xSize, // the width of the grid
+        e_iterationsPrint, // number of iterations before printing state
+        e_iterationsReal, // the number of iterations for the real run
+        e_iterationsWarmup, // the number of warm up iterations to perform
+        e_outputPrecision, // decimal places to show in output
+        e_outputWidth, // number of char per output field
+        e_sourceType, // how to determine the probability to inject charges from the source(constant, coulomb, image)
+        e_drainType, // how to determine the probability to accept charges at the drain(constant, broke)
+        e_variableSteps, // the number of steps to take from start to final
+        e_variableWorking, // the working variable that is being changed
+        e_zDefect, // charge on the defects(units e)
+        e_zTrap, // charge on traps(units e)
+        e_hoppingRange, // number of neighbors to hop between
+        e_workWidth, // local size of OpenCL work groups
+        e_workHeight, // local size of OpenCL work groups
+        e_workDepth, // local size of OpenCL work groups
+        e_workSize, // local size of OpenCL work groups
+        e_randomSeed, // seed for random number generator
+        e_kernelsPath, // source file containing OpenCL kernel
+        e_okCL, // can openCL be used on this platform?
+        e_boltzmannConstant, // thermodynamics constant - non-variable
+        e_dielectricConstant, // electrostatics constant - non-variable
+        e_electrostaticCutoff, // electrostatics constant - non-variable
+        e_electrostaticPrefactor, // collection of electrostatic constants - non-variable
+        e_elementaryCharge, // charge of electron - non-variable
+        e_gridFactor, // distance between centers of grid sites - non-variable
+        e_inverseKT, // inverse average thermal energy - non-variable
+        e_permittivitySpace, // electrostatics constant - non-variable
+        e_simulationType, // simtype = 0 is transistor and simtype != 0 is solar cell
+        e_end
     };
 
     /**
@@ -248,7 +229,7 @@ namespace Langmuir
      * @param step The step
      * @param step Save the parameter pointer to m_parameters
      */
-    bool simulationParameters ( SimulationParameters * par, int step = 0 );
+    bool simulationParameters(SimulationParameters * par, int step = 0);
 
     /**
      * @brief access lines read.
@@ -257,13 +238,13 @@ namespace Langmuir
      */
     int getReadCount();
 
-  private:
+private:
     /**
      * @brief The values of parameters.
      *
      * Struct of variable parameters.
      */
-      SimulationParameters m_parameters;
+    SimulationParameters m_parameters;
 
     /**
      * @brief string to variable type map
@@ -277,14 +258,14 @@ namespace Langmuir
      *
      * Process a line of input.
      */
-    void processLine (QIODevice * file);
+    void processLine(QIODevice * file);
 
     /**
      * @brief set up map.
      *
      * Initialize the static map of variables if necessary
      */
-    void initializeVariables ();
+    void initializeVariables();
 
     /**
      * @brief lines read.
@@ -293,6 +274,6 @@ namespace Langmuir
      */
     int readCount;
 
-  };
+};
 }
 #endif // INPUTPARSER_H
