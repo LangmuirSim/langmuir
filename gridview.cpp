@@ -8,18 +8,18 @@ namespace Langmuir
 QImage GridViewGL::drawEnergyLandscape(int layer)
 {
     //Create an empty image of the appropriate size
-    QImage img(pPar->xSize, pPar->ySize, QImage::Format_ARGB32_Premultiplied);
+    QImage img(pPar->gridX, pPar->gridY, QImage::Format_ARGB32_Premultiplied);
     img.fill(0);
 
     //Create a painter to draw the image
     QPainter painter(&img);
     //Move the origin from top left to bottom right
     painter.scale(1.0, -1.0);
-    painter.translate(0.0, -pPar->ySize);
+    painter.translate(0.0, -pPar->gridY);
     //Resize the painter window to the grid dimensions
-    painter.setWindow(QRect(0, 0, pPar->xSize, pPar->ySize));
+    painter.setWindow(QRect(0, 0, pPar->gridX, pPar->gridY));
     //Set the background to be white
-    painter.fillRect(QRect(0, 0, pPar->xSize, pPar->ySize), Qt::white);
+    painter.fillRect(QRect(0, 0, pPar->gridX, pPar->gridY), Qt::white);
     //Set the trap color to a light gray
     painter.setPen(QColor(100, 100, 100, 255));
     //Draw the traps as dots
@@ -51,31 +51,16 @@ GridViewGL::GridViewGL(const QGLFormat &format, QWidget * parent, QString input)
     {
         //Adjust some of Langmuir's default parameters so things aren't too boring
         pPar->iterationsPrint = 10;
-        pPar->gridCharge = true;
-        pPar->chargePercentage = 0.02;
+        pPar->seedCharges = true;
+        pPar->electronPercentage = 0.02;
         pPar->voltageDrain = 10.0;
         pInput = NULL;
     }
     //Or... get the simulation parameters from an input file
     else
     {
-        pInput = new InputParser(input);
-        pInput->simulationParameters(pPar);
-        //Its probably an error if the input file read contains no parameters
-        if(pInput->getReadCount()== 0)
-        {
-            QMessageBox::critical(
-                        this, 
-                        tr("Langmuir"), 
-                        QString("No parameters were found in the input file.  Langmuir's default parameters will be used."), 
-                        QMessageBox::Ok);
-
-            //Adjust some of Langmuir's default parameters so things aren't too boring
-            pPar->iterationsPrint = 10;
-            pPar->gridCharge = true;
-            pPar->chargePercentage = 0.02;
-            pPar->voltageDrain = 10.0;
-        }
+        pInput = new InputParserTemp(input);
+        pPar = &(pInput->getParameters(0));
     }
 
     //Restrict the value on iterations.print to be low(it controls how many steps are done everytime updateGL is called)
@@ -120,7 +105,6 @@ GridViewGL::GridViewGL(const QGLFormat &format, QWidget * parent, QString input)
 GridViewGL::~GridViewGL()
 {
     //Delete the objects who aren't derived from QObject
-    delete pPar;
     delete pSim;
     if(pInput){ delete pInput; }
 }
@@ -132,7 +116,7 @@ QSize GridViewGL::minimumSizeHint()const
 
 QSize GridViewGL::sizeHint()const
 {
-    return QSize(pPar->xSize + 4 * thickness, pPar->ySize + 2 * thickness);
+    return QSize(pPar->gridX + 4 * thickness, pPar->gridY + 2 * thickness);
 }
 
 void GridViewGL::initializeGL()
@@ -150,41 +134,41 @@ void GridViewGL::initializeGL()
     trapsTexture = bindTexture(drawEnergyLandscape());
 
     base = new Box(this, 
-                    QVector3D(pPar->xSize, pPar->ySize, thickness), 
+                    QVector3D(pPar->gridX, pPar->gridY, thickness),
                     QVector3D(0, 0, -thickness));
     base->setTexture(metalTexture);
 
     source = new Box(this, 
-                      QVector3D(2.0*thickness, pPar->ySize, thickness + pPar->zSize * thickness), 
+                      QVector3D(2.0*thickness, pPar->gridY, thickness + pPar->gridZ * thickness),
                       QVector3D(-2.0*thickness, 0, -thickness));
 
     drain = new Box(this, 
-                     QVector3D(2.0*thickness, pPar->ySize, thickness + pPar->zSize * thickness), 
-                     QVector3D(pPar->xSize, 0, -thickness));
+                     QVector3D(2.0*thickness, pPar->gridY, thickness + pPar->gridZ * thickness),
+                     QVector3D(pPar->gridX, 0, -thickness));
 
     side1 = new Box(this, 
-                     QVector3D(pPar->xSize, thickness, thickness), 
+                     QVector3D(pPar->gridX, thickness, thickness),
                      QVector3D(0, -thickness, -thickness));
 
     side2 = new Box(this, 
-                     QVector3D(pPar->xSize, thickness, thickness), 
-                     QVector3D(0, pPar->ySize, -thickness));
+                     QVector3D(pPar->gridX, thickness, thickness),
+                     QVector3D(0, pPar->gridY, -thickness));
 
     side3 = new Box(this, 
-                     QVector3D(2.0*thickness, thickness, thickness + pPar->zSize * thickness), 
+                     QVector3D(2.0*thickness, thickness, thickness + pPar->gridZ * thickness),
                      QVector3D(-2.0*thickness, -thickness, -thickness));
 
     side4 = new Box(this, 
-                     QVector3D(2.0*thickness, thickness, thickness + pPar->zSize * thickness), 
-                     QVector3D(-2.0*thickness, pPar->ySize, -thickness));
+                     QVector3D(2.0*thickness, thickness, thickness + pPar->gridZ * thickness),
+                     QVector3D(-2.0*thickness, pPar->gridY, -thickness));
 
     side5 = new Box(this, 
-                     QVector3D(2.0*thickness, thickness, thickness + pPar->zSize * thickness), 
-                     QVector3D(pPar->xSize, -thickness, -thickness));
+                     QVector3D(2.0*thickness, thickness, thickness + pPar->gridZ * thickness),
+                     QVector3D(pPar->gridX, -thickness, -thickness));
 
     side6 = new Box(this, 
-                     QVector3D(2.0*thickness, thickness, thickness + pPar->zSize * thickness), 
-                     QVector3D(pPar->xSize, pPar->ySize, -thickness));
+                     QVector3D(2.0*thickness, thickness, thickness + pPar->gridZ * thickness),
+                     QVector3D(pPar->gridX, pPar->gridY, -thickness));
 
     background = new ColoredObject(this);
     ambientLight = new ColoredObject(this);
@@ -192,14 +176,17 @@ void GridViewGL::initializeGL()
     specularLight = new ColoredObject(this);
 
     Grid *grid = pSim->world()->electronGrid();
-    pointBuffer1.resize((int(pPar->chargePercentage * grid->volume()))* 4);
-    pointBuffer2.resize((int(pPar->chargePercentage * grid->volume()))* 4);
+    pointBuffer1.resize((int(pPar->electronPercentage * grid->volume()))* 4);
+    pointBuffer2.resize((int(pPar->holePercentage * grid->volume()))* 4);
     for(int i = 0; i < pointBuffer1.size(); i+= 4)
     {
         pointBuffer1[i]   = 0;
         pointBuffer1[i+1] = 0;
         pointBuffer1[i+2] = 0;
         pointBuffer1[i+3] = 1;
+    }
+    for(int i = 0; i < pointBuffer2.size(); i+= 4)
+    {
         pointBuffer2[i]   = 0;
         pointBuffer2[i+1] = 0;
         pointBuffer2[i+2] = 0;
@@ -224,7 +211,7 @@ void GridViewGL::initializeGL()
 
     translation.setX(0);
     translation.setY(0);
-    translation.setZ(-(pPar->ySize)-thickness);
+    translation.setZ(-(pPar->gridY)-thickness);
     rotation.setX(0);
     rotation.setY(0);
     rotation.setZ(0);
@@ -264,7 +251,7 @@ void GridViewGL::initializeGL()
     carriersPlus->setPointSize(0.5f);
     defects->setPointSize(0.5f);
 
-    if(pPar->interactionCoulomb)
+    if(pPar->coulombCarriers)
     {
         emit coulombStatusChanged(Qt::Checked);
     }
@@ -419,7 +406,7 @@ void GridViewGL::resetView()
 {
     translation.setX(0.0);
     translation.setY(0.0);
-    translation.setZ(-(pPar->ySize)-thickness);
+    translation.setZ(-(pPar->gridY)-thickness);
     rotation.setX(0);
     rotation.setY(0);
     rotation.setZ(0);
@@ -456,13 +443,13 @@ void GridViewGL::toggleCoulombStatus(int checkState)
     {
     case Qt::Checked :
     {
-        pPar->interactionCoulomb = true;
+        pPar->coulombCarriers = true;
         emit coulombStatusChanged(Qt::Checked);
         break;
     }
     default :
     {
-        pPar->interactionCoulomb = false;
+        pPar->coulombCarriers = false;
         pSim->world()->opencl()->toggleOpenCL(false);
         emit openCLStatusChanged(Qt::Unchecked);
         emit coulombStatusChanged(Qt::Unchecked);
@@ -510,7 +497,7 @@ void GridViewGL::toggleOpenCLStatus(int checkState)
             }
             else
             {
-                if(! pPar->interactionCoulomb)
+                if(! pPar->coulombCarriers)
                 {
 
                     QMessageBox::warning(this, tr("Langmuir"), QString("Can not turn OpenCL.  Coulomb interations are turned off."));
@@ -641,7 +628,7 @@ void GridViewGL::paintGL()
     glRotatef(rotation.y(), 0.0, 1.0, 0.0);
     glRotatef(rotation.z(), 0.0, 0.0, 1.0);
     glPushMatrix();
-    glTranslatef(-0.5 *(pPar->xSize + 4.0 * thickness), - 0.5 *(pPar->ySize + 2.0 * thickness), 0);
+    glTranslatef(-0.5 *(pPar->gridX + 4.0 * thickness), - 0.5 *(pPar->gridY + 2.0 * thickness), 0);
     base->draw();
     source->draw();
     drain->draw();

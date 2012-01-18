@@ -19,11 +19,11 @@ FluxAgent::FluxAgent(Agent::Type type, World * world, double potential, double r
     m_successes    = 0;
     m_grid         = 0;
     m_potential    = potential;
-    m_rate         = rate;
+    m_probability         = rate;
     m_tries        = tries;
     m_face         = Grid::NoFace;
-    m_maxHoles     = m_world->parameters()->chargePercentage*double(m_world->holeGrid()->volume());
-    m_maxElectrons = m_world->parameters()->chargePercentage*double(m_world->electronGrid()->volume());
+    m_maxHoles     = m_world->parameters()->holePercentage*double(m_world->holeGrid()->volume());
+    m_maxElectrons = m_world->parameters()->electronPercentage*double(m_world->electronGrid()->volume());
 }
 
 void FluxAgent::initializeSite(int site)
@@ -143,7 +143,7 @@ void FluxAgent::resetCounters()
 
 bool FluxAgent::shouldTransport(int site)
 {
-    return m_world->randomNumberGenerator()->randomlyChooseYesWithPercent(m_rate);
+    return m_world->randomNumberGenerator()->randomlyChooseYesWithPercent(m_probability);
     //return m_world->randomNumberGenerator()->randomlyChooseYesWithMetropolisAndCoupling(
     //        energyChange(site), m_world->parameters()->inverseKT, m_rate);
 }
@@ -151,6 +151,49 @@ bool FluxAgent::shouldTransport(int site)
 double FluxAgent::energyChange(int site)
 {
     return 0;
+}
+
+void FluxAgent::titleString( QTextStream &stream, SimulationParameters &par )
+{
+    stream.setRealNumberPrecision(par.outputPrecision );
+    stream.setFieldWidth( par.outputWidth );
+    stream.setRealNumberNotation( QTextStream::ScientificNotation );
+    stream.setFieldAlignment( QTextStream::AlignRight );
+    stream << "type"
+           << "face"
+           << "site"
+           << "attempts"
+           << "successes"
+           << "rate"
+           << "hMax"
+           << "hCount"
+           << "eMax"
+           << "eCount"
+           << "probability"
+           << "potential"
+           << "tries";
+}
+
+QTextStream& operator<<( QTextStream &stream, const FluxAgent &flux )
+{
+    stream.setRealNumberPrecision( flux.m_world->parameters()->outputPrecision );
+    stream.setFieldWidth( flux.m_world->parameters()->outputWidth );
+    stream.setRealNumberNotation( QTextStream::ScientificNotation );
+    stream.setFieldAlignment( QTextStream::AlignRight );
+    stream << Agent::typeToQString(flux.m_type)
+           << flux.m_grid->cubeFaceToQString(flux.m_face)
+           << flux.m_site
+           << flux.attempts()
+           << flux.successes()
+           << flux.successRate()
+           << flux.maxHoles()
+           << flux.holeCount()
+           << flux.maxElectrons()
+           << flux.electronCount()
+           << flux.m_probability
+           << flux.m_potential
+           << flux.m_tries;
+    return stream;
 }
 
 }

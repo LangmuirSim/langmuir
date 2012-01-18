@@ -6,6 +6,7 @@
 namespace Langmuir
 {
 class Grid;
+class SimulationParameters;
 class ChargeAgent : public Agent
 {
 public:
@@ -22,12 +23,15 @@ public:
     int getOpenCLID();
     double coulombInteraction(int newSite);
 
+    static void titleString( QTextStream &stream, SimulationParameters &par );
+    friend QTextStream& operator<<( QTextStream &stream, const ChargeAgent &charge );
+
 protected:
     virtual double bindingPotential(int site)= 0;
     int m_charge;
     bool m_removed;
     int m_lifetime;
-    double m_pathlength;
+    int m_pathlength;
     Grid *m_grid;
     int m_openClID;
 };

@@ -6,6 +6,7 @@
 
 namespace Langmuir
 {
+class SimulationParameters;
 class FluxAgent : public Agent
 {
 public:
@@ -25,6 +26,9 @@ public:
     double successRate()const;
     void resetCounters();
 
+    static void titleString( QTextStream &stream, SimulationParameters &par );
+    friend QTextStream& operator<<( QTextStream &stream, const FluxAgent &flux );
+
 protected:
     void initializeSite(int site);
     void initializeSite(Grid::CubeFace cubeFace);
@@ -34,7 +38,7 @@ protected:
     static int m_maxElectrons;
     unsigned long int m_attempts;
     unsigned long int m_successes;
-    double m_rate;
+    double m_probability;
     int m_tries;
     double m_potential;
     Grid *m_grid;

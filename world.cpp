@@ -15,8 +15,8 @@ World::World(SimulationParameters *par, QObject *parent) : QObject(parent)
 {
     m_parameters = par;
     m_rand = new Random(m_parameters->randomSeed);
-    m_electronGrid = new Grid(m_parameters->xSize, m_parameters->ySize, m_parameters->zSize, this);
-    m_holeGrid = new Grid(m_parameters->xSize, m_parameters->ySize, m_parameters->zSize, this);
+    m_electronGrid = new Grid(m_parameters->gridX, m_parameters->gridY, m_parameters->gridZ, this);
+    m_holeGrid = new Grid(m_parameters->gridX, m_parameters->gridY, m_parameters->gridZ, this);
     m_potential = new Potential(this, this);
     m_logger = new Logger(this, this);
     m_ocl = new OpenClHelper(this, this);

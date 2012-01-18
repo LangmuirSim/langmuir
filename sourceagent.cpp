@@ -137,7 +137,7 @@ void ExcitonSourceAgent::inject(int site)
 bool ElectronSourceAgent::validToInject(int site)
 {
     if(electronCount()>= maxElectrons()||
-         m_rate <= 0 ||
+         m_probability <= 0 ||
          m_tries <= 0 ||
          site < 0 ||
          site >= m_grid->volume()||
@@ -153,7 +153,7 @@ bool ElectronSourceAgent::validToInject(int site)
 bool HoleSourceAgent::validToInject(int site)
 {
     if(holeCount()>= maxHoles()||
-         m_rate <= 0 ||
+         m_probability <= 0 ||
          m_tries <= 0 ||
          site < 0 ||
          site >= m_grid->volume()||
@@ -170,7 +170,7 @@ bool ExcitonSourceAgent::validToInject(int site)
 {
     if(electronCount()>= maxElectrons()||
          holeCount()>= maxHoles()||
-         m_rate <= 0 ||
+         m_probability <= 0 ||
          m_tries <= 0 ||
          site < 0 ||
          site >= m_world->electronGrid()->volume()||

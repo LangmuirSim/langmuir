@@ -5,807 +5,180 @@
 namespace Langmuir
 {
 
-InputParser::InputParser(const QString & fileName, QObject *parent) : QObject(parent)
+SimulationParameters::SimulationParameters()
 {
-    if(s_variables.isEmpty())
-        initializeVariables();
+    randomSeed = -1;
 
-    readCount = 0;
+    gridZ = 1;
+    gridY = 128;
+    gridX = 128;
 
-    // Open up this input file
-    QFile *file = new QFile(fileName);
-    if(!file->open(QIODevice::ReadOnly | QIODevice::Text))
-    {
-        qDebug("error opening input file: %s", qPrintable(fileName));
-        qFatal("bad input");
-    }
+    coulombCarriers = false;
+    coulombDefects = false;
+    defectsCharge = -1;
 
-    // Now read the input file in, line by line
-    while(!file->atEnd())
-        processLine(file);
+    outputElectronIDs = false;
+    outputHoleIDs = false;
+    outputDefectIDs = false;
+    outputTrapIDs = false;
 
-    //fix errors and parameter conflicts
-    if(m_parameters.outputWidth <(m_parameters.outputPrecision + 15))
-    {
-        m_parameters.outputWidth = m_parameters.outputPrecision + 15;
-    }
-    if(m_parameters.outputWidth < 20)
-    {
-        m_parameters.outputWidth = 20;
-    }
-    if(m_parameters.defectPercentage > 1.00 - m_parameters.trapPercentage)
-        qFatal("percent defects + percent traps > 100 percent");
+    outputCoulomb = false;
+    outputElectronGrid = false;
+    outputHoleGrid = false;
+    outputTrapImage = false;
+    outputOnDelete = false;
 
-    m_parameters.inverseKT =
-            m_parameters.elementaryCharge /(m_parameters.boltzmannConstant * m_parameters.temperatureKelvin);
+    iterationsPrint = 10;
+    iterationsReal = 1000;
+    iterationsWarmup = 1000;
+    outputPrecision = 5;
+    outputWidth = 20;
+    outputPath = QDir::currentPath();
 
-    m_parameters.electrostaticPrefactor =
-            m_parameters.elementaryCharge /(4.0 * M_PI *
-                                             m_parameters.dielectricConstant *
-                                             m_parameters.permittivitySpace *
-                                             m_parameters.gridFactor);
+    electronPercentage = 0.01;
+    holePercentage = 0.00;
+    seedCharges = false;
+    defectPercentage = 0.00;
+    trapPercentage = 0.00;
+    trapPotential = 0.10;
+    gaussianAverg = 0.00;
+    gaussianStdev = 0.00;
+    seedPercentage = 1.0;
+
+    voltageDrain = 0.00;
+    voltageSource = 0.00;
+    temperatureKelvin = 300.0;
+
+    useOpenCL = false;
+    workX = 4;
+    workY = 4;
+    workZ = 4;
+    workSize = 256;
+    kernelsPath = QDir::currentPath();
+
+    boltzmannConstant = 1.3806504e-23;
+    dielectricConstant = 3.5;
+    elementaryCharge = 1.60217646e-19;
+    permittivitySpace = 8.854187817e-12;
+    gridFactor = 1e-9;
+    electrostaticCutoff = 50;
+    electrostaticPrefactor = elementaryCharge /
+     (4.0 * M_PI * dielectricConstant * permittivitySpace * gridFactor);
+    inverseKT = 1.0 /(boltzmannConstant * temperatureKelvin);
+    okCL = false;
+    currentStep = 0;
+    currentSimulation = 0;
+    outputStub = "out";
+    iterationsTotal = iterationsReal + iterationsWarmup;
+
+    check();
 }
 
-bool InputParser::simulationParameters(SimulationParameters * par, 
-                                        int step)
+SimulationParameters& InputParserTemp::getParameters(int step)
 {
-    if(step < 0 || step >= m_parameters.variableSteps)// Invalid step supplied, do nothing
-        return false;
+    parameter("random.seed",m_parameters.randomSeed,step);
 
-    // Copy our parameters
-    *par = m_parameters;
+    parameter("grid.z",m_parameters.gridZ,step);
+    parameter("grid.y",m_parameters.gridY,step);
+    parameter("grid.x",m_parameters.gridX,step);
 
-    // Work out which variable to change, and supply the correct variable
-    double tmp =
-            double(step)*(m_parameters.variableFinal -
-                             m_parameters.variableStart)/
-            double(m_parameters.variableSteps - 1)+ m_parameters.variableStart;
+    parameter("coulomb.carriers",m_parameters.coulombCarriers,step);
+    parameter("coulomb.defects",m_parameters.coulombDefects,step);
+    parameter("defects.charge",m_parameters.defectsCharge,step);
 
-    switch(m_parameters.variableWorking)
-    {
+    parameter("output.electron.ids",m_parameters.outputElectronIDs,step);
+    parameter("output.hole.ids",m_parameters.outputHoleIDs,step);
+    parameter("output.defect.ids",m_parameters.outputDefectIDs,step);
+    parameter("output.trap.ids",m_parameters.outputTrapIDs,step);
 
-    case e_voltageSource:
-    {
-        par->voltageSource = tmp;
-        break;
-    }
+    parameter("output.coulomb",m_parameters.outputCoulomb,step);
+    parameter("output.electron.grid",m_parameters.outputElectronGrid,step);
+    parameter("output.hole.grid",m_parameters.outputHoleGrid,step);
+    parameter("output.trap.image",m_parameters.outputTrapImage,step);
+    parameter("output.on.delete",m_parameters.outputOnDelete,step);
 
-    case e_voltageDrain:
-    {
-        par->voltageDrain = tmp;
-        break;
-    }
+    parameter("iterations.print",m_parameters.iterationsPrint,step);
+    parameter("iterations.real",m_parameters.iterationsReal,step);
+    parameter("iterations.warmup",m_parameters.iterationsWarmup,step);
+    parameter("output.percision",m_parameters.outputPrecision,step);
+    parameter("output.width",m_parameters.outputWidth,step);
+    parameter("output.path",m_parameters.outputPath,step);
 
-    case e_defectPercentage:
-    {
-        par->defectPercentage = tmp / 100.0;
-        if(par->defectPercentage < 0 || par->defectPercentage > 1.00)
-        {
-            qFatal
-("percent defects specified by working variable out of range");
-        }
-        if(par->defectPercentage > 1.00 - par->trapPercentage)
-        {
-            qFatal
-("percent defects + percent traps > 100 percent specified by working variable");
-        }
-        break;
-    }
+    parameter("electron.percentage",m_parameters.electronPercentage ,step);
+    parameter("hole.percentage",m_parameters.holePercentage,step);
+    parameter("seed.charges",m_parameters.seedCharges,step);
+    parameter("defect.percentage",m_parameters.defectPercentage,step);
+    parameter("trap.percentage",m_parameters.trapPercentage,step);
+    parameter("trap.potential",m_parameters.trapPotential,step);
+    parameter("gaussian.average",m_parameters.gaussianAverg,step);
+    parameter("gaussian.stdev",m_parameters.gaussianStdev,step);
+    parameter("seed.percentage",m_parameters.seedPercentage,step);
 
-    case e_trapPercentage:
-    {
-        par->trapPercentage = tmp / 100.0;
-        if(par->trapPercentage < 0 || par->trapPercentage > 1.00)
-        {
-            qFatal
-("percent defects specified by working variable out of range");
-        }
-        if(par->defectPercentage > 1.00 - par->trapPercentage)
-        {
-            qFatal
-("percent defects + percent traps > 100 percent specified by working variable");
-        }
-        break;
-    }
+    parameter("voltage.drain",m_parameters.voltageDrain,step);
+    parameter("voltage.source",m_parameters.voltageSource,step);
+    parameter("temperature.kelvin",m_parameters.temperatureKelvin,step);
 
-    case e_chargePercentage:
-    {
-        par->chargePercentage = tmp / 100.0;
-        if(par->chargePercentage < 0 || par->chargePercentage > 1.00)
-            qFatal
-("percent defects specified by working variable out of range");
-        break;
-    }
+    parameter("use.opencl",m_parameters.useOpenCL,step);
+    parameter("work.x",m_parameters.workX,step);
+    parameter("work.y",m_parameters.workY,step);
+    parameter("work.z",m_parameters.workZ,step);
+    parameter("work.size",m_parameters.workSize,step);
+    parameter("kernels.path",m_parameters.kernelsPath,step);
 
-    case e_temperatureKelvin:
-    {
-        par->temperatureKelvin = tmp;
-        if(par->temperatureKelvin <= 0)
-        {
-            qFatal
-("zero or negative temperature specified by working variable");
-        }
-        par->inverseKT =
-                1.0 /(par->boltzmannConstant * par->temperatureKelvin);
-        break;
-    }
+    m_parameters.currentStep = 0;
+    m_parameters.currentSimulation = step;
 
-    default:
-    {
-        return false;
-    }
+    m_parameters.check();
 
-    }
-    return true;
+    return m_parameters;
 }
 
-inline void InputParser::processLine(QIODevice * file)
+void SimulationParameters::check()
 {
-    QString line = file->readLine();
-    if(line.at(0)== '#')
-        return;
+    electrostaticPrefactor = elementaryCharge /
+     (4.0 * M_PI * dielectricConstant * permittivitySpace * gridFactor);
+    inverseKT = 1.0 /(boltzmannConstant * temperatureKelvin);
 
-    QStringList list =
-            line.split("#", QString::SkipEmptyParts).at(0).split('=', 
-                                                                    QString::SkipEmptyParts);
+    Q_ASSERT( defectPercentage <= 1.00 - trapPercentage );
 
-    if(list.size()== 2)
-    {
+    Q_ASSERT( gridZ >= 1 );
+    Q_ASSERT( gridY >= 1 );
+    Q_ASSERT( gridX >= 1 );
 
-        QString key = list.at(0).toLower().trimmed();
+    Q_ASSERT( iterationsPrint >= 0 );
+    Q_ASSERT( iterationsReal >= 0 );
+    Q_ASSERT( iterationsWarmup >= 0 );
 
-        switch(s_variables.value(key))
-        {
+    if(outputWidth <(outputPrecision + 8)) { outputWidth = outputPrecision + 8; }
+    Q_ASSERT( outputWidth >= 8 );
 
-        case e_voltageSource:
-        {
-            m_parameters.voltageSource = list.at(1).toDouble();
-            readCount += 1;
-            break;
-        }
+    Q_ASSERT( electronPercentage >= 0.00 && electronPercentage <= 1.00 );
+    Q_ASSERT( holePercentage >= 0.00 && holePercentage <= 1.00 );
+    Q_ASSERT( defectPercentage >= 0.00 && defectPercentage <= 1.00 );
+    Q_ASSERT( trapPercentage >= 0.00 && trapPercentage <= 1.00 );
+    Q_ASSERT( seedPercentage >= 0.00 && seedPercentage <= 1.00 );
 
-        case e_voltageDrain:
-        {
-            m_parameters.voltageDrain = list.at(1).toDouble();
-            readCount += 1;
-            break;
-        }
+    Q_ASSERT( gaussianStdev >= 0.00 );
+    Q_ASSERT( temperatureKelvin >= 0.00 );
 
-        case e_defectPercentage:
-        {
-            m_parameters.defectPercentage = list.at(1).toDouble()/ 100;
-            if(m_parameters.defectPercentage < 0.00 || m_parameters.defectPercentage > 1.00)
-            {
-                qDebug()<< "Defect percentage out of range:" <<
-                             m_parameters.defectPercentage *
-                             100.0 << "(0.00 -- 100.00)";
-                qFatal("bad input");
-            }
-            readCount += 1;
-            break;
-        }
+    if ( outputElectronIDs ) { Q_ASSERT( electronPercentage > 0 ); }
+    if ( outputHoleIDs ) { Q_ASSERT( holePercentage > 0 ); }
 
-        case e_trapPercentage:
-        {
-            m_parameters.trapPercentage = list.at(1).toDouble()/ 100.0;
-            if(m_parameters.trapPercentage < 0.00 || m_parameters.trapPercentage > 1.00)
-            {
-                qDebug()<< "Trap percentage out of range:" <<
-                             m_parameters.trapPercentage *
-                             100.0 << "(0.00 -- 100.00)";
-                qFatal("bad input");
-            }
-            readCount += 1;
-            break;
-        }
-
-        case e_chargePercentage:
-        {
-            m_parameters.chargePercentage = list.at(1).toDouble()/ 100.0;
-            if(m_parameters.chargePercentage < 0.00
-                    || m_parameters.chargePercentage > 1.00)
-            {
-                qDebug()<< "Charge percentage out of range:" <<
-                             m_parameters.chargePercentage *
-                             100.0 << "(0.00 -- 100.00)";
-                qFatal("bad input");
-            }
-            readCount += 1;
-            break;
-        }
-
-        case e_temperatureKelvin:
-        {
-            m_parameters.temperatureKelvin = list.at(1).toDouble();
-            if(m_parameters.temperatureKelvin <= 0)
-            {
-                qDebug()<< "Absolute temperature must be > 0K";
-                qFatal("bad input");
-            }
-            m_parameters.inverseKT =
-                    1.0 /(m_parameters.boltzmannConstant *
-                           m_parameters.temperatureKelvin);
-            readCount += 1;
-            break;
-        }
-
-        case e_deltaEpsilon:
-        {
-            m_parameters.deltaEpsilon = list.at(1).toDouble();
-            readCount += 1;
-            break;
-        }
-
-        case e_variableWorking:
-        {
-            m_parameters.variableWorking =
-                    s_variables.value(list.at(1).toLower().trimmed());
-            if(m_parameters.variableWorking == e_voltageSource ||
-                    m_parameters.variableWorking == e_voltageDrain ||
-                    m_parameters.variableWorking == e_defectPercentage ||
-                    m_parameters.variableWorking == e_trapPercentage ||
-                    m_parameters.variableWorking == e_chargePercentage ||
-                    m_parameters.variableWorking == e_temperatureKelvin)
-            {
-            }
-            else
-            {
-                qDebug()<< "Working variable set to an invalid type:"
-                          << list.at(1).toLower().trimmed();
-                qFatal("bad input");
-            }
-            readCount += 1;
-            break;
-        }
-
-        case e_variableStart:
-        {
-            m_parameters.variableStart = list.at(1).toDouble();
-            readCount += 1;
-            break;
-        }
-
-        case e_variableFinal:
-        {
-            m_parameters.variableFinal = list.at(1).toDouble();
-            readCount += 1;
-            break;
-        }
-
-        case e_variableSteps:
-        {
-            m_parameters.variableSteps = list.at(1).toInt();
-            if(m_parameters.variableSteps < 1)
-            {
-                qDebug()<< "Number of steps must be >=1.";
-                qFatal("bad input");
-            }
-            readCount += 1;
-            break;
-        }
-
-        case e_xSize:
-        {
-            m_parameters.xSize = list.at(1).toInt();
-            if(m_parameters.xSize < 1)
-            {
-                qDebug()<< "x size must be >=1.";
-                qFatal("bad input");
-            }
-            readCount += 1;
-            break;
-        }
-
-        case e_ySize:
-        {
-            m_parameters.ySize = list.at(1).toInt();
-            if(m_parameters.ySize < 1)
-            {
-                qDebug()<< "y size must be >=1.";
-                qFatal("bad input");
-            }
-            readCount += 1;
-            break;
-        }
-
-        case e_zSize:
-        {
-            m_parameters.zSize = list.at(1).toInt();
-            if(m_parameters.zSize < 1)
-            {
-                qDebug()<< "z size must be >=1.";
-                qFatal("bad input");
-            }
-            readCount += 1;
-            break;
-        }
-
-        case e_zDefect:
-        {
-            m_parameters.zDefect = list.at(1).toInt();
-            readCount += 1;
-            break;
-        }
-
-        case e_gridCharge:
-        {
-            QString gridCharge = list.at(1).trimmed().toLower();
-            if(gridCharge == "true")
-            {
-                m_parameters.gridCharge = true;
-            }
-            else if(gridCharge == "false")
-            {
-                m_parameters.gridCharge = false;
-            }
-            else
-            {
-                qDebug()<< "Charging the grid is either true or false:" <<
-                             gridCharge;
-                qFatal("bad input");
-            }
-            readCount += 1;
-            break;
-        }
-
-        case e_iterationsWarmup:
-        {
-            m_parameters.iterationsWarmup = list.at(1).toInt();
-            if(m_parameters.iterationsWarmup < 0)
-            {
-                qDebug()<< "Warmup iterations must be >=0.";
-                qFatal("bad input");
-            }
-            readCount += 1;
-            break;
-        }
-
-        case e_iterationsReal:
-        {
-            m_parameters.iterationsReal = list.at(1).toInt();
-            if(m_parameters.iterationsReal < 1)
-            {
-                qDebug()<< "Real iterations must be >=1.";
-                qFatal("bad input");
-            }
-            readCount += 1;
-            break;
-        }
-
-        case e_iterationsPrint:
-        {
-            m_parameters.iterationsPrint = list.at(1).toInt();
-            if(m_parameters.iterationsPrint < 0)
-            {
-                qDebug()<< "Print iterations must be >=0.";
-                qFatal("bad input");
-            }
-            readCount += 1;
-            break;
-        }
-
-        case e_interactionCoulomb:
-        {
-            QString interaction = list.at(1).trimmed().toLower();
-            if(interaction == "true")
-            {
-                m_parameters.interactionCoulomb = true;
-            }
-            else if(interaction == "false")
-            {
-                m_parameters.interactionCoulomb = false;
-            }
-            else
-            {
-                qDebug()<<
-                             "Coulomb interactions are either true or false:" <<
-                             interaction;
-                qFatal("bad input");
-            }
-            readCount += 1;
-            break;
-        }
-
-        case e_chargedDefects:
-        {
-            QString interaction = list.at(1).trimmed().toLower();
-            if(interaction == "true")
-            {
-                m_parameters.chargedDefects = true;
-            }
-            else if(interaction == "false")
-            {
-                m_parameters.chargedDefects = false;
-            }
-            else
-            {
-                qDebug()<< "Charged defects are either true or false: ";
-                qFatal("bad input");
-            }
-            readCount += 1;
-            break;
-        }
-
-        case e_chargedTraps:
-        {
-            QString interaction = list.at(1).trimmed().toLower();
-            if(interaction == "true")
-            {
-                m_parameters.chargedTraps = true;
-            }
-            else if(interaction == "false")
-            {
-                m_parameters.chargedTraps = false;
-            }
-            else
-            {
-                qDebug()<< "Charged traps are either true or false: ";
-                qFatal("bad input");
-            }
-            readCount += 1;
-            break;
-        }
-
-        case e_outputGrid:
-        {
-            QString interaction = list.at(1).trimmed().toLower();
-            if(interaction == "true")
-            {
-                m_parameters.outputGrid = true;
-            }
-            else if(interaction == "false")
-            {
-                m_parameters.outputGrid = false;
-            }
-            else
-            {
-                qDebug()<< "output.grid is either true or false: ";
-                qFatal("bad input");
-            }
-            readCount += 1;
-            break;
-        }
-
-        case e_outputCoulombPotential:
-        {
-            QString interaction = list.at(1).trimmed().toLower();
-            if(interaction == "true")
-            {
-                m_parameters.outputCoulombPotential = true;
-            }
-            else if(interaction == "false")
-            {
-                m_parameters.outputCoulombPotential = false;
-            }
-            else
-            {
-                qDebug()<< "output.coulombPotential is either true or false: ";
-                qFatal("bad input");
-            }
-            readCount += 1;
-            break;
-        }
-
-        case e_outputCarriers:
-        {
-            QString interaction = list.at(1).trimmed().toLower();
-            if(interaction == "true")
-            {
-                m_parameters.outputCarriers = true;
-            }
-            else if(interaction == "false")
-            {
-                m_parameters.outputCarriers = false;
-            }
-            else
-            {
-                qDebug()<< "output.carriers is either true or false: ";
-                qFatal("bad input");
-            }
-            readCount += 1;
-            break;
-        }
-
-        case e_outputFieldPotential:
-        {
-            QString interaction = list.at(1).trimmed().toLower();
-            if(interaction == "true")
-            {
-                m_parameters.outputFieldPotential = true;
-            }
-            else if(interaction == "false")
-            {
-                m_parameters.outputFieldPotential = false;
-            }
-            else
-            {
-                qDebug()<< "output.fieldPotential is either true or false: ";
-                qFatal("bad input");
-            }
-            readCount += 1;
-            break;
-        }
-
-        case e_outputTrapIDs:
-        {
-            QString interaction = list.at(1).trimmed().toLower();
-            if(interaction == "true")
-            {
-                m_parameters.outputTrapIDs = true;
-            }
-            else if(interaction == "false")
-            {
-                m_parameters.outputTrapIDs = false;
-            }
-            else
-            {
-                qDebug()<< "output.trapIDs is either true or false: ";
-                qFatal("bad input");
-            }
-            readCount += 1;
-            break;
-        }
-
-        case e_outputDefectIDs:
-        {
-            QString interaction = list.at(1).trimmed().toLower();
-            if(interaction == "true")
-            {
-                m_parameters.outputDefectIDs = true;
-            }
-            else if(interaction == "false")
-            {
-                m_parameters.outputDefectIDs = false;
-            }
-            else
-            {
-                qDebug()<< "output.defectIDs is either true or false: ";
-                qFatal("bad input");
-            }
-            readCount += 1;
-            break;
-        }
-
-        case e_gaussianStdev:
-        {
-            m_parameters.gaussianStdev = list.at(1).toDouble();
-            if(m_parameters.gaussianStdev <= 0.00)
-            {
-                qDebug()<<
-                             "Negative or zero standard deviation specified for random noise";
-                qFatal("bad input");
-            }
-            readCount += 1;
-            break;
-        }
-
-        case e_gaussianAverg:
-        {
-            m_parameters.gaussianAverg = list.at(1).toDouble();
-            readCount += 1;
-            break;
-        }
-
-        case e_seedPercentage:
-        {
-            m_parameters.seedPercentage = list.at(1).toDouble()/ 100.0;
-            if(m_parameters.seedPercentage < 0.00
-                    || m_parameters.seedPercentage >
-                    1.00)
-            {
-                qDebug()<< "Seed percentage out of range:" <<
-                             m_parameters.seedPercentage *
-                             100.0 << "(0.00 -- 100.00)";
-                qFatal("bad input");
-            }
-            readCount += 1;
-            break;
-        }
-
-        case e_outputPrecision:
-        {
-            m_parameters.outputPrecision = list.at(1).toInt();
-            if(m_parameters.outputPrecision <= 0)
-            {
-                qDebug()<< "output precision must be >0.";
-                qFatal("bad input");
-            }
-            readCount += 1;
-            break;
-        }
-
-        case e_outputWidth:
-        {
-            m_parameters.outputWidth = list.at(1).toInt();
-            if(m_parameters.outputWidth <= 0)
-            {
-                qDebug()<< "output width must be >0.";
-                qFatal("bad input");
-            }
-            readCount += 1;
-            break;
-        }
-
-        case e_useOpenCL:
-        {
-            QString useOpenCL = list.at(1).trimmed().toLower();
-            if(useOpenCL == "true")
-            {
-                m_parameters.useOpenCL = true;
-            }
-            else if(useOpenCL == "false")
-            {
-                m_parameters.useOpenCL = false;
-            }
-            else
-            {
-                qDebug()<< "OpenCL is either true or false:" <<
-                             useOpenCL;
-                qFatal("bad input");
-            }
-            readCount += 1;
-            break;
-        }
-
-        case e_workWidth:
-        {
-            m_parameters.workWidth = list.at(1).toInt();
-            if(m_parameters.workWidth <= 0)
-            {
-                qDebug()<< "Local work group size width be larger than 0.";
-                qFatal("bad input");
-            }
-            readCount += 1;
-            break;
-        }
-
-        case e_workHeight:
-        {
-            m_parameters.workHeight = list.at(1).toInt();
-            if(m_parameters.workHeight <= 0)
-            {
-                qDebug()<< "Local work group height must be larger than 0.";
-                qFatal("bad input");
-            }
-            readCount += 1;
-            break;
-        }
-
-        case e_workDepth:
-        {
-            m_parameters.workDepth = list.at(1).toInt();
-            if(m_parameters.workDepth <= 0)
-            {
-                qDebug()<< "Local work group depth must be larger than 0.";
-                qFatal("bad input");
-            }
-            readCount += 1;
-            break;
-        }
-
-        case e_workSize:
-        {
-            m_parameters.workSize = list.at(1).toInt();
-            if(m_parameters.workSize <= 0)
-            {
-                qDebug()<< "Local work group size must be larger than 0.";
-                qFatal("bad input");
-            }
-            readCount += 1;
-            break;
-        }
-
-        case e_kernelsPath:
-        {
-            m_parameters.kernelsPath = list.at(1).trimmed();
-            readCount += 1;
-            break;
-        }
-
-        case e_randomSeed:
-        {
-            m_parameters.randomSeed = list.at(1).toInt();
-            readCount += 1;
-            break;
-        }
-
-        case e_outputStats:
-        {
-            QString interaction = list.at(1).trimmed().toLower();
-            if(interaction == "true")
-            {
-                m_parameters.outputStats = true;
-            }
-            else if(interaction == "false")
-            {
-                m_parameters.outputStats = false;
-            }
-            else
-            {
-                qDebug()<< "output.stats is either true or false: ";
-                qFatal("bad input");
-            }
-            readCount += 1;
-            break;
-        }
-
-        default:
-            qDebug()<< "Unknown key value encountered:" << qPrintable(line.trimmed());
-            break;
-        }
-    }
+    Q_ASSERT( iterationsReal % iterationsPrint == 0 );
+    Q_ASSERT( iterationsWarmup % iterationsPrint == 0 );
 }
 
-QMap < QString, InputParser::VariableType > InputParser::s_variables;
-
-void InputParser::initializeVariables()
+InputParserTemp::InputParserTemp(const QString &fileName, QObject *parent ) : QObject(parent)
 {
-    s_variables["boltzmaan.constant"] = e_boltzmannConstant;
-    s_variables["charge.percentage"] = e_chargePercentage;
-    s_variables["charged.defects"] = e_chargedDefects;
-    s_variables["charged.traps"] = e_chargedTraps;
-    s_variables["defect.percentage"] = e_defectPercentage;
-    s_variables["delta.epsilon"] = e_deltaEpsilon;
-    s_variables["dielectric.constant"] = e_dielectricConstant;
-    s_variables["electrostatic.cutoff"] = e_electrostaticCutoff;
-    s_variables["electrostatic.prefactor"] = e_electrostaticPrefactor;
-    s_variables["elementary.charge"] = e_elementaryCharge;
-    s_variables["gaussian.averg"] = e_gaussianAverg;
-    s_variables["gaussian.stdev"] = e_gaussianStdev;
-    s_variables["grid.charge"] = e_gridCharge;
-    s_variables["grid.depth"] = e_zSize;
-    s_variables["grid.factor"] = e_gridFactor;
-    s_variables["grid.height"] = e_ySize;
-    s_variables["grid.width"] = e_xSize;
-    s_variables["interaction.coulomb"] = e_interactionCoulomb;
-    s_variables["inverse.KT"] = e_inverseKT;
-    s_variables["iterations.print"] = e_iterationsPrint;
-    s_variables["iterations.real"] = e_iterationsReal;
-    s_variables["iterations.warmup"] = e_iterationsWarmup;
-    s_variables["kernels.path"] = e_kernelsPath;
-    s_variables["use.opencl"] = e_useOpenCL;
-    s_variables["output.grid"] = e_outputGrid;
-    s_variables["output.precision"] = e_outputPrecision;
-    s_variables["output.stats"] = e_outputStats;
-    s_variables["output.width"] = e_outputWidth;
-    s_variables["output.xyz"] = e_outputXyz;
-    s_variables["output.carriers"] = e_outputCarriers;
-    s_variables["output.coulombpotential"] = e_outputCoulombPotential;
-    s_variables["output.fieldpotential"] = e_outputFieldPotential;
-    s_variables["output.trappotential"] = e_outputTrapPotential;
-    s_variables["output.trapids"] = e_outputTrapIDs;
-    s_variables["output.defectids"] = e_outputDefectIDs;
-    s_variables["permittivity.space"] = e_permittivitySpace;
-    s_variables["random.seed"] = e_randomSeed;
-    s_variables["seed.percentage"] = e_seedPercentage;
-    s_variables["temperature.kelvin"] = e_temperatureKelvin;
-    s_variables["trap.percentage"] = e_trapPercentage;
-    s_variables["variable.final"] = e_variableFinal;
-    s_variables["variable.start"] = e_variableStart;
-    s_variables["variable.steps"] = e_variableSteps;
-    s_variables["variable.working"] = e_variableWorking;
-    s_variables["voltage.drain"] = e_voltageDrain;
-    s_variables["voltage.source"] = e_voltageSource;
-    s_variables["work.width"] = e_workWidth;
-    s_variables["work.height"] = e_workHeight;
-    s_variables["work.depth"] = e_workDepth;
-    s_variables["work.size"] = e_workSize;
-    s_variables["z.defect"] = e_zDefect;
-}
+    m_parameters.outputStub = fileName.split(".",QString::SkipEmptyParts)[0];
 
-int InputParser::getReadCount()
-{
-    return readCount;
-}
-
-InputParserTemp::InputParserTemp(const QString &fileName)
-{
+    getParameters(-1);
     parseFile(fileName);
+    getParameters(-1);
 }
 
 void InputParserTemp::parseFile(const QString &fileName)
 {
-    m_map.clear();
     QFile     handle(fileName);
     QFileInfo   info(fileName);
 
@@ -823,12 +196,11 @@ void InputParserTemp::parseFile(const QString &fileName)
     {
         QString unaltered = handle.readLine().trimmed();
         QString line = unaltered;
-        line = line.replace(regex1, "=");
-        line = line.replace(regex2, ", ");
-        line = line.replace(regex3, "");
-        line = line.replace(regex4, "");
-        line = line.replace(regex5, "");
-        line = line.toLower();
+        line = line.replace(regex1, "="  );
+        line = line.replace(regex2, ", " );
+        line = line.replace(regex3, ""   );
+        line = line.replace(regex4, ""   );
+        line = line.replace(regex5, ""   );
         line = line.trimmed();
 
         if(line.length()> 0)
@@ -855,7 +227,7 @@ void InputParserTemp::parseFile(const QString &fileName)
                        qPrintable(info.fileName()), lineNumber, qPrintable(unaltered));
             }
 
-            QString key = tokens[0].trimmed();
+            QString key = tokens[0].trimmed().toLower();
 
             if(key.isEmpty())
             {
@@ -867,7 +239,7 @@ void InputParserTemp::parseFile(const QString &fileName)
                        qPrintable(info.fileName()), lineNumber, qPrintable(unaltered));
             }
 
-            QStringList values = tokens[1].split(", ", QString::SkipEmptyParts);
+            QStringList values = tokens[1].split(",", QString::SkipEmptyParts);
 
             if(values.size()== 0)
             {
@@ -897,41 +269,94 @@ void InputParserTemp::parseFile(const QString &fileName)
 
                 if(! m_map.contains(key))
                 {
-                    m_map[key] = QVector< QString >();
+                    qFatal("invalid key found: %s",qPrintable(key));
                 }
-
-                if(m_map[key].contains(value))
-                {
-                    qFatal("InputParser syntax error:\n"
-                           " file: %s\n"
-                           " line: %d\n"
-                           " text: %s\n"
-                           "  key: %s\n"
-                           " what: duplicate value found", 
-                           qPrintable(info.fileName()), lineNumber, qPrintable(unaltered), qPrintable(key));
-                }
-                else
-                {
-                    m_map[key].push_back(value);
-                }
+                m_map[key].push_back(value);
             }
         }
         lineNumber += 1;
     }
-    printMap();
-}
 
-void InputParserTemp::printMap()
-{
-    for(QMap<QString, QVector<QString> >::iterator i = m_map.begin();
-          i != m_map.end(); i++)
+    m_steps = 1;
+    for(QMap<QString, QVector<QVariant> >::iterator i = m_map.begin(); i != m_map.end(); i++)
     {
-        qDebug("%s", qPrintable(i.key()) );
-        for(int j = 0; j < i.value().size(); j++)
+        QVector<QVariant> & valueList = i.value();
+
+        if (  i.value().size() > 1 )
         {
-            qDebug(" %s", qPrintable(i.value().at(j)) );
+            valueList.pop_front();
+        }
+        for ( int j = 0; j < valueList.size(); j++ )
+        {
+            if ( valueList.count( valueList[j] ) != 1 )
+            {
+                qFatal("duplicate value found for key: %s",qPrintable(i.key()));
+            }
+        }
+        if ( valueList.size() > m_steps )
+        {
+            m_steps = valueList.size();
         }
     }
+}
+
+QString InputParserTemp::mapToQString()
+{
+    QString result = "";
+    for(QMap<QString, QVector<QVariant> >::iterator i = m_map.begin(); i != m_map.end(); i++)
+    {
+        QVector< QVariant > & valueList = i.value();
+
+        QString valuesString;
+        for(int j = 0; j < valueList.size(); j++)
+        {
+            switch( i.value().at(j).type() )
+            {
+            case QVariant::String:
+            {
+                valuesString += QString("%1,").arg( valueList[j].value<QString>() );
+                break;
+            }
+            case QVariant::Double:
+            {
+                valuesString += QString("%1,").arg( valueList[j].value<double>() );
+                break;
+            }
+            case QVariant::Bool:
+            {
+                valuesString += QString("%1,").arg( valueList[j].value<bool>() );
+                break;
+            }
+            case QVariant::Int:
+            {
+                valuesString += QString("%1,").arg( valueList[j].value<int>() );
+                break;
+            }
+            default:
+            {
+                valuesString += "???";
+            }
+            }
+        }
+        valuesString = valuesString.remove(valuesString.size()-1,1);
+
+        if ( valueList.size() == 1 )
+        {
+            result += QString("%1 %2 %3\n").arg(i.key(),-30).arg("=").arg(valuesString);
+        }
+
+        else
+        {
+            result += QString("%1 %2 [%3]\n").arg(i.key(),-30).arg("=").arg(valuesString);
+        }
+    }
+    result = result.remove(result.size()-1,1);
+    return result;
+}
+
+int InputParserTemp::steps()
+{
+    return m_steps;
 }
 
 }

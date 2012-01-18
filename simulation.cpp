@@ -11,7 +11,7 @@
 #include "rand.h"
 namespace Langmuir
 {
-Simulation::Simulation(SimulationParameters * par, int id, QObject *parent):  QObject(parent), m_world(0), m_tick(0), m_id(id)
+Simulation::Simulation(SimulationParameters * par, QObject *parent):  QObject(parent), m_world(0)
 {
     // Create the World Object
     m_world = new World(par);
@@ -33,33 +33,34 @@ Simulation::Simulation(SimulationParameters * par, int id, QObject *parent):  QO
     m_world->potential()->updateInteractionEnergies();
 
     // place charges on the grid randomly(assumes source / drain were created)
-    if(m_world->parameters()->gridCharge)seedCharges();
+    if(m_world->parameters()->seedCharges)seedCharges();
 
     // Generate grid image
-    if(m_world->parameters()->outputGrid)
+    if(m_world->parameters()->outputTrapImage)
     {
-        m_world->logger()->saveTrapImageToFile(QString("trap-%1-%2-%3.png")
-                                               .arg(m_world->parameters()->trapPercentage*100.0)
-                                               .arg(m_world->parameters()->seedPercentage*100.0)
-                                               .arg(m_id));
+        m_world->logger()->saveTrapImage();
     }
 
     // Output Field Energy
-    if(m_world->parameters()->outputFieldPotential)
+    if(m_world->parameters()->outputElectronGrid)
     {
-        m_world->logger()->saveFieldEnergyToFile(QString("field-%1.dat").arg(m_id));
+        m_world->logger()->saveElectronGridPotential();
+    }
+    if(m_world->parameters()->outputHoleGrid)
+    {
+        m_world->logger()->saveHoleGridPotential();
     }
 
     // Output Defect IDs
     if(m_world->parameters()->outputDefectIDs)
     {
-        m_world->logger()->saveDefectIDsToFile(QString("defectIDs-%1.dat").arg(m_id));
+        m_world->logger()->saveDefectIDs();
     }
 
     // Output Trap IDs
     if(m_world->parameters()->outputTrapIDs)
     {
-        m_world->logger()->saveTrapIDsToFile(QString("trapIDs-%1.dat").arg(m_id));
+        m_world->logger()->saveTrapIDs();
     }
 
     // Initialize OpenCL
@@ -132,18 +133,23 @@ void Simulation::performIterations(int nIterations)
         // Perform charge injection at the source
         performInjections();
 
-        m_tick += 1;
+        m_world->parameters()->currentStep += 1;
     }
+
     // Output Coulomb Energy
-    if(m_world->parameters()->outputCoulombPotential)
+    if(m_world->parameters()->outputCoulomb)
     {
         m_world->opencl()->launchCoulombKernel1();
-        m_world->logger()->saveCoulombEnergyToFile(QString("coulomb-%1-%2.dat").arg(m_id).arg(m_tick));
+        m_world->logger()->saveCoulombEnergy();
     }
     // Output Carrier Positions and IDs
-    if(m_world->parameters()->outputCarriers)
+    if(m_world->parameters()->outputElectronIDs)
     {
-        m_world->logger()->saveCarrierIDsToFile(QString("carriers-%1-%2.dat").arg(m_id).arg(m_tick));
+        m_world->logger()->saveElectronIDs();
+    }
+    if(m_world->parameters()->outputHoleIDs)
+    {
+        m_world->logger()->saveHoleIDs();
     }
 }
 
@@ -192,7 +198,8 @@ void Simulation::nextTick()
     // Iterate over all sites to change their state
     QList < ChargeAgent * >&electrons = *m_world->electrons();
     QList < ChargeAgent * >&holes = *m_world->holes();
-    if(m_world->parameters()->outputStats)
+
+    if ( m_world->parameters()->outputOnDelete )
     {
         for(int i = 0; i < electrons.size(); ++i)
         {
@@ -200,7 +207,7 @@ void Simulation::nextTick()
             // Check if the charge was removed - then we should delete it
             if(electrons[i]->removed())
             {
-                m_world->logger()->carrierReportLifetimeAndPathlength(i, m_tick);
+                m_world->logger()->report(*electrons[i]);
                 delete electrons[i];
                 electrons.removeAt(i);
                 --i;
@@ -212,13 +219,13 @@ void Simulation::nextTick()
             // Check if the charge was removed - then we should delete it
             if(holes[i]->removed())
             {
-                m_world->logger()->carrierReportLifetimeAndPathlength(i, m_tick);
+                m_world->logger()->report(*holes[i]);
                 delete holes[i];
                 holes.removeAt(i);
                 --i;
             }
         }
-        m_world->logger()->carrierStreamFlush();
+        m_world->logger()->flush();
     }
     else
     {

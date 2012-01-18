@@ -7,6 +7,7 @@ namespace Langmuir
 {
 class World;
 class Agent;
+class ChargeAgent;
 
 /**
   *  @class Logger
@@ -18,57 +19,27 @@ Q_OBJECT public:
     Logger(World *world, QObject *parent=0);
     ~Logger();
 
-    /**
-      * @brief Save \b current carrier site ids
-      * @param name name of file
-      */
-    void saveCarrierIDsToFile(QString name);
+    void saveElectronIDs();
+    void saveHoleIDs();
+    void saveTrapIDs();
+    void saveDefectIDs();
+    void saveElectronGridPotential();
+    void saveHoleGridPotential();
+    void saveCoulombEnergy();
+    void saveTrapImage();
 
-    /**
-      * @brief Save trap site ids
-      * @param name name of file
-      */
-    void saveTrapIDsToFile(QString name);
+    void holeReportPathlength(int id);
+    void holeReportLifetime(int id);
+    void electronReportPathlength(int id);
+    void electronReportLifetime(int id);
 
-    /**
-      * @brief Save defect site ids
-      * @param name name of file
-      */
-    void saveDefectIDsToFile(QString name);
+    void holePathlengthFlush();
+    void holeLifetimeFlush();
+    void electronPathlengthFlush();
+    void electronLifetimeFlush();
 
-    /**
-      * @brief Save potential value at every site
-      * @param name name of file
-      */
-    void saveFieldEnergyToFile(QString name);
-
-    /**
-      * @brief Save \b current coulomb energy
-      * @param name name of file
-      * @note it is saving whatever is in m_oHost vector
-      */
-    void saveCoulombEnergyToFile(QString name);
-
-    /**
-      * @brief Save image of trape sites
-      * @param name name of file
-      * @note uses trap IDs
-      */
-    void saveTrapImageToFile(QString name);
-
-    /**
-      * @brief Save carrier pathlength and lifetime to carrier output stream
-      * @param i index of carrier
-      * @param tick number identifing when output is written, for example the simulation step
-      * @warning doesn't not check if \b i is in range
-      */
-    void carrierReportLifetimeAndPathlength(int i, int tick);
-
-    /**
-      * @brief flush the carrier stream file
-      * @note called in destructor of logger to make sure this is done at least once
-      */
-    void carrierStreamFlush();
+    void flush();
+    void report( ChargeAgent &charge );
 
 private:
 
@@ -83,14 +54,22 @@ private:
     QDir m_outputdir;
 
     /**
-     * @brief output file for pathlength and lifetime of carriers
+     * @brief save files with this stub, simulation specific
      */
-    QFile m_carrierFile;
+    QString m_stub;
 
-    /**
-     * @brief output stream for pathlength and lifetime of carriers
-     */
+    QFile m_carrierFile;
     QTextStream m_carrierStream;
+
+    QFile m_holeLifetimeFile;
+    QFile m_holePathlengthFile;
+    QFile m_electronLifetimeFile;
+    QFile m_electronPathlengthFile;
+
+    QTextStream m_holeLifetimeStream;
+    QTextStream m_holePathlengthStream;
+    QTextStream m_electronLifetimeStream;
+    QTextStream m_electronPathlengthStream;
 };
 }
 #endif // LOGGER_H

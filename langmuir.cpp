@@ -48,31 +48,30 @@ int main (int argc, char *argv[])
       qFatal("bad input");
     }
 
-  InputParser input(iFileName);
-  SimulationParameters par;
-  input.simulationParameters(&par);
+  InputParserTemp input(iFileName);
   Timer timer;
 
-  int total = par.iterationsWarmup + par.iterationsReal;
-  for (int i = 0; i < par.variableSteps; ++i)
+  for (int i = 0; i < input.steps(); ++i)
   {
       double timeStepStart = timer.now();
-      input.simulationParameters (&par, i);
-      Simulation sim(&par,i);
+      SimulationParameters &par = input.getParameters(i);
+      Simulation sim(&par);
 
       for (int j = 0; j < par.iterationsWarmup; j += par.iterationsPrint)
       {
           sim.performIterations (par.iterationsPrint);
-          progress( i, j, 0, total, timer.elapsed(timeStepStart) );
+          progress( i, j, 0, par.iterationsTotal, timer.elapsed(timeStepStart) );
       }
 
       for (int j = 0; j < par.iterationsReal; j += par.iterationsPrint)
       {
           sim.performIterations (par.iterationsPrint);
-          progress( i, par.iterationsWarmup, j, total, timer.elapsed(timeStepStart) );
+          progress( i, par.iterationsWarmup, j, par.iterationsTotal, timer.elapsed(timeStepStart) );
       }
-      progress( i, par.iterationsWarmup, par.iterationsReal, total, timer.elapsed(timeStepStart) ); std::cout << "\n";
+      progress( i, par.iterationsWarmup, par.iterationsReal, par.iterationsTotal, timer.elapsed(timeStepStart) );
+      std::cout << "\n";
   }
+
 /*
   // Declare output pointers
   // QFile *oFile;                        //summary

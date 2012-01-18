@@ -1,18 +1,50 @@
-grid.width=128
-grid.height=128
-grid.depth=1
-charge.percentage=2
-voltage.drain=10.0
-iterations.print=15
-iterations.warmup=50
-iterations.real=100
-grid.charge=false
-grid.charge=true
-interaction.coulomb=true
-use.opencl=true
-work.size=256
-random.seed=10
-temperature.kelvin=300
-defect.percentage=1.0
-charged.defects=true
-z.defect=-1
+random.seed          = -1
+
+grid.x               = 128
+grid.y               = 128
+grid.z               = 1
+
+coulomb.carriers     = true
+coulomb.defects      = false
+defects.charge       = -1
+
+#output.electron.ids  = true
+#output.hole.ids      = true
+#output.defect.ids    = true
+#output.trap.ids      = true
+
+#output.coulomb       = true
+#output.electron.grid = true
+#output.hole.grid     = true
+#output.trap.image    = true
+#output.on.delete     = true
+
+iterations.print     = 10
+iterations.real      = 1000
+iterations.warmup    = 0
+output.percision     = 8
+output.width         = 16
+output.path          = /home/adam/Desktop
+
+electron.percentage = 0.01
+hole.percentage     = 0.01
+seed.charges        = true
+
+defect.percentage   = 0.01
+trap.percentage     = 0.01
+trap.potential      = 0.10
+gaussian.average    = 0.00
+gaussian.stdev      = 0.10
+seed.percentage     = 0.50
+
+voltage.drain       = 50.0
+voltage.source      = 0.00
+
+temperature.kelvin  = 300.0
+
+use.opencl          = true
+work.x              = 4
+work.y              = 4
+work.z              = 4
+work.size           = 256
+kernels.path        = /home/adam/Workspace/science/langmuirQtCreator/

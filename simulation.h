@@ -30,7 +30,7 @@ Q_OBJECT public:
      * Set up the basic parameters of the simulation.
      * @param par parameter struct
      */
-    Simulation(SimulationParameters * par, int id = 0, QObject *parent = 0);
+    Simulation(SimulationParameters * par, QObject *parent = 0);
 
     /**
      * @brief Destructor.
@@ -85,16 +85,6 @@ protected:
      * @brief World pointer.
      */
     World *m_world;
-
-    /**
-     * @brief Number of iterations performed
-     */
-    int m_tick;
-
-    /**
-      * @brief a unique id for this simulation
-      */
-    int m_id;
 
     /**
              * @brief charge agent transport for QtConcurrent.

@@ -89,7 +89,7 @@ void ChargeAgent::decideFuture()
         pd *= m_charge;
 
         // Coulomb interactions
-        if(m_world->parameters()->interactionCoulomb)
+        if(m_world->parameters()->coulombCarriers)
         {
             pd += this->coulombInteraction(m_fSite);
         }
@@ -101,7 +101,7 @@ void ChargeAgent::decideFuture()
                  1.0/3.0))
         {
             // Accept move - increase distance traveled
-            m_pathlength += 1.0;
+            m_pathlength += 1;
             return;
         }
         else
@@ -120,7 +120,7 @@ void ChargeAgent::decideFuture()
         {
             if(drain->tryToAccept(this))
             {
-                m_pathlength += 1.0;
+                m_pathlength += 1;
                 break;
             }
         }
@@ -198,7 +198,7 @@ double ChargeAgent::coulombInteraction(int newSite)
         p2 -= m_world->interactionEnergies()[1][0][0] * m_charge;
 
         // Charged defects
-        if(m_world->parameters()->chargedDefects)
+        if(m_world->parameters()->coulombDefects)
         {
             p1 += m_world->potential()->coulombPotentialDefects(m_site);
             p2 += m_world->potential()->coulombPotentialDefects(newSite);
@@ -223,6 +223,45 @@ double ElectronAgent::bindingPotential(int site)
         return 0.5;
     }
     return 0.0;
+}
+
+void ChargeAgent::titleString( QTextStream &stream, SimulationParameters &par )
+{
+    stream.setRealNumberPrecision(par.outputPrecision );
+    stream.setFieldWidth( par.outputWidth );
+    stream.setRealNumberNotation( QTextStream::ScientificNotation );
+    stream.setFieldAlignment( QTextStream::AlignRight );
+    stream << "type"
+           << "site_si"
+           << "site_xi"
+           << "site_yi"
+           << "site_zi"
+           << "site_sf"
+           << "site_xf"
+           << "site_yf"
+           << "site_zf"
+           << "lifetime"
+           << "pathlength";
+}
+
+QTextStream& operator<<( QTextStream &stream, const ChargeAgent &charge )
+{
+    stream.setRealNumberPrecision( charge.m_world->parameters()->outputPrecision );
+    stream.setFieldWidth( charge.m_world->parameters()->outputWidth );
+    stream.setRealNumberNotation( QTextStream::ScientificNotation );
+    stream.setFieldAlignment( QTextStream::AlignRight );
+    stream << Agent::typeToQString(charge.m_type)
+           << charge.m_site
+           << charge.m_grid->getIndexX(charge.m_site)
+           << charge.m_grid->getIndexY(charge.m_site)
+           << charge.m_grid->getIndexZ(charge.m_site)
+           << charge.m_fSite
+           << charge.m_grid->getIndexX(charge.m_fSite)
+           << charge.m_grid->getIndexY(charge.m_fSite)
+           << charge.m_grid->getIndexZ(charge.m_fSite)
+           << charge.m_lifetime
+           << charge.m_pathlength;
+    return stream;
 }
 
 }

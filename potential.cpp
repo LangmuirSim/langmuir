@@ -53,8 +53,8 @@ void Potential::setPotentialTraps()
 
         if(! m_world->trapSiteIDs()->contains(s))
         {
-            m_world->electronGrid()->addToPotential(s, m_world->parameters()->deltaEpsilon);
-            m_world->holeGrid()->addToPotential(s, m_world->parameters()->deltaEpsilon);
+            m_world->electronGrid()->addToPotential(s, m_world->parameters()->trapPotential);
+            m_world->holeGrid()->addToPotential(s, m_world->parameters()->trapPotential);
             m_world->trapSiteIDs()->push_back(s);
         }
     }
@@ -78,8 +78,8 @@ void Potential::setPotentialTraps()
              m_world->electronGrid()->agentType(newTrapSite)!= Agent::Drain   &&
              ! m_world->trapSiteIDs()->contains(newTrapSite))
         {
-            m_world->electronGrid()->addToPotential(newTrapSite, m_world->parameters()->deltaEpsilon);
-            m_world->holeGrid()->addToPotential(newTrapSite, m_world->parameters()->deltaEpsilon);
+            m_world->electronGrid()->addToPotential(newTrapSite, m_world->parameters()->trapPotential);
+            m_world->holeGrid()->addToPotential(newTrapSite, m_world->parameters()->trapPotential);
             m_world->trapSiteIDs()->push_back(newTrapSite);
         }
     }
@@ -256,7 +256,7 @@ double Potential::coulombPotentialDefects(int site)
             potential += m_world->interactionEnergies()[dx][dy][dz];
         }
     }
-    return(m_world->parameters()->zDefect * potential);
+    return(m_world->parameters()->defectsCharge * potential);
 }
 
 double Potential::coulombImageXPotentialDefects(int site)
@@ -275,7 +275,7 @@ double Potential::coulombImageXPotentialDefects(int site)
             potential += m_world->interactionEnergies()[dx][dy][dz];
         }
     }
-    return(m_world->parameters()->zDefect * potential);
+    return(m_world->parameters()->defectsCharge * potential);
 }
 
 double Potential::potentialAtSite(int site, Grid *grid, bool useCoulomb, bool useImage)
@@ -289,7 +289,7 @@ double Potential::potentialAtSite(int site, Grid *grid, bool useCoulomb, bool us
     {
         p1 += coulombPotentialElectrons(site);
         p1 += coulombPotentialHoles(site);
-        if(m_world->parameters()->chargedDefects)
+        if(m_world->parameters()->coulombDefects)
         {
             p1 += coulombPotentialDefects(site);
         }
@@ -298,7 +298,7 @@ double Potential::potentialAtSite(int site, Grid *grid, bool useCoulomb, bool us
     {
         p1 += coulombImageXPotentialElectrons(site);
         p1 += coulombImageXPotentialHoles(site);
-        if(m_world->parameters()->chargedDefects)
+        if(m_world->parameters()->coulombDefects)
         {
             p1 += coulombImageXPotentialDefects(site);
         }
