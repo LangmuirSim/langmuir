@@ -1,7 +1,13 @@
 #ifndef AGENT_H
 #define AGENT_H
 
-#include <QtCore>
+#include <QTextStream>
+#include <QMetaObject>
+#include <QMetaEnum>
+#include <QVector>
+#include <QObject>
+#include <QString>
+#include <QDebug>
 
 namespace Langmuir{
 
@@ -16,7 +22,12 @@ class World;
     */
 class Agent : public QObject
 {
-Q_OBJECT public:
+private:
+    Q_OBJECT
+    Q_DISABLE_COPY(Agent)
+    Q_ENUMS(Type)
+
+public:
     /**
      * @enum Different Agent types
      *
@@ -32,7 +43,7 @@ Q_OBJECT public:
         Drain         =   5,
         SIZE          =   6
     };
-    static QString typeToQString(const Agent::Type &type);
+    static QString toQString(const Agent::Type e);
 
     /**
      * @brief Default Constructor.
@@ -84,11 +95,6 @@ Q_OBJECT public:
      * Return the type number
      */
     Type type() const;
-
-    /**
-     * @brief print out agent parameters
-     */
-    virtual QString toQString() const;
 
 protected:
     /**
@@ -159,134 +165,23 @@ inline Agent::Type Agent::type() const
     return m_type;
 }
 
-inline QDebug operator<<(QDebug dbg, const Agent::Type &type)
+inline QString Agent::toQString(const Agent::Type e)
 {
-    return dbg << qPrintable(Agent::typeToQString(type));
+    const QMetaObject &QMO = Agent::staticMetaObject;
+    QMetaEnum QME = QMO.enumerator(QMO.indexOfEnumerator("Type"));
+    return QString("%1").arg(QME.valueToKey(e));
 }
 
-inline QString Agent::typeToQString(const Agent::Type &type)
+inline QTextStream &operator<<(QTextStream &stream,const Agent::Type e)
 {
-    switch(type)
-    {
-    case Agent::Empty:
-    {
-        return QString("Empty");
-        break;
-    }
-
-    case Agent::Electron:
-    {
-        return QString("Electron");
-        break;
-    }
-
-    case Agent::Hole:
-    {
-        return QString("Hole");
-        break;
-    }
-
-    case Agent::Defect:
-    {
-        return QString("Defect");
-        break;
-    }
-
-    case Agent::Source:
-    {
-        return QString("Source");
-        break;
-    }
-
-    case Agent::Drain:
-    {
-        return QString("Drain");
-        break;
-    }
-
-    case Agent::SIZE:
-    {
-        return QString("SIZE");
-        break;
-    }
-
-    default:
-    {
-        return QString("UnknownType");
-        break;
-    }
-    }
-    return QString("UnknownType");
+    return stream << Agent::toQString(e);
 }
 
-inline QDebug operator<<(QDebug dbg, const Agent& agent)
+inline QDebug operator<<(QDebug dbg,const Agent::Type e)
 {
-    return dbg << qPrintable(agent.toQString());
+    return dbg << qPrintable(Agent::toQString(e));
 }
 
-inline QString Agent::toQString() const
-{
-    QString result;
-    QTextStream stream(&result);
-
-    int w = 20;
-    stream << QString("%1 %2 %3 %4 %5")
-              .arg(                      "type:", w )
-              .arg(                           "", w )
-              .arg(                           "", w )
-              .arg( Agent::typeToQString(m_type), w )
-              .arg('\n');
-
-    stream << QString("%1 %2 %3 %4 %5")
-              .arg(           "site:", w )
-              .arg(                "", w )
-              .arg(                "", w )
-              .arg(            m_site, w )
-              .arg('\n');
-
-    stream << QString("%1 %2 %3 %4 %5")
-              .arg(          "fSite:", w )
-              .arg(                "", w )
-              .arg(                "", w )
-              .arg(           m_fSite, w )
-              .arg('\n');
-
-    QString address; QTextStream astream(&address); astream << this;
-    stream << QString("%1 %2 %3 %4 %5")
-              .arg(        "address:", w )
-              .arg(                "", w )
-              .arg(                "", w )
-              .arg(           address, w )
-              .arg('\n');
-
-    if ( m_neighbors.size() == 0 )
-    {
-        stream << QString("%1 %2 %3 %4 %5")
-                  .arg(      "neighbors:", w        )
-                  .arg(               "-", w        )
-                  .arg(               "-", w        )
-                  .arg(               "-", w        )
-                  .arg('\n');
-    }
-    for ( int i = 0; i < m_neighbors.size(); i+=3 )
-    {
-        QString a = "-";
-        QString b = "-";
-        QString c = "-";
-        QString n = ":";
-        if ( i == 0 ) n = "neighbors:";
-        if ( i + 0 < m_neighbors.size() ) { a = QString("%1").arg(m_neighbors[i+0]); }
-        if ( i + 1 < m_neighbors.size() ) { b = QString("%1").arg(m_neighbors[i+1]); }
-        if ( i + 2 < m_neighbors.size() ) { c = QString("%1").arg(m_neighbors[i+2]); }
-        stream << QString("%1 %2 %3 %4 %5")
-                  .arg(                 n, w        )
-                  .arg(                 a, w        )
-                  .arg(                 b, w        )
-                  .arg(                 c, w        )
-                  .arg('\n',1);
-    }
-    return result;
-}
 }
 
 #endif

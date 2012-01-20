@@ -26,6 +26,11 @@ ElectronAgent::ElectronAgent(World *world, int site, QObject *parent): ChargeAge
     m_grid = m_world->electronGrid();
     m_charge = -1;
     m_grid->registerAgent(this);
+
+    QString string;
+    QTextStream stream(&string);
+    stream << this->metaObject()->className() << "(" << this << ")";
+    setObjectName(string);
 }
 
 HoleAgent::HoleAgent(World *world, int site, QObject *parent): ChargeAgent(Agent::Hole, world, site, parent)
@@ -33,6 +38,11 @@ HoleAgent::HoleAgent(World *world, int site, QObject *parent): ChargeAgent(Agent
     m_grid = m_world->holeGrid();
     m_charge = 1;
     m_grid->registerAgent(this);
+
+    QString string;
+    QTextStream stream(&string);
+    stream << this->metaObject()->className() << "(" << this << ")";
+    setObjectName(string);
 }
 
 ChargeAgent::~ChargeAgent()
@@ -225,21 +235,21 @@ double ElectronAgent::bindingPotential(int site)
     return 0.0;
 }
 
-void ChargeAgent::titleString( QTextStream &stream, SimulationParameters &par )
+void ChargeAgent::setTitles( QTextStream &stream, SimulationParameters &par )
 {
     stream.setRealNumberPrecision(par.outputPrecision );
     stream.setFieldWidth( par.outputWidth );
     stream.setRealNumberNotation( QTextStream::ScientificNotation );
     stream.setFieldAlignment( QTextStream::AlignRight );
     stream << "type"
-           << "site_si"
-           << "site_xi"
-           << "site_yi"
-           << "site_zi"
-           << "site_sf"
-           << "site_xf"
-           << "site_yf"
-           << "site_zf"
+           << "si"
+           << "xi"
+           << "yi"
+           << "zi"
+           << "sf"
+           << "xf"
+           << "yf"
+           << "zf"
            << "lifetime"
            << "pathlength";
 }
@@ -250,7 +260,7 @@ QTextStream& operator<<( QTextStream &stream, const ChargeAgent &charge )
     stream.setFieldWidth( charge.m_world->parameters()->outputWidth );
     stream.setRealNumberNotation( QTextStream::ScientificNotation );
     stream.setFieldAlignment( QTextStream::AlignRight );
-    stream << Agent::typeToQString(charge.m_type)
+    stream << charge.m_type
            << charge.m_site
            << charge.m_grid->getIndexX(charge.m_site)
            << charge.m_grid->getIndexY(charge.m_site)

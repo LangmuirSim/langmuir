@@ -1,11 +1,7 @@
 #include "fluxagent.h"
-#include "chargeagent.h"
-#include "potential.h"
 #include "inputparser.h"
-#include "logger.h"
 #include "world.h"
 #include "rand.h"
-#include "limits.h"
 
 namespace Langmuir
 {
@@ -180,8 +176,8 @@ QTextStream& operator<<( QTextStream &stream, const FluxAgent &flux )
     stream.setFieldWidth( flux.m_world->parameters()->outputWidth );
     stream.setRealNumberNotation( QTextStream::ScientificNotation );
     stream.setFieldAlignment( QTextStream::AlignRight );
-    stream << Agent::typeToQString(flux.m_type)
-           << flux.m_grid->cubeFaceToQString(flux.m_face)
+    stream << flux.m_type
+           << flux.m_face
            << flux.m_site
            << flux.attempts()
            << flux.successes()

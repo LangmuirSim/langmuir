@@ -23,7 +23,7 @@ public:
     int getOpenCLID();
     double coulombInteraction(int newSite);
 
-    static void titleString( QTextStream &stream, SimulationParameters &par );
+    static void setTitles( QTextStream &stream, SimulationParameters &par );
     friend QTextStream& operator<<( QTextStream &stream, const ChargeAgent &charge );
 
 protected:

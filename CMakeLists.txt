@@ -2,7 +2,8 @@ project(langmuir)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
 cmake_minimum_required(VERSION 2.8.2)
 
-set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
+#set(CMAKE_CXX_FLAGS "-j 4")
+#set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
 set(QT_MIN_VERSION "4.7.0")
 set(QT_USE_QTOPENGL TRUE)
 
@@ -46,6 +47,7 @@ set(meta_object_headers_1
       simulation.h
       world.h
       rand.h
+      timer.h
 )
 
 set(meta_object_headers_2
@@ -69,20 +71,20 @@ add_definitions(${QT_DEFINITIONS})
 QT4_WRAP_CPP(moc_output_1 ${meta_object_headers_1})
 QT4_WRAP_CPP(moc_output_2 ${meta_object_headers_2})
 
-add_executable(langmuir langmuir.cpp ${sources} ${moc_output_1})
-target_link_libraries(langmuir ${Boost_LIBRARIES})
-target_link_libraries(langmuir ${QT_LIBRARIES})
-target_link_libraries(langmuir ${OPENCL_LIBRARIES})
+#add_executable(langmuir langmuir.cpp ${sources} ${moc_output_1})
+#target_link_libraries(langmuir ${Boost_LIBRARIES})
+#target_link_libraries(langmuir ${QT_LIBRARIES})
+#target_link_libraries(langmuir ${OPENCL_LIBRARIES})
 
-include_directories(${OPENGL_INCLUDE_DIRS})
-add_executable(langmuirView langmuirview.cpp gridview.cpp ${sources} ${moc_output_1} ${moc_output_2})
-target_link_libraries(langmuirView ${Boost_LIBRARIES})
-target_link_libraries(langmuirView ${QT_LIBRARIES})
-target_link_libraries(langmuirView ${OPENCL_LIBRARIES})
-target_link_libraries(langmuirView ${OPENGL_LIBRARIES})
+#include_directories(${OPENGL_INCLUDE_DIRS})
+#add_executable(langmuirView langmuirview.cpp gridview.cpp ${sources} ${moc_output_1} ${moc_output_2})
+#target_link_libraries(langmuirView ${Boost_LIBRARIES})
+#target_link_libraries(langmuirView ${QT_LIBRARIES})
+#target_link_libraries(langmuirView ${OPENCL_LIBRARIES})
+#target_link_libraries(langmuirView ${OPENGL_LIBRARIES})
 
-#add_executable(test test.cpp ${sources})
-#target_link_libraries(test ${Boost_LIBRARIES})
-#target_link_libraries(test ${QT_LIBRARIES})
-#target_link_libraries(test ${OPENCL_LIBRARIES})
+add_executable(test test.cpp ${sources} ${moc_output_1})
+target_link_libraries(test ${Boost_LIBRARIES})
+target_link_libraries(test ${QT_LIBRARIES})
+target_link_libraries(test ${OPENCL_LIBRARIES})
 

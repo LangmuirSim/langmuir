@@ -1,6 +1,7 @@
 #include "inputparser.h"
-#include "simulation.h"
-#include <QtCore>
+#include <QTextStream>
+#include <cmath>
+#include <QDir>
 
 namespace Langmuir
 {
@@ -17,16 +18,13 @@ SimulationParameters::SimulationParameters()
     coulombDefects = false;
     defectsCharge = -1;
 
-    outputElectronIDs = false;
-    outputHoleIDs = false;
-    outputDefectIDs = false;
-    outputTrapIDs = false;
+    outputIdsOnIteration = false;
+    outputIdsAtStart = false;
+    outputIdsOnDelete = false;
 
     outputCoulomb = false;
-    outputElectronGrid = false;
-    outputHoleGrid = false;
-    outputTrapImage = false;
-    outputOnDelete = false;
+    outputPotential = false;
+    outputImage = false;
 
     iterationsPrint = 10;
     iterationsReal = 1000;
@@ -70,11 +68,14 @@ SimulationParameters::SimulationParameters()
     currentSimulation = 0;
     outputStub = "out";
     iterationsTotal = iterationsReal + iterationsWarmup;
+    currentStep = 0;
+    currentSimulation = 0;
+    simulationSteps = 0;
 
     check();
 }
 
-SimulationParameters& InputParserTemp::getParameters(int step)
+SimulationParameters& InputParser::getParameters(int step)
 {
     parameter("random.seed",m_parameters.randomSeed,step);
 
@@ -86,16 +87,13 @@ SimulationParameters& InputParserTemp::getParameters(int step)
     parameter("coulomb.defects",m_parameters.coulombDefects,step);
     parameter("defects.charge",m_parameters.defectsCharge,step);
 
-    parameter("output.electron.ids",m_parameters.outputElectronIDs,step);
-    parameter("output.hole.ids",m_parameters.outputHoleIDs,step);
-    parameter("output.defect.ids",m_parameters.outputDefectIDs,step);
-    parameter("output.trap.ids",m_parameters.outputTrapIDs,step);
+    parameter("output.ids.on.iteration",m_parameters.outputIdsOnIteration,step);
+    parameter("output.ids.at.start",m_parameters.outputIdsAtStart,step);
+    parameter("output.ids.on.delete",m_parameters.outputIdsOnDelete,step);
 
     parameter("output.coulomb",m_parameters.outputCoulomb,step);
-    parameter("output.electron.grid",m_parameters.outputElectronGrid,step);
-    parameter("output.hole.grid",m_parameters.outputHoleGrid,step);
-    parameter("output.trap.image",m_parameters.outputTrapImage,step);
-    parameter("output.on.delete",m_parameters.outputOnDelete,step);
+    parameter("output.potential",m_parameters.outputPotential,step);
+    parameter("output.image",m_parameters.outputImage,step);
 
     parameter("iterations.print",m_parameters.iterationsPrint,step);
     parameter("iterations.real",m_parameters.iterationsReal,step);
@@ -127,7 +125,10 @@ SimulationParameters& InputParserTemp::getParameters(int step)
 
     m_parameters.currentStep = 0;
     m_parameters.currentSimulation = step;
-
+    m_parameters.electrostaticPrefactor = m_parameters.elementaryCharge /
+     (4.0 * M_PI * m_parameters.dielectricConstant * m_parameters.permittivitySpace * m_parameters.gridFactor);
+    m_parameters.inverseKT = 1.0 /(m_parameters.boltzmannConstant * m_parameters.temperatureKelvin);
+    m_parameters.iterationsTotal = m_parameters.iterationsReal + m_parameters.iterationsWarmup;
     m_parameters.check();
 
     return m_parameters;
@@ -135,10 +136,6 @@ SimulationParameters& InputParserTemp::getParameters(int step)
 
 void SimulationParameters::check()
 {
-    electrostaticPrefactor = elementaryCharge /
-     (4.0 * M_PI * dielectricConstant * permittivitySpace * gridFactor);
-    inverseKT = 1.0 /(boltzmannConstant * temperatureKelvin);
-
     Q_ASSERT( defectPercentage <= 1.00 - trapPercentage );
 
     Q_ASSERT( gridZ >= 1 );
@@ -161,23 +158,26 @@ void SimulationParameters::check()
     Q_ASSERT( gaussianStdev >= 0.00 );
     Q_ASSERT( temperatureKelvin >= 0.00 );
 
-    if ( outputElectronIDs ) { Q_ASSERT( electronPercentage > 0 ); }
-    if ( outputHoleIDs ) { Q_ASSERT( holePercentage > 0 ); }
-
     Q_ASSERT( iterationsReal % iterationsPrint == 0 );
     Q_ASSERT( iterationsWarmup % iterationsPrint == 0 );
+    Q_ASSERT( iterationsTotal > 0 );
 }
 
-InputParserTemp::InputParserTemp(const QString &fileName, QObject *parent ) : QObject(parent)
+InputParser::InputParser(const QString &fileName, QObject *parent ) : QObject(parent)
 {
     m_parameters.outputStub = fileName.split(".",QString::SkipEmptyParts)[0];
+
+    QString string;
+    QTextStream stream(&string);
+    stream << this->metaObject()->className() << "(" << this << ")";
+    setObjectName(string);
 
     getParameters(-1);
     parseFile(fileName);
     getParameters(-1);
 }
 
-void InputParserTemp::parseFile(const QString &fileName)
+void InputParser::parseFile(const QString &fileName)
 {
     QFile     handle(fileName);
     QFileInfo   info(fileName);
@@ -277,7 +277,7 @@ void InputParserTemp::parseFile(const QString &fileName)
         lineNumber += 1;
     }
 
-    m_steps = 1;
+    m_parameters.simulationSteps = 1;
     for(QMap<QString, QVector<QVariant> >::iterator i = m_map.begin(); i != m_map.end(); i++)
     {
         QVector<QVariant> & valueList = i.value();
@@ -286,21 +286,14 @@ void InputParserTemp::parseFile(const QString &fileName)
         {
             valueList.pop_front();
         }
-        for ( int j = 0; j < valueList.size(); j++ )
+        if ( valueList.size() > m_parameters.simulationSteps )
         {
-            if ( valueList.count( valueList[j] ) != 1 )
-            {
-                qFatal("duplicate value found for key: %s",qPrintable(i.key()));
-            }
-        }
-        if ( valueList.size() > m_steps )
-        {
-            m_steps = valueList.size();
+            m_parameters.simulationSteps = valueList.size();
         }
     }
 }
 
-QString InputParserTemp::mapToQString()
+QString InputParser::mapToQString()
 {
     QString result = "";
     for(QMap<QString, QVector<QVariant> >::iterator i = m_map.begin(); i != m_map.end(); i++)
@@ -324,7 +317,15 @@ QString InputParserTemp::mapToQString()
             }
             case QVariant::Bool:
             {
-                valuesString += QString("%1,").arg( valueList[j].value<bool>() );
+                bool value = valueList[j].value<bool>();
+                if (value)
+                {
+                    valuesString += "true,";
+                }
+                else
+                {
+                    valuesString += "false,";
+                }
                 break;
             }
             case QVariant::Int:
@@ -354,9 +355,9 @@ QString InputParserTemp::mapToQString()
     return result;
 }
 
-int InputParserTemp::steps()
+int InputParser::steps()
 {
-    return m_steps;
+    return m_parameters.simulationSteps;
 }
 
 }

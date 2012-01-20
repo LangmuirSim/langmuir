@@ -2,14 +2,25 @@
 #define CUBICGRID_H
 
 #include "agent.h"
-#include <QtCore>
+
+#include <QTextStream>
+#include <QVector>
+#include <QString>
+#include <QObject>
+#include <QDebug>
 
 namespace Langmuir
 {
 
 class Grid : public QObject
 {
-Q_OBJECT public:
+private:
+    Q_OBJECT
+    Q_DISABLE_COPY(Grid)
+    Q_ENUMS(CubeFace)
+
+public:
+
     enum CubeFace
     {
         Left       =   0, // x =  0, yz plane
@@ -18,10 +29,10 @@ Q_OBJECT public:
         Bottom     =   3, // z = lz, xy plane
         Front      =   4, // y =  0, xz plane
         Back       =   5, // y = ly, xz plane
-        NoFace     =   6, 
-        SIZE       =   7
+        NoFace     =   6
     };
-    static QString cubeFaceToQString(const Grid::CubeFace &cubeFace);
+    static QString toQString(const Grid::CubeFace e);
+
     Grid(int xSize = 0, int ySize = 0, int zSize = 1, QObject *parent = 0);
     ~Grid();
     int xSize();
@@ -81,9 +92,9 @@ protected:
     int m_xzPlaneArea;
     int m_volume;
 };
-inline QDebug operator<<(QDebug dbg, const Grid::CubeFace &cubeFace)
-{
-    return dbg << qPrintable(Grid::cubeFaceToQString(cubeFace));
-}
+
+QTextStream &operator<<(QTextStream &stream,const Grid::CubeFace e);
+QDebug operator<<(QDebug dbg,const Grid::CubeFace e);
+
 }
 #endif

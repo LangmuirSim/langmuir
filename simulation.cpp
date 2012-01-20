@@ -36,31 +36,29 @@ Simulation::Simulation(SimulationParameters * par, QObject *parent):  QObject(pa
     if(m_world->parameters()->seedCharges)seedCharges();
 
     // Generate grid image
-    if(m_world->parameters()->outputTrapImage)
+    if(m_world->parameters()->outputImage)
     {
-        m_world->logger()->saveTrapImage();
+        //m_world->logger()->saveTrapImage();
+        //m_world->logger()->saveHoleImage();
+        //m_world->logger()->saveElectronImage();
+        //m_world->logger()->saveDefectImage();
+        //m_world->logger()->saveImage();
     }
 
     // Output Field Energy
-    if(m_world->parameters()->outputElectronGrid)
+    if(m_world->parameters()->outputPotential)
     {
-        m_world->logger()->saveElectronGridPotential();
-    }
-    if(m_world->parameters()->outputHoleGrid)
-    {
-        m_world->logger()->saveHoleGridPotential();
+        //m_world->logger()->saveElectronGridPotential();
+        //m_world->logger()->saveHoleGridPotential();
     }
 
     // Output Defect IDs
-    if(m_world->parameters()->outputDefectIDs)
+    if(m_world->parameters()->outputIdsAtStart)
     {
-        m_world->logger()->saveDefectIDs();
-    }
-
-    // Output Trap IDs
-    if(m_world->parameters()->outputTrapIDs)
-    {
-        m_world->logger()->saveTrapIDs();
+        //m_world->logger()->saveDefectIDs();
+        //m_world->logger()->saveTrapIDs();
+        //m_world->logger()->saveElectronIDs();
+        //m_world->logger()->saveHoleIDs();
     }
 
     // Initialize OpenCL
@@ -73,6 +71,11 @@ Simulation::Simulation(SimulationParameters * par, QObject *parent):  QObject(pa
     {
         m_world->opencl()->toggleOpenCL(false);
     }
+
+    QString string;
+    QTextStream stream(&string);
+    stream << this->metaObject()->className() << "(" << this << ")";
+    setObjectName(string);
 }
 
 Simulation::~Simulation()
@@ -140,16 +143,13 @@ void Simulation::performIterations(int nIterations)
     if(m_world->parameters()->outputCoulomb)
     {
         m_world->opencl()->launchCoulombKernel1();
-        m_world->logger()->saveCoulombEnergy();
+        //m_world->logger()->saveCoulombEnergy();
     }
     // Output Carrier Positions and IDs
-    if(m_world->parameters()->outputElectronIDs)
+    if(m_world->parameters()->outputIdsOnIteration)
     {
-        m_world->logger()->saveElectronIDs();
-    }
-    if(m_world->parameters()->outputHoleIDs)
-    {
-        m_world->logger()->saveHoleIDs();
+        //m_world->logger()->saveElectronIDs();
+        //m_world->logger()->saveHoleIDs();
     }
 }
 
@@ -199,7 +199,7 @@ void Simulation::nextTick()
     QList < ChargeAgent * >&electrons = *m_world->electrons();
     QList < ChargeAgent * >&holes = *m_world->holes();
 
-    if ( m_world->parameters()->outputOnDelete )
+    if ( m_world->parameters()->outputIdsOnDelete )
     {
         for(int i = 0; i < electrons.size(); ++i)
         {
@@ -207,7 +207,7 @@ void Simulation::nextTick()
             // Check if the charge was removed - then we should delete it
             if(electrons[i]->removed())
             {
-                m_world->logger()->report(*electrons[i]);
+                //m_world->logger()->report(*electrons[i]);
                 delete electrons[i];
                 electrons.removeAt(i);
                 --i;
@@ -219,13 +219,13 @@ void Simulation::nextTick()
             // Check if the charge was removed - then we should delete it
             if(holes[i]->removed())
             {
-                m_world->logger()->report(*holes[i]);
+                //m_world->logger()->report(*holes[i]);
                 delete holes[i];
                 holes.removeAt(i);
                 --i;
             }
         }
-        m_world->logger()->flush();
+        //m_world->logger()->flush();
     }
     else
     {

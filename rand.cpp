@@ -1,9 +1,16 @@
 #include "rand.h"
 #include <QDebug>
-using namespace Langmuir;
+
+namespace Langmuir
+{
 
 Random::Random(int seed, QObject *parent) : QObject(parent)
 {
+    QString string;
+    QTextStream stream(&string);
+    stream << this->metaObject()->className() << "(" << this << ")";
+    setObjectName(string);
+
     m_seed = 0;
     if(seed <= 0)
     {
@@ -137,4 +144,6 @@ bool Random::randomlyChooseYesWithPercent(double percent, double randNumber)
         return true;
     }
     return false;
+}
+
 }

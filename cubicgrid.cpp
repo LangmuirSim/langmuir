@@ -14,16 +14,27 @@ Grid::Grid(int xSize, int ySize, int zSize, QObject *parent) : QObject(parent)
     m_volume = ySize*xSize*zSize;
     m_specialAgentCount = 0;
     m_specialAgentReserve = 5;
-    m_agents.fill(0, m_volume+m_specialAgentReserve*Grid::SIZE);
-    m_potentials.fill(0.0, m_volume+m_specialAgentReserve*Grid::SIZE);
-    m_agentType.fill(Agent::Empty, m_volume+m_specialAgentReserve*Grid::SIZE);
-    m_specialAgents.reserve(Grid::SIZE);
-    for(int i = 0; i < Grid::SIZE; i++)
+
+   //const QMetaObject &QMO = *metaObject();
+   //const QMetaEnum &QME = QMO.enumerator( QMO.indexOfEnumerator("CubeFace") );
+   //if (!QME.isValid()) { qFatal("Can not obtain QMetaEnum for CubeFace"); }
+   int QMESize = 7;//QME.keyCount();
+
+    m_agents.fill(0, m_volume+m_specialAgentReserve*QMESize);
+    m_potentials.fill(0.0, m_volume+m_specialAgentReserve*QMESize);
+    m_agentType.fill(Agent::Empty, m_volume+m_specialAgentReserve*QMESize);
+    m_specialAgents.reserve(QMESize);
+    for(int i = 0; i < QMESize; i++)
     {
         QList<Agent*> qlist;
         m_specialAgents.push_back(qlist);
         m_specialAgents[i].reserve(m_specialAgentReserve);
     }
+
+    QString string;
+    QTextStream stream(&string);
+    stream << this->metaObject()->className() << "(" << this << ")";
+    setObjectName(string);
 }
 
 Grid::~Grid()
@@ -470,65 +481,21 @@ int Grid::specialAgentCount()
     return m_specialAgentCount;
 }
 
-QString Grid::cubeFaceToQString(const Grid::CubeFace &cubeFace)
+QString Grid::toQString(const Grid::CubeFace e)
 {
-    switch(cubeFace)
-    {
-    case Grid::Left:
-    {
-        return QString("Left");
-        break;
-    }
+    const QMetaObject &QMO = Grid::staticMetaObject;
+    QMetaEnum QME = QMO.enumerator(QMO.indexOfEnumerator("CubeFace"));
+    return QString("%1").arg(QME.valueToKey(e));
+}
 
-    case Grid::Right:
-    {
-        return QString("Right");
-        break;
-    }
+QTextStream &operator<<(QTextStream &stream,const Grid::CubeFace e)
+{
+    return stream << Grid::toQString(e);
+}
 
-    case Grid::Top:
-    {
-        return QString("Top");
-        break;
-    }
-
-    case Grid::Bottom:
-    {
-        return QString("Bottom");
-        break;
-    }
-
-    case Grid::Front:
-    {
-        return QString("Front");
-        break;
-    }
-
-    case Grid::Back:
-    {
-        return QString("Back");
-        break;
-    }
-
-    case Grid::NoFace:
-    {
-        return QString("NoFace");
-        break;
-    }
-
-    case Grid::SIZE:
-    {
-        return QString("SIZE");
-        break;
-    }
-
-    default:
-    {
-        return QString("UnknownCubeFace(%1)").arg(cubeFace);
-        break;
-    }
-    }
-    return QString("UnknownCubeFace(?)");
+QDebug operator<<(QDebug dbg,const Grid::CubeFace e)
+{
+    return dbg << qPrintable(Grid::toQString(e));
 }
 
 }

@@ -1,17 +1,21 @@
+#include <QTextStream>
+
 #include "openclhelper.h"
-#include "inputparser.h"
 #include "chargeagent.h"
-#include "sourceagent.h"
-#include "drainagent.h"
-#include "potential.h"
+#include "inputparser.h"
 #include "cubicgrid.h"
-#include "logger.h"
+#include "potential.h"
 #include "world.h"
-#include "rand.h"
 
 using namespace Langmuir;
 
-OpenClHelper::OpenClHelper(World * world, QObject *parent): QObject(parent), m_world(world){}
+OpenClHelper::OpenClHelper(World * world, QObject *parent): QObject(parent), m_world(world)
+{
+    QString string;
+    QTextStream stream(&string);
+    stream << this->metaObject()->className() << "(" << this << ")";
+    setObjectName(string);
+}
 
 void OpenClHelper::initializeOpenCL()
 {

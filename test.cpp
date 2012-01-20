@@ -1,36 +1,17 @@
 #include <QtCore>
-#include "inputparser.h"
-#include "solar.h"
+#include "logger.h"
 
 using namespace Langmuir;
 int main(int argc, char *argv[])
 {
   QCoreApplication app(argc, argv);
-  //InputParserTemp parser("/home/adam/Desktop/adam.inp");
-  SimulationParameters par;
-  SolarCell cell(&par,0);
 
-  return 0;
-  double     D =   5;
-  double   *pD =  &D;
-  void     *vD =  &D;
-  double   *vp = (double*)vD;
+  int col1 = 7;
+  double col2 = 8.5;
 
-  qDebug() << "  value( object):" <<   D;
-  qDebug() << "  value(pointer):" << *pD;
-  qDebug() << "address( object):" <<  &D;
-  qDebug() << "address(pointer):" <<  pD;
-  qDebug() << "address(   void):" <<  vD;
-  qDebug() << "address(   cast):" <<  vp;
-  qDebug() << "";
+  DataFile dataFile("test.dat");
+  dataFile.addColumn(col1,"col1");
+  dataFile.addColumn(col2,"col2");
+  dataFile.report();
 
-  *vp = 7;
-
-  qDebug() << "  value( object):" <<   D;
-  qDebug() << "  value(pointer):" << *pD;
-  qDebug() << "address( object):" <<  &D;
-  qDebug() << "address(pointer):" <<  pD;
-  qDebug() << "address(   void):" <<  vD;
-  qDebug() << "address(   cast):" <<  vp;
-  qDebug() << "";
 }

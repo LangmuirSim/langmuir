@@ -1,7 +1,10 @@
 #ifndef INPUTPARSER_H
 #define INPUTPARSER_H
 
-#include <QtCore>
+#include <QVariant>
+#include <QObject>
+#include <QVector>
+#include <QMap>
 
 namespace Langmuir
 {
@@ -18,16 +21,13 @@ struct SimulationParameters
     bool coulombDefects;
     int defectsCharge;
 
-    bool outputElectronIDs;
-    bool outputHoleIDs;
-    bool outputDefectIDs;
-    bool outputTrapIDs;
+    bool outputIdsOnIteration;
+    bool outputIdsAtStart;
+    bool outputIdsOnDelete;
 
     bool outputCoulomb;
-    bool outputElectronGrid;
-    bool outputHoleGrid;
-    bool outputTrapImage;
-    bool outputOnDelete;
+    bool outputPotential;
+    bool outputImage;
 
     int iterationsPrint;
     int iterationsReal;
@@ -70,15 +70,20 @@ struct SimulationParameters
     unsigned int currentSimulation;
     QString outputStub;
     int iterationsTotal;
+    int simulationSteps;
 
     SimulationParameters();
     void check();
 };
 
-class InputParserTemp : public QObject
+class InputParser : public QObject
 {
-Q_OBJECT public:
-    InputParserTemp(const QString &fileName, QObject *parent = 0);
+private:
+    Q_OBJECT
+    Q_DISABLE_COPY(InputParser)
+
+public:
+    InputParser(const QString &fileName, QObject *parent = 0);
     SimulationParameters& getParameters(int step = 0);
     QString mapToQString();
     int steps();
@@ -89,10 +94,9 @@ private:
     void parseFile(const QString &fileName);
     template <typename T> void convert( QString key );
     template <typename T> void parameter( QString key, T &parameter, int step, QList<T> validList = QList<T>() );
-    int m_steps;
 };
 
-template <> inline void InputParserTemp::convert<int>( QString key )
+template <> inline void InputParser::convert<int>( QString key )
 {
     if ( ! m_map.contains(key) ) { qFatal("error: map does not key %s",qPrintable(key)); }
     for ( int i = 0; i < m_map[key].size(); i++ )
@@ -106,7 +110,7 @@ template <> inline void InputParserTemp::convert<int>( QString key )
     }
 }
 
-template <> inline void InputParserTemp::convert<bool>( QString key )
+template <> inline void InputParser::convert<bool>( QString key )
 {
     if ( ! m_map.contains(key) ) { qFatal("error: map does not key %s",qPrintable(key)); }
     for ( int i = 0; i < m_map[key].size(); i++ )
@@ -127,7 +131,7 @@ template <> inline void InputParserTemp::convert<bool>( QString key )
     }
 }
 
-template <> inline void InputParserTemp::convert<double>( QString key )
+template <> inline void InputParser::convert<double>( QString key )
 {
     if ( ! m_map.contains(key) ) { qFatal("error: map does not key %s",qPrintable(key)); }
     for ( int i = 0; i < m_map[key].size(); i++ )
@@ -141,7 +145,7 @@ template <> inline void InputParserTemp::convert<double>( QString key )
     }
 }
 
-template <> inline void InputParserTemp::convert<QString>( QString key )
+template <> inline void InputParser::convert<QString>( QString key )
 {
     if ( ! m_map.contains(key) ) { qFatal("error: map does not key %s",qPrintable(key)); }
     for ( int i = 0; i < m_map[key].size(); i++ )
@@ -155,7 +159,7 @@ template <> inline void InputParserTemp::convert<QString>( QString key )
     }
 }
 
-template <typename T> void InputParserTemp::parameter( QString key, T &parameter, int step, QList<T> validList )
+template <typename T> void InputParser::parameter( QString key, T &parameter, int step, QList<T> validList )
 {
     if ( step < 0 )
     {
@@ -181,7 +185,7 @@ template <typename T> void InputParserTemp::parameter( QString key, T &parameter
         QVector< QVariant > &valueList = m_map[key];
         if ( step >= valueList.size() )
         {
-            parameter = valueList[0].value<T>();
+            parameter = valueList.last().value<T>();
         }
         else
         {

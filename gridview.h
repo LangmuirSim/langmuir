@@ -236,7 +236,7 @@ public:
     PointArray *carriersMinus;
     PointArray *carriersPlus;
     PointArray *defects;
-    InputParserTemp *pInput;
+    InputParser *pInput;
     SimulationParameters *pPar;
     Simulation *pSim;
     bool pause;

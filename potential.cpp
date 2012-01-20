@@ -1,7 +1,6 @@
 #include "potential.h"
-#include "simulation.h"
-#include "chargeagent.h"
 #include "inputparser.h"
+#include "chargeagent.h"
 #include "cubicgrid.h"
 #include "world.h"
 #include "rand.h"
@@ -9,7 +8,13 @@
 namespace Langmuir
 {
 
-Potential::Potential(World* world, QObject *parent): QObject(parent), m_world(world){}
+Potential::Potential(World* world, QObject *parent): QObject(parent), m_world(world)
+{
+    QString string;
+    QTextStream stream(&string);
+    stream << this->metaObject()->className() << "(" << this << ")";
+    setObjectName(string);
+}
 
 void Potential::setPotentialZero()
 {

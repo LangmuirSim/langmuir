@@ -48,7 +48,7 @@ int main (int argc, char *argv[])
       qFatal("bad input");
     }
 
-  InputParserTemp input(iFileName);
+  InputParser input(iFileName);
   Timer timer;
 
   for (int i = 0; i < input.steps(); ++i)

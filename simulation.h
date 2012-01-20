@@ -1,7 +1,7 @@
 #ifndef SIMULATION_H
 #define SIMULATION_H
 
-#include <QtCore>
+#include <QObject>
 
 namespace Langmuir
 {
@@ -22,7 +22,11 @@ struct SimulationParameters;
     */
 class Simulation : public QObject
 {
-Q_OBJECT public:
+private:
+    Q_OBJECT
+    Q_DISABLE_COPY(Simulation)
+
+public:
 
     /**
      * @brief Constructor.

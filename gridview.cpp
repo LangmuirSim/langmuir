@@ -59,7 +59,7 @@ GridViewGL::GridViewGL(const QGLFormat &format, QWidget * parent, QString input)
     //Or... get the simulation parameters from an input file
     else
     {
-        pInput = new InputParserTemp(input);
+        pInput = new InputParser(input);
         pPar = &(pInput->getParameters(0));
     }
 

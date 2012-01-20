@@ -18,7 +18,7 @@ World::World(SimulationParameters *par, QObject *parent) : QObject(parent)
     m_electronGrid = new Grid(m_parameters->gridX, m_parameters->gridY, m_parameters->gridZ, this);
     m_holeGrid = new Grid(m_parameters->gridX, m_parameters->gridY, m_parameters->gridZ, this);
     m_potential = new Potential(this, this);
-    m_logger = new Logger(this, this);
+    //m_logger = new Logger(this, this);
     m_ocl = new OpenClHelper(this, this);
 
     //transistor sources
@@ -35,6 +35,11 @@ World::World(SimulationParameters *par, QObject *parent) : QObject(parent)
     m_drains.push_back(new ElectronDrainAgent(this, Grid::Right, 0, 0.9, 1, this));
     m_drains.push_back(new HoleDrainAgent(this, Grid::Left, 0, 0.9, 1, this));
     m_drains.push_back(new HoleDrainAgent(this, Grid::Right, 0, 0.9, 1, this));
+
+    QString string;
+    QTextStream stream(&string);
+    stream << this->metaObject()->className() << "(" << this << ")";
+    setObjectName(string);
 }
 
 World::~World()
@@ -67,7 +72,7 @@ World::~World()
     delete m_potential;
     delete m_electronGrid;
     delete m_holeGrid;
-    delete m_logger;
+    //delete m_logger;
     delete m_ocl;
 }
 }

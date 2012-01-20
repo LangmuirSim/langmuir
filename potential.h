@@ -1,7 +1,7 @@
 #ifndef POTENTIALNEW_H
 #define POTENTIALNEW_H
 
-#include <QtCore>
+#include <QObject>
 
 namespace Langmuir
 {
@@ -14,7 +14,11 @@ class Grid;
     */
 class Potential : public QObject
 {
-Q_OBJECT public:
+private:
+    Q_OBJECT
+    Q_DISABLE_COPY(Potential)
+
+public:
 
     /**
        * @brief Create Potential

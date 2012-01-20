@@ -1,11 +1,7 @@
 #include "sourceagent.h"
 #include "chargeagent.h"
-#include "potential.h"
-#include "inputparser.h"
-#include "logger.h"
 #include "world.h"
 #include "rand.h"
-#include "limits.h"
 
 namespace Langmuir
 {
@@ -20,6 +16,11 @@ ElectronSourceAgent::ElectronSourceAgent(World * world, int site, double potenti
 {
     m_grid  = m_world->electronGrid();
     initializeSite(site);
+
+    QString string;
+    QTextStream stream(&string);
+    stream << this->metaObject()->className() << "(" << this << ")";
+    setObjectName(string);
 }
 
 ElectronSourceAgent::ElectronSourceAgent(World * world, Grid::CubeFace cubeFace, double potential, double rate, int tries, QObject *parent)
@@ -27,6 +28,11 @@ ElectronSourceAgent::ElectronSourceAgent(World * world, Grid::CubeFace cubeFace,
 {
     m_grid  = m_world->electronGrid();
     initializeSite(cubeFace);
+
+    QString string;
+    QTextStream stream(&string);
+    stream << this->metaObject()->className() << "(" << this << ")";
+    setObjectName(string);
 }
 
 HoleSourceAgent::HoleSourceAgent(World * world, int site, double potential, double rate, int tries, QObject *parent)
@@ -34,6 +40,11 @@ HoleSourceAgent::HoleSourceAgent(World * world, int site, double potential, doub
 {
     m_grid  = m_world->holeGrid();
     initializeSite(site);
+
+    QString string;
+    QTextStream stream(&string);
+    stream << this->metaObject()->className() << "(" << this << ")";
+    setObjectName(string);
 }
 
 HoleSourceAgent::HoleSourceAgent(World * world, Grid::CubeFace cubeFace, double potential, double rate, int tries, QObject *parent)
@@ -41,6 +52,11 @@ HoleSourceAgent::HoleSourceAgent(World * world, Grid::CubeFace cubeFace, double 
 {
     m_grid  = m_world->holeGrid();
     initializeSite(cubeFace);
+
+    QString string;
+    QTextStream stream(&string);
+    stream << this->metaObject()->className() << "(" << this << ")";
+    setObjectName(string);
 }
 
 ExcitonSourceAgent::ExcitonSourceAgent(World * world, double rate, int tries, QObject *parent)

@@ -3,8 +3,9 @@
 #define __CL_ENABLE_EXCEPTIONS
 #define __NO_STD_VECTOR
 
-#include <QtCore>
 #include "cl.hpp"
+#include <QObject>
+#include <QVector>
 
 namespace Langmuir
 {
@@ -16,7 +17,11 @@ class ChargeAgent;
   */
 class OpenClHelper : public QObject
 {
-Q_OBJECT public:
+private:
+    Q_OBJECT
+    Q_DISABLE_COPY(OpenClHelper)
+
+public:
     OpenClHelper(World * world, QObject *parent=0);
 
     /**

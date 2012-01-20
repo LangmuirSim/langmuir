@@ -1,50 +1,47 @@
-random.seed          = -1
+random.seed             = [10,10]
 
-grid.x               = 128
-grid.y               = 128
-grid.z               = 1
+grid.x                  = 128
+grid.y                  = 128
+grid.z                  = 1
 
-coulomb.carriers     = true
-coulomb.defects      = false
-defects.charge       = -1
+coulomb.carriers        = true
+coulomb.defects         = [false,true]
+defects.charge          = -1
 
-#output.electron.ids  = true
-#output.hole.ids      = true
-#output.defect.ids    = true
-#output.trap.ids      = true
+output.ids.at.start     = false
+output.ids.on.iteration = false
+output.ids.on.delete    = true
 
-#output.coulomb       = true
-#output.electron.grid = true
-#output.hole.grid     = true
-#output.trap.image    = true
-#output.on.delete     = true
+output.coulomb          = false
+output.potential        = false
+output.image            = false
 
-iterations.print     = 10
-iterations.real      = 1000
-iterations.warmup    = 0
-output.percision     = 8
-output.width         = 16
-output.path          = /home/adam/Desktop
+iterations.print        = 15
+iterations.real         = 45
+iterations.warmup       = 0
+output.percision        = 8
+output.width            = 16
+output.path             = /home/adam/Desktop
 
-electron.percentage = 0.01
-hole.percentage     = 0.01
-seed.charges        = true
+electron.percentage     = 0.01
+hole.percentage         = 0.01
+seed.charges            = true
 
-defect.percentage   = 0.01
-trap.percentage     = 0.01
-trap.potential      = 0.10
-gaussian.average    = 0.00
-gaussian.stdev      = 0.10
-seed.percentage     = 0.50
+defect.percentage       = 0.01
+trap.percentage         = 0.01
+trap.potential          = 0.10
+gaussian.average        = 0.00
+gaussian.stdev          = 0.10
+seed.percentage         = 0.50
 
-voltage.drain       = 50.0
-voltage.source      = 0.00
+voltage.drain           = 50.0
+voltage.source          = 0.00
 
-temperature.kelvin  = 300.0
+temperature.kelvin      = 300.0
 
-use.opencl          = true
-work.x              = 4
-work.y              = 4
-work.z              = 4
-work.size           = 256
-kernels.path        = /home/adam/Workspace/science/langmuirQtCreator/
+use.opencl              = true
+work.x                  = 4
+work.y                  = 4
+work.z                  = 4
+work.size               = 256
+kernels.path            = /home/adam/Workspace/science/langmuirQtCreator/

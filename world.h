@@ -29,7 +29,11 @@ struct SimulationParameters;
     */
 class World : public QObject
 {
-Q_OBJECT public:
+private:
+    Q_OBJECT
+    Q_DISABLE_COPY(World)
+
+public:
     /**
       * Default Constructor.
       */

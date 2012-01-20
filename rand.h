@@ -13,7 +13,11 @@ namespace Langmuir
   */
 class Random : public QObject
 {
-Q_OBJECT public:
+private:
+    Q_OBJECT
+    Q_DISABLE_COPY(Random)
+
+public:
 
     /**
           * @brief Create Mersenne Twister

@@ -1,21 +1,92 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
-#include <QtCore>
+#include <QTextStream>
+#include <QPainter>
+#include <QObject>
+#include <QDir>
 
 namespace Langmuir
 {
+
+class DataColumnBase : public QObject
+{
+    Q_OBJECT
+public:
+    DataColumnBase(QString title = 0,QObject *parent = 0)
+        : QObject(parent), m_title(title) {}
+    inline QString& title() { return m_title; }
+    virtual void report( QTextStream& stream ) = 0;
+private:
+    QString m_title;
+};
+
+template <class T>
+class DataColumn : public DataColumnBase
+{
+public:
+    DataColumn(T& parameter, QString title = "", QObject *parent = 0)
+        : DataColumnBase(title,parent), m_parameter(&parameter) {}
+    inline virtual void report( QTextStream &stream ) { stream << *m_parameter; }
+private:
+    T *m_parameter;
+};
+
+class DataFile : public QObject
+{
+    Q_OBJECT
+public:
+    DataFile( QString name, int width = 13, int percision = 5, QObject *parent = 0);
+    template <typename T> void addColumn( T& parameter, QString title )
+    {
+        DataColumnBase *col = new DataColumn<T>(parameter,title);
+        m_columns.push_back(col);
+    }
+    void report();
+private:
+    QFile m_file;
+    QTextStream m_stream;
+    QList<DataColumnBase*> m_columns;
+};
+
+class Logger : public QObject
+{
+    Q_OBJECT
+public:
+    Logger(QObject *parent = 0) : QObject(parent) {}
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
 class World;
 class Agent;
 class ChargeAgent;
+class FluxAgent;
 
-/**
-  *  @class Logger
-  *  @brief For writing simulation information to Files
-  */
 class Logger : public QObject
 {
-Q_OBJECT public:
+private:
+    Q_OBJECT
+    Q_DISABLE_COPY(Logger)
+
+public:
     Logger(World *world, QObject *parent=0);
     ~Logger();
 
@@ -27,49 +98,34 @@ Q_OBJECT public:
     void saveHoleGridPotential();
     void saveCoulombEnergy();
     void saveTrapImage();
-
-    void holeReportPathlength(int id);
-    void holeReportLifetime(int id);
-    void electronReportPathlength(int id);
-    void electronReportLifetime(int id);
-
-    void holePathlengthFlush();
-    void holeLifetimeFlush();
-    void electronPathlengthFlush();
-    void electronLifetimeFlush();
+    void saveDefectImage();
+    void saveElectronImage();
+    void saveHoleImage();
+    void saveImage();
+    void saveParameters();
 
     void flush();
     void report( ChargeAgent &charge );
+    void report( FluxAgent &flux );
 
 private:
 
-    /**
-     * @brief address of the world object
-     */
     World *m_world;
-
-    /**
-     * @brief directory to locate output files in
-     */
     QDir m_outputdir;
-
-    /**
-     * @brief save files with this stub, simulation specific
-     */
-    QString m_stub;
 
     QFile m_carrierFile;
     QTextStream m_carrierStream;
 
-    QFile m_holeLifetimeFile;
-    QFile m_holePathlengthFile;
-    QFile m_electronLifetimeFile;
-    QFile m_electronPathlengthFile;
+    QFile m_stepFile;
+    QTextStream m_stepStream;
 
-    QTextStream m_holeLifetimeStream;
-    QTextStream m_holePathlengthStream;
-    QTextStream m_electronLifetimeStream;
-    QTextStream m_electronPathlengthStream;
-};
+    void beginImage( QImage &image, QPainter &painter, QColor background = QColor(Qt::white) );
+    void drawSites( QPainter &painter, QList<int> &sites, QColor color = QColor(Qt::black), int layer = 0 );
+    void drawCharges( QPainter &painter, QList<ChargeAgent *> &charges, QColor color = QColor(Qt::black), int layer = 0 );
+    void endImage( QImage &image, QPainter &painter, QString name, int scale = 5 );
+    void createFileStream( QTextStream &stream, QFile &file, QString fileName );
+    void setStreamParameters( QTextStream &stream );
+    QString generateFileName( QString identifier, QString extension = QString("dat") );
+};*/
 }
 #endif // LOGGER_H
