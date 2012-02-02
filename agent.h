@@ -9,17 +9,11 @@
 #include <QString>
 #include <QDebug>
 
-namespace Langmuir{
+namespace Langmuir
+{
 
 class World;
 
-/**
-    *  @class Agent
-    *  @brief Virtual Base Class.
-    *
-    *  Pure virtual base class to inherited by all agent classes
-    *  @date 06/07/2010
-    */
 class Agent : public QObject
 {
 private:
@@ -28,11 +22,6 @@ private:
     Q_ENUMS(Type)
 
 public:
-    /**
-     * @enum Different Agent types
-     *
-     */
-    // The numbers are used as an index to access a matrix of coupling constants - so be careful changing things
     enum Type
     {
         Empty         =   0,
@@ -45,96 +34,36 @@ public:
     };
     static QString toQString(const Agent::Type e);
 
-    /**
-     * @brief Default Constructor.
-     *
-     * Creates a agent.
-     * Assigns the agent a serial site index.
-     * Points the agent to the world, where simulation parameters may be accessed.
-     * @param world address of the world object.
-     * @param site serial site index.
-     */
-    Agent(Type type, World *world = 0, int site = 0, QObject *parent = 0);
+public:
+    Agent(Type getType, World &world, int site = 0, QObject *parent = 0);
+    virtual ~Agent();
 
-    /**
-     * @brief virutal Destructor.
-     */
-    virtual ~Agent() { }
-
-    /**
-     * @brief set neighbors.
-     *
-     * Set the nearest neighbours of the agent.
-     */
+    const QVector<int>& getNeighbors() const;
     void setNeighbors(QVector<int> neighbors);
 
-    /**
-     * @brief set neighbors.
-     *
-     * Get the nearest neighbours of the agent.
-     */
-    const QVector<int>& getNeighbors() const;
+    int getCurrentSite() const;
+    int getFutureSite() const;
 
-    /**
-     * @brief Set site.
-     *
-     * Set the site number
-     */
-    void setSite(int site, bool future = false);
+    void setCurrentSite(int site);
+    void setFutureSite(int site);
 
-    /**
-     * @brief Get site.
-     *
-     * Return the site number
-     */
-    int site(bool future = false);
-
-    /**
-     * @brief Get type.
-     *
-     * Return the type number
-     */
-    Type type() const;
+    Type getType() const;
+    World& getWorld() const;
 
 protected:
-    /**
-      * @brief current site.
-      *
-      * Serial site index for the current site.
-      */
     int m_site;
-
-    /**
-      * @brief future site.
-      *
-      * Serial site index for the future site.
-      */
     int m_fSite;
-
-    /**
-      * @brief Simulation world.
-      *
-      * Address to the world object.
-      */
-    World *m_world;
-
-    /**
-      * @brief neighbor cells.
-      *
-      * List of neighboring sites in the grid.
-      */
+    World &m_world;
     QVector<int> m_neighbors;
-
-    /**
-      * @brief Agent type.
-      *
-      * Number identifying the agent type. 0 = charge carrier, 1 = defect, 2 = source, 3 = drain.
-      */
     Type m_type;
 };
 
-inline Agent::Agent(Type type, World *world, int site, QObject *parent) : QObject(parent),
+inline Agent::Agent(Type type, World &world, int site, QObject *parent) : QObject(parent),
     m_site(-1), m_fSite(site), m_world(world), m_type(type)
+{
+}
+
+inline Agent::~Agent()
 {
 }
 
@@ -148,21 +77,34 @@ inline const QVector<int>& Agent::getNeighbors() const
     return m_neighbors;
 }
 
-inline void Agent::setSite(int site, bool future)
+inline int Agent::getCurrentSite() const
 {
-    if (future) m_fSite = site;
-    else m_site = site;
+    return m_site;
 }
 
-inline int Agent::site(bool future)
+inline int Agent::getFutureSite() const
 {
-    if (future) return m_fSite;
-    else return m_site;
+    return m_fSite;
 }
 
-inline Agent::Type Agent::type() const
+inline void Agent::setCurrentSite(int site)
+{
+    m_site = site;
+}
+
+inline void Agent::setFutureSite(int site)
+{
+    m_fSite = site;
+}
+
+inline Agent::Type Agent::getType() const
 {
     return m_type;
+}
+
+inline World& Agent::getWorld() const
+{
+    return m_world;
 }
 
 inline QString Agent::toQString(const Agent::Type e)
@@ -183,5 +125,4 @@ inline QDebug operator<<(QDebug dbg,const Agent::Type e)
 }
 
 }
-
 #endif

@@ -9,12 +9,10 @@
 
 namespace Langmuir
 {
+
 class World;
 class ChargeAgent;
-/**
-  *  @class OpenClHelper
-  *  @brief For handling all OpenCl related tasks
-  */
+
 class OpenClHelper : public QObject
 {
 private:
@@ -22,60 +20,20 @@ private:
     Q_DISABLE_COPY(OpenClHelper)
 
 public:
-    OpenClHelper(World * world, QObject *parent=0);
-
-    /**
-      * @brief Set up OpenCL enviroment
-      */
+    OpenClHelper(World &world, QObject *parent=0);
     void initializeOpenCL();
-
-    /**
-      * @brief tell the GPU to perform coulomb calculations over all locations
-      */
     void launchCoulombKernel1();
-
-    /**
-      * @brief tell the GPU to perform coulomb calculations over select locations
-      */
     void launchCoulombKernel2();
-
-    /**
-      * @brief copy a charge carrier's current site ID to the m_iHost vector
-      */
-    inline void copySiteAndChargeToHostVector(int index, int site, int charge = -1){ m_sHost[index] = site; m_qHost[index] = charge; }
-
-    /**
-      * @brief read a value in m_oDevice - which should be the result of a coulomb calculation.
-      */
-    inline const double& getOutputHost(int index)const { return m_oHost[index]; }
-
-    /**
-      * @brief read a value in m_oDevice - which should be the result of a coulomb calculation.
-      */
-    inline const double& getOutputHostFuture(int index)const { return m_oHost[index+m_offset]; }
-
-    /**
-      * @brief compare GPU answer(delta energy)to CPU answer for all charges
-      */
+    void copySiteAndChargeToHostVector(int index, int site, int charge = -1);
+    const double& getOutputHost(int index) const;
+    const double& getOutputHostFuture(int index ) const;
     void compareHostAndDeviceForAllCarriers();
-
-    /**
-      * @brief compare GPU answer to CPU answer(at single point)
-      */
     void compareHostAndDeviceAtSite(int i);
-
-    /**
-      * @brief compare GPU answer(delta energy)to CPU answer for a single charge
-      */
     void compareHostAndDeviceForCarrier(int i, QList< ChargeAgent * > &charges);
-
-    /**
-     * @brief change parameters
-     */
     bool toggleOpenCL(bool on);
 
 private:
-    World                       *m_world;
+    World                       &m_world;
     cl::Context                  m_context;             // OpenCl context
     cl::CommandQueue             m_queue;               // OpenCl queue
     cl::Kernel                   m_coulombK1;           // Kernel for calculating Coulomb Energy everywhere

@@ -5,10 +5,11 @@
 
 namespace Langmuir
 {
+
 class SourceAgent : public FluxAgent
 {
 public:
-    SourceAgent(World * world, double potential = 0.0, double rate = 0.0, int tries = 1, QObject *parent = 0);
+    SourceAgent(World &world, Grid &grid, QObject *parent = 0);
     bool seed();
     bool tryToInject();
 
@@ -23,8 +24,8 @@ protected:
 class ElectronSourceAgent : public SourceAgent
 {
 public:
-    ElectronSourceAgent(World * world, int site, double potential = 0.0, double rate = 0.0, int tries = 1, QObject *parent = 0);
-    ElectronSourceAgent(World * world, Grid::CubeFace cubeFace, double potential = 0.0, double rate = 0.0, int tries = 1, QObject *parent = 0);
+    ElectronSourceAgent(World &world, int site, QObject *parent = 0);
+    ElectronSourceAgent(World &world, Grid::CubeFace cubeFace, QObject *parent = 0);
 protected:
     virtual bool validToInject(int site);
     virtual double energyChange(int site);
@@ -34,8 +35,8 @@ protected:
 class HoleSourceAgent : public SourceAgent
 {
 public:
-    HoleSourceAgent(World * world, int site, double potential = 0.0, double rate = 0.0, int tries = 1, QObject *parent = 0);
-    HoleSourceAgent(World * world, Grid::CubeFace cubeFace, double potential = 0.0, double rate = 0.0, int tries = 1, QObject *parent = 0);
+    HoleSourceAgent(World &world, int site, QObject *parent = 0);
+    HoleSourceAgent(World &world, Grid::CubeFace cubeFace, QObject *parent = 0);
 protected:
     virtual bool validToInject(int site);
     virtual double energyChange(int site);
@@ -45,12 +46,13 @@ protected:
 class ExcitonSourceAgent : public SourceAgent
 {
 public:
-    ExcitonSourceAgent(World * world, double rate = 0.0, int tries = 1, QObject *parent = 0);
+    ExcitonSourceAgent(World &world, QObject *parent = 0);
 protected:
     virtual bool validToInject(int site);
     virtual double energyChange(int site);
     virtual int chooseSite();
     virtual void inject(int site);
 };
+
 }
 #endif

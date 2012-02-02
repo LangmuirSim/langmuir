@@ -2,30 +2,26 @@
 
 #include "openclhelper.h"
 #include "chargeagent.h"
-#include "inputparser.h"
+#include "parameters.h"
 #include "cubicgrid.h"
 #include "potential.h"
 #include "world.h"
 
-using namespace Langmuir;
-
-OpenClHelper::OpenClHelper(World * world, QObject *parent): QObject(parent), m_world(world)
+namespace Langmuir
 {
-    QString string;
-    QTextStream stream(&string);
-    stream << this->metaObject()->className() << "(" << this << ")";
-    setObjectName(string);
+
+OpenClHelper::OpenClHelper(World &world, QObject *parent): QObject(parent), m_world(world)
+{
 }
 
 void OpenClHelper::initializeOpenCL()
 {
     //can't use openCL yet
-    m_world->parameters()->okCL = false;
+    m_world.parameters().okCL = false;
 
     try
     {
-        if(! m_world->parameters()) qFatal("initializeOpenCL called before parameters were set.");
-
+        //error code
         cl_int err;
 
         //obtain platforms
@@ -48,7 +44,7 @@ void OpenClHelper::initializeOpenCL()
         err = m_queue.finish();
 
         //obtain kernel source
-        QDir dir(m_world->parameters()->kernelsPath);
+        QDir dir(m_world.parameters().kernelsPath);
         if(!dir.exists()) { qFatal("%s does not exist", qPrintable(dir.path()));}
         QFile file(dir.absoluteFilePath("kernel.cl"));
         if(!(file.open(QIODevice::ReadOnly | QIODevice::Text)) ){
@@ -66,9 +62,9 @@ void OpenClHelper::initializeOpenCL()
         m_sHost.clear();
         m_qHost.clear();
         m_oHost.clear();
-        m_sHost.resize(m_world->electronGrid()->volume());
-        m_qHost.resize(m_world->electronGrid()->volume());
-        m_oHost.resize(m_world->electronGrid()->volume());
+        m_sHost.resize(m_world.electronGrid().volume());
+        m_qHost.resize(m_world.electronGrid().volume());
+        m_oHost.resize(m_world.electronGrid().volume());
 
         //initialize Device Memory
         m_sDevice = cl::Buffer(m_context, CL_MEM_READ_ONLY, m_sHost.size()* sizeof(int), NULL, &err);
@@ -84,34 +80,34 @@ void OpenClHelper::initializeOpenCL()
         err = m_coulombK1.setArg(0, m_oDevice);
         err = m_coulombK1.setArg(1, m_sDevice);
         err = m_coulombK1.setArg(2, m_qDevice);
-        err = m_coulombK1.setArg(4, m_world->parameters()->electrostaticCutoff * m_world->parameters()->electrostaticCutoff);
-        err = m_coulombK1.setArg(5, m_world->parameters()->electrostaticPrefactor);
+        err = m_coulombK1.setArg(4, m_world.parameters().electrostaticCutoff * m_world.parameters().electrostaticCutoff);
+        err = m_coulombK1.setArg(5, m_world.parameters().electrostaticPrefactor);
 
         err = m_coulombK2.setArg(0, m_oDevice);
         err = m_coulombK2.setArg(1, m_sDevice);
         err = m_coulombK2.setArg(2, m_qDevice);
-        err = m_coulombK2.setArg(4, m_world->parameters()->electrostaticCutoff * m_world->parameters()->electrostaticCutoff);
+        err = m_coulombK2.setArg(4, m_world.parameters().electrostaticCutoff * m_world.parameters().electrostaticCutoff);
         err = m_coulombK2.setArg(5, m_sDevice);
-        err = m_coulombK2.setArg(6, m_world->parameters()->gridX);
-        err = m_coulombK2.setArg(7, m_world->parameters()->gridY);
-        err = m_coulombK2.setArg(8, m_world->parameters()->electrostaticPrefactor);
+        err = m_coulombK2.setArg(6, m_world.parameters().gridX);
+        err = m_coulombK2.setArg(7, m_world.parameters().gridY);
+        err = m_coulombK2.setArg(8, m_world.parameters().electrostaticPrefactor);
 
         //check for errors
         {
-            int maxCharges = m_world->electronGrid()->volume()*(m_world->parameters()->electronPercentage + m_world->parameters()->defectPercentage);
+            int maxCharges = m_world.electronGrid().volume()*(m_world.parameters().electronPercentage + m_world.parameters().defectPercentage);
 
             //kernel1
-            int wx1 = m_world->parameters()->workX;
-            int wy1 = m_world->parameters()->workY;
-            int wz1 = m_world->parameters()->workZ;
+            int wx1 = m_world.parameters().workX;
+            int wy1 = m_world.parameters().workY;
+            int wz1 = m_world.parameters().workZ;
             int wv1 = wx1 * wy1 * wz1;
-            int gx1 = wx1 * m_world->parameters()->gridX;
-            int gy1 = wy1 * m_world->parameters()->gridY;
-            int gz1 = wz1 * m_world->parameters()->gridZ;
+            int gx1 = wx1 * m_world.parameters().gridX;
+            int gy1 = wy1 * m_world.parameters().gridY;
+            int gz1 = wz1 * m_world.parameters().gridZ;
             int gv1 = gx1 * gy1 * gz1;
 
             //kernel2
-            int wx2 = m_world->parameters()->workSize;
+            int wx2 = m_world.parameters().workSize;
             int wv2 = wx2;
             int gx2 = wx2 * maxCharges;
             int gv2 = gx2;
@@ -181,13 +177,13 @@ void OpenClHelper::initializeOpenCL()
             deviceQuery += QString("\nOTHER\n");
             deviceQuery += QString("MAX  : %1\n").arg(maxCharges, space);
             deviceQuery += QString("GRID : %1 %2 %3 : %4 %5 %6 : %7\n")
-                    .arg(m_world->parameters()->gridX, space)
-                    .arg(m_world->parameters()->gridY, space)
-                    .arg(m_world->parameters()->gridZ, space)
-                    .arg(log(m_world->parameters()->gridX)*ilog2, space)
-                    .arg(log(m_world->parameters()->gridY)*ilog2, space)
-                    .arg(log(m_world->parameters()->gridZ)*ilog2, space)
-                    .arg(m_world->electronGrid()->volume(), space);
+                    .arg(m_world.parameters().gridX, space)
+                    .arg(m_world.parameters().gridY, space)
+                    .arg(m_world.parameters().gridZ, space)
+                    .arg(log(m_world.parameters().gridX)*ilog2, space)
+                    .arg(log(m_world.parameters().gridY)*ilog2, space)
+                    .arg(log(m_world.parameters().gridZ)*ilog2, space)
+                    .arg(m_world.electronGrid().volume(), space);
 
             //checks
             if(wv2 > wv2_d)
@@ -196,13 +192,13 @@ void OpenClHelper::initializeOpenCL()
                 qFatal("work group volume of coulomb kernel 2 exceeds maxiumum for device");
             }
 
-            if(wv1 > wv1_d && m_world->parameters()->outputCoulomb)
+            if(wv1 > wv1_d && m_world.parameters().outputCoulomb)
             {
                 qDebug()<< qPrintable(deviceQuery);
                 qFatal("work group volume of coulomb kernel 1 exceeds maxiumum for device");
             }
 
-            if(gv1 > gv_d && m_world->parameters()->outputCoulomb)
+            if(gv1 > gv_d && m_world.parameters().outputCoulomb)
             {
                 qDebug()<< qPrintable(deviceQuery);
                 qFatal("global work item count of coulomb kernel 1 exceeds maximum for device");
@@ -225,39 +221,39 @@ void OpenClHelper::initializeOpenCL()
         err = m_queue.finish();
 
         //should be ok to use OpenCL
-        m_world->parameters()->okCL = true;
+        m_world.parameters().okCL = true;
     }
     catch(cl::Error& error)
     {
         qWarning("%s(%d)", error.what(), error.err());
-        m_world->parameters()->okCL = false;
+        m_world.parameters().okCL = false;
         return;
     }
-    m_world->parameters()->okCL = true;
+    m_world.parameters().okCL = true;
 }
 
 bool OpenClHelper::toggleOpenCL(bool on)
 {
     if(on)
     {
-        if(!(m_world->parameters()->okCL))
+        if(!(m_world.parameters().okCL))
         {
-            m_world->parameters()->useOpenCL = false;
+            m_world.parameters().useOpenCL = false;
             qDebug()<< "can not use openCL on this platform - openCL has been turned off";
             return false;
         }
-        if(!(m_world->parameters()->coulombCarriers))
+        if(!(m_world.parameters().coulombCarriers))
         {
-            m_world->parameters()->useOpenCL = false;
+            m_world.parameters().useOpenCL = false;
             qDebug()<< "OpenCL is on but coulomb interactions are off - disabling openCL";
             return false;
         }
-        m_world->parameters()->useOpenCL = true;
+        m_world.parameters().useOpenCL = true;
         return true;
     }
     else
     {
-        m_world->parameters()->useOpenCL = false;
+        m_world.parameters().useOpenCL = false;
         return false;
     }
 }
@@ -268,44 +264,44 @@ void OpenClHelper::launchCoulombKernel1()
     {
         int totalCharges = 0;
         //copy charges
-        for(int i = 0; i < m_world->electrons()->size(); i++)
+        for(int i = 0; i < m_world.electrons().size(); i++)
         {
-            m_sHost[i+totalCharges] = m_world->electrons()->at(i)->site(false);
-            m_qHost[i+totalCharges] = m_world->electrons()->at(i)->charge();
-            m_world->electrons()->at(i)->setOpenCLID(i);
+            m_sHost[i+totalCharges] = m_world.electrons().at(i)->getCurrentSite();
+            m_qHost[i+totalCharges] = m_world.electrons().at(i)->charge();
+            m_world.electrons().at(i)->setOpenCLID(i);
         }
-        totalCharges += m_world->electrons()->size();
+        totalCharges += m_world.electrons().size();
 
         //copy holes
-        for(int i = 0; i < m_world->holes()->size(); i++)
+        for(int i = 0; i < m_world.holes().size(); i++)
         {
-            m_sHost[i+totalCharges] = m_world->holes()->at(i)->site(false);
-            m_qHost[i+totalCharges] = m_world->holes()->at(i)->charge();
-            m_world->holes()->at(i)->setOpenCLID(i+totalCharges);
+            m_sHost[i+totalCharges] = m_world.holes().at(i)->getCurrentSite();
+            m_qHost[i+totalCharges] = m_world.holes().at(i)->charge();
+            m_world.holes().at(i)->setOpenCLID(i+totalCharges);
         }
-        totalCharges += m_world->holes()->size();
+        totalCharges += m_world.holes().size();
 
         //copy defects
-        if(m_world->parameters()->coulombDefects)
+        if(m_world.parameters().coulombDefects)
         {
-            for(int i = 0; i < m_world->defectSiteIDs()->size(); i++)
+            for(int i = 0; i < m_world.defectSiteIDs().size(); i++)
             {
-                m_sHost[i+totalCharges] = m_world->defectSiteIDs()->at(i);
-                m_qHost[i+totalCharges] = m_world->parameters()->defectsCharge;
+                m_sHost[i+totalCharges] = m_world.defectSiteIDs().at(i);
+                m_qHost[i+totalCharges] = m_world.parameters().defectsCharge;
             }
-            totalCharges += m_world->defectSiteIDs()->size();
+            totalCharges += m_world.defectSiteIDs().size();
         }
         m_offset = totalCharges;
         m_coulombK1.setArg(3, totalCharges);
         m_queue.enqueueWriteBuffer(m_sDevice, CL_TRUE, 0, totalCharges*sizeof(int), &m_sHost[0]);
         m_queue.enqueueWriteBuffer(m_qDevice, CL_TRUE, 0, totalCharges*sizeof(int), &m_qHost[0]);
         m_queue.enqueueNDRangeKernel(m_coulombK1, cl::NDRange(0, 0, 0), 
-                                     cl::NDRange(m_world->parameters()->gridX * m_world->parameters()->workX, 
-                                                  m_world->parameters()->gridY* m_world->parameters()->workY, 
-                                                  m_world->parameters()->gridZ * m_world->parameters()->workZ), 
-                                     cl::NDRange(m_world->parameters()->workX, 
-                                                  m_world->parameters()->workY, 
-                                                  m_world->parameters()->workZ));
+                                     cl::NDRange(m_world.parameters().gridX * m_world.parameters().workX,
+                                                  m_world.parameters().gridY* m_world.parameters().workY,
+                                                  m_world.parameters().gridZ * m_world.parameters().workZ),
+                                     cl::NDRange(m_world.parameters().workX,
+                                                  m_world.parameters().workY,
+                                                  m_world.parameters().workZ));
         m_queue.enqueueReadBuffer(m_oDevice, CL_TRUE, 0, m_oHost.size()*sizeof(double), &m_oHost[0]);
         m_queue.finish();
     }
@@ -323,32 +319,32 @@ void OpenClHelper::launchCoulombKernel2()
     {
         int totalCharges = 0;
         //copy charges
-        for(int i = 0; i < m_world->electrons()->size(); i++)
+        for(int i = 0; i < m_world.electrons().size(); i++)
         {
-            m_sHost[i+totalCharges] = m_world->electrons()->at(i)->site(false);
-            m_qHost[i+totalCharges] = m_world->electrons()->at(i)->charge();
-            m_world->electrons()->at(i)->setOpenCLID(i);
+            m_sHost[i+totalCharges] = m_world.electrons().at(i)->getCurrentSite();
+            m_qHost[i+totalCharges] = m_world.electrons().at(i)->charge();
+            m_world.electrons().at(i)->setOpenCLID(i);
         }
-        totalCharges += m_world->electrons()->size();
+        totalCharges += m_world.electrons().size();
 
         //copy holes
-        for(int i = 0; i < m_world->holes()->size(); i++)
+        for(int i = 0; i < m_world.holes().size(); i++)
         {
-            m_sHost[i+totalCharges] = m_world->holes()->at(i)->site(false);
-            m_qHost[i+totalCharges] = m_world->holes()->at(i)->charge();
-            m_world->holes()->at(i)->setOpenCLID(i+totalCharges);
+            m_sHost[i+totalCharges] = m_world.holes().at(i)->getCurrentSite();
+            m_qHost[i+totalCharges] = m_world.holes().at(i)->charge();
+            m_world.holes().at(i)->setOpenCLID(i+totalCharges);
         }
-        totalCharges += m_world->holes()->size();
+        totalCharges += m_world.holes().size();
 
         //copy defects
-        if(m_world->parameters()->coulombDefects)
+        if(m_world.parameters().coulombDefects)
         {
-            for(int i = 0; i < m_world->defectSiteIDs()->size(); i++)
+            for(int i = 0; i < m_world.defectSiteIDs().size(); i++)
             {
-                m_sHost[i+totalCharges] = m_world->defectSiteIDs()->at(i);
-                m_qHost[i+totalCharges] = m_world->parameters()->defectsCharge;
+                m_sHost[i+totalCharges] = m_world.defectSiteIDs().at(i);
+                m_qHost[i+totalCharges] = m_world.parameters().defectsCharge;
             }
-            totalCharges += m_world->defectSiteIDs()->size();
+            totalCharges += m_world.defectSiteIDs().size();
         }
 
         //set this argument here for future/past reasons
@@ -356,24 +352,24 @@ void OpenClHelper::launchCoulombKernel2()
         m_coulombK2.setArg(3, totalCharges);
 
         //copy charges(future)
-        for(int i = 0; i < m_world->electrons()->size(); i++)
+        for(int i = 0; i < m_world.electrons().size(); i++)
         {
-            m_sHost[i+totalCharges] = m_world->electrons()->at(i)->site(true);
-            m_qHost[i+totalCharges] = m_world->electrons()->at(i)->charge();
+            m_sHost[i+totalCharges] = m_world.electrons().at(i)->getFutureSite();
+            m_qHost[i+totalCharges] = m_world.electrons().at(i)->charge();
         }
-        totalCharges += m_world->electrons()->size();
+        totalCharges += m_world.electrons().size();
 
         //You added this recently
-        for(int i = 0; i < m_world->holes()->size(); i++)
+        for(int i = 0; i < m_world.holes().size(); i++)
         {
-            m_sHost[i+totalCharges] = m_world->holes()->at(i)->site(true);
-            m_qHost[i+totalCharges] = m_world->holes()->at(i)->charge();
+            m_sHost[i+totalCharges] = m_world.holes().at(i)->getFutureSite();
+            m_qHost[i+totalCharges] = m_world.holes().at(i)->charge();
         }
-        totalCharges += m_world->holes()->size();
+        totalCharges += m_world.holes().size();
 
         m_queue.enqueueWriteBuffer(m_sDevice, CL_TRUE, 0,(totalCharges)*sizeof(int), &m_sHost[0]);
         m_queue.enqueueWriteBuffer(m_qDevice, CL_TRUE, 0,(totalCharges)*sizeof(int), &m_qHost[0]);
-        m_queue.enqueueNDRangeKernel(m_coulombK2, cl::NDRange(0), cl::NDRange(totalCharges*m_world->parameters()->workSize), cl::NDRange(m_world->parameters()->workSize));
+        m_queue.enqueueNDRangeKernel(m_coulombK2, cl::NDRange(0), cl::NDRange(totalCharges*m_world.parameters().workSize), cl::NDRange(m_world.parameters().workSize));
         m_queue.enqueueReadBuffer(m_oDevice, CL_TRUE, 0, m_oHost.size()*sizeof(double), &m_oHost[0]);
         m_queue.finish();
     }
@@ -387,12 +383,12 @@ void OpenClHelper::launchCoulombKernel2()
 
 void OpenClHelper::compareHostAndDeviceForCarrier(int i, QList< ChargeAgent * > &charges)
 {
-    Grid &grid = *m_world->electronGrid();
-    Potential &potential = *m_world->potential();
+    Grid &grid = m_world.electronGrid();
+    Potential &potential = m_world.potential();
     ChargeAgent& charge = *charges.at(i);
 
-    int F  = charge.site(true);
-    int S  = charge.site(false);
+    int F  = charge.getFutureSite();
+    int S  = charge.getCurrentSite();
     int XI = grid.getIndexX(S);
     int YI = grid.getIndexY(S);
     int ZI = grid.getIndexZ(S);
@@ -411,7 +407,7 @@ void OpenClHelper::compareHostAndDeviceForCarrier(int i, QList< ChargeAgent * > 
     double PH2CPU = potential.coulombPotentialHoles(F);
     double PD2CPU = potential.coulombPotentialDefects(F);
 
-    double PSI    = Q * m_world->interactionEnergies()[1][0][0];
+    double PSI    = Q * m_world.interactionEnergies()[1][0][0];
 
     double P1CPU  = PE1CPU + PH1CPU + PD1CPU;
     double P2CPU  = PE2CPU + PH2CPU + PD2CPU - PSI;
@@ -429,28 +425,28 @@ void OpenClHelper::compareHostAndDeviceForCarrier(int i, QList< ChargeAgent * > 
     int DW = 13;
     int DP =  5;
 
-    QString SS = QString("     I[%1]((%2)(%3)(%4)%5)")
+    QString SS = QString("     I[%1](   (%2)  (%3)  (%4)        %5)")
             .arg(S, DW)
             .arg(XI, DW)
             .arg(YI, DW)
             .arg(ZI, DW)
             .arg("", DW);
 
-    QString SF = QString("     F[%1]((%2)(%3)(%4)%5)")
+    QString SF = QString("     F[%1](   (%2)  (%3)  (%4)        %5)")
             .arg(F, DW)
             .arg(XF, DW)
             .arg(YF, DW)
             .arg(ZF, DW)
             .arg("", DW);
 
-    QString SP1CPU = QString("CPU P1[%1](E:(%2)H:(%3)D:(%4)SI:(%5))")
+    QString SP1CPU = QString("CPU P1[%1]( E:(%2)H:(%3)D:(%4)   SI:(%5))")
             .arg(P1CPU, DW, 'f', DP)
             .arg(PE1CPU, DW, 'f', DP)
             .arg(PH1CPU, DW, 'f', DP)
             .arg(PD1CPU, DW, 'f', DP)
             .arg(0.0, DW, 'f', DP);
 
-    QString SP2CPU = QString("CPU P2[%1](E:(%2)H:(%3)D:(%4)SI:(%5))")
+    QString SP2CPU = QString("CPU P2[%1]( E:(%2)H:(%3)D:(%4)   SI:(%5))")
             .arg(P2CPU, DW, 'f', DP)
             .arg(PE2CPU, DW, 'f', DP)
             .arg(PH2CPU, DW, 'f', DP)
@@ -471,7 +467,7 @@ void OpenClHelper::compareHostAndDeviceForCarrier(int i, QList< ChargeAgent * > 
             .arg(PSI, DW, 'f', DP)
             .arg(PDIFF2, DW, 'f', DP);
 
-    QString SDGPU  = QString("DELTA [%1](C:(%2)G:(%3)%4)DIFF:(%5%)")
+    QString SDGPU  = QString("DELTA [%1]( C:(%2)G:(%3)%4 ) DIFF:(%5%)")
             .arg("", DW)
             .arg(DCPU, DW)
             .arg(DGPU, DW)
@@ -480,7 +476,7 @@ void OpenClHelper::compareHostAndDeviceForCarrier(int i, QList< ChargeAgent * > 
 
     if(PDIFF1 > 1e-4 || PDIFF2 > 1e-4 || PDIFF3 > 1e-4)
     {
-        if(&charges == m_world->electrons())
+        if(charges == m_world.electrons())
         {
             qDebug()<< "electron" << i;
         }
@@ -495,13 +491,14 @@ void OpenClHelper::compareHostAndDeviceForCarrier(int i, QList< ChargeAgent * > 
         qDebug()<< qPrintable(SP1GPU);
         qDebug()<< qPrintable(SP2GPU);
         qDebug()<< qPrintable(SDGPU);
+        qDebug()<< "";
     }
 }
 
 void OpenClHelper::compareHostAndDeviceAtSite(int i)
 {
-    Grid &grid = *m_world->electronGrid();
-    Potential &potential = *m_world->potential();
+    Grid &grid = m_world.electronGrid();
+    Potential &potential = m_world.potential();
 
     int XI = grid.getIndexX(i);
     int YI = grid.getIndexY(i);
@@ -544,12 +541,29 @@ void OpenClHelper::compareHostAndDeviceAtSite(int i)
 
 void OpenClHelper::compareHostAndDeviceForAllCarriers()
 {
-    for(int j = 0; j < m_world->electrons()->size(); j++)
+    for(int j = 0; j < m_world.electrons().size(); j++)
     {
-        compareHostAndDeviceForCarrier(j, *m_world->electrons());
+        compareHostAndDeviceForCarrier(j,m_world.electrons());
     }
-    for(int j = 0; j < m_world->holes()->size(); j++)
+    for(int j = 0; j < m_world.holes().size(); j++)
     {
-        compareHostAndDeviceForCarrier(j, *m_world->holes());
+        compareHostAndDeviceForCarrier(j,m_world.holes());
     }
+}
+
+void OpenClHelper::copySiteAndChargeToHostVector(int index, int site, int charge)
+{
+    m_sHost[index] = site; m_qHost[index] = charge;
+}
+
+const double& OpenClHelper::getOutputHost(int index) const
+{
+    return m_oHost[index];
+}
+
+const double& OpenClHelper::getOutputHostFuture(int index) const
+{
+    return m_oHost[index+m_offset];
+}
+
 }

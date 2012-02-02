@@ -20,7 +20,6 @@ private:
     Q_ENUMS(CubeFace)
 
 public:
-
     enum CubeFace
     {
         Left       =   0, // x =  0, yz plane

@@ -1,8 +1,9 @@
 #ifndef GRID_VIEW_H
 #define GRID_VIEW_H
 
-#include "inputparser.h"
 #include "chargeagent.h"
+#include "inputparser.h"
+#include "parameters.h"
 #include "simulation.h"
 #include "cubicgrid.h"
 #include "cubicgrid.h"
@@ -237,8 +238,9 @@ public:
     PointArray *carriersPlus;
     PointArray *defects;
     InputParser *pInput;
-    SimulationParameters *pPar;
+    SimulationParameters pPar;
     Simulation *pSim;
+    World *pWorld;
     bool pause;
     bool recording;
     QTimer *recordTimer;

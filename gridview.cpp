@@ -8,30 +8,30 @@ namespace Langmuir
 QImage GridViewGL::drawEnergyLandscape(int layer)
 {
     //Create an empty image of the appropriate size
-    QImage img(pPar->gridX, pPar->gridY, QImage::Format_ARGB32_Premultiplied);
+    QImage img(pPar.gridX, pPar.gridY, QImage::Format_ARGB32_Premultiplied);
     img.fill(0);
 
     //Create a painter to draw the image
     QPainter painter(&img);
     //Move the origin from top left to bottom right
     painter.scale(1.0, -1.0);
-    painter.translate(0.0, -pPar->gridY);
+    painter.translate(0.0, -pPar.gridY);
     //Resize the painter window to the grid dimensions
-    painter.setWindow(QRect(0, 0, pPar->gridX, pPar->gridY));
+    painter.setWindow(QRect(0, 0, pPar.gridX, pPar.gridY));
     //Set the background to be white
-    painter.fillRect(QRect(0, 0, pPar->gridX, pPar->gridY), Qt::white);
+    painter.fillRect(QRect(0, 0, pPar.gridX, pPar.gridY), Qt::white);
     //Set the trap color to a light gray
     painter.setPen(QColor(100, 100, 100, 255));
     //Draw the traps as dots
-    for(int i = 0; i < pSim->world()->trapSiteIDs()->size(); i++)
+    for(int i = 0; i < pWorld->trapSiteIDs().size(); i++)
     {
         //Index of a trap site
-        int ndx = pSim->world()->trapSiteIDs()->at(i);
+        int ndx = pWorld->trapSiteIDs().at(i);
         //If this trap is in the Layer we are drawing...
-        if(pSim->world()->electronGrid()->getIndexZ(ndx)== layer)
+        if(pWorld->electronGrid().getIndexZ(ndx)== layer)
         {
             //Draw the trap as a point at(x, y)=(col, row)
-            painter.drawPoint(QPoint(pSim->world()->electronGrid()->getIndexX(ndx), pSim->world()->electronGrid()->getIndexY(ndx)) );
+            painter.drawPoint(QPoint(pWorld->electronGrid().getIndexX(ndx), pWorld->electronGrid().getIndexY(ndx)) );
         }
     }
     //return the new image(its not copied on return because of how Qt stores images)
@@ -43,40 +43,43 @@ GridViewGL::GridViewGL(const QGLFormat &format, QWidget * parent, QString input)
     //This Widget responds to the keyboard
     setFocusPolicy(Qt::StrongFocus);
 
-    //Create simulation parameters struct
-    pPar = new SimulationParameters;
-
     //See if simulation parameters should be set to default values
     if(input == "default")
     {
         //Adjust some of Langmuir's default parameters so things aren't too boring
-        pPar->iterationsPrint = 10;
-        pPar->seedCharges = true;
-        pPar->electronPercentage = 0.02;
-        pPar->voltageDrain = 10.0;
+        pPar.iterationsPrint = 10;
+        pPar.seedCharges = true;
+        pPar.electronPercentage = 0.02;
+        pPar.voltageDrain = 10.0;
+        pPar.simulationSteps = 1;
+        pPar.check();
         pInput = NULL;
     }
     //Or... get the simulation parameters from an input file
     else
     {
-        pInput = new InputParser(input);
-        pPar = &(pInput->getParameters(0));
+        pInput = new InputParser();
+        pInput->parseKeyValue(input);
+        pPar = pInput->getParameters(0);
     }
 
     //Restrict the value on iterations.print to be low(it controls how many steps are done everytime updateGL is called)
-    if(pPar->iterationsPrint > 100)
+    if(pPar.iterationsPrint > 100)
     {
         QMessageBox::warning(
                     this, 
                     tr("Langmuir"), 
                     QString("The parameter iterations.print must be <= 100 for GridView to render, "
-                            " so it has been changed from %1 to 10.").arg(pPar->iterationsPrint), 
+                            " so it has been changed from %1 to 10.").arg(pPar.iterationsPrint),
                     QMessageBox::Ok);
-        pPar->iterationsPrint = 10;
+        pPar.iterationsPrint = 10;
     }
 
+    //Create the world object
+    pWorld = new World(pPar,this);
+
     //Create the simulation with the parameters chosen
-    pSim = new Simulation(pPar);
+    pSim = new Simulation(*pWorld);
 
     //Set default values
     translation.setX(0);
@@ -106,7 +109,7 @@ GridViewGL::~GridViewGL()
 {
     //Delete the objects who aren't derived from QObject
     delete pSim;
-    if(pInput){ delete pInput; }
+    if(pInput){delete pInput;}
 }
 
 QSize GridViewGL::minimumSizeHint()const
@@ -116,7 +119,7 @@ QSize GridViewGL::minimumSizeHint()const
 
 QSize GridViewGL::sizeHint()const
 {
-    return QSize(pPar->gridX + 4 * thickness, pPar->gridY + 2 * thickness);
+    return QSize(pPar.gridX + 4 * thickness, pPar.gridY + 2 * thickness);
 }
 
 void GridViewGL::initializeGL()
@@ -134,50 +137,50 @@ void GridViewGL::initializeGL()
     trapsTexture = bindTexture(drawEnergyLandscape());
 
     base = new Box(this, 
-                    QVector3D(pPar->gridX, pPar->gridY, thickness),
+                    QVector3D(pPar.gridX, pPar.gridY, thickness),
                     QVector3D(0, 0, -thickness));
     base->setTexture(metalTexture);
 
     source = new Box(this, 
-                      QVector3D(2.0*thickness, pPar->gridY, thickness + pPar->gridZ * thickness),
+                      QVector3D(2.0*thickness, pPar.gridY, thickness + pPar.gridZ * thickness),
                       QVector3D(-2.0*thickness, 0, -thickness));
 
     drain = new Box(this, 
-                     QVector3D(2.0*thickness, pPar->gridY, thickness + pPar->gridZ * thickness),
-                     QVector3D(pPar->gridX, 0, -thickness));
+                     QVector3D(2.0*thickness, pPar.gridY, thickness + pPar.gridZ * thickness),
+                     QVector3D(pPar.gridX, 0, -thickness));
 
     side1 = new Box(this, 
-                     QVector3D(pPar->gridX, thickness, thickness),
+                     QVector3D(pPar.gridX, thickness, thickness),
                      QVector3D(0, -thickness, -thickness));
 
     side2 = new Box(this, 
-                     QVector3D(pPar->gridX, thickness, thickness),
-                     QVector3D(0, pPar->gridY, -thickness));
+                     QVector3D(pPar.gridX, thickness, thickness),
+                     QVector3D(0, pPar.gridY, -thickness));
 
     side3 = new Box(this, 
-                     QVector3D(2.0*thickness, thickness, thickness + pPar->gridZ * thickness),
+                     QVector3D(2.0*thickness, thickness, thickness + pPar.gridZ * thickness),
                      QVector3D(-2.0*thickness, -thickness, -thickness));
 
     side4 = new Box(this, 
-                     QVector3D(2.0*thickness, thickness, thickness + pPar->gridZ * thickness),
-                     QVector3D(-2.0*thickness, pPar->gridY, -thickness));
+                     QVector3D(2.0*thickness, thickness, thickness + pPar.gridZ * thickness),
+                     QVector3D(-2.0*thickness, pPar.gridY, -thickness));
 
     side5 = new Box(this, 
-                     QVector3D(2.0*thickness, thickness, thickness + pPar->gridZ * thickness),
-                     QVector3D(pPar->gridX, -thickness, -thickness));
+                     QVector3D(2.0*thickness, thickness, thickness + pPar.gridZ * thickness),
+                     QVector3D(pPar.gridX, -thickness, -thickness));
 
     side6 = new Box(this, 
-                     QVector3D(2.0*thickness, thickness, thickness + pPar->gridZ * thickness),
-                     QVector3D(pPar->gridX, pPar->gridY, -thickness));
+                     QVector3D(2.0*thickness, thickness, thickness + pPar.gridZ * thickness),
+                     QVector3D(pPar.gridX, pPar.gridY, -thickness));
 
     background = new ColoredObject(this);
     ambientLight = new ColoredObject(this);
     diffuseLight = new ColoredObject(this);
     specularLight = new ColoredObject(this);
 
-    Grid *grid = pSim->world()->electronGrid();
-    pointBuffer1.resize((int(pPar->electronPercentage * grid->volume()))* 4);
-    pointBuffer2.resize((int(pPar->holePercentage * grid->volume()))* 4);
+    Grid &grid = pWorld->electronGrid();
+    pointBuffer1.resize((int(pPar.electronPercentage * grid.volume()))* 4);
+    pointBuffer2.resize((int(pPar.holePercentage * grid.volume()))* 4);
     for(int i = 0; i < pointBuffer1.size(); i+= 4)
     {
         pointBuffer1[i]   = 0;
@@ -196,13 +199,13 @@ void GridViewGL::initializeGL()
     carriersPlus = new PointArray(this, pointBuffer2);
     updatePointBuffers();
 
-    QList< int > *defectList = pSim->world()->defectSiteIDs();
-    QVector< float > xyz(defectList->size()* 4, 1);
-    for(int i = 0; i < defectList->size(); i++)
+    QList<int> &defectList = pWorld->defectSiteIDs();
+    QVector< float > xyz(defectList.size()* 4, 1);
+    for(int i = 0; i < defectList.size(); i++)
     {
-        xyz[ i * 4 + 0 ] = grid->getIndexX(defectList->at(i)) + 0.5;
-        xyz[ i * 4 + 1 ] = grid->getIndexY(defectList->at(i)) + 0.5;
-        xyz[ i * 4 + 2 ] =(grid->getIndexZ(defectList->at(i)) + 0.5)* thickness;
+        xyz[ i * 4 + 0 ] = grid.getIndexX(defectList.at(i)) + 0.5;
+        xyz[ i * 4 + 1 ] = grid.getIndexY(defectList.at(i)) + 0.5;
+        xyz[ i * 4 + 2 ] =(grid.getIndexZ(defectList.at(i)) + 0.5)* thickness;
         xyz[ i * 4 + 3 ] = 1;
     }
     defects  = new PointArray(this, xyz);
@@ -211,7 +214,7 @@ void GridViewGL::initializeGL()
 
     translation.setX(0);
     translation.setY(0);
-    translation.setZ(-(pPar->gridY)-thickness);
+    translation.setZ(-(pPar.gridY)-thickness);
     rotation.setX(0);
     rotation.setY(0);
     rotation.setZ(0);
@@ -251,7 +254,7 @@ void GridViewGL::initializeGL()
     carriersPlus->setPointSize(0.5f);
     defects->setPointSize(0.5f);
 
-    if(pPar->coulombCarriers)
+    if(pPar.coulombCarriers)
     {
         emit coulombStatusChanged(Qt::Checked);
     }
@@ -260,7 +263,7 @@ void GridViewGL::initializeGL()
         emit coulombStatusChanged(Qt::Unchecked);
     }
 
-    if(pPar->useOpenCL)
+    if(pPar.useOpenCL)
     {
         emit openCLStatusChanged(Qt::Checked);
     }
@@ -269,7 +272,7 @@ void GridViewGL::initializeGL()
         emit openCLStatusChanged(Qt::Unchecked);
     }
 
-    setIterationsPrint(pPar->iterationsPrint);
+    setIterationsPrint(pPar.iterationsPrint);
     setTimerInterval(updateTime);
 
     qtimer->start(updateTime);
@@ -277,34 +280,34 @@ void GridViewGL::initializeGL()
 
 void GridViewGL::updatePointBuffers()
 {
-    Grid *grid = pSim->world()->electronGrid();
-    QList< ChargeAgent* > *charges = pSim->world()->electrons();
-    for(int i = 0; i < charges->size(); i++)
+    Grid &grid = pWorld->electronGrid();
+    QList<ChargeAgent*> &electrons = pWorld->electrons();
+    for(int i = 0; i < electrons.size(); i++)
     {
-        int site = charges->at(i)->site();
-        pointBuffer1[ i * 4 + 0 ] = grid->getIndexX(site)+ 0.5;
-        pointBuffer1[ i * 4 + 1 ] = grid->getIndexY(site)+ 0.5;
-        pointBuffer1[ i * 4 + 2 ] =(grid->getIndexZ(site)+ 0.5)* thickness;
+        int site = electrons.at(i)->getCurrentSite();
+        pointBuffer1[i * 4 + 0] = grid.getIndexX(site)+ 0.5;
+        pointBuffer1[i * 4 + 1] = grid.getIndexY(site)+ 0.5;
+        pointBuffer1[i * 4 + 2] =(grid.getIndexZ(site)+ 0.5)* thickness;
     }
-    QList< ChargeAgent* > *holes = pSim->world()->holes();
-    for(int i = 0; i < holes->size(); i++)
+    QList<ChargeAgent*> &holes = pWorld->holes();
+    for(int i = 0; i < holes.size(); i++)
     {
-        int site = holes->at(i)->site();
-        pointBuffer2[ i * 4 + 0 ] = grid->getIndexX(site)+ 0.5;
-        pointBuffer2[ i * 4 + 1 ] = grid->getIndexY(site)+ 0.5;
-        pointBuffer2[ i * 4 + 2 ] =(grid->getIndexZ(site)+ 0.75)* thickness;
+        int site = holes.at(i)->getCurrentSite();
+        pointBuffer2[i * 4 + 0] = grid.getIndexX(site)+ 0.5;
+        pointBuffer2[i * 4 + 1] = grid.getIndexY(site)+ 0.5;
+        pointBuffer2[i * 4 + 2] =(grid.getIndexZ(site)+ 0.75)* thickness;
     }
-    carriersMinus->update(pointBuffer1, charges->size()* 4);
-    carriersPlus->update(pointBuffer2, holes->size()* 4);
+    carriersMinus->update(pointBuffer1, electrons.size()* 4);
+    carriersPlus->update(pointBuffer2, holes.size()* 4);
 }
 
 void GridViewGL::timerUpdateGL()
 {
     if(! pause)
     {
-        pSim->performIterations(pPar->iterationsPrint);
-        //double current =(pSim->totalChargesAccepted()- lastCount)/(double(pPar->iterationsPrint));
-        step += pPar->iterationsPrint;
+        pSim->performIterations(pPar.iterationsPrint);
+        //double current =(pSim->totalChargesAccepted()- lastCount)/(double(pPar.iterationsPrint));
+        step += pPar.iterationsPrint;
         updatePointBuffers();
         emit stepChanged(step);
     }
@@ -406,7 +409,7 @@ void GridViewGL::resetView()
 {
     translation.setX(0.0);
     translation.setY(0.0);
-    translation.setZ(-(pPar->gridY)-thickness);
+    translation.setZ(-(pPar.gridY)-thickness);
     rotation.setX(0);
     rotation.setY(0);
     rotation.setZ(0);
@@ -432,7 +435,7 @@ void GridViewGL::setIterationsPrint(int iterationsPrint)
 {
     if(iterationsPrint > 0 && iterationsPrint <= 100)
     {
-        pPar->iterationsPrint = iterationsPrint;
+        pPar.iterationsPrint = iterationsPrint;
         emit iterationsPrintChanged(iterationsPrint);
     }
 }
@@ -443,14 +446,14 @@ void GridViewGL::toggleCoulombStatus(int checkState)
     {
     case Qt::Checked :
     {
-        pPar->coulombCarriers = true;
+        pPar.coulombCarriers = true;
         emit coulombStatusChanged(Qt::Checked);
         break;
     }
     default :
     {
-        pPar->coulombCarriers = false;
-        pSim->world()->opencl()->toggleOpenCL(false);
+        pPar.coulombCarriers = false;
+        pWorld->opencl().toggleOpenCL(false);
         emit openCLStatusChanged(Qt::Unchecked);
         emit coulombStatusChanged(Qt::Unchecked);
         break;
@@ -483,7 +486,7 @@ void GridViewGL::toggleOpenCLStatus(int checkState)
     {
     case Qt::Checked :
     {
-        if(!(pSim->world()->opencl()->toggleOpenCL(true)) )
+        if(!(pWorld->opencl().toggleOpenCL(true)) )
         {
             bool resume = false;
             if(! pause)
@@ -491,13 +494,13 @@ void GridViewGL::toggleOpenCLStatus(int checkState)
                 togglePauseStatus();
                 resume = true;
             }
-            if(! pPar->okCL)
+            if(! pPar.okCL)
             {
                 QMessageBox::warning(this, tr("Langmuir"), QString("Can not turn OpenCL.  This platform does not allow openCL."));
             }
             else
             {
-                if(! pPar->coulombCarriers)
+                if(! pPar.coulombCarriers)
                 {
 
                     QMessageBox::warning(this, tr("Langmuir"), QString("Can not turn OpenCL.  Coulomb interations are turned off."));
@@ -517,7 +520,7 @@ void GridViewGL::toggleOpenCLStatus(int checkState)
     }
     default :
     {
-        pSim->world()->opencl()->toggleOpenCL(false);
+        pWorld->opencl().toggleOpenCL(false);
         emit openCLStatusChanged(Qt::Unchecked);
         break;
     }
@@ -628,7 +631,7 @@ void GridViewGL::paintGL()
     glRotatef(rotation.y(), 0.0, 1.0, 0.0);
     glRotatef(rotation.z(), 0.0, 0.0, 1.0);
     glPushMatrix();
-    glTranslatef(-0.5 *(pPar->gridX + 4.0 * thickness), - 0.5 *(pPar->gridY + 2.0 * thickness), 0);
+    glTranslatef(-0.5 *(pPar.gridX + 4.0 * thickness), - 0.5 *(pPar.gridY + 2.0 * thickness), 0);
     base->draw();
     source->draw();
     drain->draw();
@@ -638,9 +641,9 @@ void GridViewGL::paintGL()
     side4->draw();
     side5->draw();
     side6->draw();
-    carriersMinus->draw(pSim->world()->electrons()->size(), this->height(), fov);
-    carriersPlus->draw(pSim->world()->holes()->size(), this->height(), fov);
-    defects->draw(pSim->world()->defectSiteIDs()->size(), this->height(), fov);
+    carriersMinus->draw(pWorld->electrons().size(), this->height(), fov);
+    carriersPlus->draw(pWorld->holes().size(), this->height(), fov);
+    defects->draw(pWorld->defectSiteIDs().size(), this->height(), fov);
     glPopMatrix();
 }
 
@@ -945,6 +948,7 @@ PointArray::~PointArray()
 
 void PointArray::update(QVector<float> &xyz, int size)
 {
+    if (xyz.size() == 0) return;
     vBuffer.bind();
     vBuffer.write(0, &xyz[0], size * sizeof(float));
     vBuffer.release();

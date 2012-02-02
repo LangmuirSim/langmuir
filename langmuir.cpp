@@ -3,8 +3,8 @@
 #include "simulation.h"
 #include "drainagent.h"
 #include "cubicgrid.h"
+#include "logger.h"
 #include "world.h"
-#include "timer.h"
 
 #include <QApplication>
 #include <QPrinter>
@@ -26,209 +26,116 @@ int main (int argc, char *argv[])
 {
   QApplication app (argc, argv);
 
-  // Read command line arguments
+  // Read command line arguments ( get input file name )
   QStringList args = app.arguments ();
 
   QString iFileName = "";
-  QString oFileName = "";
-  if ( args.size() == 2 )
-    {
-      iFileName = args.at(1);
-      QStringList tokens = args.at(1).split("/",QString::SkipEmptyParts);
-      oFileName = tokens[tokens.size()-1].split(".",QString::SkipEmptyParts)[0];
-    }
-  else if ( args.size() == 3 )
-    {
-      iFileName = args.at(1);
-      oFileName = args.at(2);
-    }
+  if ( args.size() == 2 ) { iFileName = args.at(1).trimmed(); }
   else
-    {
-      qDebug() << "correct use is langmuir input.dat (output.dat)";
+  {
+      qDebug() << "correct use is langmuir input.dat";
       qFatal("bad input");
-    }
+  }
 
-  InputParser input(iFileName);
-  Timer timer;
+  // Get the current time
+  QDateTime begin = QDateTime::currentDateTime();
+  QString dateFMT = "MM/dd/yyyy";
+  QString timeFMT = "hh:mm:ss:zzz:AP";
+
+  // Create input parser and parse the input file
+  InputParser input;
+  input.parseKeyValue(iFileName);
+
+  // Get the simulation parameters
+  SimulationParameters &par = input.getParameters(0);
+
+  // Create TextStream for time info
+  DataStream timerStream(QDir(par.outputPath).absoluteFilePath("time.dat"),16,5);
+  timerStream << "simulation"
+              << "equilibration"
+              << "real"
+              << "carriers"
+              << "date_i"
+              << "time_i"
+              << "date_f"
+              << "time_f"
+              << "days"
+              << "secs"
+              << "msecs";
+  timerStream.newline();
 
   for (int i = 0; i < input.steps(); ++i)
   {
-      double timeStepStart = timer.now();
-      SimulationParameters &par = input.getParameters(i);
-      Simulation sim(&par);
+      // The time this simulation starts
+      QDateTime start = QDateTime::currentDateTime();
 
+      // Get the parameters for this simulation
+      SimulationParameters &par = input.getParameters(i);
+
+      // Create the World
+      World world(par);
+
+      // Create the simulation
+      Simulation sim(world);
+
+      // Save the parameters used for this simulation to a file
+      input.saveParameters(i);
+
+      // Perform equilibration steps
       for (int j = 0; j < par.iterationsWarmup; j += par.iterationsPrint)
       {
-          sim.performIterations (par.iterationsPrint);
-          progress( i, j, 0, par.iterationsTotal, timer.elapsed(timeStepStart) );
+          // Perform iterations
+          sim.performIterations(par.iterationsPrint);
+
+          // Print progress to the screen
+          progress( i, j, 0, par.iterationsTotal, start.time().elapsed() );
       }
 
+      // Let the simulation know that equilibration steps are complete
+      sim.equilibrated();
+
+      // Perform production steps
       for (int j = 0; j < par.iterationsReal; j += par.iterationsPrint)
       {
+          // Perform iterations
           sim.performIterations (par.iterationsPrint);
-          progress( i, par.iterationsWarmup, j, par.iterationsTotal, timer.elapsed(timeStepStart) );
+
+          // Print progress to the screen
+          progress( i, par.iterationsWarmup, j, par.iterationsTotal, start.time().elapsed() );
       }
-      progress( i, par.iterationsWarmup, par.iterationsReal, par.iterationsTotal, timer.elapsed(timeStepStart) );
+
+      // Print progress to the screen
+      progress( i, par.iterationsWarmup, par.iterationsReal, par.iterationsTotal, start.time().elapsed() );
       std::cout << "\n";
+
+      // The time this simulation stops
+      QDateTime stop = QDateTime::currentDateTime();
+
+      timerStream << i
+                  << par.iterationsWarmup
+                  << par.iterationsReal
+                  << world.maxChargeAgents()
+                  << start.toString(dateFMT)
+                  << start.toString(timeFMT)
+                  << stop.toString(dateFMT)
+                  << stop.toString(timeFMT)
+                  << start.daysTo(stop)
+                  << start.secsTo(stop)
+                  << start.msecsTo(stop);
+      timerStream.newline();
   }
 
-/*
-  // Declare output pointers
-  // QFile *oFile;                        //summary
-  // QFile *iFile;                        //iteration
-  // QTextStream *oout;
-  // QTextStream *iout;
+  // Get the current time
+  QDateTime end  = QDateTime::currentDateTime();
+  QDateTime xmas = QDateTime(QDate(end.date().year(),12,25), QTime(0,0));
 
-  // Open and read input file
-  InputParser input (iFileName);
-  SimulationParameters par;
-  input.simulationParameters (&par);
-
-  // Open summary file
-  // QDir dir(par.outputPath);
-  // if (!dir.exists()) { qFatal("output directory %s does not exist",qPrintable(dir.path()));}
-
-  // oFile = new QFile (dir.absoluteFilePath(oFileName + ".dat"));
-  // if (!(oFile->open (QIODevice::WriteOnly | QIODevice::Text)))
-  //  {
-  //    qDebug () << "Error opening summary file:" << dir.absoluteFilePath(oFileName + ".dat");
-  //    app.exit (1);
-  //  }
-  // oout = new QTextStream (oFile);
-  // oout->setRealNumberPrecision (par.outputPrecision);
-  // oout->setFieldWidth (par.outputWidth);
-  // (*oout) << scientific;
-
-  // Start timer
-  Timer timer;
-
-  // Output summary file column titles
-  // (*oout) << "working(n)";
-  // (*oout) << "temperature(K)";
-  // (*oout) << "source(eV)";
-  // (*oout) << "drain(eV)";
-  // (*oout) << "defects(%)";
-  // (*oout) << "trap(%)";
-  // (*oout) << "carriers(%)";
-  // (*oout) << "reached(%)";
-  // (*oout) << "accepted(#/step)";
-  // (*oout) << "approxTime(s/step)";
-  // (*oout) << "\n";
-  // oout->flush ();
-
-  // Total steps per simulation
-  int total = par.iterationsWarmup + par.iterationsReal;
-
-  for (int i = 0; i < par.variableSteps; ++i)
-    {
-      // Get the time we start this simulation
-      double timeStepStart = timer.now ();
-
-      // Get simulation parameters for the current step and set up a new object
-      input.simulationParameters (&par, i);
-
-      // Set up Simulation
-      Simulation *sim = new Simulation(&par,i);
-
-      // Open iteration file for this simulation
-      // iFile = new QFile (dir.absoluteFilePath(oFileName + "-i-" + QString::number (i) + ".dat"));
-      // if (!(iFile->open (QIODevice::WriteOnly | QIODevice::Text)))
-      //   {
-      //     qDebug () << "Error opening output file:" << dir.absoluteFilePath(oFileName + "-i-" + QString::number (i) + ".dat");
-      //     app.exit (1);
-      //   }
-      // iout = new QTextStream (iFile);
-      // iout->setRealNumberPrecision (par.outputPrecision);
-      // iout->setFieldWidth (par.outputWidth);
-      // (*iout) << scientific;
-
-      // Output iteration file column titles
-      // (*iout) << "move(n)";
-      // (*iout) << "temperature(K)";
-      // (*iout) << "source(eV)";
-      // (*iout) << "drain(eV)";
-      // (*iout) << "defects(%)";
-      // (*iout) << "trap(%)";
-      // (*iout) << "carriers(%)";
-      // (*iout) << "reached(%)";
-      // (*iout) << "accepted(#/step)";
-      // (*iout) << "\n";
-
-      // Perform Warmup
-      //unsigned long lastCount = 0;
-      for (int j = 0; j < par.iterationsWarmup; j += par.iterationsPrint)
-        {
-          // Perform Iterations
-          sim->performIterations (par.iterationsPrint);
-
-          // Output Iteration Information
-          // (*iout) << j
-          //  << par.temperatureKelvin
-          //  << par.voltageSource
-          //  << par.voltageDrain
-          //  << par.defectPercentage * 100.00
-          //  << par.trapPercentage * 100.0
-          //  << par.chargePercentage * 100.0
-          //  << double (sim->world()->electrons()->size()) / double (sim->world()->holeSourceL()->maxCarriers()) * 100.0
-          //  << double (sim->world()->holeDrainR()->acceptedElectrons() -
-          //             lastCount) / double (par.iterationsPrint) << "\n";
-          //iout->flush ();
-          //lastCount = sim->world()->holeDrainR()->acceptedElectrons();
-
-          progress( i, j, 0, total, timer.elapsed(timeStepStart) );
-        }
-
-      // Perform production
-      //unsigned long startCount = lastCount;
-      for (int j = 0; j < par.iterationsReal; j += par.iterationsPrint)
-        {
-          // Perform Iterations
-          sim->performIterations (par.iterationsPrint);
-
-          // Output Iteration
-          //(*iout) << j
-          //  << par.temperatureKelvin
-          //  << par.voltageSource
-          //  << par.voltageDrain
-          //  << par.defectPercentage * 100.0
-          //  << par.trapPercentage * 100.0
-          //  << par.chargePercentage * 100.0
-          //  << double (sim->world()->electrons()->size()) / double (sim->world()->holeSourceL()->maxCarriers()) * 100.0
-          //  << double (sim->world()->holeDrainR()->acceptedElectrons() -
-          //             lastCount) / double (par.iterationsPrint) << "\n";
-          //iout->flush ();
-          //lastCount = sim->world()->holeDrainR()->acceptedElectrons();
-
-          progress( i, par.iterationsWarmup, j, total, timer.elapsed(timeStepStart) );
-        }
-        progress( i, par.iterationsWarmup, par.iterationsReal, total, timer.elapsed(timeStepStart) ); std::cout << "\n";
-
-      // Now to output the result of the simulation at this data point
-      //(*oout) << i
-      //  << par.temperatureKelvin
-      //  << par.voltageSource
-      //  << par.voltageDrain
-      //  << par.defectPercentage * 100.0
-      //  << par.trapPercentage * 100.0
-      //  << par.chargePercentage * 100.0
-      //  << double (sim->world()->electrons()->size()) / double (sim->world()->holeSourceL()->maxCarriers()) * 100.0
-      //  << double (lastCount - startCount) / double (par.iterationsReal)
-      //  << timer.elapsed (timeStepStart) << "\n";
-      //oout->flush ();
-
-      //iFile->close ();
-      //delete iFile;
-      //delete iout;
-      //delete sim;
-    }
-  //output time
-  //(*oout) << reset << "\n" << "approxTime(s): " << timer.elapsed ();
-
-  // Close summary file
-  //oFile->close ();
-  //delete oFile;
-  //delete oout;
-  */
+  // Report time stats
+  timerStream << "begin:" << begin.toString(dateFMT) << begin.toString(timeFMT); timerStream.newline();
+  timerStream << "end:" << end.toString(dateFMT) << end.toString(timeFMT); timerStream.newline();
+  timerStream << "days:" << begin.daysTo(end); timerStream.newline();
+  timerStream << "secs:" << begin.secsTo(end); timerStream.newline();
+  timerStream << "msecs:" << begin.msecsTo(end); timerStream.newline();
+  timerStream << "xmas:" << QString("%1").arg(end.daysTo(xmas));
 }
 
 void progress( int sim, int warm, int real, int total, double time, bool flush )
@@ -237,32 +144,42 @@ void progress( int sim, int warm, int real, int total, double time, bool flush )
     double remaining = time / ( warm + real ) * ( total - warm - real );
 
     double factor = 1.0;
-    QString unit = "s ";
-    if ( time >= 60.0 )
+    QString unit = "ms";
+
+    if ( time >= 1000.0 )
     {
-        unit = "m "; factor = 60.0;
-        if ( time >= 3600.0 )
+        unit = "s "; factor = 1000.0;
+        if ( time >= 60000.0 )
         {
-            unit = "hr"; factor = 3600.0;
-            if ( time >= 86400.0 )
+            unit = "m "; factor = 60000.0;
+            if ( time >= 3600000.0 )
             {
-                unit = "d "; factor = 86400.0;
+                unit = "hr"; factor = 3600000.0;
+                if ( time >= 86400000.0 )
+                {
+                    unit = "d "; factor = 86400000.0;
+                }
             }
         }
     }
     QString timeString = QString("%1 %2").arg(time/factor, 9,'f',5).arg( unit );
 
     factor = 1.0;
-    unit = "s ";
-    if ( remaining >= 60.0 )
+    unit = "ms";
+
+    if ( remaining >= 1000.0 )
     {
-        unit = "m "; factor = 60.0;
-        if ( remaining >= 3600.0 )
+        unit = "s "; factor = 1000.0;
+        if ( remaining >= 60000.0 )
         {
-            unit = "hr"; factor = 3600.0;
-            if ( remaining >= 86400.0 )
+            unit = "m "; factor = 60000.0;
+            if ( remaining >= 3600000.0 )
             {
-                unit = "d "; factor = 86400.0;
+                unit = "hr"; factor = 3600000.0;
+                if ( remaining >= 86400000.0 )
+                {
+                    unit = "d "; factor = 86400000.0;
+                }
             }
         }
     }

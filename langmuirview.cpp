@@ -59,8 +59,8 @@ int main(int argc, char **argv)
     MainWindow window(iFileName);
 
     if((float)(window.width()* window.height()) /
-(float)(QApplication::desktop()->width()*
-                     QApplication::desktop()->height()) < 0.75f)
+            (float)(QApplication::desktop()->width()*
+                    QApplication::desktop()->height()) < 0.75f)
     {
         window.show();
     }

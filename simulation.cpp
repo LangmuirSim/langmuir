@@ -1,6 +1,6 @@
 #include "simulation.h"
 #include "openclhelper.h"
-#include "inputparser.h"
+#include "parameters.h"
 #include "chargeagent.h"
 #include "sourceagent.h"
 #include "drainagent.h"
@@ -11,93 +11,80 @@
 #include "rand.h"
 namespace Langmuir
 {
-Simulation::Simulation(SimulationParameters * par, QObject *parent):  QObject(parent), m_world(0)
-{
-    // Create the World Object
-    m_world = new World(par);
 
+Simulation::Simulation(World &world, QObject *parent):  QObject(parent), m_world(world)
+{
     // Place Defects
     this->createDefects();
 
     // Setup Grid Potential
     // Zero potential
-    m_world->potential()->setPotentialZero();
+    m_world.potential().setPotentialZero();
 
     // Add Linear Potential
-    m_world->potential()->setPotentialLinear();
+    m_world.potential().setPotentialLinear();
 
     // Add Trap Potential(assumes source and drain were created so that hetero traps don't start growing on the source / drain)
-    m_world->potential()->setPotentialTraps();
+    m_world.potential().setPotentialTraps();
 
     // precalculate and store coulomb interaction energies
-    m_world->potential()->updateInteractionEnergies();
+    m_world.potential().updateInteractionEnergies();
 
     // place charges on the grid randomly(assumes source / drain were created)
-    if(m_world->parameters()->seedCharges)seedCharges();
+    if(m_world.parameters().seedCharges)seedCharges();
 
     // Generate grid image
-    if(m_world->parameters()->outputImage)
+    if(m_world.parameters().outputImage)
     {
-        //m_world->logger()->saveTrapImage();
-        //m_world->logger()->saveHoleImage();
-        //m_world->logger()->saveElectronImage();
-        //m_world->logger()->saveDefectImage();
-        //m_world->logger()->saveImage();
+        m_world.logger().saveTrapImage();
+        m_world.logger().saveHoleImage();
+        m_world.logger().saveElectronImage();
+        m_world.logger().saveDefectImage();
+        m_world.logger().saveImage();
     }
 
     // Output Field Energy
-    if(m_world->parameters()->outputPotential)
+    if(m_world.parameters().outputPotential)
     {
-        //m_world->logger()->saveElectronGridPotential();
-        //m_world->logger()->saveHoleGridPotential();
+        m_world.logger().saveElectronGridPotential();
+        m_world.logger().saveHoleGridPotential();
     }
 
     // Output Defect IDs
-    if(m_world->parameters()->outputIdsAtStart)
+    if(m_world.parameters().outputIdsAtStart)
     {
-        //m_world->logger()->saveDefectIDs();
-        //m_world->logger()->saveTrapIDs();
-        //m_world->logger()->saveElectronIDs();
-        //m_world->logger()->saveHoleIDs();
+        m_world.logger().saveDefectIDs();
+        m_world.logger().saveTrapIDs();
+        m_world.logger().saveElectronIDs();
+        m_world.logger().saveHoleIDs();
     }
 
     // Initialize OpenCL
-    m_world->opencl()->initializeOpenCL();
-    if(m_world->parameters()->useOpenCL)
+    m_world.opencl().initializeOpenCL();
+    if(m_world.parameters().useOpenCL)
     {
-        m_world->opencl()->toggleOpenCL(true);
+        m_world.opencl().toggleOpenCL(true);
     }
     else
     {
-        m_world->opencl()->toggleOpenCL(false);
+        m_world.opencl().toggleOpenCL(false);
     }
-
-    QString string;
-    QTextStream stream(&string);
-    stream << this->metaObject()->className() << "(" << this << ")";
-    setObjectName(string);
 }
 
 Simulation::~Simulation()
 {
-    if(m_world != 0)
-    {
-        delete m_world;
-    }
 }
 
 void Simulation::performIterations(int nIterations)
 {
-    //m_world->electrons()->at(0)->coulombInteraction(m_world->electrons()->at(0)->site(true));
-    //  cout << "Entered performIterations function.\n";
     for(int i = 0; i < nIterations; ++i)
     {
         // Attempt to transport the charges through the film
-        QList < ChargeAgent * >&electrons = *m_world->electrons();
-        QList < ChargeAgent * >&holes = *m_world->holes();
+        QList<ChargeAgent*> &electrons = m_world.electrons();
+        QList<ChargeAgent*> &holes = m_world.holes();
 
         // If using OpenCL, launch the Kernel to calculate Coulomb Interactions
-        if(m_world->parameters()->useOpenCL &&(electrons.size()> 0 || holes.size()> 0))
+        if(m_world.parameters().useOpenCL &&(electrons.size()> 0 || holes.size()> 0))
         {
             // first have the charge carriers propose future sites
             //for(int j = 0; j < charges.size(); j++)charges[j]->chooseFuture(j);
@@ -107,10 +94,10 @@ void Simulation::performIterations(int nIterations)
             future2.waitForFinished();
 
             // tell the GPU to perform all coulomb calculations
-            m_world->opencl()->launchCoulombKernel2();
+            m_world.opencl().launchCoulombKernel2();
 
             //check the answer during debugging
-            //m_world->opencl()->compareHostAndDeviceForAllCarriers();
+            //m_world.opencl().compareHostAndDeviceForAllCarriers();
             //qFatal("done");
 
             // now use the results of the coulomb calculations to decide if the carreirs should have moved
@@ -136,47 +123,52 @@ void Simulation::performIterations(int nIterations)
         // Perform charge injection at the source
         performInjections();
 
-        m_world->parameters()->currentStep += 1;
+        m_world.parameters().currentStep += 1;
     }
 
+    m_world.logger().reportFluxStream();
+
     // Output Coulomb Energy
-    if(m_world->parameters()->outputCoulomb)
+    if(m_world.parameters().outputCoulomb)
     {
-        m_world->opencl()->launchCoulombKernel1();
-        //m_world->logger()->saveCoulombEnergy();
+        m_world.opencl().launchCoulombKernel1();
+        m_world.logger().saveCoulombEnergy();
     }
     // Output Carrier Positions and IDs
-    if(m_world->parameters()->outputIdsOnIteration)
+    if(m_world.parameters().outputIdsOnIteration)
     {
-        //m_world->logger()->saveElectronIDs();
-        //m_world->logger()->saveHoleIDs();
+        m_world.logger().saveElectronIDs();
+        m_world.logger().saveHoleIDs();
     }
 }
 
 void Simulation::createDefects()
 {
-    for(int i = 0; i < m_world->electronGrid()->volume(); ++i)
+    for(int i = 0; i < m_world.electronGrid().volume(); ++i)
     {
-        if(m_world->randomNumberGenerator()->random()< m_world->parameters()->defectPercentage)
+        if(m_world.randomNumberGenerator().random()< m_world.parameters().defectPercentage)
         {
-            m_world->electronGrid()->registerDefect(i);
-            m_world->holeGrid()->registerDefect(i);
-            m_world->defectSiteIDs()->push_back(i);
+            m_world.electronGrid().registerDefect(i);
+            m_world.holeGrid().registerDefect(i);
+            m_world.defectSiteIDs().push_back(i);
         }
     }
 }
 
 void Simulation::seedCharges()
 {
-    SourceAgent * eSource = new ElectronSourceAgent(m_world,Grid::NoFace,0,1.0,1,0);
-    SourceAgent * pSource = new HoleSourceAgent(m_world,Grid::NoFace,0,1.0,1,0);
+    SourceAgent * eSource = new ElectronSourceAgent(m_world,Grid::NoFace);
+    eSource->setRate(1.0);
 
-    for(int i = 0; i < eSource->maxElectrons();)
+    SourceAgent * pSource = new HoleSourceAgent(m_world,Grid::NoFace);
+    pSource->setRate(1.0);
+
+    for(int i = 0; i < m_world.maxElectronAgents();)
     {
         if(eSource->seed()) { ++i; }
     }
 
-    for(int i = 0; i < pSource->maxHoles();)
+    for(int i = 0; i < m_world.maxHoleAgents();)
     {
         if(pSource->seed()) { ++i; }
     }
@@ -187,19 +179,19 @@ void Simulation::seedCharges()
 
 void Simulation::performInjections()
 {
-    for(int i = 0; i < m_world->sources()->size(); i++)
+    for(int i = 0; i < m_world.sources().size(); i++)
     {
-        m_world->sources()->at(i)->tryToInject();
+        m_world.sources().at(i)->tryToInject();
     }
 }
 
 void Simulation::nextTick()
 {
     // Iterate over all sites to change their state
-    QList < ChargeAgent * >&electrons = *m_world->electrons();
-    QList < ChargeAgent * >&holes = *m_world->holes();
+    QList<ChargeAgent*> &electrons = m_world.electrons();
+    QList<ChargeAgent*> &holes = m_world.holes();
 
-    if ( m_world->parameters()->outputIdsOnDelete )
+    if ( m_world.parameters().outputIdsOnDelete )
     {
         for(int i = 0; i < electrons.size(); ++i)
         {
@@ -207,7 +199,7 @@ void Simulation::nextTick()
             // Check if the charge was removed - then we should delete it
             if(electrons[i]->removed())
             {
-                //m_world->logger()->report(*electrons[i]);
+                m_world.logger().report(*electrons[i]);
                 delete electrons[i];
                 electrons.removeAt(i);
                 --i;
@@ -219,13 +211,13 @@ void Simulation::nextTick()
             // Check if the charge was removed - then we should delete it
             if(holes[i]->removed())
             {
-                //m_world->logger()->report(*holes[i]);
+                m_world.logger().report(*holes[i]);
                 delete holes[i];
                 holes.removeAt(i);
                 --i;
             }
         }
-        //m_world->logger()->flush();
+        //m_world.logger().flush();
     }
     else
     {
@@ -273,6 +265,15 @@ inline void Simulation::chargeAgentDecideFuture(ChargeAgent * chargeAgent)
 {
     // same rules apply here as for chargeAgentIterate;
     chargeAgent->decideFuture();
+}
+
+void Simulation::equilibrated()
+{
+    m_world.parameters().currentStep = 0;
+    foreach(FluxAgent *flux, m_world.fluxes())
+    {
+        flux->resetCounters();
+    }
 }
 
 }

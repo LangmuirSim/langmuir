@@ -6,63 +6,43 @@
 namespace Langmuir
 {
 
-DrainAgent::DrainAgent(World * world, double potential, double rate, int tries, QObject *parent)
-    : FluxAgent(Agent::Drain, world, potential, rate, tries, parent)
+DrainAgent::DrainAgent(World &world, Grid &grid, QObject *parent)
+    : FluxAgent(Agent::Drain, world, grid, parent)
 {
 }
 
-ElectronDrainAgent::ElectronDrainAgent(World * world, int site, double potential, double rate, int tries, QObject *parent)
-    : DrainAgent(world, potential, rate, tries, parent)
+ElectronDrainAgent::ElectronDrainAgent(World &world, int site, QObject *parent)
+    : DrainAgent(world, world.electronGrid(), parent)
 {
-    m_grid  = m_world->electronGrid();
     initializeSite(site);
-
-    QString string;
-    QTextStream stream(&string);
-    stream << this->metaObject()->className() << "(" << this << ")";
-    setObjectName(string);
+    setObjectName("ElectronDrain");
 }
 
-ElectronDrainAgent::ElectronDrainAgent(World * world, Grid::CubeFace cubeFace, double potential, double rate, int tries, QObject *parent)
-    : DrainAgent(world, potential, rate, tries, parent)
+ElectronDrainAgent::ElectronDrainAgent(World &world, Grid::CubeFace cubeFace, QObject *parent)
+    : DrainAgent(world, world.electronGrid(), parent)
 {
-    m_grid  = m_world->electronGrid();
     initializeSite(cubeFace);
-
-    QString string;
-    QTextStream stream(&string);
-    stream << this->metaObject()->className() << "(" << this << ")";
-    setObjectName(string);
+    setObjectName("ElectronDrain");
 }
 
-HoleDrainAgent::HoleDrainAgent(World * world, int site, double potential, double rate, int tries, QObject *parent)
-    : DrainAgent(world, potential, rate, tries, parent)
+HoleDrainAgent::HoleDrainAgent(World &world, int site, QObject *parent)
+    : DrainAgent(world, world.holeGrid(), parent)
 {
-    m_grid  = m_world->holeGrid();
     initializeSite(site);
-
-    QString string;
-    QTextStream stream(&string);
-    stream << this->metaObject()->className() << "(" << this << ")";
-    setObjectName(string);
+    setObjectName("HoleDrain");
 }
 
-HoleDrainAgent::HoleDrainAgent(World * world, Grid::CubeFace cubeFace, double potential, double rate, int tries, QObject *parent)
-    : DrainAgent(world, potential, rate, tries, parent)
+HoleDrainAgent::HoleDrainAgent(World &world, Grid::CubeFace cubeFace, QObject *parent)
+    : DrainAgent(world, world.holeGrid(), parent)
 {
-    m_grid  = m_world->holeGrid();
     initializeSite(cubeFace);
-
-    QString string;
-    QTextStream stream(&string);
-    stream << this->metaObject()->className() << "(" << this << ")";
-    setObjectName(string);
+    setObjectName("HoleDrain");
 }
 
 bool DrainAgent::tryToAccept(ChargeAgent *charge)
 {
     m_attempts += 1;
-    if(shouldTransport(charge->site()) )
+    if(shouldTransport(charge->getCurrentSite()) )
     {
         m_successes += 1;
         return true;
@@ -73,14 +53,14 @@ bool DrainAgent::tryToAccept(ChargeAgent *charge)
 double ElectronDrainAgent::energyChange(int site)
 {
     double p1 = m_potential;
-    double p2 = m_grid->potential(site);
+    double p2 = m_grid.potential(site);
     return p1-p2; // its backwards because q=-1 and dE = q*(p2-p1)= p1-p2
 }
 
 double HoleDrainAgent::energyChange(int site)
 {
     double p1 = m_potential;
-    double p2 = m_grid->potential(site);
+    double p2 = m_grid.potential(site);
     return p2-p1;
 }
 

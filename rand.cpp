@@ -6,11 +6,6 @@ namespace Langmuir
 
 Random::Random(int seed, QObject *parent) : QObject(parent)
 {
-    QString string;
-    QTextStream stream(&string);
-    stream << this->metaObject()->className() << "(" << this << ")";
-    setObjectName(string);
-
     m_seed = 0;
     if(seed <= 0)
     {

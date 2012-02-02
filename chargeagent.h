@@ -5,12 +5,14 @@
 
 namespace Langmuir
 {
+
 class Grid;
 class SimulationParameters;
+
 class ChargeAgent : public Agent
 {
 public:
-    ChargeAgent(Agent::Type type, World *world, int site, QObject *parent=0);
+    ChargeAgent(Agent::Type getType, World &world, Grid &grid, int site, QObject *parent=0);
     virtual ~ChargeAgent();
     int charge();
     void chooseFuture();
@@ -18,13 +20,10 @@ public:
     void completeTick();
     bool removed();
     int lifetime();
-    double pathlength();
+    int pathlength();
     void setOpenCLID(int id);
     int getOpenCLID();
     double coulombInteraction(int newSite);
-
-    static void setTitles( QTextStream &stream, SimulationParameters &par );
-    friend QTextStream& operator<<( QTextStream &stream, const ChargeAgent &charge );
 
 protected:
     virtual double bindingPotential(int site)= 0;
@@ -32,14 +31,14 @@ protected:
     bool m_removed;
     int m_lifetime;
     int m_pathlength;
-    Grid *m_grid;
+    Grid &m_grid;
     int m_openClID;
 };
 
 class ElectronAgent : public ChargeAgent
 {
 public:
-    ElectronAgent(World *world, int site, QObject *parent=0);
+    ElectronAgent(World &world, int site, QObject *parent=0);
 protected:
     virtual double bindingPotential(int site);
 };
@@ -47,9 +46,10 @@ protected:
 class HoleAgent : public ChargeAgent
 {
 public:
-    HoleAgent(World *world, int site, QObject *parent=0);
+    HoleAgent(World &world, int site, QObject *parent=0);
 protected:
     virtual double bindingPotential(int site);
 };
+
 }
 #endif

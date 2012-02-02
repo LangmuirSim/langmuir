@@ -1,192 +1,255 @@
 #include "inputparser.h"
-#include <QTextStream>
-#include <cmath>
-#include <QDir>
+#include <QDebug>
+#include <QFile>
+#include <QFileInfo>
+#include <QRegExp>
+#include <QStringList>
 
 namespace Langmuir
 {
 
-SimulationParameters::SimulationParameters()
+InputParser::InputParser(QObject *parent) :
+    QObject(parent)
 {
-    randomSeed = -1;
+    createSteps(0);
+}
 
-    gridZ = 1;
-    gridY = 128;
-    gridX = 128;
+void InputParser::setMap(int step)
+{
+    createVariable("random.seed"            , m_parameters[step].randomSeed          , step);
 
-    coulombCarriers = false;
-    coulombDefects = false;
-    defectsCharge = -1;
+    createVariable("grid.z"                 , m_parameters[step].gridZ               , step);
+    createVariable("grid.y"                 , m_parameters[step].gridY               , step);
+    createVariable("grid.x"                 , m_parameters[step].gridX               , step);
 
-    outputIdsOnIteration = false;
-    outputIdsAtStart = false;
-    outputIdsOnDelete = false;
+    createVariable("coulomb.carriers"       , m_parameters[step].coulombCarriers     , step);
+    createVariable("coulomb.defects"        , m_parameters[step].coulombDefects      , step);
+    createVariable("defects.charge"         , m_parameters[step].defectsCharge       , step);
 
-    outputCoulomb = false;
-    outputPotential = false;
-    outputImage = false;
+    createVariable("output.ids.on.iteration", m_parameters[step].outputIdsOnIteration, step);
+    createVariable("output.ids.at.start"    , m_parameters[step].outputIdsAtStart    , step);
+    createVariable("output.ids.on.delete"   , m_parameters[step].outputIdsOnDelete   , step);
 
-    iterationsPrint = 10;
-    iterationsReal = 1000;
-    iterationsWarmup = 1000;
-    outputPrecision = 5;
-    outputWidth = 20;
-    outputPath = QDir::currentPath();
+    createVariable("output.coulomb"         , m_parameters[step].outputCoulomb       , step);
+    createVariable("output.potential"       , m_parameters[step].outputPotential     , step);
+    createVariable("output.image"           , m_parameters[step].outputImage         , step);
 
-    electronPercentage = 0.01;
-    holePercentage = 0.00;
-    seedCharges = false;
-    defectPercentage = 0.00;
-    trapPercentage = 0.00;
-    trapPotential = 0.10;
-    gaussianAverg = 0.00;
-    gaussianStdev = 0.00;
-    seedPercentage = 1.0;
+    createVariable("iterations.print"       , m_parameters[step].iterationsPrint     , step);
+    createVariable("iterations.real"        , m_parameters[step].iterationsReal      , step);
+    createVariable("iterations.warmup"      , m_parameters[step].iterationsWarmup    , step);
+    createVariable("output.percision"       , m_parameters[step].outputPrecision     , step);
+    createVariable("output.width"           , m_parameters[step].outputWidth         , step);
+    createVariable("output.path"            , m_parameters[step].outputPath          , step);
 
-    voltageDrain = 0.00;
-    voltageSource = 0.00;
-    temperatureKelvin = 300.0;
+    createVariable("electron.percentage"    , m_parameters[step].electronPercentage  , step);
+    createVariable("hole.percentage"        , m_parameters[step].holePercentage      , step);
+    createVariable("seed.charges"           , m_parameters[step].seedCharges         , step);
+    createVariable("defect.percentage"      , m_parameters[step].defectPercentage    , step);
+    createVariable("trap.percentage"        , m_parameters[step].trapPercentage      , step);
+    createVariable("trap.potential"         , m_parameters[step].trapPotential       , step);
+    createVariable("gaussian.average"       , m_parameters[step].gaussianAverg       , step);
+    createVariable("gaussian.stdev"         , m_parameters[step].gaussianStdev       , step);
+    createVariable("seed.percentage"        , m_parameters[step].seedPercentage      , step);
 
-    useOpenCL = false;
-    workX = 4;
-    workY = 4;
-    workZ = 4;
-    workSize = 256;
-    kernelsPath = QDir::currentPath();
+    createVariable("voltage.drain"          , m_parameters[step].voltageDrain        , step);
+    createVariable("voltage.source"         , m_parameters[step].voltageSource       , step);
+    createVariable("temperature.kelvin"     , m_parameters[step].temperatureKelvin   , step);
 
-    boltzmannConstant = 1.3806504e-23;
-    dielectricConstant = 3.5;
-    elementaryCharge = 1.60217646e-19;
-    permittivitySpace = 8.854187817e-12;
-    gridFactor = 1e-9;
-    electrostaticCutoff = 50;
-    electrostaticPrefactor = elementaryCharge /
-     (4.0 * M_PI * dielectricConstant * permittivitySpace * gridFactor);
-    inverseKT = 1.0 /(boltzmannConstant * temperatureKelvin);
-    okCL = false;
-    currentStep = 0;
-    currentSimulation = 0;
-    outputStub = "out";
-    iterationsTotal = iterationsReal + iterationsWarmup;
-    currentStep = 0;
-    currentSimulation = 0;
-    simulationSteps = 0;
+    createVariable("use.opencl"             , m_parameters[step].useOpenCL           , step);
+    createVariable("work.x"                 , m_parameters[step].workX               , step);
+    createVariable("work.y"                 , m_parameters[step].workY               , step);
+    createVariable("work.z"                 , m_parameters[step].workZ               , step);
+    createVariable("work.size"              , m_parameters[step].workSize            , step);
+    createVariable("kernels.path"           , m_parameters[step].kernelsPath         , step);
 
-    check();
+    createVariable("boltzmann.constant"     , m_parameters[step].boltzmannConstant     , step, false);
+    createVariable("dielectric.constant"    , m_parameters[step].dielectricConstant    , step, false);
+    createVariable("elementary.charge"      , m_parameters[step].elementaryCharge      , step, false);
+    createVariable("permittivity.space"     , m_parameters[step].permittivitySpace     , step, false);
+    createVariable("grid.factor"            , m_parameters[step].gridFactor            , step, false);
+    createVariable("electrostatic.cutoff"   , m_parameters[step].electrostaticCutoff   , step, false);
+    createVariable("electrostatic.prefactor", m_parameters[step].electrostaticPrefactor, step, false);
+    createVariable("inverse.KT"             , m_parameters[step].inverseKT             , step, false);
+    createVariable("ok.CL"                  , m_parameters[step].okCL                  , step, false);
+    createVariable("current.step"           , m_parameters[step].currentStep           , step, false);
+    createVariable("current.simulation"     , m_parameters[step].currentSimulation     , step, false);
+    createVariable("output.stub"            , m_parameters[step].outputStub            , step, false);
+    createVariable("iterations.total"       , m_parameters[step].iterationsTotal       , step, false);
+    createVariable("simulation.steps"       , m_parameters[step].simulationSteps       , step, false);
+}
+
+InputParser::~InputParser()
+{
+    for (int i = 0; i < m_variables.size(); i++)
+    {
+        foreach ( AbstractVariable *var, m_variables[i] )
+        {
+            delete var;
+        }
+        m_variables[i].clear();
+    }
 }
 
 SimulationParameters& InputParser::getParameters(int step)
 {
-    parameter("random.seed",m_parameters.randomSeed,step);
-
-    parameter("grid.z",m_parameters.gridZ,step);
-    parameter("grid.y",m_parameters.gridY,step);
-    parameter("grid.x",m_parameters.gridX,step);
-
-    parameter("coulomb.carriers",m_parameters.coulombCarriers,step);
-    parameter("coulomb.defects",m_parameters.coulombDefects,step);
-    parameter("defects.charge",m_parameters.defectsCharge,step);
-
-    parameter("output.ids.on.iteration",m_parameters.outputIdsOnIteration,step);
-    parameter("output.ids.at.start",m_parameters.outputIdsAtStart,step);
-    parameter("output.ids.on.delete",m_parameters.outputIdsOnDelete,step);
-
-    parameter("output.coulomb",m_parameters.outputCoulomb,step);
-    parameter("output.potential",m_parameters.outputPotential,step);
-    parameter("output.image",m_parameters.outputImage,step);
-
-    parameter("iterations.print",m_parameters.iterationsPrint,step);
-    parameter("iterations.real",m_parameters.iterationsReal,step);
-    parameter("iterations.warmup",m_parameters.iterationsWarmup,step);
-    parameter("output.percision",m_parameters.outputPrecision,step);
-    parameter("output.width",m_parameters.outputWidth,step);
-    parameter("output.path",m_parameters.outputPath,step);
-
-    parameter("electron.percentage",m_parameters.electronPercentage ,step);
-    parameter("hole.percentage",m_parameters.holePercentage,step);
-    parameter("seed.charges",m_parameters.seedCharges,step);
-    parameter("defect.percentage",m_parameters.defectPercentage,step);
-    parameter("trap.percentage",m_parameters.trapPercentage,step);
-    parameter("trap.potential",m_parameters.trapPotential,step);
-    parameter("gaussian.average",m_parameters.gaussianAverg,step);
-    parameter("gaussian.stdev",m_parameters.gaussianStdev,step);
-    parameter("seed.percentage",m_parameters.seedPercentage,step);
-
-    parameter("voltage.drain",m_parameters.voltageDrain,step);
-    parameter("voltage.source",m_parameters.voltageSource,step);
-    parameter("temperature.kelvin",m_parameters.temperatureKelvin,step);
-
-    parameter("use.opencl",m_parameters.useOpenCL,step);
-    parameter("work.x",m_parameters.workX,step);
-    parameter("work.y",m_parameters.workY,step);
-    parameter("work.z",m_parameters.workZ,step);
-    parameter("work.size",m_parameters.workSize,step);
-    parameter("kernels.path",m_parameters.kernelsPath,step);
-
-    m_parameters.currentStep = 0;
-    m_parameters.currentSimulation = step;
-    m_parameters.electrostaticPrefactor = m_parameters.elementaryCharge /
-     (4.0 * M_PI * m_parameters.dielectricConstant * m_parameters.permittivitySpace * m_parameters.gridFactor);
-    m_parameters.inverseKT = 1.0 /(m_parameters.boltzmannConstant * m_parameters.temperatureKelvin);
-    m_parameters.iterationsTotal = m_parameters.iterationsReal + m_parameters.iterationsWarmup;
-    m_parameters.check();
-
-    return m_parameters;
+    checkStep(step);
+    m_parameters[step].check();
+    return m_parameters[step];
 }
 
-void SimulationParameters::check()
+void InputParser::saveParametersXML(int step)
 {
-    Q_ASSERT( defectPercentage <= 1.00 - trapPercentage );
-
-    Q_ASSERT( gridZ >= 1 );
-    Q_ASSERT( gridY >= 1 );
-    Q_ASSERT( gridX >= 1 );
-
-    Q_ASSERT( iterationsPrint >= 0 );
-    Q_ASSERT( iterationsReal >= 0 );
-    Q_ASSERT( iterationsWarmup >= 0 );
-
-    if(outputWidth <(outputPrecision + 8)) { outputWidth = outputPrecision + 8; }
-    Q_ASSERT( outputWidth >= 8 );
-
-    Q_ASSERT( electronPercentage >= 0.00 && electronPercentage <= 1.00 );
-    Q_ASSERT( holePercentage >= 0.00 && holePercentage <= 1.00 );
-    Q_ASSERT( defectPercentage >= 0.00 && defectPercentage <= 1.00 );
-    Q_ASSERT( trapPercentage >= 0.00 && trapPercentage <= 1.00 );
-    Q_ASSERT( seedPercentage >= 0.00 && seedPercentage <= 1.00 );
-
-    Q_ASSERT( gaussianStdev >= 0.00 );
-    Q_ASSERT( temperatureKelvin >= 0.00 );
-
-    Q_ASSERT( iterationsReal % iterationsPrint == 0 );
-    Q_ASSERT( iterationsWarmup % iterationsPrint == 0 );
-    Q_ASSERT( iterationsTotal > 0 );
+    checkStep(step);
 }
 
-InputParser::InputParser(const QString &fileName, QObject *parent ) : QObject(parent)
+void InputParser::saveParameters(int step)
 {
-    m_parameters.outputStub = fileName.split(".",QString::SkipEmptyParts)[0];
-
-    QString string;
-    QTextStream stream(&string);
-    stream << this->metaObject()->className() << "(" << this << ")";
-    setObjectName(string);
-
-    getParameters(-1);
-    parseFile(fileName);
-    getParameters(-1);
+    checkStep(step);
+    int w1 = int(log10(steps()))+1;
+    QDir dir(m_parameters[step].outputPath);
+    if (!dir.exists())
+    {
+        qFatal("%s does not exist",
+        qPrintable(m_parameters[step].outputPath));
+    }
+    QString name = QString("%1-%2.inp")
+            .arg(m_parameters[step].outputStub)
+            .arg(step,w1,10,QLatin1Char('0'));
+    name = dir.absoluteFilePath(name);
+    QFile file(name);
+    if (!file.open(QIODevice::WriteOnly|QIODevice::Text))
+    {
+        qFatal("can not open %s",
+        qPrintable(name));
+    }
+    QTextStream stream;
+    stream.setDevice(&file);
+    stream.setFieldAlignment(QTextStream::AlignLeft);
+    foreach(AbstractVariable *var, m_variables[step])
+    {
+        stream << QString("%1 = %2\n").arg(var->key(),-25).arg(var->value(15),0);
+    }
+    stream.flush();
+    file.close();
 }
 
-void InputParser::parseFile(const QString &fileName)
+void InputParser::checkStep(int step)
+{
+    if (step < 0 || step >= m_parameters.size() || step >= m_variables.size())
+    {
+        qFatal("Parser requested step(%d) >= steps(%d) defined",steps(),step);
+    }
+}
+
+void InputParser::setValue(QString key, QString value, int step)
+{
+    createSteps(step);
+    if (!(m_variables[step].contains(key)))
+    {
+        qFatal("Parser::setValue requested key(%s) which is not a valid key",qPrintable(key));
+    }
+    m_variables[step][key]->setValue(value);
+}
+
+int InputParser::steps()
+{
+    return m_parameters.size();
+}
+
+void InputParser::createSteps(int toStep)
+{
+    for (int i = steps()-1; i < toStep; i++)
+    {
+        m_parameters.push_back(SimulationParameters());
+        m_variables.push_back(QMap<QString,AbstractVariable*>());
+        setMap(steps()-1);
+        m_parameters[steps()-1].simulationSteps = steps();
+    }
+}
+
+void InputParser::AbstractVariable::convert( QString string, QString &result )
+{
+    result = string;
+}
+
+void InputParser::AbstractVariable::convert( QString string, double &result )
+{
+    bool ok = false;
+    double converted = string.toDouble(&ok);
+    if ( ok )
+    {
+        result = converted;
+    }
+    else
+    {
+        qFatal("Parser::AbstractVariable can not convert %s to double",qPrintable(string));
+    }
+}
+
+void InputParser::AbstractVariable::convert( QString string, bool &result )
+{
+    if ( string.trimmed().toLower() == "false" )
+    {
+        result = false;
+        return;
+    }
+    if ( string.trimmed().toLower() == "true" )
+    {
+        result = true;
+        return;
+    }
+    int converted = 0;
+    convert(string,converted);
+    if ( converted <= 0 )
+    {
+        result = false;
+    }
+    else
+    {
+        result = true;
+    }
+}
+
+void InputParser::AbstractVariable::convert( QString string, int &result )
+{
+    bool ok = false;
+    int converted = string.toInt(&ok);
+    if ( ok )
+    {
+        result = converted;
+    }
+    else
+    {
+        qFatal("Parser::AbstractVariable can not convert %s to int",qPrintable(string));
+    }
+}
+
+void InputParser::AbstractVariable::convert( QString string, unsigned int &result )
+{
+    bool ok = false;
+    int converted = string.toUInt(&ok);
+    if ( ok )
+    {
+        result = converted;
+    }
+    else
+    {
+        qFatal("Parser::AbstractVariable can not convert %s to unsigned int",qPrintable(string));
+    }
+}
+
+void InputParser::parserXML(QString fileName)
+{
+}
+
+void InputParser::parseKeyValue(QString fileName)
 {
     QFile     handle(fileName);
-    QFileInfo   info(fileName);
-
     if(! handle.open(QIODevice::ReadOnly | QIODevice::Text))
         qFatal("can not open input file: %s", qPrintable(fileName));
 
     QRegExp regex1("\\s*=\\s*");
-    QRegExp regex2("\\s*, \\s*");
+    QRegExp regex2("\\s*,\\s*");
     QRegExp regex3("\\s*\\[\\s*");
     QRegExp regex4("\\s*\\]\\s*");
     QRegExp regex5("#.*$");
@@ -194,6 +257,10 @@ void InputParser::parseFile(const QString &fileName)
     int lineNumber = 0;
     while(!handle.atEnd())
     {
+        QString info;
+        info += QString(" file(%1)").arg(fileName);
+        info += QString(" line(%1)").arg(lineNumber);
+
         QString unaltered = handle.readLine().trimmed();
         QString line = unaltered;
         line = line.replace(regex1, "="  );
@@ -205,159 +272,65 @@ void InputParser::parseFile(const QString &fileName)
 
         if(line.length()> 0)
         {
-            if(line.count("=")!= 1)
+            if(line.count("=") != 1)
             {
-                qFatal("InputParser syntax error:\n"
-                       " file: %s\n"
-                       " line: %d\n"
-                       " text: %s\n"
-                       " what: line must contain 1 equal sign.", 
-                       qPrintable(info.fileName()), lineNumber, qPrintable(unaltered));
+                qFatal("Parser::parseKeyValue line without '=' sign;%s",qPrintable(info));
             }
 
             QStringList tokens = line.split("=", QString::SkipEmptyParts);
-
-            if(tokens.size()!= 2)
+            if(tokens.size() != 2)
             {
-                qFatal("InputParser syntax error:\n"
-                       " file: %s\n"
-                       " line: %d\n"
-                       " text: %s\n"
-                       " what: line does not split into 2 sections at the equal sign.", 
-                       qPrintable(info.fileName()), lineNumber, qPrintable(unaltered));
+                qFatal("Parser::parseKeyValue line with '=' sign doesn't split into 2 tokens;%s",qPrintable(info));
             }
 
             QString key = tokens[0].trimmed().toLower();
 
             if(key.isEmpty())
             {
-                qFatal("InputParser syntax error:\n"
-                       " file: %s\n"
-                       " line: %d\n"
-                       " text: %s\n"
-                       " what: key is an empty string", 
-                       qPrintable(info.fileName()), lineNumber, qPrintable(unaltered));
+                qFatal("Parser::parseKeyValue key is empty;%s",qPrintable(info));
             }
+            info += QString(" key(%1)").arg(key);
 
             QStringList values = tokens[1].split(",", QString::SkipEmptyParts);
-
             if(values.size()== 0)
             {
-                qFatal("InputParser syntax error:\n"
-                       " file: %s\n"
-                       " line: %d\n"
-                       " text: %s\n"
-                       "  key: %s\n"
-                       " what: key specifies no values", 
-                       qPrintable(info.fileName()), lineNumber, qPrintable(unaltered), qPrintable(key));
+                qFatal("Parser::parseKeyValue values are empty;%s",qPrintable(info));
             }
 
             for(int i = 0; i < values.size(); i++)
             {
                 QString value = values[i].trimmed();
-
                 if(value.isEmpty())
                 {
-                    qFatal("InputParser syntax error:\n"
-                           " file: %s\n"
-                           " line: %d\n"
-                           " text: %s\n"
-                           "  key: %s\n"
-                           " what: key value %d is an empty string", 
-                           qPrintable(info.fileName()), lineNumber, qPrintable(unaltered), qPrintable(key), i);
+                    qFatal("Parser::parseKeyValue value is empty;%s",qPrintable(info));
                 }
-
-                if(! m_map.contains(key))
-                {
-                    qFatal("invalid key found: %s",qPrintable(key));
-                }
-                m_map[key].push_back(value);
+                setValue(key,value,i);
             }
         }
         lineNumber += 1;
     }
-
-    m_parameters.simulationSteps = 1;
-    for(QMap<QString, QVector<QVariant> >::iterator i = m_map.begin(); i != m_map.end(); i++)
+    // propagate unspecified values forward
+    if (m_parameters.size() > 1)
     {
-        QVector<QVariant> & valueList = i.value();
-
-        if (  i.value().size() > 1 )
+        for (int i = 1; i < m_parameters.size(); i++)
         {
-            valueList.pop_front();
-        }
-        if ( valueList.size() > m_parameters.simulationSteps )
-        {
-            m_parameters.simulationSteps = valueList.size();
+            foreach(AbstractVariable *var, m_variables[i])
+            {
+                if (!var->wasSet())
+                {
+                    AbstractVariable *last = m_variables[i-1][var->key()];
+                    if ( var->isWritable() ) var->setValue(last->value(100));
+                }
+            }
         }
     }
-}
-
-QString InputParser::mapToQString()
-{
-    QString result = "";
-    for(QMap<QString, QVector<QVariant> >::iterator i = m_map.begin(); i != m_map.end(); i++)
+    // check the parameters at each step
+    for (int i = 0; i < m_parameters.size(); i++)
     {
-        QVector< QVariant > & valueList = i.value();
-
-        QString valuesString;
-        for(int j = 0; j < valueList.size(); j++)
-        {
-            switch( i.value().at(j).type() )
-            {
-            case QVariant::String:
-            {
-                valuesString += QString("%1,").arg( valueList[j].value<QString>() );
-                break;
-            }
-            case QVariant::Double:
-            {
-                valuesString += QString("%1,").arg( valueList[j].value<double>() );
-                break;
-            }
-            case QVariant::Bool:
-            {
-                bool value = valueList[j].value<bool>();
-                if (value)
-                {
-                    valuesString += "true,";
-                }
-                else
-                {
-                    valuesString += "false,";
-                }
-                break;
-            }
-            case QVariant::Int:
-            {
-                valuesString += QString("%1,").arg( valueList[j].value<int>() );
-                break;
-            }
-            default:
-            {
-                valuesString += "???";
-            }
-            }
-        }
-        valuesString = valuesString.remove(valuesString.size()-1,1);
-
-        if ( valueList.size() == 1 )
-        {
-            result += QString("%1 %2 %3\n").arg(i.key(),-30).arg("=").arg(valuesString);
-        }
-
-        else
-        {
-            result += QString("%1 %2 [%3]\n").arg(i.key(),-30).arg("=").arg(valuesString);
-        }
+        m_parameters[i].currentSimulation = i;
+        m_parameters[i].simulationSteps = steps();
+        m_parameters[i].check();
     }
-    result = result.remove(result.size()-1,1);
-    return result;
-}
-
-int InputParser::steps()
-{
-    return m_parameters.simulationSteps;
 }
 
 }

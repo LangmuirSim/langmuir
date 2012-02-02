@@ -13,28 +13,17 @@ Grid::Grid(int xSize, int ySize, int zSize, QObject *parent) : QObject(parent)
     m_xzPlaneArea = xSize*zSize;
     m_volume = ySize*xSize*zSize;
     m_specialAgentCount = 0;
-    m_specialAgentReserve = 5;
-
-   //const QMetaObject &QMO = *metaObject();
-   //const QMetaEnum &QME = QMO.enumerator( QMO.indexOfEnumerator("CubeFace") );
-   //if (!QME.isValid()) { qFatal("Can not obtain QMetaEnum for CubeFace"); }
-   int QMESize = 7;//QME.keyCount();
-
-    m_agents.fill(0, m_volume+m_specialAgentReserve*QMESize);
-    m_potentials.fill(0.0, m_volume+m_specialAgentReserve*QMESize);
-    m_agentType.fill(Agent::Empty, m_volume+m_specialAgentReserve*QMESize);
-    m_specialAgents.reserve(QMESize);
-    for(int i = 0; i < QMESize; i++)
+    m_specialAgentReserve = 5*7;
+    m_agents.fill(0, m_volume+m_specialAgentReserve);
+    m_potentials.fill(0.0, m_volume+m_specialAgentReserve);
+    m_agentType.fill(Agent::Empty, m_volume+m_specialAgentReserve);
+    m_specialAgents.reserve(m_specialAgentReserve);
+    for(int i = 0; i < 7; i++)
     {
         QList<Agent*> qlist;
         m_specialAgents.push_back(qlist);
-        m_specialAgents[i].reserve(m_specialAgentReserve);
+        m_specialAgents[i].reserve(5);
     }
-
-    QString string;
-    QTextStream stream(&string);
-    stream << this->metaObject()->className() << "(" << this << ")";
-    setObjectName(string);
 }
 
 Grid::~Grid()
@@ -193,9 +182,9 @@ QVector<int> Grid::sliceIndex(int xi, int xf, int yi, int yf, int zi, int zf)
         zf = ndx_rev;
         ndx_rev = 0;
     }
-    if(xi <       0 || yi <        0 || zi <       0 ||
+    if(  xi <       0 || yi <        0 || zi <       0 ||
          xf <       0 || yf <        0 || zf <       0 ||
-         xi > m_xSize || yi > m_ySize || zi > m_zSize ||
+         xi > m_xSize || yi > m_ySize || zi > m_zSize  ||
          xf > m_xSize || yf > m_ySize || zf > m_zSize)
     {
         qFatal("invalid slice index range:(%d, %d, %d)->(%d, %d, %d)", xi, yi, zi, xf, yf, zf);
@@ -243,7 +232,7 @@ QVector<int> Grid::neighborsSite(int site)
     {
         foreach(Agent* agent, m_specialAgents[Grid::Left])
         {
-            nList.push_back(agent->site());
+            nList.push_back(agent->getCurrentSite());
         }
     }
     // Right
@@ -251,7 +240,7 @@ QVector<int> Grid::neighborsSite(int site)
     {
         foreach(Agent* agent, m_specialAgents[Grid::Right])
         {
-            nList.push_back(agent->site());
+            nList.push_back(agent->getCurrentSite());
         }
     }
     // Left
@@ -259,7 +248,7 @@ QVector<int> Grid::neighborsSite(int site)
     {
         foreach(Agent* agent, m_specialAgents[Grid::Top])
         {
-            nList.push_back(agent->site());
+            nList.push_back(agent->getCurrentSite());
         }
     }
     // Right
@@ -267,7 +256,7 @@ QVector<int> Grid::neighborsSite(int site)
     {
         foreach(Agent* agent, m_specialAgents[Grid::Bottom])
         {
-            nList.push_back(agent->site());
+            nList.push_back(agent->getCurrentSite());
         }
     }
     // Bottom
@@ -275,7 +264,7 @@ QVector<int> Grid::neighborsSite(int site)
     {
         foreach(Agent* agent, m_specialAgents[Grid::Back])
         {
-            nList.push_back(agent->site());
+            nList.push_back(agent->getCurrentSite());
         }
     }
     // Top
@@ -283,7 +272,7 @@ QVector<int> Grid::neighborsSite(int site)
     {
         foreach(Agent* agent, m_specialAgents[Grid::Front])
         {
-            nList.push_back(agent->site());
+            nList.push_back(agent->getCurrentSite());
         }
     }
     return nList;
@@ -378,7 +367,8 @@ void Grid::registerSpecialAgent(Agent *agent, Grid::CubeFace cubeFace)
 {
     if(m_specialAgentCount >= m_specialAgentReserve)
     {
-        qFatal("can not register special agent; exceeded the max special agents");
+        qFatal("can not register special agent; exceeded the max special agents; %d >= %d",
+               m_specialAgentCount,m_specialAgentReserve);
     }
 
     QList< Agent *>& specialAgents = getSpecialAgentList(cubeFace);
@@ -392,7 +382,7 @@ void Grid::registerSpecialAgent(Agent *agent, Grid::CubeFace cubeFace)
     if(m_agents[site] == 0 && m_agentType[site] == Agent::Empty)
     {
         m_agents[site] = agent;
-        m_agentType[site] = agent->type();
+        m_agentType[site] = agent->getType();
     }
     else
     {
@@ -401,8 +391,8 @@ void Grid::registerSpecialAgent(Agent *agent, Grid::CubeFace cubeFace)
 
     QVector<int> neighbors = neighborsFace(cubeFace);
     agent->setNeighbors(neighbors);
-    agent->setSite(site);
-    agent->setSite(site, true);
+    agent->setCurrentSite(site);
+    agent->setFutureSite(site);
     ++m_specialAgentCount;
 }
 
@@ -415,7 +405,7 @@ void Grid::unregisterSpecialAgent(Agent *agent, Grid::CubeFace cubeFace)
     }
     specialAgents.removeOne(agent);
 
-    int site = agent->site();
+    int site = agent->getCurrentSite();
     if(!(m_agents[site] == agent))
     {
         qFatal("can not unregister special agent! pointers do not match");
@@ -428,11 +418,11 @@ void Grid::unregisterSpecialAgent(Agent *agent, Grid::CubeFace cubeFace)
 
 void Grid::registerAgent(Agent *agent)
 {
-    int site = agent->site();
+    int site = agent->getCurrentSite();
     if(m_agents[site] == 0 && m_agentType[site] == Agent::Empty)
     {
         m_agents[site] = agent;
-        m_agentType[site] = agent->type();
+        m_agentType[site] = agent->getType();
     }
     else
     {
@@ -444,7 +434,7 @@ void Grid::registerAgent(Agent *agent)
 
 void Grid::unregisterAgent(Agent *agent)
 {
-    int site = agent->site();
+    int site = agent->getCurrentSite();
     if(!(m_agents[site] == agent))
     {
         qFatal("can not unregister agent! pointers do not match");
