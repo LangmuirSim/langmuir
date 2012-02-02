@@ -17,7 +17,6 @@ set(project_headers_moc_1
       simulation.h
       world.h
       rand.h
-      timer.h
 )
 
 set(project_headers_moc_2
@@ -34,7 +33,6 @@ set(project_headers_common
       inputparser.h
       cubicgrid.h
       logger.h
-      timer.h
       potential.h
       openclhelper.h
       rand.h
