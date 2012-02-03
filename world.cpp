@@ -42,30 +42,39 @@ World::World(SimulationParameters &par, QObject *parent)
     // Create OpenCL Objects
     m_ocl = new OpenClHelper(refWorld, this);
 
-    // Create Transistor Sources
-    m_sources.push_back(new ElectronSourceAgent(refWorld, Grid::Left, this));
-    m_sources.last()->setRate(0.90);
+    if ( parameters().simulationType == "transistor" )
+    {
+        // Create Transistor Sources
+        m_sources.push_back(new ElectronSourceAgent(refWorld, Grid::Left, this));
+        m_sources.last()->setRate(parameters().sourceRate);
 
-    // Create Transistor Drains
-    m_drains.push_back(new ElectronDrainAgent(refWorld, Grid::Right, this));
-    m_drains.last()->setRate(0.90);
+        // Create Transistor Drains
+        m_drains.push_back(new ElectronDrainAgent(refWorld, Grid::Right, this));
+        m_drains.last()->setRate(parameters().drainRate);
+    }
+    else if ( parameters().simulationType == "solarcell" )
+    {
+        // Create Solar Cell Sources
+        m_sources.push_back(new ExcitonSourceAgent(refWorld, this));
+        m_sources.last()->setRate(parameters().sourceRate);
 
-    // Create Solar Cell Sources
-    //m_sources.push_back(new ExcitonSourceAgent(refWorld, this));
-    //m_sources.last()->setRate(0.001);
+        // Create Solar Cell Drains
+        m_drains.push_back(new ElectronDrainAgent(refWorld, Grid::Left, this));
+        m_drains.last()->setRate(parameters().drainRate);
 
-    // Create Solar Cell Drains
-    //m_drains.push_back(new ElectronDrainAgent(refWorld, Grid::Left, this));
-    //m_drains.last()->setRate(0.90);
+        m_drains.push_back(new HoleDrainAgent(refWorld, Grid::Left, this));
+        m_drains.last()->setRate(parameters().drainRate);
 
-    //m_drains.push_back(new HoleDrainAgent(refWorld, Grid::Left, this));
-    //m_drains.last()->setRate(0.90);
+        m_drains.push_back(new ElectronDrainAgent(refWorld, Grid::Right, this));
+        m_drains.last()->setRate(parameters().drainRate);
 
-    //m_drains.push_back(new ElectronDrainAgent(refWorld, Grid::Right, this));
-    //m_drains.last()->setRate(0.90);
-
-    //m_drains.push_back(new HoleDrainAgent(refWorld, Grid::Right, this));
-    //m_drains.last()->setRate(0.90);
+        m_drains.push_back(new HoleDrainAgent(refWorld, Grid::Right, this));
+        m_drains.last()->setRate(parameters().drainRate);
+    }
+    else
+    {
+        qFatal("simulation.type(%s) must be transistor or solarcell",qPrintable(parameters().simulationType));
+    }
 
     foreach( FluxAgent *flux, m_sources )
     {

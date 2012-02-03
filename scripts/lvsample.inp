@@ -1,7 +1,9 @@
+simulation.type         = solarcell
+
 random.seed             = -1
 
-grid.x                  = 128
-grid.y                  = 128
+grid.x                  = 256
+grid.y                  = 256
 grid.z                  = 1
 
 coulomb.carriers        = true
@@ -23,8 +25,8 @@ output.percision        = 8
 output.width            = 16
 output.path             = /home/adam/Desktop
 
-electron.percentage     = 0.1
-hole.percentage         = 0.1
+electron.percentage     = 0.01
+hole.percentage         = 0.01
 seed.charges            = false
 
 defect.percentage       = 0.00
@@ -34,8 +36,10 @@ gaussian.average        = 0.00
 gaussian.stdev          = 0.00
 seed.percentage         = 0.00
 
-voltage.drain           = 1.00
+voltage.drain           = 10.00
 voltage.source          = 0.00
+source.rate             = 0.90
+drain.rate              = 0.90
 
 temperature.kelvin      = 300.0
 

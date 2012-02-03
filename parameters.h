@@ -9,6 +9,8 @@ namespace Langmuir
 
 struct SimulationParameters
 {
+    QString simulationType;
+
     int randomSeed;
 
     int gridZ;
@@ -48,6 +50,9 @@ struct SimulationParameters
     double voltageSource;
     double temperatureKelvin;
 
+    double sourceRate;
+    double drainRate;
+
     bool useOpenCL;
     int workX;
     int workY;
@@ -71,6 +76,8 @@ struct SimulationParameters
     int simulationSteps;
 
     SimulationParameters() :
+
+        simulationType         ("transistor"),
         randomSeed             (-1),
 
         gridZ                  (1),
@@ -110,6 +117,9 @@ struct SimulationParameters
         voltageSource          (0.00),
         temperatureKelvin      (300.0),
 
+        sourceRate             (0.90),
+        drainRate              (0.90),
+
         useOpenCL              (false),
         workX                  (4),
         workY                  (4),
@@ -148,6 +158,12 @@ struct SimulationParameters
     void check()
     {
         setCalculatedValues();
+        // simulation type
+        if (!(QStringList()<<"transistor"<<"solarcell").contains(simulationType))
+        {
+            qFatal("simulation.type(%s) must be transistor or solarcell",qPrintable(simulationType));
+        }
+
         // grid size
         if (gridZ < 1)
         {
@@ -217,6 +233,14 @@ struct SimulationParameters
         {
             qFatal("trap.percentage(%f) > 1.0 - trap.percentage(%f)",defectPercentage,trapPercentage);
         }
+        if ( sourceRate < 0.0 || sourceRate > 1.0 )
+        {
+            qFatal("source.rate(%f) < 0 || > 1.0",sourceRate);
+        }
+        if ( drainRate < 0.0 || drainRate > 1.0 )
+        {
+            qFatal("drain.rate(%f) < 0 || > 1.0",drainRate);
+        }
 
         // other
         if ( gaussianStdev < 0.00 )
@@ -227,6 +251,7 @@ struct SimulationParameters
         {
             qFatal("temperature.kelvin < 0.0");
         }
+
     }
 };
 

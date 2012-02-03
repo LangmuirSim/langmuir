@@ -16,6 +16,7 @@ InputParser::InputParser(QObject *parent) :
 
 void InputParser::setMap(int step)
 {
+    createVariable("simulation.type"        , m_parameters[step].simulationType      , step);
     createVariable("random.seed"            , m_parameters[step].randomSeed          , step);
 
     createVariable("grid.z"                 , m_parameters[step].gridZ               , step);
@@ -54,6 +55,9 @@ void InputParser::setMap(int step)
     createVariable("voltage.drain"          , m_parameters[step].voltageDrain        , step);
     createVariable("voltage.source"         , m_parameters[step].voltageSource       , step);
     createVariable("temperature.kelvin"     , m_parameters[step].temperatureKelvin   , step);
+
+    createVariable("source.rate"            , m_parameters[step].sourceRate          , step);
+    createVariable("drain.rate"             , m_parameters[step].drainRate           , step);
 
     createVariable("use.opencl"             , m_parameters[step].useOpenCL           , step);
     createVariable("work.x"                 , m_parameters[step].workX               , step);
