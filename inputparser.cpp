@@ -38,7 +38,7 @@ void InputParser::setMap(int step)
     createVariable("iterations.print"       , m_parameters[step].iterationsPrint     , step);
     createVariable("iterations.real"        , m_parameters[step].iterationsReal      , step);
     createVariable("iterations.warmup"      , m_parameters[step].iterationsWarmup    , step);
-    createVariable("output.percision"       , m_parameters[step].outputPrecision     , step);
+    createVariable("output.precision"       , m_parameters[step].outputPrecision     , step);
     createVariable("output.width"           , m_parameters[step].outputWidth         , step);
     createVariable("output.path"            , m_parameters[step].outputPath          , step);
 

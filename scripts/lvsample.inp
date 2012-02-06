@@ -21,7 +21,7 @@ output.image            = false
 iterations.print        = 10
 iterations.real         = 2000
 iterations.warmup       = 0
-output.percision        = 8
+output.precision        = 8
 output.width            = 16
 output.path             = /home/adam/Desktop
 

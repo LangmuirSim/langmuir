@@ -36,7 +36,7 @@ private:
         const bool& wasSet() const { return m_set; }
         const bool& isWritable() const { return m_write; }
         const QString& key() const { return m_key; }
-        virtual QString value(int percision) const = 0;
+        virtual QString value(int precision) const = 0;
     protected:
         QString m_key;
         bool m_set;
@@ -55,7 +55,7 @@ private:
         Variable(QString key, T& value, bool write = true)
             : AbstractVariable(key,write), m_value(value) {}
         void setValue(QString value);
-        QString value(int percision) const;
+        QString value(int precision) const;
     private:
         T &m_value;
     };
@@ -83,22 +83,22 @@ template <typename T> void InputParser::createVariable(QString key, T &value, in
     m_variables[step][key] = new Variable<T>(key,value,write);
 }
 
-template <typename T> inline QString InputParser::Variable<T>::value(int percision) const
+template <typename T> inline QString InputParser::Variable<T>::value(int precision) const
 {
     QTextStream stream;
     QString result;
     stream.setString(&result);
-    stream.setRealNumberPrecision(percision);
+    stream.setRealNumberPrecision(precision);
     stream << m_value;
     return result;
 }
 
-template <> inline QString InputParser::Variable<bool>::value(int percision) const
+template <> inline QString InputParser::Variable<bool>::value(int precision) const
 {
     QTextStream stream;
     QString result;
     stream.setString(&result);
-    stream.setRealNumberPrecision(percision);
+    stream.setRealNumberPrecision(precision);
     if (m_value == true) stream << "true";
     else stream << "false";
     return result;
