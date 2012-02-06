@@ -123,6 +123,9 @@ int main (int argc, char *argv[])
                   << start.secsTo(stop)
                   << start.msecsTo(stop);
       timerStream.newline();
+      timerStream.flush();
+
+      world.logger().saveImage();
   }
 
   // Get the current time
@@ -136,6 +139,7 @@ int main (int argc, char *argv[])
   timerStream << "secs:" << begin.secsTo(end); timerStream.newline();
   timerStream << "msecs:" << begin.msecsTo(end); timerStream.newline();
   timerStream << "xmas:" << QString("%1").arg(end.daysTo(xmas));
+  timerStream.flush();
 }
 
 void progress( int sim, int warm, int real, int total, double time, bool flush )

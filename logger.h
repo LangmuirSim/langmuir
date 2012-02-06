@@ -31,10 +31,10 @@ class GridImage : public QObject
 {
     Q_OBJECT
 public:
-    GridImage(World &world, QColor bg = Qt::white, QObject *parent=0);
+    GridImage(World &world, QColor bg = Qt::black, QObject *parent=0);
     void drawSites(QList<int> &sites, QColor color, int layer);
     void drawCharges(QList<ChargeAgent *> &charges,QColor color, int layer);
-    void save(QString name, int scale=5);
+    void save(QString name, int scale=3);
 private:
     QPainter m_painter;
     QImage m_image;
