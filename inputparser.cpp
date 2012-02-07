@@ -121,6 +121,10 @@ void InputParser::saveParameters(int step)
             .arg(step,w1,10,QLatin1Char('0'));
     name = dir.absoluteFilePath(name);
     QFile file(name);
+    if (file.exists() || file.isOpen())
+    {
+        qFatal("can not open %s; file exists or is open already",qPrintable(name));
+    }
     if (!file.open(QIODevice::WriteOnly|QIODevice::Text))
     {
         qFatal("can not open %s",

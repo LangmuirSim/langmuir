@@ -16,6 +16,10 @@ DataStream::DataStream(QString name, int width, int precision)
 {
     m_file.setFileName(name);
     setDevice(&m_file);
+    if (m_file.exists() || m_file.isOpen())
+    {
+        qFatal("can not open data file (%s); file exists or is open already",qPrintable(name));
+    }
     if (!m_file.open(QIODevice::WriteOnly|QIODevice::Text))
     {
         qFatal("can not open data file (%s)",qPrintable(name));
