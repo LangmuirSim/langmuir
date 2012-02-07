@@ -46,6 +46,9 @@ int main (int argc, char *argv[])
   InputParser input;
   input.parseKeyValue(iFileName);
 
+  // Save all parameters
+  input.saveParameters();
+
   // Get the simulation parameters
   SimulationParameters &par = input.getParameters(0);
 
@@ -79,7 +82,7 @@ int main (int argc, char *argv[])
       Simulation sim(world);
 
       // Save the parameters used for this simulation to a file
-      input.saveParameters(i);
+      // input.saveParameters(i);
 
       // Perform equilibration steps
       for (int j = 0; j < par.iterationsWarmup; j += par.iterationsPrint)

@@ -141,6 +141,56 @@ void InputParser::saveParameters(int step)
     file.close();
 }
 
+void InputParser::saveParameters()
+{
+    QDir dir(m_parameters[0].outputPath);
+    if (!dir.exists())
+    {
+        qFatal("%s does not exist",
+        qPrintable(m_parameters[0].outputPath));
+    }
+    QString name = QString("parameters.dat");
+    name = dir.absoluteFilePath(name);
+    QFile file(name);
+    if (file.exists() || file.isOpen())
+    {
+        qFatal("can not open %s; file exists or is open already",qPrintable(name));
+    }
+    if (!file.open(QIODevice::WriteOnly|QIODevice::Text))
+    {
+        qFatal("can not open %s",
+        qPrintable(name));
+    }
+    QTextStream stream;
+    stream.setDevice(&file);
+    stream.setFieldAlignment(QTextStream::AlignRight);
+    stream.setFieldWidth(50);
+    stream << "step";
+    foreach(AbstractVariable *var, m_variables[0])
+    {
+        stream << var->key();
+    }
+    stream.setFieldWidth(0); stream << "\n"; stream.setFieldWidth(50);
+    for (int i=0; i<steps(); i++)
+    {
+        stream << i;
+        foreach(AbstractVariable *var, m_variables[i])
+        {
+            stream << var->value(15);
+        }
+        stream.setFieldWidth(0); stream << "\n"; stream.setFieldWidth(50);
+    }
+    stream.setFieldWidth(0); stream << "\n";
+    int i = 0;
+    foreach(AbstractVariable *var, m_variables[0])
+    {
+        stream << QString("# column %1 is %2").arg(i,3).arg(var->key()) << "\n";
+        i++;
+    }
+    stream.flush();
+    file.close();
+}
+
 void InputParser::checkStep(int step)
 {
     if (step < 0 || step >= m_parameters.size() || step >= m_variables.size())

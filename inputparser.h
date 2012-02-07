@@ -24,6 +24,7 @@ public:
 
     void saveParametersXML(int step);
     void saveParameters(int step);
+    void saveParameters();
 
 private:
 
