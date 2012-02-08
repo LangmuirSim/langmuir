@@ -87,7 +87,15 @@ World::World(SimulationParameters &par, QObject *parent)
     }
 
     // Create Logger
-    m_logger = new Logger(refWorld, this);
+    if ( parameters().outputIsOn )
+    {
+        m_logger = new Logger(refWorld, this);
+        m_logger->initialize();
+    }
+    else
+    {
+        m_logger = new NullLogger(refWorld,this);
+    }
 }
 
 World::~World()

@@ -6,6 +6,7 @@
 #include <QObject>
 #include <QImage>
 #include <QDir>
+#include <QDebug>
 
 namespace Langmuir
 {
@@ -17,7 +18,9 @@ class FluxAgent;
 class DataStream : public QTextStream
 {
 public:
-    DataStream(QString name, int width = 13, int precision = 5);
+    DataStream(QString name, int width = 13, int precision = 5,
+               QIODevice::OpenMode openMode = QIODevice::WriteOnly|QIODevice::Text,
+               bool mustNotExist = true);
     void newline();
     void setStreamParameters();
     void fillColumns(int count, QString fill = "-");
@@ -46,32 +49,58 @@ class Logger : public QObject
     Q_OBJECT
 public:
     Logger(World &world, QObject *parent = 0);
-    ~Logger();
+    virtual ~Logger();
 
-    void saveElectronIDs();
-    void saveHoleIDs();
-    void saveTrapIDs();
-    void saveDefectIDs();
-    void saveElectronGridPotential();
-    void saveHoleGridPotential();
-    void saveCoulombEnergy();
+    virtual void initialize();
+    virtual void saveElectronIDs();
+    virtual void saveHoleIDs();
+    virtual void saveTrapIDs();
+    virtual void saveDefectIDs();
+    virtual void saveElectronGridPotential();
+    virtual void saveHoleGridPotential();
+    virtual void saveCoulombEnergy();
+    virtual void saveTrapImage();
+    virtual void saveDefectImage();
+    virtual void saveElectronImage();
+    virtual void saveHoleImage();
+    virtual void saveImage();
+    virtual void report(ChargeAgent &charge);
+    virtual void reportFluxStream();
+    virtual QString generateFileName(QString identifier, QString extension = "dat", bool sim = true, bool step = true);
 
-    void saveTrapImage();
-    void saveDefectImage();
-    void saveElectronImage();
-    void saveHoleImage();
-    void saveImage();
-
-    void report(ChargeAgent &charge);
-    void reportFluxStream();
-
-    QString generateFileName(QString identifier, QString extension = "dat", bool sim = true, bool step = true);
-
-private:
+protected:
     World &m_world;
     QDir m_outputdir;
     DataStream *m_fluxStream;
     DataStream *m_carrierStream;
+};
+
+class NullLogger : public Logger
+{
+public:
+    NullLogger(World &world, QObject *parent = 0) : Logger(world,parent) { }
+    ~NullLogger() {}
+
+    virtual void initialize() {}
+    virtual void saveElectronIDs() {}
+    virtual void saveHoleIDs() {}
+    virtual void saveTrapIDs() {}
+    virtual void saveDefectIDs() {}
+    virtual void saveElectronGridPotential() {}
+    virtual void saveHoleGridPotential() {}
+    virtual void saveCoulombEnergy() {}
+    virtual void saveTrapImage() {}
+    virtual void saveDefectImage() {}
+    virtual void saveElectronImage() {}
+    virtual void saveHoleImage() {}
+    virtual void saveImage() {}
+    virtual void report(ChargeAgent &charge) {}
+    virtual void reportFluxStream() {}
+    virtual QString generateFileName(QString identifier, QString extension = "dat", bool sim = true, bool step = true)
+    {
+        qFatal("NullLogger::generateFileName");
+        return QString();
+    }
 };
 
 }

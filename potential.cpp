@@ -55,7 +55,7 @@ void Potential::setPotentialTraps()
         if(! m_world.trapSiteIDs().contains(s))
         {
             m_world.electronGrid().addToPotential(s, m_world.parameters().trapPotential);
-            m_world.holeGrid().addToPotential(s, m_world.parameters().trapPotential);
+            m_world.holeGrid().addToPotential(s, -1*m_world.parameters().trapPotential);
             m_world.trapSiteIDs().push_back(s);
         }
     }
@@ -73,14 +73,14 @@ void Potential::setPotentialTraps()
 
         int newTrapIndex                = m_world.randomNumberGenerator().integer(0, trapSeedNeighbors.size()-1);
         int newTrapSite                 = trapSeedNeighbors[newTrapIndex];
-        if(m_world.electronGrid().agentType(newTrapSite)!= Agent::Source  &&
+        if(  m_world.electronGrid().agentType(newTrapSite)!= Agent::Source  &&
              m_world.electronGrid().agentType(newTrapSite)!= Agent::Source  &&
              m_world.electronGrid().agentType(newTrapSite)!= Agent::Drain   &&
              m_world.electronGrid().agentType(newTrapSite)!= Agent::Drain   &&
-             ! m_world.trapSiteIDs().contains(newTrapSite))
+           ! m_world.trapSiteIDs().contains(newTrapSite))
         {
             m_world.electronGrid().addToPotential(newTrapSite, m_world.parameters().trapPotential);
-            m_world.holeGrid().addToPotential(newTrapSite, m_world.parameters().trapPotential);
+            m_world.holeGrid().addToPotential(newTrapSite, -1*m_world.parameters().trapPotential);
             m_world.trapSiteIDs().push_back(newTrapSite);
         }
     }
@@ -91,7 +91,7 @@ void Potential::setPotentialTraps()
             int s = m_world.trapSiteIDs().at(i);
             double v = m_world.randomNumberGenerator().normal(m_world.parameters().gaussianAverg, m_world.parameters().gaussianStdev);
             m_world.electronGrid().addToPotential(s, v);
-            m_world.holeGrid().addToPotential(s, v);
+            m_world.holeGrid().addToPotential(s, -1*v);
         }
     }
 }

@@ -1,51 +1,52 @@
-simulation.type         = solarcell
+simulation.type         = solarcell                  # solarcell or transistor
 
-random.seed             = -1
+random.seed             = [-1,10]                    # seed < 0 is random, seed >= 0 is not random
 
-grid.x                  = 256
-grid.y                  = 256
-grid.z                  = 1
+grid.x                  = 100                        # distance between drains; length of the device
+grid.y                  = 100                        # width of the device
+grid.z                  = 1                          # height of the device
 
-coulomb.carriers        = true
-coulomb.defects         = false
-defects.charge          = 0
+coulomb.carriers        = true                       # include Coulomb interactions?
+coulomb.defects         = false                      # include Coulomb interactions for defects?
+defects.charge          = 0                          # the charge of a defect
 
-output.ids.at.start     = false
-output.ids.on.iteration = false
-output.ids.on.delete    = false
+current.simulation      = 0                          # the index used in output.stub
+output.is.on            = false                      # causes all output to be turned off (useful for GUI)
+output.ids.at.start     = true                       # output carrier positions at start of simulation
+output.ids.on.iteration = true                       # output carrier positions at the end of iterations.print
+output.ids.on.delete    = true                       # output carrier lifetime and pathlength when they make it to a drain
+output.coulomb          = true                       # output Coulomb energy for the entire grid every iterations.print
+output.potential        = true                       # output potential for the entire grid (excluding Coulomb) at the start
+output.image            = true                       # output pictures of traps, defects, carriers at the start
+output.precision        = 8                          # decimal places to print in output
+output.width            = 16                         # width to allow for output columns
+output.path             = /home/adam/Desktop         # where to output
 
-output.coulomb          = false
-output.potential        = false
-output.image            = false
+iterations.print        = 10                         # how often to print certain outputs as well as to stdout
+iterations.real         = 100                        # the number of production steps
+iterations.warmup       = 0                          # the number of equilibration steps
 
-iterations.print        = 10
-iterations.real         = 2000
-iterations.warmup       = 0
-output.precision        = 8
-output.width            = 16
-output.path             = /home/adam/Desktop
+electron.percentage     = 0.01                       # fraction of the grid (between 0 and 1) that determines the maximum number of electrons
+hole.percentage         = 0.01                       # fraction of the grid (between 0 and 1) that determines the maximum number of holes
+seed.charges            = false                      # place the maximum number of charges randomly at start
 
-electron.percentage     = 0.01
-hole.percentage         = 0.01
-seed.charges            = false
+defect.percentage       = 0.00                       # fraction of the grid (between 0 and 1) that is reserved for defects
+trap.percentage         = 0.00                       # fraction of the grid (between 0 and 1) that traps are placed upon
+trap.potential          = 0.00                       # the potential energy of the traps
+gaussian.average        = 0.00                       # average of the random noise added to traps
+gaussian.stdev          = 0.00                       # standard deviation of the random noise added to traps
+seed.percentage         = 0.00                       # fraction of the traps (between 0 and 1) that are used to grow the remaining traps
 
-defect.percentage       = 0.00
-trap.percentage         = 0.00
-trap.potential          = 0.00
-gaussian.average        = 0.00
-gaussian.stdev          = 0.00
-seed.percentage         = 0.00
+voltage.drain           = 10.00                      # the voltage of the left side
+voltage.source          = 0.00                       # the voltage of the right side
+source.rate             = 0.90                       # the rate at which all sources inject
+drain.rate              = 0.90                       # the rate at which all drains accept
 
-voltage.drain           = 10.00
-voltage.source          = 0.00
-source.rate             = 0.90
-drain.rate              = 0.90
+temperature.kelvin      = 300.0                      # the temperature used in the Boltzmann factor
 
-temperature.kelvin      = 300.0
-
-use.opencl              = true
-work.x                  = 4
-work.y                  = 4
-work.z                  = 4
-work.size               = 256
+use.opencl              = true                       # use GPU for Coulomb calculations
+work.x                  = 4                          # number of groups to divide the grid into along x (only used for output.coulomb)
+work.y                  = 4                          # number of groups to divide the grid into along y (only used for output.coulomb)
+work.z                  = 4                          # number of groups to divide the grid into along z (only used for output.coulomb)
+work.size               = 256                        # number of groups to divide the list of all charges into
 kernels.path            = /home/adam/Workspace/science/langmuirQtCreator/

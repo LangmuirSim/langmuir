@@ -220,7 +220,7 @@ double ElectronAgent::bindingPotential(int site)
 {
     if(m_world.holeGrid().agentType(site)== Agent::Hole)
     {
-        return 1.0;
+        return 0.0;
     }
     return 0.0;
 }

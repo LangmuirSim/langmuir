@@ -11,16 +11,17 @@
 namespace Langmuir
 {
 
-DataStream::DataStream(QString name, int width, int precision)
+DataStream::DataStream(QString name, int width, int precision,
+                       QIODevice::OpenMode openMode, bool mustNotExist)
     : QTextStream(), m_width(width), m_precision(precision)
 {
     m_file.setFileName(name);
     setDevice(&m_file);
-    if (m_file.exists() || m_file.isOpen())
+    if (m_file.isOpen() || (mustNotExist && m_file.exists()))
     {
         qFatal("can not open data file (%s); file exists or is open already",qPrintable(name));
     }
-    if (!m_file.open(QIODevice::WriteOnly|QIODevice::Text))
+    if (!m_file.open(openMode))
     {
         qFatal("can not open data file (%s)",qPrintable(name));
     }
@@ -55,6 +56,10 @@ Logger::Logger(World &world, QObject *parent)
     : QObject(parent), m_world(world),
       m_fluxStream(0),
       m_carrierStream(0)
+{
+}
+
+void Logger::initialize()
 {
     m_outputdir = QDir(m_world.parameters().outputPath);
 

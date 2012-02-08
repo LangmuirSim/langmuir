@@ -53,19 +53,25 @@ int main (int argc, char *argv[])
   SimulationParameters &par = input.getParameters(0);
 
   // Create TextStream for time info
-  DataStream timerStream(QDir(par.outputPath).absoluteFilePath("time.dat"),16,5);
-  timerStream << "simulation"
-              << "equilibration"
-              << "real"
-              << "carriers"
-              << "date_i"
-              << "time_i"
-              << "date_f"
-              << "time_f"
-              << "days"
-              << "secs"
-              << "msecs";
-  timerStream.newline();
+  DataStream *p_timerStream;
+  if (par.outputIsOn)
+  {
+      p_timerStream = new DataStream(QDir(par.outputPath).absoluteFilePath("time.dat"),16,5,
+                                     QIODevice::Append|QIODevice::Text,false);
+      DataStream& timerStream = *p_timerStream;
+      timerStream << "simulation"
+                  << "equilibration"
+                  << "real"
+                  << "carriers"
+                  << "date_i"
+                  << "time_i"
+                  << "date_f"
+                  << "time_f"
+                  << "days"
+                  << "secs"
+                  << "msecs";
+      timerStream.newline();
+  }
 
   for (int i = 0; i < input.steps(); ++i)
   {
@@ -114,35 +120,43 @@ int main (int argc, char *argv[])
       // The time this simulation stops
       QDateTime stop = QDateTime::currentDateTime();
 
-      timerStream << i
-                  << par.iterationsWarmup
-                  << par.iterationsReal
-                  << world.maxChargeAgents()
-                  << start.toString(dateFMT)
-                  << start.toString(timeFMT)
-                  << stop.toString(dateFMT)
-                  << stop.toString(timeFMT)
-                  << start.daysTo(stop)
-                  << start.secsTo(stop)
-                  << start.msecsTo(stop);
-      timerStream.newline();
-      timerStream.flush();
-
-      world.logger().saveImage();
+      if (par.outputIsOn)
+      {
+          DataStream& timerStream = *p_timerStream;
+          timerStream << par.currentSimulation
+                      << par.iterationsWarmup
+                      << par.iterationsReal
+                      << world.maxChargeAgents()
+                      << start.toString(dateFMT)
+                      << start.toString(timeFMT)
+                      << stop.toString(dateFMT)
+                      << stop.toString(timeFMT)
+                      << start.daysTo(stop)
+                      << start.secsTo(stop)
+                      << start.msecsTo(stop);
+          timerStream.newline();
+          timerStream.flush();
+      }
   }
 
   // Get the current time
   QDateTime end  = QDateTime::currentDateTime();
   QDateTime xmas = QDateTime(QDate(end.date().year(),12,25), QTime(0,0));
 
-  // Report time stats
-  timerStream << "begin:" << begin.toString(dateFMT) << begin.toString(timeFMT); timerStream.newline();
-  timerStream << "end:" << end.toString(dateFMT) << end.toString(timeFMT); timerStream.newline();
-  timerStream << "days:" << begin.daysTo(end); timerStream.newline();
-  timerStream << "secs:" << begin.secsTo(end); timerStream.newline();
-  timerStream << "msecs:" << begin.msecsTo(end); timerStream.newline();
-  timerStream << "xmas:" << QString("%1").arg(end.daysTo(xmas));
-  timerStream.flush();
+  if (par.outputIsOn)
+  {
+      DataStream& timerStream = *p_timerStream;
+      // Report time stats
+      timerStream << "begin:" << begin.toString(dateFMT) << begin.toString(timeFMT); timerStream.newline();
+      timerStream << "end:" << end.toString(dateFMT) << end.toString(timeFMT); timerStream.newline();
+      timerStream << "days:" << begin.daysTo(end); timerStream.newline();
+      timerStream << "secs:" << begin.secsTo(end); timerStream.newline();
+      timerStream << "msecs:" << begin.msecsTo(end); timerStream.newline();
+      timerStream << "xmas:" << QString("%1").arg(end.daysTo(xmas));
+      timerStream.flush();
+
+      delete p_timerStream;
+  }
 }
 
 void progress( int sim, int warm, int real, int total, double time, bool flush )

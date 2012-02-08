@@ -28,6 +28,7 @@ struct SimulationParameters
     bool outputCoulomb;
     bool outputPotential;
     bool outputImage;
+    bool outputIsOn;
 
     int iterationsPrint;
     int iterationsReal;
@@ -95,6 +96,7 @@ struct SimulationParameters
         outputCoulomb          (false),
         outputPotential        (false),
         outputImage            (false),
+        outputIsOn             (true),
 
         iterationsPrint        (10),
         iterationsReal         (1000),

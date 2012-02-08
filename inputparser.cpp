@@ -27,20 +27,22 @@ void InputParser::setMap(int step)
     createVariable("coulomb.defects"        , m_parameters[step].coulombDefects      , step);
     createVariable("defects.charge"         , m_parameters[step].defectsCharge       , step);
 
+    createVariable("current.simulation"     , m_parameters[step].currentSimulation   , step);
+    createVariable("output.is.on"           , m_parameters[step].outputIsOn          , step);
+    createVariable("output.stub"            , m_parameters[step].outputStub          , step);
     createVariable("output.ids.on.iteration", m_parameters[step].outputIdsOnIteration, step);
     createVariable("output.ids.at.start"    , m_parameters[step].outputIdsAtStart    , step);
     createVariable("output.ids.on.delete"   , m_parameters[step].outputIdsOnDelete   , step);
-
     createVariable("output.coulomb"         , m_parameters[step].outputCoulomb       , step);
     createVariable("output.potential"       , m_parameters[step].outputPotential     , step);
     createVariable("output.image"           , m_parameters[step].outputImage         , step);
+    createVariable("output.precision"       , m_parameters[step].outputPrecision     , step);
+    createVariable("output.width"           , m_parameters[step].outputWidth         , step);
+    createVariable("output.path"            , m_parameters[step].outputPath          , step);
 
     createVariable("iterations.print"       , m_parameters[step].iterationsPrint     , step);
     createVariable("iterations.real"        , m_parameters[step].iterationsReal      , step);
     createVariable("iterations.warmup"      , m_parameters[step].iterationsWarmup    , step);
-    createVariable("output.precision"       , m_parameters[step].outputPrecision     , step);
-    createVariable("output.width"           , m_parameters[step].outputWidth         , step);
-    createVariable("output.path"            , m_parameters[step].outputPath          , step);
 
     createVariable("electron.percentage"    , m_parameters[step].electronPercentage  , step);
     createVariable("hole.percentage"        , m_parameters[step].holePercentage      , step);
@@ -76,8 +78,6 @@ void InputParser::setMap(int step)
     createVariable("inverse.KT"             , m_parameters[step].inverseKT             , step, false);
     createVariable("ok.CL"                  , m_parameters[step].okCL                  , step, false);
     createVariable("current.step"           , m_parameters[step].currentStep           , step, false);
-    createVariable("current.simulation"     , m_parameters[step].currentSimulation     , step, false);
-    createVariable("output.stub"            , m_parameters[step].outputStub            , step, false);
     createVariable("iterations.total"       , m_parameters[step].iterationsTotal       , step, false);
     createVariable("simulation.steps"       , m_parameters[step].simulationSteps       , step, false);
 }
@@ -108,6 +108,7 @@ void InputParser::saveParametersXML(int step)
 
 void InputParser::saveParameters(int step)
 {
+    if ( ! m_parameters[step].outputIsOn ) return;
     checkStep(step);
     int w1 = int(log10(steps()))+1;
     QDir dir(m_parameters[step].outputPath);
@@ -143,6 +144,7 @@ void InputParser::saveParameters(int step)
 
 void InputParser::saveParameters()
 {
+    if ( ! m_parameters[0].outputIsOn ) return;
     QDir dir(m_parameters[0].outputPath);
     if (!dir.exists())
     {
@@ -152,11 +154,7 @@ void InputParser::saveParameters()
     QString name = QString("parameters.dat");
     name = dir.absoluteFilePath(name);
     QFile file(name);
-    if (file.exists() || file.isOpen())
-    {
-        qFatal("can not open %s; file exists or is open already",qPrintable(name));
-    }
-    if (!file.open(QIODevice::WriteOnly|QIODevice::Text))
+    if (!file.open(QIODevice::Append|QIODevice::Text))
     {
         qFatal("can not open %s",
         qPrintable(name));
@@ -173,19 +171,12 @@ void InputParser::saveParameters()
     stream.setFieldWidth(0); stream << "\n"; stream.setFieldWidth(50);
     for (int i=0; i<steps(); i++)
     {
-        stream << i;
+        stream << m_parameters[i].currentSimulation;
         foreach(AbstractVariable *var, m_variables[i])
         {
             stream << var->value(15);
         }
         stream.setFieldWidth(0); stream << "\n"; stream.setFieldWidth(50);
-    }
-    stream.setFieldWidth(0); stream << "\n";
-    int i = 0;
-    foreach(AbstractVariable *var, m_variables[0])
-    {
-        stream << QString("# column %1 is %2").arg(i,3).arg(var->key()) << "\n";
-        i++;
     }
     stream.flush();
     file.close();
@@ -385,7 +376,7 @@ void InputParser::parseKeyValue(QString fileName)
     // check the parameters at each step
     for (int i = 0; i < m_parameters.size(); i++)
     {
-        m_parameters[i].currentSimulation = i;
+        m_parameters[i].currentSimulation = m_parameters[0].currentSimulation + i;
         m_parameters[i].simulationSteps = steps();
         m_parameters[i].check();
     }
