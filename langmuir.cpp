@@ -137,6 +137,9 @@ int main (int argc, char *argv[])
           timerStream.newline();
           timerStream.flush();
       }
+
+      world.logger().saveElectronIDs();
+      world.logger().saveHoleIDs();
   }
 
   // Get the current time

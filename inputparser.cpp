@@ -69,6 +69,8 @@ void InputParser::setMap(int step)
     createVariable("work.size"              , m_parameters[step].workSize            , step);
     createVariable("kernels.path"           , m_parameters[step].kernelsPath         , step);
 
+    createVariable("configuration.file"     , m_parameters[step].configurationFile   , step);
+
     createVariable("boltzmann.constant"     , m_parameters[step].boltzmannConstant     , step, false);
     createVariable("dielectric.constant"    , m_parameters[step].dielectricConstant    , step, false);
     createVariable("elementary.charge"      , m_parameters[step].elementaryCharge      , step, false);

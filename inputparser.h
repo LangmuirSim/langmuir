@@ -20,11 +20,10 @@ public:
     SimulationParameters& getParameters(int step = 0);
     void parseKeyValue(QString fileName);
     void parserXML(QString fileName);
-    int steps();
-
     void saveParametersXML(int step);
     void saveParameters(int step);
     void saveParameters();
+    int steps();
 
 private:
 

@@ -1,8 +1,10 @@
 #ifndef PARAMETERS_H
 #define PARAMETERS_H
 
-#include <QDir>
+#include <QFileInfo>
+#include <QDebug>
 #include <cmath>
+#include <QDir>
 
 namespace Langmuir
 {
@@ -77,6 +79,9 @@ struct SimulationParameters
     int iterationsTotal;
     int simulationSteps;
 
+    QString configurationFile;
+    QString potentialFile;
+
     SimulationParameters() :
 
         simulationType         ("transistor"),
@@ -144,7 +149,9 @@ struct SimulationParameters
         currentSimulation      (0),
         outputStub             ("out"),
         iterationsTotal        (0),
-        simulationSteps        (1)
+        simulationSteps        (1),
+
+        configurationFile      ("")
     {
         setCalculatedValues();
         check();
@@ -256,6 +263,19 @@ struct SimulationParameters
             qFatal("temperature.kelvin < 0.0");
         }
 
+        if ( ! configurationFile.isEmpty() )
+        {
+            QFileInfo info(configurationFile);
+            if (!info.exists())
+            {
+                info = QFileInfo(QDir(outputPath),configurationFile);
+            }
+            if (!info.exists() || !info.isFile())
+            {
+                qFatal("configuration.file does not exist"
+                       "\n\t%s",qPrintable(info.absoluteFilePath()));
+            }
+        }
     }
 };
 

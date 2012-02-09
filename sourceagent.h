@@ -10,7 +10,8 @@ class SourceAgent : public FluxAgent
 {
 public:
     SourceAgent(World &world, Grid &grid, QObject *parent = 0);
-    bool seed();
+    bool tryToSeed();
+    bool tryToSeed(int site);
     bool tryToInject();
 
 protected:

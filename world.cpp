@@ -36,6 +36,9 @@ World::World(SimulationParameters &par, QObject *parent)
     // Calculate the max number of electrons
     m_maxElectrons = parameters().electronPercentage*double(electronGrid().volume());
 
+    // Calculate the max number of electrons
+    m_maxDefects = parameters().defectPercentage*double(electronGrid().volume());
+
     // Create Potential Calculator
     m_potential = new Potential(refWorld, this);
 
@@ -215,6 +218,11 @@ int World::maxElectronAgents()
 int World::maxHoleAgents()
 {
     return m_maxHoles;
+}
+
+int World::maxDefects()
+{
+    return m_maxDefects;
 }
 
 int World::maxChargeAgents()

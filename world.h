@@ -50,6 +50,7 @@ public:
     int maxHoleAgents();
     int maxChargeAgents();
     int maxCharges();
+    int maxDefects();
     int numElectronAgents();
     int numHoleAgents();
     int numChargeAgents();
@@ -79,6 +80,7 @@ private:
     boost::multi_array<double,3> m_interactionEnergies;
     int m_maxElectrons;
     int m_maxHoles;
+    int m_maxDefects;
 };
 
 }

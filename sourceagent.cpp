@@ -66,9 +66,19 @@ ExcitonSourceAgent::ExcitonSourceAgent(World &world, QObject *parent)
     setObjectName(name);
 }
 
-bool SourceAgent::seed()
+bool SourceAgent::tryToSeed()
 {
     int site = randomSiteID();
+    if(validToInject(site))
+    {
+        inject(site);
+        return true;
+    }
+    return false;
+}
+
+bool SourceAgent::tryToSeed(int site)
+{
     if(validToInject(site))
     {
         inject(site);
