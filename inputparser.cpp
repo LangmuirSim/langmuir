@@ -29,6 +29,7 @@ void InputParser::setMap(int step)
 
     createVariable("current.simulation"     , m_parameters[step].currentSimulation   , step);
     createVariable("output.is.on"           , m_parameters[step].outputIsOn          , step);
+    createVariable("output.overwrite"       , m_parameters[step].outputOverwrite     , step);
     createVariable("output.stub"            , m_parameters[step].outputStub          , step);
     createVariable("output.ids.on.iteration", m_parameters[step].outputIdsOnIteration, step);
     createVariable("output.ids.at.start"    , m_parameters[step].outputIdsAtStart    , step);
@@ -122,6 +123,10 @@ void InputParser::saveParameters(int step)
             .arg(step,w1,10,QLatin1Char('0'));
     name = dir.absoluteFilePath(name);
     QFile file(name);
+    if (m_parameters[step].outputOverwrite)
+    {
+        file.remove();
+    }
     if (file.exists() || file.isOpen())
     {
         qFatal("can not open %s; file exists or is open already",qPrintable(name));
@@ -154,6 +159,10 @@ void InputParser::saveParameters()
     QString name = QString("parameters.dat");
     name = dir.absoluteFilePath(name);
     QFile file(name);
+    if (m_parameters[0].outputOverwrite)
+    {
+        file.remove();
+    }
     if (!file.open(QIODevice::Append|QIODevice::Text))
     {
         qFatal("can not open %s",

@@ -12,10 +12,15 @@ namespace Langmuir
 {
 
 DataStream::DataStream(QString name, int width, int precision,
-                       QIODevice::OpenMode openMode, bool mustNotExist)
+                       QIODevice::OpenMode openMode, bool mustNotExist,
+                       bool deleteBeforeOpening)
     : QTextStream(), m_width(width), m_precision(precision)
 {
     m_file.setFileName(name);
+    if (deleteBeforeOpening)
+    {
+        m_file.remove();
+    }
     setDevice(&m_file);
     if (m_file.isOpen() || (mustNotExist && m_file.exists()))
     {
@@ -75,7 +80,10 @@ void Logger::initialize()
         m_carrierStream = new DataStream(
                     generateFileName("onDelete","dat",true,false),
                     m_world.parameters().outputWidth,
-                    m_world.parameters().outputPrecision);
+                    m_world.parameters().outputPrecision,
+                    QIODevice::WriteOnly|QIODevice::Text,
+                    true,
+                    m_world.parameters().outputOverwrite);
         *m_carrierStream << "si"
                          << "xi"
                          << "yi"
@@ -93,39 +101,26 @@ void Logger::initialize()
         m_fluxStream = new DataStream(
                     generateFileName("","dat",true,false),
                     m_world.parameters().outputWidth,
-                    m_world.parameters().outputPrecision);
+                    m_world.parameters().outputPrecision,
+                    QIODevice::WriteOnly|QIODevice::Text,
+                    true,
+                    m_world.parameters().outputOverwrite);
 
         QList<FluxAgent *>& fluxAgents = m_world.fluxes();
         DataStream& stream = *m_fluxStream;
 
-        for (int i = 0; i < fluxAgents.size()*2 + 1; i++) { stream << i; }
-        stream << fluxAgents.size()*2 + 1 << fluxAgents.size()*2 + 2;
-        stream.newline();
-
-        stream << "Agent";
-        foreach(FluxAgent *flux, fluxAgents)
-        {
-            stream << flux->objectName();
-            stream.fillColumns(1);
-        }
-        stream.fillColumns(2);
-        stream.newline();
-
-        stream << "Face";
-        foreach(FluxAgent *flux, fluxAgents)
-        {
-            stream << flux->face();
-            stream.fillColumns(1);
-        }
-        stream.fillColumns(2);
-        stream.newline();
-
         stream << "Step";
-        for(int i = 0; i < fluxAgents.size(); i++)
+        foreach(FluxAgent *flux, fluxAgents)
         {
-            stream << "attempts" << "successes";
+            stream << QString("%1:attempt").arg(flux->objectName());
+            stream << QString("%1:success").arg(flux->objectName());
         }
-        stream << "electrons" << "holes";
+        stream << "electron:count"
+               << "electron:percentage"
+               << "electron:reached"
+               << "hole:count"
+               << "hole:percentage"
+               << "hole:reached";
         stream.newline();
         stream.flush();
     }
@@ -163,7 +158,9 @@ void Logger::saveElectronIDs()
     QString fname = generateFileName("electronIDs");
     DataStream stream(fname,
                 m_world.parameters().outputWidth,
-                m_world.parameters().outputPrecision);
+                m_world.parameters().outputPrecision,
+                QIODevice::WriteOnly|QIODevice::Text,
+                true,m_world.parameters().outputOverwrite);
 
     stream << "si"
            << "xi"
@@ -197,7 +194,9 @@ void Logger::saveHoleIDs()
     QString fname = generateFileName("holeIDs");
     DataStream stream(fname,
                 m_world.parameters().outputWidth,
-                m_world.parameters().outputPrecision);
+                m_world.parameters().outputPrecision,
+                QIODevice::WriteOnly|QIODevice::Text,
+                true,m_world.parameters().outputOverwrite);
 
     stream << "si"
            << "xi"
@@ -231,7 +230,9 @@ void Logger::saveTrapIDs()
     QString fname = generateFileName("trapIDs");
     DataStream stream(fname,
                 m_world.parameters().outputWidth,
-                m_world.parameters().outputPrecision);
+                m_world.parameters().outputPrecision,
+                QIODevice::WriteOnly|QIODevice::Text,
+                true,m_world.parameters().outputOverwrite);
 
     stream << "si"
            << "xi"
@@ -261,7 +262,9 @@ void Logger::saveDefectIDs()
     QString fname = generateFileName("defectIDs");
     DataStream stream(fname,
                 m_world.parameters().outputWidth,
-                m_world.parameters().outputPrecision);
+                m_world.parameters().outputPrecision,
+                QIODevice::WriteOnly|QIODevice::Text,
+                true,m_world.parameters().outputOverwrite);
 
     stream << "si"
            << "xi"
@@ -288,7 +291,9 @@ void Logger::saveElectronGridPotential()
     QString fname = generateFileName("eGrid");
     DataStream stream(fname,
                 m_world.parameters().outputWidth,
-                m_world.parameters().outputPrecision);
+                m_world.parameters().outputPrecision,
+                QIODevice::WriteOnly|QIODevice::Text,
+                true,m_world.parameters().outputOverwrite);
 
     stream << "si"
            << "xi"
@@ -323,7 +328,9 @@ void Logger::saveHoleGridPotential()
     QString fname = generateFileName("hGrid");
     DataStream stream(fname,
                 m_world.parameters().outputWidth,
-                m_world.parameters().outputPrecision);
+                m_world.parameters().outputPrecision,
+                QIODevice::WriteOnly|QIODevice::Text,
+                true,m_world.parameters().outputOverwrite);
 
     stream << "si"
            << "xi"
@@ -359,7 +366,9 @@ void Logger::saveCoulombEnergy()
     QString fname = generateFileName("coulomb");
     DataStream stream(fname,
                 m_world.parameters().outputWidth,
-                m_world.parameters().outputPrecision);
+                m_world.parameters().outputPrecision,
+                QIODevice::WriteOnly|QIODevice::Text,
+                true,m_world.parameters().outputOverwrite);
 
     stream << "si"
            << "xi"
@@ -415,6 +424,11 @@ GridImage::GridImage(World &world, QColor bg, QObject *parent)
 
 void GridImage::save(QString name, int scale)
 {
+    if (!m_world.parameters().outputIsOn) return;
+    if (m_world.parameters().outputOverwrite)
+    {
+        QFile::remove(name);
+    }
     m_painter.end();
     m_image = m_image.scaled(scale*m_image.width(),scale*m_image.height(),Qt::KeepAspectRatioByExpanding);
     m_image.save(name,"png",100);
@@ -509,7 +523,12 @@ void Logger::reportFluxStream()
     {
         stream << flux->attempts() << flux->successes();
     }
-    stream << m_world.numElectronAgents() << m_world.numHoleAgents();
+    stream << m_world.numElectronAgents()
+           << m_world.percentElectronAgents()
+           << m_world.reachedElectronAgents()
+           << m_world.numHoleAgents()
+           << m_world.percentHoleAgents()
+           << m_world.reachedHoleAgents();
     stream.newline();
     stream.flush();
 }

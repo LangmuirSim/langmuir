@@ -15,35 +15,55 @@ ElectronSourceAgent::ElectronSourceAgent(World &world, int site, QObject *parent
     : SourceAgent(world, world.electronGrid(), parent)
 {
     initializeSite(site);
-    setObjectName("ElectronSource");
+    QString name;
+    QTextStream stream(&name);
+    stream << "e" << m_type << site;
+    stream.flush();
+    setObjectName(name);
 }
 
 ElectronSourceAgent::ElectronSourceAgent(World &world, Grid::CubeFace cubeFace, QObject *parent)
     : SourceAgent(world, world.electronGrid(), parent)
 {
     initializeSite(cubeFace);
-    setObjectName("ElectronSource");
+    QString name;
+    QTextStream stream(&name);
+    stream << "e" << m_type << faceToLetter();
+    stream.flush();
+    setObjectName(name);
 }
 
 HoleSourceAgent::HoleSourceAgent(World &world, int site, QObject *parent)
     : SourceAgent(world, world.holeGrid(), parent)
 {
     initializeSite(site);
-    setObjectName("HoleSource");
+    QString name;
+    QTextStream stream(&name);
+    stream << "h" << m_type << site;
+    stream.flush();
+    setObjectName(name);
 }
 
 HoleSourceAgent::HoleSourceAgent(World &world, Grid::CubeFace cubeFace, QObject *parent)
     : SourceAgent(world, world.holeGrid(), parent)
 {
     initializeSite(cubeFace);
-    setObjectName("HoleSource");
+    QString name;
+    QTextStream stream(&name);
+    stream << "h" << m_type << faceToLetter();
+    stream.flush();
+    setObjectName(name);
 }
 
 ExcitonSourceAgent::ExcitonSourceAgent(World &world, QObject *parent)
     : SourceAgent(world, world.electronGrid(), parent)
 {
     initializeSite(Grid::NoFace);
-    setObjectName("ExcitonSource");
+    QString name;
+    QTextStream stream(&name);
+    stream << "x" << m_type;
+    stream.flush();
+    setObjectName(name);
 }
 
 bool SourceAgent::seed()

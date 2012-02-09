@@ -56,10 +56,11 @@ public:
     int numCharges();
     int numDefects();
     int numTraps();
-    double percentChargeAgents();
-    double percentElectronAgents();
+    double reachedChargeAgents();
+    double reachedElectronAgents();
+    double reachedHoleAgents();
     double percentHoleAgents();
-
+    double percentElectronAgents();
 private:
     QList<SourceAgent*> m_sources;
     QList<DrainAgent*> m_drains;

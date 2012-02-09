@@ -257,7 +257,7 @@ int World::numTraps()
     return m_trapSiteIDs.size();
 }
 
-double World::percentChargeAgents()
+double World::reachedChargeAgents()
 {
     if(maxChargeAgents()> 0)
     {
@@ -269,7 +269,7 @@ double World::percentChargeAgents()
     }
 }
 
-double World::percentHoleAgents()
+double World::reachedHoleAgents()
 {
     if(maxHoleAgents()> 0)
     {
@@ -281,7 +281,7 @@ double World::percentHoleAgents()
     }
 }
 
-double World::percentElectronAgents()
+double World::reachedElectronAgents()
 {
     if(maxElectronAgents()> 0)
     {
@@ -291,6 +291,16 @@ double World::percentElectronAgents()
     {
         return 0.0;
     }
+}
+
+double World::percentHoleAgents()
+{
+    return double(numHoleAgents())/double(m_holeGrid->volume())*100.0;
+}
+
+double World::percentElectronAgents()
+{
+    return double(numElectronAgents())/double(m_electronGrid->volume())*100.0;
 }
 
 }

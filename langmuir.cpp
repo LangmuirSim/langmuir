@@ -56,8 +56,8 @@ int main (int argc, char *argv[])
   DataStream *p_timerStream;
   if (par.outputIsOn)
   {
-      p_timerStream = new DataStream(QDir(par.outputPath).absoluteFilePath("time.dat"),16,5,
-                                     QIODevice::Append|QIODevice::Text,false);
+      QString name = QDir(par.outputPath).absoluteFilePath("time.dat");
+      p_timerStream = new DataStream(name,16,5,QIODevice::Append|QIODevice::Text,false,par.outputOverwrite);
       DataStream& timerStream = *p_timerStream;
       timerStream << "simulation"
                   << "equilibration"

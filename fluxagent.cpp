@@ -95,4 +95,13 @@ void FluxAgent::setTries(int tries)
     m_tries = tries;
 }
 
+QString FluxAgent::faceToLetter()
+{
+    QString string;
+    QTextStream stream(&string);
+    stream << m_face;
+    stream.flush();
+    return string.at(0);
+}
+
 }

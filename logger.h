@@ -20,7 +20,7 @@ class DataStream : public QTextStream
 public:
     DataStream(QString name, int width = 13, int precision = 5,
                QIODevice::OpenMode openMode = QIODevice::WriteOnly|QIODevice::Text,
-               bool mustNotExist = true);
+               bool mustNotExist = true, bool deleteBeforeOpening = false);
     void newline();
     void setStreamParameters();
     void fillColumns(int count, QString fill = "-");

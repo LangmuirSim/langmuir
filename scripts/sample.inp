@@ -12,14 +12,15 @@ defects.charge          = 0                          # the charge of a defect
 
 current.simulation      = 0                          # the index used in output.stub
 output.is.on            = false                      # causes all output to be turned off (useful for GUI)
+output.overwrite        = false                      # do not cause errors if files exist
 output.ids.at.start     = true                       # output carrier positions at start of simulation
 output.ids.on.iteration = true                       # output carrier positions at the end of iterations.print
 output.ids.on.delete    = true                       # output carrier lifetime and pathlength when they make it to a drain
 output.coulomb          = true                       # output Coulomb energy for the entire grid every iterations.print
 output.potential        = true                       # output potential for the entire grid (excluding Coulomb) at the start
 output.image            = true                       # output pictures of traps, defects, carriers at the start
-output.precision        = 8                          # decimal places to print in output
-output.width            = 16                         # width to allow for output columns
+output.precision        = 13                         # decimal places to print in output
+output.width            = 20                         # width to allow for output columns
 output.path             = /home/adam/Desktop         # where to output
 
 iterations.print        = 10                         # how often to print certain outputs as well as to stdout

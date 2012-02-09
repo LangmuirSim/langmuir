@@ -28,6 +28,7 @@ protected:
     void initializeSite(Grid::CubeFace cubeFace);
     virtual bool shouldTransport(int site);
     virtual double energyChange(int site);
+    QString faceToLetter();
     unsigned long int m_attempts;
     unsigned long int m_successes;
     double m_probability;

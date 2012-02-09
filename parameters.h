@@ -29,6 +29,7 @@ struct SimulationParameters
     bool outputPotential;
     bool outputImage;
     bool outputIsOn;
+    bool outputOverwrite;
 
     int iterationsPrint;
     int iterationsReal;
@@ -97,11 +98,12 @@ struct SimulationParameters
         outputPotential        (false),
         outputImage            (false),
         outputIsOn             (true),
+        outputOverwrite        (false),
 
         iterationsPrint        (10),
         iterationsReal         (1000),
         iterationsWarmup       (1000),
-        outputPrecision        (5),
+        outputPrecision        (13),
         outputWidth            (20),
         outputPath             (QDir::currentPath()),
 

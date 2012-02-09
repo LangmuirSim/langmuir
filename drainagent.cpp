@@ -15,28 +15,44 @@ ElectronDrainAgent::ElectronDrainAgent(World &world, int site, QObject *parent)
     : DrainAgent(world, world.electronGrid(), parent)
 {
     initializeSite(site);
-    setObjectName("ElectronDrain");
+    QString name;
+    QTextStream stream(&name);
+    stream << "e" << m_type << site;
+    stream.flush();
+    setObjectName(name);
 }
 
 ElectronDrainAgent::ElectronDrainAgent(World &world, Grid::CubeFace cubeFace, QObject *parent)
     : DrainAgent(world, world.electronGrid(), parent)
 {
     initializeSite(cubeFace);
-    setObjectName("ElectronDrain");
+    QString name;
+    QTextStream stream(&name);
+    stream << "e" << m_type << faceToLetter();
+    stream.flush();
+    setObjectName(name);
 }
 
 HoleDrainAgent::HoleDrainAgent(World &world, int site, QObject *parent)
     : DrainAgent(world, world.holeGrid(), parent)
 {
     initializeSite(site);
-    setObjectName("HoleDrain");
+    QString name;
+    QTextStream stream(&name);
+    stream << "h" << m_type << site;
+    stream.flush();
+    setObjectName(name);
 }
 
 HoleDrainAgent::HoleDrainAgent(World &world, Grid::CubeFace cubeFace, QObject *parent)
     : DrainAgent(world, world.holeGrid(), parent)
 {
     initializeSite(cubeFace);
-    setObjectName("HoleDrain");
+    QString name;
+    QTextStream stream(&name);
+    stream << "h" << m_type << faceToLetter();
+    stream.flush();
+    setObjectName(name);
 }
 
 bool DrainAgent::tryToAccept(ChargeAgent *charge)
