@@ -17,6 +17,7 @@ set(project_headers_moc_1
       simulation.h
       world.h
       rand.h
+      output.h
 )
 
 set(project_headers_moc_2
@@ -38,6 +39,7 @@ set(project_headers_common
       rand.h
       sourceagent.h
       simulation.h
+      output.h
 )
 
 set(project_sources_common
@@ -53,6 +55,7 @@ set(project_sources_common
       cubicgrid.cpp
       fluxagent.cpp
       potential.cpp
+      output.cpp
 )
 
 find_package(Boost REQUIRED)

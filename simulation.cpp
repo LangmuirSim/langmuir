@@ -137,6 +137,8 @@ void Simulation::performIterations(int nIterations)
         m_world.logger().saveElectronIDs();
         m_world.logger().saveHoleIDs();
     }
+
+    m_world.logger().reportXYZStream();
 }
 
 void Simulation::placeDefects(const QList<int>& siteIDs)

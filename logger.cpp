@@ -124,6 +124,14 @@ void Logger::initialize()
         stream.newline();
         stream.flush();
     }
+
+    m_xyzStream = new DataStream(
+                generateFileName("trajectory","xyz",true,false),
+                0,
+                0,
+                QIODevice::WriteOnly|QIODevice::Text,
+                true,
+                m_world.parameters().outputOverwrite);
 }
 
 Logger::~Logger()
@@ -530,6 +538,88 @@ void Logger::reportFluxStream()
            << m_world.percentHoleAgents()
            << m_world.reachedHoleAgents();
     stream.newline();
+    stream.flush();
+}
+
+void Logger::reportXYZStream()
+{
+    int num = m_world.numElectronAgents() +
+              m_world.numHoleAgents()     +
+              m_world.numDefects()        +
+              m_world.numTraps();
+
+    DataStream& stream = *m_xyzStream;
+
+    stream << num;
+    stream.newline();
+    stream << QString("FRAME=%1 E=%2 H=%3 D=%4 T=%5")
+              .arg(m_world.parameters().currentStep)
+              .arg(m_world.numElectronAgents())
+              .arg(m_world.numHoleAgents())
+              .arg(m_world.numDefects())
+              .arg(m_world.numTraps());
+    stream.newline();
+
+    {
+        Grid &grid = m_world.electronGrid();
+        QList<ChargeAgent*> &charges = m_world.electrons();
+        for (int i = 0; i < charges.size(); i++)
+        {
+            ChargeAgent &charge = *charges[i];
+            int site = charge.getCurrentSite();
+            stream << 'E' << " "
+                   << grid.getIndexX(site) << " "
+                   << grid.getIndexY(site) << " "
+                   << grid.getIndexZ(site) << " "
+                   << &charge;
+            stream.newline();
+        }
+    }
+    {
+        Grid &grid = m_world.holeGrid();
+        QList<ChargeAgent*> &charges = m_world.holes();
+        for (int i = 0; i < charges.size(); i++)
+        {
+            ChargeAgent &charge = *charges[i];
+            int site = charge.getCurrentSite();
+            stream << 'H' << " "
+                   << grid.getIndexX(site) << " "
+                   << grid.getIndexY(site) << " "
+                   << grid.getIndexZ(site) * 2 + 1 << " "
+                   << &charge;
+            stream.newline();
+        }
+    }
+    {
+        Grid &grid = m_world.electronGrid();
+        QList<int> &ids = m_world.defectSiteIDs();
+        for (int i = 0; i < ids.size(); i++)
+        {
+            int site = ids[i];
+            stream << 'D' << " "
+                   << grid.getIndexX(site) << " "
+                   << grid.getIndexY(site) << " "
+                   << grid.getIndexZ(site) << " "
+                   << i << " "
+                   << site;
+            stream.newline();
+        }
+    }
+    {
+        Grid &grid = m_world.electronGrid();
+        QList<int> &ids = m_world.trapSiteIDs();
+        for (int i = 0; i < ids.size(); i++)
+        {
+            int site = ids[i];
+            stream << 'T' << " "
+                   << grid.getIndexX(site) << " "
+                   << grid.getIndexY(site) << " "
+                   << grid.getIndexZ(site) - 1 << " "
+                   << i << " "
+                   << site;
+            stream.newline();
+        }
+    }
     stream.flush();
 }
 

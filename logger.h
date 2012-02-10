@@ -66,6 +66,7 @@ public:
     virtual void saveImage();
     virtual void report(ChargeAgent &charge);
     virtual void reportFluxStream();
+    virtual void reportXYZStream();
     virtual QString generateFileName(QString identifier, QString extension = "dat", bool sim = true, bool step = true);
 
 protected:
@@ -73,6 +74,7 @@ protected:
     QDir m_outputdir;
     DataStream *m_fluxStream;
     DataStream *m_carrierStream;
+    DataStream *m_xyzStream;
 };
 
 class NullLogger : public Logger
@@ -96,6 +98,7 @@ public:
     virtual void saveImage() {}
     virtual void report(ChargeAgent &charge) {}
     virtual void reportFluxStream() {}
+    virtual void reportXYZStream() {}
     virtual QString generateFileName(QString identifier, QString extension = "dat", bool sim = true, bool step = true)
     {
         qFatal("NullLogger::generateFileName");

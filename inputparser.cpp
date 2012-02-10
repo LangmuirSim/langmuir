@@ -55,8 +55,8 @@ void InputParser::setMap(int step)
     createVariable("gaussian.stdev"         , m_parameters[step].gaussianStdev       , step);
     createVariable("seed.percentage"        , m_parameters[step].seedPercentage      , step);
 
-    createVariable("voltage.drain"          , m_parameters[step].voltageDrain        , step);
-    createVariable("voltage.source"         , m_parameters[step].voltageSource       , step);
+    createVariable("voltage.right"          , m_parameters[step].voltageDrain        , step);
+    createVariable("voltage.left"           , m_parameters[step].voltageSource       , step);
     createVariable("temperature.kelvin"     , m_parameters[step].temperatureKelvin   , step);
 
     createVariable("source.rate"            , m_parameters[step].sourceRate          , step);

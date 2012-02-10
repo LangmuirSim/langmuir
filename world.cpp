@@ -9,6 +9,7 @@
 #include "world.h"
 #include "rand.h"
 #include "fluxagent.h"
+#include "output.h"
 
 namespace Langmuir {
 
@@ -88,6 +89,18 @@ World::World(SimulationParameters &par, QObject *parent)
     {
         m_fluxAgents.push_back(flux);
     }
+
+    QString name = generateFileName(
+                parameters(),
+                "coulomb",
+                "xyz",
+                true,
+                true,
+                true,
+                "-");
+    qDebug() << qPrintable(name);
+
+    qFatal("done");
 
     // Create Logger
     if ( parameters().outputIsOn )
