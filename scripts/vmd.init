@@ -1,0 +1,18 @@
+topo readvarxyz temp.xyz
+
+mol modstyle 0 top VDW 1 50
+
+[ atomselect 0 "name E" ] set radius 0.5
+[ atomselect 0 "name H" ] set radius 0.5
+[ atomselect 0 "name D" ] set radius 0.5
+[ atomselect 0 "name T" ] set radius 0.5
+
+color Display Background iceblue
+color Name E black
+color Name H red
+color Name D white
+color Name T blue
+
+display backgroundgradient on
+rotate x by -15
+axes location off
