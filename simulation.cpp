@@ -123,6 +123,7 @@ void Simulation::performIterations(int nIterations)
         m_world.parameters().currentStep += 1;
     }
 
+    // Output Source and Drain information
     m_world.logger().reportFluxStream();
 
     // Output Coulomb Energy
@@ -131,6 +132,7 @@ void Simulation::performIterations(int nIterations)
         m_world.opencl().launchCoulombKernel1();
         m_world.logger().saveCoulombEnergy();
     }
+
     // Output Carrier Positions and IDs
     if(m_world.parameters().outputIdsOnIteration)
     {
@@ -138,7 +140,7 @@ void Simulation::performIterations(int nIterations)
         m_world.logger().saveHoleIDs();
     }
 
-    m_world.logger().reportXYZStream();
+    //m_world.logger().reportXYZStream();
 }
 
 void Simulation::placeDefects(const QList<int>& siteIDs)

@@ -62,7 +62,6 @@ struct SimulationParameters
     int workY;
     int workZ;
     int workSize;
-    QString kernelsPath;
 
     double boltzmannConstant;
     double dielectricConstant;
@@ -134,7 +133,6 @@ struct SimulationParameters
         workY                  (4),
         workZ                  (4),
         workSize               (256),
-        kernelsPath            (QDir::currentPath()),
 
         boltzmannConstant      (1.3806504e-23),
         dielectricConstant     (3.5),

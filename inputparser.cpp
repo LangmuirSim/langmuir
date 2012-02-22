@@ -67,7 +67,6 @@ void InputParser::setMap(int step)
     createVariable("work.y"                 , m_parameters[step].workY               , step);
     createVariable("work.z"                 , m_parameters[step].workZ               , step);
     createVariable("work.size"              , m_parameters[step].workSize            , step);
-    createVariable("kernels.path"           , m_parameters[step].kernelsPath         , step);
 
     createVariable("configuration.file"     , m_parameters[step].configurationFile   , step);
 

@@ -44,11 +44,11 @@ void OpenClHelper::initializeOpenCL()
         err = m_queue.finish();
 
         //obtain kernel source
-        QDir dir(m_world.parameters().kernelsPath);
-        if(!dir.exists()) { qFatal("%s does not exist", qPrintable(dir.path()));}
-        QFile file(dir.absoluteFilePath("kernel.cl"));
+        QFile file(":/resources/kernel.cl");
         if(!(file.open(QIODevice::ReadOnly | QIODevice::Text)) ){
-            throw cl::Error(-1, QString("error opening kernel file: %1").arg(dir.absoluteFilePath("kernel.cl")).toLatin1());
+            qDebug() << qPrintable(QString("error opening kernel file: :/resources.kernel.cl;\n\t"
+                                           "this is a qt4.qrc file, somethings seriously wrong!"));
+            throw cl::Error(-1, "OpenCL Error!");
         }
         QByteArray contents = file.readAll();
         file.close();
@@ -225,7 +225,7 @@ void OpenClHelper::initializeOpenCL()
     }
     catch(cl::Error& error)
     {
-        qWarning("%s(%d)", error.what(), error.err());
+        qDebug("%s (%d)", error.what(), error.err());
         m_world.parameters().okCL = false;
         return;
     }

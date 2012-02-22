@@ -125,13 +125,13 @@ void Logger::initialize()
         stream.flush();
     }
 
-    m_xyzStream = new DataStream(
-                generateFileName("trajectory","xyz",true,false),
-                0,
-                0,
-                QIODevice::WriteOnly|QIODevice::Text,
-                true,
-                m_world.parameters().outputOverwrite);
+//    m_xyzStream = new DataStream(
+//                generateFileName("trajectory","xyz",true,false),
+//                0,
+//                0,
+//                QIODevice::WriteOnly|QIODevice::Text,
+//                true,
+//                m_world.parameters().outputOverwrite);
 }
 
 Logger::~Logger()

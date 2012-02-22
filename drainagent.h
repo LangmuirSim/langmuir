@@ -13,8 +13,6 @@ class DrainAgent : public FluxAgent
 public:
     DrainAgent(World &world, Grid &grid, QObject *parent = 0);
     bool tryToAccept(ChargeAgent *charge);
-
-protected:
 };
 
 class ElectronDrainAgent : public DrainAgent
