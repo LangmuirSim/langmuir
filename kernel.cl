@@ -185,6 +185,12 @@ __kernel void coulomb2( __global double *o, __global int *s, __global int *q, in
                    ( yi - yj ) * ( yi - yj ) +
                    ( zi - zj ) * ( zi - zj );
         if ( r > 0 && r < c2 ) { vlocal[ get_local_id(0) ] = vlocal[ get_local_id(0) ] + qlocal[ get_local_id(0) ] * rsqrt(r); }
+
+        //image interaction
+        //       r = ( xi + xj + 1 ) * ( xi + xj + 1 ) +
+        //           ( yi - yj     ) * ( yi - yj     ) +
+        //           ( zi - zj     ) * ( zi - zj     );
+        //if ( r > 0 && r < c2 ) { vlocal[ get_local_id(0) ] = vlocal[ get_local_id(0) ] - qlocal[ get_local_id(0) ] * rsqrt(r); }
         }
         barrier(CLK_LOCAL_MEM_FENCE);
     }

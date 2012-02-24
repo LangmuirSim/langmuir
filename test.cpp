@@ -1,14 +1,15 @@
 #include <QtCore>
-#include "inputparser.h"
-#include "logger.h"
-#include "world.h"
+
+#include "parameters.h"
+#include "output.h"
 
 using namespace Langmuir;
 int main(int argc, char *argv[])
 {
-  QCoreApplication app(argc, argv);
+    QCoreApplication app(argc, argv);
+    SimulationParameters par;
 
-  InputParser parser("lvsample.inp");
-  SimulationParameters &par = parser.getParameters(0);
-  World world(&par);
+    FileNameGenerator gen(par);
+    qDebug() << qPrintable(gen.generate("coulomb","dat",FileNameGenerator::IgnorePath));
+    //= FileNameGenerator::UseStep|FileNameGenerator::UseSimulation;
 }
