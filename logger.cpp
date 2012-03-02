@@ -1,419 +1,177 @@
-#include "openclhelper.h"
-#include "fluxagent.h"
-#include "parameters.h"
-#include "chargeagent.h"
-#include "cubicgrid.h"
-#include "sourceagent.h"
-#include "drainagent.h"
 #include "logger.h"
+#include "parameters.h"
 #include "world.h"
+#include "cubicgrid.h"
+#include "chargeagent.h"
+#include "fluxagent.h"
+#include "openclhelper.h"
 
 namespace Langmuir
 {
 
-DataStream::DataStream(QString name, int width, int precision,
-                       QIODevice::OpenMode openMode, bool mustNotExist,
-                       bool deleteBeforeOpening)
-    : QTextStream(), m_width(width), m_precision(precision)
-{
-    m_file.setFileName(name);
-    if (deleteBeforeOpening)
-    {
-        m_file.remove();
-    }
-    setDevice(&m_file);
-    if (m_file.isOpen() || (mustNotExist && m_file.exists()))
-    {
-        qFatal("can not open data file (%s); file exists or is open already",qPrintable(name));
-    }
-    if (!m_file.open(openMode))
-    {
-        qFatal("can not open data file (%s)",qPrintable(name));
-    }
-    setStreamParameters();
-}
-
-void DataStream::newline()
-{
-    reset();
-    *this << "\n";
-    setStreamParameters();
-}
-
-void DataStream::setStreamParameters()
-{
-    setRealNumberPrecision(m_precision);
-    setRealNumberNotation(QTextStream::ScientificNotation);
-    setFieldWidth(m_width);
-    setFieldAlignment(QTextStream::AlignRight);
-}
-
-void DataStream::fillColumns(int count, QString fill)
-{
-    if ( count < 0 ) return;
-    for (int i = 0; i < count; i++)
-    {
-        *this << fill;
-    }
-}
-
-Logger::Logger(World &world, QObject *parent)
-    : QObject(parent), m_world(world),
-      m_fluxStream(0),
-      m_carrierStream(0)
+XYZWriter::XYZWriter(World &world, const QString &name, OutputInfo::Options options, QObject *parent)
+    : QObject(parent), m_world(world), m_stream(name,&m_world.parameters(),options,this)
 {
 }
 
-void Logger::initialize()
+FluxWriter::FluxWriter(World &world, const QString &name, OutputInfo::Options options, QObject *parent)
+    : QObject(parent), m_world(world), m_stream(name,&m_world.parameters(),options,this)
 {
-    m_outputdir = QDir(m_world.parameters().outputPath);
-
-    if(!m_outputdir.exists())
+    QList<FluxAgent *>& fluxAgents = m_world.fluxes();
+    m_stream << qSetRealNumberPrecision(m_world.parameters().outputPrecision)
+             << qSetFieldWidth(m_world.parameters().outputWidth)
+             << right
+             << scientific;
+    m_stream << "time";
+    foreach(FluxAgent *flux, fluxAgents)
     {
-        qFatal("%s does not exist", qPrintable(m_outputdir.path()));
+        m_stream << QString("%1:attempt").arg(flux->objectName());
+        m_stream << QString("%1:success").arg(flux->objectName());
     }
+    m_stream << "electron:count"
+             << "electron:percentage"
+             << "electron:reached"
+             << "hole:count"
+             << "hole:percentage"
+             << "hole:reached"
+             << newline;
+    m_stream.flush();
+}
 
-    if(m_world.parameters().outputIdsOnDelete)
+CarrierWriter::CarrierWriter(World &world, const QString &name, OutputInfo::Options options, QObject *parent)
+    : QObject(parent), m_world(world), m_stream(name,&m_world.parameters(),options,this)
+{
+    m_stream << qSetRealNumberPrecision(m_world.parameters().outputPrecision)
+             << qSetFieldWidth(m_world.parameters().outputWidth)
+             << right
+             << scientific
+             << "type"
+             << "x"
+             << "y"
+             << "z"
+             << "s"
+             << "*"
+             << "lifetime"
+             << "pathlength"
+             << "time"
+             << newline
+             << flush;
+}
+
+void XYZWriter::write()
+{
+    int num = m_world.numElectronAgents() +
+              m_world.numHoleAgents()     +
+              m_world.numDefects()        +
+              m_world.numTraps();
+
+    m_stream << qSetFieldWidth(0)
+             << num
+             << newline;
+
+    m_stream << m_world.parameters().currentStep
+             << newline;
+
+    m_stream << qSetRealNumberPrecision(m_world.parameters().outputPrecision)
+             << qSetFieldWidth(0)
+             << right
+             << scientific;
     {
-        if (m_carrierStream) return;
-
-        m_carrierStream = new DataStream(
-                    generateFileName("onDelete","dat",true,false),
-                    m_world.parameters().outputWidth,
-                    m_world.parameters().outputPrecision,
-                    QIODevice::WriteOnly|QIODevice::Text,
-                    true,
-                    m_world.parameters().outputOverwrite);
-        *m_carrierStream << "si"
-                         << "xi"
-                         << "yi"
-                         << "zi"
-                         << "lifetime"
-                         << "pathlength"
-                         << "type"
-                         << "step";
-        m_carrierStream->newline();
-        m_carrierStream->flush();
-    }
-
-    if ( m_world.drains().size() > 0 || m_world.sources().size() > 0 )
-    {
-        m_fluxStream = new DataStream(
-                    generateFileName("","dat",true,false),
-                    m_world.parameters().outputWidth,
-                    m_world.parameters().outputPrecision,
-                    QIODevice::WriteOnly|QIODevice::Text,
-                    true,
-                    m_world.parameters().outputOverwrite);
-
-        QList<FluxAgent *>& fluxAgents = m_world.fluxes();
-        DataStream& stream = *m_fluxStream;
-
-        stream << "Step";
-        foreach(FluxAgent *flux, fluxAgents)
+        Grid &grid = m_world.electronGrid();
+        QList<ChargeAgent*> &charges = m_world.electrons();
+        foreach( ChargeAgent* pCharge, charges)
         {
-            stream << QString("%1:attempt").arg(flux->objectName());
-            stream << QString("%1:success").arg(flux->objectName());
-        }
-        stream << "electron:count"
-               << "electron:percentage"
-               << "electron:reached"
-               << "hole:count"
-               << "hole:percentage"
-               << "hole:reached";
-        stream.newline();
-        stream.flush();
-    }
-
-//    m_xyzStream = new DataStream(
-//                generateFileName("trajectory","xyz",true,false),
-//                0,
-//                0,
-//                QIODevice::WriteOnly|QIODevice::Text,
-//                true,
-//                m_world.parameters().outputOverwrite);
-}
-
-Logger::~Logger()
-{
-    if (m_fluxStream) { m_fluxStream->flush(); delete m_fluxStream; }
-    if (m_carrierStream) { m_carrierStream->flush(); delete m_carrierStream; }
-}
-
-void Logger::report( ChargeAgent &charge )
-{
-    Grid &grid = m_world.electronGrid();
-    int si = charge.getCurrentSite();
-    *m_carrierStream << si
-                     << grid.getIndexX(si)
-                     << grid.getIndexY(si)
-                     << grid.getIndexZ(si)
-                     << charge.lifetime()
-                     << charge.pathlength()
-                     << charge.getType()
-                     << m_world.parameters().currentStep;
-    m_carrierStream->newline();
-}
-
-
-void Logger::saveElectronIDs()
-{
-    QList< ChargeAgent * > &chargeAgents = m_world.electrons();
-    Grid &grid = m_world.electronGrid();
-
-    if(chargeAgents.size()==0)return;
-
-    QString fname = generateFileName("electronIDs");
-    DataStream stream(fname,
-                m_world.parameters().outputWidth,
-                m_world.parameters().outputPrecision,
-                QIODevice::WriteOnly|QIODevice::Text,
-                true,m_world.parameters().outputOverwrite);
-
-    stream << "si"
-           << "xi"
-           << "yi"
-           << "zi"
-           << "lifetime"
-           << "pathlength";
-    stream.newline();
-
-    for ( int i = 0; i < chargeAgents.size(); i++ )
-    {
-        int si = chargeAgents[i]->getCurrentSite();
-        stream << si
-               << grid.getIndexX(si)
-               << grid.getIndexY(si)
-               << grid.getIndexZ(si)
-               << chargeAgents[i]->lifetime()
-               << chargeAgents[i]->pathlength();
-        stream.newline();
-    }
-    stream.flush();
-}
-
-void Logger::saveHoleIDs()
-{
-    QList< ChargeAgent * > &chargeAgents = m_world.holes();
-    Grid &grid = m_world.holeGrid();
-
-    if(chargeAgents.size()==0)return;
-
-    QString fname = generateFileName("holeIDs");
-    DataStream stream(fname,
-                m_world.parameters().outputWidth,
-                m_world.parameters().outputPrecision,
-                QIODevice::WriteOnly|QIODevice::Text,
-                true,m_world.parameters().outputOverwrite);
-
-    stream << "si"
-           << "xi"
-           << "yi"
-           << "zi"
-           << "lifetime"
-           << "pathlength";
-    stream.newline();
-
-    for ( int i = 0; i < chargeAgents.size(); i++ )
-    {
-        int si = chargeAgents[i]->getCurrentSite();
-        stream << si
-               << grid.getIndexX(si)
-               << grid.getIndexY(si)
-               << grid.getIndexZ(si)
-               << chargeAgents[i]->lifetime()
-               << chargeAgents[i]->pathlength();
-        stream.newline();
-    }
-    stream.flush();
-}
-
-void Logger::saveTrapIDs()
-{
-    QList<int> &siteIDs = m_world.trapSiteIDs();
-    Grid &grid = m_world.electronGrid();
-
-    if(siteIDs.size()==0)return;
-
-    QString fname = generateFileName("trapIDs");
-    DataStream stream(fname,
-                m_world.parameters().outputWidth,
-                m_world.parameters().outputPrecision,
-                QIODevice::WriteOnly|QIODevice::Text,
-                true,m_world.parameters().outputOverwrite);
-
-    stream << "si"
-           << "xi"
-           << "yi"
-           << "zi";
-    stream.newline();
-
-    for ( int i = 0; i < siteIDs.size(); i++ )
-    {
-        int si = siteIDs[i];
-        stream << si
-               << grid.getIndexX(si)
-               << grid.getIndexY(si)
-               << grid.getIndexZ(si);
-        stream.newline();
-    }
-    stream.flush();
-}
-
-void Logger::saveDefectIDs()
-{
-    QList<int> &siteIDs = m_world.defectSiteIDs();
-    Grid &grid = m_world.electronGrid();
-
-    if(siteIDs.size()==0)return;
-
-    QString fname = generateFileName("defectIDs");
-    DataStream stream(fname,
-                m_world.parameters().outputWidth,
-                m_world.parameters().outputPrecision,
-                QIODevice::WriteOnly|QIODevice::Text,
-                true,m_world.parameters().outputOverwrite);
-
-    stream << "si"
-           << "xi"
-           << "yi"
-           << "zi";
-    stream.newline();
-
-    for ( int i = 0; i < siteIDs.size(); i++ )
-    {
-        int si = siteIDs[i];
-        stream << si
-               << grid.getIndexX(si)
-               << grid.getIndexY(si)
-               << grid.getIndexZ(si);
-        stream.newline();
-    }
-    stream.flush();
-}
-
-void Logger::saveElectronGridPotential()
-{
-    Grid &grid = m_world.electronGrid();
-
-    QString fname = generateFileName("eGrid");
-    DataStream stream(fname,
-                m_world.parameters().outputWidth,
-                m_world.parameters().outputPrecision,
-                QIODevice::WriteOnly|QIODevice::Text,
-                true,m_world.parameters().outputOverwrite);
-
-    stream << "si"
-           << "xi"
-           << "yi"
-           << "zi"
-           << "vi";
-    stream.newline();
-
-    for(int i = 0; i < m_world.electronGrid().xSize(); i++)
-    {
-        for(int j = 0; j < m_world.electronGrid().ySize(); j++)
-        {
-            for(int k = 0; k < m_world.electronGrid().zSize(); k++)
-            {
-                int si = grid.getIndexS(i,j,k);
-                stream << si
-                       << i
-                       << j
-                       << k
-                       << grid.potential(si);
-                stream.newline();
-            }
+            ChargeAgent &charge = *pCharge;
+            int site = charge.getCurrentSite();
+            m_stream << 'E'                  << ' '
+                     << grid.getIndexX(site) << ' '
+                     << grid.getIndexY(site) << ' '
+                     << grid.getIndexZ(site) << ' '
+                     << site                 << ' '
+                     << &charge              << ' '
+                     << charge.lifetime()    << ' '
+                     << charge.pathlength()  << '\n';
         }
     }
-    stream.flush();
-}
-
-void Logger::saveHoleGridPotential()
-{
-    Grid &grid = m_world.holeGrid();
-
-    QString fname = generateFileName("hGrid");
-    DataStream stream(fname,
-                m_world.parameters().outputWidth,
-                m_world.parameters().outputPrecision,
-                QIODevice::WriteOnly|QIODevice::Text,
-                true,m_world.parameters().outputOverwrite);
-
-    stream << "si"
-           << "xi"
-           << "yi"
-           << "zi"
-           << "vi";
-    stream.newline();
-
-    for(int i = 0; i < m_world.electronGrid().xSize(); i++)
     {
-        for(int j = 0; j < m_world.electronGrid().ySize(); j++)
+        Grid &grid = m_world.holeGrid();
+        QList<ChargeAgent*> &charges = m_world.holes();
+        foreach( ChargeAgent* pCharge, charges)
         {
-            for(int k = 0; k < m_world.electronGrid().zSize(); k++)
-            {
-                int si = grid.getIndexS(i,j,k);
-                stream << si
-                       << i
-                       << j
-                       << k
-                       << grid.potential(si);
-                stream.newline();
-            }
+            ChargeAgent &charge = *pCharge;
+            int site = charge.getCurrentSite();
+            m_stream << 'H'                  << ' '
+                     << grid.getIndexX(site) << ' '
+                     << grid.getIndexY(site) << ' '
+                     << grid.getIndexZ(site) << ' '
+                     << site                 << ' '
+                     << &charge              << ' '
+                     << charge.lifetime()    << ' '
+                     << charge.pathlength()  << '\n';
         }
     }
-    stream.flush();
-}
-
-void Logger::saveCoulombEnergy()
-{
-    Grid &grid = m_world.electronGrid();
-    OpenClHelper &openCL = m_world.opencl();
-
-    QString fname = generateFileName("coulomb");
-    DataStream stream(fname,
-                m_world.parameters().outputWidth,
-                m_world.parameters().outputPrecision,
-                QIODevice::WriteOnly|QIODevice::Text,
-                true,m_world.parameters().outputOverwrite);
-
-    stream << "si"
-           << "xi"
-           << "yi"
-           << "zi"
-           << "vi";
-    stream.newline();
-
-    for(int i = 0; i < m_world.electronGrid().xSize(); i++)
     {
-        for(int j = 0; j < m_world.electronGrid().ySize(); j++)
+        Grid &grid = m_world.electronGrid();
+        QList<int> &ids = m_world.defectSiteIDs();
+        for (int i = 0; i < ids.size(); i++)
         {
-            for(int k = 0; k < m_world.electronGrid().zSize(); k++)
-            {
-                int si = grid.getIndexS(i,j,k);
-                stream << si
-                       << i
-                       << j
-                       << k
-                       << openCL.getOutputHost(si);
-                stream.newline();
-            }
+            int site = ids[i];
+            m_stream << 'D'                  << ' '
+                     << grid.getIndexX(site) << ' '
+                     << grid.getIndexY(site) << ' '
+                     << grid.getIndexZ(site) << ' '
+                     << site                 << ' '
+                     << i                    << '\n';
         }
     }
-    stream.flush();
+    {
+        Grid &grid = m_world.electronGrid();
+        QList<int> &ids = m_world.trapSiteIDs();
+        for (int i = 0; i < ids.size(); i++)
+        {
+            int site = ids[i];
+            m_stream << 'T'                  << ' '
+                     << grid.getIndexX(site) << ' '
+                     << grid.getIndexY(site) << ' '
+                     << -1                   << ' '
+                     << site                 << ' '
+                     << i                    << '\n';
+        }
+    }
 }
 
-QString Logger::generateFileName( QString identifier, QString extension, bool sim, bool step )
+void FluxWriter::write()
 {
-    int w1 = int(log10(m_world.parameters().simulationSteps))+1;
-    int w2 = int(log10(m_world.parameters().iterationsReal))+1;
-    QString name = QString("%1").arg(m_world.parameters().outputStub);
-    if (sim) name += QString("-%1").arg(m_world.parameters().currentSimulation,w1,10,QLatin1Char('0'));
-    if (step) name += QString("-%1").arg(m_world.parameters().currentStep,w2,10,QLatin1Char('0'));
-    if (!(identifier.isEmpty())) name += QString("-%1").arg(identifier);
-    if (!(extension.isEmpty())) name += QString(".%1").arg(extension);
-    return m_outputdir.absoluteFilePath(name);
+    QList<FluxAgent *>& fluxAgents =  m_world.fluxes();
+    m_stream << m_world.parameters().currentStep;
+    foreach(FluxAgent *flux, fluxAgents)
+    {
+        m_stream << flux->attempts() << flux->successes();
+    }
+    m_stream << m_world.numElectronAgents()
+             << m_world.percentElectronAgents()
+             << m_world.reachedElectronAgents()
+             << m_world.numHoleAgents()
+             << m_world.percentHoleAgents()
+             << m_world.reachedHoleAgents()
+             << newline;
+    m_stream.flush();
+}
+
+void CarrierWriter::write(ChargeAgent &charge)
+{
+    Grid &grid = charge.getGrid();
+    int site = charge.getCurrentSite();
+    m_stream << charge.getType()
+             << grid.getIndexX(site)
+             << grid.getIndexY(site)
+             << grid.getIndexZ(site)
+             << site
+             << &charge
+             << charge.lifetime()
+             << charge.pathlength()
+             << m_world.parameters().currentStep
+             << newline;
 }
 
 GridImage::GridImage(World &world, QColor bg, QObject *parent)
@@ -432,14 +190,10 @@ GridImage::GridImage(World &world, QColor bg, QObject *parent)
 
 void GridImage::save(QString name, int scale)
 {
-    if (!m_world.parameters().outputIsOn) return;
-    if (m_world.parameters().outputOverwrite)
-    {
-        QFile::remove(name);
-    }
+    OutputInfo info(name, &m_world.parameters());
     m_painter.end();
     m_image = m_image.scaled(scale*m_image.width(),scale*m_image.height(),Qt::KeepAspectRatioByExpanding);
-    m_image.save(name,"png",100);
+    m_image.save(info.absoluteFilePath(),"png",100);
 }
 
 void GridImage::drawSites( QList<int> &sites, QColor color, int layer )
@@ -472,43 +226,156 @@ void GridImage::drawCharges( QList<ChargeAgent *> &charges,QColor color, int lay
     }
 }
 
-void Logger::saveTrapImage()
+LoggerOn::LoggerOn(World &world, QObject *parent)
+    : Logger(world,parent), m_world(world), m_xyzWriter(0), m_fluxWriter(0), m_carrierWriter(0)
+{
+    initialize();
+}
+
+void LoggerOn::initialize()
+{
+    if (m_world.parameters().outputXyz)
+    {
+        m_xyzWriter = new XYZWriter(m_world,"%path/%stub-%sim.xyz",0,this);
+    }
+
+    if (m_world.parameters().outputIdsOnDelete)
+    {
+        m_carrierWriter = new CarrierWriter(m_world,"%path/%stub-%sim-carriers.dat",0,this);
+    }
+
+    m_fluxWriter = new FluxWriter(m_world,"%path/%stub-%sim.dat",0,this);
+}
+
+void LoggerOn::saveGridPotential(const QString& name)
+{
+    Grid &grid = m_world.electronGrid();
+
+    OutputStream stream(name,&m_world.parameters(),0,this);
+
+    stream << qSetRealNumberPrecision(m_world.parameters().outputPrecision)
+           << qSetFieldWidth(m_world.parameters().outputWidth)
+           << right
+           << scientific;
+
+    stream << "s"
+           << "x"
+           << "y"
+           << "z"
+           << "e"
+           << "h"
+           << newline;
+
+    for(int i = 0; i < m_world.electronGrid().xSize(); i++)
+    {
+        for(int j = 0; j < m_world.electronGrid().ySize(); j++)
+        {
+            for(int k = 0; k < m_world.electronGrid().zSize(); k++)
+            {
+                int si = grid.getIndexS(i,j,k);
+                stream << si
+                       << i
+                       << j
+                       << k
+                       << m_world.electronGrid().potential(si)
+                       << m_world.holeGrid().potential(si)
+                       << newline;
+            }
+        }
+    }
+    stream << flush;
+}
+
+void LoggerOn::saveCoulombEnergy(const QString& name)
+{
+    Grid &grid = m_world.electronGrid();
+    OpenClHelper &openCL = m_world.opencl();
+
+    OutputStream stream(name,&m_world.parameters(),0,this);
+
+    stream << qSetRealNumberPrecision(m_world.parameters().outputPrecision)
+           << qSetFieldWidth(m_world.parameters().outputWidth)
+           << right
+           << scientific;
+
+    stream << "s"
+           << "x"
+           << "y"
+           << "z"
+           << "v"
+           << newline;
+
+    for(int i = 0; i < grid.xSize(); i++)
+    {
+        for(int j = 0; j < grid.ySize(); j++)
+        {
+            for(int k = 0; k < grid.zSize(); k++)
+            {
+                int si = grid.getIndexS(i,j,k);
+                stream << si
+                       << i
+                       << j
+                       << k
+                       << openCL.getOutputHost(si)
+                       << newline;
+            }
+        }
+    }
+    stream << flush;
+}
+
+void LoggerOn::reportFluxStream()
+{
+    if (m_fluxWriter) m_fluxWriter->write();
+}
+
+void LoggerOn::reportXYZStream()
+{
+    if (m_xyzWriter) m_xyzWriter->write();
+}
+
+void LoggerOn::reportCarrier(ChargeAgent &charge)
+{
+    if (m_carrierWriter) m_carrierWriter->write(charge);
+}
+
+void LoggerOn::saveTrapImage(const QString& name)
 {
     QList<int>& siteIDs = m_world.trapSiteIDs();
     if(siteIDs.size()==0)return;
     GridImage image(m_world,Qt::white,this);
     image.drawSites(siteIDs,Qt::green,0);
-    image.save(generateFileName("traps","png"));
+    image.save(name);
 }
 
-void Logger::saveDefectImage()
+void LoggerOn::saveDefectImage(const QString& name)
 {
     QList<int>& siteIDs = m_world.defectSiteIDs();
     if(siteIDs.size()==0)return;
     GridImage image(m_world,Qt::white,this);
     image.drawSites(siteIDs,Qt::cyan,0);
-    image.save(generateFileName("defects","png"));
+    image.save(name);
 }
 
-void Logger::saveElectronImage()
+void LoggerOn::saveElectronImage(const QString& name)
 {
     QList<ChargeAgent*>& chargeIDs = m_world.electrons();
     if(chargeIDs.size()==0)return;
     GridImage image(m_world,Qt::white,this);
     image.drawCharges(chargeIDs,Qt::red,0);
-    image.save(generateFileName("electrons","png"));
+    image.save(name);
 }
 
-void Logger::saveHoleImage()
+void LoggerOn::saveHoleImage(const QString& name)
 {
     QList<ChargeAgent*>& chargeIDs = m_world.holes();
     if(chargeIDs.size()==0)return;
     GridImage image(m_world,Qt::white,this);
     image.drawCharges(chargeIDs,Qt::blue,0);
-    image.save(generateFileName("holes","png"));
+    image.save(name);
 }
 
-void Logger::saveImage()
+void LoggerOn::saveImage(const QString& name)
 {
     QList<int>& traps = m_world.trapSiteIDs();
     QList<int>& defects = m_world.defectSiteIDs();
@@ -519,108 +386,7 @@ void Logger::saveImage()
     if (defects.size()>0) { image.drawSites(defects,Qt::cyan,0); }
     if (electrons.size()>0) { image.drawCharges(electrons,Qt::red,0); }
     if (holes.size()>0) { image.drawCharges(holes,Qt::blue,0); }
-    image.save(generateFileName("all","png"));
-}
-
-void Logger::reportFluxStream()
-{
-    DataStream& stream = *m_fluxStream;
-    QList<FluxAgent *>& fluxAgents =  m_world.fluxes();
-    stream << m_world.parameters().currentStep;
-    foreach(FluxAgent *flux, fluxAgents)
-    {
-        stream << flux->attempts() << flux->successes();
-    }
-    stream << m_world.numElectronAgents()
-           << m_world.percentElectronAgents()
-           << m_world.reachedElectronAgents()
-           << m_world.numHoleAgents()
-           << m_world.percentHoleAgents()
-           << m_world.reachedHoleAgents();
-    stream.newline();
-    stream.flush();
-}
-
-void Logger::reportXYZStream()
-{
-    int num = m_world.numElectronAgents() +
-              m_world.numHoleAgents()     +
-              m_world.numDefects()        +
-              m_world.numTraps();
-
-    DataStream& stream = *m_xyzStream;
-
-    stream << num;
-    stream.newline();
-    stream << QString("FRAME=%1 E=%2 H=%3 D=%4 T=%5")
-              .arg(m_world.parameters().currentStep)
-              .arg(m_world.numElectronAgents())
-              .arg(m_world.numHoleAgents())
-              .arg(m_world.numDefects())
-              .arg(m_world.numTraps());
-    stream.newline();
-
-    {
-        Grid &grid = m_world.electronGrid();
-        QList<ChargeAgent*> &charges = m_world.electrons();
-        for (int i = 0; i < charges.size(); i++)
-        {
-            ChargeAgent &charge = *charges[i];
-            int site = charge.getCurrentSite();
-            stream << 'E' << " "
-                   << grid.getIndexX(site) << " "
-                   << grid.getIndexY(site) << " "
-                   << grid.getIndexZ(site) << " "
-                   << &charge;
-            stream.newline();
-        }
-    }
-    {
-        Grid &grid = m_world.holeGrid();
-        QList<ChargeAgent*> &charges = m_world.holes();
-        for (int i = 0; i < charges.size(); i++)
-        {
-            ChargeAgent &charge = *charges[i];
-            int site = charge.getCurrentSite();
-            stream << 'H' << " "
-                   << grid.getIndexX(site) << " "
-                   << grid.getIndexY(site) << " "
-                   << grid.getIndexZ(site) * 2 + 1 << " "
-                   << &charge;
-            stream.newline();
-        }
-    }
-    {
-        Grid &grid = m_world.electronGrid();
-        QList<int> &ids = m_world.defectSiteIDs();
-        for (int i = 0; i < ids.size(); i++)
-        {
-            int site = ids[i];
-            stream << 'D' << " "
-                   << grid.getIndexX(site) << " "
-                   << grid.getIndexY(site) << " "
-                   << grid.getIndexZ(site) << " "
-                   << i << " "
-                   << site;
-            stream.newline();
-        }
-    }
-    {
-        Grid &grid = m_world.electronGrid();
-        QList<int> &ids = m_world.trapSiteIDs();
-        for (int i = 0; i < ids.size(); i++)
-        {
-            int site = ids[i];
-            stream << 'T' << " "
-                   << grid.getIndexX(site) << " "
-                   << grid.getIndexY(site) << " "
-                   << grid.getIndexZ(site) - 1 << " "
-                   << i << " "
-                   << site;
-            stream.newline();
-        }
-    }
-    stream.flush();
+    image.save(name);
 }
 
 }

@@ -46,20 +46,18 @@ int main (int argc, char *argv[])
   InputParser input;
   input.parseKeyValue(iFileName);
 
-  // Save all parameters
-  input.saveParameters();
+  const SimulationParameters& par = input.getParameters(0);
 
-  // Get the simulation parameters
-  SimulationParameters &par = input.getParameters(0);
-
-  // Create TextStream for time info
-  DataStream *p_timerStream;
+  //Create TextStream for time info
+  OutputStream *p_timerStream = 0;
   if (par.outputIsOn)
   {
-      QString name = QDir(par.outputPath).absoluteFilePath("time.dat");
-      p_timerStream = new DataStream(name,16,5,QIODevice::Append|QIODevice::Text,false,par.outputOverwrite);
-      DataStream& timerStream = *p_timerStream;
-      timerStream << "simulation"
+      p_timerStream = new OutputStream("%path/time.dat",&par,OutputInfo::AppendMode);
+      OutputStream& timerStream = *p_timerStream;
+      timerStream << right
+                  << qSetFieldWidth(20)
+                  << qSetRealNumberPrecision(12)
+                  << "simulation"
                   << "equilibration"
                   << "real"
                   << "carriers"
@@ -68,9 +66,13 @@ int main (int argc, char *argv[])
                   << "date_f"
                   << "time_f"
                   << "days"
+                  << "hours"
+                  << "min"
                   << "secs"
-                  << "msecs";
-      timerStream.newline();
+                  << "msecs"
+                  << newline
+                  << flush;
+      timerStream.setRealNumberNotation(QTextStream::SmartNotation);
   }
 
   for (int i = 0; i < input.steps(); ++i)
@@ -88,7 +90,7 @@ int main (int argc, char *argv[])
       Simulation sim(world);
 
       // Save the parameters used for this simulation to a file
-      // input.saveParameters(i);
+      input.saveParameters(i);
 
       // Perform equilibration steps
       for (int j = 0; j < par.iterationsWarmup; j += par.iterationsPrint)
@@ -122,7 +124,7 @@ int main (int argc, char *argv[])
 
       if (par.outputIsOn)
       {
-          DataStream& timerStream = *p_timerStream;
+          OutputStream& timerStream = *p_timerStream;
           timerStream << par.currentSimulation
                       << par.iterationsWarmup
                       << par.iterationsReal
@@ -131,11 +133,13 @@ int main (int argc, char *argv[])
                       << start.toString(timeFMT)
                       << stop.toString(dateFMT)
                       << stop.toString(timeFMT)
-                      << start.daysTo(stop)
-                      << start.secsTo(stop)
-                      << start.msecsTo(stop);
-          timerStream.newline();
-          timerStream.flush();
+                      << start.msecsTo(stop) / 1000.0 / 60.0 / 60.0 / 24.0
+                      << start.msecsTo(stop) / 1000.0 / 60.0 / 60.0
+                      << start.msecsTo(stop) / 1000.0 / 60.0
+                      << start.msecsTo(stop) / 1000.0
+                      << start.msecsTo(stop)
+                      << newline
+                      << flush;
       }
   }
 
@@ -145,16 +149,16 @@ int main (int argc, char *argv[])
 
   if (par.outputIsOn)
   {
-      DataStream& timerStream = *p_timerStream;
+      OutputStream& timerStream = *p_timerStream;
       // Report time stats
-      timerStream << "begin:" << begin.toString(dateFMT) << begin.toString(timeFMT); timerStream.newline();
-      timerStream << "end:" << end.toString(dateFMT) << end.toString(timeFMT); timerStream.newline();
-      timerStream << "days:" << begin.daysTo(end); timerStream.newline();
-      timerStream << "secs:" << begin.secsTo(end); timerStream.newline();
-      timerStream << "msecs:" << begin.msecsTo(end); timerStream.newline();
-      timerStream << "xmas:" << QString("%1").arg(end.daysTo(xmas));
-      timerStream.flush();
-
+      timerStream << "begin:" << begin.toString(dateFMT) << begin.toString(timeFMT) << newline;
+      timerStream << "end:" << end.toString(dateFMT) << end.toString(timeFMT) << newline;
+      timerStream << "days:" << begin.msecsTo(end) / 1000.0 / 60.0 / 60.0 / 24.0 << newline;
+      timerStream << "hours:" << begin.msecsTo(end) / 1000.0 / 60.0 / 60.0 << newline;
+      timerStream << "mins:" << begin.msecsTo(end) / 1000.0 / 60.0 << newline;
+      timerStream << "secs:" << begin.msecsTo(end) / 1000.0 << newline;
+      timerStream << "msecs:" << begin.msecsTo(end) << newline;
+      timerStream << "xmas:" << QString("%1").arg(end.daysTo(xmas)) << newline << flush;
       delete p_timerStream;
   }
 }

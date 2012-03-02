@@ -91,14 +91,13 @@ World::World(SimulationParameters &par, QObject *parent)
     }
 
     // Create Logger
-    if ( parameters().outputIsOn )
+    if (parameters().outputIsOn)
     {
-        m_logger = new Logger(refWorld, this);
-        m_logger->initialize();
+        m_logger = new LoggerOn(refWorld, this);
     }
     else
     {
-        m_logger = new NullLogger(refWorld,this);
+        m_logger = new Logger(refWorld, this);
     }
 }
 

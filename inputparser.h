@@ -22,7 +22,6 @@ public:
     void parserXML(QString fileName);
     void saveParametersXML(int step);
     void saveParameters(int step);
-    void saveParameters();
     int steps();
 
 private:

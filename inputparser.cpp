@@ -1,4 +1,5 @@
 #include "inputparser.h"
+#include "output.h"
 #include <QDebug>
 #include <QFile>
 #include <QFileInfo>
@@ -31,12 +32,11 @@ void InputParser::setMap(int step)
     createVariable("output.is.on"           , m_parameters[step].outputIsOn          , step);
     createVariable("output.overwrite"       , m_parameters[step].outputOverwrite     , step);
     createVariable("output.stub"            , m_parameters[step].outputStub          , step);
-    createVariable("output.ids.on.iteration", m_parameters[step].outputIdsOnIteration, step);
-    createVariable("output.ids.at.start"    , m_parameters[step].outputIdsAtStart    , step);
     createVariable("output.ids.on.delete"   , m_parameters[step].outputIdsOnDelete   , step);
     createVariable("output.coulomb"         , m_parameters[step].outputCoulomb       , step);
     createVariable("output.potential"       , m_parameters[step].outputPotential     , step);
     createVariable("output.image"           , m_parameters[step].outputImage         , step);
+    createVariable("output.xyz"             , m_parameters[step].outputXyz           , step);
     createVariable("output.precision"       , m_parameters[step].outputPrecision     , step);
     createVariable("output.width"           , m_parameters[step].outputWidth         , step);
     createVariable("output.path"            , m_parameters[step].outputPath          , step);
@@ -55,8 +55,8 @@ void InputParser::setMap(int step)
     createVariable("gaussian.stdev"         , m_parameters[step].gaussianStdev       , step);
     createVariable("seed.percentage"        , m_parameters[step].seedPercentage      , step);
 
-    createVariable("voltage.right"          , m_parameters[step].voltageDrain        , step);
-    createVariable("voltage.left"           , m_parameters[step].voltageSource       , step);
+    createVariable("voltage.right"          , m_parameters[step].voltageRight        , step);
+    createVariable("voltage.left"           , m_parameters[step].voltageLeft       , step);
     createVariable("temperature.kelvin"     , m_parameters[step].temperatureKelvin   , step);
 
     createVariable("source.rate"            , m_parameters[step].sourceRate          , step);
@@ -81,7 +81,6 @@ void InputParser::setMap(int step)
     createVariable("ok.CL"                  , m_parameters[step].okCL                  , step, false);
     createVariable("current.step"           , m_parameters[step].currentStep           , step, false);
     createVariable("iterations.total"       , m_parameters[step].iterationsTotal       , step, false);
-    createVariable("simulation.steps"       , m_parameters[step].simulationSteps       , step, false);
 }
 
 InputParser::~InputParser()
@@ -112,84 +111,12 @@ void InputParser::saveParameters(int step)
 {
     if ( ! m_parameters[step].outputIsOn ) return;
     checkStep(step);
-    int w1 = int(log10(steps()))+1;
-    QDir dir(m_parameters[step].outputPath);
-    if (!dir.exists())
-    {
-        qFatal("%s does not exist",
-        qPrintable(m_parameters[step].outputPath));
-    }
-    QString name = QString("%1-%2.inp")
-            .arg(m_parameters[step].outputStub)
-            .arg(step,w1,10,QLatin1Char('0'));
-    name = dir.absoluteFilePath(name);
-    QFile file(name);
-    if (m_parameters[step].outputOverwrite)
-    {
-        file.remove();
-    }
-    if (file.exists() || file.isOpen())
-    {
-        qFatal("can not open %s; file exists or is open already",qPrintable(name));
-    }
-    if (!file.open(QIODevice::WriteOnly|QIODevice::Text))
-    {
-        qFatal("can not open %s",
-        qPrintable(name));
-    }
-    QTextStream stream;
-    stream.setDevice(&file);
-    stream.setFieldAlignment(QTextStream::AlignLeft);
+    OutputStream stream("%path/%stub-%sim.inp",&m_parameters[step],0,this);
     foreach(AbstractVariable *var, m_variables[step])
     {
         stream << QString("%1 = %2\n").arg(var->key(),-25).arg(var->value(15),0);
     }
-    stream.flush();
-    file.close();
-}
-
-void InputParser::saveParameters()
-{
-    if ( ! m_parameters[0].outputIsOn ) return;
-    QDir dir(m_parameters[0].outputPath);
-    if (!dir.exists())
-    {
-        qFatal("%s does not exist",
-        qPrintable(m_parameters[0].outputPath));
-    }
-    QString name = QString("parameters.dat");
-    name = dir.absoluteFilePath(name);
-    QFile file(name);
-    if (m_parameters[0].outputOverwrite)
-    {
-        file.remove();
-    }
-    if (!file.open(QIODevice::Append|QIODevice::Text))
-    {
-        qFatal("can not open %s",
-        qPrintable(name));
-    }
-    QTextStream stream;
-    stream.setDevice(&file);
-    stream.setFieldAlignment(QTextStream::AlignRight);
-    stream.setFieldWidth(50);
-    stream << "step";
-    foreach(AbstractVariable *var, m_variables[0])
-    {
-        stream << var->key();
-    }
-    stream.setFieldWidth(0); stream << "\n"; stream.setFieldWidth(50);
-    for (int i=0; i<steps(); i++)
-    {
-        stream << m_parameters[i].currentSimulation;
-        foreach(AbstractVariable *var, m_variables[i])
-        {
-            stream << var->value(15);
-        }
-        stream.setFieldWidth(0); stream << "\n"; stream.setFieldWidth(50);
-    }
-    stream.flush();
-    file.close();
+    stream << flush;
 }
 
 void InputParser::checkStep(int step)
@@ -222,7 +149,6 @@ void InputParser::createSteps(int toStep)
         m_parameters.push_back(SimulationParameters());
         m_variables.push_back(QMap<QString,AbstractVariable*>());
         setMap(steps()-1);
-        m_parameters[steps()-1].simulationSteps = steps();
     }
 }
 
@@ -387,7 +313,7 @@ void InputParser::parseKeyValue(QString fileName)
     for (int i = 0; i < m_parameters.size(); i++)
     {
         m_parameters[i].currentSimulation = m_parameters[0].currentSimulation + i;
-        m_parameters[i].simulationSteps = steps();
+        //m_parameters[i].simulationSteps = steps();
         m_parameters[i].check();
     }
 }

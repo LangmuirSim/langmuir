@@ -24,6 +24,7 @@ public:
     void setOpenCLID(int id);
     int getOpenCLID();
     double coulombInteraction(int newSite);
+    Grid& getGrid();
 
 protected:
     virtual double bindingPotential(int site)= 0;

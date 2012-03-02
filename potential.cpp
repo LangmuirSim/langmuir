@@ -23,8 +23,8 @@ void Potential::setPotentialZero()
 
 void Potential::setPotentialLinear()
 {
-    double  m =(m_world.parameters().voltageDrain - m_world.parameters().voltageSource)/ double(m_world.electronGrid().xSize());
-    double  b = m_world.parameters().voltageSource;
+    double  m =(m_world.parameters().voltageRight - m_world.parameters().voltageLeft)/ double(m_world.electronGrid().xSize());
+    double  b = m_world.parameters().voltageLeft;
     for(int i = 0; i < m_world.electronGrid().xSize(); i++)
     {
         for(int j = 0; j < m_world.electronGrid().ySize(); j++)

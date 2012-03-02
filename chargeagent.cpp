@@ -75,6 +75,11 @@ void ChargeAgent::chooseFuture()
     m_fSite = m_neighbors[m_world.randomNumberGenerator().integer(0, m_neighbors.size()-1)];
 }
 
+Grid& ChargeAgent::getGrid()
+{
+    return m_grid;
+}
+
 void ChargeAgent::decideFuture()
 {
     // Increase lifetime in existance

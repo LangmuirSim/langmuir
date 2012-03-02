@@ -43,17 +43,7 @@ Simulation::Simulation(World &world, QObject *parent):  QObject(parent), m_world
     // Output Field Energy
     if(m_world.parameters().outputPotential)
     {
-        m_world.logger().saveElectronGridPotential();
-        m_world.logger().saveHoleGridPotential();
-    }
-
-    // Output Defect IDs
-    if(m_world.parameters().outputIdsAtStart)
-    {
-        m_world.logger().saveDefectIDs();
-        m_world.logger().saveTrapIDs();
-        m_world.logger().saveElectronIDs();
-        m_world.logger().saveHoleIDs();
+        m_world.logger().saveGridPotential();
     }
 
     // Initialize OpenCL
@@ -133,14 +123,10 @@ void Simulation::performIterations(int nIterations)
         m_world.logger().saveCoulombEnergy();
     }
 
-    // Output Carrier Positions and IDs
-    if(m_world.parameters().outputIdsOnIteration)
+    if(m_world.parameters().outputXyz)
     {
-        m_world.logger().saveElectronIDs();
-        m_world.logger().saveHoleIDs();
+        m_world.logger().reportXYZStream();
     }
-
-    //m_world.logger().reportXYZStream();
 }
 
 void Simulation::placeDefects(const QList<int>& siteIDs)
@@ -369,7 +355,7 @@ void Simulation::nextTick()
             // Check if the charge was removed - then we should delete it
             if(electrons[i]->removed())
             {
-                m_world.logger().report(*electrons[i]);
+                m_world.logger().reportCarrier(*electrons[i]);
                 delete electrons[i];
                 electrons.removeAt(i);
                 --i;
@@ -381,7 +367,7 @@ void Simulation::nextTick()
             // Check if the charge was removed - then we should delete it
             if(holes[i]->removed())
             {
-                m_world.logger().report(*holes[i]);
+                m_world.logger().reportCarrier(*holes[i]);
                 delete holes[i];
                 holes.removeAt(i);
                 --i;
