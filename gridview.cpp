@@ -51,6 +51,7 @@ GridViewGL::GridViewGL(const QGLFormat &format, QWidget * parent, QString input)
         pPar.seedCharges = true;
         pPar.electronPercentage = 0.02;
         pPar.voltageRight = 10.0;
+        pPar.simulationStart = QDateTime::currentDateTime();
         pPar.check();
         pInput = NULL;
     }
@@ -60,6 +61,7 @@ GridViewGL::GridViewGL(const QGLFormat &format, QWidget * parent, QString input)
         pInput = new InputParser();
         pInput->parseKeyValue(input);
         pPar = pInput->getParameters(0);
+        pPar.simulationStart = QDateTime::currentDateTime();
     }
 
     //Restrict the value on iterations.print to be low(it controls how many steps are done everytime updateGL is called)

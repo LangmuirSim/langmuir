@@ -82,6 +82,7 @@ int main (int argc, char *argv[])
 
       // Get the parameters for this simulation
       SimulationParameters &par = input.getParameters(i);
+      par.simulationStart = start;
 
       // Create the World
       World world(par);

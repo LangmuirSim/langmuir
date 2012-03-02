@@ -32,7 +32,6 @@ seed.charges            = false                      # place the maximum number 
 defect.percentage       = 0.00                       # fraction of the grid (between 0 and 1) that is reserved for defects
 trap.percentage         = 0.00                       # fraction of the grid (between 0 and 1) that traps are placed upon
 trap.potential          = 0.00                       # the potential energy of the traps
-gaussian.average        = 0.00                       # average of the random noise added to traps
 gaussian.stdev          = 0.00                       # standard deviation of the random noise added to traps
 seed.percentage         = 0.00                       # fraction of the traps (between 0 and 1) that are used to grow the remaining traps
 

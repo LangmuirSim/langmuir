@@ -1,6 +1,7 @@
 #ifndef PARAMETERS_H
 #define PARAMETERS_H
 
+#include <QDateTime>
 #include <QFileInfo>
 #include <QDebug>
 #include <cmath>
@@ -241,6 +242,9 @@ struct SimulationParameters
     //! a file containing a preconfigured potential
     QString potentialFile;
 
+    //! the time this simulation started
+    QDateTime simulationStart;
+
     SimulationParameters() :
 
         simulationType         ("transistor"),
@@ -305,7 +309,9 @@ struct SimulationParameters
         outputStub             ("out"),
         iterationsTotal        (0),
 
-        configurationFile      ("")
+        configurationFile      (""),
+
+        simulationStart (QDateTime::fromMSecsSinceEpoch(0))
     {
         setCalculatedValues();
         check();

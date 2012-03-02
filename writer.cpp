@@ -22,7 +22,7 @@ FluxWriter::FluxWriter(World &world, const QString &name, OutputInfo::Options op
              << qSetFieldWidth(m_world.parameters().outputWidth)
              << right
              << scientific;
-    m_stream << "time";
+    m_stream << "simulation:time";
     foreach(FluxAgent *flux, fluxAgents)
     {
         m_stream << QString("%1:attempt").arg(flux->objectName());
@@ -34,6 +34,7 @@ FluxWriter::FluxWriter(World &world, const QString &name, OutputInfo::Options op
              << "hole:count"
              << "hole:percentage"
              << "hole:reached"
+             << "real:time"
              << newline;
     m_stream.flush();
 }
@@ -142,6 +143,7 @@ void XYZWriter::write()
 
 void FluxWriter::write()
 {
+    QDateTime now = QDateTime::currentDateTime();
     QList<FluxAgent *>& fluxAgents =  m_world.fluxes();
     m_stream << m_world.parameters().currentStep;
     foreach(FluxAgent *flux, fluxAgents)
@@ -154,6 +156,7 @@ void FluxWriter::write()
              << m_world.numHoleAgents()
              << m_world.percentHoleAgents()
              << m_world.reachedHoleAgents()
+             << m_world.parameters().simulationStart.msecsTo(now)
              << newline;
     m_stream.flush();
 }
