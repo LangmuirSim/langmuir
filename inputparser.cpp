@@ -51,7 +51,6 @@ void InputParser::setMap(int step)
     createVariable("defect.percentage"      , m_parameters[step].defectPercentage    , step);
     createVariable("trap.percentage"        , m_parameters[step].trapPercentage      , step);
     createVariable("trap.potential"         , m_parameters[step].trapPotential       , step);
-    createVariable("gaussian.average"       , m_parameters[step].gaussianAverg       , step);
     createVariable("gaussian.stdev"         , m_parameters[step].gaussianStdev       , step);
     createVariable("seed.percentage"        , m_parameters[step].seedPercentage      , step);
 

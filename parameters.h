@@ -129,9 +129,6 @@ struct SimulationParameters
     //! the potential of traps
     double trapPotential;
 
-    //! a constant to be added to trap potential (redundant, remove this)
-    double gaussianAverg;
-
     //! the standard deviation of trap sites
     double gaussianStdev;
 
@@ -278,7 +275,6 @@ struct SimulationParameters
         defectPercentage       (0.00),
         trapPercentage         (0.00),
         trapPotential          (0.10),
-        gaussianAverg          (0.00),
         gaussianStdev          (0.00),
         seedPercentage         (1.0),
 

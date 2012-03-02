@@ -107,9 +107,9 @@ template <typename T> inline void InputParser::Variable<T>::setValue(QString val
 {
     if (!m_write)
     {
-        qFatal("setValue requested parameter %s, which is not writable",
+        qWarning("setValue requested parameter %s, which is not writable (ignoring it)",
                qPrintable(m_key));
-        return;
+        //return;
     }
     convert(value,m_value);
     m_set = true;

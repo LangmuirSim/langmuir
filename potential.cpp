@@ -89,7 +89,7 @@ void Potential::setPotentialTraps()
         for(int i = 0; i < m_world.trapSiteIDs().size(); i++)
         {
             int s = m_world.trapSiteIDs().at(i);
-            double v = m_world.randomNumberGenerator().normal(m_world.parameters().gaussianAverg, m_world.parameters().gaussianStdev);
+            double v = m_world.randomNumberGenerator().normal(0, m_world.parameters().gaussianStdev);
             m_world.electronGrid().addToPotential(s, v);
             m_world.holeGrid().addToPotential(s, -1*v);
         }

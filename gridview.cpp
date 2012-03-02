@@ -50,8 +50,7 @@ GridViewGL::GridViewGL(const QGLFormat &format, QWidget * parent, QString input)
         pPar.iterationsPrint = 10;
         pPar.seedCharges = true;
         pPar.electronPercentage = 0.02;
-        pPar.voltageDrain = 10.0;
-        pPar.simulationSteps = 1;
+        pPar.voltageRight = 10.0;
         pPar.check();
         pInput = NULL;
     }
