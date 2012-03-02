@@ -1,6 +1,6 @@
 simulation.type         = solarcell                  # solarcell or transistor
 
-random.seed             = [-1,10]                    # seed < 0 is random, seed >= 0 is not random
+random.seed             = -1                         # seed < 0 is random, seed >= 0 is not random
 
 grid.x                  = 100                        # distance between drains; length of the device
 grid.y                  = 100                        # width of the device
@@ -13,13 +13,11 @@ defects.charge          = 0                          # the charge of a defect
 current.simulation      = 0                          # the index used in output.stub
 output.is.on            = false                      # causes all output to be turned off (useful for GUI)
 output.overwrite        = false                      # do not cause errors if files exist
-output.ids.at.start     = true                       # output carrier positions at start of simulation
-output.ids.on.iteration = true                       # output carrier positions at the end of iterations.print
-output.ids.on.delete    = true                       # output carrier lifetime and pathlength when they make it to a drain
-output.coulomb          = true                       # output Coulomb energy for the entire grid every iterations.print
-output.potential        = true                       # output potential for the entire grid (excluding Coulomb) at the start
-output.image            = true                       # output pictures of traps, defects, carriers at the start
-output.precision        = 13                         # decimal places to print in output
+output.ids.on.delete    = false                      # output carrier lifetime and pathlength when they make it to a drain
+output.coulomb          = false                      # output Coulomb energy for the entire grid every iterations.print
+output.potential        = false                      # output potential for the entire grid (excluding Coulomb) at the start
+output.image            = false                      # output pictures of traps, defects, carriers at the start
+output.precision        = 12                         # decimal places to print in output
 output.width            = 20                         # width to allow for output columns
 output.path             = /home/adam/Desktop         # where to output
 
@@ -38,7 +36,7 @@ gaussian.average        = 0.00                       # average of the random noi
 gaussian.stdev          = 0.00                       # standard deviation of the random noise added to traps
 seed.percentage         = 0.00                       # fraction of the traps (between 0 and 1) that are used to grow the remaining traps
 
-configuration.file      = ""                         # a file containing initial configuration information
+#configuration.file      =                            # a file containing initial configuration information
 voltage.right           = 10.00                      # the voltage of the left side
 voltage.left            = 0.00                       # the voltage of the right side
 source.rate             = 0.90                       # the rate at which all sources inject
@@ -51,4 +49,3 @@ work.x                  = 4                          # number of groups to divid
 work.y                  = 4                          # number of groups to divide the grid into along y (only used for output.coulomb)
 work.z                  = 4                          # number of groups to divide the grid into along z (only used for output.coulomb)
 work.size               = 256                        # number of groups to divide the list of all charges into
-kernels.path            = /home/adam/Workspace/science/langmuirQtCreator/
