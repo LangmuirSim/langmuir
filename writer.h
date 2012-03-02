@@ -1,5 +1,5 @@
-#ifndef LOGGER_H
-#define LOGGER_H
+#ifndef WRITER_H
+#define WRITER_H
 
 #include <QObject>
 #include <QPainter>
@@ -174,4 +174,4 @@ protected:
 };
 
 }
-#endif // LOGGER_H
+#endif // WRITER_H

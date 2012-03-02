@@ -6,7 +6,7 @@ SET(PROJECT_SOURCES
 simulation.cpp
 openclhelper.cpp
 inputparser.cpp
-logger.cpp
+writer.cpp
 chargeagent.cpp
 drainagent.cpp
 sourceagent.cpp
@@ -27,7 +27,7 @@ agent.h
 chargeagent.h
 inputparser.h
 cubicgrid.h
-logger.h
+writer.h
 potential.h
 openclhelper.h
 rand.h
@@ -40,7 +40,7 @@ SET(PROJECT_MOC_HEADERS_1
 agent.h
 cubicgrid.h
 inputparser.h
-logger.h
+writer.h
 openclhelper.h
 potential.h
 simulation.h

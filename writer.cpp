@@ -1,4 +1,4 @@
-#include "logger.h"
+#include "writer.h"
 #include "parameters.h"
 #include "world.h"
 #include "cubicgrid.h"

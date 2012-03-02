@@ -6,7 +6,7 @@
 #include "drainagent.h"
 #include "potential.h"
 #include "cubicgrid.h"
-#include "logger.h"
+#include "writer.h"
 #include "world.h"
 #include "rand.h"
 namespace Langmuir
