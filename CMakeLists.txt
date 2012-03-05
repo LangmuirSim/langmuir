@@ -16,6 +16,7 @@ cubicgrid.cpp
 fluxagent.cpp
 potential.cpp
 output.cpp
+parser.cpp
 )
 
 SET(PROJECT_HEADERS
@@ -34,6 +35,7 @@ rand.h
 sourceagent.h
 simulation.h
 output.h
+parser.h
 )
 
 SET(PROJECT_MOC_HEADERS_1
@@ -47,6 +49,7 @@ simulation.h
 world.h
 rand.h
 output.h
+parser.h
 )
 
 SET(PROJECT_MOC_HEADERS_2
@@ -79,7 +82,7 @@ ADD_DEFINITIONS(-Wall -O2)
 
 ################################################################################
 
-FIND_PACKAGE(Boost REQUIRED)
+FIND_PACKAGE(Boost REQUIRED COMPONENTS program_options)
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${BOOST_PYTHON_INCLUDES})
 
@@ -99,9 +102,9 @@ INCLUDE_DIRECTORIES(${OPENGL_INCLUDE_DIRS})
 ENDIF(${OPENGL_FOUND})
 
 ################################################################################
-SET(COMPILE_TEST FALSE)
+SET(COMPILE_TEST TRUE)
 IF(${COMPILE_TEST})
-MESSAGE("-- Compiling Langmuir")
+MESSAGE("-- Compiling Test")
 ADD_EXECUTABLE(
 test
 test.cpp
@@ -126,7 +129,7 @@ ENDIF(${COMPILE_TEST})
 
 ################################################################################
 
-SET(COMPILE_LANGMUIR TRUE)
+SET(COMPILE_LANGMUIR FALSE)
 IF(${COMPILE_LANGMUIR})
 MESSAGE("-- Compiling Langmuir")
 ADD_EXECUTABLE(
@@ -153,7 +156,7 @@ ENDIF(${COMPILE_LANGMUIR})
 
 ################################################################################
 
-SET(COMPILE_LANGMUIR_VIEW TRUE)
+SET(COMPILE_LANGMUIR_VIEW FALSE)
 IF(${COMPILE_LANGMUIR_VIEW})
 IF(${OPENGL_FOUND})
 MESSAGE("-- Compiling LangmuirView")

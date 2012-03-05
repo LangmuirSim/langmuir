@@ -10,6 +10,10 @@
 namespace Langmuir
 {
 
+struct Parameters
+{
+};
+
 struct SimulationParameters
 {
     //! tells Langmuir how to set up the Sources and Drains: (\b\c "transistor", \b\c "solarcell")
