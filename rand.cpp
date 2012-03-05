@@ -7,7 +7,7 @@ namespace Langmuir
 Random::Random(int seed, QObject *parent) : QObject(parent)
 {
     m_seed = 0;
-    if(seed <= 0)
+    if(seed == 0)
     {
         m_seed = static_cast < unsigned int >(time(0));
     }

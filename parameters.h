@@ -20,7 +20,7 @@ struct SimulationParameters
     QString simulationType;
 
     //! seed the random number generator, if negative, uses the current time (making seperate runs random)
-    int randomSeed;
+    unsigned int randomSeed;
 
     //! the number of sites per layer, at least one
     int gridZ;
@@ -248,7 +248,7 @@ struct SimulationParameters
     SimulationParameters() :
 
         simulationType         ("transistor"),
-        randomSeed             (-1),
+        randomSeed             (0),
 
         gridZ                  (1),
         gridY                  (128),
