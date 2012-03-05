@@ -5,7 +5,6 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.2)
 SET(PROJECT_SOURCES
 simulation.cpp
 openclhelper.cpp
-inputparser.cpp
 writer.cpp
 chargeagent.cpp
 drainagent.cpp
@@ -26,7 +25,6 @@ fluxagent.h
 drainagent.h
 agent.h
 chargeagent.h
-inputparser.h
 cubicgrid.h
 writer.h
 potential.h
@@ -41,7 +39,6 @@ parser.h
 SET(PROJECT_MOC_HEADERS_1
 agent.h
 cubicgrid.h
-inputparser.h
 writer.h
 openclhelper.h
 potential.h
@@ -129,7 +126,7 @@ ENDIF(${COMPILE_TEST})
 
 ################################################################################
 
-SET(COMPILE_LANGMUIR FALSE)
+SET(COMPILE_LANGMUIR TRUE)
 IF(${COMPILE_LANGMUIR})
 MESSAGE("-- Compiling Langmuir")
 ADD_EXECUTABLE(
@@ -156,7 +153,7 @@ ENDIF(${COMPILE_LANGMUIR})
 
 ################################################################################
 
-SET(COMPILE_LANGMUIR_VIEW FALSE)
+SET(COMPILE_LANGMUIR_VIEW TRUE)
 IF(${COMPILE_LANGMUIR_VIEW})
 IF(${OPENGL_FOUND})
 MESSAGE("-- Compiling LangmuirView")

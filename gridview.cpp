@@ -52,15 +52,14 @@ GridViewGL::GridViewGL(const QGLFormat &format, QWidget * parent, QString input)
         pPar.electronPercentage = 0.02;
         pPar.voltageRight = 10.0;
         pPar.simulationStart = QDateTime::currentDateTime();
-        pPar.check();
-        pInput = NULL;
+        check(pPar);
     }
     //Or... get the simulation parameters from an input file
     else
     {
-        pInput = new InputParser();
-        pInput->parseKeyValue(input);
-        pPar = pInput->getParameters(0);
+        Parser parser(this);
+        parser.parse(input);
+        pPar = parser.parameters();
         pPar.simulationStart = QDateTime::currentDateTime();
     }
 
@@ -110,7 +109,6 @@ GridViewGL::~GridViewGL()
 {
     //Delete the objects who aren't derived from QObject
     delete pSim;
-    if(pInput){delete pInput;}
 }
 
 QSize GridViewGL::minimumSizeHint()const

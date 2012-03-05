@@ -17,7 +17,7 @@ public:
     explicit Parser(QObject *parent = 0);
     void parse(const QString& fileName = "");
     void parse(int &argc, char **argv);
-    const Parameters& parameters();
+    SimulationParameters& parameters();
 
 private:
 
@@ -29,7 +29,7 @@ private:
     boost::program_options::options_description            m_description;
     boost::program_options::variables_map                  m_variables;
 
-    Parameters m_parameters;
+    SimulationParameters m_parameters;
 };
 
 //declare validate functions for custom types

@@ -2,7 +2,7 @@
 #define GRID_VIEW_H
 
 #include "chargeagent.h"
-#include "inputparser.h"
+#include "parser.h"
 #include "parameters.h"
 #include "simulation.h"
 #include "cubicgrid.h"
@@ -237,7 +237,6 @@ public:
     PointArray *carriersMinus;
     PointArray *carriersPlus;
     PointArray *defects;
-    InputParser *pInput;
     SimulationParameters pPar;
     Simulation *pSim;
     World *pWorld;

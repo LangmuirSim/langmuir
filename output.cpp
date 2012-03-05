@@ -14,7 +14,6 @@ OutputInfo::OutputInfo(const QString &name, const SimulationParameters *par, Opt
     QString sep = "-";
     QString stub("");
     QString step("");
-    QString  sim("");
     QString path("");
 
     // if SimulationParameters were passed, convert the needed ones to strings
@@ -22,12 +21,11 @@ OutputInfo::OutputInfo(const QString &name, const SimulationParameters *par, Opt
     {
         stub = QString("%1").arg(par->outputStub);
         step = QString("%1").arg(par->currentStep);
-        sim  = QString("%1").arg(par->currentSimulation);
         path = QString("%1").arg(par->outputPath)+QDir::separator();
     }
     result.replace(QRegExp("%stub", Qt::CaseInsensitive), stub);  // replace %stub
-    result.replace(QRegExp("%sim" , Qt::CaseInsensitive), sim );  // replace %sim
     result.replace(QRegExp("%step", Qt::CaseInsensitive), step);  // replace %step
+    result.replace(QRegExp("%sim" , Qt::CaseInsensitive),   "");  // replace %sim
 
     // replace %path, making sure it only occured once, and was at the begining of name
     {

@@ -10,17 +10,12 @@
 namespace Langmuir
 {
 
-struct Parameters
-{
-};
-
 struct SimulationParameters
 {
+    //! name of the input parameters file
+    QString inputFile;
+
     //! tells Langmuir how to set up the Sources and Drains: (\b\c "transistor", \b\c "solarcell")
-    /*!
-      - \b\c "transistor" creates an ElectronSource on the left and an electronDrain on the right
-      - \b\c "solarcell" creates 2 ElectronDrain and 2 holeDrain, one on each side of the grid, and an ExcitonSource
-      */
     QString simulationType;
 
     //! seed the random number generator, if negative, uses the current time (making seperate runs random)
@@ -36,24 +31,12 @@ struct SimulationParameters
     int gridX;
 
     //! turn on Coulomb interactions between ChargeAgents
-    /*!
-      \see SimulationParameters::useOpenCL
-      \see SimulationParameters::workSize
-      */
     bool coulombCarriers;
 
     //! turn on Coulomb interactions between ChargeAgents and Defects
-    /*!
-      \see SimulationParameters::useOpenCL
-      \see SimulationParameters::defectsCharge
-      */
     bool coulombDefects;
 
     //! the charge of defect sites
-    /*!
-      \see SimulationParameters::useOpenCL
-      \see SimulationParameters::coulombDefects
-      */
     int defectsCharge;
 
     //! output trajectory file every interationsPrint
@@ -63,15 +46,6 @@ struct SimulationParameters
     bool outputIdsOnDelete;
 
     //! output coulomb energy for the entire grid every iterationsPrint
-    /*!
-      \warning computationally expensive, will slow down the code
-      \warning files are large, will eat up a lot of hard drive space
-      \warning requires OpenCL
-      \see SimulationParameters::useOpenCL
-      \see SimulationParameters::workX
-      \see SimulationParameters::workY
-      \see SimulationParameters::workZ
-      */
     bool outputCoulomb;
 
     //! output grid potential at the start of the simulation, includes the trap potential
@@ -90,31 +64,22 @@ struct SimulationParameters
     int iterationsPrint;
 
     //! number of simulation steps after equilibration
-    /*!
-      \see SimulationParameters::iterationsWarmup
-      */
     int iterationsReal;
 
     //! number of equilibration steps
-    /*!
-      \see SimulationParameters::iterationsReal
-      */
     int iterationsWarmup;
 
     //! number of significant figures used for doubles in output
-    /*!
-      \see SimulationParameters::outputWidth
-      */
     int outputPrecision;
 
     //! width of columns in output, ignored in certain files, like trajectory files
-    /*!
-      \see SimulationParameters::outputPrecision
-      */
     int outputWidth;
 
      //! the output directory, defaults to the current working directory
     QString outputPath;
+
+    //! the stub to use when naming output files
+    QString outputStub;
 
     //! the percent of the grid that is reserved for electrons, between 0 and 1
     double electronPercentage;
@@ -159,46 +124,15 @@ struct SimulationParameters
     bool useOpenCL;
 
     //! the x size of OpenCL 3DRange kernel work groups - only needed if using SimulationParameters::outputCoulomb
-    /*!
-      make it a multiple of the SimulationParameters::gridX
-      \see SimulationParameters::outputCoulomb
-      \see SimulationParameters::useOpenCL
-      \see SimulationParameters::workY
-      \see SimulationParameters::workZ
-      \see SimulationParameters::gridX
-      */
     int workX;
 
     //! the y size of OpenCL 3DRange kernel work groups - only needed if using SimulationParameters::outputCoulomb
-    /*!
-      make it a multiple of the SimulationParameters::gridY
-      \see SimulationParameters::outputCoulomb
-      \see SimulationParameters::useOpenCL
-      \see SimulationParameters::workX
-      \see SimulationParameters::workZ
-      \see SimulationParameters::gridY
-      */
     int workY;
 
     //! the z size of OpenCL 3DRange kernel work groups - only needed if using SimulationParameters::outputCoulomb
-    /*!
-      make it a multiple of the SimulationParameters::gridZ
-      \see SimulationParameters::outputCoulomb
-      \see SimulationParameters::useOpenCL
-      \see SimulationParameters::workX
-      \see SimulationParameters::workY
-      \see SimulationParameters::gridZ
-      */
     int workZ;
 
     //! the size of OpenCL 1DRange kernel work groups
-    /*!
-      make it a power of 2
-      \see SimulationParameters::outputCoulomb
-      \see SimulationParameters::useOpenCL
-      \warning the speed of Coulomb calculations is very sensitive to this number,
-               try various powers of 2 for a few steps to find an optimal value
-      */
     int workSize;
 
     //! physical constant, the boltzmann constant
@@ -231,12 +165,6 @@ struct SimulationParameters
     //! the current step of the simulation
     unsigned int currentStep;
 
-    //! the current simulation
-    unsigned int currentSimulation;
-
-    //! the stub to use when naming output files
-    QString outputStub;
-
     //! the total number of simulation steps
     int iterationsTotal;
 
@@ -251,6 +179,7 @@ struct SimulationParameters
 
     SimulationParameters() :
 
+        inputFile              (""),
         simulationType         ("transistor"),
         randomSeed             (0),
 
@@ -276,6 +205,7 @@ struct SimulationParameters
         outputPrecision        (12),
         outputWidth            (20),
         outputPath             (QDir::currentPath()),
+        outputStub             ("out"),
 
         electronPercentage     (0.01),
         holePercentage         (0.00),
@@ -309,137 +239,120 @@ struct SimulationParameters
         inverseKT              (0),
         okCL                   (false),
         currentStep            (0),
-        currentSimulation      (0),
-        outputStub             ("out"),
         iterationsTotal        (0),
 
         configurationFile      (""),
 
         simulationStart (QDateTime::fromMSecsSinceEpoch(0))
     {
-        setCalculatedValues();
-        check();
     }
 
-    //! sets parameters that depend upon other parameters
-    void setCalculatedValues()
-    {
-        electrostaticPrefactor  = elementaryCharge /(4.0 * M_PI * dielectricConstant * permittivitySpace * gridFactor);
-        inverseKT = elementaryCharge /(boltzmannConstant * temperatureKelvin);
-        iterationsTotal = iterationsReal + iterationsWarmup;
-        if (outputWidth < 8 ) { outputWidth = 8; }
-        if (outputWidth < (outputPrecision + 8)) { outputWidth = outputPrecision + 8; }
-    }
-
-    //! check the parameters, making sure they are valid
-    void check()
-    {
-        setCalculatedValues();
-        // simulation type
-        if (!(QStringList()<<"transistor"<<"solarcell").contains(simulationType))
-        {
-            qFatal("simulation.type(%s) must be transistor or solarcell",qPrintable(simulationType));
-        }
-
-        // grid size
-        if (gridZ < 1)
-        {
-            qFatal("grid.x(%d) >= 1",gridX);
-        }
-        if (gridY < 1)
-        {
-            qFatal("grid.y(%d) >= 1",gridY);
-        }
-        if (gridX < 1)
-        {
-            qFatal("grid.z(%d) >= 1",gridZ);
-        }
-
-        // output
-        if (iterationsPrint <= 0 )
-        {
-            qFatal("iterations.print(%d) <= 0",iterationsPrint);
-        }
-        if (iterationsReal < 0 )
-        {
-            qFatal("iterations.real(%d) < 0",iterationsReal);
-        }
-        if (iterationsWarmup < 0 )
-        {
-            qFatal("iterations.warmup(%d) < 0",iterationsWarmup);
-        }
-        if ( iterationsReal % iterationsPrint != 0 )
-        {
-            qFatal("iterations.real(%d) %% iterations.print(%d) != 0",iterationsReal,iterationsPrint);
-        }
-        if ( iterationsWarmup % iterationsPrint != 0 )
-        {
-            qFatal("iterations.warmup(%d) %% iterations.print(%d) != 0",iterationsWarmup,iterationsPrint);
-        }
-        if ( iterationsTotal < 0 )
-        {
-            qFatal("iterations.total(%d) < 0",iterationsTotal);
-        }
-
-        // percentages
-        if ( electronPercentage < 0.0 || electronPercentage > 1.0 )
-        {
-            qFatal("electron.pecentage(%f) < 0 || > 1.0",electronPercentage);
-        }
-        if ( holePercentage     < 0.0 || holePercentage     > 1.0 )
-        {
-            qFatal("hole.pecentage(%f) < 0 || > 1.0",holePercentage);
-        }
-        if ( defectPercentage   < 0.0 || defectPercentage   > 1.0 )
-        {
-            qFatal("defect.pecentage(%f) < 0 || > 1.0",defectPercentage);
-        }
-        if ( trapPercentage     < 0.0 || trapPercentage     > 1.0 )
-        {
-            qFatal("trap.pecentage(%f) < 0 || > 1.0",trapPercentage);
-        }
-        if ( seedPercentage     < 0.0 || seedPercentage     > 1.0 )
-        {
-            qFatal("seed.pecentage(%f) < 0 || > 1.0",seedPercentage);
-        }
-        if (defectPercentage > 1.00 - trapPercentage)
-        {
-            qFatal("trap.percentage(%f) > 1.0 - trap.percentage(%f)",defectPercentage,trapPercentage);
-        }
-        if ( sourceRate < 0.0 || sourceRate > 1.0 )
-        {
-            qFatal("source.rate(%f) < 0 || > 1.0",sourceRate);
-        }
-        if ( drainRate < 0.0 || drainRate > 1.0 )
-        {
-            qFatal("drain.rate(%f) < 0 || > 1.0",drainRate);
-        }
-
-        // other
-        if ( gaussianStdev < 0.00 )
-        {
-            qFatal("gaussian.stdev < 0.0");
-        }
-        if ( temperatureKelvin < 0.0 )
-        {
-            qFatal("temperature.kelvin < 0.0");
-        }
-
-        if ( ! configurationFile.isEmpty() )
-        {
-            QFileInfo info(configurationFile);
-            if (!info.exists())
-            {
-                info = QFileInfo(QDir(outputPath),configurationFile);
-            }
-            if (!info.exists() || !info.isFile())
-            {
-                qFatal("configuration.file does not exist"
-                       "\n\t%s",qPrintable(info.absoluteFilePath()));
-            }
-        }
-    }
 };
+
+//! sets parameters that depend upon other parameters
+inline void setCalculatedValues(SimulationParameters& par)
+{
+    par.electrostaticPrefactor  = par.elementaryCharge /(4.0 * M_PI * par.dielectricConstant * par.permittivitySpace * par.gridFactor);
+    par.inverseKT = par.elementaryCharge /(par.boltzmannConstant * par.temperatureKelvin);
+    par.iterationsTotal = par.iterationsReal + par.iterationsWarmup;
+    if (par.outputWidth < 8 ) { par.outputWidth = 8; }
+    if (par.outputWidth < (par.outputPrecision + 8)) { par.outputWidth = par.outputPrecision + 8; }
+}
+
+//! check the parameters, making sure they are valid
+inline void check(SimulationParameters& par)
+{
+    setCalculatedValues(par);
+    // simulation type
+    if (!(QStringList()<<"transistor"<<"solarcell").contains(par.simulationType))
+    {
+        qFatal("simulation.type(%s) must be transistor or solarcell",qPrintable(par.simulationType));
+    }
+
+    // grid size
+    if (par.gridZ < 1)
+    {
+        qFatal("grid.x(%d) >= 1",par.gridX);
+    }
+    if (par.gridY < 1)
+    {
+        qFatal("grid.y(%d) >= 1",par.gridY);
+    }
+    if (par.gridX < 1)
+    {
+        qFatal("grid.z(%d) >= 1",par.gridZ);
+    }
+
+    // output
+    if (par.iterationsPrint <= 0 )
+    {
+        qFatal("iterations.print(%d) <= 0",par.iterationsPrint);
+    }
+    if (par.iterationsReal < 0 )
+    {
+        qFatal("iterations.real(%d) < 0",par.iterationsReal);
+    }
+    if (par.iterationsWarmup < 0 )
+    {
+        qFatal("iterations.warmup(%d) < 0",par.iterationsWarmup);
+    }
+    if (par.iterationsReal % par.iterationsPrint != 0 )
+    {
+        qFatal("iterations.real(%d) %% iterations.print(%d) != 0",par.iterationsReal,par.iterationsPrint);
+    }
+    if (par.iterationsWarmup % par.iterationsPrint != 0 )
+    {
+        qFatal("iterations.warmup(%d) %% iterations.print(%d) != 0",par.iterationsWarmup,par.iterationsPrint);
+    }
+    if (par.iterationsTotal < 0 )
+    {
+        qFatal("iterations.total(%d) < 0",par.iterationsTotal);
+    }
+
+    // percentages
+    if (par.electronPercentage < 0.0 || par.electronPercentage > 1.0 )
+    {
+        qFatal("electron.pecentage(%f) < 0 || > 1.0",par.electronPercentage);
+    }
+    if (par.holePercentage     < 0.0 ||par. holePercentage     > 1.0 )
+    {
+        qFatal("hole.pecentage(%f) < 0 || > 1.0",par.holePercentage);
+    }
+    if (par.defectPercentage   < 0.0 || par.defectPercentage   > 1.0 )
+    {
+        qFatal("defect.pecentage(%f) < 0 || > 1.0",par.defectPercentage);
+    }
+    if (par.trapPercentage     < 0.0 || par.trapPercentage     > 1.0 )
+    {
+        qFatal("trap.pecentage(%f) < 0 || > 1.0",par.trapPercentage);
+    }
+    if (par.seedPercentage     < 0.0 || par.seedPercentage     > 1.0 )
+    {
+        qFatal("seed.pecentage(%f) < 0 || > 1.0",par.seedPercentage);
+    }
+    if (par.defectPercentage > 1.00 - par.trapPercentage)
+    {
+        qFatal("trap.percentage(%f) > 1.0 - trap.percentage(%f)",par.defectPercentage,par.trapPercentage);
+    }
+    if (par.sourceRate < 0.0 || par.sourceRate > 1.0 )
+    {
+        qFatal("source.rate(%f) < 0 || > 1.0",par.sourceRate);
+    }
+    if (par.drainRate < 0.0 || par.drainRate > 1.0 )
+    {
+        qFatal("drain.rate(%f) < 0 || > 1.0",par.drainRate);
+    }
+
+    // other
+    if (par.gaussianStdev < 0.00)
+    {
+        qFatal("gaussian.stdev < 0.0");
+    }
+    if (par.temperatureKelvin < 0.0)
+    {
+        qFatal("temperature.kelvin < 0.0");
+    }
+}
 
 }
 
