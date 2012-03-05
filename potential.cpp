@@ -44,7 +44,7 @@ void Potential::setPotentialTraps()
 {
     // Do nothing if we shouldn't have traps
     if(m_world.parameters().trapPercentage <= 0)return;
-    if(m_world.parameters().seedPercentage <= 0)return;
+    if(m_world.parameters().seedPercentage <  0)return;
 
     // Seed traps, if seed.percentage=100% then this is just placing traps normally
     int progress = int(m_world.electronGrid().volume()* m_world.parameters().trapPercentage * m_world.parameters().seedPercentage);

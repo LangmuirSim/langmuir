@@ -24,6 +24,7 @@ World::World(SimulationParameters &par, QObject *parent)
 
     // Create Random Number Generator
     m_rand = new Random(parameters().randomSeed);
+    m_parameters->randomSeed = m_rand->seed();
 
     // Create Electron Grid
     m_electronGrid = new Grid(parameters().gridX, parameters().gridY, parameters().gridZ, this);
