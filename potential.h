@@ -20,7 +20,7 @@ public:
     void setPotentialZero();
     void setPotentialLinear();
     void setPotentialTraps();
-    void setPotentialFromFile(QString filename);
+    void setPotentialFromFile(QString fileName);
     void setPotentialFromScript(QString filename);
     void updateInteractionEnergies();
     double coulombPotentialElectrons(int site);

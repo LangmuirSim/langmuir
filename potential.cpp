@@ -96,38 +96,8 @@ void Potential::setPotentialTraps()
     }
 }
 
-void Potential::setPotentialFromFile(QString filename)
+void Potential::setPotentialFromFile(QString fileName)
 {
-    QFile in(filename);
-    if(!(in.open(QIODevice::ReadOnly | QIODevice::Text)) )
-    {
-        qFatal("can not open file %s", qPrintable(filename));
-    }
-    QString contents = in.readAll();
-    QStringList tokens = contents.split(QRegExp("[\\s\n]"), QString::SkipEmptyParts);
-
-    if(tokens.size()% 2 != 0){ qFatal("setPotentialFromFile does not give an even number of values(site, energy)"); }
-
-    for(int i = 0; i < tokens.size(); i+= 2)
-    {
-        bool ok1 = true;
-        bool ok2 = true;
-        int site = tokens[i].toInt(&ok1);
-        double energy = tokens[i+1].toFloat(&ok2);
-        if(!ok1 || !ok2)
-        {
-            qDebug("setPotentialFromFile can not convert set %d(site, energy)to number:(%s, %s)", i, qPrintable(tokens[i]), qPrintable(tokens[i+1]));
-            if(!ok1){ qDebug("site is not int"); }
-            if(!ok2){ qDebug("energy is not float"); }
-            qFatal("simulation terminated");
-        }
-        if(site < 0 || site > m_world.electronGrid().volume())
-        {
-            qFatal("setPotentialFromFile can not set site energy for set %d(site, energy):(%d, %f); site is out of range", i, site, energy);
-        }
-        m_world.electronGrid().addToPotential(site, energy);
-        m_world.holeGrid().addToPotential(site, energy);
-    }
 }
 
 void Potential::setPotentialFromScript(QString filename)

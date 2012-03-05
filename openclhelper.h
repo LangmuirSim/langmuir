@@ -25,8 +25,8 @@ public:
     void launchCoulombKernel1();
     void launchCoulombKernel2();
     void copySiteAndChargeToHostVector(int index, int site, int charge = -1);
-    const double& getOutputHost(int index) const;
-    const double& getOutputHostFuture(int index ) const;
+    double getOutputHost(int index) const;
+    double getOutputHostFuture(int index ) const;
     void compareHostAndDeviceForAllCarriers();
     void compareHostAndDeviceAtSite(int i);
     void compareHostAndDeviceForCarrier(int i, QList< ChargeAgent * > &charges);
@@ -34,6 +34,7 @@ public:
 
 private:
     World                       &m_world;
+#ifdef LANGMUIR_OPEN_CL
     cl::Context                  m_context;             // OpenCl context
     cl::CommandQueue             m_queue;               // OpenCl queue
     cl::Kernel                   m_coulombK1;           // Kernel for calculating Coulomb Energy everywhere
@@ -45,6 +46,7 @@ private:
     cl::Buffer                   m_qDevice;             // Device charges
     cl::Buffer                   m_oDevice;             // Device output vector
     int                          m_offset;              // Offset between current and future energies in m_oHost;
+#endif // LANGMUIR_OPEN_CL
 };
 }
 

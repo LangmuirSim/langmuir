@@ -63,6 +63,8 @@ resources.qrc
 SET(PROJECT_DATA
 )
 
+################################################################################
+
 SET(QT_MIN_VERSION 4.7)
 SET(QT_USE_QTOPENGL TRUE)
 FIND_PACKAGE(Qt4 REQUIRED)
@@ -75,33 +77,58 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 ADD_DEFINITIONS(${QT_DEFINITIONS})
 ADD_DEFINITIONS(-Wall -O2)
 
+################################################################################
+
 FIND_PACKAGE(Boost REQUIRED)
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${BOOST_PYTHON_INCLUDES})
 
-FIND_PACKAGE(OpenCL REQUIRED)
+################################################################################
+
+FIND_PACKAGE(OpenCL)
+IF(${OPENCL_FOUND})
+ADD_DEFINITIONS(-DLANGMUIR_OPEN_CL)
 INCLUDE_DIRECTORIES(${OPENCL_INCLUDE_DIRS})
+ENDIF(${OPENCL_FOUND})
 
-FIND_PACKAGE(OpenGL REQUIRED)
+################################################################################
+
+FIND_PACKAGE(OpenGL)
+IF(${OPENGL_FOUND})
 INCLUDE_DIRECTORIES(${OPENGL_INCLUDE_DIRS})
+ENDIF(${OPENGL_FOUND})
 
-#ADD_EXECUTABLE(
-#est
-#test.cpp
-#${PROJECT_SOURCES}
-#${PROJECT_HEADERS}
-#${PROJECT_MOC_HEADERS_PROCESSED_1}
-#${PROJECT_FORMS_PROCESSED}
-#${PROJECT_RESOURCES_PROCESSED}
-#)
+################################################################################
+SET(COMPILE_TEST FALSE)
+IF(${COMPILE_TEST})
+MESSAGE("-- Compiling Langmuir")
+ADD_EXECUTABLE(
+test
+test.cpp
+${PROJECT_SOURCES}
+${PROJECT_HEADERS}
+${PROJECT_MOC_HEADERS_PROCESSED_1}
+${PROJECT_FORMS_PROCESSED}
+${PROJECT_RESOURCES_PROCESSED}
+)
+TARGET_LINK_LIBRARIES(
+test
+${Boost_LIBRARIES}
+${QT_LIBRARIES}
+)
+IF(${OPENCL_FOUND})
+TARGET_LINK_LIBRARIES(
+test
+${OPENCL_LIBRARIES}
+)
+ENDIF(${OPENCL_FOUND})
+ENDIF(${COMPILE_TEST})
 
-#TARGET_LINK_LIBRARIES(
-#test
-#${Boost_LIBRARIES}
-#${QT_LIBRARIES}
-#${OPENCL_LIBRARIES}
-#)
+################################################################################
 
+SET(COMPILE_LANGMUIR TRUE)
+IF(${COMPILE_LANGMUIR})
+MESSAGE("-- Compiling Langmuir")
 ADD_EXECUTABLE(
 langmuir
 langmuir.cpp
@@ -111,14 +138,25 @@ ${PROJECT_MOC_HEADERS_PROCESSED_1}
 ${PROJECT_FORMS_PROCESSED}
 ${PROJECT_RESOURCES_PROCESSED}
 )
-
 TARGET_LINK_LIBRARIES(
 langmuir
 ${Boost_LIBRARIES}
 ${QT_LIBRARIES}
+)
+IF(${OPENCL_FOUND})
+TARGET_LINK_LIBRARIES(
+langmuir
 ${OPENCL_LIBRARIES}
 )
+ENDIF(${OPENCL_FOUND})
+ENDIF(${COMPILE_LANGMUIR})
 
+################################################################################
+
+SET(COMPILE_LANGMUIR_VIEW TRUE)
+IF(${COMPILE_LANGMUIR_VIEW})
+IF(${OPENGL_FOUND})
+MESSAGE("-- Compiling LangmuirView")
 ADD_EXECUTABLE(
 langmuirView
 langmuirview.cpp
@@ -134,7 +172,16 @@ TARGET_LINK_LIBRARIES(
 langmuirView
 ${Boost_LIBRARIES}
 ${QT_LIBRARIES}
-${OPENCL_LIBRARIES}
 ${OPENGL_LIBRARIES}
 )
+IF(${OPENCL_FOUND})
+TARGET_LINK_LIBRARIES(
+langmuirView
+${OPENCL_LIBRARIES}
+)
+ENDIF(${OPENCL_FOUND})
+ENDIF(${OPENGL_FOUND})
+ENDIF(${COMPILE_LANGMUIR_VIEW})
+
+################################################################################
 

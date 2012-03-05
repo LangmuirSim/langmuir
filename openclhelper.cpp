@@ -19,6 +19,7 @@ void OpenClHelper::initializeOpenCL()
     //can't use openCL yet
     m_world.parameters().okCL = false;
 
+#ifdef LANGMUIR_OPEN_CL
     try
     {
         //error code
@@ -230,6 +231,7 @@ void OpenClHelper::initializeOpenCL()
         return;
     }
     m_world.parameters().okCL = true;
+#endif //LANGMUIR_OPEN_CL
 }
 
 bool OpenClHelper::toggleOpenCL(bool on)
@@ -260,6 +262,7 @@ bool OpenClHelper::toggleOpenCL(bool on)
 
 void OpenClHelper::launchCoulombKernel1()
 {
+#ifdef LANGMUIR_OPEN_CL
     try
     {
         int totalCharges = 0;
@@ -311,10 +314,12 @@ void OpenClHelper::launchCoulombKernel1()
         qFatal("Fatal OpenCl fatal error when calling coulomb kernel 1");
         return;
     }
+#endif //LANGMUIR_OPEN_CL
 }
 
 void OpenClHelper::launchCoulombKernel2()
 {
+#ifdef LANGMUIR_OPEN_CL
     try
     {
         int totalCharges = 0;
@@ -379,10 +384,12 @@ void OpenClHelper::launchCoulombKernel2()
         qFatal("Fatal OpenCl fatal error when calling coulomb kernel 2");
         return;
     }
+#endif //LANGMUIR_OPEN_CL
 }
 
 void OpenClHelper::compareHostAndDeviceForCarrier(int i, QList< ChargeAgent * > &charges)
 {
+#ifdef LANGMUIR_OPEN_CL
     Grid &grid = m_world.electronGrid();
     Potential &potential = m_world.potential();
     ChargeAgent& charge = *charges.at(i);
@@ -493,10 +500,12 @@ void OpenClHelper::compareHostAndDeviceForCarrier(int i, QList< ChargeAgent * > 
         qDebug()<< qPrintable(SDGPU);
         qDebug()<< "";
     }
+#endif //LANGMUIR_OPEN_CL
 }
 
 void OpenClHelper::compareHostAndDeviceAtSite(int i)
 {
+#ifdef LANGMUIR_OPEN_CL
     Grid &grid = m_world.electronGrid();
     Potential &potential = m_world.potential();
 
@@ -537,10 +546,12 @@ void OpenClHelper::compareHostAndDeviceAtSite(int i)
     qDebug()<< qPrintable(SS);
     qDebug()<< qPrintable(SP1CPU);
     qDebug()<< qPrintable(SP1GPU);
+#endif //LANGMUIR_OPEN_CL
 }
 
 void OpenClHelper::compareHostAndDeviceForAllCarriers()
 {
+#ifdef LANGMUIR_OPEN_CL
     for(int j = 0; j < m_world.electrons().size(); j++)
     {
         compareHostAndDeviceForCarrier(j,m_world.electrons());
@@ -549,21 +560,32 @@ void OpenClHelper::compareHostAndDeviceForAllCarriers()
     {
         compareHostAndDeviceForCarrier(j,m_world.holes());
     }
+#endif //LANGMUIR_OPEN_CL
 }
 
 void OpenClHelper::copySiteAndChargeToHostVector(int index, int site, int charge)
 {
+#ifdef LANGMUIR_OPEN_CL
     m_sHost[index] = site; m_qHost[index] = charge;
+#endif //LANGMUIR_OPEN_CL
 }
 
-const double& OpenClHelper::getOutputHost(int index) const
+double OpenClHelper::getOutputHost(int index) const
 {
+#ifdef LANGMUIR_OPEN_CL
     return m_oHost[index];
+#else
+    return 0;
+#endif //LANGMUIR_OPEN_CL
 }
 
-const double& OpenClHelper::getOutputHostFuture(int index) const
+double OpenClHelper::getOutputHostFuture(int index) const
 {
+#ifdef LANGMUIR_OPEN_CL
     return m_oHost[index+m_offset];
+#else
+    return 0;
+#endif //LANGMUIR_OPEN_CL
 }
 
 }
