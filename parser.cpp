@@ -79,6 +79,9 @@ void Parser::describeParameters()
             ("input.file", boost::program_options::value<QString>(&m_parameters.inputFile),
              "input file name")
 
+            ("use.checkpoint", boost::program_options::value<QString>(&m_parameters.checkFile),
+             "checkpoint file name")
+
             ("simulation.type",boost::program_options::value<QString>(&m_parameters.simulationType),
              "set up the sources and drains a certain way; transistor or solarcell")
 
@@ -115,23 +118,26 @@ void Parser::describeParameters()
             ("output.potential",boost::program_options::value<bool>(&m_parameters.outputPotential),
              "output the potential of the grid (including traps)")
 
-            ("output.image",boost::program_options::value<bool>(&m_parameters.outputImage),
-             "output images of the grid (carriers, defects, traps)")
+            ("image.defects",boost::program_options::value<bool>(&m_parameters.imageDefects),
+             "output image of the defects")
+
+            ("image.traps",boost::program_options::value<bool>(&m_parameters.imageTraps),
+             "output image of the traps")
 
             ("output.is.on",boost::program_options::value<bool>(&m_parameters.outputIsOn),
              "if false, produce no output")
 
-            ("output.overwrite",boost::program_options::value<bool>(&m_parameters.outputOverwrite),
-             "if true, don't throw errors when output already exists")
+            ("output.append",boost::program_options::value<bool>(&m_parameters.outputAppend),
+             "if true, append to data files when they already exist")
+
+            ("output.backup",boost::program_options::value<bool>(&m_parameters.outputBackup),
+             "if true, backup files if they already exist")
 
             ("iterations.print",boost::program_options::value<int>(&m_parameters.iterationsPrint),
              "how often to print to the screen")
 
             ("iterations.real",boost::program_options::value<int>(&m_parameters.iterationsReal),
              "the number of production steps")
-
-            ("iterations.warmup",boost::program_options::value<int>(&m_parameters.iterationsWarmup),
-             "the number of equilibration steps")
 
             ("output.precision",boost::program_options::value<int>(&m_parameters.outputPrecision),
              "the precision of doubles in certain output files")

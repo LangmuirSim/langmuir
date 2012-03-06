@@ -32,13 +32,6 @@ void backupFile(const QString& name);
 class OutputInfo : public QFileInfo
 {
 public:
-    //! Flag to be passed to constructor
-    enum Option
-    {
-        AppendMode = 1 //<! The QFile will be appended to, so it is allowed to already exist
-    };
-    Q_DECLARE_FLAGS(Options,Option)
-
     //! Generate file name according to SimulationParameters
     /*!
       The constructor makes useful substitutions into the passed name (deatiled below)
@@ -49,20 +42,12 @@ public:
         - \b "%path", substitutes in SimulationParameters::outputPath
         - \b "%stub", substitutes in SimulationParameters::outputStub
         - \b "%step", substitutes in SimulationParameters::currentStep
-        - \b "%sim" , substitutes in SimulationParameters::currentSimulation
       \param par pointer to a SimulationParameters object
         - if 0 or NULL, then all substitutions become empty strings
-      \param options flags to determine certain constructor behavoirs
-        - Option::AppendMode though no file is opened, lets the constructor know if
-        we will being appending to the file, so that no errors are thrown if the
-        file already exists and SimulationParameters::outputOverwrite is false
       \warning \b "%path" must be at the start of the name and only appear once
       */
-    OutputInfo(const QString &name,
-               const SimulationParameters *par = 0,
-               Options options = 0);
+    OutputInfo(const QString &name, const SimulationParameters *par = 0);
 };
-Q_DECLARE_OPERATORS_FOR_FLAGS(OutputInfo::Options)
 
 //! A Class to combine QFile, QTextStream and OutputInfo (QFileInfo).
 /*! Only for used for output.  Derived from QObject so destruction
@@ -82,7 +67,6 @@ public:
      */
     OutputStream(const QString &name,
                const SimulationParameters *par = 0,
-               OutputInfo::Options options = 0,
                QObject *parent = 0);
 
     //! Flush the stream and close the file

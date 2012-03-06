@@ -47,7 +47,6 @@ public:
     QList<int>& trapSiteIDs();
     QList<double>& trapSitePotentials();
     boost::multi_array<double,3>& interactionEnergies();
-
     int maxElectronAgents();
     int maxHoleAgents();
     int maxChargeAgents();
@@ -65,10 +64,8 @@ public:
     double reachedHoleAgents();
     double percentHoleAgents();
     double percentElectronAgents();
+    void saveCheckpointFile(const QString &name = "%path/%stub.bin");
 
-    void saveCheckpointFile();
-    void loadCheckpointFile();
-    void checkDataStream(QDataStream& stream, const QString& message = "");
 private:
     QList<SourceAgent*> m_sources;
     QList<DrainAgent*> m_drains;
@@ -90,10 +87,11 @@ private:
     int m_maxHoles;
     int m_maxDefects;
     int m_maxTraps;
-
     void placeDefects(const QList<int>& siteIDs = QList<int>());
     void placeElectrons(const QList<int>& siteIDs = QList<int>());
     void placeHoles(const QList<int>& siteIDs = QList<int>());
+    void initialize();
+    void checkDataStream(QDataStream& stream, const QString& message = "");
 };
 
 }

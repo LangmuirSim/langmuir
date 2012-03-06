@@ -7,7 +7,7 @@
 namespace Langmuir
 {
 
-OutputInfo::OutputInfo(const QString &name, const SimulationParameters *par, Options options)
+OutputInfo::OutputInfo(const QString &name, const SimulationParameters *par)
 {
     // make substitutions in the passed name
     QString result = name;
@@ -94,35 +94,26 @@ OutputInfo::OutputInfo(const QString &name, const SimulationParameters *par, Opt
                    qPrintable(absoluteFilePath()));
         }
     }
-
-    // if we didn't want to open in append mode...
-    if (!options.testFlag(AppendMode))
-    {
-        // if the file exists...
-        if (exists())
-        {
-            // if we were given parameters and don't want to overwrite files or...
-            // if we were not givent parameters...
-            if ((par != 0 && ! par->outputOverwrite) || par == 0)
-            {
-                // backup the file
-                backupFile(absoluteFilePath());
-            }
-        }
-    }
 }
 
 OutputStream::OutputStream(const QString &name,
            const SimulationParameters *par,
-           OutputInfo::Options options,
            QObject *parent)
-    : QObject(parent), m_info(name,par,options)
+    : QObject(parent), m_info(name,par)
 {
     // open as Text and as WriteOnly, it's an OutputStream
     QIODevice::OpenMode mode = QIODevice::Text|QIODevice::WriteOnly;
 
-    // open as Append if the option was set
-    if (options.testFlag(OutputInfo::AppendMode)) mode |= QIODevice::Append;
+    if ( par == 0 || (par != 0 && par->outputAppend) )
+    {
+        mode |= QIODevice::Append;
+    }
+
+    // back up file if it exists
+    if ( par == 0 || (par != 0 && par->outputBackup) )
+    {
+        backupFile(m_info.absoluteFilePath());
+    }
 
     // set the parent of our file
     m_file.setParent(this);

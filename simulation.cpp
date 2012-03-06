@@ -177,13 +177,4 @@ inline void Simulation::chargeAgentDecideFuture(ChargeAgent * chargeAgent)
     chargeAgent->decideFuture();
 }
 
-void Simulation::equilibrated()
-{
-    m_world.parameters().currentStep = 0;
-    foreach(FluxAgent *flux, m_world.fluxes())
-    {
-        flux->resetCounters();
-    }
-}
-
 }

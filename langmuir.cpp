@@ -20,7 +20,7 @@
 using namespace Langmuir;
 
 // Print information to the screen about simulation status
-void progress( int warm, int real, int total, double time, bool flush = true );
+void progress( int real, int total, double time, bool flush = true );
 
 int main (int argc, char *argv[])
 {
@@ -53,19 +53,6 @@ int main (int argc, char *argv[])
     // Save the parameters used for this simulation to a file
     //input.saveParameters(i);
 
-    // Perform equilibration steps
-    for (int j = 0; j < par.iterationsWarmup; j += par.iterationsPrint)
-    {
-        // Perform iterations
-        sim.performIterations(par.iterationsPrint);
-
-        // Print progress to the screen
-        progress( j, 0, par.iterationsTotal, begin.time().elapsed() );
-    }
-
-    // Let the simulation know that equilibration steps are complete
-    sim.equilibrated();
-
     // Perform production steps
     for (int j = 0; j < par.iterationsReal; j += par.iterationsPrint)
     {
@@ -73,11 +60,17 @@ int main (int argc, char *argv[])
         sim.performIterations (par.iterationsPrint);
 
         // Print progress to the screen
-        progress( par.iterationsWarmup, j, par.iterationsTotal, begin.time().elapsed() );
+        progress( j, par.iterationsReal, begin.time().elapsed() );
+
+        // Save a Checkpoint File
+        world.saveCheckpointFile();
     }
 
+    // Save a Checkpoint File
+    world.saveCheckpointFile();
+
     // Print progress to the screen
-    progress( par.iterationsWarmup, par.iterationsReal, par.iterationsTotal, begin.time().elapsed() );
+    progress( par.iterationsReal, par.iterationsReal, begin.time().elapsed() );
     std::cout << "\n";
 
     // The time this simulation stops
@@ -86,11 +79,11 @@ int main (int argc, char *argv[])
     // Output time
     if (par.outputIsOn)
     {
-        OutputStream timerStream("%path/time.dat",&par,OutputInfo::AppendMode);
+        OutputStream timerStream("%path/time.dat",&par);
+
         timerStream << right
                     << qSetFieldWidth(20)
                     << qSetRealNumberPrecision(12)
-                    << "equilibration"
                     << "real"
                     << "carriers"
                     << "date_i"
@@ -104,8 +97,7 @@ int main (int argc, char *argv[])
                     << "msecs"
                     << newline;
         timerStream.setRealNumberNotation(QTextStream::SmartNotation);
-        timerStream << par.iterationsWarmup
-                    << par.iterationsReal
+        timerStream << par.iterationsReal
                     << world.maxChargeAgents()
                     << begin.toString(dateFMT)
                     << begin.toString(timeFMT)
@@ -121,10 +113,10 @@ int main (int argc, char *argv[])
     }
 }
 
-void progress( int warm, int real, int total, double time, bool flush )
+void progress( int real, int total, double time, bool flush )
 {
-    double percent = double( warm + real ) / double ( total ) * 100.0;
-    double remaining = time / ( warm + real ) * ( total - warm - real );
+    double percent = double( real ) / double ( total ) * 100.0;
+    double remaining = time / ( real ) * ( total - real );
 
     double factor = 1.0;
     QString unit = "ms";
@@ -168,9 +160,9 @@ void progress( int warm, int real, int total, double time, bool flush )
     }
     QString remainingString = QString("%1 %2").arg(remaining/factor, 9,'f',5).arg( unit );
 
-    std::cout << QString( "warmup: %1 | real: %2 | percent: %3 % | time: %4| remaining: %5\r")
-                 .arg(warm,9)
+    std::cout << QString( "step: %1 ps / %2 ps = %3 % | time: %4 | remaining: %5\r")
                  .arg(real,9)
+                 .arg(total)
                  .arg(percent,6,'f',2)
                  .arg(timeString)
                  .arg(remainingString)

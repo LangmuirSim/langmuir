@@ -19,140 +19,8 @@ World::World(SimulationParameters &par, QObject *parent)
     // Set the address of the Parameters passed
     m_parameters = &par;
 
-    // Pointers are EVIL
-    World &refWorld = *this;
-
-    // Create Random Number Generator
-    m_rand = new Random(parameters().randomSeed);
-    m_parameters->randomSeed = m_rand->seed();
-
-    // Create Electron Grid
-    m_electronGrid = new Grid(parameters().gridX, parameters().gridY, parameters().gridZ, this);
-
-    // Create Hole Grid
-    m_holeGrid = new Grid(parameters().gridX, parameters().gridY, parameters().gridZ, this);
-
-    // Calculate the max number of holes
-    m_maxHoles = parameters().holePercentage*double(holeGrid().volume());
-
-    // Calculate the max number of electrons
-    m_maxElectrons = parameters().electronPercentage*double(electronGrid().volume());
-
-    // Calculate the max number of electrons
-    m_maxDefects = parameters().defectPercentage*double(electronGrid().volume());
-
-    // Calculate the max number of traps
-    m_maxTraps = parameters().trapPercentage*double(electronGrid().volume());
-
-    // Create Potential Calculator
-    m_potential = new Potential(refWorld, this);
-
-    // Create OpenCL Objects
-    m_ocl = new OpenClHelper(refWorld, this);
-
-    if ( parameters().simulationType == "transistor" )
-    {
-        // Create Transistor Sources
-        m_sources.push_back(new ElectronSourceAgent(refWorld, Grid::Left, this));
-        m_sources.last()->setRate(parameters().sourceRate);
-
-        // Create Transistor Drains
-        m_drains.push_back(new ElectronDrainAgent(refWorld, Grid::Right, this));
-        m_drains.last()->setRate(parameters().drainRate);
-    }
-    else if ( parameters().simulationType == "solarcell" )
-    {
-        // Create Solar Cell Sources
-        m_sources.push_back(new ExcitonSourceAgent(refWorld, this));
-        m_sources.last()->setRate(parameters().sourceRate);
-
-        // Create Solar Cell Drains
-        m_drains.push_back(new ElectronDrainAgent(refWorld, Grid::Left, this));
-        m_drains.last()->setRate(parameters().drainRate);
-
-        m_drains.push_back(new HoleDrainAgent(refWorld, Grid::Left, this));
-        m_drains.last()->setRate(parameters().drainRate);
-
-        m_drains.push_back(new ElectronDrainAgent(refWorld, Grid::Right, this));
-        m_drains.last()->setRate(parameters().drainRate);
-
-        m_drains.push_back(new HoleDrainAgent(refWorld, Grid::Right, this));
-        m_drains.last()->setRate(parameters().drainRate);
-    }
-    else
-    {
-        qFatal("simulation.type(%s) must be transistor or solarcell",qPrintable(parameters().simulationType));
-    }
-
-    foreach( FluxAgent *flux, m_sources )
-    {
-        m_fluxAgents.push_back(flux);
-    }
-
-    foreach( FluxAgent *flux, m_drains )
-    {
-        m_fluxAgents.push_back(flux);
-    }
-
-    // Create Logger
-    if (parameters().outputIsOn)
-    {
-        m_logger = new LoggerOn(refWorld, this);
-    }
-    else
-    {
-        m_logger = new Logger(refWorld, this);
-    }
-
-    // Setup the Sites on the Grid
-    placeDefects();
-    placeElectrons();
-    placeHoles();
-
-    // Setup Grid Potential
-    // Zero potential
-    potential().setPotentialZero();
-
-    // Add Linear Potential
-    potential().setPotentialLinear();
-
-    // Add Trap Potential(assumes source and drain were created so that hetero traps don't start growing on the source / drain)
-    potential().setPotentialTraps();
-
-    // precalculate and store coulomb interaction energies
-    potential().updateInteractionEnergies();
-
-    // Generate grid image
-    if(parameters().outputImage)
-    {
-        logger().saveTrapImage();
-        logger().saveHoleImage();
-        logger().saveElectronImage();
-        logger().saveDefectImage();
-        logger().saveImage();
-    }
-
-    // Output Field Energy
-    if(parameters().outputPotential)
-    {
-        logger().saveGridPotential();
-    }
-
-    // Initialize OpenCL
-    opencl().initializeOpenCL();
-    if(parameters().useOpenCL)
-    {
-        opencl().toggleOpenCL(true);
-    }
-    else
-    {
-        opencl().toggleOpenCL(false);
-    }
-
-//    saveCheckpointFile();
-//    loadCheckpointFile();
-
-//    qFatal("done");
+    // Initialize World
+    initialize();
 }
 
 World::~World()
@@ -375,11 +243,31 @@ double World::percentElectronAgents()
     return double(numElectronAgents())/double(m_electronGrid->volume())*100.0;
 }
 
-void World::saveCheckpointFile()
+void World::saveCheckpointFile(const QString &name)
 {
+    OutputInfo info(name,m_parameters);
+
+    QString bak1 = info.absoluteFilePath() + ".bak";
+    QString bak2 = info.absoluteFilePath() + ".bak.bak";
+
+    if ( info.exists() )
+    {
+        if ( QFile::exists(bak1) )
+        {
+            if ( QFile::exists(bak2) )
+            {
+                // out.bin + out.bin.1 + out.bin.2
+                qFatal("can not create checkpoint safely");
+            }
+            // out.bin + out.bin.1
+            QFile::rename(bak1,bak2);
+        }
+        // out.bin
+        QFile::rename(info.absoluteFilePath(),bak1);
+    }
+
     // Create binary file
-    QString name = "/home/adam/Desktop/out.bin";
-    QFile handle(name);
+    QFile handle(info.absoluteFilePath());
     if (!handle.open(QIODevice::WriteOnly))
     {
         qFatal("can not open checkpoint file: %s",qPrintable(name));
@@ -389,107 +277,260 @@ void World::saveCheckpointFile()
     stream.setFloatingPointPrecision(QDataStream::DoublePrecision);
 
     // Electrons
-    stream << qint64(numElectronAgents());
-    for (int i = 0; i < numElectronAgents(); i++) { stream << qint64(m_electrons.at(i)->getCurrentSite()); }
+    stream << qint32(numElectronAgents());
+    for (int i = 0; i < numElectronAgents(); i++) { stream << qint32(m_electrons.at(i)->getCurrentSite()); }
 
     // Holes
-    stream << qint64(numHoleAgents());
-    for (int i = 0; i < numHoleAgents(); i++) { stream << qint64(m_holes.at(i)->getCurrentSite()); }
+    stream << qint32(numHoleAgents());
+    for (int i = 0; i < numHoleAgents(); i++) { stream << qint32(m_holes.at(i)->getCurrentSite()); }
 
     // Defects
-    stream << qint64(numDefects());
-    for (int i = 0; i < numDefects(); i++) { stream << qint64(m_defectSiteIDs.at(i)); }
+    stream << qint32(numDefects());
+    for (int i = 0; i < numDefects(); i++) { stream << qint32(m_defectSiteIDs.at(i)); }
 
     // Traps
-    stream << qint64(numTraps());
-    for (int i = 0; i < numTraps(); i++) { stream << qint64(m_trapSiteIDs.at(i)); }
+    stream << qint32(numTraps());
+    for (int i = 0; i < numTraps(); i++) { stream << qint32(m_trapSiteIDs.at(i)); }
+    for (int i = 0; i < numTraps(); i++) { stream << m_trapSitePotentials.at(i); }
+
+    // Random Seed
+    stream << quint32(parameters().randomSeed);
+
+    // Current Step
+    stream << quint32(parameters().currentStep);
 
     // Close File
     handle.close();
+
+    // Remove the oldest backup file
+    if ( QFile::exists(bak2) ) { QFile::remove(bak2); }
 }
 
-void World::loadCheckpointFile()
+void World::initialize()
 {
-    // Create binary file
-    QString name = "/home/adam/Desktop/out.bin";
-    QFile handle(name);
-    if (!handle.open(QIODevice::ReadOnly))
-    {
-        qFatal("can not open checkpoint file: %s",qPrintable(name));
-    }
-    QDataStream stream(&handle);
-    stream.setVersion(QDataStream::Qt_4_7);
-    stream.setFloatingPointPrecision(QDataStream::DoublePrecision);
+    // Pointers are EVIL
+    World &refWorld = *this;
 
     // Create data
-    QList<qint64> electrons;
-    QList<qint64> holes;
-    QList<qint64> defects;
-    QList<qint64> traps;
+    QList<qint32> electrons;
+    QList<qint32> holes;
+    QList<qint32> defects;
+    QList<qint32> traps;
+    QList<double> potentials;
 
-    // Electrons
+    if (!parameters().checkFile.isEmpty())
     {
-        qint64 num_electrons = 0;
-        stream >> num_electrons;
-        checkDataStream(stream,"expected number of electrons");
-        for (int i = 0; i < num_electrons; i++)
+        // Create binary file
+        QFile handle(parameters().checkFile);
+        if (!handle.open(QIODevice::ReadOnly))
         {
-            qint64 value;
-            stream >> value;
-            checkDataStream(stream,QString("expected electron %1 site id").arg(i));
-            electrons.push_back(value);
+            qFatal("can not open checkpoint file: %s",qPrintable(parameters().checkFile));
         }
+        QDataStream stream(&handle);
+        stream.setVersion(QDataStream::Qt_4_7);
+        stream.setFloatingPointPrecision(QDataStream::DoublePrecision);
+
+        // Electrons
+        {
+            qint32 num_electrons = 0;
+            stream >> num_electrons;
+            checkDataStream(stream,"expected number of electrons");
+            for (int i = 0; i < num_electrons; i++)
+            {
+                qint32 value;
+                stream >> value;
+                checkDataStream(stream,QString("expected electron %1 site id").arg(i));
+                electrons.push_back(value);
+            }
+        }
+
+        // Holes
+        {
+            qint32 num_holes = 0;
+            stream >> num_holes;
+            checkDataStream(stream,"expected number of holes");
+            for (int i = 0; i < num_holes; i++)
+            {
+                qint32 value;
+                stream >> value;
+                checkDataStream(stream,QString("expected hole %1 site id").arg(i));
+                holes.push_back(value);
+            }
+        }
+
+        // Defects
+        {
+            qint32 num_defects = 0;
+            stream >> num_defects;
+            checkDataStream(stream,"expected number of defects");
+            for (int i = 0; i < num_defects; i++)
+            {
+                qint32 value;
+                stream >> value;
+                checkDataStream(stream,QString("expected defect %1 site id").arg(i));
+                defects.push_back(value);
+            }
+        }
+
+        // Traps
+        {
+            qint32 num_traps = 0;
+            stream >> num_traps;
+            checkDataStream(stream,"expected number of traps");
+            for (int i = 0; i < num_traps; i++)
+            {
+                qint32 value;
+                stream >> value;
+                checkDataStream(stream,QString("expected trap %1 site id").arg(i));
+                traps.push_back(value);
+            }
+            for (int i = 0; i < num_traps; i++)
+            {
+                double value;
+                stream >> value;
+                checkDataStream(stream,QString("expected trap %1 potential id").arg(i));
+                potentials.push_back(value);
+            }
+        }
+
+        // Random Seed
+        stream >> m_parameters->randomSeed;
+        checkDataStream(stream,"expected parameter random.seed");
+
+        // Random Seed
+        stream >> m_parameters->currentStep;
+        checkDataStream(stream,"expected parameter current.step");
+
+        // Close file
+        handle.close();
+
+        // Set append parameter so that data is not lost
+        m_parameters->outputAppend = true;
     }
 
-    // Holes
+    // Create Random Number Generator
+    m_rand = new Random(parameters().randomSeed);
+    m_parameters->randomSeed = m_rand->seed();
+
+    // Create Electron Grid
+    m_electronGrid = new Grid(parameters().gridX, parameters().gridY, parameters().gridZ, this);
+
+    // Create Hole Grid
+    m_holeGrid = new Grid(parameters().gridX, parameters().gridY, parameters().gridZ, this);
+
+    // Calculate the max number of holes
+    m_maxHoles = parameters().holePercentage*double(holeGrid().volume());
+
+    // Calculate the max number of electrons
+    m_maxElectrons = parameters().electronPercentage*double(electronGrid().volume());
+
+    // Calculate the max number of electrons
+    m_maxDefects = parameters().defectPercentage*double(electronGrid().volume());
+
+    // Calculate the max number of traps
+    m_maxTraps = parameters().trapPercentage*double(electronGrid().volume());
+
+    // Create Potential Calculator
+    m_potential = new Potential(refWorld, this);
+
+    // Create OpenCL Objects
+    m_ocl = new OpenClHelper(refWorld, this);
+
+    if ( parameters().simulationType == "transistor" )
     {
-        qint64 num_holes = 0;
-        stream >> num_holes;
-        checkDataStream(stream,"expected number of holes");
-        for (int i = 0; i < num_holes; i++)
-        {
-            qint64 value;
-            stream >> value;
-            checkDataStream(stream,QString("expected hole %1 site id").arg(i));
-            holes.push_back(value);
-        }
+        // Create Transistor Sources
+        m_sources.push_back(new ElectronSourceAgent(refWorld, Grid::Left, this));
+        m_sources.last()->setRate(parameters().sourceRate);
+
+        // Create Transistor Drains
+        m_drains.push_back(new ElectronDrainAgent(refWorld, Grid::Right, this));
+        m_drains.last()->setRate(parameters().drainRate);
+    }
+    else if ( parameters().simulationType == "solarcell" )
+    {
+        // Create Solar Cell Sources
+        m_sources.push_back(new ExcitonSourceAgent(refWorld, this));
+        m_sources.last()->setRate(parameters().sourceRate);
+
+        // Create Solar Cell Drains
+        m_drains.push_back(new ElectronDrainAgent(refWorld, Grid::Left, this));
+        m_drains.last()->setRate(parameters().drainRate);
+
+        m_drains.push_back(new HoleDrainAgent(refWorld, Grid::Left, this));
+        m_drains.last()->setRate(parameters().drainRate);
+
+        m_drains.push_back(new ElectronDrainAgent(refWorld, Grid::Right, this));
+        m_drains.last()->setRate(parameters().drainRate);
+
+        m_drains.push_back(new HoleDrainAgent(refWorld, Grid::Right, this));
+        m_drains.last()->setRate(parameters().drainRate);
+    }
+    else
+    {
+        qFatal("simulation.type(%s) must be transistor or solarcell",qPrintable(parameters().simulationType));
     }
 
-    // Defects
+    foreach( FluxAgent *flux, m_sources )
     {
-        qint64 num_defects = 0;
-        stream >> num_defects;
-        checkDataStream(stream,"expected number of defects");
-        for (int i = 0; i < num_defects; i++)
-        {
-            qint64 value;
-            stream >> value;
-            checkDataStream(stream,QString("expected defect %1 site id").arg(i));
-            defects.push_back(value);
-        }
+        m_fluxAgents.push_back(flux);
     }
 
-    // Traps
+    foreach( FluxAgent *flux, m_drains )
     {
-        qint64 num_traps = 0;
-        stream >> num_traps;
-        checkDataStream(stream,"expected number of traps");
-        for (int i = 0; i < num_traps; i++)
-        {
-            qint64 value;
-            stream >> value;
-            checkDataStream(stream,QString("expected trap %1 site id").arg(i));
-            traps.push_back(value);
-        }
+        m_fluxAgents.push_back(flux);
     }
 
-    // Close file
-    handle.close();
+    // Create Logger
+    if (parameters().outputIsOn)
+    {
+        m_logger = new LoggerOn(refWorld, this);
+    }
+    else
+    {
+        m_logger = new Logger(refWorld, this);
+    }
 
-    qDebug() << electrons.size();
-    qDebug() << holes.size();
-    qDebug() << defects.size();
-    qDebug() << traps.size();
+    // Place Defects
+    placeDefects(defects);
+
+    // Place Electrons
+    placeElectrons(electrons);
+
+    // Place Holes
+    placeHoles(holes);
+
+    // Zero potential
+    potential().setPotentialZero();
+
+    // Set Linear Potential
+    potential().setPotentialLinear();
+
+    // Place Traps
+    potential().setPotentialTraps(traps,potentials);
+
+    // precalculate and store coulomb interaction energies
+    potential().updateInteractionEnergies();
+
+    // Generate grid image
+    if(parameters().imageDefects)
+    {
+        logger().saveDefectImage();
+    }
+
+    if(parameters().imageTraps)
+    {
+        logger().saveTrapImage();
+    }
+
+    // Output Field Energy
+    if(parameters().outputPotential)
+    {
+        logger().saveGridPotential();
+    }
+
+    // Initialize OpenCL
+    opencl().initializeOpenCL();
+    opencl().toggleOpenCL(parameters().useOpenCL);
 }
 
 void World::checkDataStream(QDataStream& stream, const QString& message)
@@ -641,85 +682,5 @@ void World::placeHoles(const QList<int>& siteIDs)
         }
     }
 }
-
-//void Simulation::initializeSites()
-//{
-//    QList<int> defects;
-//    QList<int> electrons;
-//    QList<int> holes;
-//    QList<int> traps;
-
-//    if (!parameters().configurationFile.isEmpty())
-//    {
-//        QFile file;
-//        file.setFileName(parameters().configurationFile);
-//        if (!file.open(QIODevice::ReadOnly|QIODevice::Text))
-//        {
-//            qFatal("can not open data file (%s)",
-//                   qPrintable(parameters().configurationFile));
-//        }
-//        int count = 0;
-//        while (!file.atEnd())
-//        {
-//            QString line = file.readLine().trimmed().toLower();
-//            QStringList tokens = line.split(QRegExp("\\s"),QString::SkipEmptyParts);
-//            if (!(tokens.size()%2 == 0))
-//            {
-//                qFatal("invalid number of entries on line(%d) in "
-//                       "configuration.file\n\tline: %s",
-//                       count,qPrintable(line));
-//            }
-//            for (int i= 0; i < tokens.size(); i+=2)
-//            {
-//                bool ok = false;
-//                int site = tokens[i].toInt(&ok);
-//                if (!ok)
-//                {
-//                    qFatal("cannot convert site to int on line(%d) in "
-//                           "configuration.file\n\tline: %s",
-//                           count,qPrintable(line));
-//                }
-
-//                QList<int> *pList = 0;
-//                switch (tokens[i+1][0].toAscii())
-//                {
-//                case 'e': { pList = &electrons; break; }
-//                case 'h': { pList = &holes;     break; }
-//                case 'd': { pList = &defects;   break; }
-//                case 't': { pList = &traps;     break; }
-//                default:
-//                {
-//                    qFatal("invalid type on line(%d) in "
-//                           "configuration.file; type is "
-//                           "e, h, d, or t\n\tline: %s",
-//                           count,qPrintable(line));
-//                    break;
-//                }
-//                }
-//                if (!pList->contains(site))
-//                {
-//                    pList->push_back(site);
-//                }
-//                else
-//                {
-//                    qFatal("invalid site on line(%d) in "
-//                           "configuration.file; site defined "
-//                           "previously\n\tline: %s",
-//                           count,qPrintable(line));
-//                }
-//            }
-//            count++;
-//        }
-//    }
-
-//    // Place Defects
-//    placeDefects(defects);
-
-//    // place electrons on the grid
-//    placeElectrons(electrons);
-
-//    // place holes on the grid
-//    placeHoles(holes);
-//}
 
 }

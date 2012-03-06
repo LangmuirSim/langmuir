@@ -15,6 +15,9 @@ struct SimulationParameters
     //! name of the input parameters file
     QString inputFile;
 
+    //! name of the input parameters file
+    QString checkFile;
+
     //! tells Langmuir how to set up the Sources and Drains: (\b\c "transistor", \b\c "solarcell")
     QString simulationType;
 
@@ -51,23 +54,26 @@ struct SimulationParameters
     //! output grid potential at the start of the simulation, includes the trap potential
     bool outputPotential;
 
-    //! output images of defects and traps at the start of the simulation
-    bool outputImage;
-
     //! if false, produce no output (useful for LangmuirView)
     bool outputIsOn;
 
-    //! if true, overwrite files; if false, backup files
-    bool outputOverwrite;
+    //! if true, backup files when they exist
+    bool outputBackup;
+
+    //! if true, append to data files; if false, overwrite files
+    bool outputAppend;
+
+    //! output images of defects
+    bool imageDefects;
+
+    //! output images of defects
+    bool imageTraps;
 
     //! if Langmuir, how often to output; if LangmuirView, how many steps between rendering
     int iterationsPrint;
 
     //! number of simulation steps after equilibration
     int iterationsReal;
-
-    //! number of equilibration steps
-    int iterationsWarmup;
 
     //! number of significant figures used for doubles in output
     int outputPrecision;
@@ -165,21 +171,13 @@ struct SimulationParameters
     //! the current step of the simulation
     unsigned int currentStep;
 
-    //! the total number of simulation steps
-    int iterationsTotal;
-
-    //! an xyz file containing a preconfigured grid
-    QString configurationFile;
-
-    //! a file containing a preconfigured potential
-    QString potentialFile;
-
     //! the time this simulation started
     QDateTime simulationStart;
 
     SimulationParameters() :
 
         inputFile              (""),
+        checkFile              (""),
         simulationType         ("transistor"),
         randomSeed             (0),
 
@@ -195,13 +193,15 @@ struct SimulationParameters
         outputIdsOnDelete      (false),
         outputCoulomb          (false),
         outputPotential        (false),
-        outputImage            (false),
         outputIsOn             (true),
-        outputOverwrite        (false),
+        outputBackup           (true),
+        outputAppend           (true),
+
+        imageDefects           (false),
+        imageTraps             (false),
 
         iterationsPrint        (10),
         iterationsReal         (1000),
-        iterationsWarmup       (1000),
         outputPrecision        (12),
         outputWidth            (20),
         outputPath             (QDir::currentPath()),
@@ -239,11 +239,7 @@ struct SimulationParameters
         inverseKT              (0),
         okCL                   (false),
         currentStep            (0),
-        iterationsTotal        (0),
-
-        configurationFile      (""),
-
-        simulationStart (QDateTime::fromMSecsSinceEpoch(0))
+        simulationStart        (QDateTime::currentDateTime())
     {
     }
 
@@ -254,7 +250,6 @@ inline void setCalculatedValues(SimulationParameters& par)
 {
     par.electrostaticPrefactor  = par.elementaryCharge /(4.0 * M_PI * par.dielectricConstant * par.permittivitySpace * par.gridFactor);
     par.inverseKT = par.elementaryCharge /(par.boltzmannConstant * par.temperatureKelvin);
-    par.iterationsTotal = par.iterationsReal + par.iterationsWarmup;
     if (par.outputWidth < 8 ) { par.outputWidth = 8; }
     if (par.outputWidth < (par.outputPrecision + 8)) { par.outputWidth = par.outputPrecision + 8; }
 }
@@ -292,21 +287,9 @@ inline void check(SimulationParameters& par)
     {
         qFatal("iterations.real(%d) < 0",par.iterationsReal);
     }
-    if (par.iterationsWarmup < 0 )
-    {
-        qFatal("iterations.warmup(%d) < 0",par.iterationsWarmup);
-    }
     if (par.iterationsReal % par.iterationsPrint != 0 )
     {
         qFatal("iterations.real(%d) %% iterations.print(%d) != 0",par.iterationsReal,par.iterationsPrint);
-    }
-    if (par.iterationsWarmup % par.iterationsPrint != 0 )
-    {
-        qFatal("iterations.warmup(%d) %% iterations.print(%d) != 0",par.iterationsWarmup,par.iterationsPrint);
-    }
-    if (par.iterationsTotal < 0 )
-    {
-        qFatal("iterations.total(%d) < 0",par.iterationsTotal);
     }
 
     // percentages

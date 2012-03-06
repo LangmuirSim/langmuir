@@ -9,13 +9,13 @@
 namespace Langmuir
 {
 
-XYZWriter::XYZWriter(World &world, const QString &name, OutputInfo::Options options, QObject *parent)
-    : QObject(parent), m_world(world), m_stream(name,&m_world.parameters(),options,this)
+XYZWriter::XYZWriter(World &world, const QString &name, QObject *parent)
+    : QObject(parent), m_world(world), m_stream(name,&m_world.parameters(),this)
 {
 }
 
-FluxWriter::FluxWriter(World &world, const QString &name, OutputInfo::Options options, QObject *parent)
-    : QObject(parent), m_world(world), m_stream(name,&m_world.parameters(),options,this)
+FluxWriter::FluxWriter(World &world, const QString &name, QObject *parent)
+    : QObject(parent), m_world(world), m_stream(name,&m_world.parameters(),this)
 {
     QList<FluxAgent *>& fluxAgents = m_world.fluxes();
     m_stream << qSetRealNumberPrecision(m_world.parameters().outputPrecision)
@@ -39,8 +39,8 @@ FluxWriter::FluxWriter(World &world, const QString &name, OutputInfo::Options op
     m_stream.flush();
 }
 
-CarrierWriter::CarrierWriter(World &world, const QString &name, OutputInfo::Options options, QObject *parent)
-    : QObject(parent), m_world(world), m_stream(name,&m_world.parameters(),options,this)
+CarrierWriter::CarrierWriter(World &world, const QString &name, QObject *parent)
+    : QObject(parent), m_world(world), m_stream(name,&m_world.parameters(),this)
 {
     m_stream << qSetRealNumberPrecision(m_world.parameters().outputPrecision)
              << qSetFieldWidth(m_world.parameters().outputWidth)
@@ -194,6 +194,10 @@ GridImage::GridImage(World &world, QColor bg, QObject *parent)
 void GridImage::save(QString name, int scale)
 {
     OutputInfo info(name, &m_world.parameters());
+    if ( m_world.parameters().outputBackup )
+    {
+        backupFile(info.absoluteFilePath());
+    }
     m_painter.end();
     m_image = m_image.scaled(scale*m_image.width(),scale*m_image.height(),Qt::KeepAspectRatioByExpanding);
     m_image.save(info.absoluteFilePath(),"png",100);
@@ -239,22 +243,22 @@ void LoggerOn::initialize()
 {
     if (m_world.parameters().outputXyz)
     {
-        m_xyzWriter = new XYZWriter(m_world,"%path/%stub-%sim.xyz",0,this);
+        m_xyzWriter = new XYZWriter(m_world,"%path/%stub-%sim.xyz",this);
     }
 
     if (m_world.parameters().outputIdsOnDelete)
     {
-        m_carrierWriter = new CarrierWriter(m_world,"%path/%stub-%sim-carriers.dat",0,this);
+        m_carrierWriter = new CarrierWriter(m_world,"%path/%stub-%sim-carriers.dat",this);
     }
 
-    m_fluxWriter = new FluxWriter(m_world,"%path/%stub-%sim.dat",0,this);
+    m_fluxWriter = new FluxWriter(m_world,"%path/%stub-%sim.dat",this);
 }
 
 void LoggerOn::saveGridPotential(const QString& name)
 {
     Grid &grid = m_world.electronGrid();
 
-    OutputStream stream(name,&m_world.parameters(),0,this);
+    OutputStream stream(name,&m_world.parameters(),this);
 
     stream << qSetRealNumberPrecision(m_world.parameters().outputPrecision)
            << qSetFieldWidth(m_world.parameters().outputWidth)
@@ -294,7 +298,7 @@ void LoggerOn::saveCoulombEnergy(const QString& name)
     Grid &grid = m_world.electronGrid();
     OpenClHelper &openCL = m_world.opencl();
 
-    OutputStream stream(name,&m_world.parameters(),0,this);
+    OutputStream stream(name,&m_world.parameters(),this);
 
     stream << qSetRealNumberPrecision(m_world.parameters().outputPrecision)
            << qSetFieldWidth(m_world.parameters().outputWidth)

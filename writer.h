@@ -24,7 +24,6 @@ public:
     //! Constructs the writer, has the same parameters as OutputInfo
     XYZWriter(World &world,
               const QString& name,
-              OutputInfo::Options options = 0,
               QObject *parent = 0);
     void write();
 protected:
@@ -40,7 +39,6 @@ public:
     //! Constructs the writer, has the same parameters as OutputInfo
     FluxWriter(World &world,
                const QString& name,
-               OutputInfo::Options options = 0,
                QObject *parent = 0);
     void write();
 protected:
@@ -56,7 +54,6 @@ public:
     //! Constructs the writer, has the same parameters as OutputInfo
     CarrierWriter(World &world,
                   const QString& name,
-                  OutputInfo::Options options = 0,
                   QObject *parent = 0);
     void write(ChargeAgent &charge);
 protected:

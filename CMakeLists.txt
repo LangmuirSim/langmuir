@@ -153,7 +153,7 @@ ENDIF(${COMPILE_LANGMUIR})
 
 ################################################################################
 
-SET(COMPILE_LANGMUIR_VIEW FALSE)
+SET(COMPILE_LANGMUIR_VIEW TRUE)
 IF(${COMPILE_LANGMUIR_VIEW})
 IF(${OPENGL_FOUND})
 MESSAGE("-- Compiling LangmuirView")
