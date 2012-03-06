@@ -100,6 +100,51 @@ World::World(SimulationParameters &par, QObject *parent)
     {
         m_logger = new Logger(refWorld, this);
     }
+
+    // Setup the Sites on the Grid
+    placeDefects();
+    placeElectrons();
+    placeHoles();
+
+    // Setup Grid Potential
+    // Zero potential
+    potential().setPotentialZero();
+
+    // Add Linear Potential
+    potential().setPotentialLinear();
+
+    // Add Trap Potential(assumes source and drain were created so that hetero traps don't start growing on the source / drain)
+    potential().setPotentialTraps();
+
+    // precalculate and store coulomb interaction energies
+    potential().updateInteractionEnergies();
+
+    // Generate grid image
+    if(parameters().outputImage)
+    {
+        logger().saveTrapImage();
+        logger().saveHoleImage();
+        logger().saveElectronImage();
+        logger().saveDefectImage();
+        logger().saveImage();
+    }
+
+    // Output Field Energy
+    if(parameters().outputPotential)
+    {
+        logger().saveGridPotential();
+    }
+
+    // Initialize OpenCL
+    opencl().initializeOpenCL();
+    if(parameters().useOpenCL)
+    {
+        opencl().toggleOpenCL(true);
+    }
+    else
+    {
+        opencl().toggleOpenCL(false);
+    }
 }
 
 World::~World()
@@ -311,5 +356,242 @@ double World::percentElectronAgents()
 {
     return double(numElectronAgents())/double(m_electronGrid->volume())*100.0;
 }
+
+void World::saveCheckpointFile()
+{
+    // Create binary file
+    QString name = "/home/adam/Desktop/out.bin";
+    QFile handle(name);
+    if (!handle.open(QIODevice::WriteOnly))
+    {
+        qFatal("can not open checkpoint file: %s",qPrintable(name));
+    }
+    QDataStream stream(&handle);
+    stream.setVersion(QDataStream::Qt_4_7);
+    stream.setFloatingPointPrecision(QDataStream::DoublePrecision);
+
+    // Electrons
+    stream << numElectronAgents();
+    for (int i = 0; i < numElectronAgents(); i++) { stream << qint64(m_electrons.at(i)->getCurrentSite()); }
+
+    // Holes
+    stream << numHoleAgents();
+    for (int i = 0; i < numHoleAgents(); i++) { stream << qint64(m_holes.at(i)->getCurrentSite()); }
+
+    // Defects
+    stream << numDefects();
+    for (int i = 0; i < numDefects(); i++) { stream << qint64(m_defectSiteIDs.at(i)); }
+
+    // Traps
+    stream << numTraps();
+    for (int i = 0; i < numTraps(); i++) { stream << qint64(m_trapSiteIDs.at(i)); }
+
+    // Close File
+    handle.close();
+}
+
+void World::placeDefects(const QList<int>& siteIDs)
+{
+    int count = numDefects();
+    int toBePlaced = maxDefects()-count;
+    int toBePlacedUsingIDs = siteIDs.size();
+    int toBePlacedRandomly = toBePlaced - siteIDs.size();
+
+    if (toBePlacedRandomly < 0)
+    {
+        qFatal("can not place defects;\n\tmost likely the list "
+               "of defect site IDs exceeds the maximum "
+               "given by defect.precentage");
+    }
+
+    // Place the defects in the siteID list
+    for (int i = 0; i < toBePlacedUsingIDs; i++)
+    {
+        int site = siteIDs.at(i);
+        if ( defectSiteIDs().contains(site) )
+        {
+            qFatal("can not add defect;\n\tdefect already exists");
+        }
+        electronGrid().registerDefect(site);
+        holeGrid().registerDefect(site);
+        defectSiteIDs().push_back(site);
+        count++;
+    }
+
+    // Place the rest of the defects randomly
+    int tries = 0;
+    int maxTries = 10*(electronGrid().volume());
+    for(int i = count; i < maxDefects();)
+    {
+        tries++;
+        int site = randomNumberGenerator()
+                .integer(0,electronGrid().volume()-1);
+
+        if (!defectSiteIDs().contains(site))
+        {
+            electronGrid().registerDefect(site);
+            holeGrid().registerDefect(site);
+            defectSiteIDs().push_back(site);
+            count++;
+            i++;
+        }
+
+        if (tries > maxTries)
+        {
+            qFatal("can not seed defects;\n\texceeded max tries(%d)",
+                   maxTries);
+        }
+    }
+}
+
+void World::placeElectrons(const QList<int>& siteIDs)
+{
+    // Create a Source Agent for placing electrons
+    ElectronSourceAgent source(*this,Grid::NoFace);
+    source.setRate(1.0);
+
+    // Place the electrons in the site ID list
+    for (int i = 0; i < siteIDs.size(); i++)
+    {
+        if (!source.tryToSeed(siteIDs[i]))
+        {
+            qFatal("can not inject electron at site %d",
+                   siteIDs[i]);
+        }
+    }
+
+    // Place the rest of the electrons randomly if charge seeding is on
+    if (parameters().seedCharges)
+    {
+        int tries = 0;
+        int maxTries = 10*(electronGrid().volume());
+        for(int i = numElectronAgents();
+            i < maxElectronAgents();)
+        {
+            if(source.tryToSeed()) { ++i; }
+            tries++;
+            if (tries > maxTries)
+            {
+                qFatal("can not seed electrons;\n\texceeded max tries(%d)",
+                       maxTries);
+            }
+        }
+    }
+}
+
+void World::placeHoles(const QList<int>& siteIDs)
+{
+    // Create a Source Agent for placing holes
+    HoleSourceAgent source(*this,Grid::NoFace);
+    source.setRate(1.0);
+
+    // Place the holes in the site ID list
+    for (int i = 0; i < siteIDs.size(); i++)
+    {
+        if (!source.tryToSeed(siteIDs[i]))
+        {
+            qFatal("can not inject hole at site %d",
+                   siteIDs[i]);
+        }
+    }
+
+    // Place the rest of the holes randomly if charge seeding is on
+    if (parameters().seedCharges)
+    {
+        int tries = 0;
+        int maxTries = 10*(holeGrid().volume());
+        for(int i = numHoleAgents();
+            i < maxHoleAgents();)
+        {
+            if(source.tryToSeed()) { ++i; }
+            tries++;
+            if (tries > maxTries)
+            {
+                qFatal("can not seed holes;\n\texceeded max tries(%d)",
+                       maxTries);
+            }
+        }
+    }
+}
+
+//void Simulation::initializeSites()
+//{
+//    QList<int> defects;
+//    QList<int> electrons;
+//    QList<int> holes;
+//    QList<int> traps;
+
+//    if (!parameters().configurationFile.isEmpty())
+//    {
+//        QFile file;
+//        file.setFileName(parameters().configurationFile);
+//        if (!file.open(QIODevice::ReadOnly|QIODevice::Text))
+//        {
+//            qFatal("can not open data file (%s)",
+//                   qPrintable(parameters().configurationFile));
+//        }
+//        int count = 0;
+//        while (!file.atEnd())
+//        {
+//            QString line = file.readLine().trimmed().toLower();
+//            QStringList tokens = line.split(QRegExp("\\s"),QString::SkipEmptyParts);
+//            if (!(tokens.size()%2 == 0))
+//            {
+//                qFatal("invalid number of entries on line(%d) in "
+//                       "configuration.file\n\tline: %s",
+//                       count,qPrintable(line));
+//            }
+//            for (int i= 0; i < tokens.size(); i+=2)
+//            {
+//                bool ok = false;
+//                int site = tokens[i].toInt(&ok);
+//                if (!ok)
+//                {
+//                    qFatal("cannot convert site to int on line(%d) in "
+//                           "configuration.file\n\tline: %s",
+//                           count,qPrintable(line));
+//                }
+
+//                QList<int> *pList = 0;
+//                switch (tokens[i+1][0].toAscii())
+//                {
+//                case 'e': { pList = &electrons; break; }
+//                case 'h': { pList = &holes;     break; }
+//                case 'd': { pList = &defects;   break; }
+//                case 't': { pList = &traps;     break; }
+//                default:
+//                {
+//                    qFatal("invalid type on line(%d) in "
+//                           "configuration.file; type is "
+//                           "e, h, d, or t\n\tline: %s",
+//                           count,qPrintable(line));
+//                    break;
+//                }
+//                }
+//                if (!pList->contains(site))
+//                {
+//                    pList->push_back(site);
+//                }
+//                else
+//                {
+//                    qFatal("invalid site on line(%d) in "
+//                           "configuration.file; site defined "
+//                           "previously\n\tline: %s",
+//                           count,qPrintable(line));
+//                }
+//            }
+//            count++;
+//        }
+//    }
+
+//    // Place Defects
+//    placeDefects(defects);
+
+//    // place electrons on the grid
+//    placeElectrons(electrons);
+
+//    // place holes on the grid
+//    placeHoles(holes);
+//}
 
 }

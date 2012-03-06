@@ -28,12 +28,6 @@ public:
     void equilibrated();
 
 protected:
-
-    virtual void initializeSites();
-    virtual void placeDefects(const QList<int>& siteIDs = QList<int>());
-    virtual void placeElectrons(const QList<int>& siteIDs = QList<int>());
-    virtual void placeHoles(const QList<int>& siteIDs = QList<int>());
-
     void performInjections();
     void nextTick();
     static void chargeAgentIterate(ChargeAgent * chargeAgent);

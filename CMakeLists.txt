@@ -99,7 +99,7 @@ INCLUDE_DIRECTORIES(${OPENGL_INCLUDE_DIRS})
 ENDIF(${OPENGL_FOUND})
 
 ################################################################################
-SET(COMPILE_TEST TRUE)
+SET(COMPILE_TEST FALSE)
 IF(${COMPILE_TEST})
 MESSAGE("-- Compiling Test")
 ADD_EXECUTABLE(
@@ -153,7 +153,7 @@ ENDIF(${COMPILE_LANGMUIR})
 
 ################################################################################
 
-SET(COMPILE_LANGMUIR_VIEW TRUE)
+SET(COMPILE_LANGMUIR_VIEW FALSE)
 IF(${COMPILE_LANGMUIR_VIEW})
 IF(${OPENGL_FOUND})
 MESSAGE("-- Compiling LangmuirView")
