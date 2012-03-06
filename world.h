@@ -45,6 +45,7 @@ public:
     QList<ChargeAgent*>& holes();
     QList<int>& defectSiteIDs();
     QList<int>& trapSiteIDs();
+    QList<double>& trapSitePotentials();
     boost::multi_array<double,3>& interactionEnergies();
 
     int maxElectronAgents();
@@ -52,6 +53,7 @@ public:
     int maxChargeAgents();
     int maxCharges();
     int maxDefects();
+    int maxTraps();
     int numElectronAgents();
     int numHoleAgents();
     int numChargeAgents();
@@ -82,10 +84,12 @@ private:
     QList<ChargeAgent*> m_holes;
     QList<int> m_defectSiteIDs;
     QList<int> m_trapSiteIDs;
+    QList<double> m_trapSitePotentials;
     boost::multi_array<double,3> m_interactionEnergies;
     int m_maxElectrons;
     int m_maxHoles;
     int m_maxDefects;
+    int m_maxTraps;
 
     void placeDefects(const QList<int>& siteIDs = QList<int>());
     void placeElectrons(const QList<int>& siteIDs = QList<int>());

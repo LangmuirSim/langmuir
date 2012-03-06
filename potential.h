@@ -19,9 +19,10 @@ public:
     Potential(World &world, QObject *parent=0);
     void setPotentialZero();
     void setPotentialLinear();
-    void setPotentialTraps();
-    void setPotentialFromFile(QString fileName);
-    void setPotentialFromScript(QString filename);
+    void setPotentialTraps(
+        const QList<int>& trapIDs = QList<int>(),
+        const QList<double>& trapPotentials = QList<double>()
+        );
     void updateInteractionEnergies();
     double coulombPotentialElectrons(int site);
     double coulombImageXPotentialElectrons(int site);
@@ -29,8 +30,10 @@ public:
     double coulombImageXPotentialHoles(int site);
     double coulombPotentialDefects(int site);
     double coulombImageXPotentialDefects(int site);
-    double potentialAtSite(int site, Grid *grid = 0, bool useCoulomb = false, bool useImage = false);
-
+    double potentialAtSite(int site,
+                           Grid *grid = 0,
+                           bool useCoulomb = false,
+                           bool useImage = false);
 private:
     World &m_world;
 };

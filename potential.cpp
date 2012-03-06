@@ -40,69 +40,158 @@ void Potential::setPotentialLinear()
     }
 }
 
-void Potential::setPotentialTraps()
+void Potential::setPotentialTraps(const QList<int> &trapIDs, const QList<double> &trapPotentials)
 {
-    // Do nothing if we shouldn't have traps
-    if(m_world.parameters().trapPercentage <= 0)return;
-    if(m_world.parameters().seedPercentage <  0)return;
+    if ( m_world.numTraps() != 0 )
+    {
+        qFatal("traps have already been created; can not call setPotentialTraps");
+    }
 
-    // Seed traps, if seed.percentage=100% then this is just placing traps normally
-    int progress = int(m_world.electronGrid().volume()* m_world.parameters().trapPercentage * m_world.parameters().seedPercentage);
-    while(progress >= m_world.trapSiteIDs().size())
+    int toBePlacedTotal    = m_world.maxTraps();
+    int toBePlacedForced   = trapIDs.size();
+    int toBePlacedRandomly = toBePlacedTotal - toBePlacedForced;
+    int toBePlacedSeeds    = toBePlacedRandomly * m_world.parameters().seedPercentage;
+    int toBePlacedGrown    = toBePlacedRandomly - toBePlacedSeeds;
+
+    // This happens when all traps are forced
+    if (toBePlacedRandomly <= 0)
+    {
+        toBePlacedSeeds = 0;
+        toBePlacedGrown = 0;
+    }
+
+    if (toBePlacedSeeds == 0 && toBePlacedGrown > 0)
+    {
+        toBePlacedSeeds = toBePlacedGrown;
+        toBePlacedGrown = 0;
+    }
+
+    QString message =
+            QString("parameters:               \n"
+                    "        total: %1         \n"
+                    "       forced: %2         \n"
+                    "       random: %3         \n"
+                    "       seeded: %4         \n"
+                    "        grown: %5         \n"
+                    "                          \n"
+                    " total  = forced + random \n"
+                    " random = seeded + grown  \n")
+            .arg(toBePlacedTotal,20)
+            .arg(toBePlacedForced,20)
+            .arg(toBePlacedRandomly,20)
+            .arg(toBePlacedSeeds,20)
+            .arg(toBePlacedGrown,20);
+
+    if (toBePlacedTotal < 0 ||
+            toBePlacedForced < 0 ||
+            toBePlacedRandomly < 0 ||
+            toBePlacedSeeds < 0 ||
+            toBePlacedGrown < 0 ||
+            toBePlacedForced > toBePlacedTotal ||
+            toBePlacedRandomly > toBePlacedTotal ||
+            toBePlacedSeeds > toBePlacedTotal ||
+            toBePlacedGrown > toBePlacedTotal)
+    {
+        qFatal("invalid trap %s",qPrintable(message));
+    }
+
+    if ( toBePlacedForced > 0 &&
+         trapPotentials.size() != 0 &&
+         trapPotentials.size() != trapIDs.size() )
+    {
+        qFatal("invalid trap %s\n forced number of ids (%d) "
+               "does not match forced number of passed "
+               "potentials (%d)",
+               qPrintable(message),
+               trapIDs.size(),
+               trapPotentials.size());
+    }
+
+    // We do not alter the grid potential until we are done
+    QList<double> potentials;
+    QList<int>         traps;
+
+    // First, place the forced traps
+    for (int i = 0; i < toBePlacedForced; i++)
+    {
+        if (trapPotentials.size() != 0)
+        {
+            potentials.push_back(trapPotentials.at(i));
+        }
+        else
+        {
+            potentials.push_back(m_world.parameters().trapPotential);
+        }
+        traps.push_back(trapIDs.at(i));
+    }
+
+    // Now place traps randomly
+    QList<double> randomPotentials;
+    QList<int>    randomIDs;
+
+    // Place the seeds
+    int progress = 0;
+    while (progress < toBePlacedSeeds)
     {
         int s = m_world.randomNumberGenerator().integer(0, m_world.electronGrid().volume()-1);
-
-        if(! m_world.trapSiteIDs().contains(s))
+        if ( ! randomIDs.contains(s) && ! traps.contains(s) )
         {
-            m_world.electronGrid().addToPotential(s, m_world.parameters().trapPotential);
-            m_world.holeGrid().addToPotential(s, -1*m_world.parameters().trapPotential);
-            m_world.trapSiteIDs().push_back(s);
+            randomIDs.push_back(s);
+            randomPotentials.push_back(m_world.parameters().trapPotential);
+            ++progress;
         }
     }
 
-    // Do not grow traps if we aren't growing hetergeneous traps.
-    if(m_world.parameters().trapPercentage <= 0)return;
-    if(m_world.parameters().seedPercentage <= 0 ||
-         m_world.parameters().seedPercentage == 1)return;
-    progress = int(m_world.electronGrid().volume()* m_world.parameters().trapPercentage);
-    while(progress >= m_world.trapSiteIDs().size())
+    // Place the grown (if 0, does nothing)
+    progress = 0;
+    while (progress < toBePlacedGrown)
     {
-        int trapSeedIndex               = m_world.randomNumberGenerator().integer(0, m_world.trapSiteIDs().size()-1);
-        int trapSeedSite                = m_world.trapSiteIDs().at(trapSeedIndex);
+        int trapSeedIndex               = m_world.randomNumberGenerator().integer(0, randomIDs.size()-1);
+        int trapSeedSite                = randomIDs.at(trapSeedIndex);
         QVector<int> trapSeedNeighbors  = m_world.electronGrid().neighborsSite(trapSeedSite);
 
         int newTrapIndex                = m_world.randomNumberGenerator().integer(0, trapSeedNeighbors.size()-1);
         int newTrapSite                 = trapSeedNeighbors[newTrapIndex];
         if(  m_world.electronGrid().agentType(newTrapSite)!= Agent::Source  &&
-             m_world.electronGrid().agentType(newTrapSite)!= Agent::Source  &&
-             m_world.electronGrid().agentType(newTrapSite)!= Agent::Drain   &&
-             m_world.electronGrid().agentType(newTrapSite)!= Agent::Drain   &&
-           ! m_world.trapSiteIDs().contains(newTrapSite))
+             m_world.electronGrid().agentType(newTrapSite)!= Agent::Drain  &&
+             m_world.holeGrid().agentType(newTrapSite)!= Agent::Source   &&
+             m_world.holeGrid().agentType(newTrapSite)!= Agent::Drain   &&
+             ! randomIDs.contains(newTrapSite) &&
+             ! traps.contains(newTrapSite) )
         {
-            m_world.electronGrid().addToPotential(newTrapSite, m_world.parameters().trapPotential);
-            m_world.holeGrid().addToPotential(newTrapSite, -1*m_world.parameters().trapPotential);
-            m_world.trapSiteIDs().push_back(newTrapSite);
+            randomIDs.push_back(newTrapSite);
+            randomPotentials.push_back(m_world.parameters().trapPotential);
+            ++progress;
         }
     }
+
+    // Apply a deviation to the trap energies (only the randomly generated ones)
     if(abs(m_world.parameters().gaussianStdev)> 0)
     {
-        for(int i = 0; i < m_world.trapSiteIDs().size(); i++)
+        for(int i = 0; i < randomIDs.size(); i++)
         {
-            int s = m_world.trapSiteIDs().at(i);
             double v = m_world.randomNumberGenerator().normal(0, m_world.parameters().gaussianStdev);
-            m_world.electronGrid().addToPotential(s, v);
-            m_world.holeGrid().addToPotential(s, -1*v);
+            randomPotentials[i] = randomPotentials[i] + v;
         }
     }
-}
 
-void Potential::setPotentialFromFile(QString fileName)
-{
-}
+    // Save the trap ids and potentials
+    for (int i = 0; i < randomIDs.size(); i++)
+    {
+        traps.push_back(randomIDs.at(i));
+        potentials.push_back(randomPotentials.at(i));
+    }
+    m_world.trapSiteIDs() = traps;
+    m_world.trapSitePotentials() = potentials;
 
-void Potential::setPotentialFromScript(QString filename)
-{
-    qFatal("setPotentialFromScript not implemented!");
+    // Now update the grids
+    for (int i = 0; i < traps.size(); i++)
+    {
+        int s = traps.at(i);
+        double v = potentials.at(i);
+        m_world.electronGrid().addToPotential(s,v);
+        m_world.holeGrid().addToPotential(s,v);
+    }
 }
 
 void Potential::updateInteractionEnergies()

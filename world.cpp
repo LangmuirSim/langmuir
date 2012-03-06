@@ -41,6 +41,9 @@ World::World(SimulationParameters &par, QObject *parent)
     // Calculate the max number of electrons
     m_maxDefects = parameters().defectPercentage*double(electronGrid().volume());
 
+    // Calculate the max number of traps
+    m_maxTraps = parameters().trapPercentage*double(electronGrid().volume());
+
     // Create Potential Calculator
     m_potential = new Potential(refWorld, this);
 
@@ -145,6 +148,11 @@ World::World(SimulationParameters &par, QObject *parent)
     {
         opencl().toggleOpenCL(false);
     }
+
+//    saveCheckpointFile();
+//    loadCheckpointFile();
+
+//    qFatal("done");
 }
 
 World::~World()
@@ -251,6 +259,11 @@ QList<int>& World::trapSiteIDs()
     return m_trapSiteIDs;
 }
 
+QList<double>& World::trapSitePotentials()
+{
+    return m_trapSitePotentials;
+}
+
 boost::multi_array<double,3>& World::interactionEnergies()
 {
     return m_interactionEnergies;
@@ -269,6 +282,11 @@ int World::maxHoleAgents()
 int World::maxDefects()
 {
     return m_maxDefects;
+}
+
+int World::maxTraps()
+{
+    return m_maxTraps;
 }
 
 int World::maxChargeAgents()
@@ -503,7 +521,7 @@ void World::checkDataStream(QDataStream& stream, const QString& message)
 void World::placeDefects(const QList<int>& siteIDs)
 {
     int count = numDefects();
-    int toBePlaced = maxDefects()-count;
+    int toBePlaced = maxDefects() - count;
     int toBePlacedUsingIDs = siteIDs.size();
     int toBePlacedRandomly = toBePlaced - siteIDs.size();
 
