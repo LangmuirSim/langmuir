@@ -65,6 +65,8 @@ public:
     double percentElectronAgents();
 
     void saveCheckpointFile();
+    void loadCheckpointFile();
+    void checkDataStream(QDataStream& stream, const QString& message = "");
 private:
     QList<SourceAgent*> m_sources;
     QList<DrainAgent*> m_drains;

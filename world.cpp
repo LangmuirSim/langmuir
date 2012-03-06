@@ -371,23 +371,133 @@ void World::saveCheckpointFile()
     stream.setFloatingPointPrecision(QDataStream::DoublePrecision);
 
     // Electrons
-    stream << numElectronAgents();
+    stream << qint64(numElectronAgents());
     for (int i = 0; i < numElectronAgents(); i++) { stream << qint64(m_electrons.at(i)->getCurrentSite()); }
 
     // Holes
-    stream << numHoleAgents();
+    stream << qint64(numHoleAgents());
     for (int i = 0; i < numHoleAgents(); i++) { stream << qint64(m_holes.at(i)->getCurrentSite()); }
 
     // Defects
-    stream << numDefects();
+    stream << qint64(numDefects());
     for (int i = 0; i < numDefects(); i++) { stream << qint64(m_defectSiteIDs.at(i)); }
 
     // Traps
-    stream << numTraps();
+    stream << qint64(numTraps());
     for (int i = 0; i < numTraps(); i++) { stream << qint64(m_trapSiteIDs.at(i)); }
 
     // Close File
     handle.close();
+}
+
+void World::loadCheckpointFile()
+{
+    // Create binary file
+    QString name = "/home/adam/Desktop/out.bin";
+    QFile handle(name);
+    if (!handle.open(QIODevice::ReadOnly))
+    {
+        qFatal("can not open checkpoint file: %s",qPrintable(name));
+    }
+    QDataStream stream(&handle);
+    stream.setVersion(QDataStream::Qt_4_7);
+    stream.setFloatingPointPrecision(QDataStream::DoublePrecision);
+
+    // Create data
+    QList<qint64> electrons;
+    QList<qint64> holes;
+    QList<qint64> defects;
+    QList<qint64> traps;
+
+    // Electrons
+    {
+        qint64 num_electrons = 0;
+        stream >> num_electrons;
+        checkDataStream(stream,"expected number of electrons");
+        for (int i = 0; i < num_electrons; i++)
+        {
+            qint64 value;
+            stream >> value;
+            checkDataStream(stream,QString("expected electron %1 site id").arg(i));
+            electrons.push_back(value);
+        }
+    }
+
+    // Holes
+    {
+        qint64 num_holes = 0;
+        stream >> num_holes;
+        checkDataStream(stream,"expected number of holes");
+        for (int i = 0; i < num_holes; i++)
+        {
+            qint64 value;
+            stream >> value;
+            checkDataStream(stream,QString("expected hole %1 site id").arg(i));
+            holes.push_back(value);
+        }
+    }
+
+    // Defects
+    {
+        qint64 num_defects = 0;
+        stream >> num_defects;
+        checkDataStream(stream,"expected number of defects");
+        for (int i = 0; i < num_defects; i++)
+        {
+            qint64 value;
+            stream >> value;
+            checkDataStream(stream,QString("expected defect %1 site id").arg(i));
+            defects.push_back(value);
+        }
+    }
+
+    // Traps
+    {
+        qint64 num_traps = 0;
+        stream >> num_traps;
+        checkDataStream(stream,"expected number of traps");
+        for (int i = 0; i < num_traps; i++)
+        {
+            qint64 value;
+            stream >> value;
+            checkDataStream(stream,QString("expected trap %1 site id").arg(i));
+            traps.push_back(value);
+        }
+    }
+
+    // Close file
+    handle.close();
+
+    qDebug() << electrons.size();
+    qDebug() << holes.size();
+    qDebug() << defects.size();
+    qDebug() << traps.size();
+}
+
+void World::checkDataStream(QDataStream& stream, const QString& message)
+{
+    switch (stream.status())
+    {
+    case QDataStream::Ok:
+    {
+        return;
+        break;
+    }
+    case QDataStream::ReadPastEnd:
+    {
+        QString error = "binary stream read error: QDataStream::ReadPastEnd";
+        if (!message.isEmpty()) { error += QString("\n\t%1").arg(message); }
+        qFatal("%s",qPrintable(error));
+        break;
+    }
+    case QDataStream::ReadCorruptData:
+    {
+        QString error = "binary stream read error: QDataStream::ReadCorruptData";
+        if (!message.isEmpty()) { error += QString("\n\t%1").arg(message); }
+        qFatal("%s",qPrintable(error));
+        break;
+    }
+    }
 }
 
 void World::placeDefects(const QList<int>& siteIDs)
