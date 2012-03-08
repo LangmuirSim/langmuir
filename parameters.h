@@ -25,13 +25,13 @@ struct SimulationParameters
     quint64 randomSeed;
 
     //! the number of sites per layer, at least one
-    int gridZ;
+    qint32 gridZ;
 
     //! the number of sites along the device width, at least one
-    int gridY;
+    qint32 gridY;
 
     //! the number of sites along the device length, at least one
-    int gridX;
+    qint32 gridX;
 
     //! turn on Coulomb interactions between ChargeAgents
     bool coulombCarriers;
@@ -40,7 +40,7 @@ struct SimulationParameters
     bool coulombDefects;
 
     //! the charge of defect sites
-    int defectsCharge;
+    qint32 defectsCharge;
 
     //! output trajectory file every interationsPrint
     bool outputXyz;
@@ -70,16 +70,16 @@ struct SimulationParameters
     bool imageTraps;
 
     //! if Langmuir, how often to output; if LangmuirView, how many steps between rendering
-    int iterationsPrint;
+    qint32 iterationsPrint;
 
     //! number of simulation steps after equilibration
-    int iterationsReal;
+    qint32 iterationsReal;
 
     //! number of significant figures used for doubles in output
-    int outputPrecision;
+    qint32 outputPrecision;
 
     //! width of columns in output, ignored in certain files, like trajectory files
-    int outputWidth;
+    qint32 outputWidth;
 
      //! the output directory, defaults to the current working directory
     QString outputPath;
@@ -88,88 +88,88 @@ struct SimulationParameters
     QString outputStub;
 
     //! the percent of the grid that is reserved for electrons, between 0 and 1
-    double electronPercentage;
+    qreal electronPercentage;
 
     //! the percent of the grid that is reserved for holes, between 0 and 1
-    double holePercentage;
+    qreal holePercentage;
 
     //! if true, place charges randomly before the simulation starts
     bool seedCharges;
 
     //! the percent of the grid that is reserved for electrons, between 0 and 1
-    double defectPercentage;
+    qreal defectPercentage;
 
     //! the percent of the grid that is reserved for traps, between 0 and 1
-    double trapPercentage;
+    qreal trapPercentage;
 
     //! the potential of traps
-    double trapPotential;
+    qreal trapPotential;
 
     //! the standard deviation of trap sites
-    double gaussianStdev;
+    qreal gaussianStdev;
 
     //! the percent of the traps to be placed and grown upon to form islands
-    double seedPercentage;
+    qreal seedPercentage;
 
     //! the potential on the right side of the grid, used in setting up an electric field
-    double voltageRight;
+    qreal voltageRight;
 
     //! the potential on the left side of the grid, used in setting up an electric field
-    double voltageLeft;
+    qreal voltageLeft;
 
     //! the temperature used in the boltzmann factor
-    double temperatureKelvin;
+    qreal temperatureKelvin;
 
     //! the rate at which all sources inject charges
-    double sourceRate;
+    qreal sourceRate;
 
     //! the rate at which all drains accept chargew
-    double drainRate;
+    qreal drainRate;
 
     //! if true, try to use OpenCL to speed up Coulomb interaction calculations
     bool useOpenCL;
 
     //! the x size of OpenCL 3DRange kernel work groups - only needed if using SimulationParameters::outputCoulomb
-    int workX;
+    qint32 workX;
 
     //! the y size of OpenCL 3DRange kernel work groups - only needed if using SimulationParameters::outputCoulomb
-    int workY;
+    qint32 workY;
 
     //! the z size of OpenCL 3DRange kernel work groups - only needed if using SimulationParameters::outputCoulomb
-    int workZ;
+    qint32 workZ;
 
     //! the size of OpenCL 1DRange kernel work groups
-    int workSize;
+    qint32 workSize;
 
     //! physical constant, the boltzmann constant
-    double boltzmannConstant;
+    qreal boltzmannConstant;
 
     //! physical constant, the dielectic constant
-    double dielectricConstant;
+    qreal dielectricConstant;
 
     //! physical constant, the elementary charge
-    double elementaryCharge;
+    qreal elementaryCharge;
 
     //! physical constant, the permittivity of free spece
-    double permittivitySpace;
+    qreal permittivitySpace;
 
     //! size constant, the size associated with grid sites (~1nm)
-    double gridFactor;
+    qreal gridFactor;
 
     //! the cut off for Coulomb interations
-    int electrostaticCutoff;
+    qint32 electrostaticCutoff;
 
     //! a compilation of physical constants
-    double electrostaticPrefactor;
+    qreal electrostaticPrefactor;
 
     //! a compilation of physical constants
-    double inverseKT;
+    qreal inverseKT;
 
     //! if true, OpenCL can be used on this platform
     bool okCL;
 
     //! the current step of the simulation
-    unsigned int currentStep;
+    quint32 currentStep;
 
     //! the time this simulation started
     QDateTime simulationStart;
