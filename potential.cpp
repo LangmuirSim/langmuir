@@ -349,7 +349,7 @@ double Potential::potentialAtSite(int site, Grid *grid, bool useCoulomb, bool us
     {
         p1 += coulombPotentialElectrons(site);
         p1 += coulombPotentialHoles(site);
-        if(m_world.parameters().coulombDefects)
+        if(m_world.parameters().defectsCharge != 0)
         {
             p1 += coulombPotentialDefects(site);
         }
@@ -358,7 +358,7 @@ double Potential::potentialAtSite(int site, Grid *grid, bool useCoulomb, bool us
     {
         p1 += coulombImageXPotentialElectrons(site);
         p1 += coulombImageXPotentialHoles(site);
-        if(m_world.parameters().coulombDefects)
+        if(m_world.parameters().defectsCharge != 0)
         {
             p1 += coulombImageXPotentialDefects(site);
         }

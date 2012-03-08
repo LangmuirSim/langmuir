@@ -203,7 +203,7 @@ double ChargeAgent::coulombInteraction(int newSite)
         p2 -= m_world.interactionEnergies()[1][0][0] * m_charge;
 
         // Charged defects
-        if(m_world.parameters().coulombDefects)
+        if(m_world.parameters().defectsCharge != 0)
         {
             p1 += m_world.potential().coulombPotentialDefects(m_site);
             p2 += m_world.potential().coulombPotentialDefects(newSite);

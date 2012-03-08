@@ -285,7 +285,7 @@ void OpenClHelper::launchCoulombKernel1()
         totalCharges += m_world.holes().size();
 
         //copy defects
-        if(m_world.parameters().coulombDefects)
+        if(m_world.parameters().defectsCharge != 0)
         {
             for(int i = 0; i < m_world.defectSiteIDs().size(); i++)
             {
@@ -342,7 +342,7 @@ void OpenClHelper::launchCoulombKernel2()
         totalCharges += m_world.holes().size();
 
         //copy defects
-        if(m_world.parameters().coulombDefects)
+        if(m_world.parameters().defectsCharge != 0)
         {
             for(int i = 0; i < m_world.defectSiteIDs().size(); i++)
             {

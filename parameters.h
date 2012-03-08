@@ -36,9 +36,6 @@ struct SimulationParameters
     //! turn on Coulomb interactions between ChargeAgents
     bool coulombCarriers;
 
-    //! turn on Coulomb interactions between ChargeAgents and Defects
-    bool coulombDefects;
-
     //! the charge of defect sites
     qint32 defectsCharge;
 
@@ -186,7 +183,6 @@ struct SimulationParameters
         gridX                  (128),
 
         coulombCarriers        (false),
-        coulombDefects         (false),
         defectsCharge          (-1),
 
         outputXyz              (false),
@@ -334,6 +330,11 @@ inline void check(SimulationParameters& par)
     if (par.temperatureKelvin < 0.0)
     {
         qFatal("temperature.kelvin < 0.0");
+    }
+
+    if (par.defectsCharge != 0 && ! par.coulombCarriers)
+    {
+        qFatal("defects.charge != 0 && coulomb.carriers = false");
     }
 }
 

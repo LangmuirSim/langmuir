@@ -107,10 +107,6 @@ void Parser::describeParameters()
             createVariable("coulomb.carriers",m_parameters.coulombCarriers,
              "if true, calcualte Coulomb interactions between carriers");
 
-            createVariable("coulomb.defects",m_parameters.coulombDefects,
-             "if true, calculate Coulomb interactions between defects and "
-             "carriers");
-
             createVariable("defects.charge",m_parameters.defectsCharge,
              "the chrage of charged defects");
 
