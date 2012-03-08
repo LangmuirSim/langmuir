@@ -15,9 +15,9 @@ private:
     Q_DISABLE_COPY(Random)
 
 public:
-    Random(int seed=0, QObject *parent=0);
+    Random(quint64 seed=0, QObject *parent=0);
     ~Random();
-    unsigned int seed();
+    quint64 seed();
     double random();
     double range(const double low=0.0, const double high=1.0);
     double normal(const double mean, const double sigma);
@@ -35,7 +35,7 @@ public:
 private:
     boost::mt19937 *twister;
     boost::variate_generator<boost::mt19937&, boost::uniform_01<double> >* generator01;
-    unsigned int m_seed;
+    quint64 m_seed;
 };
 
 }

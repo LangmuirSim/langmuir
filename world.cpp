@@ -294,7 +294,7 @@ void World::saveCheckpointFile(const QString &name)
     for (int i = 0; i < numTraps(); i++) { stream << m_trapSitePotentials.at(i); }
 
     // Random Seed
-    stream << quint32(parameters().randomSeed);
+    stream << quint64(parameters().randomSeed);
 
     // Current Step
     stream << quint32(parameters().currentStep);

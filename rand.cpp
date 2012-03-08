@@ -4,7 +4,7 @@
 namespace Langmuir
 {
 
-Random::Random(int seed, QObject *parent) : QObject(parent)
+Random::Random(quint64 seed, QObject *parent) : QObject(parent)
 {
     m_seed = 0;
     if(seed == 0)
@@ -27,7 +27,7 @@ Random::~Random()
     delete generator01;
 }
 
-unsigned int Random::seed()
+quint64 Random::seed()
 {
     return m_seed;
 }
