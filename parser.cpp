@@ -233,10 +233,13 @@ SimulationParameters& Parser::parameters()
 
 void Parser::saveParameters()
 {
-    OutputStream stream("%path/%stub.inp",&m_parameters);
-    foreach(AbstractVariable *var, m_printable)
+    if (m_parameters.outputIsOn)
     {
-        stream << *var;
+        OutputStream stream("%path/%stub.inp",&m_parameters);
+        foreach(AbstractVariable *var, m_printable)
+        {
+            stream << *var;
+        }
     }
 }
 
