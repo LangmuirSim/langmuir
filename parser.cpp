@@ -163,7 +163,7 @@ void Parser::describeParameters()
              "the total percentage of positive charges to place");
 
             createVariable("seed.charges",m_parameters.seedCharges,
-             "place charges randomly at start of the simulation");
+             "place charges this percent of the charges randomly at start of the simulation");
 
             createVariable("defect.percentage",m_parameters.defectPercentage,
              "the total percentage of defects to palce");

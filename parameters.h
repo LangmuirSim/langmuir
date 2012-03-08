@@ -91,7 +91,7 @@ struct SimulationParameters
     qreal holePercentage;
 
     //! if true, place charges randomly before the simulation starts
-    bool seedCharges;
+    qreal seedCharges;
 
     //! the percent of the grid that is reserved for electrons, between 0 and 1
     qreal defectPercentage;
@@ -205,7 +205,7 @@ struct SimulationParameters
 
         electronPercentage     (0.01),
         holePercentage         (0.00),
-        seedCharges            (false),
+        seedCharges            (0.00),
         defectPercentage       (0.00),
         trapPercentage         (0.00),
         trapPotential          (0.10),
@@ -320,6 +320,10 @@ inline void check(SimulationParameters& par)
     if (par.drainRate < 0.0 || par.drainRate > 1.0 )
     {
         qFatal("drain.rate(%f) < 0 || > 1.0",par.drainRate);
+    }
+    if (par.seedCharges < 0.0 || par.seedCharges > 1.0 )
+    {
+        qFatal("seed.charges(%f) < 0 || > 1.0",par.seedCharges);
     }
 
     // other

@@ -630,12 +630,12 @@ void World::placeElectrons(const QList<int>& siteIDs)
     }
 
     // Place the rest of the electrons randomly if charge seeding is on
-    if (parameters().seedCharges)
+    if (parameters().seedCharges != 0)
     {
         int tries = 0;
         int maxTries = 10*(electronGrid().volume());
         for(int i = numElectronAgents();
-            i < maxElectronAgents();)
+            i < maxElectronAgents() * parameters().seedCharges;)
         {
             if(source.tryToSeed()) { ++i; }
             tries++;
@@ -665,12 +665,12 @@ void World::placeHoles(const QList<int>& siteIDs)
     }
 
     // Place the rest of the holes randomly if charge seeding is on
-    if (parameters().seedCharges)
+    if (parameters().seedCharges != 0)
     {
         int tries = 0;
         int maxTries = 10*(holeGrid().volume());
         for(int i = numHoleAgents();
-            i < maxHoleAgents();)
+            i < maxHoleAgents() * parameters().seedCharges;)
         {
             if(source.tryToSeed()) { ++i; }
             tries++;

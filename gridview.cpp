@@ -48,7 +48,7 @@ GridViewGL::GridViewGL(const QGLFormat &format, QWidget * parent, QString input)
     {
         //Adjust some of Langmuir's default parameters so things aren't too boring
         pPar.iterationsPrint = 10;
-        pPar.seedCharges = true;
+        pPar.seedCharges = 1.00;
         pPar.electronPercentage = 0.02;
         pPar.voltageRight = 10.0;
         pPar.simulationStart = QDateTime::currentDateTime();
