@@ -1,16 +1,22 @@
 #include "parser.h"
-#include <QDebug>
+#include "output.h"
 
 namespace Langmuir
 {
 
 Parser::Parser(QObject *parent) :
     QObject(parent),
-    m_description_sim("Simulation Options"),
-    m_description_gui       ("GUI Options"       ),
-    m_description           ("Langmuir Options"  )
+    m_description("Langmuir Options")
 {
     describeParameters();
+}
+
+Parser::~Parser()
+{
+    foreach(AbstractVariable *var, m_printable)
+    {
+        delete var;
+    }
 }
 
 void Parser::parse(int &argc, char **argv)
@@ -71,144 +77,146 @@ void Parser::describeParameters()
 {
     try
     {
-    m_description_sim.add_options()
+            m_description.add_options()
+                ("help",
+                 "produce help message");
 
-            ("help",
-             "produce help message")
+            createVariable("input.file", m_parameters.inputFile,
+             "input file name");
 
-            ("input.file", boost::program_options::value<QString>(&m_parameters.inputFile),
-             "input file name")
+            createVariable("use.checkpoint", m_parameters.checkFile,
+             "checkpoint file name");
 
-            ("use.checkpoint", boost::program_options::value<QString>(&m_parameters.checkFile),
-             "checkpoint file name")
+            createVariable("simulation.type",m_parameters.simulationType,
+             "set up the sources and drains a certain way; transistor or "
+             "solarcell");
 
-            ("simulation.type",boost::program_options::value<QString>(&m_parameters.simulationType),
-             "set up the sources and drains a certain way; transistor or solarcell")
+            createVariable("random.seed",m_parameters.randomSeed,
+             "if 0, use the current time; otherwise seed the random number "
+             "generater to make it predictable");
 
-            ("random.seed",boost::program_options::value<unsigned int>(&m_parameters.randomSeed),
-             "if 0, use the current time; otherwise seed the random number generater to make it predictable")
+            createVariable("grid.z",m_parameters.gridZ,
+             "the height of the device");
 
-            ("grid.z",boost::program_options::value<int>(&m_parameters.gridZ),
-             "the height of the device")
+            createVariable("grid.y",m_parameters.gridY,
+             "the width of the device");
 
-            ("grid.y",boost::program_options::value<int>(&m_parameters.gridY),
-             "the width of the device")
+            createVariable("grid.x",m_parameters.gridX,
+             "the length of the device");
 
-            ("grid.x",boost::program_options::value<int>(&m_parameters.gridX),
-             "the length of the device")
+            createVariable("coulomb.carriers",m_parameters.coulombCarriers,
+             "if true, calcualte Coulomb interactions between carriers");
 
-            ("coulomb.carriers",boost::program_options::value<bool>(&m_parameters.coulombCarriers),
-             "if true, calcualte Coulomb interactions between carriers")
+            createVariable("coulomb.defects",m_parameters.coulombDefects,
+             "if true, calculate Coulomb interactions between defects and "
+             "carriers");
 
-            ("coulomb.defects",boost::program_options::value<bool>(&m_parameters.coulombDefects),
-             "if true, calculate Coulomb interactions between defects and carriers")
+            createVariable("defects.charge",m_parameters.defectsCharge,
+             "the chrage of charged defects");
 
-            ("defects.charge",boost::program_options::value<int>(&m_parameters.defectsCharge),
-             "the chrage of charged defects")
+            createVariable("output.xyz",m_parameters.outputXyz,
+             "output trajector frames every iterations.print");
 
-            ("output.xyz",boost::program_options::value<bool>(&m_parameters.outputXyz),
-             "output trajector frames every iterations.print")
+            createVariable("output.ids.on.delete",m_parameters.outputIdsOnDelete,
+             "output carrier lifetime and pathlength when carriers are deleted");
 
-            ("output.ids.on.delete",boost::program_options::value<bool>(&m_parameters.outputIdsOnDelete),
-             "output carrier lifetime and pathlength when carriers are deleted")
+            createVariable("output.coulomb",m_parameters.outputCoulomb,
+             "output the coulomb potential every iterations.print "
+             "(expensive and slow!)");
 
-            ("output.coulomb",boost::program_options::value<bool>(&m_parameters.outputCoulomb),
-             "output the coulomb potential every iterations.print (expensive and slow!)")
+            createVariable("output.potential",m_parameters.outputPotential,
+             "output the potential of the grid including traps");
 
-            ("output.potential",boost::program_options::value<bool>(&m_parameters.outputPotential),
-             "output the potential of the grid (including traps)")
+            createVariable("image.defects",m_parameters.imageDefects,
+             "output image of the defects");
 
-            ("image.defects",boost::program_options::value<bool>(&m_parameters.imageDefects),
-             "output image of the defects")
+            createVariable("image.traps",m_parameters.imageTraps,
+             "output image of the traps");
 
-            ("image.traps",boost::program_options::value<bool>(&m_parameters.imageTraps),
-             "output image of the traps")
+            createVariable("output.is.on",m_parameters.outputIsOn,
+             "if false, produce no output");
 
-            ("output.is.on",boost::program_options::value<bool>(&m_parameters.outputIsOn),
-             "if false, produce no output")
+            createVariable("output.append",m_parameters.outputAppend,
+             "if true, append to data files when they already exist");
 
-            ("output.append",boost::program_options::value<bool>(&m_parameters.outputAppend),
-             "if true, append to data files when they already exist")
+            createVariable("output.backup",m_parameters.outputBackup,
+             "if true, backup files if they already exist");
 
-            ("output.backup",boost::program_options::value<bool>(&m_parameters.outputBackup),
-             "if true, backup files if they already exist")
+            createVariable("iterations.print",m_parameters.iterationsPrint,
+             "how often to print to the screen");
 
-            ("iterations.print",boost::program_options::value<int>(&m_parameters.iterationsPrint),
-             "how often to print to the screen")
+            createVariable("iterations.real",m_parameters.iterationsReal,
+             "the number of production steps");
 
-            ("iterations.real",boost::program_options::value<int>(&m_parameters.iterationsReal),
-             "the number of production steps")
+            createVariable("output.precision",m_parameters.outputPrecision,
+             "the precision of doubles in certain output files");
 
-            ("output.precision",boost::program_options::value<int>(&m_parameters.outputPrecision),
-             "the precision of doubles in certain output files")
+            createVariable("output.width",m_parameters.outputWidth,
+             "the width of columns in certain output files");
 
-            ("output.width",boost::program_options::value<int>(&m_parameters.outputWidth),
-             "the width of columns in certain output files")
+            createVariable("output.path",m_parameters.outputPath,
+             "the default path for output files");
 
-            ("output.path",boost::program_options::value<QString>(&m_parameters.outputPath),
-             "the default path for output files")
+            createVariable("output.stub",m_parameters.outputStub,
+             "how to name output files, ex: out.dat, stub = out");
 
-            ("output.stub",boost::program_options::value<QString>(&m_parameters.outputStub),
-             "how to name output files (ex: out.dat, stub = out)")
+            createVariable("electron.percentage",m_parameters.electronPercentage,
+             "the total percentage of negative charges to place");
 
-            ("electron.percentage",boost::program_options::value<double>(&m_parameters.electronPercentage),
-             "the total percentage of negative charges to place")
+            createVariable("hole.percentage",m_parameters.holePercentage,
+             "the total percentage of positive charges to place");
 
-            ("hole.percentage",boost::program_options::value<double>(&m_parameters.holePercentage),
-             "the total percentage of positive charges to place")
+            createVariable("seed.charges",m_parameters.seedCharges,
+             "place charges randomly at start of the simulation");
 
-            ("seed.charges",boost::program_options::value<bool>(&m_parameters.seedCharges),
-             "place charges randomly at start of the simulation")
+            createVariable("defect.percentage",m_parameters.defectPercentage,
+             "the total percentage of defects to palce");
 
-            ("defect.percentage",boost::program_options::value<double>(&m_parameters.defectPercentage),
-             "the total percentage of defects to palce")
+            createVariable("trap.percentage",m_parameters.trapPercentage,
+             "the total percentage of traps to place");
 
-            ("trap.percentage",boost::program_options::value<double>(&m_parameters.trapPercentage),
-             "the total percentage of traps to place")
+            createVariable("trap.potential",m_parameters.trapPotential,
+             "the potential of trap sites");
 
-            ("trap.potential",boost::program_options::value<double>(&m_parameters.trapPotential),
-             "the potential of trap sites")
+            createVariable("gaussian.stdev",m_parameters.gaussianStdev,
+             "add a gaussian spread in the potential of traps");
 
-            ("gaussian.stdev",boost::program_options::value<double>(&m_parameters.gaussianStdev),
-             "add a gaussian spread in the potential of traps (trap.potential)")
+            createVariable("seed.percentage",m_parameters.seedPercentage,
+             "the percent of traps to place initially, to which the remaining "
+             "traps will grow around");
 
-            ("seed.percentage",boost::program_options::value<double>(&m_parameters.seedPercentage),
-             "the percent of traps to place initially, to which the remaining traps will grow around")
+            createVariable("voltage.right",m_parameters.voltageRight,
+             "the potential of the right right x=grid.x side of"
+             " the device");
 
-            ("voltage.right",boost::program_options::value<double>(&m_parameters.voltageRight),
-             "the potential of the right right (x=grid.x) side of the device")
+            createVariable("voltage.left",m_parameters.voltageLeft,
+             "the potential of the left x=0 side of the device");
 
-            ("voltage.left",boost::program_options::value<double>(&m_parameters.voltageLeft),
-             "the potential of the left (x=0) side of the device")
+            createVariable("temperature.kelvin",m_parameters.temperatureKelvin,
+             "the temperature used in the Boltzmann factor");
 
-            ("temperature.kelvin",boost::program_options::value<double>(&m_parameters.temperatureKelvin),
-             "the temperature used in the Boltzmann factor")
+            createVariable("source.rate",m_parameters.sourceRate,
+             "the probability at which all sources inject charges");
 
-            ("source.rate",boost::program_options::value<double>(&m_parameters.sourceRate),
-             "the probability at which all sources inject charges")
+            createVariable("drain.rate",m_parameters.drainRate,
+             "the probability at which all drains accept charges");
 
-            ("drain.rate",boost::program_options::value<double>(&m_parameters.drainRate),
-             "the probability at which all drains accept charges")
+            createVariable("use.opencl",m_parameters.useOpenCL,
+             "turn on OpenCL to speed up Coulomb interactions");
 
-            ("use.opencl",boost::program_options::value<bool>(&m_parameters.useOpenCL),
-             "turn on OpenCL to speed up Coulomb interactions")
+            createVariable("work.x",m_parameters.workX,
+             "size of work groups for OpenCL kernel 3D");
 
-            ("work.x",boost::program_options::value<int>(&m_parameters.workX),
-             "size of work groups for OpenCL kernel 3D")
+            createVariable("work.y",m_parameters.workY,
+             "size of work groups for OpenCL kernel 3D");
 
-            ("work.y",boost::program_options::value<int>(&m_parameters.workY),
-             "size of work groups for OpenCL kernel 3D")
+            createVariable("work.z",m_parameters.workZ,
+             "size of work groups for OpenCL kernel 3D");
 
-            ("work.z",boost::program_options::value<int>(&m_parameters.workZ),
-             "size of work groups for OpenCL kernel 3D")
-
-            ("work.size",boost::program_options::value<int>(&m_parameters.workSize),
-             "size of work groups for OpenCL kernel 1D")
-            ;
+            createVariable("work.size",m_parameters.workSize,
+             "size of work groups for OpenCL kernel 1D");
 
     m_description_pos.add("input.file",1);
-
-    m_description.add(m_description_sim).add(m_description_gui);
     }
     catch (std::exception& e)
     {
@@ -221,6 +229,15 @@ SimulationParameters& Parser::parameters()
 {
     check(m_parameters);
     return m_parameters;
+}
+
+void Parser::saveParameters()
+{
+    OutputStream stream("%path/%stub.inp",&m_parameters);
+    foreach(AbstractVariable *var, m_printable)
+    {
+        stream << *var;
+    }
 }
 
 }

@@ -51,7 +51,7 @@ int main (int argc, char *argv[])
     Simulation sim(world);
 
     // Save the parameters used for this simulation to a file
-    //input.saveParameters(i);
+    parser.saveParameters();
 
     // Perform production steps
     for (int j = 0; j < par.iterationsReal; j += par.iterationsPrint)
