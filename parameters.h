@@ -40,13 +40,13 @@ struct SimulationParameters
     qint32 defectsCharge;
 
     //! output trajectory file every interationsPrint
-    bool outputXyz;
+    qint32 outputXyz;
 
     //! output carrier lifetime and pathlength when they are deleted
     bool outputIdsOnDelete;
 
     //! output coulomb energy for the entire grid every iterationsPrint
-    bool outputCoulomb;
+    qint32 outputCoulomb;
 
     //! output grid potential at the start of the simulation, includes the trap potential
     bool outputPotential;
@@ -65,6 +65,9 @@ struct SimulationParameters
 
     //! output images of defects
     bool imageTraps;
+
+    //! output images of carriers (if n < 0, only at the end; if np == 0, never; if n > 0, every n * iterations.print steps)
+    qint32 imageCarriers;
 
     //! if Langmuir, how often to output; if LangmuirView, how many steps between rendering
     qint32 iterationsPrint;
@@ -185,9 +188,9 @@ struct SimulationParameters
         coulombCarriers        (false),
         defectsCharge          (-1),
 
-        outputXyz              (false),
+        outputXyz              (0),
         outputIdsOnDelete      (false),
-        outputCoulomb          (false),
+        outputCoulomb          (0),
         outputPotential        (false),
         outputIsOn             (true),
         outputBackup           (true),
@@ -195,6 +198,7 @@ struct SimulationParameters
 
         imageDefects           (false),
         imageTraps             (false),
+        imageCarriers          (0),
 
         iterationsPrint        (10),
         iterationsReal         (1000),

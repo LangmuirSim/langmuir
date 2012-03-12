@@ -111,14 +111,17 @@ void Parser::describeParameters()
              "the chrage of charged defects");
 
             createVariable("output.xyz",m_parameters.outputXyz,
-             "output trajector frames every iterations.print");
+             "output trajector frames every so many steps; if n < 0"
+             ", output at end; if n == 0, output never; if n > 0, "
+             "output every n*iterations.print");
 
             createVariable("output.ids.on.delete",m_parameters.outputIdsOnDelete,
              "output carrier lifetime and pathlength when carriers are deleted");
 
             createVariable("output.coulomb",m_parameters.outputCoulomb,
-             "output the coulomb potential every iterations.print "
-             "(expensive and slow!)");
+             "output coulomb potential every so many steps; if n < 0"
+             ", output at end; if n == 0, output never; if n > 0, "
+             "output every n*iterations.print (expensive and slow!)");
 
             createVariable("output.potential",m_parameters.outputPotential,
              "output the potential of the grid including traps");
@@ -128,6 +131,11 @@ void Parser::describeParameters()
 
             createVariable("image.traps",m_parameters.imageTraps,
              "output image of the traps");
+
+            createVariable("image.carriers",m_parameters.imageCarriers,
+             "output image of the carriers every so many steps; if n < 0"
+             ", output at end; if n == 0, output never; if n > 0, "
+             "output every n*iterations.print");
 
             createVariable("output.is.on",m_parameters.outputIsOn,
              "if false, produce no output");

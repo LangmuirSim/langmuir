@@ -75,15 +75,35 @@ void Simulation::performIterations(int nIterations)
     m_world.logger().reportFluxStream();
 
     // Output Coulomb Energy
-    if(m_world.parameters().outputCoulomb)
+    if ( m_world.parameters().outputCoulomb > 0 &&
+         m_world.parameters().currentStep %
+        (m_world.parameters().iterationsPrint *
+         m_world.parameters().outputCoulomb) == 0
+       )
     {
         m_world.opencl().launchCoulombKernel1();
         m_world.logger().saveCoulombEnergy();
     }
 
-    if(m_world.parameters().outputXyz)
+    // Output Trajectory
+    if ( m_world.parameters().outputXyz > 0 &&
+         m_world.parameters().currentStep %
+        (m_world.parameters().iterationsPrint *
+         m_world.parameters().outputXyz) == 0
+       )
     {
         m_world.logger().reportXYZStream();
+    }
+
+    // Output Image of Carriers
+    if ( m_world.parameters().imageCarriers > 0 &&
+         m_world.parameters().currentStep %
+        (m_world.parameters().iterationsPrint *
+         m_world.parameters().imageCarriers) == 0
+       )
+    {
+        m_world.logger().saveElectronImage();
+        m_world.logger().saveHoleImage();
     }
 }
 

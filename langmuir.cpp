@@ -5,6 +5,7 @@
 #include "parser.h"
 #include "writer.h"
 #include "world.h"
+#include "openclhelper.h"
 
 #include <QApplication>
 #include <QPrinter>
@@ -63,11 +64,11 @@ int main (int argc, char *argv[])
         progress( j, par.iterationsReal, begin.time().elapsed() );
 
         // Save a Checkpoint File
-        world.saveCheckpointFile();
+        if (par.outputIsOn) world.saveCheckpointFile();
     }
 
     // Save a Checkpoint File
-    world.saveCheckpointFile();
+    if (par.outputIsOn) world.saveCheckpointFile();
 
     // Print progress to the screen
     progress( par.iterationsReal, par.iterationsReal, begin.time().elapsed() );
@@ -75,6 +76,26 @@ int main (int argc, char *argv[])
 
     // The time this simulation stops
     QDateTime stop = QDateTime::currentDateTime();
+
+    // Output Trajectory
+    if (par.outputXyz == -1)
+    {
+        world.logger().reportXYZStream();
+    }
+
+    // Output Image of Carriers
+    if (par.outputCoulomb == -1)
+    {
+        world.opencl().launchCoulombKernel1();
+        world.logger().saveCoulombEnergy();
+    }
+
+    // Output Image of Carriers
+    if (par.imageCarriers == -1)
+    {
+        world.logger().saveElectronImage();
+        world.logger().saveHoleImage();
+    }
 
     // Output time
     if (par.outputIsOn)

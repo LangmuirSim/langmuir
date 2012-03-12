@@ -75,7 +75,7 @@ inline QTextStream& operator<<(QTextStream& stream, const AbstractVariable& vari
 //! function to write key=value to a QTextStream
 template <class T> inline void Variable<T>::write(QTextStream &stream) const
 {
-    stream << right  << qSetFieldWidth(30) << m_name
+    stream << left   << qSetFieldWidth(30) << m_name
            << center << qSetFieldWidth( 3) << '='
            << left   << qSetFieldWidth( 0) << m_value
            << right  << qSetFieldWidth( 0) << '\n';
@@ -84,7 +84,7 @@ template <class T> inline void Variable<T>::write(QTextStream &stream) const
 //! function to write key=value to a QTextStream for bool
 template <> inline void Variable<bool>::write(QTextStream &stream) const
 {
-    stream << right  << qSetFieldWidth(30) << m_name
+    stream << left   << qSetFieldWidth(30) << m_name
            << center << qSetFieldWidth( 3) << '='
            << left   << qSetFieldWidth( 0);
     if (m_value)

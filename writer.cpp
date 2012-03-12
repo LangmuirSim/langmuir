@@ -295,6 +295,8 @@ void LoggerOn::saveGridPotential(const QString& name)
 
 void LoggerOn::saveCoulombEnergy(const QString& name)
 {
+    if (! m_world.parameters().okCL) return;
+
     Grid &grid = m_world.electronGrid();
     OpenClHelper &openCL = m_world.opencl();
 
