@@ -93,6 +93,7 @@ int main (int argc, char *argv[])
     // Output Image of Carriers
     if (par.imageCarriers == -1)
     {
+        world.logger().saveCarriersImage();
         world.logger().saveElectronImage();
         world.logger().saveHoleImage();
     }

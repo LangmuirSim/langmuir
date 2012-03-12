@@ -128,6 +128,8 @@ public:
     virtual void saveHoleImage(const QString& name = "%path/%stub-%sim-%step-holes.png") {}
     //! does nothing \see LoggerOn::saveElectronImage
     virtual void saveElectronImage(const QString& name = "%path/%stub-%sim-%step-electrons.png") {}
+    //! does nothing \see LoggerOn::saveElectronImage
+    virtual void saveCarriersImage(const QString& name = "%path/%stub-%sim-%step-carriers.png") {}
     //! does nothing \see LoggerOn::saveDefectImage
     virtual void saveDefectImage(const QString& name = "%path/%stub-%sim-defects.png") {}
     //! does nothing \see LoggerOn::saveImage
@@ -152,6 +154,7 @@ public:
     virtual void saveTrapImage(const QString& name = "%path/%stub-%sim-traps.png");
     virtual void saveHoleImage(const QString& name = "%path/%stub-%sim-%step-holes.png");
     virtual void saveElectronImage(const QString& name = "%path/%stub-%sim-%step-electrons.png");
+    virtual void saveCarriersImage(const QString& name = "%path/%stub-%sim-%step-carriers.png");
     virtual void saveDefectImage(const QString& name = "%path/%stub-%sim-defects.png");
     virtual void saveImage(const QString& name = "%path/%stub-%sim-%step-all.png");
 

@@ -102,6 +102,7 @@ void Simulation::performIterations(int nIterations)
          m_world.parameters().imageCarriers) == 0
        )
     {
+        m_world.logger().saveCarriersImage();
         m_world.logger().saveElectronImage();
         m_world.logger().saveHoleImage();
     }

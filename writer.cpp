@@ -384,6 +384,17 @@ void LoggerOn::saveHoleImage(const QString& name)
     image.save(name);
 }
 
+void LoggerOn::saveCarriersImage(const QString& name)
+{
+    QList<ChargeAgent*>& electrons = m_world.electrons();
+    QList<ChargeAgent*>& holes = m_world.holes();
+    if((electrons.size() + holes.size())==0)return;
+    GridImage image(m_world,Qt::white,this);
+    image.drawCharges(electrons,Qt::red,0);
+    image.drawCharges(holes,Qt::blue,0);
+    image.save(name);
+}
+
 void LoggerOn::saveImage(const QString& name)
 {
     QList<int>& traps = m_world.trapSiteIDs();
