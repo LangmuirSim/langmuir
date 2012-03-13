@@ -8,18 +8,18 @@ namespace Langmuir
 QImage GridViewGL::drawEnergyLandscape(int layer)
 {
     //Create an empty image of the appropriate size
-    QImage img(pPar.gridX, pPar.gridY, QImage::Format_ARGB32_Premultiplied);
+    QImage img(pWorld->parameters().gridX, pWorld->parameters().gridY, QImage::Format_ARGB32_Premultiplied);
     img.fill(0);
 
     //Create a painter to draw the image
     QPainter painter(&img);
     //Move the origin from top left to bottom right
     painter.scale(1.0, -1.0);
-    painter.translate(0.0, -pPar.gridY);
+    painter.translate(0.0, -pWorld->parameters().gridY);
     //Resize the painter window to the grid dimensions
-    painter.setWindow(QRect(0, 0, pPar.gridX, pPar.gridY));
+    painter.setWindow(QRect(0, 0, pWorld->parameters().gridX, pWorld->parameters().gridY));
     //Set the background to be white
-    painter.fillRect(QRect(0, 0, pPar.gridX, pPar.gridY), Qt::white);
+    painter.fillRect(QRect(0, 0, pWorld->parameters().gridX, pWorld->parameters().gridY), Qt::white);
     //Set the trap color to a light gray
     painter.setPen(QColor(100, 100, 100, 255));
     //Draw the traps as dots
@@ -44,42 +44,42 @@ GridViewGL::GridViewGL(const QGLFormat &format, QWidget * parent, QString input)
     setFocusPolicy(Qt::StrongFocus);
 
     //See if simulation parameters should be set to default values
-    if(input == "default")
-    {
-        //Adjust some of Langmuir's default parameters so things aren't too boring
-        pPar.iterationsPrint = 10;
-        pPar.seedCharges = 1.00;
-        pPar.electronPercentage = 0.02;
-        pPar.voltageRight = 10.0;
-        pPar.simulationStart = QDateTime::currentDateTime();
-        check(pPar);
-    }
-    //Or... get the simulation parameters from an input file
-    else
-    {
-        Parser parser(this);
-        parser.parse(input);
-        pPar = parser.parameters();
-        pPar.simulationStart = QDateTime::currentDateTime();
-    }
+//    if(input == "default")
+//    {
+//        //Adjust some of Langmuir's default parameters so things aren't too boring
+//        pWorld->parameters().iterationsPrint = 10;
+//        pWorld->parameters().seedCharges = 1.00;
+//        pWorld->parameters().electronPercentage = 0.02;
+//        pWorld->parameters().voltageRight = 10.0;
+//        pWorld->parameters().simulationStart = QDateTime::currentDateTime();
+//        check(pWorld->parameters());
+//    }
+//    //Or... get the simulation parameters from an input file
+//    else
+//    {
+//        Parser parser(this);
+//        parser.parse(input);
+//        pWorld->parameters() = parser.parameters();
+//        pWorld->parameters().simulationStart = QDateTime::currentDateTime();
+//    }
+
+    //Create the world object
+    pWorld = new World(input,this);
+
+    //Create the simulation with the parameters chosen
+    pSim = new Simulation(*pWorld);
 
     //Restrict the value on iterations.print to be low(it controls how many steps are done everytime updateGL is called)
-    if(pPar.iterationsPrint > 100)
+    if(pWorld->parameters().iterationsPrint > 100)
     {
         QMessageBox::warning(
                     this, 
                     tr("Langmuir"), 
                     QString("The parameter iterations.print must be <= 100 for GridView to render, "
-                            " so it has been changed from %1 to 10.").arg(pPar.iterationsPrint),
+                            " so it has been changed from %1 to 10.").arg(pWorld->parameters().iterationsPrint),
                     QMessageBox::Ok);
-        pPar.iterationsPrint = 10;
+        pWorld->parameters().iterationsPrint = 10;
     }
-
-    //Create the world object
-    pWorld = new World(pPar,this);
-
-    //Create the simulation with the parameters chosen
-    pSim = new Simulation(*pWorld);
 
     //Set default values
     translation.setX(0);
@@ -118,7 +118,7 @@ QSize GridViewGL::minimumSizeHint()const
 
 QSize GridViewGL::sizeHint()const
 {
-    return QSize(pPar.gridX + 4 * thickness, pPar.gridY + 2 * thickness);
+    return QSize(pWorld->parameters().gridX + 4 * thickness, pWorld->parameters().gridY + 2 * thickness);
 }
 
 void GridViewGL::initializeGL()
@@ -136,41 +136,41 @@ void GridViewGL::initializeGL()
     trapsTexture = bindTexture(drawEnergyLandscape());
 
     base = new Box(this, 
-                    QVector3D(pPar.gridX, pPar.gridY, thickness),
+                    QVector3D(pWorld->parameters().gridX, pWorld->parameters().gridY, thickness),
                     QVector3D(0, 0, -thickness));
     base->setTexture(metalTexture);
 
     source = new Box(this, 
-                      QVector3D(2.0*thickness, pPar.gridY, thickness + pPar.gridZ * thickness),
+                      QVector3D(2.0*thickness, pWorld->parameters().gridY, thickness + pWorld->parameters().gridZ * thickness),
                       QVector3D(-2.0*thickness, 0, -thickness));
 
     drain = new Box(this, 
-                     QVector3D(2.0*thickness, pPar.gridY, thickness + pPar.gridZ * thickness),
-                     QVector3D(pPar.gridX, 0, -thickness));
+                     QVector3D(2.0*thickness, pWorld->parameters().gridY, thickness + pWorld->parameters().gridZ * thickness),
+                     QVector3D(pWorld->parameters().gridX, 0, -thickness));
 
     side1 = new Box(this, 
-                     QVector3D(pPar.gridX, thickness, thickness),
+                     QVector3D(pWorld->parameters().gridX, thickness, thickness),
                      QVector3D(0, -thickness, -thickness));
 
     side2 = new Box(this, 
-                     QVector3D(pPar.gridX, thickness, thickness),
-                     QVector3D(0, pPar.gridY, -thickness));
+                     QVector3D(pWorld->parameters().gridX, thickness, thickness),
+                     QVector3D(0, pWorld->parameters().gridY, -thickness));
 
     side3 = new Box(this, 
-                     QVector3D(2.0*thickness, thickness, thickness + pPar.gridZ * thickness),
+                     QVector3D(2.0*thickness, thickness, thickness + pWorld->parameters().gridZ * thickness),
                      QVector3D(-2.0*thickness, -thickness, -thickness));
 
     side4 = new Box(this, 
-                     QVector3D(2.0*thickness, thickness, thickness + pPar.gridZ * thickness),
-                     QVector3D(-2.0*thickness, pPar.gridY, -thickness));
+                     QVector3D(2.0*thickness, thickness, thickness + pWorld->parameters().gridZ * thickness),
+                     QVector3D(-2.0*thickness, pWorld->parameters().gridY, -thickness));
 
     side5 = new Box(this, 
-                     QVector3D(2.0*thickness, thickness, thickness + pPar.gridZ * thickness),
-                     QVector3D(pPar.gridX, -thickness, -thickness));
+                     QVector3D(2.0*thickness, thickness, thickness + pWorld->parameters().gridZ * thickness),
+                     QVector3D(pWorld->parameters().gridX, -thickness, -thickness));
 
     side6 = new Box(this, 
-                     QVector3D(2.0*thickness, thickness, thickness + pPar.gridZ * thickness),
-                     QVector3D(pPar.gridX, pPar.gridY, -thickness));
+                     QVector3D(2.0*thickness, thickness, thickness + pWorld->parameters().gridZ * thickness),
+                     QVector3D(pWorld->parameters().gridX, pWorld->parameters().gridY, -thickness));
 
     background = new ColoredObject(this);
     ambientLight = new ColoredObject(this);
@@ -178,8 +178,8 @@ void GridViewGL::initializeGL()
     specularLight = new ColoredObject(this);
 
     Grid &grid = pWorld->electronGrid();
-    pointBuffer1.resize((int(pPar.electronPercentage * grid.volume()))* 4);
-    pointBuffer2.resize((int(pPar.holePercentage * grid.volume()))* 4);
+    pointBuffer1.resize((int(pWorld->parameters().electronPercentage * grid.volume()))* 4);
+    pointBuffer2.resize((int(pWorld->parameters().holePercentage * grid.volume()))* 4);
     for(int i = 0; i < pointBuffer1.size(); i+= 4)
     {
         pointBuffer1[i]   = 0;
@@ -213,7 +213,7 @@ void GridViewGL::initializeGL()
 
     translation.setX(0);
     translation.setY(0);
-    translation.setZ(-(pPar.gridY)-thickness);
+    translation.setZ(-(pWorld->parameters().gridY)-thickness);
     rotation.setX(0);
     rotation.setY(0);
     rotation.setZ(0);
@@ -253,7 +253,7 @@ void GridViewGL::initializeGL()
     carriersPlus->setPointSize(0.5f);
     defects->setPointSize(0.5f);
 
-    if(pPar.coulombCarriers)
+    if(pWorld->parameters().coulombCarriers)
     {
         emit coulombStatusChanged(Qt::Checked);
     }
@@ -262,7 +262,7 @@ void GridViewGL::initializeGL()
         emit coulombStatusChanged(Qt::Unchecked);
     }
 
-    if(pPar.useOpenCL)
+    if(pWorld->parameters().useOpenCL)
     {
         emit openCLStatusChanged(Qt::Checked);
     }
@@ -271,7 +271,7 @@ void GridViewGL::initializeGL()
         emit openCLStatusChanged(Qt::Unchecked);
     }
 
-    setIterationsPrint(pPar.iterationsPrint);
+    setIterationsPrint(pWorld->parameters().iterationsPrint);
     setTimerInterval(updateTime);
 
     qtimer->start(updateTime);
@@ -304,9 +304,9 @@ void GridViewGL::timerUpdateGL()
 {
     if(! pause)
     {
-        pSim->performIterations(pPar.iterationsPrint);
-        //double current =(pSim->totalChargesAccepted()- lastCount)/(double(pPar.iterationsPrint));
-        step += pPar.iterationsPrint;
+        pSim->performIterations(pWorld->parameters().iterationsPrint);
+        //double current =(pSim->totalChargesAccepted()- lastCount)/(double(pWorld->parameters().iterationsPrint));
+        step += pWorld->parameters().iterationsPrint;
         updatePointBuffers();
         emit stepChanged(step);
     }
@@ -408,7 +408,7 @@ void GridViewGL::resetView()
 {
     translation.setX(0.0);
     translation.setY(0.0);
-    translation.setZ(-(pPar.gridY)-thickness);
+    translation.setZ(-(pWorld->parameters().gridY)-thickness);
     rotation.setX(0);
     rotation.setY(0);
     rotation.setZ(0);
@@ -434,7 +434,7 @@ void GridViewGL::setIterationsPrint(int iterationsPrint)
 {
     if(iterationsPrint > 0 && iterationsPrint <= 100)
     {
-        pPar.iterationsPrint = iterationsPrint;
+        pWorld->parameters().iterationsPrint = iterationsPrint;
         emit iterationsPrintChanged(iterationsPrint);
     }
 }
@@ -445,13 +445,13 @@ void GridViewGL::toggleCoulombStatus(int checkState)
     {
     case Qt::Checked :
     {
-        pPar.coulombCarriers = true;
+        pWorld->parameters().coulombCarriers = true;
         emit coulombStatusChanged(Qt::Checked);
         break;
     }
     default :
     {
-        pPar.coulombCarriers = false;
+        pWorld->parameters().coulombCarriers = false;
         pWorld->opencl().toggleOpenCL(false);
         emit openCLStatusChanged(Qt::Unchecked);
         emit coulombStatusChanged(Qt::Unchecked);
@@ -493,13 +493,13 @@ void GridViewGL::toggleOpenCLStatus(int checkState)
                 togglePauseStatus();
                 resume = true;
             }
-            if(! pPar.okCL)
+            if(! pWorld->parameters().okCL)
             {
                 QMessageBox::warning(this, tr("Langmuir"), QString("Can not turn OpenCL.  This platform does not allow openCL."));
             }
             else
             {
-                if(! pPar.coulombCarriers)
+                if(! pWorld->parameters().coulombCarriers)
                 {
 
                     QMessageBox::warning(this, tr("Langmuir"), QString("Can not turn OpenCL.  Coulomb interations are turned off."));
@@ -630,7 +630,7 @@ void GridViewGL::paintGL()
     glRotatef(rotation.y(), 0.0, 1.0, 0.0);
     glRotatef(rotation.z(), 0.0, 0.0, 1.0);
     glPushMatrix();
-    glTranslatef(-0.5 *(pPar.gridX + 4.0 * thickness), - 0.5 *(pPar.gridY + 2.0 * thickness), 0);
+    glTranslatef(-0.5 *(pWorld->parameters().gridX + 4.0 * thickness), - 0.5 *(pWorld->parameters().gridY + 2.0 * thickness), 0);
     base->draw();
     source->draw();
     drain->draw();

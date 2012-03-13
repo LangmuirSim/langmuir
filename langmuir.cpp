@@ -2,7 +2,7 @@
 #include "simulation.h"
 #include "drainagent.h"
 #include "cubicgrid.h"
-#include "parser.h"
+#include "reader.h"
 #include "writer.h"
 #include "world.h"
 #include "openclhelper.h"
@@ -33,26 +33,25 @@ int main (int argc, char *argv[])
     // Create the application
     QApplication app(argc, argv);
 
-    // Create the configuration file parser
-    Parser parser;
+    // Get the input file
+    QStringList args = app.arguments();
+    if (args.size() != 2)
+    {
+        qFatal("correct use is: langmuir input.dat");
+    }
+    QString inputFile = args.at(1);
 
-    // Parse the command line first ( which will over-ride config file parameters )
-    parser.parse(argc,argv);
+    // Create the world
+    World world(inputFile);
 
-    // Prase the configuration file
-    parser.parse();
-
-    // Get the simulation parameters
-    SimulationParameters& par = parser.parameters();
-
-    // Create the World
-    World world(par);
+    // Get the simulation Parameters
+    SimulationParameters &par = world.parameters();
 
     // Create the simulation
     Simulation sim(world);
 
     // Save the parameters used for this simulation to a file
-    parser.saveParameters();
+    world.reader().save();
 
     // Perform production steps
     for (int j = 0; j < par.iterationsReal; j += par.iterationsPrint)

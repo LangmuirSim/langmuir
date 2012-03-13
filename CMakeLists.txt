@@ -15,7 +15,7 @@ cubicgrid.cpp
 fluxagent.cpp
 potential.cpp
 output.cpp
-parser.cpp
+reader.cpp
 )
 
 SET(PROJECT_HEADERS
@@ -33,7 +33,7 @@ rand.h
 sourceagent.h
 simulation.h
 output.h
-parser.h
+variable.h
 )
 
 SET(PROJECT_MOC_HEADERS_1
@@ -46,7 +46,8 @@ simulation.h
 world.h
 rand.h
 output.h
-parser.h
+reader.h
+variable.h
 )
 
 SET(PROJECT_MOC_HEADERS_2

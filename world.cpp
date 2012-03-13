@@ -10,17 +10,14 @@
 #include "rand.h"
 #include "fluxagent.h"
 #include "output.h"
+#include "reader.h"
 
 namespace Langmuir {
 
-World::World(SimulationParameters &par, QObject *parent)
+World::World(const QString &fileName, QObject *parent)
     : QObject(parent)
 {
-    // Set the address of the Parameters passed
-    m_parameters = &par;
-
-    // Initialize World
-    initialize();
+    initialize(fileName);
 }
 
 World::~World()
@@ -55,6 +52,12 @@ World::~World()
     delete m_holeGrid;
     delete m_logger;
     delete m_ocl;
+    delete m_reader;
+}
+
+Reader& World::reader()
+{
+    return *m_reader;
 }
 
 Grid& World::electronGrid()
@@ -293,11 +296,12 @@ void World::saveCheckpointFile(const QString &name)
     for (int i = 0; i < numTraps(); i++) { stream << qint32(m_trapSiteIDs.at(i)); }
     for (int i = 0; i < numTraps(); i++) { stream << m_trapSitePotentials.at(i); }
 
+    stream << *m_reader;
     // Random Seed
-    stream << quint64(parameters().randomSeed);
+    //stream << quint64(parameters().randomSeed);
 
     // Current Step
-    stream << quint32(parameters().currentStep);
+    //stream << quint32(parameters().currentStep);
 
     // Close File
     handle.close();
@@ -306,8 +310,20 @@ void World::saveCheckpointFile(const QString &name)
     if ( QFile::exists(bak2) ) { QFile::remove(bak2); }
 }
 
-void World::initialize()
+void World::initialize(const QString &fileName)
 {
+    // Set the Reader
+    m_reader = new Reader(this);
+
+    // Parse the input file
+    if (! fileName.isEmpty())
+    {
+        m_reader->parseFile(fileName);
+    }
+
+    // Set the address of the Parameters
+    m_parameters = &m_reader->parameters();
+
     // Pointers are EVIL
     World &refWorld = *this;
 
@@ -393,19 +409,26 @@ void World::initialize()
             }
         }
 
-        // Random Seed
-        stream >> m_parameters->randomSeed;
-        checkDataStream(stream,"expected parameter random.seed");
+        // Read the parameters from the file
+        stream >> *m_reader;
+        checkDataStream(stream,"at end of reader operator<<");
 
-        // Random Seed
-        stream >> m_parameters->currentStep;
-        checkDataStream(stream,"expected parameter current.step");
+        // Certain parameters need to be altered between runs!
+        m_parameters->outputAppend = true;
+        m_parameters->outputBackup = true;
+        m_parameters->outputPath   = QDir::currentPath();
+
+        // Parse the input file (again!)
+        if (! fileName.isEmpty())
+        {
+            qWarning("Warning! Reparsing the input file after reading the checkpoint file."
+                     "\nThe parameters inside the input file will override those "
+                     "found in the checkpoint file.");
+            m_reader->parseFile(fileName);
+        }
 
         // Close file
         handle.close();
-
-        // Set append parameter so that data is not lost
-        m_parameters->outputAppend = true;
     }
 
     // Create Random Number Generator

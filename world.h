@@ -13,6 +13,7 @@ class Grid;
 class Agent;
 class Random;
 class Logger;
+class Reader;
 class Potential;
 class FluxAgent;
 class DrainAgent;
@@ -29,8 +30,10 @@ private:
     Q_DISABLE_COPY(World)
 
 public:
-    World(SimulationParameters &par, QObject *parent = 0);
+    //World(SimulationParameters &par, QObject *parent = 0);
+    World(const QString& fileName, QObject *parent = 0);
     ~World();
+    Reader& reader();
     Grid& electronGrid();
     Grid& holeGrid();
     Potential& potential();
@@ -67,6 +70,7 @@ public:
     void saveCheckpointFile(const QString &name = "%path/%stub.bin");
 
 private:
+    Reader *m_reader;
     QList<SourceAgent*> m_sources;
     QList<DrainAgent*> m_drains;
     QList<FluxAgent*> m_fluxAgents;
@@ -90,7 +94,7 @@ private:
     void placeDefects(const QList<int>& siteIDs = QList<int>());
     void placeElectrons(const QList<int>& siteIDs = QList<int>());
     void placeHoles(const QList<int>& siteIDs = QList<int>());
-    void initialize();
+    void initialize(const QString& fileName = "");
     void checkDataStream(QDataStream& stream, const QString& message = "");
 };
 

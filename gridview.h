@@ -2,7 +2,6 @@
 #define GRID_VIEW_H
 
 #include "chargeagent.h"
-#include "parser.h"
 #include "parameters.h"
 #include "simulation.h"
 #include "cubicgrid.h"
@@ -237,7 +236,6 @@ public:
     PointArray *carriersMinus;
     PointArray *carriersPlus;
     PointArray *defects;
-    SimulationParameters pPar;
     Simulation *pSim;
     World *pWorld;
     bool pause;

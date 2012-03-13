@@ -13,9 +13,6 @@ namespace Langmuir
 struct SimulationParameters
 {
     //! name of the input parameters file
-    QString inputFile;
-
-    //! name of the input parameters file
     QString checkFile;
 
     //! tells Langmuir how to set up the Sources and Drains: (\b\c "transistor", \b\c "solarcell")
@@ -176,7 +173,6 @@ struct SimulationParameters
 
     SimulationParameters() :
 
-        inputFile              (""),
         checkFile              (""),
         simulationType         ("transistor"),
         randomSeed             (0),
@@ -186,7 +182,7 @@ struct SimulationParameters
         gridX                  (128),
 
         coulombCarriers        (false),
-        defectsCharge          (-1),
+        defectsCharge          (0),
 
         outputXyz              (0),
         outputIdsOnDelete      (false),
