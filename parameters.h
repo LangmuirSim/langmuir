@@ -198,8 +198,8 @@ struct SimulationParameters
 
         iterationsPrint        (10),
         iterationsReal         (1000),
-        outputPrecision        (12),
-        outputWidth            (20),
+        outputPrecision        (15),
+        outputWidth            (23),
         outputPath             (QDir::currentPath()),
         outputStub             ("out"),
 
