@@ -26,7 +26,6 @@ public:
     friend QTextStream& operator<<(QTextStream& stream, const Reader &reader);
     friend QDataStream& operator<<(QDataStream &stream, const Reader &reader);
     friend QDataStream& operator>>(QDataStream &stream, const Reader &reader);
-    friend QDebug operator<<(QDebug debug, const Reader &reader);
 
     SimulationParameters& parameters();
 

@@ -18,7 +18,7 @@ Reader::Reader(QObject *parent) :
     registerVariable("grid.y", m_parameters.gridY);
     registerVariable("grid.x", m_parameters.gridX);
     registerVariable("coulomb.carriers", m_parameters.coulombCarriers);
-    registerVariable("defects.charge", m_parameters.defectPercentage);
+    registerVariable("defects.charge", m_parameters.defectsCharge);
     registerVariable("output.xyz", m_parameters.outputXyz);
     registerVariable("output.ids.on.delete", m_parameters.outputIdsOnDelete);
     registerVariable("output.coulomb", m_parameters.outputCoulomb);
@@ -120,7 +120,8 @@ void Reader::parse(const QString &line)
     }
 
     // Get the value
-    QString value = tokens.at(1).trimmed();
+    QString value = tokens.at(1).trimmed()
+            .replace(QRegExp("^\"+"),"").replace(QRegExp("\"+$"),"");
     if (value.isEmpty())
     {
         qWarning("warning! value is empty for key: %s",
@@ -180,20 +181,11 @@ QTextStream& operator<<(QTextStream &stream, const Reader &reader)
     return stream;
 }
 
-QDebug operator<<(QDebug debug, const Reader &reader)
-{
-    foreach (Variable *variable, reader.m_variableMap)
-    {
-        debug << *variable;
-    }
-    return debug;
-}
-
 QDataStream& operator<<(QDataStream &stream, const Reader &reader)
 {
     foreach (Variable *variable, reader.m_variableMap)
     {
-        variable->binaryWrite(stream);
+        stream << *variable;
     }
     return stream;
 }
@@ -202,7 +194,7 @@ QDataStream& operator>>(QDataStream &stream, const Reader &reader)
 {
     foreach (Variable *variable, reader.m_variableMap)
     {
-        variable->binaryRead(stream);
+        stream >> *variable;
     }
     return stream;
 }

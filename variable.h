@@ -2,6 +2,7 @@
 #define VARIABLE_H
 
 #include <QTextStream>
+#include <QDateTime>
 #include <QObject>
 #include <QDebug>
 #include <limits>
@@ -9,7 +10,14 @@
 namespace Langmuir
 {
 
-//! A Base class to map between variable names (keys) and locations (references)
+//! A class to map between variable names (keys) and locations (references)
+/*
+  The class is a template so that it may point to arbitray data types.  In order to
+  add a new data type you must implement the following, with \b 'T' replaced by your
+  new type:
+    - template <> inline void Variable<T>::convert(const QString& token, T& result)
+    - inline QTextStream& operator<<(QTextStream& stream, const T& variable)
+  */
 class Variable : public QObject
 {
     Q_OBJECT
@@ -32,22 +40,13 @@ public:
     virtual void read(const QString& token) = 0;    
 
     //! Get this variable's key (name)
-    virtual QString key() const;
+    virtual QString key() const = 0;
 
     //! Get this variable's value as a QString
     virtual QString value() const = 0;
 
     //! Get this variable's key and value in the form 'key = value'
-    virtual QString keyValue() const;
-
-    //! Operator overload to output 'key = value' to QTextStream
-    friend QTextStream& operator<<(QTextStream& stream, const Variable &variable);
-
-    //! Operator overload to output debug information to QDebug
-    friend QDebug operator<<(QDebug debug, const Variable &variable);
-
-    //! Write 'key = value' to a stream
-    virtual void write(QTextStream& stream) const = 0;
+    virtual QString keyValue() const = 0;
 
     //! True if the Variable::Constant mode flag was set
     bool isConstant() const;
@@ -55,11 +54,14 @@ public:
     //! Get this variable's mode flags
     const VariableMode& mode() const;
 
-    //! Write value to a binary stream
-    virtual void binaryWrite(QDataStream& stream) const = 0;
+    //! Operator overload to output 'key = value' to QTextStream
+    friend QTextStream& operator<<(QTextStream& stream, const Variable &variable);
 
-    //! Read value from a binary stream
-    virtual void binaryRead(QDataStream& stream) = 0;
+    //! Operator overload to input 'value' from QDataStream
+    friend QDataStream& operator<<(QDataStream& stream, const Variable &variable);
+
+    //! Operator overload to input 'value' from QDataStream
+    friend QDataStream& operator>>(QDataStream& stream, Variable &variable);
 
 protected:
 
@@ -68,17 +70,20 @@ protected:
 
     //! The mode flags for this variable
     VariableMode m_mode;
+
+    //! Write 'key = value' to a stream
+    virtual void write(QTextStream& stream) const = 0;
+
+    //! Write value to a binary stream
+    virtual void binaryWrite(QDataStream& stream) const = 0;
+
+    //! Read value from a binary stream
+    virtual void binaryRead(QDataStream& stream) = 0;
+
 };
 Q_DECLARE_OPERATORS_FOR_FLAGS(Variable::VariableMode)
 
 //! A template class to map between variable names (keys) and locations (references)
-/*
-  The class is a template so that it may point to arbitray data types.  In order to
-  add a new data type you must implement the following, with \b 'T' replaced by your
-  new type:
-    - template <> inline void Variable<T>::convert(const QString& token, T& result)
-    - inline QTextStream& operator<<(QTextStream& stream, const T& variable)
-  */
 template <class T>
 class TypedVariable : public Variable
 {
@@ -103,38 +108,34 @@ public:
       */
     virtual void read(const QString& token);
 
-    //! Write 'key = value' to a stream
-    virtual void write(QTextStream& stream) const;
+    //! Get this variable's key (name)
+    virtual QString key() const;
+
+    //! Get this variable's value as a QString
+    QString value() const;
+
+    //! Get this variable's key and value in the form 'key = value'
+    virtual QString keyValue() const;
 
     //! A template function for converting a QString to some type T
     /*!
-      This was used because things like QVariant and QString.toDouble (etc)
-      methods tend to return default constructed values when conversion fails -
-      not to mention conversion from string to bool ignores keywords (like true
-      or false).  So rather we implement this function for new data types so
-      that we can have more control over the conversion and throw errors or
-      call qFatal if the conversion fails.  To implement this function for a
-      new data type, use declarations of the form:
-      \code template <> inline void Variable<T>::convert(const QString& token, T& result)
-      Replace the \b 'T' with the data type you want to implement (for example, double).
+      To implement this function for a new data type, use declarations of the form:
+       - template <> inline void Variable<T>::convert(const QString& token, T& result)
+       - replace the \b 'T' with the data type you want to implement (for example, double).
       */
     static void convert(const QString& token, T& result);
 
-    //! Get this variable's value as a QString
-    /*!
-      This function assumes \b 'void Variable<T>::convert' has been implemented
-      for that data type T.  Keep this in mind if adding a new data type.
-      */
-    QString value() const;
+protected:
+    T &m_value;
+
+    //! Write 'key = value' to a stream
+    virtual void write(QTextStream& stream) const;
 
     //! Write value to a binary stream
     void binaryWrite(QDataStream& stream) const;
 
     //! Read value from a binary stream
     void binaryRead(QDataStream& stream);
-
-protected:
-    T &m_value;
 };
 
 // initialize a Variable with a key
@@ -149,7 +150,7 @@ inline Variable::Variable(
 }
 
 // get the variable's key
-inline QString Variable::key() const
+template <class T> inline QString TypedVariable<T>::key() const
 {
     return m_key;
 }
@@ -158,7 +159,27 @@ inline QString Variable::key() const
 template <class T> inline QString TypedVariable<T>::value() const
 {
     QString result; QTextStream stream(&result);
-    stream << qSetRealNumberPrecision(std::numeric_limits<T>::digits10)
+    stream << m_value;
+    stream.flush();
+    return result;
+}
+
+// get the variable's value (converted to string)
+template <> inline QString TypedVariable<float>::value() const
+{
+    QString result; QTextStream stream(&result);
+    stream << qSetRealNumberPrecision(std::numeric_limits<float>::digits10)
+           << scientific
+           << m_value;
+    stream.flush();
+    return result;
+}
+
+// get the variable's value (converted to string)
+template <> inline QString TypedVariable<qreal>::value() const
+{
+    QString result; QTextStream stream(&result);
+    stream << qSetRealNumberPrecision(std::numeric_limits<qreal>::digits10)
            << scientific
            << m_value;
     stream.flush();
@@ -176,16 +197,50 @@ template <> inline QString TypedVariable<bool>::value() const
 }
 
 // get the variable's key
-inline QString Variable::keyValue() const
+template <class T> inline QString TypedVariable<T>::keyValue() const
 {
     QString result; QTextStream stream(&result);
     stream << left
            << qSetFieldWidth(30)
-           << key()
-           << qSetFieldWidth(3)
-           << '='
-           << qSetFieldWidth(0)
-           << value();
+           << key();
+    QString theValue = value();
+    if (theValue.startsWith('-'))
+    {
+        stream << qSetFieldWidth(2)
+               << '='
+               << qSetFieldWidth(0)
+               << theValue;
+    }
+    else
+    {
+        stream << qSetFieldWidth(3)
+               << '='
+               << qSetFieldWidth(0)
+               << theValue;
+    }
+    stream.flush();
+    return result;
+}
+
+// get the variable's key
+template <> inline QString TypedVariable<QString>::keyValue() const
+{
+    QString result; QTextStream stream(&result);
+    stream << left
+           << qSetFieldWidth(30)
+           << key();
+    if (m_value.isEmpty())
+    {
+        stream << qSetFieldWidth(0)
+               << '=';
+    }
+    else
+    {
+        stream << qSetFieldWidth(3)
+               << '='
+               << qSetFieldWidth(0)
+               << value();
+    }
     stream.flush();
     return result;
 }
@@ -271,14 +326,18 @@ inline QTextStream& operator<<(QTextStream& stream, const Variable& variable)
     return stream;
 }
 
-// overload operator to write keyValue() to a qDebug()
-inline QDebug operator<<(QDebug debug, const Variable &variable)
+// Operator overload to output 'value' to QDataStream
+inline QDataStream& operator<<(QDataStream& stream, const Variable &variable)
 {
-    QString result = QString("(%1, %2, %3)")
-            .arg(variable.key())
-            .arg(variable.value())
-            .arg(variable.isConstant());
-    return debug << qPrintable(result);
+    variable.binaryWrite(stream);
+    return stream;
+}
+
+// Operator overload to input 'value' from QDataStream
+inline QDataStream& operator>>(QDataStream& stream, Variable &variable)
+{
+    variable.binaryRead(stream);
+    return stream;
 }
 
 // convert to QString
@@ -355,16 +414,19 @@ template <> inline void TypedVariable<quint64>::convert(const QString& token, qu
     if (!ok) qFatal("can not convert to unsigned long long int: %s", qPrintable(token));
 }
 
-// convert to QDateTime
+// convert to QDateTime, assumes data is a qint64 mSecsSinceEpoch
 template <> inline void TypedVariable<QDateTime>::convert(const QString& token, QDateTime& result)
 {
-//    bool ok = false;
-//    result = token.toULongLong(&ok);
-//    if (!ok) qFatal("can not convert to unsigned long long int: %s", qPrintable(token));
+    bool ok = false;
+    qint64 msecSinceEpoch = token.toLongLong(&ok);
+    if (!ok) qFatal("can not convert to QDateTime (expecting long long int): %s", qPrintable(token));
+    result = QDateTime::fromMSecsSinceEpoch(msecSinceEpoch);
 }
 
+// output QDateTime as qint64 mSecsSinceEpoch
 inline QTextStream& operator<<(QTextStream& stream, const QDateTime& datetime)
 {
+    stream << datetime.toMSecsSinceEpoch();
     return stream;
 }
 
