@@ -53,6 +53,9 @@ int main (int argc, char *argv[])
     // Save the parameters used for this simulation to a file
     world.reader().save();
 
+    // Print progress to the screen
+    progress( 0, par.iterationsReal, begin.time().elapsed() );
+
     // Perform production steps
     for (int j = 0; j < par.iterationsReal; j += par.iterationsPrint)
     {
@@ -60,7 +63,7 @@ int main (int argc, char *argv[])
         sim.performIterations (par.iterationsPrint);
 
         // Print progress to the screen
-        progress( j, par.iterationsReal, begin.time().elapsed() );
+        progress( j + par.iterationsPrint, par.iterationsReal, begin.time().elapsed() );
 
         // Save a Checkpoint File
         if (par.outputIsOn) world.saveCheckpointFile();
@@ -70,7 +73,6 @@ int main (int argc, char *argv[])
     if (par.outputIsOn) world.saveCheckpointFile();
 
     // Print progress to the screen
-    progress( par.iterationsReal, par.iterationsReal, begin.time().elapsed() );
     std::cout << "\n";
 
     // The time this simulation stops
