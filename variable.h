@@ -37,6 +37,10 @@ public:
         QObject *parent = 0);
 
     //! Cast the value stored in string to the correct type and store it in the correct location
+    /*!
+      This function assumes \b 'QTextStream& operator<<' has been implemented
+      for that data type T.  Keep this in mind if adding a new data type.
+      */
     virtual void read(const QString& token) = 0;    
 
     //! Get this variable's key (name)
@@ -102,17 +106,13 @@ public:
         QObject *parent = 0);
 
     //! Cast the value stored in string to the correct type and store it in the correct location
-    /*!
-      This function assumes \b 'QTextStream& operator<<' has been implemented
-      for that data type T.  Keep this in mind if adding a new data type.
-      */
     virtual void read(const QString& token);
 
     //! Get this variable's key (name)
     virtual QString key() const;
 
     //! Get this variable's value as a QString
-    QString value() const;
+    virtual QString value() const;
 
     //! Get this variable's key and value in the form 'key = value'
     virtual QString keyValue() const;
