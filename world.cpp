@@ -312,8 +312,11 @@ void World::saveCheckpointFile(const QString &name)
 
 void World::initialize(const QString &fileName)
 {
+    // Pointers are EVIL
+    World &refWorld = *this;
+
     // Set the Reader
-    m_reader = new Reader(this);
+    m_reader = new Reader(refWorld,this);
 
     // Parse the input file
     if (! fileName.isEmpty())
@@ -323,9 +326,6 @@ void World::initialize(const QString &fileName)
 
     // Set the address of the Parameters
     m_parameters = &m_reader->parameters();
-
-    // Pointers are EVIL
-    World &refWorld = *this;
 
     // Create data
     QList<qint32> electrons;

@@ -5,6 +5,7 @@
 
 #include "variable.h"
 #include "parameters.h"
+#include "world.h"
 
 namespace Langmuir
 {
@@ -14,7 +15,7 @@ class Reader : public QObject
 {
     Q_OBJECT
 public:
-    explicit Reader(QObject *parent = 0);
+    explicit Reader(World& world, QObject *parent = 0);
     ~Reader();
 
     void parseFile(const QString& fileName);
@@ -32,6 +33,7 @@ public:
 private:
     QMap<QString,Variable*> m_variableMap;
     SimulationParameters m_parameters;
+    World& m_world;
 
     void parse(const QString& line);
     template <typename T> void registerVariable(

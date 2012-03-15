@@ -8,8 +8,8 @@
 namespace Langmuir
 {
 
-Reader::Reader(QObject *parent) :
-    QObject(parent)
+Reader::Reader(World &world, QObject *parent) :
+    QObject(parent), m_world(world)
 {
     registerVariable("use.checkpoint", m_parameters.checkFile);
     registerVariable("simulation.type", m_parameters.simulationType);
