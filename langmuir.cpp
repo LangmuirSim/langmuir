@@ -6,6 +6,7 @@
 #include "writer.h"
 #include "world.h"
 #include "openclhelper.h"
+#include "checkpointer.h"
 
 #include <QApplication>
 #include <QPrinter>
@@ -66,11 +67,11 @@ int main (int argc, char *argv[])
         progress( j + par.iterationsPrint, par.iterationsReal, begin.time().elapsed() );
 
         // Save a Checkpoint File
-        if (par.outputIsOn) world.saveCheckpointFile();
+        if (par.outputIsOn) world.checkPointer().save();
     }
 
     // Save a Checkpoint File
-    if (par.outputIsOn) world.saveCheckpointFile();
+    if (par.outputIsOn) world.checkPointer().save();
 
     // Print progress to the screen
     std::cout << "\n";

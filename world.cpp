@@ -54,6 +54,7 @@ World::~World()
     delete m_logger;
     delete m_ocl;
     delete m_reader;
+    delete m_checkPointer;
 }
 
 CheckPointer& World::checkPointer()
@@ -252,70 +253,6 @@ double World::percentElectronAgents()
     return double(numElectronAgents())/double(m_electronGrid->volume())*100.0;
 }
 
-void World::saveCheckpointFile(const QString &name)
-{
-    OutputInfo info(name,m_parameters);
-
-    QString bak1 = info.absoluteFilePath() + ".bak";
-    QString bak2 = info.absoluteFilePath() + ".bak.bak";
-
-    if ( info.exists() )
-    {
-        if ( QFile::exists(bak1) )
-        {
-            if ( QFile::exists(bak2) )
-            {
-                // out.bin + out.bin.1 + out.bin.2
-                qFatal("can not create checkpoint safely");
-            }
-            // out.bin + out.bin.1
-            QFile::rename(bak1,bak2);
-        }
-        // out.bin
-        QFile::rename(info.absoluteFilePath(),bak1);
-    }
-
-    // Create binary file
-    QFile handle(info.absoluteFilePath());
-    if (!handle.open(QIODevice::WriteOnly))
-    {
-        qFatal("can not open checkpoint file: %s",qPrintable(name));
-    }
-    QDataStream stream(&handle);
-    stream.setVersion(QDataStream::Qt_4_7);
-    stream.setFloatingPointPrecision(QDataStream::DoublePrecision);
-
-    // Electrons
-    stream << qint32(numElectronAgents());
-    for (int i = 0; i < numElectronAgents(); i++) { stream << qint32(m_electrons.at(i)->getCurrentSite()); }
-
-    // Holes
-    stream << qint32(numHoleAgents());
-    for (int i = 0; i < numHoleAgents(); i++) { stream << qint32(m_holes.at(i)->getCurrentSite()); }
-
-    // Defects
-    stream << qint32(numDefects());
-    for (int i = 0; i < numDefects(); i++) { stream << qint32(m_defectSiteIDs.at(i)); }
-
-    // Traps
-    stream << qint32(numTraps());
-    for (int i = 0; i < numTraps(); i++) { stream << qint32(m_trapSiteIDs.at(i)); }
-    for (int i = 0; i < numTraps(); i++) { stream << m_trapSitePotentials.at(i); }
-
-    stream << *m_reader;
-    // Random Seed
-    //stream << quint64(parameters().randomSeed);
-
-    // Current Step
-    //stream << quint32(parameters().currentStep);
-
-    // Close File
-    handle.close();
-
-    // Remove the oldest backup file
-    if ( QFile::exists(bak2) ) { QFile::remove(bak2); }
-}
-
 void World::initialize(const QString &fileName)
 {
     // Pointers are EVIL
@@ -333,108 +270,16 @@ void World::initialize(const QString &fileName)
     // Set the address of the Parameters
     m_parameters = &m_reader->parameters();
 
-    // Create data
-    QList<qint32> electrons;
-    QList<qint32> holes;
-    QList<qint32> defects;
-    QList<qint32> traps;
-    QList<double> potentials;
+    // Create CheckPointer
+    m_checkPointer = new CheckPointer(refWorld,this);
 
-    if (!parameters().checkFile.isEmpty())
+    // Create Site info
+    SimulationSiteInfo siteInfo;
+
+    // Parse the check point file
+    if (!m_parameters->checkFile.isEmpty())
     {
-        // Create binary file
-        QFile handle(parameters().checkFile);
-        if (!handle.open(QIODevice::ReadOnly))
-        {
-            qFatal("can not open checkpoint file: %s",qPrintable(parameters().checkFile));
-        }
-        QDataStream stream(&handle);
-        stream.setVersion(QDataStream::Qt_4_7);
-        stream.setFloatingPointPrecision(QDataStream::DoublePrecision);
-
-        // Electrons
-        {
-            qint32 num_electrons = 0;
-            stream >> num_electrons;
-            checkDataStream(stream,"expected number of electrons");
-            for (int i = 0; i < num_electrons; i++)
-            {
-                qint32 value;
-                stream >> value;
-                checkDataStream(stream,QString("expected electron %1 site id").arg(i));
-                electrons.push_back(value);
-            }
-        }
-
-        // Holes
-        {
-            qint32 num_holes = 0;
-            stream >> num_holes;
-            checkDataStream(stream,"expected number of holes");
-            for (int i = 0; i < num_holes; i++)
-            {
-                qint32 value;
-                stream >> value;
-                checkDataStream(stream,QString("expected hole %1 site id").arg(i));
-                holes.push_back(value);
-            }
-        }
-
-        // Defects
-        {
-            qint32 num_defects = 0;
-            stream >> num_defects;
-            checkDataStream(stream,"expected number of defects");
-            for (int i = 0; i < num_defects; i++)
-            {
-                qint32 value;
-                stream >> value;
-                checkDataStream(stream,QString("expected defect %1 site id").arg(i));
-                defects.push_back(value);
-            }
-        }
-
-        // Traps
-        {
-            qint32 num_traps = 0;
-            stream >> num_traps;
-            checkDataStream(stream,"expected number of traps");
-            for (int i = 0; i < num_traps; i++)
-            {
-                qint32 value;
-                stream >> value;
-                checkDataStream(stream,QString("expected trap %1 site id").arg(i));
-                traps.push_back(value);
-            }
-            for (int i = 0; i < num_traps; i++)
-            {
-                double value;
-                stream >> value;
-                checkDataStream(stream,QString("expected trap %1 potential id").arg(i));
-                potentials.push_back(value);
-            }
-        }
-
-        // Read the parameters from the file
-        stream >> *m_reader;
-        checkDataStream(stream,"at end of reader operator<<");
-
-        // Certain parameters need to be altered between runs!
-        m_parameters->outputAppend = true;
-        m_parameters->outputBackup = true;
-        m_parameters->outputPath   = QDir::currentPath();
-
-        // Parse the input file (again!)
-        if (! fileName.isEmpty())
-        {
-            qWarning("Warning! Reparsing the input file after reading the checkpoint file."
-                     "\nThe parameters inside the input file will override those "
-                     "found in the checkpoint file.");
-            m_reader->parseFile(fileName);
-        }
-
-        // Close file
-        handle.close();
+        m_checkPointer->load(m_parameters->checkFile,siteInfo);
     }
 
     // Create Random Number Generator
@@ -520,13 +365,13 @@ void World::initialize(const QString &fileName)
     }
 
     // Place Defects
-    placeDefects(defects);
+    placeDefects(siteInfo.defects);
 
     // Place Electrons
-    placeElectrons(electrons);
+    placeElectrons(siteInfo.electrons);
 
     // Place Holes
-    placeHoles(holes);
+    placeHoles(siteInfo.holes);
 
     // Zero potential
     potential().setPotentialZero();
@@ -535,7 +380,7 @@ void World::initialize(const QString &fileName)
     potential().setPotentialLinear();
 
     // Place Traps
-    potential().setPotentialTraps(traps,potentials);
+    potential().setPotentialTraps(siteInfo.traps,siteInfo.potentials);
 
     // precalculate and store coulomb interaction energies
     potential().updateInteractionEnergies();
@@ -560,32 +405,6 @@ void World::initialize(const QString &fileName)
     // Initialize OpenCL
     opencl().initializeOpenCL();
     opencl().toggleOpenCL(parameters().useOpenCL);
-}
-
-void World::checkDataStream(QDataStream& stream, const QString& message)
-{
-    switch (stream.status())
-    {
-    case QDataStream::Ok:
-    {
-        return;
-        break;
-    }
-    case QDataStream::ReadPastEnd:
-    {
-        QString error = "binary stream read error: QDataStream::ReadPastEnd";
-        if (!message.isEmpty()) { error += QString("\n\t%1").arg(message); }
-        qFatal("%s",qPrintable(error));
-        break;
-    }
-    case QDataStream::ReadCorruptData:
-    {
-        QString error = "binary stream read error: QDataStream::ReadCorruptData";
-        if (!message.isEmpty()) { error += QString("\n\t%1").arg(message); }
-        qFatal("%s",qPrintable(error));
-        break;
-    }
-    }
 }
 
 void World::placeDefects(const QList<int>& siteIDs)

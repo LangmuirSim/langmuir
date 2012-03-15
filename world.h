@@ -69,7 +69,6 @@ public:
     double reachedHoleAgents();
     double percentHoleAgents();
     double percentElectronAgents();
-    void saveCheckpointFile(const QString &name = "%path/%stub.bin");
 
 private:
     Reader *m_reader;
@@ -98,7 +97,6 @@ private:
     void placeElectrons(const QList<int>& siteIDs = QList<int>());
     void placeHoles(const QList<int>& siteIDs = QList<int>());
     void initialize(const QString& fileName = "");
-    void checkDataStream(QDataStream& stream, const QString& message = "");
 };
 
 }

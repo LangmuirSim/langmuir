@@ -18,7 +18,7 @@ public:
     explicit CheckPointer(World& world, QObject *parent = 0);
 
     void load(const QString& fileName, SimulationSiteInfo &siteInfo);
-    void save(const QString& fileName);
+    void save(const QString& fileName = "%path/%stub.bin");
     void checkDataStream(QDataStream& stream, const QString& message = "");
 
 private:
