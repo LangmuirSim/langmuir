@@ -10,6 +10,21 @@
 namespace Langmuir
 {
 
+struct SimulationSiteInfo
+{
+    //! a list of current electron site IDs
+    QList<int> electrons;
+
+    //! a list of current holes site IDs
+    QList<int> holes;
+
+    //! a list of current defects site IDs
+    QList<int> defects;
+
+    //! a list of current traps site IDs
+    QList<int> traps;
+};
+
 struct SimulationParameters
 {
     //! name of the input parameters file
