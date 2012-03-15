@@ -2,6 +2,15 @@ PROJECT(Langmuir)
 SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.2)
 
+SET(COMPILE_TEST FALSE)
+SET(COMPILE_LANGMUIR_VIEW TRUE)
+SET(COMPILE_LANGMUIR TRUE)
+
+IF(COMPILE_TEST)
+    SET(COMPILE_LANGMUIR_VIEW FALSE)
+    SET(COMPILE_LANGMUIR FALSE)
+ENDIF(COMPILE_TEST)
+
 SET(PROJECT_SOURCES
 simulation.cpp
 openclhelper.cpp
@@ -103,7 +112,7 @@ INCLUDE_DIRECTORIES(${OPENGL_INCLUDE_DIRS})
 ENDIF(${OPENGL_FOUND})
 
 ################################################################################
-SET(COMPILE_TEST FALSE)
+
 IF(${COMPILE_TEST})
 MESSAGE("-- Compiling Test")
 ADD_EXECUTABLE(
@@ -130,7 +139,6 @@ ENDIF(${COMPILE_TEST})
 
 ################################################################################
 
-SET(COMPILE_LANGMUIR TRUE)
 IF(${COMPILE_LANGMUIR})
 MESSAGE("-- Compiling Langmuir")
 ADD_EXECUTABLE(
@@ -157,7 +165,6 @@ ENDIF(${COMPILE_LANGMUIR})
 
 ################################################################################
 
-SET(COMPILE_LANGMUIR_VIEW TRUE)
 IF(${COMPILE_LANGMUIR_VIEW})
 IF(${OPENGL_FOUND})
 MESSAGE("-- Compiling LangmuirView")
