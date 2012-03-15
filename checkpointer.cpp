@@ -9,12 +9,131 @@ namespace Langmuir
 {
 
 Checkpointer::Checkpointer(World &world, QObject *parent) :
-    QObject(parent), m_world(world)
+    QObject(parent), m_world(world), m_magic(0xA0B0C0D0), m_version(106)
 {
 }
 
-void Checkpointer::load(const QString& fileName)
+void Checkpointer::load(const QString &fileName, SimulationSiteInfo &siteInfo)
 {
+    // Clear the site info
+    siteInfo.clear();
+
+    // Create binary file
+    QFile handle(fileName);
+    if (!handle.open(QIODevice::ReadOnly))
+    {
+        qFatal("can not open checkpoint file: %s",
+               qPrintable(fileName));
+    }
+    QDataStream stream(&handle);
+    stream.setVersion(QDataStream::Qt_4_7);
+    stream.setFloatingPointPrecision(QDataStream::DoublePrecision);
+
+    // Magic Number
+    quint32 magic;
+    stream >> magic;
+    checkDataStream(stream,QString("expected magic number"));
+    if (magic != m_magic)
+    {
+        qFatal("can not understand binary file format.\n"
+               "the magic number does not match");
+    }
+
+    // Version
+    qint32 version;
+    stream >> version;
+    checkDataStream(stream,QString("expected version number"));
+    if (version < 100)
+    {
+        qFatal("can not understand binary file format.\n"
+               "the version number is too low");
+    }
+
+    // Electrons
+    if (version > 100)
+    {
+        qint32 num_electrons = 0;
+        stream >> num_electrons;
+        checkDataStream(stream,"expected number of electrons");
+        for (int i = 0; i < num_electrons; i++)
+        {
+            qint32 value;
+            stream >> value;
+            checkDataStream(stream,QString("expected electron %1 site id").arg(i));
+            siteInfo.electrons.push_back(value);
+        }
+    }
+
+    // Holes
+    if (version > 101)
+    {
+        qint32 num_holes = 0;
+        stream >> num_holes;
+        checkDataStream(stream,"expected number of holes");
+        for (int i = 0; i < num_holes; i++)
+        {
+            qint32 value;
+            stream >> value;
+            checkDataStream(stream,QString("expected hole %1 site id").arg(i));
+            siteInfo.holes.push_back(value);
+        }
+    }
+
+    // Defects
+    if (version > 102)
+    {
+        qint32 num_defects = 0;
+        stream >> num_defects;
+        checkDataStream(stream,"expected number of defects");
+        for (int i = 0; i < num_defects; i++)
+        {
+            qint32 value;
+            stream >> value;
+            checkDataStream(stream,QString("expected defect %1 site id").arg(i));
+            siteInfo.defects.push_back(value);
+        }
+    }
+
+    // Traps
+    if (version > 103)
+    {
+        qint32 num_traps = 0;
+        stream >> num_traps;
+        checkDataStream(stream,"expected number of traps");
+        for (int i = 0; i < num_traps; i++)
+        {
+            qint32 value;
+            stream >> value;
+            checkDataStream(stream,QString("expected trap %1 site id").arg(i));
+            siteInfo.traps.push_back(value);
+        }
+        for (int i = 0; i < num_traps; i++)
+        {
+            qreal value;
+            stream >> value;
+            checkDataStream(stream,QString("expected trap %1 potential id").arg(i));
+            siteInfo.potentials.push_back(value);
+        }
+    }
+
+    if (version > 104)
+    {
+        quint64 value;
+        stream >> value;
+        checkDataStream(stream,QString("expected random.seed"));
+        m_world.parameters().randomSeed = value;
+    }
+
+    if (version > 105)
+    {
+        quint32 value;
+        stream >> value;
+        checkDataStream(stream,QString("expected current.step"));
+        m_world.parameters().currentStep = value;
+    }
+
+    // Close file
+    handle.close();
 }
 
 void Checkpointer::save(const QString& fileName)
@@ -47,33 +166,44 @@ void Checkpointer::save(const QString& fileName)
     stream.setFloatingPointPrecision(QDataStream::DoublePrecision);
 
     // Magic Number
-    stream << (quint32)0xA0B0C0D0;
+    stream << m_magic;
 
     // Version
-    stream << (qint32 )100;
+    stream << m_version;
 
     // Electrons
-    stream << qint32(m_world.numElectronAgents());
-    for (int i = 0; i < m_world.numElectronAgents(); i++)
+    if (m_version > 100)
     {
-        stream << qint32(m_world.electrons().at(i)->getCurrentSite());
+        stream << qint32(m_world.numElectronAgents());
+        for (int i = 0; i < m_world.numElectronAgents(); i++)
+        {
+            stream << qint32(m_world.electrons().at(i)->getCurrentSite());
+        }
     }
 
     // Holes
+    if (m_version > 101)
+    {
     stream << qint32(m_world.numHoleAgents());
     for (int i = 0; i < m_world.numHoleAgents(); i++)
     {
         stream << qint32(m_world.holes().at(i)->getCurrentSite());
     }
+    }
 
     // Defects
+    if (m_version > 102)
+    {
     stream << qint32(m_world.numDefects());
     for (int i = 0; i < m_world.numDefects(); i++)
     {
         stream << qint32(m_world.defectSiteIDs().at(i));
     }
+    }
 
     // Traps
+    if (m_version > 103)
+    {
     stream << qint32(m_world.numTraps());
     for (int i = 0; i < m_world.numTraps(); i++)
     {
@@ -81,14 +211,21 @@ void Checkpointer::save(const QString& fileName)
     }
     for (int i = 0; i < m_world.numTraps(); i++)
     {
-        stream << m_world.trapSitePotentials().at(i);
+        stream << qreal(m_world.trapSitePotentials().at(i));
+    }
     }
 
     // Random Seed
-    //stream << quint64(parameters().randomSeed);
+    if (m_version > 104)
+    {
+        stream << quint64(m_world.parameters().randomSeed);
+    }
 
     // Current Step
-    //stream << quint32(parameters().currentStep);
+    if (m_version > 105)
+    {
+        stream << quint32(m_world.parameters().currentStep);
+    }
 
     // Close File
     handle.close();
@@ -97,7 +234,7 @@ void Checkpointer::save(const QString& fileName)
     if ( QFile::exists(bak2) ) { QFile::remove(bak2); }
 }
 
-void Checkpointer::check(QDataStream& stream, const QString& message)
+void Checkpointer::checkDataStream(QDataStream& stream, const QString& message)
 {
     switch (stream.status())
     {

@@ -26,6 +26,16 @@ struct SimulationSiteInfo
 
     //! a list of current traps site IDs
     QList<qreal> potentials;
+
+    //! clear the lists
+    void clear()
+    {
+        electrons.clear();
+        holes.clear();
+        defects.clear();
+        traps.clear();
+        potentials.clear();
+    }
 };
 
 struct SimulationParameters
