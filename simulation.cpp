@@ -28,6 +28,22 @@ void Simulation::performIterations(int nIterations)
         QList<ChargeAgent*> &electrons = m_world.electrons();
         QList<ChargeAgent*> &holes = m_world.holes();
 
+//        for (int i = 0; i < electrons.size(); i++)
+//        {
+//            electrons.at(i)->chooseFuture();
+//        }
+//        for (int i = 0; i < holes.size(); i++)
+//        {
+//            holes.at(i)->chooseFuture();
+//        }
+//        for (int i = 0; i < electrons.size(); i++)
+//        {
+//            electrons.at(i)->decideFuture();
+//        }
+//        for (int i = 0; i < holes.size(); i++)
+//        {
+//            holes.at(i)->decideFuture();
+//        }
         // If using OpenCL, launch the Kernel to calculate Coulomb Interactions
         if(m_world.parameters().useOpenCL &&(electrons.size()> 0 || holes.size()> 0))
         {

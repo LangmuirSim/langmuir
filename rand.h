@@ -32,6 +32,18 @@ public:
     bool randomlyChooseNoWithPercent(double percent, double randNumber);
     bool randomlyChooseNoWithPercent(double percent);
 
+    template<class CharT, class Traits>
+    void save(std::basic_ostream<CharT,Traits>& os)
+    {
+      os << *twister;
+    }
+
+    template<class CharT, class Traits>
+    void load(std::basic_istream<CharT,Traits>& is)
+    {
+      is >> *twister;
+    }
+
 private:
     boost::mt19937 *twister;
     boost::variate_generator<boost::mt19937&, boost::uniform_01<double> >* generator01;

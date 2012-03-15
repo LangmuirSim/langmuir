@@ -2,14 +2,16 @@
 #include "chargeagent.h"
 #include "output.h"
 #include "world.h"
+#include "rand.h"
 
 #include <QFile>
+#include <fstream>
 
 namespace Langmuir
 {
 
 CheckPointer::CheckPointer(World &world, QObject *parent) :
-    QObject(parent), m_world(world), m_magic(0xA0B0C0D0), m_version(106)
+    QObject(parent), m_world(world), m_magic(0xA0B0C0D0), m_version(107)
 {
 }
 
@@ -20,7 +22,7 @@ void CheckPointer::load(const QString &fileName, SimulationSiteInfo &siteInfo)
 
     // Create binary file
     QFile handle(fileName);
-    if (!handle.open(QIODevice::ReadOnly))
+    if (!handle.open(QIODevice::ReadWrite))
     {
         qFatal("can not open checkpoint file: %s",
                qPrintable(fileName));
@@ -36,7 +38,7 @@ void CheckPointer::load(const QString &fileName, SimulationSiteInfo &siteInfo)
     if (magic != m_magic)
     {
         qFatal("can not understand binary file format.\n"
-               "the magic number does not match");
+               "the magic number does not match: %d < %d", magic, m_magic);
     }
 
     // Version
@@ -46,7 +48,7 @@ void CheckPointer::load(const QString &fileName, SimulationSiteInfo &siteInfo)
     if (version < 100)
     {
         qFatal("can not understand binary file format.\n"
-               "the version number is too low");
+               "the version number is too low: %d < %d", version, m_version);
     }
 
     // Electrons
@@ -132,8 +134,28 @@ void CheckPointer::load(const QString &fileName, SimulationSiteInfo &siteInfo)
         m_world.parameters().currentStep = value;
     }
 
-    // Close file
+    // Flush File
+    handle.flush();
+
+    // Mark the file location
+    quint64 offset = handle.pos();
+
+    // Close File
     handle.close();
+
+    // Load the Random Number Generator State
+    if (m_version > 106)
+    {
+        std::ifstream stream(fileName.toLocal8Bit());
+        stream.seekg(offset);
+        m_world.randomNumberGenerator().load(stream);
+        if (stream.fail() || stream.bad())
+        {
+            qFatal("ifstream read error: "
+                   "expected random number generator state");
+        }
+        stream.close();
+    }
 }
 
 void CheckPointer::save(const QString& fileName)
@@ -160,16 +182,16 @@ void CheckPointer::save(const QString& fileName)
     }
 
     QFile handle(info.absoluteFilePath());
-    handle.open(QIODevice::WriteOnly);
+    handle.open(QIODevice::ReadWrite);
     QDataStream stream(&handle);
     stream.setVersion(QDataStream::Qt_4_7);
     stream.setFloatingPointPrecision(QDataStream::DoublePrecision);
 
     // Magic Number
-    stream << m_magic;
+    stream << quint32(m_magic);
 
     // Version
-    stream << m_version;
+    stream << qint32(m_version);
 
     // Electrons
     if (m_version > 100)
@@ -227,8 +249,29 @@ void CheckPointer::save(const QString& fileName)
         stream << quint32(m_world.parameters().currentStep);
     }
 
+    // Flush File
+    handle.flush();
+
+    // Mark the file location
+    quint64 offset = handle.pos();
+
     // Close File
     handle.close();
+
+    // Save Random Number Generator State
+    if (m_version > 106)
+    {
+        std::fstream stream(info.absoluteFilePath().toLocal8Bit());
+        stream.seekp(offset);
+        m_world.randomNumberGenerator().save(stream);
+        stream.flush();
+        if (stream.fail() || stream.bad())
+        {
+            qFatal("fstream write error: "
+                   "expected random number generator state");
+        }
+        stream.close();
+    }
 
     // Remove the oldest backup file
     if ( QFile::exists(bak2) ) { QFile::remove(bak2); }

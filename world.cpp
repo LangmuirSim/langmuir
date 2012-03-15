@@ -270,6 +270,9 @@ void World::initialize(const QString &fileName)
     // Set the address of the Parameters
     m_parameters = &m_reader->parameters();
 
+    // Create Random Number Generator
+    m_rand = new Random(parameters().randomSeed);
+
     // Create CheckPointer
     m_checkPointer = new CheckPointer(refWorld,this);
 
@@ -282,8 +285,7 @@ void World::initialize(const QString &fileName)
         m_checkPointer->load(m_parameters->checkFile,siteInfo);
     }
 
-    // Create Random Number Generator
-    m_rand = new Random(parameters().randomSeed);
+    // Save the seed
     m_parameters->randomSeed = m_rand->seed();
 
     // Create Electron Grid
