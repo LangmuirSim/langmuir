@@ -11,11 +11,11 @@ namespace Langmuir
 
 class World;
 
-class Checkpointer : public QObject
+class CheckPointer : public QObject
 {
     Q_OBJECT
 public:
-    explicit Checkpointer(World& world, QObject *parent = 0);
+    explicit CheckPointer(World& world, QObject *parent = 0);
 
     void load(const QString& fileName, SimulationSiteInfo &siteInfo);
     void save(const QString& fileName);

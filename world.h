@@ -20,6 +20,7 @@ class DrainAgent;
 class Simulation;
 class ChargeAgent;
 class SourceAgent;
+class CheckPointer;
 class OpenClHelper;
 struct SimulationParameters;
 
@@ -34,6 +35,7 @@ public:
     World(const QString& fileName, QObject *parent = 0);
     ~World();
     Reader& reader();
+    CheckPointer& checkPointer();
     Grid& electronGrid();
     Grid& holeGrid();
     Potential& potential();
@@ -71,6 +73,7 @@ public:
 
 private:
     Reader *m_reader;
+    CheckPointer *m_checkPointer;
     QList<SourceAgent*> m_sources;
     QList<DrainAgent*> m_drains;
     QList<FluxAgent*> m_fluxAgents;

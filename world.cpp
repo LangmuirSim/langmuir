@@ -11,6 +11,7 @@
 #include "fluxagent.h"
 #include "output.h"
 #include "reader.h"
+#include "checkpointer.h"
 
 namespace Langmuir {
 
@@ -53,6 +54,11 @@ World::~World()
     delete m_logger;
     delete m_ocl;
     delete m_reader;
+}
+
+CheckPointer& World::checkPointer()
+{
+    return *m_checkPointer;
 }
 
 Reader& World::reader()

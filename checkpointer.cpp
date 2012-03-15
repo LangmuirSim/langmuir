@@ -8,12 +8,12 @@
 namespace Langmuir
 {
 
-Checkpointer::Checkpointer(World &world, QObject *parent) :
+CheckPointer::CheckPointer(World &world, QObject *parent) :
     QObject(parent), m_world(world), m_magic(0xA0B0C0D0), m_version(106)
 {
 }
 
-void Checkpointer::load(const QString &fileName, SimulationSiteInfo &siteInfo)
+void CheckPointer::load(const QString &fileName, SimulationSiteInfo &siteInfo)
 {
     // Clear the site info
     siteInfo.clear();
@@ -136,7 +136,7 @@ void Checkpointer::load(const QString &fileName, SimulationSiteInfo &siteInfo)
     handle.close();
 }
 
-void Checkpointer::save(const QString& fileName)
+void CheckPointer::save(const QString& fileName)
 {
     OutputInfo info(fileName,&m_world.parameters());
 
@@ -234,7 +234,7 @@ void Checkpointer::save(const QString& fileName)
     if ( QFile::exists(bak2) ) { QFile::remove(bak2); }
 }
 
-void Checkpointer::checkDataStream(QDataStream& stream, const QString& message)
+void CheckPointer::checkDataStream(QDataStream& stream, const QString& message)
 {
     switch (stream.status())
     {
