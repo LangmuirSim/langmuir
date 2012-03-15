@@ -13,16 +13,19 @@ namespace Langmuir
 struct SimulationSiteInfo
 {
     //! a list of current electron site IDs
-    QList<int> electrons;
+    QList<qint32> electrons;
 
     //! a list of current holes site IDs
-    QList<int> holes;
+    QList<qint32> holes;
 
     //! a list of current defects site IDs
-    QList<int> defects;
+    QList<qint32> defects;
 
     //! a list of current traps site IDs
-    QList<int> traps;
+    QList<qint32> traps;
+
+    //! a list of current traps site IDs
+    QList<qreal> potentials;
 };
 
 struct SimulationParameters
