@@ -16,6 +16,7 @@ fluxagent.cpp
 potential.cpp
 output.cpp
 reader.cpp
+checkpointer.cpp
 )
 
 SET(PROJECT_HEADERS
@@ -34,6 +35,7 @@ sourceagent.h
 simulation.h
 output.h
 variable.h
+checkpointer.h
 )
 
 SET(PROJECT_MOC_HEADERS_1
@@ -48,6 +50,7 @@ rand.h
 output.h
 reader.h
 variable.h
+checkpointer.h
 )
 
 SET(PROJECT_MOC_HEADERS_2
