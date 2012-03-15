@@ -17,8 +17,30 @@ void save(const QString& fileName)
 {
 }
 
-void check(QDataStream& stream)
+void check(QDataStream& stream, const QString& message)
 {
+    switch (stream.status())
+    {
+    case QDataStream::Ok:
+    {
+        return;
+        break;
+    }
+    case QDataStream::ReadPastEnd:
+    {
+        QString error = "binary stream read error: QDataStream::ReadPastEnd";
+        if (!message.isEmpty()) { error += QString("\n\t%1").arg(message); }
+        qFatal("%s",qPrintable(error));
+        break;
+    }
+    case QDataStream::ReadCorruptData:
+    {
+        QString error = "binary stream read error: QDataStream::ReadCorruptData";
+        if (!message.isEmpty()) { error += QString("\n\t%1").arg(message); }
+        qFatal("%s",qPrintable(error));
+        break;
+    }
+    }
 }
 
 }

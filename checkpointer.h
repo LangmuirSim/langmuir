@@ -17,7 +17,7 @@ public:
 
     void load(const QString& fileName);
     void save(const QString& fileName);
-    void check(QDataStream& stream);
+    void check(QDataStream& stream, const QString& message = "");
 
 private:
     World &m_world;
