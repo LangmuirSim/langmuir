@@ -212,12 +212,17 @@ double ChargeAgent::coulombInteraction(int newSite)
 
     //When holes and electrons on on the same site the interaction is not zero
     p2 += bindingPotential(newSite);
+    p1 += bindingPotential(m_site);
 
     return m_charge *(p2 - p1);
 }
 
 double HoleAgent::bindingPotential(int site)
 {
+    if(m_world.holeGrid().agentType(site)== Agent::Electron)
+    {
+        return -0.5;
+    }
     return 0.0;
 }
 
@@ -225,7 +230,7 @@ double ElectronAgent::bindingPotential(int site)
 {
     if(m_world.holeGrid().agentType(site)== Agent::Hole)
     {
-        return 0.0;
+        return 0.5;
     }
     return 0.0;
 }

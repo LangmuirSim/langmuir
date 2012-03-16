@@ -226,7 +226,7 @@ void GridViewGL::initializeGL()
     emit yRotationChanged(rotation.y());
     emit zRotationChanged(rotation.z());
 
-    base->setColor(QColor(0, 0, 0, 255));
+    base->setColor(QColor(255, 255, 255, 255));
     source->setColor(QColor(0, 0, 255, 255));
     drain->setColor(QColor(255, 0, 0, 255));
     side1->setColor(QColor(255, 255, 255, 255));
