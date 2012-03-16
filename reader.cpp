@@ -133,7 +133,7 @@ void Reader::parse(const QString &line)
     it.value()->read(value);
 }
 
-void Reader::parseFile(const QString &fileName)
+void Reader::load(const QString &fileName)
 {
     // Open the file
     QFile file(fileName);
@@ -148,25 +148,6 @@ void Reader::parseFile(const QString &fileName)
         QString line = file.readLine();
         parse(line);
     }
-    file.close();
-    setCalculatedValues(m_parameters);
-    check(m_parameters);
-}
-
-void Reader::parseBinary(const QString &fileName)
-{
-    // Open the file
-    QFile file(fileName);
-    if (!file.open(QIODevice::ReadOnly))
-    {
-        qFatal("can not open file: %s", qPrintable(fileName));
-    }
-
-    // Read the variables from the file
-    QDataStream stream(&file);
-    stream.setVersion(QDataStream::Qt_4_7);
-    stream.setFloatingPointPrecision(QDataStream::DoublePrecision);
-    stream >> *this;
     file.close();
     setCalculatedValues(m_parameters);
     check(m_parameters);
@@ -212,30 +193,8 @@ void Reader::save(const QString& fileName)
 
     // Write the variables to the file
     QTextStream stream(&file);
-    foreach (Variable *variable, m_variableMap)
-    {
-        stream << *variable << endl;
-    }
-    stream.flush();
-    file.close();
-}
-
-void Reader::saveBinary(const QString &fileName)
-{
-    if (!m_parameters.outputIsOn) return;
-    // Open the file
-    OutputInfo info(fileName,&m_parameters);
-    QFile file(info.absoluteFilePath());
-    if (!file.open(QIODevice::WriteOnly))
-    {
-        qFatal("can not open file: %s", qPrintable(fileName));
-    }
-
-    // Write the variables to the file
-    QDataStream stream(&file);
-    stream.setVersion(QDataStream::Qt_4_7);
-    stream.setFloatingPointPrecision(QDataStream::DoublePrecision);
     stream << *this;
+    stream.flush();
     file.close();
 }
 

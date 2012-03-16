@@ -22,7 +22,7 @@ void CheckPointer::load(const QString &fileName, SimulationSiteInfo &siteInfo)
 
     // Create binary file
     QFile handle(fileName);
-    if (!handle.open(QIODevice::ReadWrite))
+    if (!handle.open(QIODevice::ReadOnly))
     {
         qFatal("can not open checkpoint file: %s",
                qPrintable(fileName));
@@ -38,7 +38,7 @@ void CheckPointer::load(const QString &fileName, SimulationSiteInfo &siteInfo)
     if (magic != m_magic)
     {
         qFatal("can not understand binary file format.\n"
-               "the magic number does not match: %d < %d", magic, m_magic);
+               "the magic number does not match: %d != %d", magic, m_magic);
     }
 
     // Version
@@ -118,12 +118,12 @@ void CheckPointer::load(const QString &fileName, SimulationSiteInfo &siteInfo)
         }
     }
 
-    if (version > 104)
+    // Load the Random Number Generator State
+    if (m_version > 104)
     {
-        quint64 value;
-        stream >> value;
-        checkDataStream(stream,QString("expected random.seed"));
-        m_world.parameters().randomSeed = value;
+        stream >> m_world.randomNumberGenerator();
+        checkDataStream(stream,QString("expected random number generator state"));
+        m_world.parameters().randomSeed = m_world.randomNumberGenerator().seed();
     }
 
     if (version > 105)
@@ -134,28 +134,8 @@ void CheckPointer::load(const QString &fileName, SimulationSiteInfo &siteInfo)
         m_world.parameters().currentStep = value;
     }
 
-    // Flush File
-    handle.flush();
-
-    // Mark the file location
-    quint64 offset = handle.pos();
-
     // Close File
     handle.close();
-
-    // Load the Random Number Generator State
-    if (m_version > 106)
-    {
-        std::ifstream stream(fileName.toLocal8Bit());
-        stream.seekg(offset);
-        m_world.randomNumberGenerator().load(stream);
-        if (stream.fail() || stream.bad())
-        {
-            qFatal("ifstream read error: "
-                   "expected random number generator state");
-        }
-        stream.close();
-    }
 }
 
 void CheckPointer::save(const QString& fileName)
@@ -182,7 +162,7 @@ void CheckPointer::save(const QString& fileName)
     }
 
     QFile handle(info.absoluteFilePath());
-    handle.open(QIODevice::ReadWrite);
+    handle.open(QIODevice::WriteOnly);
     QDataStream stream(&handle);
     stream.setVersion(QDataStream::Qt_4_7);
     stream.setFloatingPointPrecision(QDataStream::DoublePrecision);
@@ -237,10 +217,10 @@ void CheckPointer::save(const QString& fileName)
     }
     }
 
-    // Random Seed
+    // Save Random Number Generator State
     if (m_version > 104)
     {
-        stream << quint64(m_world.parameters().randomSeed);
+        stream << m_world.randomNumberGenerator();
     }
 
     // Current Step
@@ -249,29 +229,8 @@ void CheckPointer::save(const QString& fileName)
         stream << quint32(m_world.parameters().currentStep);
     }
 
-    // Flush File
-    handle.flush();
-
-    // Mark the file location
-    quint64 offset = handle.pos();
-
     // Close File
     handle.close();
-
-    // Save Random Number Generator State
-    if (m_version > 106)
-    {
-        std::fstream stream(info.absoluteFilePath().toLocal8Bit());
-        stream.seekp(offset);
-        m_world.randomNumberGenerator().save(stream);
-        stream.flush();
-        if (stream.fail() || stream.bad())
-        {
-            qFatal("fstream write error: "
-                   "expected random number generator state");
-        }
-        stream.close();
-    }
 
     // Remove the oldest backup file
     if ( QFile::exists(bak2) ) { QFile::remove(bak2); }
@@ -296,6 +255,13 @@ void CheckPointer::checkDataStream(QDataStream& stream, const QString& message)
     case QDataStream::ReadCorruptData:
     {
         QString error = "binary stream read error: QDataStream::ReadCorruptData";
+        if (!message.isEmpty()) { error += QString("\n\t%1").arg(message); }
+        qFatal("%s",qPrintable(error));
+        break;
+    }
+    default:
+    {
+        QString error = "binary stream error: QDataStream::Status unknown";
         if (!message.isEmpty()) { error += QString("\n\t%1").arg(message); }
         qFatal("%s",qPrintable(error));
         break;

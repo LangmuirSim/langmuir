@@ -18,11 +18,8 @@ public:
     explicit Reader(World& world, QObject *parent = 0);
     ~Reader();
 
-    void parseFile(const QString& fileName);
-    void parseBinary(const QString& fileName);
-
+    void load(const QString& fileName);
     void save(const QString& fileName = "%path/%stub.inp");
-    void saveBinary(const QString& fileName = "%path/%stub-input.bin");
 
     friend QTextStream& operator<<(QTextStream& stream, const Reader &reader);
     friend QDataStream& operator<<(QDataStream &stream, const Reader &reader);

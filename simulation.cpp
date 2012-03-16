@@ -28,55 +28,55 @@ void Simulation::performIterations(int nIterations)
         QList<ChargeAgent*> &electrons = m_world.electrons();
         QList<ChargeAgent*> &holes = m_world.holes();
 
-//        for (int i = 0; i < electrons.size(); i++)
-//        {
-//            electrons.at(i)->chooseFuture();
-//        }
-//        for (int i = 0; i < holes.size(); i++)
-//        {
-//            holes.at(i)->chooseFuture();
-//        }
-//        for (int i = 0; i < electrons.size(); i++)
-//        {
-//            electrons.at(i)->decideFuture();
-//        }
-//        for (int i = 0; i < holes.size(); i++)
-//        {
-//            holes.at(i)->decideFuture();
-//        }
+        for (int i = 0; i < electrons.size(); i++)
+        {
+            electrons.at(i)->chooseFuture();
+        }
+        for (int i = 0; i < holes.size(); i++)
+        {
+            holes.at(i)->chooseFuture();
+        }
+        for (int i = 0; i < electrons.size(); i++)
+        {
+            electrons.at(i)->decideFuture();
+        }
+        for (int i = 0; i < holes.size(); i++)
+        {
+            holes.at(i)->decideFuture();
+        }
         // If using OpenCL, launch the Kernel to calculate Coulomb Interactions
-        if(m_world.parameters().useOpenCL &&(electrons.size()> 0 || holes.size()> 0))
-        {
-            // first have the charge carriers propose future sites
-            //for(int j = 0; j < charges.size(); j++)charges[j]->chooseFuture(j);
-            QFuture < void > future1 = QtConcurrent::map(electrons, Simulation::chargeAgentChooseFuture);
-            QFuture < void > future2 = QtConcurrent::map(holes, Simulation::chargeAgentChooseFuture);
-            future1.waitForFinished();
-            future2.waitForFinished();
+//        if(m_world.parameters().useOpenCL &&(electrons.size()> 0 || holes.size()> 0))
+//        {
+//            // first have the charge carriers propose future sites
+//            //for(int j = 0; j < charges.size(); j++)charges[j]->chooseFuture(j);
+//            QFuture < void > future1 = QtConcurrent::map(electrons, Simulation::chargeAgentChooseFuture);
+//            QFuture < void > future2 = QtConcurrent::map(holes, Simulation::chargeAgentChooseFuture);
+//            future1.waitForFinished();
+//            future2.waitForFinished();
 
-            // tell the GPU to perform all coulomb calculations
-            m_world.opencl().launchCoulombKernel2();
+//            // tell the GPU to perform all coulomb calculations
+//            m_world.opencl().launchCoulombKernel2();
 
-            //check the answer during debugging
-            //m_world.opencl().compareHostAndDeviceForAllCarriers();
-            //qFatal("done");
+//            //check the answer during debugging
+//            //m_world.opencl().compareHostAndDeviceForAllCarriers();
+//            //qFatal("done");
 
-            // now use the results of the coulomb calculations to decide if the carreirs should have moved
-            future1 = QtConcurrent::map(electrons, Simulation::chargeAgentDecideFuture);
-            future2 = QtConcurrent::map(holes, Simulation::chargeAgentDecideFuture);
-            future1.waitForFinished();
-            future2.waitForFinished();
-        }
-        else // Not using OpenCL
-        {
-            // Use QtConcurrnet to parallelise the charge calculations
-            QFuture < void > future1 = QtConcurrent::map(electrons, Simulation::chargeAgentIterate);
-            QFuture < void > future2 = QtConcurrent::map(holes, Simulation::chargeAgentIterate);
+//            // now use the results of the coulomb calculations to decide if the carreirs should have moved
+//            future1 = QtConcurrent::map(electrons, Simulation::chargeAgentDecideFuture);
+//            future2 = QtConcurrent::map(holes, Simulation::chargeAgentDecideFuture);
+//            future1.waitForFinished();
+//            future2.waitForFinished();
+//        }
+//        else // Not using OpenCL
+//        {
+//            // Use QtConcurrnet to parallelise the charge calculations
+//            QFuture < void > future1 = QtConcurrent::map(electrons, Simulation::chargeAgentIterate);
+//            QFuture < void > future2 = QtConcurrent::map(holes, Simulation::chargeAgentIterate);
 
-            // We want to wait for it to finish before continuing on
-            future1.waitForFinished();
-            future2.waitForFinished();
-        }
+//            // We want to wait for it to finish before continuing on
+//            future1.waitForFinished();
+//            future2.waitForFinished();
+//        }
 
         // Now we are done with the charge movement, move them to the next tick!
         nextTick();

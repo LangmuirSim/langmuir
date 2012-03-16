@@ -1,9 +1,10 @@
 #ifndef _RAND_H
 #define _RAND_H
 
-#include<ctime>
-#include<boost/random.hpp>
-#include<QObject>
+#include <ctime>
+#include <boost/random.hpp>
+#include <QObject>
+#include <QDataStream>
 
 namespace Langmuir
 {
@@ -31,18 +32,8 @@ public:
     bool randomlyChooseYesWithPercent(double percent);
     bool randomlyChooseNoWithPercent(double percent, double randNumber);
     bool randomlyChooseNoWithPercent(double percent);
-
-    template<class CharT, class Traits>
-    void save(std::basic_ostream<CharT,Traits>& os)
-    {
-      os << *twister;
-    }
-
-    template<class CharT, class Traits>
-    void load(std::basic_istream<CharT,Traits>& is)
-    {
-      is >> *twister;
-    }
+    friend QDataStream& operator<<(QDataStream& stream, Random& random);
+    friend QDataStream& operator>>(QDataStream& stream, Random& random);
 
 private:
     boost::mt19937 *twister;

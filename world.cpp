@@ -264,7 +264,7 @@ void World::initialize(const QString &fileName)
     // Parse the input file
     if (! fileName.isEmpty())
     {
-        m_reader->parseFile(fileName);
+        m_reader->load(fileName);
     }
 
     // Set the address of the Parameters
