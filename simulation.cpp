@@ -36,6 +36,12 @@ void Simulation::performIterations(int nIterations)
         {
             holes.at(i)->chooseFuture();
         }
+
+        if (m_world.parameters().useOpenCL)
+        {
+            m_world.opencl().launchCoulombKernel2();
+        }
+
         for (int i = 0; i < electrons.size(); i++)
         {
             electrons.at(i)->decideFuture();
