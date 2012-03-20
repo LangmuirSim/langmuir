@@ -1,17 +1,20 @@
 #include "cubicgrid.h"
 #include <cmath>
+#include "world.h"
+#include "parameters.h"
 
 namespace Langmuir
 {
-Grid::Grid(int xSize, int ySize, int zSize, QObject *parent) : QObject(parent)
+Grid::Grid(World &world, QObject *parent)
+    : QObject(parent), m_world(world)
 {
-    m_xSize = xSize;
-    m_ySize = ySize;
-    m_zSize = zSize;
-    m_xyPlaneArea = ySize*xSize;
-    m_yzPlaneArea = ySize*zSize;
-    m_xzPlaneArea = xSize*zSize;
-    m_volume = ySize*xSize*zSize;
+    m_xSize = m_world.parameters().gridX;
+    m_ySize = m_world.parameters().gridY;
+    m_zSize = m_world.parameters().gridZ;
+    m_xyPlaneArea = m_world.parameters().gridY*m_world.parameters().gridX;
+    m_yzPlaneArea = m_world.parameters().gridY*m_world.parameters().gridZ;
+    m_xzPlaneArea = m_world.parameters().gridX*m_world.parameters().gridZ;
+    m_volume = m_world.parameters().gridY*m_world.parameters().gridX*m_world.parameters().gridZ;
     m_specialAgentCount = 0;
     m_specialAgentReserve = 5*7;
     m_agents.fill(0, m_volume+m_specialAgentReserve);
@@ -201,34 +204,249 @@ QVector<int> Grid::sliceIndex(int xi, int xf, int yi, int yf, int zi, int zf)
     return ndx;
 }
 
-QVector<int> Grid::neighborsSite(int site)
+QVector<int> Grid::neighborsSite(int site, int hoppingRange)
 {
     // Return the indexes of all nearest neighbours
-    QVector<int>     nList(0);
-    int col = getIndexX(site);
-    int row = getIndexY(site);
-    int lay = getIndexZ(site);
-    // To the west
-    if(col > 0)
-        nList.push_back(getIndexS(col-1, row, lay));
-    // To the east
-    if(col < m_xSize - 1)
-        nList.push_back(getIndexS(col+1, row, lay));
-    // To the south
-    if(row > 0)
-        nList.push_back(getIndexS(col, row-1, lay));
-    // To the north
-    if(row < m_ySize - 1)
-        nList.push_back(getIndexS(col, row+1, lay));
-    // Below
-    if(lay > 0)
-        nList.push_back(getIndexS(col, row, lay-1));
-    // Above
-    if(lay < m_zSize - 1)
-        nList.push_back(getIndexS(col, row, lay+1));
+    QVector<int>   nList(0);
+    int x = getIndexX(site);
+    int y = getIndexY(site);
+    int z = getIndexZ(site);
+
+//    qDebug() << qPrintable(QString("GRID: xsize(%1) ysize(%2) zsize(%3)").arg(m_xSize,3).arg(m_ySize,3).arg(m_zSize,3));
+//    qDebug() << qPrintable(QString("SITE:     s(%1)     x(%2)     y(%3)     z(%4)     t(%5)")
+//                           .arg(site,3)
+//                           .arg(x,3)
+//                           .arg(y,3)
+//                           .arg(z,3)
+//                           .arg(Agent::toQString(m_agentType[site])));
+    switch (hoppingRange)
+    {
+        case 1:
+        {
+            // To the west
+            if(x > 0)
+                nList.push_back(getIndexS(x-1, y, z));
+            // To the east
+            if(x < m_xSize - 1)
+                nList.push_back(getIndexS(x+1, y, z));
+            // To the south
+            if(y > 0)
+                nList.push_back(getIndexS(x, y-1, z));
+            // To the north
+            if(y < m_ySize - 1)
+                nList.push_back(getIndexS(x, y+1, z));
+            // Below
+            if(z > 0)
+                nList.push_back(getIndexS(x, y, z-1));
+            // Above
+            if(z < m_zSize - 1)
+                nList.push_back(getIndexS(x, y, z+1));
+            break;
+        }
+        case 2:
+        {
+            // Optimized for 1 layer
+            if (m_zSize == 1)
+            {
+                //qDebug() << "special case: m_zSize == 1";
+                // To the west 1
+                if (x > 0)
+                {
+                    nList.push_back(getIndexS(x-1, y, z));
+                    // To the south 1
+                    if (y > 0)
+                    {
+                        nList.push_back(getIndexS(x-1, y-1, z));
+                    }
+                    // To the north 1
+                    if (y < m_ySize - 1)
+                    {
+                        nList.push_back(getIndexS(x-1, y+1, z));
+                    }
+                    // To the west 2
+                    if (x > 1)
+                        nList.push_back(getIndexS(x-2, y, z));
+                }
+
+                // To the east 1
+                if (x < m_xSize - 1)
+                {
+                    nList.push_back(getIndexS(x+1, y, z));
+                    // To the south 1
+                    if (y > 0)
+                    {
+                        nList.push_back(getIndexS(x+1, y-1, z));
+                    }
+                    // To the north 1
+                    if (y < m_ySize - 1)
+                    {
+                        nList.push_back(getIndexS(x+1, y+1, z));
+                    }
+                    // To the east 2
+                    if (x < m_xSize - 2)
+                        nList.push_back(getIndexS(x+2, y, z));
+                }
+
+                // To the south 1
+                if (y > 0)
+                {
+                    nList.push_back(getIndexS(x, y-1, z));
+                    // To the south 2
+                    if (y > 1)
+                        nList.push_back(getIndexS(x, y-2, z));
+                }
+
+                // To the north 2
+                if (y < m_ySize - 1)
+                {
+                    nList.push_back(getIndexS(x, y+1, z));
+                    // To the north 2
+                    if (y < m_ySize - 2)
+                        nList.push_back(getIndexS(x, y+2, z));
+                }
+            }
+            else
+            {
+                // To the west 1
+                if (x > 0)
+                {
+                    nList.push_back(getIndexS(x-1, y, z));
+                    // To the south 1
+                    if (y > 0)
+                    {
+                        nList.push_back(getIndexS(x-1, y-1, z));
+                        // To the down 1
+                        if (z > 0)
+                            nList.push_back(getIndexS(x-1, y-1, z-1));
+                        // To the up 1
+                        if (z < m_zSize - 1)
+                            nList.push_back(getIndexS(x-1, y-1, z+1));
+                    }
+                    // To the north 1
+                    if (y < m_ySize - 1)
+                    {
+                        nList.push_back(getIndexS(x-1, y+1, z));
+                        // To the down 1
+                        if (z > 0)
+                            nList.push_back(getIndexS(x-1, y+1, z-1));
+                        // To the up 1
+                        if (z < m_zSize - 1)
+                            nList.push_back(getIndexS(x-1, y+1, z+1));
+                    }
+                    if (z > 0)
+                        nList.push_back(getIndexS(x-1, y, z-1));
+                    // To the up 1
+                    if (z < m_zSize - 1)
+                        nList.push_back(getIndexS(x-1, y, z+1));
+                    // To the west 2
+                    if (x > 1)
+                        nList.push_back(getIndexS(x-2, y, z));
+                }
+
+                // To the east 1
+                if (x < m_xSize - 1)
+                {
+                    nList.push_back(getIndexS(x+1, y, z));
+                    // To the south 1
+                    if (y > 0)
+                    {
+                        nList.push_back(getIndexS(x+1, y-1, z));
+                        // To the down 1
+                        if (z > 0)
+                            nList.push_back(getIndexS(x+1, y-1, z-1));
+                        // To the up 1
+                        if (z < m_zSize - 1)
+                            nList.push_back(getIndexS(x+1, y-1, z+1));
+                    }
+                    // To the north 1
+                    if (y < m_ySize - 1)
+                    {
+                        nList.push_back(getIndexS(x+1, y+1, z));
+                        // To the down 1
+                        if (z > 0)
+                            nList.push_back(getIndexS(x+1, y+1, z-1));
+                        // To the up 1
+                        if (z < m_zSize - 1)
+                            nList.push_back(getIndexS(x+1, y+1, z+1));
+                    }
+                    if (z > 0)
+                        nList.push_back(getIndexS(x+1, y, z-1));
+                    // To the up 1
+                    if (z < m_zSize - 1)
+                        nList.push_back(getIndexS(x+1, y, z+1));
+                    // To the east 2
+                    if (x < m_xSize - 2)
+                        nList.push_back(getIndexS(x+2, y, z));
+                }
+
+                // To the down 1
+                if (z > 0)
+                {
+                    nList.push_back(getIndexS(x, y, z-1));
+                    // To the south 1
+                    if (y > 0)
+                    {
+                        nList.push_back(getIndexS(x, y-1, z-1));
+                    }
+                    // To the north 1
+                    if (y < m_ySize - 1)
+                    {
+                        nList.push_back(getIndexS(x, y+1, z-1));
+                    }
+                    // To the down 2
+                    if (z > 1)
+                        nList.push_back(getIndexS(x, y, z-2));
+                }
+
+                // To the up 1
+                if (z < m_zSize - 1)
+                {
+                    nList.push_back(getIndexS(x, y, z+1));
+                    // To the south 1
+                    if (y > 0)
+                    {
+                        nList.push_back(getIndexS(x, y-1, z+1));
+                    }
+                    // To the north 1
+                    if (y < m_ySize - 1)
+                    {
+                        nList.push_back(getIndexS(x, y+1, z+1));
+                    }
+                    // To the up 2
+                    if (z < m_zSize - 2)
+                        nList.push_back(getIndexS(x, y, z+2));
+                }
+
+                // To the south 1
+                if (y > 0)
+                {
+                    nList.push_back(getIndexS(x, y-1, z));
+                    // To the south 2
+                    if (y > 1)
+                        nList.push_back(getIndexS(x, y-2, z));
+                }
+
+                // To the north 2
+                if (y < m_ySize - 1)
+                {
+                    nList.push_back(getIndexS(x, y+1, z));
+                    // To the north 2
+                    if (y < m_ySize - 2)
+                        nList.push_back(getIndexS(x, y+2, z));
+                }
+            }
+            break;
+        }
+        default:
+        {
+            qFatal("invalid neighbor list size parameter");
+            break;
+        }
+    }
+
     // Now for the drains....
     // Left
-    if(col == 0)
+    if(x == 0)
     {
         foreach(Agent* agent, m_specialAgents[Grid::Left])
         {
@@ -236,45 +454,54 @@ QVector<int> Grid::neighborsSite(int site)
         }
     }
     // Right
-    if(col == m_xSize - 1)
+    if(x == m_xSize - 1)
     {
         foreach(Agent* agent, m_specialAgents[Grid::Right])
         {
             nList.push_back(agent->getCurrentSite());
         }
     }
-    // Left
-    if(row == 0)
-    {
-        foreach(Agent* agent, m_specialAgents[Grid::Top])
-        {
-            nList.push_back(agent->getCurrentSite());
-        }
-    }
-    // Right
-    if(row == m_ySize - 1)
-    {
-        foreach(Agent* agent, m_specialAgents[Grid::Bottom])
-        {
-            nList.push_back(agent->getCurrentSite());
-        }
-    }
-    // Bottom
-    if(lay == 0)
-    {
-        foreach(Agent* agent, m_specialAgents[Grid::Back])
-        {
-            nList.push_back(agent->getCurrentSite());
-        }
-    }
-    // Top
-    if(lay == m_zSize - 1)
-    {
-        foreach(Agent* agent, m_specialAgents[Grid::Front])
-        {
-            nList.push_back(agent->getCurrentSite());
-        }
-    }
+//    foreach (int s, nList)
+//    {
+//        qDebug() << qPrintable(QString("SITE:     s(%1)     x(%2)     y(%3)     z(%4)     t(%5)")
+//                               .arg(s,3)
+//                               .arg(getIndexX(s),3)
+//                               .arg(getIndexY(s),3)
+//                               .arg(getIndexZ(s),3)
+//                               .arg(Agent::toQString(m_agentType[s])));
+//    }
+//    // Bottom
+//    if(row == 0)
+//    {
+//        foreach(Agent* agent, m_specialAgents[Grid::Top])
+//        {
+//            nList.push_back(agent->getCurrentSite());
+//        }
+//    }
+//    // Top
+//    if(row == m_ySize - 1)
+//    {
+//        foreach(Agent* agent, m_specialAgents[Grid::Bottom])
+//        {
+//            nList.push_back(agent->getCurrentSite());
+//        }
+//    }
+//    // Back
+//    if(lay == 0)
+//    {
+//        foreach(Agent* agent, m_specialAgents[Grid::Back])
+//        {
+//            nList.push_back(agent->getCurrentSite());
+//        }
+//    }
+//    // Front
+//    if(lay == m_zSize - 1)
+//    {
+//        foreach(Agent* agent, m_specialAgents[Grid::Front])
+//        {
+//            nList.push_back(agent->getCurrentSite());
+//        }
+//    }
     return nList;
 }
 
@@ -428,7 +655,7 @@ void Grid::registerAgent(Agent *agent)
     {
         qFatal("can not register agent: site is already occupied");
     }
-    QVector<int> neighbors = neighborsSite(site);
+    QVector<int> neighbors = neighborsSite(site, m_world.parameters().hoppingRange);
     agent->setNeighbors(neighbors);
 }
 

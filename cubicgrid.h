@@ -12,6 +12,8 @@
 namespace Langmuir
 {
 
+class World;
+
 class Grid : public QObject
 {
 private:
@@ -32,7 +34,7 @@ public:
     };
     static QString toQString(const Grid::CubeFace e);
 
-    Grid(int xSize = 0, int ySize = 0, int zSize = 1, QObject *parent = 0);
+    Grid(World &world, QObject *parent = 0);
     ~Grid();
     int xSize();
     int ySize();
@@ -64,7 +66,7 @@ public:
     void addToPotential(int site, double potential);
     void setPotential(int site, double potential);
     double potential(int site);
-    QVector<int> neighborsSite(int site);
+    QVector<int> neighborsSite(int site, int hoppingRange = 1);
     QVector<int> neighborsFace(Grid::CubeFace cubeFace);
     QVector<int> sliceIndex(int xi, int xf, int yi, int yf, int zi, int zf);
     void registerAgent(Agent *agent);
@@ -77,6 +79,7 @@ public:
     QList<Agent *>& getSpecialAgentList(Grid::CubeFace cubeFace);
 
 protected:
+    World &m_world;
     QVector<Agent *> m_agents;
     QVector<double> m_potentials;
     QVector<Agent::Type> m_agentType;

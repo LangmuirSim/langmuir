@@ -199,6 +199,9 @@ struct SimulationParameters
     //! the time this simulation started
     QDateTime simulationStart;
 
+    //! the number of sites away from a given site used when calculating neighboring sites
+    qint32 hoppingRange;
+
     SimulationParameters() :
 
         checkFile              (""),
@@ -263,7 +266,8 @@ struct SimulationParameters
         inverseKT              (0),
         okCL                   (false),
         currentStep            (0),
-        simulationStart        (QDateTime::currentDateTime())
+        simulationStart        (QDateTime::currentDateTime()),
+        hoppingRange           (1)
     {
     }
 
@@ -367,6 +371,11 @@ inline void check(SimulationParameters& par)
     if (par.defectsCharge != 0 && ! par.coulombCarriers)
     {
         qFatal("defects.charge != 0 && coulomb.carriers = false");
+    }
+
+    if (par.hoppingRange < 0 || par.hoppingRange > 2)
+    {
+        qFatal("hopping.range(%d) < 0 || > 2",par.hoppingRange);
     }
 }
 

@@ -24,6 +24,7 @@ public:
         const QList<double>& trapPotentials = QList<double>()
         );
     void updateInteractionEnergies();
+    void updateCouplingConstants();
     double coulombPotentialElectrons(int site);
     double coulombImageXPotentialElectrons(int site);
     double coulombPotentialHoles(int site);

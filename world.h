@@ -52,6 +52,8 @@ public:
     QList<int>& trapSiteIDs();
     QList<double>& trapSitePotentials();
     boost::multi_array<double,3>& interactionEnergies();
+    boost::multi_array<double,3>& couplingConstants();
+    double coupling(int dx, int dy, int dz);
     int maxElectronAgents();
     int maxHoleAgents();
     int maxChargeAgents();
@@ -89,6 +91,7 @@ private:
     QList<int> m_trapSiteIDs;
     QList<double> m_trapSitePotentials;
     boost::multi_array<double,3> m_interactionEnergies;
+    boost::multi_array<double,3> m_couplingConstants;
     int m_maxElectrons;
     int m_maxHoles;
     int m_maxDefects;

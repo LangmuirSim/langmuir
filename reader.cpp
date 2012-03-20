@@ -64,6 +64,7 @@ Reader::Reader(World &world, QObject *parent) :
     registerVariable("ok.cl", m_parameters.okCL, Variable::Constant);
     registerVariable("current.step", m_parameters.currentStep, Variable::Constant);
     registerVariable("simulation.start", m_parameters.simulationStart, Variable::Constant);
+    registerVariable("hopping.range", m_parameters.hoppingRange);
 }
 
 Reader::~Reader()

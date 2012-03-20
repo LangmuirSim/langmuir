@@ -4,6 +4,7 @@
 #include "cubicgrid.h"
 #include "world.h"
 #include "rand.h"
+#include <cmath>
 
 namespace Langmuir
 {
@@ -148,7 +149,7 @@ void Potential::setPotentialTraps(const QList<int> &trapIDs, const QList<double>
     {
         int trapSeedIndex               = m_world.randomNumberGenerator().integer(0, randomIDs.size()-1);
         int trapSeedSite                = randomIDs.at(trapSeedIndex);
-        QVector<int> trapSeedNeighbors  = m_world.electronGrid().neighborsSite(trapSeedSite);
+        QVector<int> trapSeedNeighbors  = m_world.electronGrid().neighborsSite(trapSeedSite,1);
 
         int newTrapIndex                = m_world.randomNumberGenerator().integer(0, trapSeedNeighbors.size()-1);
         int newTrapSite                 = trapSeedNeighbors[newTrapIndex];
@@ -222,6 +223,34 @@ void Potential::updateInteractionEnergies()
             }
         }
     }
+}
+
+void Potential::updateCouplingConstants()
+{
+    //These values are used for moving between sites
+    boost::multi_array<double, 3>& constants = m_world.couplingConstants();
+    constants.resize(boost::extents
+                     [m_world.parameters().hoppingRange+1]
+                     [m_world.parameters().hoppingRange+1]
+                     [m_world.parameters().hoppingRange+1]);
+
+    //Assuming coupling(r=1) is 1/3 and coupling(r=2) is 1/9 for now
+    double c1 = 1.0 /  3.0;
+    double c2 = 1.0 / 81.0;
+    for (int dx = 0; dx < m_world.parameters().hoppingRange+1; dx++)
+    {
+        for (int dy = 0; dy < m_world.parameters().hoppingRange+1; dy++)
+        {
+            for (int dz = 0; dz < m_world.parameters().hoppingRange+1; dz++)
+            {
+                double r = sqrt(dx*dx + dy*dy + dz*dz);
+                double c = c1 * pow(3.0, r - 1) * pow(c2, r - 1);
+                constants[dx][dy][dz] = c;
+                //qDebug() << dx << dy << dz << constants[dx][dy][dz];
+            }
+        }
+    }
+    constants[0][0][0] = 0;
 }
 
 double Potential::coulombPotentialElectrons(int site)

@@ -99,11 +99,17 @@ void ChargeAgent::decideFuture()
             pd += this->coulombInteraction(m_fSite);
         }
 
+        // Calculate the coupling constant...
+        int dx = m_grid.xDistancei(m_site,m_fSite);
+        int dy = m_grid.yDistancei(m_site,m_fSite);
+        int dz = m_grid.zDistancei(m_site,m_fSite);
+        double coupling = m_world.coupling(dx,dy,dz);
+
         // Metropolis criterion
         if(m_world.randomNumberGenerator().randomlyChooseYesWithMetropolisAndCoupling(
                  pd,
                  m_world.parameters().inverseKT,
-                 1.0/3.0))
+                 coupling))
         {
             // Accept move - increase distance traveled
             m_pathlength += 1;

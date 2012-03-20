@@ -147,6 +147,16 @@ boost::multi_array<double,3>& World::interactionEnergies()
     return m_interactionEnergies;
 }
 
+boost::multi_array<double,3>& World::couplingConstants()
+{
+    return m_couplingConstants;
+}
+
+double World::coupling(int dx, int dy, int dz)
+{
+    return m_couplingConstants[dx][dy][dz];
+}
+
 int World::maxElectronAgents()
 {
     return m_maxElectrons;
@@ -289,10 +299,10 @@ void World::initialize(const QString &fileName)
     m_parameters->randomSeed = m_rand->seed();
 
     // Create Electron Grid
-    m_electronGrid = new Grid(parameters().gridX, parameters().gridY, parameters().gridZ, this);
+    m_electronGrid = new Grid(refWorld, this);
 
     // Create Hole Grid
-    m_holeGrid = new Grid(parameters().gridX, parameters().gridY, parameters().gridZ, this);
+    m_holeGrid = new Grid(refWorld, this);
 
     // Calculate the max number of holes
     m_maxHoles = parameters().holePercentage*double(holeGrid().volume());
@@ -386,6 +396,9 @@ void World::initialize(const QString &fileName)
 
     // precalculate and store coulomb interaction energies
     potential().updateInteractionEnergies();
+
+    // precalculate and store coupling constants
+    potential().updateCouplingConstants();
 
     // Generate grid image
     if(parameters().imageDefects)
