@@ -28,6 +28,7 @@ void Simulation::performIterations(int nIterations)
         QList<ChargeAgent*> &electrons = m_world.electrons();
         QList<ChargeAgent*> &holes = m_world.holes();
 
+        // Choose future sites
         for (int i = 0; i < electrons.size(); i++)
         {
             electrons.at(i)->chooseFuture();
@@ -37,18 +38,55 @@ void Simulation::performIterations(int nIterations)
             holes.at(i)->chooseFuture();
         }
 
-        if (m_world.parameters().useOpenCL && (electrons.size()> 0 || holes.size()> 0))
+        // If using OpenCL...
+        if (m_world.parameters().useOpenCL)
         {
-            m_world.opencl().launchCoulombKernel2();
-        }
+            // Don't use OpenCL if there are not that many charges
+            if (m_world.numChargeAgents() < 150)
+            {
+                // Turn off OpenCL
+                m_world.opencl().toggleOpenCL(false);
 
-        for (int i = 0; i < electrons.size(); i++)
-        {
-            electrons.at(i)->decideFuture();
+                // Decide future with CPU values
+                for (int i = 0; i < electrons.size(); i++)
+                {
+                    electrons.at(i)->decideFuture();
+                }
+                for (int i = 0; i < holes.size(); i++)
+                {
+                    holes.at(i)->decideFuture();
+                }
+
+                // Turn on OpenCL
+                m_world.opencl().toggleOpenCL(true);
+            }
+            else
+            {
+                // Use OpenCL if there are a lot of charges
+                m_world.opencl().launchCoulombKernel2();
+
+                // Decide future with the OpenCL values
+                for (int i = 0; i < electrons.size(); i++)
+                {
+                    electrons.at(i)->decideFuture();
+                }
+                for (int i = 0; i < holes.size(); i++)
+                {
+                    holes.at(i)->decideFuture();
+                }
+            }
         }
-        for (int i = 0; i < holes.size(); i++)
+        else
         {
-            holes.at(i)->decideFuture();
+            // Decide future with CPU values
+            for (int i = 0; i < electrons.size(); i++)
+            {
+                electrons.at(i)->decideFuture();
+            }
+            for (int i = 0; i < holes.size(); i++)
+            {
+                holes.at(i)->decideFuture();
+            }
         }
         // If using OpenCL, launch the Kernel to calculate Coulomb Interactions
 //        if(m_world.parameters().useOpenCL &&(electrons.size()> 0 || holes.size()> 0))

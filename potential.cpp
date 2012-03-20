@@ -234,9 +234,9 @@ void Potential::updateCouplingConstants()
                      [m_world.parameters().hoppingRange+1]
                      [m_world.parameters().hoppingRange+1]);
 
-    //Assuming coupling(r=1) is 1/3 and coupling(r=2) is 1/9 for now
+    //Assuming coupling(r=1) is 1/3 and coupling(r=2) is 1/27 for now
     double c1 = 1.0 /  3.0;
-    double c2 = 1.0 / 81.0;
+    double c2 = 1.0 / 27.0;
     for (int dx = 0; dx < m_world.parameters().hoppingRange+1; dx++)
     {
         for (int dy = 0; dy < m_world.parameters().hoppingRange+1; dy++)
