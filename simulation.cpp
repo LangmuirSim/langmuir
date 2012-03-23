@@ -135,7 +135,8 @@ void Simulation::performIterations(int nIterations)
     m_world.logger().reportFluxStream();
 
     // Output Coulomb Energy
-    if ( m_world.parameters().outputCoulomb > 0 &&
+    if ( m_world.numChargeAgents() > 0 &&
+         m_world.parameters().outputCoulomb > 0 &&
          m_world.parameters().currentStep %
         (m_world.parameters().iterationsPrint *
          m_world.parameters().outputCoulomb) == 0

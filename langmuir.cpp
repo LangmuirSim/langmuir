@@ -88,8 +88,11 @@ int main (int argc, char *argv[])
     // Output Image of Carriers
     if (par.outputCoulomb == -1)
     {
-        world.opencl().launchCoulombKernel1();
-        world.logger().saveCoulombEnergy();
+        if (world.numChargeAgents() > 0)
+        {
+            world.opencl().launchCoulombKernel1();
+            world.logger().saveCoulombEnergy();
+        }
     }
 
     // Output Image of Carriers
