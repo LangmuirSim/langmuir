@@ -92,7 +92,7 @@ ADD_DEFINITIONS(-Wall -O2)
 
 ################################################################################
 
-FIND_PACKAGE(Boost REQUIRED COMPONENTS program_options)
+FIND_PACKAGE(Boost REQUIRED)
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${BOOST_PYTHON_INCLUDES})
 
