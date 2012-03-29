@@ -106,7 +106,7 @@ int main (int argc, char *argv[])
     // Output time
     if (par.outputIsOn)
     {
-        OutputStream timerStream("%path/time.dat",&par);
+        OutputStream timerStream("%path/%stub.time",&par);
 
         timerStream << right
                     << qSetFieldWidth(20)
