@@ -78,7 +78,7 @@ SET(PROJECT_DATA
 
 ################################################################################
 
-SET(QT_MIN_VERSION 4.7)
+SET(QT_MIN_VERSION 4.0.1)
 SET(QT_USE_QTOPENGL TRUE)
 FIND_PACKAGE(Qt4 REQUIRED)
 INCLUDE(${QT_USE_FILE})
