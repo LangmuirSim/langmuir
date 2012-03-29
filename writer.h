@@ -123,21 +123,21 @@ public:
     //! does nothing \see LoggerOn::LoggerOn
     Logger(World &world, QObject *parent = 0) : QObject(parent) {}
     //! does nothing \see LoggerOn::saveTrapImage
-    virtual void saveTrapImage(const QString& name = "%path/%stub-%sim-traps.png") {}
+    virtual void saveTrapImage(const QString& name = "%path/%stub-traps.png") {}
     //! does nothing \see LoggerOn::saveHoleImage
-    virtual void saveHoleImage(const QString& name = "%path/%stub-%sim-%step-holes.png") {}
+    virtual void saveHoleImage(const QString& name = "%path/%stub-%step-holes.png") {}
     //! does nothing \see LoggerOn::saveElectronImage
-    virtual void saveElectronImage(const QString& name = "%path/%stub-%sim-%step-electrons.png") {}
+    virtual void saveElectronImage(const QString& name = "%path/%stub-%step-electrons.png") {}
     //! does nothing \see LoggerOn::saveElectronImage
-    virtual void saveCarriersImage(const QString& name = "%path/%stub-%sim-%step-carriers.png") {}
+    virtual void saveCarriersImage(const QString& name = "%path/%stub-%step-carriers.png") {}
     //! does nothing \see LoggerOn::saveDefectImage
-    virtual void saveDefectImage(const QString& name = "%path/%stub-%sim-defects.png") {}
+    virtual void saveDefectImage(const QString& name = "%path/%stub-defects.png") {}
     //! does nothing \see LoggerOn::saveImage
-    virtual void saveImage(const QString& name = "%path/%stub-%sim-%step-all.png") {}
+    virtual void saveImage(const QString& name = "%path/%stub-%step-all.png") {}
     //! does nothing \see LoggerOn::saveGridPotential
-    virtual void saveGridPotential(const QString& name = "%path/%stub-%sim-grid.dat") {}
+    virtual void saveGridPotential(const QString& name = "%path/%stub.grid") {}
     //! does nothing \see LoggerOn::saveCoulombEnergy
-    virtual void saveCoulombEnergy(const QString& name = "%path/%stub-%sim-%step-coulomb.dat") {}
+    virtual void saveCoulombEnergy(const QString& name = "%path/%stub-%step.coulomb") {}
     //! does nothing \see LoggerOn::reportFluxStream
     virtual void reportFluxStream() {}
     //! does nothing \see LoggerOn::reportXYZStream
@@ -151,15 +151,15 @@ class LoggerOn : public Logger
 public:
     LoggerOn(World &world, QObject *parent = 0);
 
-    virtual void saveTrapImage(const QString& name = "%path/%stub-%sim-traps.png");
-    virtual void saveHoleImage(const QString& name = "%path/%stub-%sim-%step-holes.png");
-    virtual void saveElectronImage(const QString& name = "%path/%stub-%sim-%step-electrons.png");
-    virtual void saveCarriersImage(const QString& name = "%path/%stub-%sim-%step-carriers.png");
-    virtual void saveDefectImage(const QString& name = "%path/%stub-%sim-defects.png");
-    virtual void saveImage(const QString& name = "%path/%stub-%sim-%step-all.png");
+    virtual void saveTrapImage(const QString& name = "%path/%stub-traps.png");
+    virtual void saveHoleImage(const QString& name = "%path/%stub-%step-holes.png");
+    virtual void saveElectronImage(const QString& name = "%path/%stub-%step-electrons.png");
+    virtual void saveCarriersImage(const QString& name = "%path/%stub-%step-carriers.png");
+    virtual void saveDefectImage(const QString& name = "%path/%stub-defects.png");
+    virtual void saveImage(const QString& name = "%path/%stub-%step-all.png");
 
-    virtual void saveGridPotential(const QString& name = "%path/%stub-%sim-grid.dat");
-    virtual void saveCoulombEnergy(const QString& name = "%path/%stub-%sim-%step-coulomb.dat");
+    virtual void saveGridPotential(const QString& name = "%path/%stub.grid");
+    virtual void saveCoulombEnergy(const QString& name = "%path/%stub-%step.coulomb");
 
     virtual void reportFluxStream();
     virtual void reportXYZStream();

@@ -19,7 +19,7 @@ public:
     ~Reader();
 
     void load(const QString& fileName);
-    void save(const QString& fileName = "%path/%stub.inp");
+    void save(const QString& fileName = "%path/%stub.parm");
 
     friend QTextStream& operator<<(QTextStream& stream, const Reader &reader);
     friend QDataStream& operator<<(QDataStream &stream, const Reader &reader);
