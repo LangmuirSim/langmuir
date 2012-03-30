@@ -1,0 +1,33 @@
+simulation.type         = solarcell
+
+grid.x                  = 96
+grid.y                  = 96
+grid.z                  = 1
+
+coulomb.carriers        = true
+defects.charge          = 0
+
+output.is.on            = false
+iterations.print        = 5
+
+electron.percentage     = 0.10
+hole.percentage         = 0.10
+
+defect.percentage       = 0.00
+trap.percentage         = 0.00
+trap.potential          = 0.00
+gaussian.stdev          = 0.00
+seed.percentage         = 0.00
+
+voltage.right           = 7.50
+voltage.left            = 0.00
+source.rate             = 0.01
+drain.rate              = 0.90
+
+temperature.kelvin      = 300.0
+
+use.opencl              = true
+work.x                  = 4
+work.y                  = 4
+work.z                  = 4
+work.size               = 256
