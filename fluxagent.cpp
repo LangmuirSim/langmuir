@@ -45,11 +45,23 @@ unsigned long int FluxAgent::successes()const
     return m_successes;
 }
 
-double FluxAgent::successRate()const
+double FluxAgent::successProbability()const
 {
     if(m_attempts > 0)
     {
         return double(m_successes)/double(m_attempts)*100.0;
+    }
+    else
+    {
+        return 0.0;
+    }
+}
+
+double FluxAgent::successRate()const
+{
+    if(m_world.parameters().currentStep > 0)
+    {
+        return double(m_successes)/double(m_world.parameters().currentStep);
     }
     else
     {

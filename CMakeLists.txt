@@ -26,6 +26,7 @@ potential.cpp
 output.cpp
 reader.cpp
 checkpointer.cpp
+tolerance.cpp
 )
 
 SET(PROJECT_HEADERS
@@ -45,6 +46,7 @@ simulation.h
 output.h
 variable.h
 checkpointer.h
+tolerance.h
 )
 
 SET(PROJECT_MOC_HEADERS_1
@@ -60,6 +62,7 @@ output.h
 reader.h
 variable.h
 checkpointer.h
+tolerance.h
 )
 
 SET(PROJECT_MOC_HEADERS_2

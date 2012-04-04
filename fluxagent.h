@@ -16,6 +16,7 @@ public:
     ~FluxAgent();
     unsigned long int attempts()const;
     unsigned long int successes()const;
+    double successProbability()const;
     double successRate()const;
     Grid::CubeFace face()const;
     void resetCounters();
