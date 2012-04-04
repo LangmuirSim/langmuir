@@ -23,7 +23,9 @@ public:
     int pathlength();
     void setOpenCLID(int id);
     int getOpenCLID();
-    double coulombInteraction(int newSite);
+    double coulombInteraction();
+    void coulombCPU();
+    void coulombGPU();
     Grid& getGrid();
 
 protected:
@@ -34,6 +36,7 @@ protected:
     int m_pathlength;
     Grid &m_grid;
     int m_openClID;
+    double m_de;
 };
 
 class ElectronAgent : public ChargeAgent

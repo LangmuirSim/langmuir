@@ -19,6 +19,7 @@ ChargeAgent::ChargeAgent(Agent::Type type, World &world, Grid &grid, int site,QO
     m_lifetime = 0;
     m_pathlength = 0;
     m_openClID = 0;
+    m_de = 0;
 }
 
 ElectronAgent::ElectronAgent(World &world, int site, QObject *parent)
@@ -73,6 +74,7 @@ void ChargeAgent::chooseFuture()
 {
     // Select a proposed transport site at random
     m_fSite = m_neighbors[m_world.randomNumberGenerator().integer(0, m_neighbors.size()-1)];
+    m_de = 0;
 }
 
 Grid& ChargeAgent::getGrid()
@@ -94,10 +96,8 @@ void ChargeAgent::decideFuture()
         pd *= m_charge;
 
         // Coulomb interactions
-        if(m_world.parameters().coulombCarriers)
-        {
-            pd += this->coulombInteraction(m_fSite);
-        }
+        // Don't worry, it's zero if coulomb interactions are off
+        pd += m_de;
 
         // Calculate the coupling constant...
         int dx = m_grid.xDistancei(m_site,m_fSite);
@@ -181,46 +181,73 @@ void ChargeAgent::completeTick()
     }
 }
 
-double ChargeAgent::coulombInteraction(int newSite)
+double ChargeAgent::coulombInteraction()
+{
+    if(m_world.parameters().useOpenCL)
+    {
+        coulombGPU();
+        return m_de;
+    }
+    else
+    {
+        coulombCPU();
+        return m_de;
+    }
+}
+
+void ChargeAgent::coulombCPU()
 {
     double p1 = 0;
     double p2 = 0;
 
-    if(m_world.parameters().useOpenCL)
+    // Electrons
+    p1 += m_world.potential().coulombPotentialElectrons(m_site);
+    p2 += m_world.potential().coulombPotentialElectrons(m_fSite);
+
+    // Holes
+    p1 += m_world.potential().coulombPotentialHoles(m_site);
+    p2 += m_world.potential().coulombPotentialHoles(m_fSite);
+
+    // Remove self interaction
+    p2 -= m_world.interactionEnergies()[1][0][0] * m_charge;
+
+    // Charged defects
+    if(m_world.parameters().defectsCharge != 0)
     {
-        // Assuming the GPU calculation output was copied to the CPU already
-        p1 += m_world.opencl().getOutputHost(m_openClID);
-        p2 += m_world.opencl().getOutputHostFuture(m_openClID);
-
-        // Remove self interaction
-        p2 -= m_world.interactionEnergies()[1][0][0] * m_charge;
-    }
-    else
-    {
-        // Electrons
-        p1 += m_world.potential().coulombPotentialElectrons(m_site);
-        p2 += m_world.potential().coulombPotentialElectrons(newSite);
-
-        // Holes
-        p1 += m_world.potential().coulombPotentialHoles(m_site);
-        p2 += m_world.potential().coulombPotentialHoles(newSite);
-
-        // Remove self interaction
-        p2 -= m_world.interactionEnergies()[1][0][0] * m_charge;
-
-        // Charged defects
-        if(m_world.parameters().defectsCharge != 0)
-        {
-            p1 += m_world.potential().coulombPotentialDefects(m_site);
-            p2 += m_world.potential().coulombPotentialDefects(newSite);
-        }
+        p1 += m_world.potential().coulombPotentialDefects(m_site);
+        p2 += m_world.potential().coulombPotentialDefects(m_fSite);
     }
 
     //When holes and electrons on on the same site the interaction is not zero
-    p2 += bindingPotential(newSite);
+    p2 += bindingPotential(m_fSite);
     p1 += bindingPotential(m_site);
 
-    return m_charge *(p2 - p1);
+    m_de = m_charge *(p2 - p1);
+}
+
+void ChargeAgent::coulombGPU()
+{
+    double p1 = 0;
+    double p2 = 0;
+
+    // Assuming the GPU calculation output was copied to the CPU already
+    p1 += m_world.opencl().getOutputHost(m_openClID);
+    p2 += m_world.opencl().getOutputHostFuture(m_openClID);
+
+    // Remove self interaction
+    p2 -= m_world.interactionEnergies()[1][0][0] * m_charge;
+
+    //When holes and electrons on on the same site the interaction is not zero
+    p2 += bindingPotential(m_fSite);
+    p1 += bindingPotential(m_site);
+
+    //Check the answer!
+    //coulombCPU();
+    //double GPU = m_charge *(p2 - p1);
+    //double CPU = m_de;
+    //qDebug() << GPU << CPU << fabs(GPU-CPU);
+
+    m_de = m_charge *(p2 - p1);
 }
 
 double HoleAgent::bindingPotential(int site)

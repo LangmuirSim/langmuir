@@ -22,63 +22,45 @@ Simulation::~Simulation()
 
 void Simulation::performIterations(int nIterations)
 {
-    for(int i = 0; i < nIterations; ++i)
+    // Do some parallel stuff if using Coulomb interactions
+    if (m_world.parameters().coulombCarriers)
     {
-        // Attempt to transport the charges through the film
-        QList<ChargeAgent*> &electrons = m_world.electrons();
-        QList<ChargeAgent*> &holes = m_world.holes();
+        for(int i = 0; i < nIterations; ++i)
+        {
+            QList<ChargeAgent*> &electrons = m_world.electrons();
+            QList<ChargeAgent*> &holes = m_world.holes();
 
-        // Choose future sites
-        for (int i = 0; i < electrons.size(); i++)
-        {
-            electrons.at(i)->chooseFuture();
-        }
-        for (int i = 0; i < holes.size(); i++)
-        {
-            holes.at(i)->chooseFuture();
-        }
-
-        // If using OpenCL...
-        if (m_world.parameters().useOpenCL)
-        {
-            // Don't use OpenCL if there are not that many charges
-            if (m_world.numChargeAgents() < 150)
+            // Select future sites in serial (because random number generator is being used)
+            for (int i = 0; i < electrons.size(); i++)
             {
-                // Turn off OpenCL
-                m_world.opencl().toggleOpenCL(false);
+                electrons.at(i)->chooseFuture();
+            }
+            for (int i = 0; i < holes.size(); i++)
+            {
+                holes.at(i)->chooseFuture();
+            }
 
-                // Decide future with CPU values
-                for (int i = 0; i < electrons.size(); i++)
-                {
-                    electrons.at(i)->decideFuture();
-                }
-                for (int i = 0; i < holes.size(); i++)
-                {
-                    holes.at(i)->decideFuture();
-                }
+            // Calculate the coulomb interactions in parallel some way or another
+            if (m_world.parameters().useOpenCL && m_world.numChargeAgents() > 150)
+            {
+                    // Use OpenCL if there are a lot of charges
+                    m_world.opencl().launchCoulombKernel2();
 
-                // Turn on OpenCL
-                m_world.opencl().toggleOpenCL(true);
+                    QFutureSynchronizer<void> sync;
+                    sync.addFuture(QtConcurrent::map(electrons, Simulation::chargeAgentCoulombInteractionQtConcurrentGPU));
+                    sync.addFuture(QtConcurrent::map(holes, Simulation::chargeAgentCoulombInteractionQtConcurrentGPU));
+                    sync.waitForFinished();
             }
             else
             {
-                // Use OpenCL if there are a lot of charges
-                m_world.opencl().launchCoulombKernel2();
-
-                // Decide future with the OpenCL values
-                for (int i = 0; i < electrons.size(); i++)
-                {
-                    electrons.at(i)->decideFuture();
-                }
-                for (int i = 0; i < holes.size(); i++)
-                {
-                    holes.at(i)->decideFuture();
-                }
+                // Use multi threaded CPU if there are not many charges or when we can not use OpenCL
+                QFutureSynchronizer<void> sync;
+                sync.addFuture(QtConcurrent::map(electrons, Simulation::chargeAgentCoulombInteractionQtConcurrentCPU));
+                sync.addFuture(QtConcurrent::map(holes, Simulation::chargeAgentCoulombInteractionQtConcurrentCPU));
+                sync.waitForFinished();
             }
-        }
-        else
-        {
-            // Decide future with CPU values
+
+            // Decide future in serial (because random number generator is being used)
             for (int i = 0; i < electrons.size(); i++)
             {
                 electrons.at(i)->decideFuture();
@@ -87,48 +69,53 @@ void Simulation::performIterations(int nIterations)
             {
                 holes.at(i)->decideFuture();
             }
+
+            // Now we are done with the charge movement, move them to the next tick!
+            nextTick();
+
+            // Perform charge injection at the source
+            performInjections();
+
+            m_world.parameters().currentStep += 1;
         }
-        // If using OpenCL, launch the Kernel to calculate Coulomb Interactions
-//        if(m_world.parameters().useOpenCL &&(electrons.size()> 0 || holes.size()> 0))
-//        {
-//            // first have the charge carriers propose future sites
-//            //for(int j = 0; j < charges.size(); j++)charges[j]->chooseFuture(j);
-//            QFuture < void > future1 = QtConcurrent::map(electrons, Simulation::chargeAgentChooseFuture);
-//            QFuture < void > future2 = QtConcurrent::map(holes, Simulation::chargeAgentChooseFuture);
-//            future1.waitForFinished();
-//            future2.waitForFinished();
+    }
 
-//            // tell the GPU to perform all coulomb calculations
-//            m_world.opencl().launchCoulombKernel2();
+    // Skip the parallel stuff if no Coulomb interactions
+    else
+    {
+        for(int i = 0; i < nIterations; ++i)
+        {
+            QList<ChargeAgent*> &electrons = m_world.electrons();
+            QList<ChargeAgent*> &holes = m_world.holes();
 
-//            //check the answer during debugging
-//            //m_world.opencl().compareHostAndDeviceForAllCarriers();
-//            //qFatal("done");
+            // Select future sites in serial (because random number generator is being used)
+            for (int i = 0; i < electrons.size(); i++)
+            {
+                electrons.at(i)->chooseFuture();
+            }
+            for (int i = 0; i < holes.size(); i++)
+            {
+                holes.at(i)->chooseFuture();
+            }
 
-//            // now use the results of the coulomb calculations to decide if the carreirs should have moved
-//            future1 = QtConcurrent::map(electrons, Simulation::chargeAgentDecideFuture);
-//            future2 = QtConcurrent::map(holes, Simulation::chargeAgentDecideFuture);
-//            future1.waitForFinished();
-//            future2.waitForFinished();
-//        }
-//        else // Not using OpenCL
-//        {
-//            // Use QtConcurrnet to parallelise the charge calculations
-//            QFuture < void > future1 = QtConcurrent::map(electrons, Simulation::chargeAgentIterate);
-//            QFuture < void > future2 = QtConcurrent::map(holes, Simulation::chargeAgentIterate);
+            // Decide future in serial (because random number generator is being used)
+            for (int i = 0; i < electrons.size(); i++)
+            {
+                electrons.at(i)->decideFuture();
+            }
+            for (int i = 0; i < holes.size(); i++)
+            {
+                holes.at(i)->decideFuture();
+            }
 
-//            // We want to wait for it to finish before continuing on
-//            future1.waitForFinished();
-//            future2.waitForFinished();
-//        }
+            // Now we are done with the charge movement, move them to the next tick!
+            nextTick();
 
-        // Now we are done with the charge movement, move them to the next tick!
-        nextTick();
+            // Perform charge injection at the source
+            performInjections();
 
-        // Perform charge injection at the source
-        performInjections();
-
-        m_world.parameters().currentStep += 1;
+            m_world.parameters().currentStep += 1;
+        }
     }
 
     // Output Source and Drain information
@@ -238,25 +225,14 @@ void Simulation::nextTick()
     }
 }
 
-inline void Simulation::chargeAgentIterate(ChargeAgent * chargeAgent)
+inline void Simulation::chargeAgentCoulombInteractionQtConcurrentCPU(ChargeAgent * chargeAgent)
 {
-    // This function performs a single iteration for a charge agent, only thread
-    // safe calls can be made in this function. Other threads may access the
-    // current state of the chargeAgent, but will not attempt to modify it.
-    chargeAgent->chooseFuture();
-    chargeAgent->decideFuture();
+    chargeAgent->coulombCPU();
 }
 
-inline void Simulation::chargeAgentChooseFuture(ChargeAgent * chargeAgent)
+inline void Simulation::chargeAgentCoulombInteractionQtConcurrentGPU(ChargeAgent * chargeAgent)
 {
-    // same rules apply here as for chargeAgentIterate;
-    chargeAgent->chooseFuture();
-}
-
-inline void Simulation::chargeAgentDecideFuture(ChargeAgent * chargeAgent)
-{
-    // same rules apply here as for chargeAgentIterate;
-    chargeAgent->decideFuture();
+    chargeAgent->coulombGPU();
 }
 
 }

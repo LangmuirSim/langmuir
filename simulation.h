@@ -30,9 +30,8 @@ public:
 protected:
     void performInjections();
     void nextTick();
-    static void chargeAgentIterate(ChargeAgent * chargeAgent);
-    static void chargeAgentChooseFuture(ChargeAgent * chargeAgent);
-    static void chargeAgentDecideFuture(ChargeAgent * chargeAgent);
+    static void chargeAgentCoulombInteractionQtConcurrentCPU(ChargeAgent * chargeAgent);
+    static void chargeAgentCoulombInteractionQtConcurrentGPU(ChargeAgent * chargeAgent);
     World &m_world;
 };
 
