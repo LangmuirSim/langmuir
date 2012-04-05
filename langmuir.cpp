@@ -32,7 +32,7 @@ int main (int argc, char *argv[])
     QString timeFMT = "hh:mm:ss:zzz:AP";
 
     // Create the application
-    QApplication app(argc, argv);
+    QCoreApplication app(argc, argv);
 
     // Get the input file
     QStringList args = app.arguments();
