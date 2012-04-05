@@ -242,4 +242,136 @@ QDataStream& operator>>(QDataStream& stream, Random& random)
     return stream;
 }
 
+QTextStream& operator<<(QTextStream& stream, Random& random)
+{
+    std::stringstream sstream;
+    sstream << *random.twister;
+    if (sstream.fail() || sstream.bad())
+    {
+        qFatal("can not save state of random number generator to QTextStream; "
+               "std::stringstream has failed on write");
+    }
+    QList<quint64> state;
+    quint64 value;
+    sstream >> value;
+    while(!sstream.eof())
+    {
+        if (sstream.fail() || sstream.bad())
+        {
+            qFatal("can not save state of random number generator to QTextStream; "
+                   "std::stringstream has failed on read");
+        }
+        state.push_back(value);
+        sstream >> value;
+    }
+    stream << quint64(random.m_seed);
+    stream << " " << quint64(state.size());
+    for (int i = 0; i < state.size(); i++)
+    {
+        stream << " " << quint64(state.at(i));
+    }
+    return stream;
+}
+
+QTextStream& operator>>(QTextStream& stream, Random& random)
+{
+    stream >> random.m_seed;
+    switch (stream.status())
+    {
+    case QTextStream::Ok:
+    {
+        break;
+    }
+    case QTextStream::ReadPastEnd:
+    {
+        qFatal("can not load state of random number generator from QTextStream, random.seed: "
+               "QTextStream::ReadPastEnd");
+        break;
+    }
+    case QTextStream::ReadCorruptData:
+    {
+        qFatal("can not load state of random number generator from QTextStream, random.seed: "
+               "QTextStream::ReadCorruptData");
+        break;
+    }
+    default:
+    {
+        qFatal("can not load state of random number generator from QTextStream, random.seed: "
+               "QTextStream::Status unknown");
+    break;
+    }
+    }
+    quint64 size;
+    stream >> size;
+    switch (stream.status())
+    {
+    case QTextStream::Ok:
+    {
+        break;
+    }
+    case QTextStream::ReadPastEnd:
+    {
+        qFatal("can not load state of random number generator from QTextStream, state.size(): "
+               "QTextStream::ReadPastEnd");
+        break;
+    }
+    case QTextStream::ReadCorruptData:
+    {
+        qFatal("can not load state of random number generator from QTextStream, state.size(): "
+               "QTextStream::ReadCorruptData");
+        break;
+    }
+    default:
+    {
+        qFatal("can not load state of random number generator from QTextStream, state.size(): "
+               "QTextStream::Status unknown");
+    break;
+    }
+    }
+    std::stringstream sstream;
+    for (int i = 0; i < int(size); i++)
+    {
+        quint64 value = 0;
+        stream >> value;
+        switch (stream.status())
+        {
+        case QTextStream::Ok:
+        {
+            break;
+        }
+        case QTextStream::ReadPastEnd:
+        {
+            qFatal("can not load state of random number generator from QTextStream: state.at(%d)"
+                   "QTextStream::ReadPastEnd",i);
+            break;
+        }
+        case QTextStream::ReadCorruptData:
+        {
+            qFatal("can not load state of random number generator from QTextStream: state.at(%d)"
+                   "QTextStream::ReadCorruptData",i);
+            break;
+        }
+        default:
+        {
+            qFatal("can not load state of random number generator from QTextStream: state.at(%d)"
+                   "QTextStream::Status unknown",i);
+        break;
+        }
+        }
+        sstream << value << " ";
+        if (sstream.fail() || sstream.bad())
+        {
+            qFatal("can not load state of random number generator from QTextStream; state.at(%d)"
+                   "std::stringstream has failed on write", i);
+        }
+    }
+    sstream >> *random.twister;
+    if (sstream.fail() || sstream.bad())
+    {
+        qFatal("can not load state of random number generator from QTextStream; "
+               "std::stringstream has failed on read");
+    }
+    return stream;
+}
+
 }

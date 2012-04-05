@@ -5,6 +5,7 @@
 #include <boost/random.hpp>
 #include <QObject>
 #include <QDataStream>
+#include <QTextStream>
 
 namespace Langmuir
 {
@@ -34,6 +35,8 @@ public:
     bool randomlyChooseNoWithPercent(double percent);
     friend QDataStream& operator<<(QDataStream& stream, Random& random);
     friend QDataStream& operator>>(QDataStream& stream, Random& random);
+    friend QTextStream& operator<<(QTextStream& stream, Random& random);
+    friend QTextStream& operator>>(QTextStream& stream, Random& random);
 
 private:
     boost::mt19937 *twister;
