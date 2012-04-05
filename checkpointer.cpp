@@ -269,4 +269,37 @@ void CheckPointer::checkDataStream(QDataStream& stream, const QString& message)
     }
 }
 
+void CheckPointer::checkTextStream(QTextStream& stream, const QString& message)
+{
+    switch (stream.status())
+    {
+    case QTextStream::Ok:
+    {
+        return;
+        break;
+    }
+    case QTextStream::ReadPastEnd:
+    {
+        QString error = "binary stream read error: QTextStream::ReadPastEnd";
+        if (!message.isEmpty()) { error += QString("\n\t%1").arg(message); }
+        qFatal("%s",qPrintable(error));
+        break;
+    }
+    case QTextStream::ReadCorruptData:
+    {
+        QString error = "binary stream read error: QTextStream::ReadCorruptData";
+        if (!message.isEmpty()) { error += QString("\n\t%1").arg(message); }
+        qFatal("%s",qPrintable(error));
+        break;
+    }
+    default:
+    {
+        QString error = "binary stream error: QTextStream::Status unknown";
+        if (!message.isEmpty()) { error += QString("\n\t%1").arg(message); }
+        qFatal("%s",qPrintable(error));
+        break;
+    }
+    }
+}
+
 }

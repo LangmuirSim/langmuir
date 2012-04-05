@@ -20,6 +20,7 @@ public:
     void load(const QString& fileName, SimulationSiteInfo &siteInfo);
     void save(const QString& fileName = "%path/%stub.bin");
     void checkDataStream(QDataStream& stream, const QString& message = "");
+    void checkTextStream(QTextStream& stream, const QString& message = "");
 
 private:
     World &m_world;
