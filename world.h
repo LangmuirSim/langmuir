@@ -13,7 +13,7 @@ class Grid;
 class Agent;
 class Random;
 class Logger;
-class Reader;
+class KeyValueParser;
 class Potential;
 class FluxAgent;
 class DrainAgent;
@@ -34,7 +34,7 @@ public:
     //World(SimulationParameters &par, QObject *parent = 0);
     World(const QString& fileName, QObject *parent = 0);
     ~World();
-    Reader& reader();
+    KeyValueParser& keyValueParser();
     CheckPointer& checkPointer();
     Grid& electronGrid();
     Grid& holeGrid();
@@ -73,7 +73,7 @@ public:
     double percentElectronAgents();
 
 private:
-    Reader *m_reader;
+    KeyValueParser *m_keyValueParser;
     CheckPointer *m_checkPointer;
     QList<SourceAgent*> m_sources;
     QList<DrainAgent*> m_drains;

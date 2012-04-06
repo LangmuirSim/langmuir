@@ -1,5 +1,5 @@
-#ifndef READER_H
-#define READER_H
+#ifndef KEYVALUEPARSER_H
+#define KEYVALUEPARSER_H
 
 #include <QObject>
 
@@ -11,35 +11,29 @@ namespace Langmuir
 {
 
 //! Read the parameters and store them in the correct place
-class Reader : public QObject
+class KeyValueParser : public QObject
 {
     Q_OBJECT
 public:
-    explicit Reader(World& world, QObject *parent = 0);
-    ~Reader();
-
-    void load(const QString& fileName);
-    void save(const QString& fileName = "%path/%stub.parm");
-
-    friend QTextStream& operator<<(QTextStream& stream, const Reader &reader);
-    friend QDataStream& operator<<(QDataStream &stream, const Reader &reader);
-    friend QDataStream& operator>>(QDataStream &stream, const Reader &reader);
+    KeyValueParser(World& world, QObject *parent = 0);
+   ~KeyValueParser();
 
     SimulationParameters& parameters();
+    void parse(const QString& line);
+    friend std::ostream& operator<<(std::ostream &stream, const KeyValueParser &keyValueParser);
 
 private:
     QMap<QString,Variable*> m_variableMap;
     SimulationParameters m_parameters;
     World& m_world;
 
-    void parse(const QString& line);
     template <typename T> void registerVariable(
         const QString &key,
         T &value,
         Variable::VariableMode mode = 0);
 };
 
-template <typename T> void Reader::registerVariable(
+template <typename T> void KeyValueParser::registerVariable(
     const QString &key,
     T &value,
     Variable::VariableMode mode)
@@ -54,4 +48,4 @@ template <typename T> void Reader::registerVariable(
 
 }
 
-#endif // READER_H
+#endif // KEYVALUEPARSER_H

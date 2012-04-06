@@ -24,7 +24,7 @@ cubicgrid.cpp
 fluxagent.cpp
 potential.cpp
 output.cpp
-reader.cpp
+keyvalueparser.cpp
 checkpointer.cpp
 tolerance.cpp
 )
@@ -59,7 +59,7 @@ simulation.h
 world.h
 rand.h
 output.h
-reader.h
+keyvalueparser.h
 variable.h
 checkpointer.h
 tolerance.h

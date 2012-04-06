@@ -25,24 +25,11 @@ struct SimulationSiteInfo
     QList<qint32> traps;
 
     //! a list of current traps site IDs
-    QList<qreal> potentials;
-
-    //! clear the lists
-    void clear()
-    {
-        electrons.clear();
-        holes.clear();
-        defects.clear();
-        traps.clear();
-        potentials.clear();
-    }
+    QList<qreal> trapPotentials;
 };
 
 struct SimulationParameters
 {
-    //! name of the input parameters file
-    QString checkFile;
-
     //! tells Langmuir how to set up the Sources and Drains: (\b\c "transistor", \b\c "solarcell")
     QString simulationType;
 
@@ -204,7 +191,6 @@ struct SimulationParameters
 
     SimulationParameters() :
 
-        checkFile              (""),
         simulationType         ("transistor"),
         randomSeed             (0),
 

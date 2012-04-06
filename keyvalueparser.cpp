@@ -1,17 +1,17 @@
-#include "reader.h"
+#include "keyvalueparser.h"
 #include <QDebug>
 #include <QRegExp>
 #include <QStringList>
 #include <QFile>
 #include "output.h"
+#include <ostream>
 
 namespace Langmuir
 {
 
-Reader::Reader(World &world, QObject *parent) :
+KeyValueParser::KeyValueParser(World &world, QObject *parent) :
     QObject(parent), m_world(world)
 {
-    registerVariable("use.checkpoint", m_parameters.checkFile);
     registerVariable("simulation.type", m_parameters.simulationType);
     registerVariable("random.seed", m_parameters.randomSeed);
     registerVariable("grid.z", m_parameters.gridZ);
@@ -62,16 +62,16 @@ Reader::Reader(World &world, QObject *parent) :
     registerVariable("electrostatic.prefactor", m_parameters.electrostaticPrefactor, Variable::Constant);
     registerVariable("inverse.kt", m_parameters.inverseKT, Variable::Constant);
     registerVariable("ok.cl", m_parameters.okCL, Variable::Constant);
-    registerVariable("current.step", m_parameters.currentStep, Variable::Constant);
+    registerVariable("current.step", m_parameters.currentStep);
     registerVariable("simulation.start", m_parameters.simulationStart, Variable::Constant);
     registerVariable("hopping.range", m_parameters.hoppingRange);
 }
 
-Reader::~Reader()
+KeyValueParser::~KeyValueParser()
 {
 }
 
-void Reader::parse(const QString &line)
+void KeyValueParser::parse(const QString &line)
 {
     // Remove whitespace
     QString parsed = line.trimmed();
@@ -134,72 +134,19 @@ void Reader::parse(const QString &line)
     it.value()->read(value);
 }
 
-void Reader::load(const QString &fileName)
+std::ostream& operator<<(std::ostream& stream, const KeyValueParser &keyValueParser)
 {
-    // Open the file
-    QFile file(fileName);
-    if (!file.open(QIODevice::ReadOnly|QIODevice::Text))
+    foreach (Variable *variable, keyValueParser.m_variableMap)
     {
-        qFatal("can not open file: %s", qPrintable(fileName));
-    }
-
-    // Parse the lines
-    while (!file.atEnd())
-    {
-        QString line = file.readLine();
-        parse(line);
-    }
-    file.close();
-    setCalculatedValues(m_parameters);
-    check(m_parameters);
-}
-
-QTextStream& operator<<(QTextStream &stream, const Reader &reader)
-{
-    foreach (Variable *variable, reader.m_variableMap)
-    {
-        stream << *variable << endl;
+        if (!variable->isConstant())
+        {
+            stream << '\n' << *variable;
+        }
     }
     return stream;
 }
 
-QDataStream& operator<<(QDataStream &stream, const Reader &reader)
-{
-    foreach (Variable *variable, reader.m_variableMap)
-    {
-        stream << *variable;
-    }
-    return stream;
-}
-
-QDataStream& operator>>(QDataStream &stream, const Reader &reader)
-{
-    foreach (Variable *variable, reader.m_variableMap)
-    {
-        stream >> *variable;
-    }
-    return stream;
-}
-
-void Reader::save(const QString& fileName)
-{
-    if (!m_parameters.outputIsOn) return;
-    // Open the file
-    OutputInfo info(fileName,&m_parameters);
-    QFile file(info.absoluteFilePath());
-    if (!file.open(QIODevice::WriteOnly|QIODevice::Text))
-    {
-        qFatal("can not open file: %s", qPrintable(fileName));
-    }
-
-    // Write the variables to the file
-    QTextStream stream(&file);
-    stream << *this;
-    stream.flush();
-    file.close();
-}
-
-SimulationParameters& Reader::parameters()
+SimulationParameters& KeyValueParser::parameters()
 {
     check(m_parameters);
     return m_parameters;

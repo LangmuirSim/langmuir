@@ -20,6 +20,7 @@ public:
     Random(quint64 seed=0, QObject *parent=0);
     ~Random();
     quint64 seed();
+    void seed(quint64 seed);
     double random();
     double range(const double low=0.0, const double high=1.0);
     double normal(const double mean, const double sigma);
@@ -37,6 +38,8 @@ public:
     friend QDataStream& operator>>(QDataStream& stream, Random& random);
     friend QTextStream& operator<<(QTextStream& stream, Random& random);
     friend QTextStream& operator>>(QTextStream& stream, Random& random);
+    friend std::ostream& operator<<(std::ostream& stream, Random& random);
+    friend std::istream& operator>>(std::istream& stream, Random& random);
 
 private:
     boost::mt19937 *twister;

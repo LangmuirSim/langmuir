@@ -6,6 +6,7 @@
 #include <QObject>
 #include <QDebug>
 #include <limits>
+#include <ostream>
 
 namespace Langmuir
 {
@@ -61,11 +62,8 @@ public:
     //! Operator overload to output 'key = value' to QTextStream
     friend QTextStream& operator<<(QTextStream& stream, const Variable &variable);
 
-    //! Operator overload to input 'value' from QDataStream
-    friend QDataStream& operator<<(QDataStream& stream, const Variable &variable);
-
-    //! Operator overload to input 'value' from QDataStream
-    friend QDataStream& operator>>(QDataStream& stream, Variable &variable);
+    //! Operator overload to output to output 'key = value' to std::ofstream
+    friend std::ostream& operator<<(std::ostream &stream, Variable &variable);
 
 protected:
 
@@ -77,12 +75,6 @@ protected:
 
     //! Write 'key = value' to a stream
     virtual void write(QTextStream& stream) const = 0;
-
-    //! Write value to a binary stream
-    virtual void binaryWrite(QDataStream& stream) const = 0;
-
-    //! Read value from a binary stream
-    virtual void binaryRead(QDataStream& stream) = 0;
 
 };
 Q_DECLARE_OPERATORS_FOR_FLAGS(Variable::VariableMode)
@@ -130,12 +122,6 @@ protected:
 
     //! Write 'key = value' to a stream
     virtual void write(QTextStream& stream) const;
-
-    //! Write value to a binary stream
-    void binaryWrite(QDataStream& stream) const;
-
-    //! Read value from a binary stream
-    void binaryRead(QDataStream& stream);
 };
 
 // initialize a Variable with a key
@@ -190,8 +176,8 @@ template <> inline QString TypedVariable<qreal>::value() const
 template <> inline QString TypedVariable<bool>::value() const
 {
     QString result; QTextStream stream(&result);
-    if (m_value == true) { stream << "true"; }
-    else { stream << "false"; }
+    if (m_value == true) { stream << "True"; }
+    else { stream << "False"; }
     stream.flush();
     return result;
 }
@@ -280,39 +266,6 @@ template <class T> inline void TypedVariable<T>::read(const QString& token)
     convert(token,m_value);
 }
 
-// Read bytes
-template <class T> inline void TypedVariable<T>::binaryRead(QDataStream& stream)
-{
-    stream >> m_value;
-    switch (stream.status())
-    {
-    case QDataStream::Ok:
-    {
-        return;
-        break;
-    }
-    case QDataStream::ReadPastEnd:
-    {
-        QString error = QString("binary stream read error: QDataStream::ReadPastEnd\n\texpected parameter: %1").arg(m_key);
-
-        qFatal("%s",qPrintable(error));
-        break;
-    }
-    case QDataStream::ReadCorruptData:
-    {
-        QString error = QString("binary stream read error: QDataStream::ReadCorruptData\n\texpected parameter: %1").arg(m_key);
-        qFatal("%s",qPrintable(error));
-        break;
-    }
-    }
-}
-
-// Write bytes
-template <class T> inline void TypedVariable<T>::binaryWrite(QDataStream& stream) const
-{
-    stream << m_value;
-}
-
 // write keyValue() to a stream
 template <class T> inline void TypedVariable<T>::write(QTextStream& stream) const
 {
@@ -326,17 +279,10 @@ inline QTextStream& operator<<(QTextStream& stream, const Variable& variable)
     return stream;
 }
 
-// Operator overload to output 'value' to QDataStream
-inline QDataStream& operator<<(QDataStream& stream, const Variable &variable)
+//! Operator overload to output to output 'key = value' to std::ostream
+inline std::ostream& operator<<(std::ostream &stream, Variable &variable)
 {
-    variable.binaryWrite(stream);
-    return stream;
-}
-
-// Operator overload to input 'value' from QDataStream
-inline QDataStream& operator>>(QDataStream& stream, Variable &variable)
-{
-    variable.binaryRead(stream);
+    stream << variable.keyValue().toStdString();
     return stream;
 }
 

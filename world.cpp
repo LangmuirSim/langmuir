@@ -10,7 +10,7 @@
 #include "rand.h"
 #include "fluxagent.h"
 #include "output.h"
-#include "reader.h"
+#include "keyvalueparser.h"
 #include "checkpointer.h"
 
 namespace Langmuir {
@@ -53,7 +53,7 @@ World::~World()
     delete m_holeGrid;
     delete m_logger;
     delete m_ocl;
-    delete m_reader;
+    delete m_keyValueParser;
     delete m_checkPointer;
 }
 
@@ -62,9 +62,9 @@ CheckPointer& World::checkPointer()
     return *m_checkPointer;
 }
 
-Reader& World::reader()
+KeyValueParser& World::keyValueParser()
 {
-    return *m_reader;
+    return *m_keyValueParser;
 }
 
 Grid& World::electronGrid()
@@ -268,20 +268,14 @@ void World::initialize(const QString &fileName)
     // Pointers are EVIL
     World &refWorld = *this;
 
-    // Set the Reader
-    m_reader = new Reader(refWorld,this);
-
-    // Parse the input file
-    if (! fileName.isEmpty())
-    {
-        m_reader->load(fileName);
-    }
+    // Set the Key Value Parser
+    m_keyValueParser = new KeyValueParser(refWorld,this);
 
     // Set the address of the Parameters
-    m_parameters = &m_reader->parameters();
+    m_parameters = &m_keyValueParser->parameters();
 
-    // Create Random Number Generator
-    m_rand = new Random(parameters().randomSeed);
+    // Create Random Number Generator using current time
+    m_rand = new Random(0,this);
 
     // Create CheckPointer
     m_checkPointer = new CheckPointer(refWorld,this);
@@ -289,13 +283,10 @@ void World::initialize(const QString &fileName)
     // Create Site info
     SimulationSiteInfo siteInfo;
 
-    // Parse the check point file
-    if (!m_parameters->checkFile.isEmpty())
-    {
-        m_checkPointer->load(m_parameters->checkFile,siteInfo);
-    }
+    // Parse the input file
+    m_checkPointer->load(fileName,siteInfo);
 
-    // Save the seed
+    // Save the seed that has been used
     m_parameters->randomSeed = m_rand->seed();
 
     // Create Electron Grid
@@ -392,7 +383,7 @@ void World::initialize(const QString &fileName)
     potential().setPotentialLinear();
 
     // Place Traps
-    potential().setPotentialTraps(siteInfo.traps,siteInfo.potentials);
+    potential().setPotentialTraps(siteInfo.traps,siteInfo.trapPotentials);
 
     // precalculate and store coulomb interaction energies
     potential().updateInteractionEnergies();

@@ -1,4 +1,5 @@
 #include "rand.h"
+#include <fstream>
 #include <sstream>
 
 namespace Langmuir
@@ -30,6 +31,12 @@ Random::~Random()
 quint64 Random::seed()
 {
     return m_seed;
+}
+
+void Random::seed(quint64 seed)
+{
+    twister->seed(seed);
+    m_seed = seed;
 }
 
 double Random::random()
@@ -370,6 +377,30 @@ QTextStream& operator>>(QTextStream& stream, Random& random)
     {
         qFatal("can not load state of random number generator from QTextStream; "
                "std::stringstream has failed on read");
+    }
+    return stream;
+}
+
+std::ostream& operator<<(std::ostream& stream, Random& random)
+{
+    stream << random.m_seed << ' ';
+    stream << *random.twister;
+    return stream;
+}
+
+std::istream& operator>>(std::istream& stream, Random& random)
+{
+    stream >> random.m_seed;
+    if (stream.fail() || stream.bad() || stream.eof())
+    {
+        qFatal("can not load state of random number generator; random.m_seed\n"
+               "std::ifstream has failed on write");
+    }
+    stream >> *random.twister;
+    if (stream.fail() || stream.bad() || stream.eof())
+    {
+        qFatal("can not load state of random number generator; twister\n"
+               "std::ifstream has failed on write");
     }
     return stream;
 }
