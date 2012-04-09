@@ -31,7 +31,7 @@ public:
 
     explicit CheckPointer(World& world, QObject *parent = 0);
     void load(const QString& fileName, SimulationSiteInfo &siteInfo);
-    void save(const QString& fileName = "%path/%stub.bin");
+    void save(const QString& fileName = "%stub.chk");
     void checkStream(std::istream& stream, const QString& message = "");
 
 private:

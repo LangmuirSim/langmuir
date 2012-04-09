@@ -14,39 +14,15 @@ OutputInfo::OutputInfo(const QString &name, const SimulationParameters *par)
     QString sep = "-";
     QString stub("");
     QString step("");
-    QString path("");
 
     // if SimulationParameters were passed, convert the needed ones to strings
     if (par != 0)
     {
         stub = QString("%1").arg(par->outputStub);
         step = QString("%1").arg(par->currentStep);
-        path = QString("%1").arg(par->outputPath)+QDir::separator();
     }
     result.replace(QRegExp("%stub", Qt::CaseInsensitive), stub);  // replace %stub
     result.replace(QRegExp("%step", Qt::CaseInsensitive), step);  // replace %step
-    result.replace(QRegExp("%sim" , Qt::CaseInsensitive),   "");  // replace %sim
-
-    // replace %path, making sure it only occured once, and was at the begining of name
-    {
-        QRegExp regex("%path", Qt::CaseInsensitive);
-        int count = result.count(regex);
-        if (count > 1)
-        {
-            qFatal("invalid file name %s",qPrintable(name));
-        }
-        if (count == 1)
-        {
-            regex = QRegExp("\\s*^%path", Qt::CaseInsensitive);
-            count = result.count(regex);
-            if (count != 1)
-            {
-                qFatal("invalid file name %s",qPrintable(name));
-            }
-            result.replace(regex,path);
-            result = QDir::cleanPath(result);
-        }
-    }
 
     // reset the fileInfo (this class is derived from QFileInfo)
     setFile(result);
@@ -81,19 +57,6 @@ OutputInfo::OutputInfo(const QString &name, const SimulationParameters *par)
                "the file name is empty:\n\t%s",
                qPrintable(absoluteFilePath()));
     }
-
-    // if the directory passed doesn't exist, try to make it
-    if (!dir().exists())
-    {
-        // if we can't make the directory, then theres an error
-        if ( ! dir().mkpath(dir().absolutePath()) )
-        {
-            qFatal("can not generate file:\n\t"
-                   "directory does not exist and "
-                   "I can not create it:\n\t%s",
-                   qPrintable(absoluteFilePath()));
-        }
-    }
 }
 
 OutputStream::OutputStream(const QString &name,
@@ -103,17 +66,6 @@ OutputStream::OutputStream(const QString &name,
 {
     // open as Text and as WriteOnly, it's an OutputStream
     QIODevice::OpenMode mode = QIODevice::Text|QIODevice::WriteOnly;
-
-    if ( par == 0 || (par != 0 && par->outputAppend) )
-    {
-        mode |= QIODevice::Append;
-    }
-
-    // back up file if it exists
-    if ( par == 0 || (par != 0 && par->outputBackup) )
-    {
-        backupFile(m_info.absoluteFilePath());
-    }
 
     // set the parent of our file
     m_file.setParent(this);

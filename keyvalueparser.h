@@ -20,6 +20,7 @@ public:
 
     SimulationParameters& parameters();
     void parse(const QString& line);
+    void save(const QString& fileName = "%stub.parm");
     friend std::ostream& operator<<(std::ostream &stream, const KeyValueParser &keyValueParser);
 
 private:

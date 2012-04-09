@@ -275,6 +275,8 @@ void World::initialize(const QString &fileName)
     m_parameters = &m_keyValueParser->parameters();
 
     // Create Random Number Generator using current time
+    // Note that checkPointer may either reseed the generator
+    // or load a previous RandomState
     m_rand = new Random(0,this);
 
     // Create CheckPointer

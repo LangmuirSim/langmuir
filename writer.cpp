@@ -194,10 +194,6 @@ GridImage::GridImage(World &world, QColor bg, QObject *parent)
 void GridImage::save(QString name, int scale)
 {
     OutputInfo info(name, &m_world.parameters());
-    if ( m_world.parameters().outputBackup )
-    {
-        backupFile(info.absoluteFilePath());
-    }
     m_painter.end();
     m_image = m_image.scaled(scale*m_image.width(),scale*m_image.height(),Qt::KeepAspectRatioByExpanding);
     m_image.save(info.absoluteFilePath(),"png",100);
@@ -243,15 +239,15 @@ void LoggerOn::initialize()
 {
     if (m_world.parameters().outputXyz)
     {
-        m_xyzWriter = new XYZWriter(m_world,"%path/%stub-%sim.xyz",this);
+        m_xyzWriter = new XYZWriter(m_world,"%stub.xyz",this);
     }
 
     if (m_world.parameters().outputIdsOnDelete)
     {
-        m_carrierWriter = new CarrierWriter(m_world,"%path/%stub-%sim-carriers.dat",this);
+        m_carrierWriter = new CarrierWriter(m_world,"%stub-carriers.dat",this);
     }
 
-    m_fluxWriter = new FluxWriter(m_world,"%path/%stub-%sim.dat",this);
+    m_fluxWriter = new FluxWriter(m_world,"%stub.dat",this);
 }
 
 void LoggerOn::saveGridPotential(const QString& name)

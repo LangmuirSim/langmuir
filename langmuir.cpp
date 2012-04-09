@@ -47,6 +47,9 @@ int main (int argc, char *argv[])
     // Get the simulation Parameters
     SimulationParameters &par = world.parameters();
 
+    // Save the parameters
+    world.keyValueParser().save("%stub.parm");
+
     // Create the simulation
     Simulation sim(world);
 
@@ -96,7 +99,7 @@ int main (int argc, char *argv[])
     // Output time
     if (par.outputIsOn)
     {
-        OutputStream timerStream("%path/%stub.time",&par);
+        OutputStream timerStream("%stub.time",&par);
 
         timerStream << right
                     << qSetFieldWidth(20)
