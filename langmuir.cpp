@@ -69,9 +69,6 @@ int main (int argc, char *argv[])
     // Save a Checkpoint File
     if (par.outputIsOn) world.checkPointer().save();
 
-    // The time this simulation stops
-    QDateTime stop = QDateTime::currentDateTime();
-
     // Output Trajectory
     if (par.outputXyz == -1)
     {
@@ -95,6 +92,9 @@ int main (int argc, char *argv[])
         world.logger().saveElectronImage();
         world.logger().saveHoleImage();
     }
+
+    // The time this simulation stops
+    QDateTime stop = QDateTime::currentDateTime();
 
     // Output time
     if (par.outputIsOn)
