@@ -183,6 +183,9 @@ struct SimulationParameters
     //! the number of sites away from a given site used when calculating neighboring sites
     qint32 hoppingRange;
 
+    //! slope of potential along z direction when there are multiple layers (as if there were a gate electrode)
+    qreal slopeZ;
+
     SimulationParameters() :
 
         simulationType         ("transistor"),
@@ -244,7 +247,8 @@ struct SimulationParameters
         okCL                   (false),
         currentStep            (0),
         simulationStart        (QDateTime::currentDateTime()),
-        hoppingRange           (1)
+        hoppingRange           (1),
+        slopeZ                 (0.00)
     {
     }
 

@@ -41,6 +41,27 @@ void Potential::setPotentialLinear()
     }
 }
 
+void Potential::setPotentialGate()
+{
+    if ( m_world.parameters().gridZ == 1 || m_world.parameters().slopeZ == 0 )
+    {
+        return;
+    }
+    for(int i = 0; i < m_world.electronGrid().xSize(); i++)
+    {
+        for(int j = 0; j < m_world.electronGrid().ySize(); j++)
+        {
+            for(int k = 0; k < m_world.electronGrid().zSize(); k++)
+            {
+                int s = m_world.electronGrid().getIndexS(i, j, k);
+                double v = m_world.parameters().slopeZ *(k + 0.5);
+                m_world.electronGrid().addToPotential(s, v);
+                m_world.holeGrid().addToPotential(s, v);
+            }
+        }
+    }
+}
+
 void Potential::setPotentialTraps(const QList<int> &trapIDs, const QList<double> &trapPotentials)
 {
     if ( m_world.numTraps() != 0 )

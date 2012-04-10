@@ -19,6 +19,7 @@ public:
     Potential(World &world, QObject *parent=0);
     void setPotentialZero();
     void setPotentialLinear();
+    void setPotentialGate();
     void setPotentialTraps(
         const QList<int>& trapIDs = QList<int>(),
         const QList<double>& trapPotentials = QList<double>()

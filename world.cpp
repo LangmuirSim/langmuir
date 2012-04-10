@@ -401,6 +401,9 @@ void World::initialize(const QString &fileName)
     // Set Linear Potential
     potential().setPotentialLinear();
 
+    // Set Gate Potential (does nothing is slope.z is zero or if there is only 1 layer)
+    potential().setPotentialGate();
+
     // Place Traps
     potential().setPotentialTraps(configInfo.traps,configInfo.trapPotentials);
 

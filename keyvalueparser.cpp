@@ -62,6 +62,7 @@ KeyValueParser::KeyValueParser(World &world, QObject *parent) :
     registerVariable("current.step", m_parameters.currentStep);
     registerVariable("simulation.start", m_parameters.simulationStart, Variable::Constant);
     registerVariable("hopping.range", m_parameters.hoppingRange);
+    registerVariable("slope.z", m_parameters.slopeZ);
 }
 
 KeyValueParser::~KeyValueParser()
