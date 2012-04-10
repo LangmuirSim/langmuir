@@ -4,6 +4,7 @@
 #include "world.h"
 #include "rand.h"
 #include "keyvalueparser.h"
+#include "fluxagent.h"
 
 #include <fstream>
 #include <limits>
@@ -17,7 +18,7 @@ CheckPointer::CheckPointer(World &world, QObject *parent) :
 {
 }
 
-void CheckPointer::load(const QString &fileName, SimulationSiteInfo &siteInfo)
+void CheckPointer::load(const QString &fileName, ConfigurationInfo &configInfo)
 {
     // Open the stream
     std::ifstream stream;
@@ -76,31 +77,31 @@ void CheckPointer::load(const QString &fileName, SimulationSiteInfo &siteInfo)
 
                 case Electrons:
                 {
-                    loadElectrons(stream, siteInfo);
+                    loadElectrons(stream, configInfo);
                     break;
                 }
 
                 case Holes:
                 {
-                    loadHoles(stream, siteInfo);
+                    loadHoles(stream, configInfo);
                     break;
                 }
 
                 case Defects:
                 {
-                    loadDefects(stream, siteInfo);
+                    loadDefects(stream, configInfo);
                     break;
                 }
 
                 case Traps:
                 {
-                    loadTraps(stream, siteInfo);
+                    loadTraps(stream, configInfo);
                     break;
                 }
 
                 case TrapPotentials:
                 {
-                    loadTrapPotentials(stream, siteInfo);
+                    loadTrapPotentials(stream, configInfo);
                     break;
                 }
 
@@ -108,6 +109,12 @@ void CheckPointer::load(const QString &fileName, SimulationSiteInfo &siteInfo)
                 {
                     loadRandomState(stream);
                     readRandomState = true;
+                    break;
+                }
+
+                case FluxState:
+                {
+                    loadFluxState(stream, configInfo);
                     break;
                 }
 
@@ -160,6 +167,7 @@ void CheckPointer::save(const QString& fileName)
     saveDefects(stream)        << '\n';
     saveTraps(stream)          << '\n';
     saveTrapPotentials(stream) << '\n';
+    saveFluxState(stream)      << '\n';
     saveRandomState(stream)    << '\n';
     saveParameters(stream);
 
@@ -194,13 +202,13 @@ void CheckPointer::checkStream(std::istream& stream, const QString& message)
     }
 }
 
-std::istream& CheckPointer::loadElectrons(std::istream &stream, SimulationSiteInfo &siteInfo)
+std::istream& CheckPointer::loadElectrons(std::istream &stream, ConfigurationInfo &configInfo)
 {
     QString token =    "";
     bool       ok = false;
 
     // Clear the old sites
-    siteInfo.electrons.clear();
+    configInfo.electrons.clear();
 
     // Get the number to values to read
     stream >> token;
@@ -223,20 +231,20 @@ std::istream& CheckPointer::loadElectrons(std::istream &stream, SimulationSiteIn
             qFatal("stream error: can not convert %s to unsigned int\n\t"
                    "expected electron %d of %d", qPrintable(token),i+1,size);
         }
-        siteInfo.electrons.push_back(value);
+        configInfo.electrons.push_back(value);
     }
 
     // Return the stream
     return stream;
 }
 
-std::istream& CheckPointer::loadHoles(std::istream &stream, SimulationSiteInfo &siteInfo)
+std::istream& CheckPointer::loadHoles(std::istream &stream, ConfigurationInfo &configInfo)
 {
     QString token =    "";
     bool       ok = false;
 
     // Clear the old sites
-    siteInfo.holes.clear();
+    configInfo.holes.clear();
 
     // Get the number to values to read
     stream >> token;
@@ -259,20 +267,20 @@ std::istream& CheckPointer::loadHoles(std::istream &stream, SimulationSiteInfo &
             qFatal("stream error: can not convert %s to unsigned int\n\t"
                    "expected hole %d of %d", qPrintable(token),i+1,size);
         }
-        siteInfo.holes.push_back(value);
+        configInfo.holes.push_back(value);
     }
 
     // Return the stream
     return stream;
 }
 
-std::istream& CheckPointer::loadDefects(std::istream &stream, SimulationSiteInfo &siteInfo)
+std::istream& CheckPointer::loadDefects(std::istream &stream, ConfigurationInfo &configInfo)
 {
     QString token =    "";
     bool       ok = false;
 
     // Clear the old sites
-    siteInfo.defects.clear();
+    configInfo.defects.clear();
 
     // Get the number to values to read
     stream >> token;
@@ -295,20 +303,20 @@ std::istream& CheckPointer::loadDefects(std::istream &stream, SimulationSiteInfo
             qFatal("stream error: can not convert %s to unsigned int\n\t"
                    "expected defect %d of %d", qPrintable(token),i+1,size);
         }
-        siteInfo.defects.push_back(value);
+        configInfo.defects.push_back(value);
     }
 
     // Return the stream
     return stream;
 }
 
-std::istream& CheckPointer::loadTraps(std::istream &stream, SimulationSiteInfo &siteInfo)
+std::istream& CheckPointer::loadTraps(std::istream &stream, ConfigurationInfo &configInfo)
 {
     QString token =    "";
     bool       ok = false;
 
     // Clear the old sites
-    siteInfo.traps.clear();
+    configInfo.traps.clear();
 
     // Get the number to values to read
     stream >> token;
@@ -331,20 +339,20 @@ std::istream& CheckPointer::loadTraps(std::istream &stream, SimulationSiteInfo &
             qFatal("stream error: can not convert %s to unsigned int\n\t"
                    "expected trap %d of %d", qPrintable(token),i+1,size);
         }
-        siteInfo.traps.push_back(value);
+        configInfo.traps.push_back(value);
     }
 
     // Return the stream
     return stream;
 }
 
-std::istream& CheckPointer::loadTrapPotentials(std::istream &stream, SimulationSiteInfo &siteInfo)
+std::istream& CheckPointer::loadTrapPotentials(std::istream &stream, ConfigurationInfo &configInfo)
 {
     QString token =    "";
     bool       ok = false;
 
     // Clear the old sites
-    siteInfo.trapPotentials.clear();
+    configInfo.trapPotentials.clear();
 
     // Get the number to values to read
     stream >> token;
@@ -367,7 +375,7 @@ std::istream& CheckPointer::loadTrapPotentials(std::istream &stream, SimulationS
             qFatal("stream error: can not convert %s to double\n\t"
                    "expected trap potential %d of %d", qPrintable(token),i+1,size);
         }
-        siteInfo.trapPotentials.push_back(value);
+        configInfo.trapPotentials.push_back(value);
     }
 
     // Return the stream
@@ -407,6 +415,42 @@ std::istream& CheckPointer::loadRandomState(std::istream &stream)
     stream >> m_world.randomNumberGenerator();
     checkStream(stream, QString("expected random number generator state"));
     qWarning("warning: loaded a random number generator state");
+    return stream;
+}
+
+std::istream& CheckPointer::loadFluxState(std::istream &stream, ConfigurationInfo &configInfo)
+{
+    QString token =    "";
+    bool       ok = false;
+
+    // Clear the old sites
+    configInfo.fluxInfo.clear();
+
+    // Get the number to values to read
+    stream >> token;
+    checkStream(stream, QString("expected number of fluxes * 2"));
+    unsigned int size = token.toUInt(&ok);
+    if (!ok)
+    {
+        qFatal("stream error: can not convert %s to unsigned int\n\t"
+               "expected number of fluxes * 2", qPrintable(token));
+    }
+
+    // Read the values (sites)
+    for (unsigned int i = 0; i < size; i++)
+    {
+        stream >> token;
+        checkStream(stream, QString("expected flux %1 of %2").arg(i+1).arg(size));
+        unsigned int value = token.toUInt(&ok);
+        if (!ok)
+        {
+            qFatal("stream error: can not convert %s to unsigned int\n\t"
+                   "expected flux %d of %d", qPrintable(token),i+1,size);
+        }
+        configInfo.fluxInfo.push_back(value);
+    }
+
+    // Return the stream
     return stream;
 }
 
@@ -533,6 +577,26 @@ std::ostream& CheckPointer::saveRandomState(std::ostream &stream)
     // Output info
     stream << '[' << name << ']';
     stream << '\n' << m_world.randomNumberGenerator();
+
+    // Return the stream
+    return stream;
+}
+
+std::ostream& CheckPointer::saveFluxState(std::ostream &stream)
+{
+    // Get the section name
+    const QMetaObject &QMO = CheckPointer::staticMetaObject;
+    QMetaEnum QME = QMO.enumerator(QMO.indexOfEnumerator("Section"));
+    QString name = QME.key(FluxState);
+
+    // Output info
+    stream << '[' << name << ']';
+    stream << '\n' << m_world.fluxes().size() * 2;
+    foreach (FluxAgent *flux, m_world.fluxes())
+    {
+        stream << '\n' << flux->attempts();
+        stream << '\n' << flux->successes();
+    }
 
     // Return the stream
     return stream;

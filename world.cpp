@@ -12,6 +12,7 @@
 #include "output.h"
 #include "keyvalueparser.h"
 #include "checkpointer.h"
+#include "fluxagent.h"
 
 namespace Langmuir {
 
@@ -281,10 +282,10 @@ void World::initialize(const QString &fileName)
     m_checkPointer = new CheckPointer(refWorld,this);
 
     // Create Site info
-    SimulationSiteInfo siteInfo;
+    ConfigurationInfo configInfo;
 
     // Parse the input file
-    m_checkPointer->load(fileName,siteInfo);
+    m_checkPointer->load(fileName,configInfo);
 
     // Save the seed that has been used
     m_parameters->randomSeed = m_rand->seed();
@@ -357,6 +358,22 @@ void World::initialize(const QString &fileName)
         m_fluxAgents.push_back(flux);
     }
 
+    // Set previous flux state
+    if (configInfo.fluxInfo.size() > 0)
+    {
+        if (configInfo.fluxInfo.size() != 2*m_fluxAgents.size())
+        {
+            qFatal("the flux info in the input file has an invalid size for this simulation.type");
+        }
+        int j = 0;
+        for (int i = 0; i < m_fluxAgents.size(); i++)
+        {
+            m_fluxAgents.at(i)->setAttempts(configInfo.fluxInfo.at(j));
+            m_fluxAgents.at(i)->setSuccesses(configInfo.fluxInfo.at(j+1));
+            j += 2;
+        }
+    }
+
     // Create Logger
     if (parameters().outputIsOn)
     {
@@ -368,13 +385,13 @@ void World::initialize(const QString &fileName)
     }
 
     // Place Defects
-    placeDefects(siteInfo.defects);
+    placeDefects(configInfo.defects);
 
     // Place Electrons
-    placeElectrons(siteInfo.electrons);
+    placeElectrons(configInfo.electrons);
 
     // Place Holes
-    placeHoles(siteInfo.holes);
+    placeHoles(configInfo.holes);
 
     // Zero potential
     potential().setPotentialZero();
@@ -383,7 +400,7 @@ void World::initialize(const QString &fileName)
     potential().setPotentialLinear();
 
     // Place Traps
-    potential().setPotentialTraps(siteInfo.traps,siteInfo.trapPotentials);
+    potential().setPotentialTraps(configInfo.traps,configInfo.trapPotentials);
 
     // precalculate and store coulomb interaction energies
     potential().updateInteractionEnergies();

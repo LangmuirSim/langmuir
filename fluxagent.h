@@ -23,6 +23,8 @@ public:
     void setPotential(double potential);
     void setRate(double rate);
     void setTries(int tries);
+    void setAttempts(unsigned long int value);
+    void setSuccesses(unsigned long int value);
 
 protected:
     void initializeSite(int site);

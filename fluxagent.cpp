@@ -116,4 +116,14 @@ QString FluxAgent::faceToLetter()
     return string.at(0);
 }
 
+void FluxAgent::setAttempts(unsigned long int value)
+{
+    m_attempts = value;
+}
+
+void FluxAgent::setSuccesses(unsigned long int value)
+{
+    m_successes = value;
+}
+
 }

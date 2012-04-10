@@ -25,22 +25,24 @@ public:
         Defects,
         Traps,
         TrapPotentials,
-        RandomState
+        RandomState,
+        FluxState
     };
     Q_ENUMS(Section)
 
     explicit CheckPointer(World& world, QObject *parent = 0);
-    void load(const QString& fileName, SimulationSiteInfo &siteInfo);
+    void load(const QString& fileName, ConfigurationInfo &configInfo);
     void save(const QString& fileName = "%path/%stub.bin");
     void checkStream(std::istream& stream, const QString& message = "");
 
 private:
 
-    std::istream& loadElectrons(std::istream &stream, SimulationSiteInfo &siteInfo);
-    std::istream& loadHoles(std::istream &stream, SimulationSiteInfo &siteInfo);
-    std::istream& loadDefects(std::istream &stream, SimulationSiteInfo &siteInfo);
-    std::istream& loadTraps(std::istream &stream, SimulationSiteInfo &siteInfo);
-    std::istream& loadTrapPotentials(std::istream &stream, SimulationSiteInfo &siteInfo);
+    std::istream& loadElectrons(std::istream &stream, ConfigurationInfo &configInfo);
+    std::istream& loadHoles(std::istream &stream, ConfigurationInfo &configInfo);
+    std::istream& loadDefects(std::istream &stream, ConfigurationInfo &configInfo);
+    std::istream& loadTraps(std::istream &stream, ConfigurationInfo &configInfo);
+    std::istream& loadTrapPotentials(std::istream &stream, ConfigurationInfo &configInfo);
+    std::istream& loadFluxState(std::istream &stream, ConfigurationInfo &configInfo);
     std::istream& loadParameters(std::istream &stream);
     std::istream& loadRandomState(std::istream &stream);
 
@@ -49,6 +51,7 @@ private:
     std::ostream& saveDefects(std::ostream &stream);
     std::ostream& saveTraps(std::ostream &stream);
     std::ostream& saveTrapPotentials(std::ostream &stream);
+    std::ostream& saveFluxState(std::ostream &stream);
     std::ostream& saveParameters(std::ostream &stream);
     std::ostream& saveRandomState(std::ostream &stream);
 

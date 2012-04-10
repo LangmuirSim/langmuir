@@ -10,7 +10,7 @@
 namespace Langmuir
 {
 
-struct SimulationSiteInfo
+struct ConfigurationInfo
 {
     //! a list of current electron site IDs
     QList<qint32> electrons;
@@ -26,6 +26,9 @@ struct SimulationSiteInfo
 
     //! a list of current traps site IDs
     QList<qreal> trapPotentials;
+
+    //! a list of flux attempt, success values
+    QList<quint64> fluxInfo;
 };
 
 struct SimulationParameters
