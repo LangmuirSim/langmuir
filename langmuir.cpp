@@ -47,6 +47,9 @@ int main (int argc, char *argv[])
     // Get the simulation Parameters
     SimulationParameters &par = world.parameters();
 
+    // Save the parameters
+    world.keyValueParser().save("%stub.parm");
+
     // Create the simulation
     Simulation sim(world);
 
@@ -65,9 +68,6 @@ int main (int argc, char *argv[])
 
     // Save a Checkpoint File
     if (par.outputIsOn) world.checkPointer().save();
-
-    // The time this simulation stops
-    QDateTime stop = QDateTime::currentDateTime();
 
     // Output Trajectory
     if (par.outputXyz == -1)
@@ -93,10 +93,13 @@ int main (int argc, char *argv[])
         world.logger().saveHoleImage();
     }
 
+    // The time this simulation stops
+    QDateTime stop = QDateTime::currentDateTime();
+
     // Output time
     if (par.outputIsOn)
     {
-        OutputStream timerStream("%path/%stub.time",&par);
+        OutputStream timerStream("%stub.time",&par);
 
         timerStream << right
                     << qSetFieldWidth(20)

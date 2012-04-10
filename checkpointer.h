@@ -32,7 +32,7 @@ public:
 
     explicit CheckPointer(World& world, QObject *parent = 0);
     void load(const QString& fileName, ConfigurationInfo &configInfo);
-    void save(const QString& fileName = "%path/%stub.bin");
+    void save(const QString& fileName = "%stub.chk");
     void checkStream(std::istream& stream, const QString& message = "");
 
 private:

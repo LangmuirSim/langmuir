@@ -69,12 +69,6 @@ struct SimulationParameters
     //! if false, produce no output (useful for LangmuirView)
     bool outputIsOn;
 
-    //! if true, backup files when they exist
-    bool outputBackup;
-
-    //! if true, append to data files; if false, overwrite files
-    bool outputAppend;
-
     //! output images of defects
     bool imageDefects;
 
@@ -95,9 +89,6 @@ struct SimulationParameters
 
     //! width of columns in output, ignored in certain files, like trajectory files
     qint32 outputWidth;
-
-     //! the output directory, defaults to the current working directory
-    QString outputPath;
 
     //! the stub to use when naming output files
     QString outputStub;
@@ -209,8 +200,6 @@ struct SimulationParameters
         outputCoulomb          (0),
         outputPotential        (false),
         outputIsOn             (true),
-        outputBackup           (true),
-        outputAppend           (true),
 
         imageDefects           (false),
         imageTraps             (false),
@@ -220,7 +209,6 @@ struct SimulationParameters
         iterationsReal         (1000),
         outputPrecision        (15),
         outputWidth            (23),
-        outputPath             (QDir::currentPath()),
         outputStub             ("out"),
 
         electronPercentage     (0.01),

@@ -24,8 +24,6 @@ KeyValueParser::KeyValueParser(World &world, QObject *parent) :
     registerVariable("output.coulomb", m_parameters.outputCoulomb);
     registerVariable("output.potential", m_parameters.outputPotential);
     registerVariable("output.is.on", m_parameters.outputIsOn);
-    registerVariable("output.backup", m_parameters.outputBackup);
-    registerVariable("output.append", m_parameters.outputAppend);
     registerVariable("image.traps", m_parameters.imageTraps);
     registerVariable("image.defects", m_parameters.imageDefects);
     registerVariable("image.carriers", m_parameters.imageCarriers);
@@ -33,7 +31,6 @@ KeyValueParser::KeyValueParser(World &world, QObject *parent) :
     registerVariable("iterations.real", m_parameters.iterationsReal);
     registerVariable("output.precision", m_parameters.outputPrecision);
     registerVariable("output.width", m_parameters.outputWidth);
-    registerVariable("output.path", m_parameters.outputPath);
     registerVariable("output.stub", m_parameters.outputStub);
     registerVariable("electron.percentage", m_parameters.electronPercentage);
     registerVariable("hole.percentage", m_parameters.holePercentage);
@@ -132,6 +129,27 @@ void KeyValueParser::parse(const QString &line)
 
     // Convert and store the value
     it.value()->read(value);
+}
+
+void KeyValueParser::save(const QString& fileName)
+{
+    OutputInfo info(fileName, &m_world.parameters());
+    QFile handle(info.absoluteFilePath());
+    if (!handle.open(QIODevice::WriteOnly|QIODevice::Text))
+    {
+        qFatal("can not open file: %s", qPrintable(info.absoluteFilePath()));
+    }
+    QTextStream stream(&handle);
+    stream << "[Parameters]";
+    foreach (Variable *variable, m_variableMap)
+    {
+        if (!variable->isConstant())
+        {
+            stream << '\n' << *variable;
+        }
+    }
+    stream.flush();
+    handle.close();
 }
 
 std::ostream& operator<<(std::ostream& stream, const KeyValueParser &keyValueParser)
