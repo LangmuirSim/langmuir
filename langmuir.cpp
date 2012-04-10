@@ -20,6 +20,18 @@
 
 using namespace Langmuir;
 
+QTextStream& progress(QTextStream &stream, SimulationParameters& par)
+{
+    qint64 msec  = par.simulationStart.msecsTo(QDateTime::currentDateTime());
+    double sec   = msec / 1000.0;
+    qint64 left  = par.iterationsReal - par.currentStep;
+    QString info = QString("step: %1 remaining: %2 elapsed: %3 s")
+            .arg(par.currentStep, 35)
+            .arg(left, 35)
+            .arg(sec, 35, 'f', 5);
+    return stream << qPrintable(info);
+}
+
 int main (int argc, char *argv[])
 {
     // Create stdout
@@ -60,11 +72,12 @@ int main (int argc, char *argv[])
         sim.performIterations (par.iterationsPrint);
 
         // Output to the screen
-        qout << "on step: " << j << endl;
+        progress(qout, par) << '\r'; qout.flush();
 
         // Save a Checkpoint File
         if (par.outputIsOn) world.checkPointer().save();
     }
+    progress(qout, par) << '\n'; qout.flush();
 
     // Save a Checkpoint File
     if (par.outputIsOn) world.checkPointer().save();
