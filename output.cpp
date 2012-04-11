@@ -65,7 +65,7 @@ OutputStream::OutputStream(const QString &name,
     : QObject(parent), m_info(name,par)
 {
     // open as Text and as WriteOnly, it's an OutputStream
-    QIODevice::OpenMode mode = QIODevice::Text|QIODevice::WriteOnly;
+    QIODevice::OpenMode mode = QIODevice::Text|QIODevice::WriteOnly|QIODevice::Append;
 
     // set the parent of our file
     m_file.setParent(this);

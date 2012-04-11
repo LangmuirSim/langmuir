@@ -39,12 +39,10 @@ public:
       SimulationParameters).  If the directory of the passed name doesn't exist, it
       will be created.
       \param name the file name desired.  The following substitutions can be made:
-        - \b "%path", substitutes in SimulationParameters::outputPath
         - \b "%stub", substitutes in SimulationParameters::outputStub
         - \b "%step", substitutes in SimulationParameters::currentStep
       \param par pointer to a SimulationParameters object
         - if 0 or NULL, then all substitutions become empty strings
-      \warning \b "%path" must be at the start of the name and only appear once
       */
     OutputInfo(const QString &name, const SimulationParameters *par = 0);
 };

@@ -12,7 +12,7 @@ class SimulationParameters;
 class FluxAgent : public Agent
 {
 public:    
-    FluxAgent(Agent::Type getType, World &world, Grid& grid, QObject *parent = 0);
+    FluxAgent(Agent::Type type, World &world, Grid& grid, QObject *parent = 0);
     ~FluxAgent();
     unsigned long int attempts()const;
     unsigned long int successes()const;
