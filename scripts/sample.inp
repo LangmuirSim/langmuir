@@ -1,42 +1,39 @@
+[Parameters]
 simulation.type         = solarcell          # solarcell or transistor
 random.seed             = 0                  # seed == 0 is random, seed > 0 is not random
 
-#use.checkpoint         = out.bin            # path to a checkpoint file
-
 grid.x                  = 128                # distance between drains; length of the device
 grid.y                  = 128                # width of the device
-grid.z                  = 1                  # height of the device
+grid.z                  = 1                  # height of the device; the number of layers
 
-coulomb.carriers        = true               # include Coulomb interactions?
-defects.charge          = -1                 # the charge of a defect
+coulomb.carriers        = True               # if true, include Coulomb interactions
+defects.charge          = 0                  # the charge of a defect, if 0, do not calculate Coulomb interactions for defects
 
-output.is.on            = 1                  # causes all output to be turned off (useful for GUI)
-output.backup           = false              # if true, back up files
-output.append           = false              # if true, append to files
-output.ids.on.delete    = false              # output carrier lifetime and pathlength when they make it to a drain
-output.potential        = false              # output potential for the entire grid (excluding Coulomb) at the start
-output.coulomb          = 0                  # output Coulomb energy for the entire grid every iterations.print
-output.xyz              = 0                  # output positions of carriers, traps, and defects
+output.is.on            = True               # causes all output to be turned off (useful for GUI)
+output.ids.on.delete    = False              # output carrier lifetime and pathlength when they make it to a drain
+output.potential        = False              # output potential for the entire grid (excluding Coulomb) at the start
+output.coulomb          = 0                  # output Coulomb energy for the entire grid every step % value
+output.xyz              = 0                  # output positions of carriers, traps, and defects every step % value
 output.precision        = 15                 # decimal places to print in output
 output.width            = 23                 # width to allow for output columns
-output.path             = /home/adam/Desktop # where to output
 
-image.defects           = true
-image.traps             = true
-image.carriers          = 0
+image.defects           = False              # draw the defects as a png at the start
+image.traps             = False              # draw the traps as a png at the start
+image.carriers          = 0                  # draw the carriers as a png every step % value
 
-iterations.print        = 1                  # how often to print certain outputs as well as to stdout
-iterations.real         = 1000               # the number of production steps
+current.step            = 0                  # the starting step of the simulation
+iterations.print        = 1                  # the number of steps between printing output
+iterations.real         = 1000               # the ending step of the simulation
 
-electron.percentage     = 0.1                # fraction of the grid (between 0 and 1) that determines the maximum number of electrons
-hole.percentage         = 0.1                # fraction of the grid (between 0 and 1) that determines the maximum number of holes
-seed.charges            = 0.0                # place this percent of the maximum number of charges randomly at start
+electron.percentage     = 0.01               # percent of the grid (between 0 and 1) that determines the maximum number of electrons
+hole.percentage         = 0.01               # percent of the grid (between 0 and 1) that determines the maximum number of holes
+seed.charges            = 1.00               # percent of the maximum number of charges (between 0 and 1) to be placed randomly at start
 
-defect.percentage       = 0.00               # fraction of the grid (between 0 and 1) that is reserved for defects
-trap.percentage         = 0.50               # fraction of the grid (between 0 and 1) that traps are placed upon
+defect.percentage       = 0.01               # percent of the grid (between 0 and 1) that is reserved for defects
+trap.percentage         = 0.01               # percent of the grid (between 0 and 1) that traps are placed upon
 trap.potential          = 1.00               # the potential energy of the traps
-gaussian.stdev          = 0.00               # standard deviation of the random noise added to traps
-seed.percentage         = 0.01               # fraction of the traps (between 0 and 1) that are used to grow the remaining traps
+gaussian.stdev          = 0.00               # standard deviation of the random noise added to trap potential
+seed.percentage         = 0.00               # percent of the traps (between 0 and 1) that are used to grow the remaining traps
 
 voltage.right           = 2.00               # the voltage of the left side
 voltage.left            = 0.00               # the voltage of the right side
@@ -45,7 +42,7 @@ drain.rate              = 0.90               # the rate at which all drains acce
 
 temperature.kelvin      = 300.0              # the temperature used in the Boltzmann factor
 
-use.opencl              = true               # use GPU for Coulomb calculations
+use.opencl              = True               # use GPU for Coulomb calculations
 work.x                  = 4                  # number of groups to divide the grid into along x (only used for output.coulomb)
 work.y                  = 4                  # number of groups to divide the grid into along y (only used for output.coulomb)
 work.z                  = 4                  # number of groups to divide the grid into along z (only used for output.coulomb)
