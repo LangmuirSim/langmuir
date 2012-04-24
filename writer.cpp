@@ -27,6 +27,8 @@ FluxWriter::FluxWriter(World &world, const QString &name, QObject *parent)
     {
         m_stream << QString("%1:attempt").arg(flux->objectName());
         m_stream << QString("%1:success").arg(flux->objectName());
+        m_stream << QString("%1:probability").arg(flux->objectName());
+        m_stream << QString("%1:rate").arg(flux->objectName());
     }
     m_stream << "electron:count"
              << "electron:percentage"
@@ -148,7 +150,7 @@ void FluxWriter::write()
     m_stream << m_world.parameters().currentStep;
     foreach(FluxAgent *flux, fluxAgents)
     {
-        m_stream << flux->attempts() << flux->successes();
+        m_stream << flux->attempts() << flux->successes() << flux->successProbability() << flux->successRate();
     }
     m_stream << m_world.numElectronAgents()
              << m_world.percentElectronAgents()

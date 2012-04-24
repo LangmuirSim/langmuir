@@ -134,6 +134,7 @@ void KeyValueParser::parse(const QString &line)
 
 void KeyValueParser::save(const QString& fileName)
 {
+    if (!m_world.parameters().outputIsOn) return;
     OutputInfo info(fileName, &m_world.parameters());
     QFile handle(info.absoluteFilePath());
     if (!handle.open(QIODevice::WriteOnly|QIODevice::Text))
