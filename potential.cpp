@@ -306,7 +306,7 @@ double Potential::coulombImageXPotentialElectrons(int site)
                 dy < m_world.parameters().electrostaticCutoff &&
                 dz < m_world.parameters().electrostaticCutoff)
         {
-            potential += m_world.interactionEnergies()[dx][dy][dz] * m_world.electrons().at(i)->charge();
+            potential += m_world.interactionEnergies()[dx][dy][dz] * -1 * m_world.electrons().at(i)->charge();
         }
     }
     return(potential);
@@ -344,7 +344,7 @@ double Potential::coulombImageXPotentialHoles(int site)
                 dy < m_world.parameters().electrostaticCutoff &&
                 dz < m_world.parameters().electrostaticCutoff)
         {
-            potential += m_world.interactionEnergies()[dx][dy][dz] * m_world.holes().at(i)->charge();
+            potential += m_world.interactionEnergies()[dx][dy][dz] * -1 * m_world.holes().at(i)->charge();
         }
     }
     return(potential);
@@ -385,7 +385,7 @@ double Potential::coulombImageXPotentialDefects(int site)
             potential += m_world.interactionEnergies()[dx][dy][dz];
         }
     }
-    return(m_world.parameters().defectsCharge * potential);
+    return(-1 * m_world.parameters().defectsCharge * potential);
 }
 
 double Potential::potentialAtSite(int site, Grid *grid, bool useCoulomb, bool useImage)

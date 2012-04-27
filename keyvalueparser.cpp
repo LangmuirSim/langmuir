@@ -63,6 +63,8 @@ KeyValueParser::KeyValueParser(World &world, QObject *parent) :
     registerVariable("simulation.start", m_parameters.simulationStart, Variable::Constant);
     registerVariable("hopping.range", m_parameters.hoppingRange);
     registerVariable("slope.z", m_parameters.slopeZ);
+    registerVariable("source.metropolis", m_parameters.sourceMetropolis);
+    registerVariable("source.coulomb", m_parameters.sourceCoulomb);
 }
 
 KeyValueParser::~KeyValueParser()
@@ -168,7 +170,7 @@ std::ostream& operator<<(std::ostream& stream, const KeyValueParser &keyValuePar
 
 SimulationParameters& KeyValueParser::parameters()
 {
-    check(m_parameters);
+    checkSimulationParameters(m_parameters);
     return m_parameters;
 }
 

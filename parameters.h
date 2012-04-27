@@ -186,6 +186,12 @@ struct SimulationParameters
     //! slope of potential along z direction when there are multiple layers (as if there were a gate electrode)
     qreal slopeZ;
 
+    //! if true, use an energy change (source potential and site) and metropolis criterion to calculate injection probability for hole and electron sources (not exciton sources)
+    bool sourceMetropolis;
+
+    //! if true, use the Coulomb + Image interaction when calcualting energy change for injection
+    bool sourceCoulomb;
+
     SimulationParameters() :
 
         simulationType         ("transistor"),
@@ -248,7 +254,9 @@ struct SimulationParameters
         currentStep            (0),
         simulationStart        (QDateTime::currentDateTime()),
         hoppingRange           (1),
-        slopeZ                 (0.00)
+        slopeZ                 (0.00),
+        sourceMetropolis       (false),
+        sourceCoulomb          (false)
     {
     }
 
@@ -264,7 +272,7 @@ inline void setCalculatedValues(SimulationParameters& par)
 }
 
 //! check the parameters, making sure they are valid
-inline void check(SimulationParameters& par)
+inline void checkSimulationParameters(SimulationParameters& par)
 {
     setCalculatedValues(par);
     // simulation type
@@ -357,6 +365,14 @@ inline void check(SimulationParameters& par)
     if (par.hoppingRange < 0 || par.hoppingRange > 2)
     {
         qFatal("hopping.range(%d) < 0 || > 2",par.hoppingRange);
+    }
+
+    if (!par.sourceMetropolis)
+    {
+        if (par.sourceCoulomb)
+        {
+            qFatal("source.metropolis = false, yet source.coulomb = true");
+        }
     }
 }
 

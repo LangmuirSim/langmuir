@@ -288,6 +288,7 @@ void World::initialize(const QString &fileName)
 
     // Parse the input file
     m_checkPointer->load(fileName,configInfo);
+    checkSimulationParameters(*m_parameters);
 
     // Save the seed that has been used
     m_parameters->randomSeed = m_rand->seed();
@@ -321,10 +322,12 @@ void World::initialize(const QString &fileName)
         // Create Transistor Sources
         m_sources.push_back(new ElectronSourceAgent(refWorld, Grid::Left, this));
         m_sources.last()->setRate(parameters().sourceRate);
+        m_sources.last()->setPotential(parameters().voltageLeft);
 
         // Create Transistor Drains
         m_drains.push_back(new ElectronDrainAgent(refWorld, Grid::Right, this));
         m_drains.last()->setRate(parameters().drainRate);
+        m_drains.last()->setPotential(parameters().voltageRight);
     }
     else if ( parameters().simulationType == "solarcell" )
     {
@@ -335,15 +338,19 @@ void World::initialize(const QString &fileName)
         // Create Solar Cell Drains
         m_drains.push_back(new ElectronDrainAgent(refWorld, Grid::Left, this));
         m_drains.last()->setRate(parameters().drainRate);
+        m_drains.last()->setPotential(parameters().voltageLeft);
 
         m_drains.push_back(new HoleDrainAgent(refWorld, Grid::Left, this));
         m_drains.last()->setRate(parameters().drainRate);
+        m_drains.last()->setPotential(parameters().voltageLeft);
 
         m_drains.push_back(new ElectronDrainAgent(refWorld, Grid::Right, this));
         m_drains.last()->setRate(parameters().drainRate);
+        m_drains.last()->setPotential(parameters().voltageRight);
 
         m_drains.push_back(new HoleDrainAgent(refWorld, Grid::Right, this));
         m_drains.last()->setRate(parameters().drainRate);
+        m_drains.last()->setPotential(parameters().voltageRight);
     }
     else
     {

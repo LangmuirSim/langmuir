@@ -18,6 +18,7 @@ protected:
     virtual int chooseSite();
     virtual bool validToInject(int site)= 0;
     virtual void inject(int site)= 0;
+    virtual bool shouldTransport(int site);
     int randomSiteID();
     int randomNeighborSiteID();
 };
@@ -51,6 +52,7 @@ public:
 protected:
     virtual bool validToInject(int site);
     virtual double energyChange(int site);
+    virtual bool shouldTransport(int site);
     virtual int chooseSite();
     virtual void inject(int site);
 };
