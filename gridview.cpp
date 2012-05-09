@@ -1,6 +1,7 @@
 #include "openclhelper.h"
 #include "drainagent.h"
 #include "gridview.h"
+#include "GL/glu.h"
 
 namespace Langmuir
 {
