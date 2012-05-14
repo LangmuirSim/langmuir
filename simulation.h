@@ -28,6 +28,7 @@ public:
     void equilibrated();
 
 protected:
+    void performRecombinations();
     void performInjections();
     void nextTick();
     static void chargeAgentCoulombInteractionQtConcurrentCPU(ChargeAgent * chargeAgent);

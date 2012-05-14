@@ -65,6 +65,7 @@ KeyValueParser::KeyValueParser(World &world, QObject *parent) :
     registerVariable("slope.z", m_parameters.slopeZ);
     registerVariable("source.metropolis", m_parameters.sourceMetropolis);
     registerVariable("source.coulomb", m_parameters.sourceCoulomb);
+    registerVariable("output.ids.on.encounter", m_parameters.outputIdsOnEncounter);
 }
 
 KeyValueParser::~KeyValueParser()

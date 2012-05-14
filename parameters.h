@@ -192,6 +192,9 @@ struct SimulationParameters
     //! if true, use the Coulomb + Image interaction when calcualting energy change for injection
     bool sourceCoulomb;
 
+    //! output carrier lifetime and pathlength when holes and electrons encounter one another
+    bool outputIdsOnEncounter;
+
     SimulationParameters() :
 
         simulationType         ("transistor"),
@@ -256,7 +259,8 @@ struct SimulationParameters
         hoppingRange           (1),
         slopeZ                 (0.00),
         sourceMetropolis       (false),
-        sourceCoulomb          (false)
+        sourceCoulomb          (false),
+        outputIdsOnEncounter   (false)
     {
     }
 
@@ -373,6 +377,17 @@ inline void checkSimulationParameters(SimulationParameters& par)
         {
             qFatal("source.metropolis = false, yet source.coulomb = true");
         }
+    }
+
+    if (par.outputIdsOnEncounter && !((par.electronPercentage > 0) && (par.holePercentage > 0)))
+    {
+        qFatal("output.ids.on.encounter = true, yet electron.percentage = %.5f and hole.percentage = %.5f",
+               par.electronPercentage, par.holePercentage);
+    }
+
+    if (par.outputIdsOnEncounter && par.simulationType != "solarcell")
+    {
+        qFatal("output.ids.on.encounter = true, yet simulation.type != solarcell");
     }
 }
 

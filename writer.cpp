@@ -48,15 +48,39 @@ CarrierWriter::CarrierWriter(World &world, const QString &name, QObject *parent)
              << qSetFieldWidth(m_world.parameters().outputWidth)
              << right
              << scientific
-             << "type"
+             << "s"
              << "x"
              << "y"
              << "z"
-             << "s"
+             << "type"
              << "*"
              << "lifetime"
              << "pathlength"
-             << "time"
+             << "step"
+             << newline
+             << flush;    
+}
+
+ExcitonWriter::ExcitonWriter(World &world, const QString &name, QObject *parent)
+    : QObject(parent), m_world(world), m_stream(name,&m_world.parameters(),this)
+{
+    m_stream << qSetRealNumberPrecision(m_world.parameters().outputPrecision)
+             << qSetFieldWidth(m_world.parameters().outputWidth)
+             << right
+             << scientific
+             << "s"
+             << "x"
+             << "y"
+             << "z"
+             << "type:1"
+             << "*:1"
+             << "lifetime:1"
+             << "pathlength:1"
+             << "type:2"
+             << "*:2"
+             << "lifetime:2"
+             << "pathlength:2"
+             << "step"
              << newline
              << flush;
 }
@@ -167,14 +191,34 @@ void CarrierWriter::write(ChargeAgent &charge)
 {
     Grid &grid = charge.getGrid();
     int site = charge.getCurrentSite();
-    m_stream << charge.getType()
+    m_stream << site
              << grid.getIndexX(site)
              << grid.getIndexY(site)
              << grid.getIndexZ(site)
-             << site
+             << charge.getType()
              << &charge
              << charge.lifetime()
              << charge.pathlength()
+             << m_world.parameters().currentStep
+             << newline;
+}
+
+void ExcitonWriter::write(ChargeAgent &charge1, ChargeAgent &charge2)
+{
+    Grid &grid = charge1.getGrid();
+    int site = charge1.getCurrentSite();
+    m_stream << site
+             << grid.getIndexX(site)
+             << grid.getIndexY(site)
+             << grid.getIndexZ(site)
+             << charge1.getType()
+             << &charge1
+             << charge1.lifetime()
+             << charge1.pathlength()
+             << charge2.getType()
+             << &charge2
+             << charge2.lifetime()
+             << charge2.pathlength()
              << m_world.parameters().currentStep
              << newline;
 }
@@ -232,7 +276,7 @@ void GridImage::drawCharges( QList<ChargeAgent *> &charges,QColor color, int lay
 }
 
 LoggerOn::LoggerOn(World &world, QObject *parent)
-    : Logger(world,parent), m_world(world), m_xyzWriter(0), m_fluxWriter(0), m_carrierWriter(0)
+    : Logger(world,parent), m_world(world), m_xyzWriter(0), m_fluxWriter(0), m_carrierWriter(0), m_excitonWriter(0)
 {
     initialize();
 }
@@ -247,6 +291,11 @@ void LoggerOn::initialize()
     if (m_world.parameters().outputIdsOnDelete)
     {
         m_carrierWriter = new CarrierWriter(m_world,"%stub-carriers.dat",this);
+    }
+
+    if (m_world.parameters().outputIdsOnEncounter)
+    {
+        m_excitonWriter = new ExcitonWriter(m_world,"%stub-excitons.dat",this);
     }
 
     m_fluxWriter = new FluxWriter(m_world,"%stub.dat",this);
@@ -344,6 +393,11 @@ void LoggerOn::reportXYZStream()
 void LoggerOn::reportCarrier(ChargeAgent &charge)
 {
     if (m_carrierWriter) m_carrierWriter->write(charge);
+}
+
+void LoggerOn::reportExciton(ChargeAgent &charge1, ChargeAgent &charge2)
+{
+    if (m_excitonWriter) m_excitonWriter->write(charge1, charge2);
 }
 
 void LoggerOn::saveTrapImage(const QString& name)

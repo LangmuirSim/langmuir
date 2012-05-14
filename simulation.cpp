@@ -70,6 +70,9 @@ void Simulation::performIterations(int nIterations)
                 holes.at(i)->decideFuture();
             }
 
+            // Recombine holes and electrons
+            performRecombinations();
+
             // Now we are done with the charge movement, move them to the next tick!
             nextTick();
 
@@ -107,6 +110,9 @@ void Simulation::performIterations(int nIterations)
             {
                 holes.at(i)->decideFuture();
             }
+
+            // Recombine holes and electrons
+            performRecombinations();
 
             // Now we are done with the charge movement, move them to the next tick!
             nextTick();
@@ -153,6 +159,31 @@ void Simulation::performIterations(int nIterations)
         m_world.logger().saveCarriersImage();
         m_world.logger().saveElectronImage();
         m_world.logger().saveHoleImage();
+    }
+}
+
+void Simulation::performRecombinations()
+{
+    if (!m_world.parameters().outputIdsOnEncounter)
+    {
+        return;
+    }
+    QList<ChargeAgent*> &electrons = m_world.electrons();
+    for (int i = 0; i < electrons.size(); i++)
+    {
+        int site = electrons.at(i)->getCurrentSite();
+        if (m_world.holeGrid().agentType(site) == Agent::Hole)
+        {
+            ChargeAgent *hole = dynamic_cast<ChargeAgent*>(m_world.holeGrid().agentAddress(site));
+            if (hole)
+            {
+                m_world.logger().reportExciton(*m_world.electrons().at(i), *hole);
+            }
+            else
+            {
+                qFatal("dynamic cast from Agent* to ChargeAgent* has failed during output.ids.on.encoutner");
+            }
+        }
     }
 }
 
