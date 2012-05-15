@@ -27,6 +27,9 @@ public:
     void coulombCPU();
     void coulombGPU();
     Grid& getGrid();
+    void setRemoved(const bool &status = true);
+    virtual Agent::Type otherType() = 0;
+    virtual Grid& otherGrid() = 0;
 
 protected:
     virtual double bindingPotential(int site)= 0;
@@ -45,6 +48,8 @@ public:
     ElectronAgent(World &world, int site, QObject *parent=0);
 protected:
     virtual double bindingPotential(int site);
+    virtual Agent::Type otherType();
+    virtual Grid& otherGrid();
 };
 
 class HoleAgent : public ChargeAgent
@@ -53,6 +58,8 @@ public:
     HoleAgent(World &world, int site, QObject *parent=0);
 protected:
     virtual double bindingPotential(int site);
+    virtual Agent::Type otherType();
+    virtual Grid& otherGrid();
 };
 
 }

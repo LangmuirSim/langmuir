@@ -118,6 +118,11 @@ QList<FluxAgent*>& World::fluxes()
     return m_fluxAgents;
 }
 
+RecombinationAgent& World::recombinationAgent()
+{
+    return *m_recombinationAgent;
+}
+
 QList<ChargeAgent*>& World::electrons()
 {
     return m_electrons;
@@ -351,6 +356,12 @@ void World::initialize(const QString &fileName)
         m_drains.push_back(new HoleDrainAgent(refWorld, Grid::Right, this));
         m_drains.last()->setRate(parameters().drainRate);
         m_drains.last()->setPotential(parameters().voltageRight);
+
+        // Create Recombination Agent
+        m_recombinationAgent = new RecombinationAgent(refWorld, this);
+        m_drains.push_back(m_recombinationAgent);
+        m_drains.last()->setRate(parameters().recombinationRate);
+        m_drains.last()->setPotential(0.0);
     }
     else
     {

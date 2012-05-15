@@ -82,6 +82,11 @@ Grid& ChargeAgent::getGrid()
     return m_grid;
 }
 
+void ChargeAgent::setRemoved(const bool &status)
+{
+    m_removed = status;
+}
+
 void ChargeAgent::decideFuture()
 {
     // Increase lifetime in existance
@@ -153,6 +158,14 @@ void ChargeAgent::decideFuture()
 
 void ChargeAgent::completeTick()
 {
+    // If the charge was removed by some other means (recombination)...
+    if (m_removed)
+    {
+        m_grid.unregisterAgent(this);
+        return;
+    }
+
+    // If the charge moved...
     if(m_site != m_fSite)
     {   
         // If the future site is empty move along
@@ -266,6 +279,26 @@ double ElectronAgent::bindingPotential(int site)
         return 0.5;
     }
     return 0.0;
+}
+
+Agent::Type HoleAgent::otherType()
+{
+    return Agent::Electron;
+}
+
+Agent::Type ElectronAgent::otherType()
+{
+    return Agent::Hole;
+}
+
+Grid& HoleAgent::otherGrid()
+{
+    return m_world.electronGrid();
+}
+
+Grid& ElectronAgent::otherGrid()
+{
+    return m_world.holeGrid();
 }
 
 }

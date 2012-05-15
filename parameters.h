@@ -192,8 +192,8 @@ struct SimulationParameters
     //! if true, use the Coulomb + Image interaction when calcualting energy change for injection
     bool sourceCoulomb;
 
-    //! output carrier lifetime and pathlength when holes and electrons encounter one another
-    bool outputIdsOnEncounter;
+    //! the rate at which holes and electrons can combine when they sit upon one another
+    qreal recombinationRate;
 
     SimulationParameters() :
 
@@ -260,7 +260,7 @@ struct SimulationParameters
         slopeZ                 (0.00),
         sourceMetropolis       (false),
         sourceCoulomb          (false),
-        outputIdsOnEncounter   (false)
+        recombinationRate      (0.00)
     {
     }
 
@@ -379,15 +379,20 @@ inline void checkSimulationParameters(SimulationParameters& par)
         }
     }
 
-    if (par.outputIdsOnEncounter && !((par.electronPercentage > 0) && (par.holePercentage > 0)))
+    if (par.recombinationRate < 0.0 || par.recombinationRate > 1.0 )
     {
-        qFatal("output.ids.on.encounter = true, yet electron.percentage = %.5f and hole.percentage = %.5f",
-               par.electronPercentage, par.holePercentage);
+        qFatal("recombination.rate(%f) < 0 || > 1.0",par.recombinationRate);
     }
 
-    if (par.outputIdsOnEncounter && par.simulationType != "solarcell")
+    if (par.recombinationRate > 0 && par.simulationType != "solarcell")
     {
-        qFatal("output.ids.on.encounter = true, yet simulation.type != solarcell");
+        qFatal("recombination.rate(%f) > 0, yet simulation.type != solarcell",par.recombinationRate);
+    }
+
+    if (par.recombinationRate && !((par.electronPercentage > 0) && (par.holePercentage > 0)))
+    {
+        qFatal("recombination.rate(%f) > 0, yet electron.percentage = %.5f and hole.percentage = %.5f",
+               par.recombinationRate, par.electronPercentage, par.holePercentage);
     }
 }
 

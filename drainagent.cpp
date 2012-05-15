@@ -55,6 +55,17 @@ HoleDrainAgent::HoleDrainAgent(World &world, Grid::CubeFace cubeFace, QObject *p
     setObjectName(name);
 }
 
+RecombinationAgent::RecombinationAgent(World &world, QObject *parent)
+    : DrainAgent(world, world.electronGrid(), parent)
+{
+    initializeSite(Grid::NoFace);
+    QString name;
+    QTextStream stream(&name);
+    stream << "x" << m_type;
+    stream.flush();
+    setObjectName(name);
+}
+
 bool DrainAgent::tryToAccept(ChargeAgent *charge)
 {
     m_attempts += 1;
@@ -78,6 +89,37 @@ double HoleDrainAgent::energyChange(int site)
     double p1 = m_potential;
     double p2 = m_grid.potential(site);
     return p2-p1;
+}
+
+double RecombinationAgent::energyChange(int site)
+{
+    return 0.0;
+}
+
+bool RecombinationAgent::tryToAccept(ChargeAgent *charge)
+{
+    int site = charge->getCurrentSite();
+    if (charge->otherGrid().agentType(site) == charge->otherType())
+    {
+        m_attempts += 1;
+        if(shouldTransport(site))
+        {
+            m_successes += 1;
+            ChargeAgent *other = dynamic_cast<ChargeAgent*>(charge->otherGrid().agentAddress(site));
+            if (other)
+            {
+                charge->setRemoved(true);
+                other->setRemoved(true);
+            }
+            else
+            {
+                qFatal("dynamic cast from Agent* to ChargeAgent* has failed during recombination");
+            }
+            return true;
+        }
+        return false;
+    }
+    return false;
 }
 
 }

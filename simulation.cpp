@@ -164,25 +164,11 @@ void Simulation::performIterations(int nIterations)
 
 void Simulation::performRecombinations()
 {
-    if (!m_world.parameters().outputIdsOnEncounter)
+    if (m_world.parameters().recombinationRate > 0)
     {
-        return;
-    }
-    QList<ChargeAgent*> &electrons = m_world.electrons();
-    for (int i = 0; i < electrons.size(); i++)
-    {
-        int site = electrons.at(i)->getCurrentSite();
-        if (m_world.holeGrid().agentType(site) == Agent::Hole)
+        foreach (ChargeAgent *charge, m_world.electrons())
         {
-            ChargeAgent *hole = dynamic_cast<ChargeAgent*>(m_world.holeGrid().agentAddress(site));
-            if (hole)
-            {
-                m_world.logger().reportExciton(*m_world.electrons().at(i), *hole);
-            }
-            else
-            {
-                qFatal("dynamic cast from Agent* to ChargeAgent* has failed during output.ids.on.encoutner");
-            }
+            m_world.recombinationAgent().tryToAccept(charge);
         }
     }
 }

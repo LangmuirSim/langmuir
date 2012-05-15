@@ -61,21 +61,6 @@ protected:
     OutputStream m_stream;
 };
 
-//! A class to output carrier stats (lifetime and pathlength)
-class ExcitonWriter : public QObject
-{
-    Q_OBJECT
-public:
-    //! Constructs the writer, has the same parameters as OutputInfo
-    ExcitonWriter(World &world,
-                  const QString& name,
-                  QObject *parent = 0);
-    void write(ChargeAgent &charge1, ChargeAgent &charge2);
-protected:
-    World &m_world;
-    OutputStream m_stream;
-};
-
 //! A class to draw images of the grid
 class GridImage : public QObject
 {
@@ -159,8 +144,6 @@ public:
     virtual void reportXYZStream() {}
     //! does nothing \see LoggerOn::reportCarrier
     virtual void reportCarrier(ChargeAgent &charge) {}
-    //! does nothing \see LoggerOn::reportExciton
-    virtual void reportExciton(ChargeAgent &charge1, ChargeAgent &charge2) {}
 };
 
 class LoggerOn : public Logger
@@ -181,7 +164,6 @@ public:
     virtual void reportFluxStream();
     virtual void reportXYZStream();
     virtual void reportCarrier(ChargeAgent &charge);
-    virtual void reportExciton(ChargeAgent &charge1, ChargeAgent &charge2);
 
 protected:
     virtual void initialize();
@@ -189,7 +171,6 @@ protected:
     XYZWriter *m_xyzWriter;
     FluxWriter *m_fluxWriter;
     CarrierWriter *m_carrierWriter;
-    ExcitonWriter *m_excitonWriter;
 };
 
 }

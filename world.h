@@ -22,6 +22,7 @@ class ChargeAgent;
 class SourceAgent;
 class CheckPointer;
 class OpenClHelper;
+class RecombinationAgent;
 struct SimulationParameters;
 
 class World : public QObject
@@ -46,6 +47,7 @@ public:
     QList<SourceAgent*>& sources();
     QList<DrainAgent*>& drains();
     QList<FluxAgent*>& fluxes();
+    RecombinationAgent& recombinationAgent();
     QList<ChargeAgent*>& electrons();
     QList<ChargeAgent*>& holes();
     QList<int>& defectSiteIDs();
@@ -78,6 +80,7 @@ private:
     QList<SourceAgent*> m_sources;
     QList<DrainAgent*> m_drains;
     QList<FluxAgent*> m_fluxAgents;
+    RecombinationAgent *m_recombinationAgent;
     Grid *m_electronGrid;
     Grid *m_holeGrid;
     Random *m_rand;

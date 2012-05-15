@@ -12,7 +12,7 @@ class DrainAgent : public FluxAgent
 {
 public:
     DrainAgent(World &world, Grid &grid, QObject *parent = 0);
-    bool tryToAccept(ChargeAgent *charge);
+    virtual bool tryToAccept(ChargeAgent *charge);
 };
 
 class ElectronDrainAgent : public DrainAgent
@@ -30,6 +30,15 @@ public:
     HoleDrainAgent(World &world, int site, QObject *parent = 0);
     HoleDrainAgent(World &world, Grid::CubeFace cubeFace, QObject *parent = 0);
 protected:
+    virtual double energyChange(int fSite);
+};
+
+class RecombinationAgent : public DrainAgent
+{
+public:
+    RecombinationAgent(World &world, QObject *parent = 0);
+    virtual bool tryToAccept(ChargeAgent *charge);
+private:
     virtual double energyChange(int fSite);
 };
 
