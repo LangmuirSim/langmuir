@@ -37,7 +37,7 @@ class RecombinationAgent : public DrainAgent
 {
 public:
     RecombinationAgent(World &world, QObject *parent = 0);
-    virtual bool tryToAccept(ChargeAgent *charge);
+    //virtual bool tryToAccept(ChargeAgent *charge);
 private:
     virtual double energyChange(int fSite);
 };

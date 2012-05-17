@@ -69,7 +69,7 @@ RecombinationAgent::RecombinationAgent(World &world, QObject *parent)
 bool DrainAgent::tryToAccept(ChargeAgent *charge)
 {
     m_attempts += 1;
-    if(shouldTransport(charge->getCurrentSite()) )
+    if(shouldTransport(charge->getCurrentSite()))
     {
         m_successes += 1;
         return true;
@@ -96,30 +96,30 @@ double RecombinationAgent::energyChange(int site)
     return 0.0;
 }
 
-bool RecombinationAgent::tryToAccept(ChargeAgent *charge)
-{
-    int site = charge->getCurrentSite();
-    if (charge->otherGrid().agentType(site) == charge->otherType())
-    {
-        m_attempts += 1;
-        if(shouldTransport(site))
-        {
-            m_successes += 1;
-            ChargeAgent *other = dynamic_cast<ChargeAgent*>(charge->otherGrid().agentAddress(site));
-            if (other)
-            {
-                charge->setRemoved(true);
-                other->setRemoved(true);
-            }
-            else
-            {
-                qFatal("dynamic cast from Agent* to ChargeAgent* has failed during recombination");
-            }
-            return true;
-        }
-        return false;
-    }
-    return false;
-}
+//bool RecombinationAgent::tryToAccept(ChargeAgent *charge)
+//{
+//    int site = charge->getCurrentSite();
+//    if (charge->otherGrid().agentType(site) == charge->otherType())
+//    {
+//        m_attempts += 1;
+//        if(shouldTransport(site))
+//        {
+//            m_successes += 1;
+//            ChargeAgent *other = dynamic_cast<ChargeAgent*>(charge->otherGrid().agentAddress(site));
+//            if (other)
+//            {
+//                charge->setRemoved(true);
+//                other->setRemoved(true);
+//            }
+//            else
+//            {
+//                qFatal("dynamic cast from Agent* to ChargeAgent* has failed during recombination");
+//            }
+//            return true;
+//        }
+//        return false;
+//    }
+//    return false;
+//}
 
 }

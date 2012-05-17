@@ -45,20 +45,45 @@ CarrierWriter::CarrierWriter(World &world, const QString &name, QObject *parent)
     : QObject(parent), m_world(world), m_stream(name,&m_world.parameters(),this)
 {
     m_stream << qSetRealNumberPrecision(m_world.parameters().outputPrecision)
-             << qSetFieldWidth(m_world.parameters().outputWidth)
+             //<< qSetFieldWidth(m_world.parameters().outputWidth)
              << right
              << scientific
-             << "s"
-             << "x"
-             << "y"
-             << "z"
-             << "type"
-             << "*"
-             << "lifetime"
-             << "pathlength"
+             << "s" << ' '
+             << "x" << ' '
+             << "y" << ' '
+             << "z" << ' '
+             << "type" << ' '
+             << "address" << ' '
+             << "lifetime" << ' '
+             << "pathlength" << ' '
              << "step"
              << newline
              << flush;    
+}
+
+ExcitonWriter::ExcitonWriter(World &world, const QString &name, QObject *parent)
+    : QObject(parent), m_world(world), m_stream(name,&m_world.parameters(),this)
+{
+    m_stream << qSetRealNumberPrecision(m_world.parameters().outputPrecision)
+             //<< qSetFieldWidth(m_world.parameters().outputWidth)
+             << right
+             << scientific
+             << "s" << ' '
+             << "x" << ' '
+             << "y" << ' '
+             << "z" << ' '
+             << "1_type" << ' '
+             << "1_address" << ' '
+             << "1_lifetime" << ' '
+             << "1_pathlength" << ' '
+             << "2_type" << ' '
+             << "2_address" << ' '
+             << "2_lifetime" << ' '
+             << "2_pathlength" << ' '
+             << "step" << ' '
+             << "recombined"
+             << newline
+             << flush;
 }
 
 void XYZWriter::write()
@@ -167,15 +192,36 @@ void CarrierWriter::write(ChargeAgent &charge)
 {
     Grid &grid = charge.getGrid();
     int site = charge.getCurrentSite();
-    m_stream << site
-             << grid.getIndexX(site)
-             << grid.getIndexY(site)
-             << grid.getIndexZ(site)
-             << charge.getType()
-             << &charge
-             << charge.lifetime()
-             << charge.pathlength()
+    m_stream << site << ' '
+             << grid.getIndexX(site) << ' '
+             << grid.getIndexY(site) << ' '
+             << grid.getIndexZ(site) << ' '
+             << Agent::toQString(charge.getType()).at(0) << ' '
+             << &charge << ' '
+             << charge.lifetime() << ' '
+             << charge.pathlength() << ' '
              << m_world.parameters().currentStep
+             << newline;
+}
+
+void ExcitonWriter::write(ChargeAgent &charge1, ChargeAgent &charge2, bool recombined)
+{
+    Grid &grid = charge1.getGrid();
+    int site = charge1.getCurrentSite();
+    m_stream << site << ' '
+             << grid.getIndexX(site) << ' '
+             << grid.getIndexY(site) << ' '
+             << grid.getIndexZ(site) << ' '
+             << Agent::toQString(charge1.getType()).at(0) << ' '
+             << &charge1 << ' '
+             << charge1.lifetime() << ' '
+             << charge1.pathlength() << ' '
+             << Agent::toQString(charge2.getType()).at(0) << ' '
+             << &charge2 << ' '
+             << charge2.lifetime() << ' '
+             << charge2.pathlength() << ' '
+             << m_world.parameters().currentStep << ' '
+             << recombined
              << newline;
 }
 
@@ -247,6 +293,11 @@ void LoggerOn::initialize()
     if (m_world.parameters().outputIdsOnDelete)
     {
         m_carrierWriter = new CarrierWriter(m_world,"%stub-carriers.dat",this);
+    }
+
+    if (m_world.parameters().outputIdsOnEncounter)
+    {
+        m_excitonWriter = new ExcitonWriter(m_world,"%stub-excitons.dat",this);
     }
 
     m_fluxWriter = new FluxWriter(m_world,"%stub.dat",this);
@@ -344,6 +395,11 @@ void LoggerOn::reportXYZStream()
 void LoggerOn::reportCarrier(ChargeAgent &charge)
 {
     if (m_carrierWriter) m_carrierWriter->write(charge);
+}
+
+void LoggerOn::reportExciton(ChargeAgent &charge1, ChargeAgent &charge2, bool recombined)
+{
+    if (m_excitonWriter) m_excitonWriter->write(charge1, charge2, recombined);
 }
 
 void LoggerOn::saveTrapImage(const QString& name)

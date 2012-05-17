@@ -66,6 +66,7 @@ KeyValueParser::KeyValueParser(World &world, QObject *parent) :
     registerVariable("source.metropolis", m_parameters.sourceMetropolis);
     registerVariable("source.coulomb", m_parameters.sourceCoulomb);
     registerVariable("recombination.rate", m_parameters.recombinationRate);
+    registerVariable("output.ids.on.encounter", m_parameters.outputIdsOnEncounter);
 }
 
 KeyValueParser::~KeyValueParser()
