@@ -381,15 +381,42 @@ void World::initialize(const QString &fileName)
     // Set previous flux state
     if (configInfo.fluxInfo.size() > 0)
     {
-        if (configInfo.fluxInfo.size() != 2*m_fluxAgents.size())
+        if (configInfo.fluxInfo.size() % 2 != 0 ||
+            configInfo.fluxInfo.size() != 2*m_fluxAgents.size())
         {
-            qFatal("the flux info in the input file has an invalid size for this simulation.type");
+            qWarning("warning: [FluxInfo] has an invalid size for this simulation.type (expected %d values, found %d)",
+                     2*m_fluxAgents.size(), configInfo.fluxInfo.size());
+            if (configInfo.fluxInfo.size() > 2*m_fluxAgents.size())
+            {
+                qWarning("warning: the excess values will be ignored...");
+            }
+            else
+            {
+                qWarning("warning: missing values will be set to zero...");
+            }
         }
         int j = 0;
         for (int i = 0; i < m_fluxAgents.size(); i++)
         {
-            m_fluxAgents.at(i)->setAttempts(configInfo.fluxInfo.at(j));
-            m_fluxAgents.at(i)->setSuccesses(configInfo.fluxInfo.at(j+1));
+            if (j < configInfo.fluxInfo.size())
+            {
+                m_fluxAgents.at(i)->setAttempts(configInfo.fluxInfo.at(j));
+            }
+            else
+            {
+                qWarning("warning: missing [FluxInfo] attempts for fluxAgent %s",
+                         qPrintable(m_fluxAgents.at(i)->objectName()));
+            }
+
+            if ((j + 1) < configInfo.fluxInfo.size())
+            {
+                m_fluxAgents.at(i)->setSuccesses(configInfo.fluxInfo.at(j+1));
+            }
+            else
+            {
+                qWarning("warning: missing [FluxInfo] successes for fluxAgent %s",
+                         qPrintable(m_fluxAgents.at(i)->objectName()));
+            }
             j += 2;
         }
     }
