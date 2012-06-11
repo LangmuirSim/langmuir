@@ -7,7 +7,7 @@
 namespace Langmuir
 {
 
-class SimulationParameters;
+struct SimulationParameters;
 
 class FluxAgent : public Agent
 {

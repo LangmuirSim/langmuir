@@ -7,7 +7,7 @@ namespace Langmuir
 {
 
 class Grid;
-class SimulationParameters;
+struct SimulationParameters;
 
 class ChargeAgent : public Agent
 {
