@@ -72,7 +72,7 @@ int main (int argc, char *argv[])
         sim.performIterations (par.iterationsPrint);
 
         // Output to the screen
-        progress(qout, par) << '\r'; qout.flush();
+        progress(qout, par) << '\n'; qout.flush();
 
         // Save a Checkpoint File
         if (par.outputIsOn) world.checkPointer().save();

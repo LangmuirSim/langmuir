@@ -11,6 +11,10 @@
 namespace Langmuir
 {
 
+// output QDateTime as qint64 mSecsSinceEpoch
+// must be declared before template functions
+inline QTextStream& operator<<(QTextStream& stream, const QDateTime& datetime);
+
 //! A class to map between variable names (keys) and locations (references)
 /*
   The class is a template so that it may point to arbitray data types.  In order to
