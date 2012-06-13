@@ -25,7 +25,6 @@ public:
     double range(const double low=0.0, const double high=1.0);
     double normal(const double mean, const double sigma);
     int integer(const int low=0, const int high=1);
-    void testInteger(const int low=0, const int high=1, const int tries=100000);
     bool randomlyChooseYesWithMetropolis(double energyChange, double inversekT, double randNumber);
     bool randomlyChooseYesWithMetropolis(double energyChange, double inversekT);
     bool randomlyChooseYesWithMetropolisAndCoupling(double energyChange, double inversekT, double coupling, double randNumber);

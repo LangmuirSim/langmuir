@@ -65,15 +65,6 @@ int Random::integer(const int low, const int high)
     return generator();
 }
 
-void Random::testInteger(const int low, const int high, int tries)
-{
-    for(int i = 0; i < tries; i++)
-    {
-        int generated = this->integer(low, high);
-        Q_ASSERT_X(generated >= low && generated <= high, "testInteger", qPrintable(QString("low: %1 high: %2 generated: %3").arg(low).arg(high).arg(generated)) );
-    }
-}
-
 bool Random::randomlyChooseYesWithMetropolis(double energyChange, double inversekT)
 {
     double randNumber = this->random();
