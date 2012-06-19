@@ -169,21 +169,18 @@ QVector<int> Grid::sliceIndex(int xi, int xf, int yi, int yf, int zi, int zf)
         ndx_rev = xi;
         xi = xf;
         xf = ndx_rev;
-        ndx_rev = 0;
     }
     if(yf < yi)
     {
         ndx_rev = yi;
         yi = yf;
         yf = ndx_rev;
-        ndx_rev = 0;
     }
     if(zf < zi)
     {
         ndx_rev = zi;
         zi = zf;
         zf = ndx_rev;
-        ndx_rev = 0;
     }
     if(  xi <       0 || yi <        0 || zi <       0 ||
          xf <       0 || yf <        0 || zf <       0 ||
