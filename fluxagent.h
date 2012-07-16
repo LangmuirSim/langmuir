@@ -14,17 +14,28 @@ class FluxAgent : public Agent
 public:    
     FluxAgent(Agent::Type type, World &world, Grid& grid, QObject *parent = 0);
     ~FluxAgent();
+
+    void setPotential(double potential);
+    double potential()const;
+
+    void setRate(double rate);
+    double rate()const;
+
+    void setTries(int tries);
+    int tries()const;
+
+    void setAttempts(unsigned long int value);
     unsigned long int attempts()const;
+
+    void setSuccesses(unsigned long int value);
     unsigned long int successes()const;
+
     double successProbability()const;
     double successRate()const;
-    Grid::CubeFace face()const;
     void resetCounters();
-    void setPotential(double potential);
-    void setRate(double rate);
-    void setTries(int tries);
-    void setAttempts(unsigned long int value);
-    void setSuccesses(unsigned long int value);
+
+    Grid::CubeFace face()const;
+    Grid& grid()const;
 
 protected:
     void initializeSite(int site);

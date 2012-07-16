@@ -263,7 +263,7 @@ template <class T> inline void TypedVariable<T>::read(const QString& token)
 {
     if (m_mode.testFlag(Constant))
     {
-        qWarning("ignoring constant; key: %s, token: %s",
+        qWarning("warning: ignoring constant; key: %s, token: %s",
                  qPrintable(m_key),qPrintable(token));
         return;
     }

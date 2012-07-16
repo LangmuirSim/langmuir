@@ -198,6 +198,9 @@ struct SimulationParameters
     //! output carrier lifetime and pathlength when holes and electrons encounter one another
     bool outputIdsOnEncounter;
 
+    //! for SimulationParameters::simulationType == "solarcell", multiply SimulationParameters::sourceRate by (Grid::xyPlaneArea)/(SimulationParameters::sourceScaleArea); if <= 0, does not scale rate
+    qreal sourceScaleArea;
+
     SimulationParameters() :
 
         simulationType         ("transistor"),
@@ -264,7 +267,8 @@ struct SimulationParameters
         sourceMetropolis       (false),
         sourceCoulomb          (false),
         recombinationRate      (0.00),
-        outputIdsOnEncounter   (false)
+        outputIdsOnEncounter   (false),
+        sourceScaleArea        (65536)
     {
     }
 

@@ -67,6 +67,7 @@ KeyValueParser::KeyValueParser(World &world, QObject *parent) :
     registerVariable("source.coulomb", m_parameters.sourceCoulomb);
     registerVariable("recombination.rate", m_parameters.recombinationRate);
     registerVariable("output.ids.on.encounter", m_parameters.outputIdsOnEncounter);
+    registerVariable("source.scale.area", m_parameters.sourceScaleArea);
 }
 
 KeyValueParser::~KeyValueParser()

@@ -340,6 +340,17 @@ void World::initialize(const QString &fileName)
         m_sources.push_back(new ExcitonSourceAgent(refWorld, this));
         m_sources.last()->setRate(parameters().sourceRate);
 
+        // Scale the source.rate according to the area of the simulation cell
+        if ( parameters().sourceScaleArea > 0 )
+        {
+            double oldRate = parameters().sourceRate;
+            double scaleFactor = m_electronGrid->xyPlaneArea() / double(parameters().sourceScaleArea);
+            double newRate = oldRate * scaleFactor;
+            qWarning("warning: source.rate is being scaled... %.5e * 2^(%.5e) = %.5e",
+                     oldRate, log2(scaleFactor), newRate);
+            m_sources.last()->setRate(newRate);
+        }
+
         // Create Solar Cell Drains
         m_drains.push_back(new ElectronDrainAgent(refWorld, Grid::Left, this));
         m_drains.last()->setRate(parameters().drainRate);

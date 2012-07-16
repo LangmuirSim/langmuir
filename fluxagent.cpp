@@ -126,4 +126,24 @@ void FluxAgent::setSuccesses(unsigned long int value)
     m_successes = value;
 }
 
+double FluxAgent::potential()const
+{
+    return m_potential;
+}
+
+double FluxAgent::rate()const
+{
+    return m_probability;
+}
+
+int FluxAgent::tries()const
+{
+    return m_tries;
+}
+
+Grid& FluxAgent::grid()const
+{
+    return m_grid;
+}
+
 }
