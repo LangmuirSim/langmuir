@@ -341,7 +341,7 @@ void World::initialize(const QString &fileName)
         m_sources.last()->setRate(parameters().sourceRate);
 
         // Scale the source.rate according to the area of the simulation cell
-        if ( parameters().sourceScaleArea > 0 )
+        if ( parameters().sourceScaleArea > 0 && parameters().sourceScaleArea != m_electronGrid->xyPlaneArea())
         {
             double oldRate = parameters().sourceRate;
             double scaleFactor = m_electronGrid->xyPlaneArea() / double(parameters().sourceScaleArea);
