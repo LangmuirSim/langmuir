@@ -201,6 +201,9 @@ struct SimulationParameters
     //! for SimulationParameters::simulationType == "solarcell", multiply SimulationParameters::sourceRate by (Grid::xyPlaneArea)/(SimulationParameters::sourceScaleArea); if <= 0, does not scale rate
     qreal sourceScaleArea;
 
+    //! max threads allowed for QThreadPool - if its <= 0 then the QThread::idealThreadCount is used; note that Qt ignores PBS and SGE so when this isn't set Qt will use all the cores on a node
+    qint32 maxThreads;
+
     SimulationParameters() :
 
         simulationType         ("transistor"),
@@ -268,7 +271,8 @@ struct SimulationParameters
         sourceCoulomb          (false),
         recombinationRate      (0.00),
         outputIdsOnEncounter   (false),
-        sourceScaleArea        (65536)
+        sourceScaleArea        (65536),
+        maxThreads             (-1)
     {
     }
 

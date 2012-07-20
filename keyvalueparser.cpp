@@ -68,6 +68,7 @@ KeyValueParser::KeyValueParser(World &world, QObject *parent) :
     registerVariable("recombination.rate", m_parameters.recombinationRate);
     registerVariable("output.ids.on.encounter", m_parameters.outputIdsOnEncounter);
     registerVariable("source.scale.area", m_parameters.sourceScaleArea);
+    registerVariable("max.threads", m_parameters.maxThreads);
 }
 
 KeyValueParser::~KeyValueParser()

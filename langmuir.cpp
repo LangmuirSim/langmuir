@@ -7,6 +7,7 @@
 #include "world.h"
 #include "openclhelper.h"
 #include "checkpointer.h"
+#include "parameters.h"
 
 #include <QApplication>
 #include <QPrinter>
@@ -17,6 +18,7 @@
 #include <QtCore/QTextStream>
 #include <QtCore/QDateTime>
 #include <QtCore/QDebug>
+#include <QThreadPool>
 
 using namespace Langmuir;
 
@@ -30,6 +32,31 @@ QTextStream& progress(QTextStream &stream, SimulationParameters& par)
             .arg(left, 35)
             .arg(sec, 35, 'f', 5);
     return stream << qPrintable(info);
+}
+
+void alterMaxThreads(SimulationParameters &par)
+{
+    if (par.maxThreads <= 0)
+    {
+        return;
+    }
+
+    QThreadPool& threadPool = *QThreadPool::globalInstance();
+    int maxThreadCount = threadPool.maxThreadCount();
+
+    if (par.maxThreads == maxThreadCount)
+    {
+        return;
+    }
+
+    if (par.maxThreads > maxThreadCount)
+    {
+        qWarning("warning: requesting more threads than recommended\n"
+                 "QThread::idealThreadCount = %d\n"
+                 "max.threads = %d", maxThreadCount, par.maxThreads);
+    }
+
+    threadPool.setMaxThreadCount(par.maxThreads);
 }
 
 int main (int argc, char *argv[])
@@ -59,6 +86,9 @@ int main (int argc, char *argv[])
     // Get the simulation Parameters
     SimulationParameters &par = world.parameters();
 
+    // Set the max number of QThreads in QThreadPool
+    alterMaxThreads(par);
+
     // Save the parameters
     world.keyValueParser().save("%stub.parm");
 
@@ -72,7 +102,7 @@ int main (int argc, char *argv[])
         sim.performIterations (par.iterationsPrint);
 
         // Output to the screen
-        progress(qout, par) << '\n'; qout.flush();
+        progress(qout, par) << '\r'; qout.flush();
 
         // Save a Checkpoint File
         if (par.outputIsOn) world.checkPointer().save();
