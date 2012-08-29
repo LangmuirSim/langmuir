@@ -57,6 +57,18 @@ struct SimulationParameters
     //! output trajectory file every interationsPrint
     qint32 outputXyz;
 
+    //! output electrons in trajectory file (ignored if outputXyz is off)
+    bool outputXyzE;
+
+    //! output holes in trajectory file (ignored if outputXyz is off)
+    bool outputXyzH;
+
+    //! output defects in trajectory file (ignored if outputXyz is off)
+    bool outputXyzD;
+
+    //! output traps in trajectory file (ignored if outputXyz is off)
+    bool outputXyzT;
+
     //! output carrier lifetime and pathlength when they are deleted
     bool outputIdsOnDelete;
 
@@ -217,6 +229,11 @@ struct SimulationParameters
         defectsCharge          (0),
 
         outputXyz              (0),
+        outputXyzE             (true),
+        outputXyzH             (true),
+        outputXyzD             (true),
+        outputXyzT             (true),
+
         outputIdsOnDelete      (false),
         outputCoulomb          (0),
         outputPotential        (false),
@@ -416,6 +433,12 @@ inline void checkSimulationParameters(SimulationParameters& par)
     {
         qFatal("output.ids.on.encounter == true, yet electron.percentage = %.5f and hole.percentage = %.5f",
                par.electronPercentage, par.holePercentage);
+    }
+
+    if (((par.outputXyzE == false) && (par.outputXyzH == false) && (par.outputXyzD == false) && (par.outputXyzT == false)) && par.outputXyz > 0)
+    {
+        qFatal("output.xyz > 0, yet output.xyz.e && output.xyz.h && output.xyz.d && output.xyz.t are all false");
+
     }
 }
 

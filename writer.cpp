@@ -88,10 +88,11 @@ ExcitonWriter::ExcitonWriter(World &world, const QString &name, QObject *parent)
 
 void XYZWriter::write()
 {
-    int num = m_world.numElectronAgents() +
-              m_world.numHoleAgents()     +
-              m_world.numDefects()        +
-              m_world.numTraps();
+    int num = 0;
+    if (m_world.parameters().outputXyzE == true) { num += m_world.numElectronAgents(); }
+    if (m_world.parameters().outputXyzH == true) { num += m_world.numHoleAgents(); }
+    if (m_world.parameters().outputXyzD == true) { num += m_world.numDefects(); }
+    if (m_world.parameters().outputXyzT == true) { num += m_world.numTraps(); }
 
     m_stream << qSetFieldWidth(0)
              << num
@@ -104,6 +105,8 @@ void XYZWriter::write()
              << qSetFieldWidth(0)
              << right
              << scientific;
+
+    if (m_world.parameters().outputXyzE == true)
     {
         Grid &grid = m_world.electronGrid();
         QList<ChargeAgent*> &charges = m_world.electrons();
@@ -121,6 +124,8 @@ void XYZWriter::write()
                      << charge.pathlength()  << '\n';
         }
     }
+
+    if (m_world.parameters().outputXyzH == true)
     {
         Grid &grid = m_world.holeGrid();
         QList<ChargeAgent*> &charges = m_world.holes();
@@ -138,6 +143,8 @@ void XYZWriter::write()
                      << charge.pathlength()  << '\n';
         }
     }
+
+    if (m_world.parameters().outputXyzD == true)
     {
         Grid &grid = m_world.electronGrid();
         QList<int> &ids = m_world.defectSiteIDs();
@@ -152,6 +159,8 @@ void XYZWriter::write()
                      << i                    << '\n';
         }
     }
+
+    if (m_world.parameters().outputXyzT == true)
     {
         Grid &grid = m_world.electronGrid();
         QList<int> &ids = m_world.trapSiteIDs();
