@@ -12,6 +12,7 @@ namespace Langmuir
 XYZWriter::XYZWriter(World &world, const QString &name, QObject *parent)
     : QObject(parent), m_world(world), m_stream(name,&m_world.parameters(),this)
 {
+    writeVMDInitFile();
 }
 
 FluxWriter::FluxWriter(World &world, const QString &name, QObject *parent)
@@ -175,6 +176,42 @@ void XYZWriter::write()
                      << i                    << '\n';
         }
     }
+}
+
+void XYZWriter::writeVMDInitFile()
+{
+    OutputStream stream("vmd.init", &m_world.parameters(), this);
+
+    m_stream.info().fileName();
+
+    stream << "#use this script with VMD: vmd -e vmd.init" << '\n';
+    stream                                                 << '\n';
+    stream << QString("topo readvarxyz %1")
+                  .arg(m_stream.info().fileName())         << '\n';
+    stream                                                 << '\n';
+    stream << "mol modstyle 0 top VDW 1 50"                << '\n';
+    stream                                                 << '\n';
+    stream << "[ atomselect 0 \"name E\" ] set radius 0.5" << '\n';
+    stream << "[ atomselect 0 \"name H\" ] set radius 0.5" << '\n';
+    stream << "[ atomselect 0 \"name D\" ] set radius 0.5" << '\n';
+    stream << "[ atomselect 0 \"name T\" ] set radius 0.5" << '\n';
+    stream                                                 << '\n';
+    stream << "color Display Background iceblue"           << '\n';
+    stream << "color Name E black"                         << '\n';
+    stream << "color Name H red"                           << '\n';
+    stream << "color Name D white"                         << '\n';
+    stream << "color Name T blue"                          << '\n';
+    stream                                                 << '\n';
+    stream << "display backgroundgradient on"              << '\n';
+    stream << "rotate x by -15"                            << '\n';
+    stream << "axes location off"                          << '\n';
+    stream                                                 << '\n';
+    stream << QString("pbc set {%1 %2 %3} -all")
+                  .arg(m_world.parameters().gridX)
+                  .arg(m_world.parameters().gridY)
+                  .arg(m_world.parameters().gridZ)         << '\n';
+    stream << "pbc box -color white"                       << '\n';
+    stream.flush();
 }
 
 void FluxWriter::write()

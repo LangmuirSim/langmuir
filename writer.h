@@ -29,6 +29,7 @@ public:
 protected:
     World &m_world;
     OutputStream m_stream;
+    void writeVMDInitFile();
 };
 
 //! A class to output source and drain info
