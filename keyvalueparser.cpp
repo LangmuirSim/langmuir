@@ -73,6 +73,7 @@ KeyValueParser::KeyValueParser(World &world, QObject *parent) :
     registerVariable("output.xyz.h", m_parameters.outputXyzH);
     registerVariable("output.xyz.d", m_parameters.outputXyzD);
     registerVariable("output.xyz.t", m_parameters.outputXyzT);
+    registerVariable("output.xyz.mode", m_parameters.outputXyzMode);
 }
 
 KeyValueParser::~KeyValueParser()

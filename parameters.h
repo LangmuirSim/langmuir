@@ -69,6 +69,9 @@ struct SimulationParameters
     //! output traps in trajectory file (ignored if outputXyz is off)
     bool outputXyzT;
 
+    //! output mode for xyz file (if 0, particle count varies; if 1, particle count is constant using "phantom particles")
+    bool outputXyzMode;
+
     //! output carrier lifetime and pathlength when they are deleted
     bool outputIdsOnDelete;
 
@@ -233,6 +236,7 @@ struct SimulationParameters
         outputXyzH             (true),
         outputXyzD             (true),
         outputXyzT             (true),
+        outputXyzMode          (0),
 
         outputIdsOnDelete      (false),
         outputCoulomb          (0),
@@ -439,6 +443,11 @@ inline void checkSimulationParameters(SimulationParameters& par)
     {
         qFatal("output.xyz > 0, yet output.xyz.e && output.xyz.h && output.xyz.d && output.xyz.t are all false");
 
+    }
+
+    if (par.outputXyzMode < 0 || par.outputXyzMode > 1)
+    {
+        qFatal("output.xyz.mode must be 0 or 1");
     }
 }
 

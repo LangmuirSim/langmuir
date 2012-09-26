@@ -89,92 +89,231 @@ ExcitonWriter::ExcitonWriter(World &world, const QString &name, QObject *parent)
 
 void XYZWriter::write()
 {
-    int num = 0;
-    if (m_world.parameters().outputXyzE == true) { num += m_world.numElectronAgents(); }
-    if (m_world.parameters().outputXyzH == true) { num += m_world.numHoleAgents(); }
-    if (m_world.parameters().outputXyzD == true) { num += m_world.numDefects(); }
-    if (m_world.parameters().outputXyzT == true) { num += m_world.numTraps(); }
-
-    m_stream << qSetFieldWidth(0)
-             << num
-             << newline;
-
-    m_stream << m_world.parameters().currentStep
-             << newline;
-
-    m_stream << qSetRealNumberPrecision(m_world.parameters().outputPrecision)
-             << qSetFieldWidth(0)
-             << right
-             << scientific;
-
-    if (m_world.parameters().outputXyzE == true)
+    if (m_world.parameters().outputXyzMode == 0)
     {
-        Grid &grid = m_world.electronGrid();
-        QList<ChargeAgent*> &charges = m_world.electrons();
-        foreach( ChargeAgent* pCharge, charges)
+        int num = 0;
+        if (m_world.parameters().outputXyzE == true) { num += m_world.numElectronAgents(); }
+        if (m_world.parameters().outputXyzH == true) { num += m_world.numHoleAgents(); }
+        if (m_world.parameters().outputXyzD == true) { num += m_world.numDefects(); }
+        if (m_world.parameters().outputXyzT == true) { num += m_world.numTraps(); }
+
+        m_stream << qSetFieldWidth(0)
+                 << num
+                 << newline;
+
+        m_stream << m_world.parameters().currentStep
+                 << newline;
+
+        m_stream << qSetRealNumberPrecision(m_world.parameters().outputPrecision)
+                 << qSetFieldWidth(0)
+                 << right
+                 << scientific;
+
+        if (m_world.parameters().outputXyzE == true)
         {
-            ChargeAgent &charge = *pCharge;
-            int site = charge.getCurrentSite();
-            m_stream << 'E'                  << ' '
-                     << grid.getIndexX(site) << ' '
-                     << grid.getIndexY(site) << ' '
-                     << grid.getIndexZ(site) << ' '
-                     << site                 << ' '
-                     << &charge              << ' '
-                     << charge.lifetime()    << ' '
-                     << charge.pathlength()  << '\n';
+            Grid &grid = m_world.electronGrid();
+            QList<ChargeAgent*> &charges = m_world.electrons();
+            foreach( ChargeAgent* pCharge, charges)
+            {
+                ChargeAgent &charge = *pCharge;
+                int site = charge.getCurrentSite();
+                m_stream << 'E'                  << ' '
+                         << grid.getIndexX(site) << ' '
+                         << grid.getIndexY(site) << ' '
+                         << grid.getIndexZ(site) << ' '
+                         << site                 << ' '
+                         << &charge              << ' '
+                         << charge.lifetime()    << ' '
+                         << charge.pathlength()  << '\n';
+            }
+        }
+
+        if (m_world.parameters().outputXyzH == true)
+        {
+            Grid &grid = m_world.holeGrid();
+            QList<ChargeAgent*> &charges = m_world.holes();
+            foreach( ChargeAgent* pCharge, charges)
+            {
+                ChargeAgent &charge = *pCharge;
+                int site = charge.getCurrentSite();
+                m_stream << 'H'                  << ' '
+                         << grid.getIndexX(site) << ' '
+                         << grid.getIndexY(site) << ' '
+                         << grid.getIndexZ(site) << ' '
+                         << site                 << ' '
+                         << &charge              << ' '
+                         << charge.lifetime()    << ' '
+                         << charge.pathlength()  << '\n';
+            }
+        }
+
+        if (m_world.parameters().outputXyzD == true)
+        {
+            Grid &grid = m_world.electronGrid();
+            QList<int> &ids = m_world.defectSiteIDs();
+            for (int i = 0; i < ids.size(); i++)
+            {
+                int site = ids[i];
+                m_stream << 'D'                  << ' '
+                         << grid.getIndexX(site) << ' '
+                         << grid.getIndexY(site) << ' '
+                         << grid.getIndexZ(site) << ' '
+                         << site                 << ' '
+                         << i                    << '\n';
+            }
+        }
+
+        if (m_world.parameters().outputXyzT == true)
+        {
+            Grid &grid = m_world.electronGrid();
+            QList<int> &ids = m_world.trapSiteIDs();
+            for (int i = 0; i < ids.size(); i++)
+            {
+                int site = ids[i];
+                m_stream << 'T'                  << ' '
+                         << grid.getIndexX(site) << ' '
+                         << grid.getIndexY(site) << ' '
+                         << -1                   << ' '
+                         << site                 << ' '
+                         << i                    << '\n';
+            }
         }
     }
-
-    if (m_world.parameters().outputXyzH == true)
+    else if (m_world.parameters().outputXyzMode == 1)
     {
-        Grid &grid = m_world.holeGrid();
-        QList<ChargeAgent*> &charges = m_world.holes();
-        foreach( ChargeAgent* pCharge, charges)
+        int num = 0;
+        if (m_world.parameters().outputXyzE == true) { num += m_world.maxElectronAgents(); }
+        if (m_world.parameters().outputXyzH == true) { num += m_world.maxHoleAgents(); }
+        if (m_world.parameters().outputXyzD == true) { num += m_world.maxDefects(); }
+        if (m_world.parameters().outputXyzT == true) { num += m_world.maxTraps(); }
+
+        m_stream << qSetFieldWidth(0)
+                 << num
+                 << newline;
+
+        m_stream << m_world.parameters().currentStep
+                 << newline;
+
+        m_stream << qSetRealNumberPrecision(m_world.parameters().outputPrecision)
+                 << qSetFieldWidth(0)
+                 << right
+                 << scientific;
+
+        if (m_world.parameters().outputXyzE == true)
         {
-            ChargeAgent &charge = *pCharge;
-            int site = charge.getCurrentSite();
-            m_stream << 'H'                  << ' '
-                     << grid.getIndexX(site) << ' '
-                     << grid.getIndexY(site) << ' '
-                     << grid.getIndexZ(site) << ' '
-                     << site                 << ' '
-                     << &charge              << ' '
-                     << charge.lifetime()    << ' '
-                     << charge.pathlength()  << '\n';
+            Grid &grid = m_world.electronGrid();
+            QList<ChargeAgent*> &charges = m_world.electrons();
+            foreach( ChargeAgent* pCharge, charges)
+            {
+                ChargeAgent &charge = *pCharge;
+                int site = charge.getCurrentSite();
+                m_stream << 'E'                  << ' '
+                         << grid.getIndexX(site) << ' '
+                         << grid.getIndexY(site) << ' '
+                         << grid.getIndexZ(site) << ' '
+                         << site                 << ' '
+                         << &charge              << ' '
+                         << charge.lifetime()    << ' '
+                         << charge.pathlength()  << '\n';
+            }
+            for (int i = 0; i < m_world.maxElectronAgents() - m_world.numElectronAgents(); i++)
+            {
+                m_stream << 'E'   << ' '
+                         << -1024 << ' '
+                         << -1024 << ' '
+                         << -1024 << ' '
+                         << -1    << ' '
+                         << -1    << ' '
+                         << -1    << ' '
+                         << -1    << '\n';
+            }
+        }
+
+        if (m_world.parameters().outputXyzH == true)
+        {
+            Grid &grid = m_world.holeGrid();
+            QList<ChargeAgent*> &charges = m_world.holes();
+            foreach( ChargeAgent* pCharge, charges)
+            {
+                ChargeAgent &charge = *pCharge;
+                int site = charge.getCurrentSite();
+                m_stream << 'H'                  << ' '
+                         << grid.getIndexX(site) << ' '
+                         << grid.getIndexY(site) << ' '
+                         << grid.getIndexZ(site) << ' '
+                         << site                 << ' '
+                         << &charge              << ' '
+                         << charge.lifetime()    << ' '
+                         << charge.pathlength()  << '\n';
+            }
+            for (int i = 0; i < m_world.maxHoleAgents() - m_world.numHoleAgents(); i++)
+            {
+                m_stream << 'H'   << ' '
+                         << -1024 << ' '
+                         << -1024 << ' '
+                         << -1024 << ' '
+                         << -1    << ' '
+                         << -1    << ' '
+                         << -1    << ' '
+                         << -1    << '\n';
+            }
+        }
+
+        if (m_world.parameters().outputXyzD == true)
+        {
+            Grid &grid = m_world.electronGrid();
+            QList<int> &ids = m_world.defectSiteIDs();
+            for (int i = 0; i < ids.size(); i++)
+            {
+                int site = ids[i];
+                m_stream << 'D'                  << ' '
+                         << grid.getIndexX(site) << ' '
+                         << grid.getIndexY(site) << ' '
+                         << grid.getIndexZ(site) << ' '
+                         << site                 << ' '
+                         << i                    << '\n';
+            }
+            for (int i = 0; i < m_world.maxDefects() - m_world.numDefects(); i++)
+            {
+                m_stream << 'D'   << ' '
+                         << -1024 << ' '
+                         << -1024 << ' '
+                         << -1024 << ' '
+                         << -1    << ' '
+                         << -1    << ' '
+                         << -1    << '\n';
+            }
+        }
+
+        if (m_world.parameters().outputXyzT == true)
+        {
+            Grid &grid = m_world.electronGrid();
+            QList<int> &ids = m_world.trapSiteIDs();
+            for (int i = 0; i < ids.size(); i++)
+            {
+                int site = ids[i];
+                m_stream << 'T'                  << ' '
+                         << grid.getIndexX(site) << ' '
+                         << grid.getIndexY(site) << ' '
+                         << -1                   << ' '
+                         << site                 << ' '
+                         << i                    << '\n';
+            }
+        }
+        for (int i = 0; i < m_world.maxTraps() - m_world.numTraps(); i++)
+        {
+            m_stream << 'T'   << ' '
+                     << -1024 << ' '
+                     << -1024 << ' '
+                     << -1024 << ' '
+                     << -1    << ' '
+                     << -1    << ' '
+                     << -1    << '\n';
         }
     }
-
-    if (m_world.parameters().outputXyzD == true)
+    else
     {
-        Grid &grid = m_world.electronGrid();
-        QList<int> &ids = m_world.defectSiteIDs();
-        for (int i = 0; i < ids.size(); i++)
-        {
-            int site = ids[i];
-            m_stream << 'D'                  << ' '
-                     << grid.getIndexX(site) << ' '
-                     << grid.getIndexY(site) << ' '
-                     << grid.getIndexZ(site) << ' '
-                     << site                 << ' '
-                     << i                    << '\n';
-        }
-    }
-
-    if (m_world.parameters().outputXyzT == true)
-    {
-        Grid &grid = m_world.electronGrid();
-        QList<int> &ids = m_world.trapSiteIDs();
-        for (int i = 0; i < ids.size(); i++)
-        {
-            int site = ids[i];
-            m_stream << 'T'                  << ' '
-                     << grid.getIndexX(site) << ' '
-                     << grid.getIndexY(site) << ' '
-                     << -1                   << ' '
-                     << site                 << ' '
-                     << i                    << '\n';
-        }
+        qFatal("invalid output.xyz.mode encountered in XYZWriter");
     }
 }
 
