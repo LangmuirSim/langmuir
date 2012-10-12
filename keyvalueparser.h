@@ -25,6 +25,7 @@ public:
 
 private:
     QMap<QString,Variable*> m_variableMap;
+    QStringList m_orderedNames;
     SimulationParameters m_parameters;
     World& m_world;
 
@@ -45,6 +46,7 @@ template <typename T> void KeyValueParser::registerVariable(
                qPrintable(key));
     }
     m_variableMap.insert(key, new TypedVariable<T>(key,value,mode,this));
+    m_orderedNames.push_back(key);
 }
 
 }

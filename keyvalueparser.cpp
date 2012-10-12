@@ -13,25 +13,37 @@ KeyValueParser::KeyValueParser(World &world, QObject *parent) :
     QObject(parent), m_world(world)
 {
     registerVariable("simulation.type", m_parameters.simulationType);
+    registerVariable("current.step", m_parameters.currentStep);
+    registerVariable("iterations.real", m_parameters.iterationsReal);
     registerVariable("random.seed", m_parameters.randomSeed);
+
     registerVariable("grid.z", m_parameters.gridZ);
     registerVariable("grid.y", m_parameters.gridY);
     registerVariable("grid.x", m_parameters.gridX);
-    registerVariable("coulomb.carriers", m_parameters.coulombCarriers);
-    registerVariable("defects.charge", m_parameters.defectsCharge);
-    registerVariable("output.xyz", m_parameters.outputXyz);
-    registerVariable("output.ids.on.delete", m_parameters.outputIdsOnDelete);
-    registerVariable("output.coulomb", m_parameters.outputCoulomb);
-    registerVariable("output.potential", m_parameters.outputPotential);
+    registerVariable("hopping.range", m_parameters.hoppingRange);
+
     registerVariable("output.is.on", m_parameters.outputIsOn);
-    registerVariable("image.traps", m_parameters.imageTraps);
-    registerVariable("image.defects", m_parameters.imageDefects);
-    registerVariable("image.carriers", m_parameters.imageCarriers);
     registerVariable("iterations.print", m_parameters.iterationsPrint);
-    registerVariable("iterations.real", m_parameters.iterationsReal);
     registerVariable("output.precision", m_parameters.outputPrecision);
     registerVariable("output.width", m_parameters.outputWidth);
     registerVariable("output.stub", m_parameters.outputStub);
+
+    registerVariable("output.ids.on.delete", m_parameters.outputIdsOnDelete);
+    registerVariable("output.ids.on.encounter", m_parameters.outputIdsOnEncounter);
+    registerVariable("output.coulomb", m_parameters.outputCoulomb);
+    registerVariable("output.potential", m_parameters.outputPotential);
+
+    registerVariable("output.xyz", m_parameters.outputXyz);
+    registerVariable("output.xyz.e", m_parameters.outputXyzE);
+    registerVariable("output.xyz.h", m_parameters.outputXyzH);
+    registerVariable("output.xyz.d", m_parameters.outputXyzD);
+    registerVariable("output.xyz.t", m_parameters.outputXyzT);
+    registerVariable("output.xyz.mode", m_parameters.outputXyzMode);
+
+    registerVariable("image.traps", m_parameters.imageTraps);
+    registerVariable("image.defects", m_parameters.imageDefects);
+    registerVariable("image.carriers", m_parameters.imageCarriers);
+
     registerVariable("electron.percentage", m_parameters.electronPercentage);
     registerVariable("hole.percentage", m_parameters.holePercentage);
     registerVariable("seed.charges", m_parameters.seedCharges);
@@ -40,16 +52,34 @@ KeyValueParser::KeyValueParser(World &world, QObject *parent) :
     registerVariable("trap.potential", m_parameters.trapPotential);
     registerVariable("gaussian.stdev", m_parameters.gaussianStdev);
     registerVariable("seed.percentage", m_parameters.seedPercentage);
+
     registerVariable("voltage.right", m_parameters.voltageRight);
     registerVariable("voltage.left", m_parameters.voltageLeft);
+    registerVariable("slope.z", m_parameters.slopeZ);
+    registerVariable("coulomb.carriers", m_parameters.coulombCarriers);
+    registerVariable("defects.charge", m_parameters.defectsCharge);
     registerVariable("temperature.kelvin", m_parameters.temperatureKelvin);
+
     registerVariable("source.rate", m_parameters.sourceRate);
+    registerVariable("source.metropolis", m_parameters.sourceMetropolis);
+    registerVariable("source.coulomb", m_parameters.sourceCoulomb);
+    registerVariable("source.scale.area", m_parameters.sourceScaleArea);
+
     registerVariable("drain.rate", m_parameters.drainRate);
+    registerVariable("e.drain.l.rate", m_parameters.eDrainLRate);
+    registerVariable("e.drain.r.rate", m_parameters.eDrainRRate);
+    registerVariable("h.drain.l.rate", m_parameters.hDrainLRate);
+    registerVariable("h.drain.r.rate", m_parameters.hDrainRRate);
+
+    registerVariable("recombination.rate", m_parameters.recombinationRate);
+
     registerVariable("use.opencl", m_parameters.useOpenCL);
     registerVariable("work.x", m_parameters.workX);
     registerVariable("work.y", m_parameters.workY);
     registerVariable("work.z", m_parameters.workZ);
     registerVariable("work.size", m_parameters.workSize);
+    registerVariable("max.threads", m_parameters.maxThreads);
+
     registerVariable("boltzmann.constant", m_parameters.boltzmannConstant, Variable::Constant);
     registerVariable("dielectric.constant", m_parameters.dielectricConstant, Variable::Constant);
     registerVariable("elementary.charge", m_parameters.elementaryCharge, Variable::Constant);
@@ -59,25 +89,7 @@ KeyValueParser::KeyValueParser(World &world, QObject *parent) :
     registerVariable("electrostatic.prefactor", m_parameters.electrostaticPrefactor, Variable::Constant);
     registerVariable("inverse.kt", m_parameters.inverseKT, Variable::Constant);
     registerVariable("ok.cl", m_parameters.okCL, Variable::Constant);
-    registerVariable("current.step", m_parameters.currentStep);
     registerVariable("simulation.start", m_parameters.simulationStart, Variable::Constant);
-    registerVariable("hopping.range", m_parameters.hoppingRange);
-    registerVariable("slope.z", m_parameters.slopeZ);
-    registerVariable("source.metropolis", m_parameters.sourceMetropolis);
-    registerVariable("source.coulomb", m_parameters.sourceCoulomb);
-    registerVariable("recombination.rate", m_parameters.recombinationRate);
-    registerVariable("output.ids.on.encounter", m_parameters.outputIdsOnEncounter);
-    registerVariable("source.scale.area", m_parameters.sourceScaleArea);
-    registerVariable("max.threads", m_parameters.maxThreads);
-    registerVariable("output.xyz.e", m_parameters.outputXyzE);
-    registerVariable("output.xyz.h", m_parameters.outputXyzH);
-    registerVariable("output.xyz.d", m_parameters.outputXyzD);
-    registerVariable("output.xyz.t", m_parameters.outputXyzT);
-    registerVariable("output.xyz.mode", m_parameters.outputXyzMode);
-    registerVariable("e.drain.l.rate", m_parameters.eDrainLRate);
-    registerVariable("e.drain.r.rate", m_parameters.eDrainRRate);
-    registerVariable("h.drain.l.rate", m_parameters.hDrainLRate);
-    registerVariable("h.drain.r.rate", m_parameters.hDrainRRate);
 }
 
 KeyValueParser::~KeyValueParser()
@@ -158,8 +170,9 @@ void KeyValueParser::save(const QString& fileName)
     }
     QTextStream stream(&handle);
     stream << "[Parameters]";
-    foreach (Variable *variable, m_variableMap)
+    foreach (QString key, m_orderedNames)
     {
+        Variable *variable = m_variableMap[key];
         if (!variable->isConstant())
         {
             stream << '\n' << *variable;
@@ -171,8 +184,9 @@ void KeyValueParser::save(const QString& fileName)
 
 std::ostream& operator<<(std::ostream& stream, const KeyValueParser &keyValueParser)
 {
-    foreach (Variable *variable, keyValueParser.m_variableMap)
+    foreach (QString key, keyValueParser.m_orderedNames)
     {
+        Variable *variable = keyValueParser.m_variableMap[key];
         if (!variable->isConstant())
         {
             stream << '\n' << *variable;
