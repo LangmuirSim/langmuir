@@ -14,6 +14,11 @@ output.ids.on.delete    = False              # output carrier lifetime and pathl
 output.potential        = False              # output potential for the entire grid (excluding Coulomb) at the start
 output.coulomb          = 0                  # output Coulomb energy for the entire grid every step % value
 output.xyz              = 0                  # output positions of carriers, traps, and defects every step % value
+output.xyz.e            = True               # in the xyz file, output positions of electrons
+output.xyz.h            = True               # in the xyz file, output positions of holes
+output.xyz.t            = True               # in the xyz file, output positions of traps
+output.xyz.d            = True               # in the xyz file, output positions of defects
+output.xyz.mode         = 0                  # if 0, the number of particles can vary; if 1, the particle count is kept constant using "phantom particles"
 output.precision        = 15                 # decimal places to print in output
 output.width            = 23                 # width to allow for output columns
 
@@ -22,23 +27,32 @@ image.traps             = False              # draw the traps as a png at the st
 image.carriers          = 0                  # draw the carriers as a png every step % value
 
 current.step            = 0                  # the starting step of the simulation
-iterations.print        = 1                  # the number of steps between printing output
+iterations.print        = 100                # the number of steps between printing output
 iterations.real         = 1000               # the ending step of the simulation
 
 electron.percentage     = 0.01               # percent of the grid (between 0 and 1) that determines the maximum number of electrons
 hole.percentage         = 0.01               # percent of the grid (between 0 and 1) that determines the maximum number of holes
 seed.charges            = 1.00               # percent of the maximum number of charges (between 0 and 1) to be placed randomly at start
 
-defect.percentage       = 0.01               # percent of the grid (between 0 and 1) that is reserved for defects
-trap.percentage         = 0.01               # percent of the grid (between 0 and 1) that traps are placed upon
-trap.potential          = 1.00               # the potential energy of the traps
+defect.percentage       = 0.00               # percent of the grid (between 0 and 1) that is reserved for defects
+trap.percentage         = 0.50               # percent of the grid (between 0 and 1) that traps are placed upon
+trap.potential          = 0.50               # the potential energy of the traps
 gaussian.stdev          = 0.00               # standard deviation of the random noise added to trap potential
-seed.percentage         = 0.00               # percent of the traps (between 0 and 1) that are used to grow the remaining traps
+seed.percentage         = 0.05               # percent of the traps (between 0 and 1) that are used to grow the remaining traps
 
-voltage.right           = 2.00               # the voltage of the left side
+voltage.right           = 9.00               # the voltage of the left side
 voltage.left            = 0.00               # the voltage of the right side
-source.rate             = 0.001              # the rate at which all sources inject
-drain.rate              = 0.90               # the rate at which all drains accept
+source.rate             = 0.01               # the rate at which all sources inject
+source.scale.area       = 65536              # the area to use when scaling the source.rate for solarcell simulations; if <= 0 then no scaling happens
+source.metropolis       = False              # use energy change when calculating injection probability for sources (ignored for exciton source)
+source.coulomb          = False              # in addition to the site energy difference, use Coulomb + image interaction for the energy change of injection
+drain.rate              = 0.90               # the default rate at which all drains accept
+e.drain.l.rate          = 0                  # the rate at which the left electron drain accepts (overrides drain.rate; ignored if < 0)
+e.drain.r.rate          = 0                  # the rate at which the right electron drain accepts (overrides drain.rate; ignored if < 0)
+h.drain.l.rate          = 0                  # the rate at which the left hole drain accepts (overrides drain.rate; ignored if < 0)
+h.drain.r.rate          = 0                  # the rate at which the right hole drain accepts (overrides drain.rate; ignored if < 0)
+
+recombination.rate      = 0.00               # the rate at which holes and electrons combine if they encounter one another
 
 temperature.kelvin      = 300.0              # the temperature used in the Boltzmann factor
 
@@ -48,4 +62,5 @@ work.y                  = 4                  # number of groups to divide the gr
 work.z                  = 4                  # number of groups to divide the grid into along z (only used for output.coulomb)
 work.size               = 256                # number of groups to divide the list of all charges into
 
-hopping.range           = 2                  # max distance away to consider when choosing neighbors
+hopping.range           = 2                  # max distance away to consider when choosing neighbor
+max.threads             = 4                  # number of qthreads

@@ -275,6 +275,10 @@ void World::initialize(const QString &fileName)
     World &refWorld = *this;
 
     // Set the Key Value Parser
+    // keyValueParser is an object that maps between parameter
+    // names and their locations in the simulationParameters struct
+    // It is also the global location of the simulationParameters struct,
+    // that a lot of objects carry around references to
     m_keyValueParser = new KeyValueParser(refWorld,this);
 
     // Set the address of the Parameters
@@ -286,9 +290,14 @@ void World::initialize(const QString &fileName)
     m_rand = new Random(0,this);
 
     // Create CheckPointer
+    // In retrospect, checkPointer is an amazingly terrible name.
+    // It has nothing to do with "pointers".
+    // checkPointer handles the checkpoint files (simulation input)
     m_checkPointer = new CheckPointer(refWorld,this);
 
     // Create Site info
+    // This is temporary storage for info (like electron locations)
+    // loaded in the simulation input file
     ConfigurationInfo configInfo;
 
     // Parse the input file
@@ -322,17 +331,28 @@ void World::initialize(const QString &fileName)
     // Create OpenCL Objects
     m_ocl = new OpenClHelper(refWorld, this);
 
+    // Create the Sources and Drains
     if ( parameters().simulationType == "transistor" )
     {
         // Create Transistor Sources
         m_sources.push_back(new ElectronSourceAgent(refWorld, Grid::Left, this));
-        m_sources.last()->setRate(parameters().sourceRate);
         m_sources.last()->setPotential(parameters().voltageLeft);
+        m_sources.last()->setRate(parameters().sourceRate);
 
         // Create Transistor Drains
         m_drains.push_back(new ElectronDrainAgent(refWorld, Grid::Right, this));
-        m_drains.last()->setRate(parameters().drainRate);
         m_drains.last()->setPotential(parameters().voltageRight);
+        if (parameters().eDrainRRate >= 0)
+        {
+            qWarning("warning: e.drain.r.rate=(%.3f) has has overridden drain.rate=(%.3e)"
+                     "for eDrainR in transistor",
+                     parameters().eDrainRRate, parameters().drainRate);
+            m_drains.last()->setRate(parameters().eDrainRRate);
+        }
+        else
+        {
+            m_drains.last()->setRate(parameters().drainRate);
+        }
     }
     else if ( parameters().simulationType == "solarcell" )
     {
@@ -353,20 +373,60 @@ void World::initialize(const QString &fileName)
 
         // Create Solar Cell Drains
         m_drains.push_back(new ElectronDrainAgent(refWorld, Grid::Left, this));
-        m_drains.last()->setRate(parameters().drainRate);
         m_drains.last()->setPotential(parameters().voltageLeft);
+        if (parameters().eDrainLRate >= 0)
+        {
+            qWarning("warning: e.drain.l.rate=%.3e has has overridden drain.rate=%.3e"
+                     " for the left electron drain in solar cell",
+                     parameters().eDrainLRate, parameters().drainRate);
+            m_drains.last()->setRate(parameters().eDrainLRate);
+        }
+        else
+        {
+            m_drains.last()->setRate(parameters().drainRate);
+        }
 
         m_drains.push_back(new HoleDrainAgent(refWorld, Grid::Left, this));
-        m_drains.last()->setRate(parameters().drainRate);
         m_drains.last()->setPotential(parameters().voltageLeft);
+        if (parameters().hDrainLRate >= 0)
+        {
+            qWarning("warning: h.drain.l.rate=%.3e has has overridden drain.rate=%.3e"
+                     " for the left hole drain in solar cell",
+                     parameters().hDrainLRate, parameters().drainRate);
+            m_drains.last()->setRate(parameters().hDrainLRate);
+        }
+        else
+        {
+            m_drains.last()->setRate(parameters().drainRate);
+        }
 
         m_drains.push_back(new ElectronDrainAgent(refWorld, Grid::Right, this));
-        m_drains.last()->setRate(parameters().drainRate);
         m_drains.last()->setPotential(parameters().voltageRight);
+        if (parameters().eDrainRRate >= 0)
+        {
+            qWarning("warning: e.drain.r.rate=%.3e has has overridden drain.rate=%.3e"
+                     " for the right electron drain in solar cell",
+                     parameters().eDrainRRate, parameters().drainRate);
+            m_drains.last()->setRate(parameters().eDrainRRate);
+        }
+        else
+        {
+            m_drains.last()->setRate(parameters().drainRate);
+        }
 
         m_drains.push_back(new HoleDrainAgent(refWorld, Grid::Right, this));
-        m_drains.last()->setRate(parameters().drainRate);
         m_drains.last()->setPotential(parameters().voltageRight);
+        if (parameters().hDrainRRate >= 0)
+        {
+            qWarning("warning: h.drain.r.rate=%.3e has has overridden drain.rate=%.3e"
+                     " for the right hole drain in solar cell",
+                     parameters().hDrainRRate, parameters().drainRate);
+            m_drains.last()->setRate(parameters().hDrainRRate);
+        }
+        else
+        {
+            m_drains.last()->setRate(parameters().drainRate);
+        }
 
         // Create Recombination Agent
         m_recombinationAgent = new RecombinationAgent(refWorld, this);

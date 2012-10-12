@@ -144,8 +144,20 @@ struct SimulationParameters
     //! the rate at which all sources inject charges
     qreal sourceRate;
 
-    //! the rate at which all drains accept chargew
+    //! the rate at which all drains accept charges (default, used when eDrainL, etc. are < 0)
     qreal drainRate;
+
+    //! the rate at which the left electron drain accept charges (overrides default)
+    qreal eDrainLRate;
+
+    //! the rate at which the right electron drain accept charges (overrides default)
+    qreal eDrainRRate;
+
+    //! the rate at which the left hole drain accept charges (overrides default)
+    qreal hDrainLRate;
+
+    //! the rate at which the right hole drain accept charges (overrides default)
+    qreal hDrainRRate;
 
     //! if true, try to use OpenCL to speed up Coulomb interaction calculations
     bool useOpenCL;
@@ -268,6 +280,10 @@ struct SimulationParameters
 
         sourceRate             (0.90),
         drainRate              (0.90),
+        eDrainLRate            (-1.0),
+        eDrainRRate            (-1.0),
+        hDrainLRate            (-1.0),
+        hDrainRRate            (-1.0),
 
         useOpenCL              (false),
         workX                  (4),
@@ -351,34 +367,74 @@ inline void checkSimulationParameters(SimulationParameters& par)
     {
         qFatal("electron.pecentage(%f) < 0 || > 1.0",par.electronPercentage);
     }
+
     if (par.holePercentage     < 0.0 ||par. holePercentage     > 1.0 )
     {
         qFatal("hole.pecentage(%f) < 0 || > 1.0",par.holePercentage);
     }
+
     if (par.defectPercentage   < 0.0 || par.defectPercentage   > 1.0 )
     {
         qFatal("defect.pecentage(%f) < 0 || > 1.0",par.defectPercentage);
     }
+
     if (par.trapPercentage     < 0.0 || par.trapPercentage     > 1.0 )
     {
         qFatal("trap.pecentage(%f) < 0 || > 1.0",par.trapPercentage);
     }
+
     if (par.seedPercentage     < 0.0 || par.seedPercentage     > 1.0 )
     {
         qFatal("seed.pecentage(%f) < 0 || > 1.0",par.seedPercentage);
     }
+
     if (par.defectPercentage > 1.00 - par.trapPercentage)
     {
         qFatal("trap.percentage(%f) > 1.0 - trap.percentage(%f)",par.defectPercentage,par.trapPercentage);
     }
+
     if (par.sourceRate < 0.0 || par.sourceRate > 1.0 )
     {
         qFatal("source.rate(%f) < 0 || > 1.0",par.sourceRate);
     }
+
     if (par.drainRate < 0.0 || par.drainRate > 1.0 )
     {
         qFatal("drain.rate(%f) < 0 || > 1.0",par.drainRate);
     }
+
+    if (par.eDrainLRate >= 0.0)
+    {
+        if (par.eDrainLRate < 0.0 || par.eDrainLRate > 1.0 )
+        {
+            qFatal("e.drain.l.rate(%f) < 0 || > 1.0", par.eDrainLRate);
+        }
+    }
+
+    if (par.eDrainRRate >= 0.0)
+    {
+        if (par.eDrainRRate < 0.0 || par.eDrainRRate > 1.0 )
+        {
+            qFatal("e.drain.r.rate(%f) < 0 || > 1.0", par.eDrainRRate);
+        }
+    }
+
+    if (par.hDrainLRate >= 0.0)
+    {
+        if (par.hDrainLRate < 0.0 || par.hDrainLRate > 1.0 )
+        {
+            qFatal("h.drain.l.rate(%f) < 0 || > 1.0", par.hDrainLRate);
+        }
+    }
+
+    if (par.hDrainRRate >= 0.0)
+    {
+        if (par.hDrainRRate < 0.0 || par.hDrainRRate > 1.0 )
+        {
+            qFatal("h.drain.r.rate(%f) < 0 || > 1.0", par.hDrainRRate);
+        }
+    }
+
     if (par.seedCharges < 0.0 || par.seedCharges > 1.0 )
     {
         qFatal("seed.charges(%f) < 0 || > 1.0",par.seedCharges);

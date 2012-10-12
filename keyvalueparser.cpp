@@ -74,6 +74,10 @@ KeyValueParser::KeyValueParser(World &world, QObject *parent) :
     registerVariable("output.xyz.d", m_parameters.outputXyzD);
     registerVariable("output.xyz.t", m_parameters.outputXyzT);
     registerVariable("output.xyz.mode", m_parameters.outputXyzMode);
+    registerVariable("e.drain.l.rate", m_parameters.eDrainLRate);
+    registerVariable("e.drain.r.rate", m_parameters.eDrainRRate);
+    registerVariable("h.drain.l.rate", m_parameters.hDrainLRate);
+    registerVariable("h.drain.r.rate", m_parameters.hDrainRRate);
 }
 
 KeyValueParser::~KeyValueParser()
