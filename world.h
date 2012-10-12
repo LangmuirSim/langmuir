@@ -37,7 +37,11 @@ public:
     ~World();
     KeyValueParser& keyValueParser();
     CheckPointer& checkPointer();
+
+    //! Reference to the grid used for conducting electrons
     Grid& electronGrid();
+
+    //! Reference to the grid used for conducting holes
     Grid& holeGrid();
     Potential& potential();
     SimulationParameters& parameters();

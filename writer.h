@@ -84,46 +84,46 @@ class GridImage : public QObject
 public:
     //! Create the image and painter, setting the background and size
     /*!
-      \param world reference to the world object
-      \param bg background color
-      \param parent the parent of this QObject
+      \param world Reference to the world object
+      \param bg Background color
+      \param parent parent QObject
       */
     GridImage(World &world, QColor bg = Qt::black, QObject *parent=0);
 
     //! Draw some sites
     /*!
-      \param sites a list of integers that are site ids
+      \param sites A list of integers that are site ids
         - could be the list of trap ids
         - could be the list of defect ids
-      \param color the color of the points
-      \param layer which layer are we drawing? its a 2D image
+      \param color The color of the points
+      \param layer Which layer are we drawing? its a 2D image
       */
     void drawSites(QList<int> &sites, QColor color, int layer);
 
     //! Draw some sites
     /*!
-      \param sites a list of ChargeAgents, which have site ids
+      \param sites A list of ChargeAgents, which have site ids
         - could be the list of electrons
         - could be the list of holes
-      \param color the color of the points
-      \param layer which layer are we drawing? its a 2D image
+      \param color The color of the points
+      \param layer Which layer are we drawing? its a 2D image
       */
     void drawCharges(QList<ChargeAgent *> &charges,QColor color, int layer);
 
-    //! save the image to a file
+    //! Save the image to a file
     /*!
-      \param name a file name that is passed to a OutputInfo object, the output is assummed png
-      \param scale multiple the image by some scale, increasing the resolution
+      \param name A file name that is passed to a OutputInfo object, the output is assummed png
+      \param scale Multiply the image by some scale, increasing the resolution
       */
     void save(QString name, int scale=3);
 private:
-    //! the painter that paints the image
+    //! The painter that paints the image
     QPainter m_painter;
 
-    //! the image we draw onto
+    //! The image we draw onto
     QImage m_image;
 
-    //! reference to the world object
+    //! Reference to the world object
     World &m_world;
 };
 
@@ -136,31 +136,43 @@ class Logger : public QObject
 {
     Q_OBJECT
 public:
-    //! does nothing \see LoggerOn::LoggerOn
+    //! Does nothing \see LoggerOn::LoggerOn
     Logger(World &world, QObject *parent = 0) : QObject(parent) {}
-    //! does nothing \see LoggerOn::saveTrapImage
+
+    //! Does nothing \see LoggerOn::saveTrapImage
     virtual void saveTrapImage(const QString& name = "%stub-traps.png") {}
-    //! does nothing \see LoggerOn::saveHoleImage
+
+    //! Does nothing \see LoggerOn::saveHoleImage
     virtual void saveHoleImage(const QString& name = "%stub-%step-holes.png") {}
-    //! does nothing \see LoggerOn::saveElectronImage
+
+    //! Does nothing \see LoggerOn::saveElectronImage
     virtual void saveElectronImage(const QString& name = "%stub-%step-electrons.png") {}
-    //! does nothing \see LoggerOn::saveElectronImage
+
+    //! Does nothing \see LoggerOn::saveElectronImage
     virtual void saveCarriersImage(const QString& name = "%stub-%step-carriers.png") {}
-    //! does nothing \see LoggerOn::saveDefectImage
+
+    //! Does nothing \see LoggerOn::saveDefectImage
     virtual void saveDefectImage(const QString& name = "%stub-defects.png") {}
-    //! does nothing \see LoggerOn::saveImage
+
+    //! Does nothing \see LoggerOn::saveImage
     virtual void saveImage(const QString& name = "%stub-%step-all.png") {}
-    //! does nothing \see LoggerOn::saveGridPotential
+
+    //! Does nothing \see LoggerOn::saveGridPotential
     virtual void saveGridPotential(const QString& name = "%stub.grid") {}
-    //! does nothing \see LoggerOn::saveCoulombEnergy
+
+    //! Does nothing \see LoggerOn::saveCoulombEnergy
     virtual void saveCoulombEnergy(const QString& name = "%stub-%step.coulomb") {}
-    //! does nothing \see LoggerOn::reportFluxStream
+
+    //! Does nothing \see LoggerOn::reportFluxStream
     virtual void reportFluxStream() {}
-    //! does nothing \see LoggerOn::reportXYZStream
+
+    //! Does nothing \see LoggerOn::reportXYZStream
     virtual void reportXYZStream() {}
-    //! does nothing \see LoggerOn::reportCarrier
+
+    //! Does nothing \see LoggerOn::reportCarrier
     virtual void reportCarrier(ChargeAgent &charge) {}
-    //! does nothing \see LoggerOn::reportExciton
+
+    //! Does nothing \see LoggerOn::reportExciton
     virtual void reportExciton(ChargeAgent &charge1, ChargeAgent &charge2, bool recombined = false) {}
 };
 
@@ -169,27 +181,60 @@ class LoggerOn : public Logger
 public:
     LoggerOn(World &world, QObject *parent = 0);
 
+    //! Save an image of trap sites as png
     virtual void saveTrapImage(const QString& name = "%stub-traps.png");
+
+    //! Save an image of holes (at the current step) as png
     virtual void saveHoleImage(const QString& name = "%stub-%step-holes.png");
+
+    //! Save an image of electrons (at the current step) as png
     virtual void saveElectronImage(const QString& name = "%stub-%step-electrons.png");
+
+    //! Save an image of holes \b and electrons (at the current step) as png
     virtual void saveCarriersImage(const QString& name = "%stub-%step-carriers.png");
+
+    //! Save an image of defects as png
     virtual void saveDefectImage(const QString& name = "%stub-defects.png");
+
+    //! Save an image of electrons, holes, defects, and traps (at current step) as png
     virtual void saveImage(const QString& name = "%stub-%step-all.png");
 
+    //! Output the grid potential as (x, y, z, v) to a file
     virtual void saveGridPotential(const QString& name = "%stub.grid");
+
+    //! Output the Coulomb potential as (x, y, z, v) to a file; \b requires the use of the \b GPU
     virtual void saveCoulombEnergy(const QString& name = "%stub-%step.coulomb");
 
+    //! Output information about Sources and Drains (at the current step) to the main output file
     virtual void reportFluxStream();
+
+    //! Output xyz information (at the current step) to the xyz file
     virtual void reportXYZStream();
+
+    //! Output carrier information (for example pathlength) to the carrier file
     virtual void reportCarrier(ChargeAgent &charge);
+
+    //! Output carrier information (for example pathlength) on two carriers at once to the exciton file
     virtual void reportExciton(ChargeAgent &charge1, ChargeAgent &charge2, bool recombined = false);
 
 protected:
+
+    //! Open the various output streams if they are turned on
     virtual void initialize();
+
+    //! Reference to world
     World &m_world;
+
+    //! Writer in charge of writing xyz files
     XYZWriter *m_xyzWriter;
+
+    //! Writer in charge of writing source & drain information
     FluxWriter *m_fluxWriter;
+
+    //! Writer in charge of writing carrier information
     CarrierWriter *m_carrierWriter;
+
+    //! Writer in charge of writing multiple carrier's information (excitons)
     ExcitonWriter *m_excitonWriter;
 };
 
