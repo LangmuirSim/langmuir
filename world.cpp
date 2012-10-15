@@ -344,7 +344,7 @@ void World::initialize(const QString &fileName)
         m_drains.last()->setPotential(parameters().voltageRight);
         if (parameters().eDrainRRate >= 0)
         {
-            qWarning("warning: e.drain.r.rate=(%.3f) has has overridden drain.rate=(%.3e)"
+            qWarning("warning: e.drain.r.rate=(%.3f) has been overridden drain.rate=(%.3e)"
                      "for eDrainR in transistor",
                      parameters().eDrainRRate, parameters().drainRate);
             m_drains.last()->setRate(parameters().eDrainRRate);
@@ -376,7 +376,7 @@ void World::initialize(const QString &fileName)
         m_drains.last()->setPotential(parameters().voltageLeft);
         if (parameters().eDrainLRate >= 0)
         {
-            qWarning("warning: e.drain.l.rate=%.3e has has overridden drain.rate=%.3e"
+            qWarning("warning: e.drain.l.rate=%.3e has been overridden drain.rate=%.3e"
                      " for the left electron drain in solar cell",
                      parameters().eDrainLRate, parameters().drainRate);
             m_drains.last()->setRate(parameters().eDrainLRate);
@@ -390,7 +390,7 @@ void World::initialize(const QString &fileName)
         m_drains.last()->setPotential(parameters().voltageLeft);
         if (parameters().hDrainLRate >= 0)
         {
-            qWarning("warning: h.drain.l.rate=%.3e has has overridden drain.rate=%.3e"
+            qWarning("warning: h.drain.l.rate=%.3e has been overridden drain.rate=%.3e"
                      " for the left hole drain in solar cell",
                      parameters().hDrainLRate, parameters().drainRate);
             m_drains.last()->setRate(parameters().hDrainLRate);
@@ -404,7 +404,7 @@ void World::initialize(const QString &fileName)
         m_drains.last()->setPotential(parameters().voltageRight);
         if (parameters().eDrainRRate >= 0)
         {
-            qWarning("warning: e.drain.r.rate=%.3e has has overridden drain.rate=%.3e"
+            qWarning("warning: e.drain.r.rate=%.3e has been overridden drain.rate=%.3e"
                      " for the right electron drain in solar cell",
                      parameters().eDrainRRate, parameters().drainRate);
             m_drains.last()->setRate(parameters().eDrainRRate);
@@ -418,7 +418,7 @@ void World::initialize(const QString &fileName)
         m_drains.last()->setPotential(parameters().voltageRight);
         if (parameters().hDrainRRate >= 0)
         {
-            qWarning("warning: h.drain.r.rate=%.3e has has overridden drain.rate=%.3e"
+            qWarning("warning: h.drain.r.rate=%.3e has been overridden drain.rate=%.3e"
                      " for the right hole drain in solar cell",
                      parameters().hDrainRRate, parameters().drainRate);
             m_drains.last()->setRate(parameters().hDrainRRate);
