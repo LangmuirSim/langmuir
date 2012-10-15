@@ -47,10 +47,10 @@ source.scale.area       = 65536              # the area to use when scaling the 
 source.metropolis       = False              # use energy change when calculating injection probability for sources (ignored for exciton source)
 source.coulomb          = False              # in addition to the site energy difference, use Coulomb + image interaction for the energy change of injection
 drain.rate              = 0.90               # the default rate at which all drains accept
-e.drain.l.rate          = 0                  # the rate at which the left electron drain accepts (overrides drain.rate; ignored if < 0)
-e.drain.r.rate          = 0                  # the rate at which the right electron drain accepts (overrides drain.rate; ignored if < 0)
-h.drain.l.rate          = 0                  # the rate at which the left hole drain accepts (overrides drain.rate; ignored if < 0)
-h.drain.r.rate          = 0                  # the rate at which the right hole drain accepts (overrides drain.rate; ignored if < 0)
+e.drain.l.rate          = -1                 # the rate at which the left electron drain accepts (overrides drain.rate; ignored if < 0)
+e.drain.r.rate          = -1                 # the rate at which the right electron drain accepts (overrides drain.rate; ignored if < 0)
+h.drain.l.rate          = -1                 # the rate at which the left hole drain accepts (overrides drain.rate; ignored if < 0)
+h.drain.r.rate          = -1                 # the rate at which the right hole drain accepts (overrides drain.rate; ignored if < 0)
 
 recombination.rate      = 0.00               # the rate at which holes and electrons combine if they encounter one another
 
