@@ -537,16 +537,15 @@ void LoggerOn::saveCoulombEnergy(const QString& name)
     OutputStream stream(name,&m_world.parameters(),this);
 
     stream << qSetRealNumberPrecision(m_world.parameters().outputPrecision)
-           << qSetFieldWidth(m_world.parameters().outputWidth)
+    //     << qSetFieldWidth(m_world.parameters().outputWidth)
            << right
            << scientific;
 
-    stream << "s"
-           << "x"
-           << "y"
-           << "z"
-           << "v"
-           << newline;
+    stream << "s" << ' '
+           << "x" << ' '
+           << "y" << ' '
+           << "z" << ' '
+           << "v" << newline;
 
     for(int i = 0; i < grid.xSize(); i++)
     {
@@ -555,12 +554,11 @@ void LoggerOn::saveCoulombEnergy(const QString& name)
             for(int k = 0; k < grid.zSize(); k++)
             {
                 int si = grid.getIndexS(i,j,k);
-                stream << si
-                       << i
-                       << j
-                       << k
-                       << openCL.getOutputHost(si)
-                       << newline;
+                stream << si << ' '
+                       << i  << ' '
+                       << j  << ' '
+                       << k  << ' '
+                       << openCL.getOutputHost(si) << newline;
             }
         }
     }
