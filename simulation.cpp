@@ -6,6 +6,7 @@
 #include "drainagent.h"
 #include "potential.h"
 #include "cubicgrid.h"
+#include "checkpointer.h"
 #include "writer.h"
 #include "world.h"
 #include "rand.h"
@@ -159,6 +160,23 @@ void Simulation::performIterations(int nIterations)
         m_world.logger().saveCarriersImage();
         m_world.logger().saveElectronImage();
         m_world.logger().saveHoleImage();
+    }
+
+    // Save a Checkpoint Files
+    if (m_world.parameters().outputIsOn)
+    {
+        // For a specific step
+        if ( m_world.parameters().outputStepChk > 0 &&
+             m_world.parameters().currentStep %
+            (m_world.parameters().iterationsPrint *
+             m_world.parameters().outputStepChk) == 0
+           )
+        {
+            m_world.checkPointer().save("%stub-%step.chk");
+        }
+
+        // Always overwrite the generic one
+        m_world.checkPointer().save();
     }
 }
 

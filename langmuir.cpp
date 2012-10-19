@@ -103,9 +103,6 @@ int main (int argc, char *argv[])
 
         // Output to the screen
         progress(qout, par) << '\r'; qout.flush();
-
-        // Save a Checkpoint File
-        if (par.outputIsOn) world.checkPointer().save();
     }
     progress(qout, par) << '\n'; qout.flush();
 

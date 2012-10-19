@@ -31,6 +31,7 @@ KeyValueParser::KeyValueParser(World &world, QObject *parent) :
     registerVariable("output.ids.on.delete", m_parameters.outputIdsOnDelete);
     registerVariable("output.ids.on.encounter", m_parameters.outputIdsOnEncounter);
     registerVariable("output.coulomb", m_parameters.outputCoulomb);
+    registerVariable("output.step.chk", m_parameters.outputStepChk);
     registerVariable("output.potential", m_parameters.outputPotential);
 
     registerVariable("output.xyz", m_parameters.outputXyz);
