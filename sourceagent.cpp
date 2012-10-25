@@ -169,15 +169,15 @@ bool SourceAgent::shouldTransport(int site)
 {
     if (m_world.parameters().sourceMetropolis)
     {
-        return m_world.randomNumberGenerator().randomlyChooseYesWithMetropolisAndCoupling(
+        return m_world.randomNumberGenerator().metropolisWithCoupling(
                 energyChange(site), m_world.parameters().inverseKT, m_probability);
     }
-    return m_world.randomNumberGenerator().randomlyChooseYesWithPercent(m_probability);
+    return m_world.randomNumberGenerator().chooseYes(m_probability);
 }
 
 bool ExcitonSourceAgent::shouldTransport(int site)
 {
-    return m_world.randomNumberGenerator().randomlyChooseYesWithPercent(m_probability);
+    return m_world.randomNumberGenerator().chooseYes(m_probability);
 }
 
 void ElectronSourceAgent::inject(int site)

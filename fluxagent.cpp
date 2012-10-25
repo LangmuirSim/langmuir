@@ -77,7 +77,7 @@ void FluxAgent::resetCounters()
 
 bool FluxAgent::shouldTransport(int site)
 {
-    return m_world.randomNumberGenerator().randomlyChooseYesWithPercent(m_probability);
+    return m_world.randomNumberGenerator().chooseYes(m_probability);
     //return m_world.randomNumberGenerator().randomlyChooseYesWithMetropolisAndCoupling(
     //        energyChange(site), m_world.parameters().inverseKT, m_rate);
 }

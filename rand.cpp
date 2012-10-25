@@ -65,17 +65,11 @@ int Random::integer(const int low, const int high)
     return generator();
 }
 
-bool Random::randomlyChooseYesWithMetropolis(double energyChange, double inversekT)
-{
-    double randNumber = this->random();
-    return randomlyChooseYesWithMetropolis(energyChange, inversekT, randNumber);
-}
-
-bool Random::randomlyChooseYesWithMetropolis(double energyChange, double inversekT, double randNumber)
+bool Random::metropolis(double energyChange, double inversekT)
 {
     if(energyChange > 0.0)
     {
-        if(exp(-energyChange * inversekT)> randNumber)
+        if(exp(-energyChange * inversekT) > this->random())
         {
             return true;
         }
@@ -87,14 +81,9 @@ bool Random::randomlyChooseYesWithMetropolis(double energyChange, double inverse
     return false;
 }
 
-bool Random::randomlyChooseYesWithMetropolisAndCoupling(double energyChange, double inversekT, double coupling)
+bool Random::metropolisWithCoupling(double energyChange, double inversekT, double coupling)
 {
     double randNumber = this->random();
-    return randomlyChooseYesWithMetropolisAndCoupling(energyChange, inversekT, coupling, randNumber);
-}
-
-bool Random::randomlyChooseYesWithMetropolisAndCoupling(double energyChange, double inversekT, double coupling, double randNumber)
-{
     if(energyChange > 0.0)
     {
         if(coupling * exp(-energyChange * inversekT)> randNumber)
@@ -109,30 +98,18 @@ bool Random::randomlyChooseYesWithMetropolisAndCoupling(double energyChange, dou
     return false;
 }
 
-bool Random::randomlyChooseNoWithPercent(double percent)
+bool Random::chooseNo(double percent)
 {
-    double randNumber = this->random();
-    return randomlyChooseNoWithPercent(percent, randNumber);
-}
-
-bool Random::randomlyChooseNoWithPercent(double percent, double randNumber)
-{
-    if(percent < randNumber)
+    if(percent < this->random())
     {
         return true;
     }
     return false;
 }
 
-bool Random::randomlyChooseYesWithPercent(double percent)
+bool Random::chooseYes(double percent)
 {
-    double randNumber = this->random();
-    return randomlyChooseYesWithPercent(percent, randNumber);
-}
-
-bool Random::randomlyChooseYesWithPercent(double percent, double randNumber)
-{
-    if(percent > randNumber)
+    if(percent > this->random())
     {
         return true;
     }

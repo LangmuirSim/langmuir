@@ -111,7 +111,7 @@ void ChargeAgent::decideFuture()
         double coupling = m_world.coupling(dx,dy,dz);
 
         // Metropolis criterion
-        if(m_world.randomNumberGenerator().randomlyChooseYesWithMetropolisAndCoupling(
+        if(m_world.randomNumberGenerator().metropolisWithCoupling(
                  pd,
                  m_world.parameters().inverseKT,
                  coupling))
