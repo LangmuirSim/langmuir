@@ -1,0 +1,5 @@
+bin/
+build/
+CMakeLists.txt.user
+doc/
+copy_to_frank.py
