@@ -1,42 +1,42 @@
-LANGMUIR:
----------
+# LANGMUIR #
 
 This is the source code for the "Langmuir" engine for charge transfer
 simulations in molecular transistors.
 
 
-BUILD INSTRUCTIONS
-------------------
+# BUILD INSTRUCTIONS #
 
 In order to build the Langmuir engine the following dependencies are required,
 
 Qt4
-OpenCL
 Boost
-OpenGL ( optional )
 CMake
+
+The following are optional:
+OpenCL
+OpenGL
+Doxygen
 
 To build the engine go to the source directory and run the following commands,
 
-SIMPLE BUILD
-------------
+# SIMPLE BUILD #
 
 mkdir build
 cd build
 cmake ../
 make -j 4
+make install
+make doc
 
-ON MAC
-------
+# ON MAC #
 
 cmake -DCMAKE_OSX_ARCHITECTURES=i386 ../
 
-CLANG SCAN-BUILD
-----------------
+# CLANG SCAN-BUILD #
 
 mkdir build
 cd build
-scan-build -v cmake .. 
+scan-build -v cmake ..
 scan-build -v -k -analyze-headers -stats -o . make -j 4
 scan-view scan-build-output-dir
 

@@ -201,3 +201,34 @@ ENDIF(${COMPILE_LANGMUIR_VIEW})
 
 ################################################################################
 
+FIND_PACKAGE(Doxygen)
+
+IF(DOXYGEN_FOUND)
+
+    CONFIGURE_FILE(
+        ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
+        ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY
+    )
+
+    ADD_CUSTOM_TARGET(doc
+        ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        COMMENT "Generating API documentation with Doxygen" VERBATIM
+    )
+
+    ADD_CUSTOM_TARGET(show
+        gnome-www-browser ${CMAKE_SOURCE_DIR}/doc/html/index.html
+        DEPENDS doc
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        COMMENT "Opening Documentation" VERBATIM
+    )
+
+    SET_DIRECTORY_PROPERTIES(
+        PROPERTIES
+        ADDITIONAL_MAKE_CLEAN_FILES
+        ${CMAKE_SOURCE_DIR}/doc
+    )
+
+ENDIF(DOXYGEN_FOUND)
+
+################################################################################
