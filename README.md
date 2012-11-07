@@ -13,7 +13,7 @@ Boost
 CMake
 
 The following are optional:
-OpenCL
+OpenCL 1.1
 OpenGL
 Doxygen
 
