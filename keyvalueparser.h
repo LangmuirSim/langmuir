@@ -10,7 +10,7 @@
 namespace Langmuir
 {
 
-//! Read the parameters and store them in the correct place
+//! A class to read the parameters and store them in the correct place
 class KeyValueParser : public QObject
 {
     Q_OBJECT

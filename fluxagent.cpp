@@ -13,7 +13,6 @@ FluxAgent::FluxAgent(Agent::Type type, World &world, Grid &grid, QObject *parent
     m_successes     = 0;
     m_potential     = 0;
     m_probability   = 0;
-    m_tries         = 1;
     m_face          = Grid::NoFace;
 }
 
@@ -102,11 +101,6 @@ void FluxAgent::setRate(double rate)
     m_probability = rate;
 }
 
-void FluxAgent::setTries(int tries)
-{
-    m_tries = tries;
-}
-
 QString FluxAgent::faceToLetter()
 {
     QString string;
@@ -134,11 +128,6 @@ double FluxAgent::potential()const
 double FluxAgent::rate()const
 {
     return m_probability;
-}
-
-int FluxAgent::tries()const
-{
-    return m_tries;
 }
 
 Grid& FluxAgent::grid()const

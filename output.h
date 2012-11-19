@@ -28,7 +28,7 @@ namespace Langmuir
 */
 void backupFile(const QString& name);
 
-//! A Class to generate file names using the SimulationParameters
+//! A class to generate file names using the SimulationParameters
 class OutputInfo : public QFileInfo
 {
 public:
@@ -47,7 +47,7 @@ public:
     OutputInfo(const QString &name, const SimulationParameters *par = 0);
 };
 
-//! A Class to combine QFile, QTextStream and OutputInfo (QFileInfo).
+//! A class to combine QFile, QTextStream and OutputInfo (QFileInfo).
 /*! Only for used for output.  Derived from QObject so destruction
   ensures streams are flushed and files are closed.
   */

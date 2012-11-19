@@ -205,7 +205,6 @@ bool ElectronSourceAgent::validToInject(int site)
 {
     if( m_world.numElectronAgents() >= m_world.maxElectronAgents() ||
         m_probability <= 0 ||
-        m_tries <= 0 ||
         site < 0 ||
         site >= m_grid.volume()||
         m_grid.agentType(site)!= Agent::Empty ||
@@ -221,7 +220,6 @@ bool HoleSourceAgent::validToInject(int site)
 {
     if( m_world.numHoleAgents() >= m_world.maxHoleAgents() ||
         m_probability <= 0 ||
-        m_tries <= 0 ||
         site < 0 ||
         site >= m_grid.volume()||
         m_grid.agentType(site)!= Agent::Empty ||
@@ -238,7 +236,6 @@ bool ExcitonSourceAgent::validToInject(int site)
     if( m_world.numElectronAgents() >= m_world.maxElectronAgents() ||
         m_world.numHoleAgents() >= m_world.maxHoleAgents() ||
         m_probability <= 0 ||
-        m_tries <= 0 ||
         site < 0 ||
         site >= m_world.electronGrid().volume()||
         m_world.electronGrid().agentType(site)!= Agent::Empty ||

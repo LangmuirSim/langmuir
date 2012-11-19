@@ -94,6 +94,7 @@ public:
       \param key the name of the variable
       \param value the location where the value of the variable is stored
       \param mode flags to alter variable's behavoir, see AbstractVariable::VariableModeFlag
+      \param parent QObject this belongs to
       */
     TypedVariable(
         const QString& key,
@@ -122,13 +123,14 @@ public:
     static void convert(const QString& token, T& result);
 
 protected:
+    //! Reference to the object being tracked
     T &m_value;
 
     //! Write 'key = value' to a stream
     virtual void write(QTextStream& stream) const;
 };
 
-// initialize a Variable with a key
+//! initialize a Variable with a key
 inline Variable::Variable(
     const QString &key,
     VariableMode mode,
@@ -139,13 +141,13 @@ inline Variable::Variable(
 {
 }
 
-// get the variable's key
+//! get the variable's key
 template <class T> inline QString TypedVariable<T>::key() const
 {
     return m_key;
 }
 
-// get the variable's value (converted to string)
+//! get the variable's value (converted to string)
 template <class T> inline QString TypedVariable<T>::value() const
 {
     QString result; QTextStream stream(&result);
@@ -154,7 +156,7 @@ template <class T> inline QString TypedVariable<T>::value() const
     return result;
 }
 
-// get the variable's value (converted to string)
+//! get the variable's value (converted to string)
 template <> inline QString TypedVariable<float>::value() const
 {
     QString result; QTextStream stream(&result);
@@ -165,7 +167,7 @@ template <> inline QString TypedVariable<float>::value() const
     return result;
 }
 
-// get the variable's value (converted to string)
+//! get the variable's value (converted to string)
 template <> inline QString TypedVariable<qreal>::value() const
 {
     QString result; QTextStream stream(&result);
@@ -176,7 +178,7 @@ template <> inline QString TypedVariable<qreal>::value() const
     return result;
 }
 
-// get the variable's value (converted to string)
+//! get the variable's value (converted to string)
 template <> inline QString TypedVariable<bool>::value() const
 {
     QString result; QTextStream stream(&result);
@@ -186,7 +188,7 @@ template <> inline QString TypedVariable<bool>::value() const
     return result;
 }
 
-// get the variable's key
+//! get the variable's key
 template <class T> inline QString TypedVariable<T>::keyValue() const
 {
     QString result; QTextStream stream(&result);
@@ -212,7 +214,7 @@ template <class T> inline QString TypedVariable<T>::keyValue() const
     return result;
 }
 
-// get the variable's key
+//! get the variable's key
 template <> inline QString TypedVariable<QString>::keyValue() const
 {
     QString result; QTextStream stream(&result);
@@ -235,19 +237,19 @@ template <> inline QString TypedVariable<QString>::keyValue() const
     return result;
 }
 
-// see if the Variable is really a Constant
+//! see if the Variable is really a Constant
 inline bool Variable::isConstant() const
 {
     return m_mode.testFlag(Constant);
 }
 
-// get the mode flags of this Variable
+//! get the mode flags of this Variable
 inline const Variable::VariableMode& Variable::mode() const
 {
     return m_mode;
 }
 
-// initialize Variable with a key and a location
+//! initialize Variable with a key and a location
 template <class T> inline TypedVariable<T>::TypedVariable(
     const QString& key,
     T &value,
@@ -258,7 +260,7 @@ template <class T> inline TypedVariable<T>::TypedVariable(
 {
 }
 
-// convert a QString token to its correct type
+//! convert a QString token to its correct type
 template <class T> inline void TypedVariable<T>::read(const QString& token)
 {
     if (m_mode.testFlag(Constant))
@@ -270,13 +272,13 @@ template <class T> inline void TypedVariable<T>::read(const QString& token)
     convert(token,m_value);
 }
 
-// write keyValue() to a stream
+//! write keyValue() to a stream
 template <class T> inline void TypedVariable<T>::write(QTextStream& stream) const
 {
     stream << keyValue();
 }
 
-// overload operator to write keyValue() to a stream
+//! overload operator to write keyValue() to a stream
 inline QTextStream& operator<<(QTextStream& stream, const Variable& variable)
 {
     variable.write(stream);
@@ -290,13 +292,13 @@ inline std::ostream& operator<<(std::ostream &stream, Variable &variable)
     return stream;
 }
 
-// convert to QString
+//! convert to QString
 template <> inline void TypedVariable<QString>::convert(const QString& token, QString& result)
 {
     result = token.trimmed();
 }
 
-// convert to double
+//! convert to double
 template <> inline void TypedVariable<qreal>::convert(const QString& token, qreal& result)
 {
     bool ok = false;
@@ -304,7 +306,7 @@ template <> inline void TypedVariable<qreal>::convert(const QString& token, qrea
     if (!ok) qFatal("can not convert to double: %s", qPrintable(token));
 }
 
-// convert to float
+//! convert to float
 template <> inline void TypedVariable<float>::convert(const QString& token, float& result)
 {
     bool ok = false;
@@ -312,7 +314,7 @@ template <> inline void TypedVariable<float>::convert(const QString& token, floa
     if (!ok) qFatal("can not convert to double: %s", qPrintable(token));
 }
 
-// convert to bool
+//! convert to bool
 template <> inline void TypedVariable<bool>::convert(const QString& token, bool& result)
 {
     QString lower = token.trimmed().toLower();
@@ -332,7 +334,7 @@ template <> inline void TypedVariable<bool>::convert(const QString& token, bool&
     }
 }
 
-// convert to int
+//! convert to int
 template <> inline void TypedVariable<qint32>::convert(const QString& token, qint32& result)
 {
     bool ok = false;
@@ -340,7 +342,7 @@ template <> inline void TypedVariable<qint32>::convert(const QString& token, qin
     if (!ok) qFatal("can not convert to int: %s", qPrintable(token));
 }
 
-// convert to unsigned int
+//! convert to unsigned int
 template <> inline void TypedVariable<quint32>::convert(const QString& token, quint32& result)
 {
     bool ok = false;
@@ -348,7 +350,7 @@ template <> inline void TypedVariable<quint32>::convert(const QString& token, qu
     if (!ok) qFatal("can not convert to unsigned int: %s", qPrintable(token));
 }
 
-// convert to long long int
+//! convert to long long int
 template <> inline void TypedVariable<qint64>::convert(const QString& token, qint64& result)
 {
     bool ok = false;
@@ -356,7 +358,7 @@ template <> inline void TypedVariable<qint64>::convert(const QString& token, qin
     if (!ok) qFatal("can not convert to long long int: %s", qPrintable(token));
 }
 
-// convert to unsigned long long int
+//! convert to unsigned long long int
 template <> inline void TypedVariable<quint64>::convert(const QString& token, quint64& result)
 {
     bool ok = false;
@@ -364,7 +366,7 @@ template <> inline void TypedVariable<quint64>::convert(const QString& token, qu
     if (!ok) qFatal("can not convert to unsigned long long int: %s", qPrintable(token));
 }
 
-// convert to QDateTime, assumes data is a qint64 mSecsSinceEpoch
+//! convert to QDateTime, assumes data is a qint64 mSecsSinceEpoch
 template <> inline void TypedVariable<QDateTime>::convert(const QString& token, QDateTime& result)
 {
     bool ok = false;
@@ -373,7 +375,7 @@ template <> inline void TypedVariable<QDateTime>::convert(const QString& token, 
     result = QDateTime::fromMSecsSinceEpoch(msecSinceEpoch);
 }
 
-// output QDateTime as qint64 mSecsSinceEpoch
+//! output QDateTime as qint64 mSecsSinceEpoch
 inline QTextStream& operator<<(QTextStream& stream, const QDateTime& datetime)
 {
     stream << datetime.toMSecsSinceEpoch();

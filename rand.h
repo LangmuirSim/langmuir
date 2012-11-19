@@ -12,7 +12,7 @@ namespace Langmuir
 {
 
 /**
- * @brief Generate random numbers
+ * @brief A class to generate random numbers
  */
 class Random : public QObject
 {

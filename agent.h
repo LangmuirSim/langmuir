@@ -14,7 +14,7 @@ namespace Langmuir
 
 class World;
 
-//! A base class that abstractly represents an object that can occupy grid sites
+//! A class that abstractly represents an object that can occupy grid sites
 /*!
   Agents can be Electrons, Holes, Defects, Sources, or Drains.  The Agent class
   encodes basic information that all agents have, regardless of their type.

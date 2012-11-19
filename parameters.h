@@ -10,6 +10,7 @@
 namespace Langmuir
 {
 
+//! A struct to temporarily store site IDs
 struct ConfigurationInfo
 {
     //! a list of current electron site IDs
@@ -31,6 +32,7 @@ struct ConfigurationInfo
     QList<quint64> fluxInfo;
 };
 
+//! A struct to store all simulation options
 struct SimulationParameters
 {
     //! tells Langmuir how to set up the Sources and Drains: (\b\c "transistor", \b\c "solarcell")
