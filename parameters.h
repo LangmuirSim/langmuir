@@ -32,7 +32,16 @@ struct ConfigurationInfo
     QList<quint64> fluxInfo;
 };
 
-//! A struct to store all simulation options
+/**
+  * @brief A struct to store all simulation options
+  * To add new variables, follow these steps:
+  *   - declare the new variable in the SimulationParameters struct (parameters.h)
+  *   - assign the default value of the new variable in the SimulationParameters constructor (parameters.h)
+  *   - implement validity checking for the variable in the checkSimulationParameters() function (parameters.h)
+  *   - register the variable in the KeyValueParser construction using the registerVariable() function (keyvalueparser.h)
+  *   - to use non-standard types, you must overload certain template functions in variable.h.  See, for example,
+  *     overloads for QDateTime in variable.h.
+  */
 struct SimulationParameters
 {
     //! tells Langmuir how to set up the Sources and Drains: (\b\c "transistor", \b\c "solarcell")
