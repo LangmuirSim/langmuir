@@ -2,6 +2,7 @@
 #include "drainagent.h"
 #include "gridview.h"
 #include "GL/glu.h"
+#include "writer.h"
 
 namespace Langmuir
 {
@@ -44,33 +45,13 @@ GridViewGL::GridViewGL(const QGLFormat &format, QWidget * parent, QString input)
     //This Widget responds to the keyboard
     setFocusPolicy(Qt::StrongFocus);
 
-    //See if simulation parameters should be set to default values
-//    if(input == "default")
-//    {
-//        //Adjust some of Langmuir's default parameters so things aren't too boring
-//        pWorld->parameters().iterationsPrint = 10;
-//        pWorld->parameters().seedCharges = 1.00;
-//        pWorld->parameters().electronPercentage = 0.02;
-//        pWorld->parameters().voltageRight = 10.0;
-//        pWorld->parameters().simulationStart = QDateTime::currentDateTime();
-//        check(pWorld->parameters());
-//    }
-//    //Or... get the simulation parameters from an input file
-//    else
-//    {
-//        Parser parser(this);
-//        parser.parse(input);
-//        pWorld->parameters() = parser.parameters();
-//        pWorld->parameters().simulationStart = QDateTime::currentDateTime();
-//    }
-
     //Create the world object
-    pWorld = new World(input,this);
+    pWorld = new World(input, this);
 
     //Create the simulation with the parameters chosen
     pSim = new Simulation(*pWorld);
 
-    //Restrict the value on iterations.print to be low(it controls how many steps are done everytime updateGL is called)
+    //Restrict the value on iterations.print to be low
     if(pWorld->parameters().iterationsPrint > 100)
     {
         QMessageBox::warning(
@@ -80,6 +61,30 @@ GridViewGL::GridViewGL(const QGLFormat &format, QWidget * parent, QString input)
                             " so it has been changed from %1 to 10.").arg(pWorld->parameters().iterationsPrint),
                     QMessageBox::Ok);
         pWorld->parameters().iterationsPrint = 10;
+    }
+
+    if(pWorld->parameters().outputIsOn)
+    {
+        QMessageBox::StandardButton ret = QMessageBox::warning(
+                    this, tr("Langmuir"),
+                    QString("Do you want LangmuirView to create output files? (output.is.on=True), "
+                            "This may cause LangmuirView to lag."),
+                    QMessageBox::Yes|QMessageBox::No,
+                    QMessageBox::No);
+        switch(ret) {
+          case QMessageBox::Yes:
+          {
+            pWorld->parameters().outputIsOn = true;
+            pWorld->logger().initialize();
+            break;
+          }
+          case QMessageBox::No: default:
+          {
+            qWarning("warning: set output.is.on to false");
+            pWorld->parameters().outputIsOn = false;
+            break;
+          }
+        }
     }
 
     //Set default values

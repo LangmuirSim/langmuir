@@ -172,11 +172,9 @@ void Simulation::performIterations(int nIterations)
              m_world.parameters().outputStepChk) == 0
            )
         {
-            m_world.checkPointer().save("%stub-%step.chk");
+            //m_world.checkPointer().save("%stub-%step.chk");
+            m_world.checkPointer().save();
         }
-
-        // Always overwrite the generic one
-        m_world.checkPointer().save();
     }
 }
 

@@ -493,14 +493,7 @@ void World::initialize(const QString &fileName)
     }
 
     // Create Logger
-    if (parameters().outputIsOn)
-    {
-        m_logger = new LoggerOn(refWorld, this);
-    }
-    else
-    {
-        m_logger = new Logger(refWorld, this);
-    }
+    m_logger = new Logger(refWorld, this);
 
     // Place Defects
     placeDefects(configInfo.defects);
@@ -528,23 +521,6 @@ void World::initialize(const QString &fileName)
 
     // precalculate and store coupling constants
     potential().updateCouplingConstants();
-
-    // Generate grid image
-    if(parameters().imageDefects)
-    {
-        logger().saveDefectImage();
-    }
-
-    if(parameters().imageTraps)
-    {
-        logger().saveTrapImage();
-    }
-
-    // Output Field Energy
-    if(parameters().outputPotential)
-    {
-        logger().saveGridPotential();
-    }
 
     // Initialize OpenCL
     opencl().initializeOpenCL();

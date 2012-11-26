@@ -152,6 +152,7 @@ void CheckPointer::load(const QString &fileName, ConfigurationInfo &configInfo)
 
 void CheckPointer::save(const QString& fileName)
 {
+    //qWarning("warning: saving checkpoint file: %d", m_world.parameters().currentStep);
     OutputInfo info(fileName,&m_world.parameters());
 
     std::ofstream stream;

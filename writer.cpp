@@ -462,33 +462,35 @@ void GridImage::drawCharges( QList<ChargeAgent *> &charges,QColor color, int lay
     }
 }
 
-LoggerOn::LoggerOn(World &world, QObject *parent)
-    : Logger(world,parent), m_world(world), m_xyzWriter(0), m_fluxWriter(0), m_carrierWriter(0)
+Logger::Logger(World &world, QObject *parent)
+    : QObject(parent), m_world(world), m_xyzWriter(0), m_fluxWriter(0), m_carrierWriter(0)
 {
-    initialize();
 }
 
-void LoggerOn::initialize()
+void Logger::initialize()
 {
-    if (m_world.parameters().outputXyz)
+    if (m_world.parameters().outputIsOn)
     {
-        m_xyzWriter = new XYZWriter(m_world,"%stub.xyz",this);
-    }
+        if (m_world.parameters().outputXyz)
+        {
+            m_xyzWriter = new XYZWriter(m_world,"%stub.xyz",this);
+        }
 
-    if (m_world.parameters().outputIdsOnDelete)
-    {
-        m_carrierWriter = new CarrierWriter(m_world,"%stub-carriers.dat",this);
-    }
+        if (m_world.parameters().outputIdsOnDelete)
+        {
+            m_carrierWriter = new CarrierWriter(m_world,"%stub-carriers.dat",this);
+        }
 
-    if (m_world.parameters().outputIdsOnEncounter)
-    {
-        m_excitonWriter = new ExcitonWriter(m_world,"%stub-excitons.dat",this);
-    }
+        if (m_world.parameters().outputIdsOnEncounter)
+        {
+            m_excitonWriter = new ExcitonWriter(m_world,"%stub-excitons.dat",this);
+        }
 
-    m_fluxWriter = new FluxWriter(m_world,"%stub.dat",this);
+        m_fluxWriter = new FluxWriter(m_world,"%stub.dat",this);
+    }
 }
 
-void LoggerOn::saveGridPotential(const QString& name)
+void Logger::saveGridPotential(const QString& name)
 {
     Grid &grid = m_world.electronGrid();
 
@@ -527,7 +529,7 @@ void LoggerOn::saveGridPotential(const QString& name)
     stream << flush;
 }
 
-void LoggerOn::saveCoulombEnergy(const QString& name)
+void Logger::saveCoulombEnergy(const QString& name)
 {
     if (! m_world.parameters().okCL) return;
 
@@ -565,28 +567,29 @@ void LoggerOn::saveCoulombEnergy(const QString& name)
     stream << flush;
 }
 
-void LoggerOn::reportFluxStream()
+void Logger::reportFluxStream()
 {
-    if (m_fluxWriter) m_fluxWriter->write();
+    if (m_fluxWriter && m_world.parameters().outputIsOn) m_fluxWriter->write();
 }
 
-void LoggerOn::reportXYZStream()
+void Logger::reportXYZStream()
 {
-    if (m_xyzWriter) m_xyzWriter->write();
+    if (m_xyzWriter && m_world.parameters().outputIsOn) m_xyzWriter->write();
 }
 
-void LoggerOn::reportCarrier(ChargeAgent &charge)
+void Logger::reportCarrier(ChargeAgent &charge)
 {
-    if (m_carrierWriter) m_carrierWriter->write(charge);
+    if (m_carrierWriter && m_world.parameters().outputIsOn) m_carrierWriter->write(charge);
 }
 
-void LoggerOn::reportExciton(ChargeAgent &charge1, ChargeAgent &charge2, bool recombined)
+void Logger::reportExciton(ChargeAgent &charge1, ChargeAgent &charge2, bool recombined)
 {
-    if (m_excitonWriter) m_excitonWriter->write(charge1, charge2, recombined);
+    if (m_excitonWriter && m_world.parameters().outputIsOn) m_excitonWriter->write(charge1, charge2, recombined);
 }
 
-void LoggerOn::saveTrapImage(const QString& name)
+void Logger::saveTrapImage(const QString& name)
 {
+    if (!m_world.parameters().outputIsOn) return;
     QList<int>& siteIDs = m_world.trapSiteIDs();
     if(siteIDs.size()==0)return;
     GridImage image(m_world,Qt::white,this);
@@ -594,8 +597,9 @@ void LoggerOn::saveTrapImage(const QString& name)
     image.save(name);
 }
 
-void LoggerOn::saveDefectImage(const QString& name)
+void Logger::saveDefectImage(const QString& name)
 {
+    if (!m_world.parameters().outputIsOn) return;
     QList<int>& siteIDs = m_world.defectSiteIDs();
     if(siteIDs.size()==0)return;
     GridImage image(m_world,Qt::white,this);
@@ -603,8 +607,9 @@ void LoggerOn::saveDefectImage(const QString& name)
     image.save(name);
 }
 
-void LoggerOn::saveElectronImage(const QString& name)
+void Logger::saveElectronImage(const QString& name)
 {
+    if (!m_world.parameters().outputIsOn) return;
     QList<ChargeAgent*>& chargeIDs = m_world.electrons();
     if(chargeIDs.size()==0)return;
     GridImage image(m_world,Qt::white,this);
@@ -612,8 +617,9 @@ void LoggerOn::saveElectronImage(const QString& name)
     image.save(name);
 }
 
-void LoggerOn::saveHoleImage(const QString& name)
+void Logger::saveHoleImage(const QString& name)
 {
+    if (!m_world.parameters().outputIsOn) return;
     QList<ChargeAgent*>& chargeIDs = m_world.holes();
     if(chargeIDs.size()==0)return;
     GridImage image(m_world,Qt::white,this);
@@ -621,8 +627,9 @@ void LoggerOn::saveHoleImage(const QString& name)
     image.save(name);
 }
 
-void LoggerOn::saveCarriersImage(const QString& name)
+void Logger::saveCarriersImage(const QString& name)
 {
+    if (!m_world.parameters().outputIsOn) return;
     QList<ChargeAgent*>& electrons = m_world.electrons();
     QList<ChargeAgent*>& holes = m_world.holes();
     if((electrons.size() + holes.size())==0)return;
@@ -632,8 +639,9 @@ void LoggerOn::saveCarriersImage(const QString& name)
     image.save(name);
 }
 
-void LoggerOn::saveImage(const QString& name)
+void Logger::saveImage(const QString& name)
 {
+    if (!m_world.parameters().outputIsOn) return;
     QList<int>& traps = m_world.trapSiteIDs();
     QList<int>& defects = m_world.defectSiteIDs();
     QList<ChargeAgent*>& electrons = m_world.electrons();

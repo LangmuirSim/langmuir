@@ -266,7 +266,7 @@ struct SimulationParameters
 
         outputIdsOnDelete      (false),
         outputCoulomb          (0),
-        outputStepChk          (0),
+        outputStepChk          (1),
         outputPotential        (false),
         outputIsOn             (true),
 

@@ -82,6 +82,7 @@ int main (int argc, char *argv[])
 
     // Create the world
     World world(inputFile);
+    world.logger().initialize();
 
     // Get the simulation Parameters
     SimulationParameters &par = world.parameters();
@@ -94,6 +95,24 @@ int main (int argc, char *argv[])
 
     // Create the simulation
     Simulation sim(world);
+
+    // Output Image of Defects
+    if(par.imageDefects)
+    {
+        world.logger().saveDefectImage();
+    }
+
+    // Output Image of Traps
+    if(par.imageTraps)
+    {
+        world.logger().saveTrapImage();
+    }
+
+    // Output Image of Field Potential
+    if(par.outputPotential)
+    {
+        world.logger().saveGridPotential();
+    }
 
     // Perform production steps
     for (int j = par.currentStep; j < par.iterationsReal; j += par.iterationsPrint)

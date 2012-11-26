@@ -149,61 +149,16 @@ private:
     World &m_world;
 };
 
-//! A class that organizes output (actually, this base class does nothing - LoggerOn is used when the output is on)
-/*!
-  This version of the class is a base class that actually does nothing when any
-  of its function are called - used to turn the output off.
-  */
+/**
+ * @brief A class that organizes output
+ * @warning You must manually call initialize() to open output streams
+ */
 class Logger : public QObject
 {
     Q_OBJECT
 public:
-    //! does nothing \see LoggerOn::LoggerOn
-    Logger(World &world, QObject *parent = 0) : QObject(parent) {}
-
-    //! does nothing \see LoggerOn::saveTrapImage
-    virtual void saveTrapImage(const QString& name = "%stub-traps.png") {}
-
-    //! does nothing \see LoggerOn::saveHoleImage
-    virtual void saveHoleImage(const QString& name = "%stub-%step-holes.png") {}
-
-    //! does nothing \see LoggerOn::saveElectronImage
-    virtual void saveElectronImage(const QString& name = "%stub-%step-electrons.png") {}
-
-    //! does nothing \see LoggerOn::saveElectronImage
-    virtual void saveCarriersImage(const QString& name = "%stub-%step-carriers.png") {}
-
-    //! does nothing \see LoggerOn::saveDefectImage
-    virtual void saveDefectImage(const QString& name = "%stub-defects.png") {}
-
-    //! does nothing \see LoggerOn::saveImage
-    virtual void saveImage(const QString& name = "%stub-%step-all.png") {}
-
-    //! does nothing \see LoggerOn::saveGridPotential
-    virtual void saveGridPotential(const QString& name = "%stub.grid") {}
-
-    //! does nothing \see LoggerOn::saveCoulombEnergy
-    virtual void saveCoulombEnergy(const QString& name = "%stub-%step.coulomb") {}
-
-    //! does nothing \see LoggerOn::reportFluxStream
-    virtual void reportFluxStream() {}
-
-    //! does nothing \see LoggerOn::reportXYZStream
-    virtual void reportXYZStream() {}
-
-    //! does nothing \see LoggerOn::reportCarrier
-    virtual void reportCarrier(ChargeAgent &charge) {}
-
-    //! does nothing \see LoggerOn::reportExciton
-    virtual void reportExciton(ChargeAgent &charge1, ChargeAgent &charge2, bool recombined = false) {}
-};
-
-//! A class that organizes output (derived from Logger)
-class LoggerOn : public Logger
-{
-public:
     //! create Logger
-    LoggerOn(World &world, QObject *parent = 0);
+    Logger(World &world, QObject *parent = 0);
 
     //! save an image of trap sites as png
     virtual void saveTrapImage(const QString& name = "%stub-traps.png");
@@ -241,10 +196,10 @@ public:
     //! output carrier information (for example pathlength) on two carriers at once to the exciton file
     virtual void reportExciton(ChargeAgent &charge1, ChargeAgent &charge2, bool recombined = false);
 
-protected:
     //! open the various output streams if they are turned on
     virtual void initialize();
 
+protected:
     //! reference to world
     World &m_world;
 
