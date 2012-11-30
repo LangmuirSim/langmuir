@@ -1,5 +1,6 @@
 #include "drainagent.h"
 #include "chargeagent.h"
+#include "parameters.h"
 #include "world.h"
 #include "rand.h"
 
@@ -64,6 +65,11 @@ RecombinationAgent::RecombinationAgent(World &world, QObject *parent)
     stream << "x" << m_type;
     stream.flush();
     setObjectName(name);
+}
+
+void RecombinationAgent::guessProbability()
+{
+    m_probability = (m_world.parameters().recombinationRate * m_world.parameters().currentStep) / m_attempts;
 }
 
 bool DrainAgent::tryToAccept(ChargeAgent *charge)

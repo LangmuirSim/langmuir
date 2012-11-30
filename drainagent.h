@@ -97,7 +97,12 @@ public:
      * @brief create a RecombinationAgent
      */
     RecombinationAgent(World &world, QObject *parent = 0);
-    //virtual bool tryToAccept(ChargeAgent *charge);
+
+    /**
+     * @brief calculate an acceptance probability based upon the desired rate and encounter frequency
+     */
+    void guessProbability();
+
 private:
     /**
      * @brief currently implemented as zero and not really used

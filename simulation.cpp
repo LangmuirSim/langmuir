@@ -125,6 +125,9 @@ void Simulation::performIterations(int nIterations)
         }
     }
 
+    // Update RecombinationAgent probability
+    m_world.recombinationAgent().guessProbability();
+
     // Output Source and Drain information
     m_world.logger().reportFluxStream();
 
