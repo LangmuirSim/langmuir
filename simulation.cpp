@@ -186,88 +186,11 @@ void Simulation::performIterations(int nIterations)
 
 void Simulation::performRecombinations()
 {
-    if (m_world.parameters().recombinationRate > 0)
+    if (m_world.parameters().recombinationRate > 0 || (m_world.parameters().outputIdsOnEncounter && m_world.parameters().outputIsOn))
     {
-        if (m_world.parameters().outputIdsOnEncounter)
+        foreach (ChargeAgent *charge, m_world.electrons())
         {
-            // recombine and output ids
-            foreach (ChargeAgent *charge, m_world.electrons())
-            {
-                int site = charge->getCurrentSite();
-                if (charge->otherGrid().agentType(site) == charge->otherType())
-                {
-                    ChargeAgent *other = dynamic_cast<ChargeAgent*>(charge->otherGrid().agentAddress(site));
-                    if (other)
-                    {
-                        if (m_world.recombinationAgent().tryToAccept(charge))
-                        {
-                            charge->setRemoved(true);
-                            other->setRemoved(true);
-                            m_world.logger().reportExciton(*charge, *other, true);
-                        }
-                        else
-                        {
-                            m_world.logger().reportExciton(*charge, *other, false);
-                        }
-                    }
-                    else
-                    {
-                        qFatal("dynamic cast from Agent* to ChargeAgent* has failed during recombination");
-                    }
-                }
-            } // end loop
-        }
-        else
-        {
-            // just recombine
-            foreach (ChargeAgent *charge, m_world.electrons())
-            {
-                int site = charge->getCurrentSite();
-                if (charge->otherGrid().agentType(site) == charge->otherType())
-                {
-                    ChargeAgent *other = dynamic_cast<ChargeAgent*>(charge->otherGrid().agentAddress(site));
-                    if (other)
-                    {
-                        if (m_world.recombinationAgent().tryToAccept(charge))
-                        {
-                            charge->setRemoved(true);
-                            other->setRemoved(true);
-                        }
-                    }
-                    else
-                    {
-                        qFatal("dynamic cast from Agent* to ChargeAgent* has failed during recombination");
-                    }
-                }
-            } // end loop
-        }
-    }
-    else
-    {
-        if (m_world.parameters().outputIdsOnEncounter)
-        {
-            // just output ids
-            foreach (ChargeAgent *charge, m_world.electrons())
-            {
-                int site = charge->getCurrentSite();
-                if (charge->otherGrid().agentType(site) == charge->otherType())
-                {
-                    ChargeAgent *other = dynamic_cast<ChargeAgent*>(charge->otherGrid().agentAddress(site));
-                    if (other)
-                    {
-                        m_world.logger().reportExciton(*charge, *other, false);
-                    }
-                    else
-                    {
-                        qFatal("dynamic cast from Agent* to ChargeAgent* has failed during recombination");
-                    }
-                }
-            } // end loop
-        }
-        else
-        {
-            // do nothing
-            return;
+            m_world.recombinationAgent().tryToAccept(charge);
         }
     }
 }

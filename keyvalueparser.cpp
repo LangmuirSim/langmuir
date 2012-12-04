@@ -73,6 +73,7 @@ KeyValueParser::KeyValueParser(World &world, QObject *parent) :
     registerVariable("h.drain.r.rate", m_parameters.hDrainRRate);
 
     registerVariable("recombination.rate", m_parameters.recombinationRate);
+    registerVariable("recombination.range", m_parameters.recombinationRange);
 
     registerVariable("use.opencl", m_parameters.useOpenCL);
     registerVariable("work.x", m_parameters.workX);

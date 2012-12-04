@@ -99,6 +99,11 @@ public:
     RecombinationAgent(World &world, QObject *parent = 0);
 
     /**
+     * @brief accept charge with constant probability
+     */
+    virtual bool tryToAccept(ChargeAgent *charge);
+
+    /**
      * @brief calculate an acceptance probability based upon the desired rate and encounter frequency
      */
     void guessProbability();

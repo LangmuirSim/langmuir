@@ -239,6 +239,9 @@ struct SimulationParameters
     //! the rate at which holes and electrons can combine when they sit upon one another
     qreal recombinationRate;
 
+    //! the number of sites to consider when performing recombinations (0 means same-site, 1 means one-site away and same-site)
+    qint32 recombinationRange;
+
     //! output carrier lifetime and pathlength when holes and electrons encounter one another
     bool outputIdsOnEncounter;
 
@@ -326,6 +329,7 @@ struct SimulationParameters
         sourceMetropolis       (false),
         sourceCoulomb          (false),
         recombinationRate      (0.00),
+        recombinationRange     (0),
         outputIdsOnEncounter   (false),
         sourceScaleArea        (65536),
         maxThreads             (-1)

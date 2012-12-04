@@ -69,14 +69,18 @@ ExcitonWriter::ExcitonWriter(World &world, const QString &name, QObject *parent)
              //<< qSetFieldWidth(m_world.parameters().outputWidth)
              << right
              << scientific
-             << "s" << ' '
-             << "x" << ' '
-             << "y" << ' '
-             << "z" << ' '
+             << "1_s" << ' '
+             << "1_x" << ' '
+             << "1_y" << ' '
+             << "1_z" << ' '
              << "1_type" << ' '
              << "1_address" << ' '
              << "1_lifetime" << ' '
              << "1_pathlength" << ' '
+             << "2_s" << ' '
+             << "2_x" << ' '
+             << "2_y" << ' '
+             << "2_z" << ' '
              << "2_type" << ' '
              << "2_address" << ' '
              << "2_lifetime" << ' '
@@ -391,16 +395,24 @@ void CarrierWriter::write(ChargeAgent &charge)
 
 void ExcitonWriter::write(ChargeAgent &charge1, ChargeAgent &charge2, bool recombined)
 {
-    Grid &grid = charge1.getGrid();
-    int site = charge1.getCurrentSite();
-    m_stream << site << ' '
-             << grid.getIndexX(site) << ' '
-             << grid.getIndexY(site) << ' '
-             << grid.getIndexZ(site) << ' '
+    Grid &grid1 = charge1.getGrid();
+    int site1 = charge1.getCurrentSite();
+
+    Grid &grid2 = charge2.getGrid();
+    int site2 = charge2.getCurrentSite();
+
+    m_stream << site1 << ' '
+             << grid1.getIndexX(site1) << ' '
+             << grid1.getIndexY(site1) << ' '
+             << grid1.getIndexZ(site1) << ' '
              << Agent::toQString(charge1.getType()).at(0) << ' '
              << &charge1 << ' '
              << charge1.lifetime() << ' '
              << charge1.pathlength() << ' '
+             << site2 << ' '
+             << grid2.getIndexX(site2) << ' '
+             << grid2.getIndexY(site2) << ' '
+             << grid2.getIndexZ(site2) << ' '
              << Agent::toQString(charge2.getType()).at(0) << ' '
              << &charge2 << ' '
              << charge2.lifetime() << ' '

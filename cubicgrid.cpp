@@ -436,7 +436,7 @@ QVector<int> Grid::neighborsSite(int site, int hoppingRange)
         }
         default:
         {
-            qFatal("invalid neighbor list size parameter");
+            qFatal("invalid neighbor list size parameter : (%d)", hoppingRange);
             break;
         }
     }

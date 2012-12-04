@@ -1,6 +1,7 @@
 #include "drainagent.h"
 #include "chargeagent.h"
 #include "parameters.h"
+#include "writer.h"
 #include "world.h"
 #include "rand.h"
 
@@ -102,30 +103,151 @@ double RecombinationAgent::energyChange(int site)
     return 0.0;
 }
 
-//bool RecombinationAgent::tryToAccept(ChargeAgent *charge)
-//{
-//    int site = charge->getCurrentSite();
-//    if (charge->otherGrid().agentType(site) == charge->otherType())
-//    {
-//        m_attempts += 1;
-//        if(shouldTransport(site))
-//        {
-//            m_successes += 1;
-//            ChargeAgent *other = dynamic_cast<ChargeAgent*>(charge->otherGrid().agentAddress(site));
-//            if (other)
-//            {
-//                charge->setRemoved(true);
-//                other->setRemoved(true);
-//            }
-//            else
-//            {
-//                qFatal("dynamic cast from Agent* to ChargeAgent* has failed during recombination");
-//            }
-//            return true;
-//        }
-//        return false;
-//    }
-//    return false;
-//}
+bool RecombinationAgent::tryToAccept(ChargeAgent *charge)
+{
+    // The current site
+    int site = charge->getCurrentSite();
+
+    // A list of neighboring sites WITH carriers
+    QVector<int> neighbors;
+
+    // Consider same-site neighbors
+    if (charge->otherGrid().agentType(site) == charge->otherType())
+    {
+        neighbors.push_back(charge->getCurrentSite());
+    }
+
+    // Add more possibilities
+    switch (m_world.parameters().recombinationRange)
+    {
+        // Only consider same-site neighbors, which we did above
+        case 0:
+        {
+            break;
+        }
+
+        // Consider more neighbors
+        default:
+        {
+            // Don't construct a neighbor list if one already exists
+            if (m_world.parameters().hoppingRange == m_world.parameters().recombinationRange)
+            {
+                // Loop over the neighbors and check if charges are there
+                foreach (int otherSite, charge->getNeighbors())
+                {
+                    if (charge->otherGrid().agentType(otherSite) == charge->otherType())
+                    {
+                        neighbors.push_back(otherSite);
+                    }
+                }
+            }
+            else
+            {
+                // We need to make a new neighborlist
+                QVector<int> constructed_neighbors = m_grid.neighborsSite(charge->getCurrentSite(), m_world.parameters().recombinationRange);
+
+                // Loop over the neighbors and check if charges are there
+                foreach (int otherSite, constructed_neighbors)
+                {
+                    if (charge->otherGrid().agentType(otherSite) == charge->otherType())
+                    {
+                        neighbors.push_back(otherSite);
+                    }
+                }
+            }
+            break;
+        }
+    }
+
+    // Found charges to recombine with
+    if (neighbors.size() > 0)
+    {
+        // Randomly choose which neighboring site to recombine with
+        int recombiningSite = neighbors[m_world.randomNumberGenerator().integer(0, neighbors.size()-1)];
+
+        // Get the other ChargeAgent
+        ChargeAgent *other = dynamic_cast<ChargeAgent*>(charge->otherGrid().agentAddress(recombiningSite));
+
+        // Make sure things are OK with the other ChargeAgent
+        if (!other)
+        {
+             qFatal("dynamic cast from Agent* to ChargeAgent* has failed during recombination");
+        }
+
+        // Attempt recombination only if we should...
+        if (m_world.parameters().recombinationRate > 0)
+        {
+            // Output encounters & recombine
+            if (m_world.parameters().outputIdsOnEncounter)
+            {
+                // Try to recombine
+                m_attempts += 1;
+                if(shouldTransport(recombiningSite))
+                {
+                    // RecombinationAgent has succeeded
+                    m_successes += 1;
+
+                    // Remove both charges
+                    charge->setRemoved(true);
+                    other->setRemoved(true);
+
+                    // Report encounter
+                    m_world.logger().reportExciton(*charge, *other, true);
+
+                    // A recombination occured
+                    return true;
+                }
+                // Report encounter
+                m_world.logger().reportExciton(*charge, *other, false);
+
+                // No recombination occured
+                return false;
+            }
+            // Just recombine
+            else
+            {
+                // Try to recombine
+                m_attempts += 1;
+                if(shouldTransport(recombiningSite))
+                {
+                    // RecombinationAgent has succeeded
+                    m_successes += 1;
+
+                    // Remove both charges
+                    charge->setRemoved(true);
+                    other->setRemoved(true);
+
+                    // A recombination occured
+                    return true;
+                }
+                // No recombination occured
+                return false;
+            }
+        }
+        // (recombination.rate <= 0)
+        else
+        {
+            // Just output encounters
+            if (m_world.parameters().outputIdsOnEncounter)
+            {
+                // Report encounter
+                m_world.logger().reportExciton(*charge, *other, false);
+
+                // No recombination occured
+                return false;
+            }
+            // Why is this function even being called
+            else
+            {
+                qFatal("the recombination agent is calling tryToAccept when the recombination.rate"
+                       "<= 0 && output.ids.on.encounter == false");
+            }
+        }
+        // This should never ever ever never ever ever never ever happen
+        return false;
+    }
+    // No charges to recombine with found
+    return false;
+}
 
 }
