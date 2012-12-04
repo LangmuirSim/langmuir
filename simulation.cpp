@@ -42,7 +42,7 @@ void Simulation::performIterations(int nIterations)
             }
 
             // Calculate the coulomb interactions in parallel some way or another
-            if (m_world.parameters().useOpenCL && m_world.numChargeAgents() > 150)
+            if (m_world.parameters().useOpenCL && m_world.numChargeAgents() > m_world.parameters().openclThreshold)
             {
                     // Use OpenCL if there are a lot of charges
                     m_world.opencl().launchCoulombKernel2();
@@ -126,7 +126,10 @@ void Simulation::performIterations(int nIterations)
     }
 
     // Update RecombinationAgent probability
-    m_world.recombinationAgent().guessProbability();
+    if (m_world.parameters().simulationType == "solarcell")
+    {
+        m_world.recombinationAgent().guessProbability();
+    }
 
     // Output Source and Drain information
     m_world.logger().reportFluxStream();

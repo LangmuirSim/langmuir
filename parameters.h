@@ -188,6 +188,9 @@ struct SimulationParameters
     //! the size of OpenCL 1DRange kernel work groups
     qint32 workSize;
 
+    //! the minimum number of charges that must be present to use OpenCL
+    qint32 openclThreshold;
+
     //! physical constant, the boltzmann constant
     qreal boltzmannConstant;
 
@@ -305,6 +308,7 @@ struct SimulationParameters
         workY                  (4),
         workZ                  (4),
         workSize               (256),
+        openclThreshold        (256),
 
         boltzmannConstant      (1.3806504e-23),
         dielectricConstant     (3.5),
@@ -519,6 +523,11 @@ inline void checkSimulationParameters(SimulationParameters& par)
     if (par.outputXyzMode < 0 || par.outputXyzMode > 1)
     {
         qFatal("output.xyz.mode must be 0 or 1");
+    }
+
+    if (par.openclThreshold <= 0)
+    {
+        qFatal("opencl.threshold must be >= 0");
     }
 }
 

@@ -17,7 +17,21 @@
 namespace Langmuir {
 
 World::World(const QString &fileName, QObject *parent)
-    : QObject(parent)
+    : QObject(parent),
+      m_keyValueParser(0),
+      m_checkPointer(0),
+      m_recombinationAgent(0),
+      m_electronGrid(0),
+      m_holeGrid(0),
+      m_rand(0),
+      m_potential(0),
+      m_parameters(0),
+      m_logger(0),
+      m_ocl(0),
+      m_maxElectrons(0),
+      m_maxHoles(0),
+      m_maxDefects(0),
+      m_maxTraps(0)
 {
     initialize(fileName);
 }
