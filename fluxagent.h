@@ -40,7 +40,7 @@ public:
     /**
      * @brief get the FluxAgent's potential
      */
-    double potential()const;
+    double potential() const;
 
     /**
      * @brief set the FluxAgent's rate
@@ -51,29 +51,51 @@ public:
     /**
      * @brief get the FluxAgent's rate
      */
-    double rate()const;
+    double rate() const;
 
     /**
      * @brief set the FluxAgent's attempt counter
      * @param potential the value of the attempt counter
+     * @warning also calls storeLast()
      */
     void setAttempts(unsigned long int value);
 
     /**
      * @brief get the FluxAgent's attempt counter
      */
-    unsigned long int attempts()const;
+    unsigned long int attempts() const;
 
     /**
      * @brief set the FluxAgent's success counter
      * @param potential the value of the counter
+     * @warning also calls storeLast()
      */
     void setSuccesses(unsigned long int value);
 
     /**
      * @brief get the FluxAgent's success counter
      */
-    unsigned long int successes()const;
+    unsigned long int successes() const;
+
+    /**
+     * @brief set the value of last to the value of successes, and store the current step
+     */
+    void storeLast();
+
+    /**
+     * @brief get the number of successes since storeLast() was called
+     */
+    unsigned long int successesSinceLast() const;
+
+    /**
+     * @brief get the number of attempts since storeLast() was called
+     */
+    unsigned long int attemptsSinceLast() const;
+
+    /**
+     * @brief get the number of steps since storeLast() was called
+     */
+    unsigned long int stepsSinceLast() const;
 
     /**
      * @brief calculate and return the current probabilty of success
@@ -92,6 +114,21 @@ public:
      * The current is related to the rate.
      */
     double successRate()const;
+
+    /**
+     * @brief calculate and return the probabilty of success since storeLast() was called
+     *
+     * This is the number of successesSinceLast() divided by the number of attemptsSinceLast() (x100).
+     */
+    double successProbabilitySinceLast()const;
+
+    /**
+     * @brief calculate and return the rate of success since storeLast() was called
+     *
+     * This is the number of successesSinceLast() divided by the number of stepsSinceLast().
+     * The current is related to the rate.
+     */
+    double successRateSinceLast()const;
 
     /**
      * @brief set the attempt and success counters to zero
@@ -159,6 +196,21 @@ protected:
      * @brief the number of times the FluxAgent was successful in transporting.
      */
     unsigned long int m_successes;
+
+    /**
+     * @brief storage to note the number of successes at some step
+     */
+    unsigned long int m_lastSuccesses;
+
+    /**
+     * @brief storage to note the number of successes at some step
+     */
+    unsigned long int m_lastAttempts;
+
+    /**
+     * @brief the step at which last was noted
+     */
+    unsigned long int m_lastStep;
 
     /**
      * @brief the constant probability used in the default behavoir of shouldTransport().

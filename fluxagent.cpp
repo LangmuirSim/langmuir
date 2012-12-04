@@ -14,6 +14,7 @@ FluxAgent::FluxAgent(Agent::Type type, World &world, Grid &grid, QObject *parent
     m_potential     = 0;
     m_probability   = 0;
     m_face          = Grid::NoFace;
+    storeLast();
 }
 
 void FluxAgent::initializeSite(int site)
@@ -44,6 +45,28 @@ unsigned long int FluxAgent::successes()const
     return m_successes;
 }
 
+void FluxAgent::storeLast()
+{
+    m_lastSuccesses = m_successes;
+    m_lastAttempts = m_attempts;
+    m_lastStep = m_world.parameters().currentStep;
+}
+
+unsigned long int FluxAgent::successesSinceLast() const
+{
+    return m_successes - m_lastSuccesses;
+}
+
+unsigned long int FluxAgent::attemptsSinceLast() const
+{
+    return m_attempts - m_lastAttempts;
+}
+
+unsigned long int FluxAgent::stepsSinceLast() const
+{
+    return m_world.parameters().currentStep - m_lastStep;
+}
+
 double FluxAgent::successProbability()const
 {
     if(m_attempts > 0)
@@ -68,10 +91,35 @@ double FluxAgent::successRate()const
     }
 }
 
+double FluxAgent::successProbabilitySinceLast() const
+{
+    if(attemptsSinceLast() > 0)
+    {
+        return double(successesSinceLast())/double(attemptsSinceLast())*100.0;
+    }
+    else
+    {
+        return 0.0;
+    }
+}
+
+double FluxAgent::successRateSinceLast() const
+{
+    if(stepsSinceLast() > 0)
+    {
+        return double(successesSinceLast())/double(stepsSinceLast());
+    }
+    else
+    {
+        return 0.0;
+    }
+}
+
 void FluxAgent::resetCounters()
 {
     m_attempts = 0;
     m_successes = 0;
+    storeLast();
 }
 
 bool FluxAgent::shouldTransport(int site)
@@ -113,11 +161,13 @@ QString FluxAgent::faceToLetter()
 void FluxAgent::setAttempts(unsigned long int value)
 {
     m_attempts = value;
+    storeLast();
 }
 
 void FluxAgent::setSuccesses(unsigned long int value)
 {
     m_successes = value;
+    storeLast();
 }
 
 double FluxAgent::potential()const
