@@ -1,3 +1,4 @@
+[Parameters]
 simulation.type         = transistor
 
 grid.x                  = 128

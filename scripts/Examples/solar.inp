@@ -1,3 +1,4 @@
+[Parameters]
 simulation.type         = solarcell
 
 grid.x                  = 96
@@ -23,6 +24,7 @@ voltage.right           = 7.50
 voltage.left            = 0.00
 source.rate             = 0.01
 drain.rate              = 0.90
+recombination.rate      = 1e-4
 
 temperature.kelvin      = 300.0
 
