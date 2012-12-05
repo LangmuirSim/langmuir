@@ -211,9 +211,16 @@ void Simulation::performRecombinations()
 
 void Simulation::performInjections()
 {
-    for(int i = 0; i < m_world.sources().size(); i++)
+    if (m_world.parameters().simulationType == "solarcell")
     {
-        m_world.sources().at(i)->tryToInject();
+        m_world.excitonSourceAgent().tryToInject();
+    }
+    else
+    {
+        for(int i = 0; i < m_world.sources().size(); i++)
+        {
+            m_world.sources().at(i)->tryToInject();
+        }
     }
 }
 
