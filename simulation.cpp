@@ -28,6 +28,12 @@ void Simulation::performIterations(int nIterations)
     {
         for(int i = 0; i < nIterations; ++i)
         {
+            //Store fluxAgent states
+            foreach (FluxAgent* flux, m_world.fluxes())
+            {
+                flux->storeLast();
+            }
+
             QList<ChargeAgent*> &electrons = m_world.electrons();
             QList<ChargeAgent*> &holes = m_world.holes();
 
@@ -89,6 +95,12 @@ void Simulation::performIterations(int nIterations)
     {
         for(int i = 0; i < nIterations; ++i)
         {
+            //Store fluxAgent states
+            foreach (FluxAgent* flux, m_world.fluxes())
+            {
+                flux->storeLast();
+            }
+
             QList<ChargeAgent*> &electrons = m_world.electrons();
             QList<ChargeAgent*> &holes = m_world.holes();
 
