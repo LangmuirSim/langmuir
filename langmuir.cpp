@@ -96,22 +96,26 @@ int main (int argc, char *argv[])
     // Create the simulation
     Simulation sim(world);
 
-    // Output Image of Defects
-    if(par.imageDefects)
+    // Output some stuff
+    if (par.outputIsOn)
     {
-        world.logger().saveDefectImage();
-    }
+        // Output Image of Defects
+        if(par.imageDefects)
+        {
+            world.logger().saveDefectImage();
+        }
 
-    // Output Image of Traps
-    if(par.imageTraps)
-    {
-        world.logger().saveTrapImage();
-    }
+        // Output Image of Traps
+        if(par.imageTraps)
+        {
+            world.logger().saveTrapImage();
+        }
 
-    // Output Image of Field Potential
-    if(par.outputPotential)
-    {
-        world.logger().saveGridPotential();
+        // Output Image of Field Potential
+        if(par.outputPotential)
+        {
+            world.logger().saveGridPotential();
+        }
     }
 
     // Perform production steps
@@ -125,69 +129,70 @@ int main (int argc, char *argv[])
     }
     progress(qout, par) << '\n'; qout.flush();
 
-    // Save a Checkpoint File
-    if (par.outputIsOn) world.checkPointer().save();
-
-    // Output Trajectory
-    if (par.outputXyz == -1)
+    // Output some stuff
+    if (par.outputIsOn)
     {
-        world.logger().reportXYZStream();
-    }
+        // Save a Checkpoint File
+        if (par.outputIsOn) world.checkPointer().save();
 
-    // Output Image of Carriers
-    if (par.outputCoulomb == -1)
-    {
-        if (world.numChargeAgents() > 0)
+        // Output Trajectory
+        if (par.outputXyz == -1)
         {
-            world.opencl().launchCoulombKernel1();
-            world.logger().saveCoulombEnergy();
+            world.logger().reportXYZStream();
         }
-    }
 
-    // Output Image of Carriers
-    if (par.imageCarriers == -1)
-    {
-        world.logger().saveCarriersImage();
-        world.logger().saveElectronImage();
-        world.logger().saveHoleImage();
-    }
+        // Output Image of Carriers
+        if (par.outputCoulomb == -1)
+        {
+            if (world.numChargeAgents() > 0)
+            {
+                world.opencl().launchCoulombKernel1();
+                world.logger().saveCoulombEnergy();
+            }
+        }
+
+        // Output Image of Carriers
+        if (par.imageCarriers == -1)
+        {
+            world.logger().saveCarriersImage();
+            world.logger().saveElectronImage();
+            world.logger().saveHoleImage();
+        }
 
     // The time this simulation stops
     QDateTime stop = QDateTime::currentDateTime();
 
     // Output time
-    if (par.outputIsOn)
-    {
-        OutputStream timerStream("%stub.time",&par);
+    OutputStream timerStream("%stub.time",&par);
 
-        timerStream << right
-                    << qSetFieldWidth(20)
-                    << qSetRealNumberPrecision(12)
-                    << "real"
-                    << "carriers"
-                    << "date_i"
-                    << "time_i"
-                    << "date_f"
-                    << "time_f"
-                    << "days"
-                    << "hours"
-                    << "min"
-                    << "secs"
-                    << "msecs"
-                    << newline;
-        timerStream.setRealNumberNotation(QTextStream::SmartNotation);
-        timerStream << par.iterationsReal
-                    << world.maxChargeAgents()
-                    << begin.toString(dateFMT)
-                    << begin.toString(timeFMT)
-                    << stop.toString(dateFMT)
-                    << stop.toString(timeFMT)
-                    << begin.msecsTo(stop) / 1000.0 / 60.0 / 60.0 / 24.0
-                    << begin.msecsTo(stop) / 1000.0 / 60.0 / 60.0
-                    << begin.msecsTo(stop) / 1000.0 / 60.0
-                    << begin.msecsTo(stop) / 1000.0
-                    << begin.msecsTo(stop)
-                    << newline
-                    << flush;
+    timerStream << right
+                << qSetFieldWidth(20)
+                << qSetRealNumberPrecision(12)
+                << "real"
+                << "carriers"
+                << "date_i"
+                << "time_i"
+                << "date_f"
+                << "time_f"
+                << "days"
+                << "hours"
+                << "min"
+                << "secs"
+                << "msecs"
+                << newline;
+    timerStream.setRealNumberNotation(QTextStream::SmartNotation);
+    timerStream << par.iterationsReal
+                << world.maxChargeAgents()
+                << begin.toString(dateFMT)
+                << begin.toString(timeFMT)
+                << stop.toString(dateFMT)
+                << stop.toString(timeFMT)
+                << begin.msecsTo(stop) / 1000.0 / 60.0 / 60.0 / 24.0
+                << begin.msecsTo(stop) / 1000.0 / 60.0 / 60.0
+                << begin.msecsTo(stop) / 1000.0 / 60.0
+                << begin.msecsTo(stop) / 1000.0
+                << begin.msecsTo(stop)
+                << newline
+                << flush;
     }
 }

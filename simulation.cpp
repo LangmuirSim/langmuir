@@ -131,54 +131,53 @@ void Simulation::performIterations(int nIterations)
         m_world.recombinationAgent().guessProbability();
     }
 
-    // Output Source and Drain information
-    m_world.logger().reportFluxStream();
-
-    // Output Coulomb Energy
-    if ( m_world.numChargeAgents() > 0 &&
-         m_world.parameters().outputCoulomb > 0 &&
-         m_world.parameters().currentStep %
-        (m_world.parameters().iterationsPrint *
-         m_world.parameters().outputCoulomb) == 0
-       )
-    {
-        m_world.opencl().launchCoulombKernel1();
-        m_world.logger().saveCoulombEnergy();
-    }
-
-    // Output Trajectory
-    if ( m_world.parameters().outputXyz > 0 &&
-         m_world.parameters().currentStep %
-        (m_world.parameters().iterationsPrint *
-         m_world.parameters().outputXyz) == 0
-       )
-    {
-        m_world.logger().reportXYZStream();
-    }
-
-    // Output Image of Carriers
-    if ( m_world.parameters().imageCarriers > 0 &&
-         m_world.parameters().currentStep %
-        (m_world.parameters().iterationsPrint *
-         m_world.parameters().imageCarriers) == 0
-       )
-    {
-        m_world.logger().saveCarriersImage();
-        m_world.logger().saveElectronImage();
-        m_world.logger().saveHoleImage();
-    }
-
-    // Save a Checkpoint Files
+    // Save output
     if (m_world.parameters().outputIsOn)
     {
-        // For a specific step
+        // Output Source and Drain information
+        m_world.logger().reportFluxStream();
+
+        // Output Coulomb Energy
+        if ( m_world.numChargeAgents() > 0 &&
+             m_world.parameters().outputCoulomb > 0 &&
+             m_world.parameters().currentStep %
+            (m_world.parameters().iterationsPrint *
+             m_world.parameters().outputCoulomb) == 0
+           )
+        {
+            m_world.opencl().launchCoulombKernel1();
+            m_world.logger().saveCoulombEnergy();
+        }
+
+        // Output Trajectory
+        if ( m_world.parameters().outputXyz > 0 &&
+             m_world.parameters().currentStep %
+            (m_world.parameters().iterationsPrint *
+             m_world.parameters().outputXyz) == 0
+           )
+        {
+            m_world.logger().reportXYZStream();
+        }
+
+        // Output Image of Carriers
+        if ( m_world.parameters().imageCarriers > 0 &&
+             m_world.parameters().currentStep %
+            (m_world.parameters().iterationsPrint *
+             m_world.parameters().imageCarriers) == 0
+           )
+        {
+            m_world.logger().saveCarriersImage();
+            m_world.logger().saveElectronImage();
+            m_world.logger().saveHoleImage();
+        }
+
+        // Output checkpoint file
         if ( m_world.parameters().outputStepChk > 0 &&
              m_world.parameters().currentStep %
             (m_world.parameters().iterationsPrint *
              m_world.parameters().outputStepChk) == 0
            )
         {
-            //m_world.checkPointer().save("%stub-%step.chk");
             m_world.checkPointer().save();
         }
     }
