@@ -22,6 +22,7 @@ class ChargeAgent;
 class SourceAgent;
 class CheckPointer;
 class OpenClHelper;
+class ExcitonSourceAgent;
 class RecombinationAgent;
 struct SimulationParameters;
 
@@ -108,6 +109,11 @@ public:
      * @brief get a list of all FluxAgents
      */
     QList<FluxAgent*>& fluxes();
+
+    /**
+     * @brief get the RecombinationAgent
+     */
+    ExcitonSourceAgent& excitonSourceAgent();
 
     /**
      * @brief get the RecombinationAgent
@@ -266,7 +272,12 @@ private:
     QList<FluxAgent*> m_fluxAgents;
 
     /**
-     * @brief pointer to hole RecombinationAgent, used for removing Excitons
+     * @brief pointer to ExcitonSourceAgent, used for injecting Excitons
+     */
+    ExcitonSourceAgent *m_excitonSourceAgent;
+
+    /**
+     * @brief pointer to electron/hole RecombinationAgent, used for removing Excitons
      */
     RecombinationAgent *m_recombinationAgent;
 

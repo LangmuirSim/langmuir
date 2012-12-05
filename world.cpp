@@ -20,6 +20,7 @@ World::World(const QString &fileName, QObject *parent)
     : QObject(parent),
       m_keyValueParser(0),
       m_checkPointer(0),
+      m_excitonSourceAgent(0),
       m_recombinationAgent(0),
       m_electronGrid(0),
       m_holeGrid(0),
@@ -130,6 +131,11 @@ QList<DrainAgent*>& World::drains()
 QList<FluxAgent*>& World::fluxes()
 {
     return m_fluxAgents;
+}
+
+ExcitonSourceAgent& World::excitonSourceAgent()
+{
+    return *m_excitonSourceAgent;
 }
 
 RecombinationAgent& World::recombinationAgent()
@@ -371,7 +377,8 @@ void World::initialize(const QString &fileName)
     else if ( parameters().simulationType == "solarcell" )
     {
         // Create Solar Cell Sources
-        m_sources.push_back(new ExcitonSourceAgent(refWorld, this));
+        m_excitonSourceAgent = new ExcitonSourceAgent(refWorld, this);
+        m_sources.push_back(m_excitonSourceAgent);
         m_sources.last()->setRate(parameters().sourceRate);
 
         // Scale the source.rate according to the area of the simulation cell
