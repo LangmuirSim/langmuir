@@ -17,13 +17,13 @@ class KeyValueParser;
 class Potential;
 class FluxAgent;
 class DrainAgent;
+class RecombinationAgent;
 class Simulation;
 class ChargeAgent;
 class SourceAgent;
+class ExcitonSourceAgent;
 class CheckPointer;
 class OpenClHelper;
-class ExcitonSourceAgent;
-class RecombinationAgent;
 struct SimulationParameters;
 
 /**
@@ -101,9 +101,39 @@ public:
     QList<SourceAgent*>& sources();
 
     /**
+     * @brief get a list of all ElectronSourceAgents
+     */
+    QList<SourceAgent*>& eSources();
+
+    /**
+     * @brief get a list of all ElectronSourceAgents
+     */
+    QList<SourceAgent*>& hSources();
+
+    /**
+     * @brief get a list of all ElectronSourceAgents
+     */
+    QList<SourceAgent*>& xSources();
+
+    /**
      * @brief get a list of all DrainAgents
      */
     QList<DrainAgent*>& drains();
+
+    /**
+     * @brief get a list of all ElectronSourceAgents
+     */
+    QList<DrainAgent*>& eDrains();
+
+    /**
+     * @brief get a list of all ElectronSourceAgents
+     */
+    QList<DrainAgent*>& hDrains();
+
+    /**
+     * @brief get a list of all ElectronSourceAgents
+     */
+    QList<DrainAgent*>& xDrains();
 
     /**
      * @brief get a list of all FluxAgents
@@ -262,12 +292,42 @@ private:
     QList<SourceAgent*> m_sources;
 
     /**
+     * @brief list of ElectronSourceAgents
+     */
+    QList<SourceAgent*> m_eSources;
+
+    /**
+     * @brief list of HoleSourceAgents
+     */
+    QList<SourceAgent*> m_hSources;
+
+    /**
+     * @brief list of ExcitonSourceAgents
+     */
+    QList<SourceAgent*> m_xSources;
+
+    /**
      * @brief list of DrainAgents
      */
     QList<DrainAgent*> m_drains;
 
     /**
-     * @brief list of FluxAgents, such as SoureAgents, DrainAgents, etc.
+     * @brief list of ElectronSourceAgents
+     */
+    QList<DrainAgent*> m_eDrains;
+
+    /**
+     * @brief list of HoleSourceAgents
+     */
+    QList<DrainAgent*> m_hDrains;
+
+    /**
+     * @brief list of ExcitonSourceAgents
+     */
+    QList<DrainAgent*> m_xDrains;
+
+    /**
+     * @brief list of all FluxAgents, such as SoureAgents, DrainAgents, etc.
      */
     QList<FluxAgent*> m_fluxAgents;
 

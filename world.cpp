@@ -123,9 +123,39 @@ QList<SourceAgent*>& World::sources()
     return m_sources;
 }
 
+QList<SourceAgent*>& World::eSources()
+{
+    return m_eSources;
+}
+
+QList<SourceAgent*>& World::hSources()
+{
+    return m_hSources;
+}
+
+QList<SourceAgent*>& World::xSources()
+{
+    return m_xSources;
+}
+
 QList<DrainAgent*>& World::drains()
 {
     return m_drains;
+}
+
+QList<DrainAgent*>& World::eDrains()
+{
+    return m_eDrains;
+}
+
+QList<DrainAgent*>& World::hDrains()
+{
+    return m_hDrains;
+}
+
+QList<DrainAgent*>& World::xDrains()
+{
+    return m_xDrains;
 }
 
 QList<FluxAgent*>& World::fluxes()
@@ -356,11 +386,13 @@ void World::initialize(const QString &fileName)
     {
         // Create Transistor Sources
         m_sources.push_back(new ElectronSourceAgent(refWorld, Grid::Left, this));
+        m_eSources.push_back(m_sources.last());
         m_sources.last()->setPotential(parameters().voltageLeft);
         m_sources.last()->setRate(parameters().sourceRate);
 
         // Create Transistor Drains
         m_drains.push_back(new ElectronDrainAgent(refWorld, Grid::Right, this));
+        m_eDrains.push_back(m_drains.last());
         m_drains.last()->setPotential(parameters().voltageRight);
         if (parameters().eDrainRRate >= 0)
         {
@@ -379,6 +411,7 @@ void World::initialize(const QString &fileName)
         // Create Solar Cell Sources
         m_excitonSourceAgent = new ExcitonSourceAgent(refWorld, this);
         m_sources.push_back(m_excitonSourceAgent);
+        m_xSources.push_back(m_sources.last());
         m_sources.last()->setRate(parameters().sourceRate);
 
         // Scale the source.rate according to the area of the simulation cell
@@ -394,6 +427,7 @@ void World::initialize(const QString &fileName)
 
         // Create Solar Cell Drains
         m_drains.push_back(new ElectronDrainAgent(refWorld, Grid::Left, this));
+        m_eDrains.push_back(m_drains.last());
         m_drains.last()->setPotential(parameters().voltageLeft);
         if (parameters().eDrainLRate >= 0)
         {
@@ -408,6 +442,7 @@ void World::initialize(const QString &fileName)
         }
 
         m_drains.push_back(new HoleDrainAgent(refWorld, Grid::Left, this));
+        m_hDrains.push_back(m_drains.last());
         m_drains.last()->setPotential(parameters().voltageLeft);
         if (parameters().hDrainLRate >= 0)
         {
@@ -422,6 +457,7 @@ void World::initialize(const QString &fileName)
         }
 
         m_drains.push_back(new ElectronDrainAgent(refWorld, Grid::Right, this));
+        m_eDrains.push_back(m_drains.last());
         m_drains.last()->setPotential(parameters().voltageRight);
         if (parameters().eDrainRRate >= 0)
         {
@@ -436,6 +472,7 @@ void World::initialize(const QString &fileName)
         }
 
         m_drains.push_back(new HoleDrainAgent(refWorld, Grid::Right, this));
+        m_hDrains.push_back(m_drains.last());
         m_drains.last()->setPotential(parameters().voltageRight);
         if (parameters().hDrainRRate >= 0)
         {
@@ -452,6 +489,7 @@ void World::initialize(const QString &fileName)
         // Create Recombination Agent
         m_recombinationAgent = new RecombinationAgent(refWorld, this);
         m_drains.push_back(m_recombinationAgent);
+        m_xDrains.push_back(m_drains.last());
         m_drains.last()->setRate(parameters().recombinationRate);
         m_drains.last()->setPotential(0.0);
     }
