@@ -52,16 +52,7 @@ GridViewGL::GridViewGL(const QGLFormat &format, QWidget * parent, QString input)
     pSim = new Simulation(*pWorld);
 
     //Restrict the value on iterations.print to be low
-    if(pWorld->parameters().iterationsPrint > 100)
-    {
-        QMessageBox::warning(
-                    this, 
-                    tr("Langmuir"), 
-                    QString("The parameter iterations.print must be <= 100 for GridView to render, "
-                            " so it has been changed from %1 to 10.").arg(pWorld->parameters().iterationsPrint),
-                    QMessageBox::Ok);
-        pWorld->parameters().iterationsPrint = 10;
-    }
+    pWorld->parameters().iterationsPrint = 1;
 
     if(pWorld->parameters().outputIsOn)
     {
@@ -438,7 +429,7 @@ void GridViewGL::setTimerInterval(int time)
 
 void GridViewGL::setIterationsPrint(int iterationsPrint)
 {
-    if(iterationsPrint > 0 && iterationsPrint <= 100)
+    if(iterationsPrint > 0)
     {
         pWorld->parameters().iterationsPrint = iterationsPrint;
         emit iterationsPrintChanged(iterationsPrint);
@@ -1926,11 +1917,11 @@ Controls::Controls(QWidget *parent): QWidget(parent)
     spinBoxes[0]->setMinimum(1);
     spinBoxes[1]->setMinimum(1);
 
-    spinBoxes[0]->setMaximum(100);
-    spinBoxes[1]->setMaximum(100);
+    spinBoxes[0]->setMaximum(1000);
+    spinBoxes[1]->setMaximum(1000);
 
-    spinBoxes[0]->setValue(100);
-    spinBoxes[1]->setValue(100);
+    spinBoxes[0]->setValue(1000);
+    spinBoxes[1]->setValue(1000);
 
     spinBoxes[0]->setWrapping(true);
     spinBoxes[1]->setWrapping(true);
