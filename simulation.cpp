@@ -185,11 +185,14 @@ void Simulation::performIterations(int nIterations)
 
 void Simulation::performRecombinations()
 {
-    if (m_world.parameters().recombinationRate > 0 || (m_world.parameters().outputIdsOnEncounter && m_world.parameters().outputIsOn))
+    if (m_world.parameters().simulationType == "solarcell")
     {
-        foreach (ChargeAgent *charge, m_world.electrons())
+        if (m_world.parameters().recombinationRate > 0 || (m_world.parameters().outputIdsOnEncounter && m_world.parameters().outputIsOn))
         {
-            m_world.recombinationAgent().tryToAccept(charge);
+            foreach (ChargeAgent *charge, m_world.electrons())
+            {
+                m_world.recombinationAgent().tryToAccept(charge);
+            }
         }
     }
 }
