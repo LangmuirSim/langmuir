@@ -168,7 +168,7 @@ void CheckPointer::save(const QString& fileName)
     saveDefects(stream)        << '\n';
     saveTraps(stream)          << '\n';
 
-    if (!m_world.parameters().outputChkTrapPotential)
+    if (m_world.parameters().outputChkTrapPotential)
     {
         saveTrapPotentials(stream) << '\n';
     }
