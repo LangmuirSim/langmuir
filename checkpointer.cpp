@@ -533,6 +533,12 @@ std::ostream& CheckPointer::saveTraps(std::ostream &stream)
 
 std::ostream& CheckPointer::saveTrapPotentials(std::ostream &stream)
 {
+    // Do not output trap potentials if their output is turned off
+    if (!m_world.parameters().outputChkTP)
+    {
+        return stream;
+    }
+
     // Get the section name
     const QMetaObject &QMO = CheckPointer::staticMetaObject;
     QMetaEnum QME = QMO.enumerator(QMO.indexOfEnumerator("Section"));
