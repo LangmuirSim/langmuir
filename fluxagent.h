@@ -49,6 +49,15 @@ public:
     void setRate(double rate);
 
     /**
+     * @brief set the FluxAgent's rate
+     * @param potential the value of the rate
+     * @param dflt the default value to set the rate to
+     *
+     * If rate is negative, uses the default rate instead
+     */
+    void setRateSmartly(double rate, double dflt);
+
+    /**
      * @brief get the FluxAgent's rate
      */
     double rate() const;

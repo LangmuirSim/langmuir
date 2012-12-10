@@ -214,14 +214,118 @@ void Simulation::performInjections()
     if (m_world.parameters().simulationType == "solarcell")
     {
         m_world.excitonSourceAgent().tryToInject();
+
+        if (m_world.parameters().balanceCharges)
+        {
+            balanceCharges();
+        }
     }
     else
     {
-        for(int i = 0; i < m_world.sources().size(); i++)
+        m_world.electronSourceAgentLeft().tryToInject();
+    }
+}
+
+void Simulation::balanceCharges()
+{
+    int tries = 0;
+    while (m_world.electronsMinusHoles() < 0 && !m_world.atMaxElectrons())
+    {
+        if (m_world.parameters().voltageRight >
+            m_world.parameters().voltageLeft)
         {
-            m_world.sources().at(i)->tryToInject();
+            m_world.electronSourceAgentLeft().tryToInject();
+        }
+        else
+        if (m_world.parameters().voltageLeft >
+            m_world.parameters().voltageRight)
+        {
+            m_world.electronSourceAgentRight().tryToInject();
+        }
+        else
+        {
+            if (m_world.randomNumberGenerator().random() > 0.5)
+            {
+                m_world.electronSourceAgentLeft().tryToInject();
+            }
+            else
+            {
+                m_world.electronSourceAgentRight().tryToInject();
+            }
+        }
+        tries += 1;
+        if (tries > 1024)
+        {
+            qFatal("can not balance electrons");
         }
     }
+
+    tries = 0;
+    while (m_world.holesMinusElectrons() < 0 && !m_world.atMaxHoles())
+    {
+        if (m_world.parameters().voltageRight >
+            m_world.parameters().voltageLeft)
+        {
+            m_world.holeSourceAgentRight().tryToInject();
+        }
+        else
+        if (m_world.parameters().voltageLeft >
+            m_world.parameters().voltageRight)
+        {
+            m_world.holeSourceAgentLeft().tryToInject();
+        }
+        else
+        {
+            if (m_world.randomNumberGenerator().random() > 0.5)
+            {
+                m_world.holeSourceAgentRight().tryToInject();
+            }
+            else
+            {
+                m_world.holeSourceAgentLeft().tryToInject();
+            }
+        }
+        tries += 1;
+        if (tries > 1024)
+        {
+            qFatal("can not balance holes");
+        }
+    }
+//    for (unsigned int i = 0;
+//         i < m_world.electronDrainAgentRight().successesSinceLast(); i++)
+//    {
+//        while(!m_world.electronSourceAgentLeft().tryToInject())
+//        {
+//            m_world.electronSourceAgentLeft().tryToInject();
+//        }
+//    }
+
+//    for (unsigned int i = 0;
+//         i < m_world.electronDrainAgentLeft().successesSinceLast(); i++)
+//    {
+//        while(!m_world.electronSourceAgentRight().tryToInject())
+//        {
+//            m_world.electronSourceAgentRight().tryToInject();
+//        }
+//    }
+
+//    for (unsigned int i = 0;
+//         i < m_world.holeDrainAgentRight().successesSinceLast(); i++)
+//    {
+//        while(!m_world.holeSourceAgentLeft().tryToInject())
+//        {
+//            m_world.holeSourceAgentLeft().tryToInject();
+//        }
+//    }
+
+//    for (unsigned int i = 0;
+//         i < m_world.holeDrainAgentLeft().successesSinceLast(); i++)
+//    {
+//        while(!m_world.holeSourceAgentRight().tryToInject())
+//        {
+//            m_world.holeSourceAgentRight().tryToInject();
+//        }
+//    }
 }
 
 void Simulation::nextTick()

@@ -51,9 +51,14 @@ protected:
     void performRecombinations();
 
     /**
-     * @brief Tell all sources to inject charges
+     * @brief Tell sources to inject charges
      */
     void performInjections();
+
+    /**
+     * @brief \b Try to use the sources to keep the number of ChargeAgents balanced
+     */
+    void balanceCharges();
 
     /**
      * @brief Remove charges from the simulation

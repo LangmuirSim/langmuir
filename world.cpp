@@ -20,7 +20,15 @@ World::World(const QString &fileName, QObject *parent)
     : QObject(parent),
       m_keyValueParser(0),
       m_checkPointer(0),
+      m_electronSourceAgentRight(0),
+      m_electronSourceAgentLeft(0),
+      m_holeSourceAgentRight(0),
+      m_holeSourceAgentLeft(0),
       m_excitonSourceAgent(0),
+      m_electronDrainAgentRight(0),
+      m_electronDrainAgentLeft(0),
+      m_holeDrainAgentRight(0),
+      m_holeDrainAgentLeft(0),
       m_recombinationAgent(0),
       m_electronGrid(0),
       m_holeGrid(0),
@@ -163,9 +171,49 @@ QList<FluxAgent*>& World::fluxes()
     return m_fluxAgents;
 }
 
+ElectronSourceAgent& World::electronSourceAgentRight()
+{
+    return *m_electronSourceAgentRight;
+}
+
+ElectronSourceAgent& World::electronSourceAgentLeft()
+{
+    return *m_electronSourceAgentLeft;
+}
+
+HoleSourceAgent& World::holeSourceAgentRight()
+{
+    return *m_holeSourceAgentRight;
+}
+
+HoleSourceAgent& World::holeSourceAgentLeft()
+{
+    return *m_holeSourceAgentLeft;
+}
+
 ExcitonSourceAgent& World::excitonSourceAgent()
 {
     return *m_excitonSourceAgent;
+}
+
+ElectronDrainAgent& World::electronDrainAgentRight()
+{
+    return *m_electronDrainAgentRight;
+}
+
+ElectronDrainAgent& World::electronDrainAgentLeft()
+{
+    return *m_electronDrainAgentLeft;
+}
+
+HoleDrainAgent& World::holeDrainAgentRight()
+{
+    return *m_holeDrainAgentRight;
+}
+
+HoleDrainAgent& World::holeDrainAgentLeft()
+{
+    return *m_holeDrainAgentLeft;
 }
 
 RecombinationAgent& World::recombinationAgent()
@@ -238,9 +286,13 @@ int World::maxChargeAgents()
     return maxElectronAgents() + maxHoleAgents();
 }
 
-int World::maxCharges()
+int World::maxChargeAgentsAndChargedDefects()
 {
-    return maxChargeAgents() + numDefects();
+    if (parameters().defectsCharge)
+    {
+        return maxChargeAgents() + numDefects();
+    }
+    return maxChargeAgents();
 }
 
 int World::numElectronAgents()
@@ -258,9 +310,28 @@ int World::numChargeAgents()
     return numElectronAgents() + numHoleAgents();
 }
 
-int World::numCharges()
+int World::electronsMinusHoles()
 {
-    return numChargeAgents() + numDefects();
+    return numElectronAgents() - numHoleAgents();
+}
+
+int World::holesMinusElectrons()
+{
+    return numHoleAgents() - numElectronAgents();
+}
+
+bool World::chargesAreBalanced()
+{
+    return numHoleAgents() == numElectronAgents();
+}
+
+int World::numChargeAgentsAndChargedDefects()
+{
+    if (parameters().defectsCharge)
+    {
+        return numChargeAgents() + numDefects();
+    }
+    return numChargeAgents();
 }
 
 int World::numDefects()
@@ -317,6 +388,21 @@ double World::percentHoleAgents()
 double World::percentElectronAgents()
 {
     return double(numElectronAgents())/double(m_electronGrid->volume())*100.0;
+}
+
+bool World::atMaxElectrons()
+{
+    return numElectronAgents() >= maxElectronAgents();
+}
+
+bool World::atMaxHoles()
+{
+    return numHoleAgents() >= maxHoleAgents();
+}
+
+bool World::atMaxCharges()
+{
+    return numChargeAgents() >= maxChargeAgents();
 }
 
 void World::initialize(const QString &fileName)
@@ -381,175 +467,14 @@ void World::initialize(const QString &fileName)
     // Create OpenCL Objects
     m_ocl = new OpenClHelper(refWorld, this);
 
-    // Create the Sources and Drains
-    if ( parameters().simulationType == "transistor" )
-    {
-        // Create Transistor Sources
-        m_sources.push_back(new ElectronSourceAgent(refWorld, Grid::Left, this));
-        m_eSources.push_back(m_sources.last());
-        m_sources.last()->setPotential(parameters().voltageLeft);
-        m_sources.last()->setRate(parameters().sourceRate);
+    // Create SourceAgents
+    createSources();
 
-        // Create Transistor Drains
-        m_drains.push_back(new ElectronDrainAgent(refWorld, Grid::Right, this));
-        m_eDrains.push_back(m_drains.last());
-        m_drains.last()->setPotential(parameters().voltageRight);
-        if (parameters().eDrainRRate >= 0)
-        {
-            qWarning("warning: e.drain.r.rate=(%.3f) has been overridden drain.rate=(%.3e)"
-                     "for eDrainR in transistor",
-                     parameters().eDrainRRate, parameters().drainRate);
-            m_drains.last()->setRate(parameters().eDrainRRate);
-        }
-        else
-        {
-            m_drains.last()->setRate(parameters().drainRate);
-        }
-    }
-    else if ( parameters().simulationType == "solarcell" )
-    {
-        // Create Solar Cell Sources
-        m_excitonSourceAgent = new ExcitonSourceAgent(refWorld, this);
-        m_sources.push_back(m_excitonSourceAgent);
-        m_xSources.push_back(m_sources.last());
-        m_sources.last()->setRate(parameters().sourceRate);
+    // Create DrainAgents
+    createDrains();
 
-        // Scale the source.rate according to the area of the simulation cell
-        if ( parameters().sourceScaleArea > 0 && parameters().sourceScaleArea != m_electronGrid->xyPlaneArea())
-        {
-            double oldRate = parameters().sourceRate;
-            double scaleFactor = m_electronGrid->xyPlaneArea() / double(parameters().sourceScaleArea);
-            double newRate = oldRate * scaleFactor;
-            qWarning("warning: source.rate is being scaled... %.5e * 2^(%.5e) = %.5e",
-                     oldRate, log2(scaleFactor), newRate);
-            m_sources.last()->setRate(newRate);
-        }
-
-        // Create Solar Cell Drains
-        m_drains.push_back(new ElectronDrainAgent(refWorld, Grid::Left, this));
-        m_eDrains.push_back(m_drains.last());
-        m_drains.last()->setPotential(parameters().voltageLeft);
-        if (parameters().eDrainLRate >= 0)
-        {
-            qWarning("warning: e.drain.l.rate=%.3e has been overridden drain.rate=%.3e"
-                     " for the left electron drain in solar cell",
-                     parameters().eDrainLRate, parameters().drainRate);
-            m_drains.last()->setRate(parameters().eDrainLRate);
-        }
-        else
-        {
-            m_drains.last()->setRate(parameters().drainRate);
-        }
-
-        m_drains.push_back(new HoleDrainAgent(refWorld, Grid::Left, this));
-        m_hDrains.push_back(m_drains.last());
-        m_drains.last()->setPotential(parameters().voltageLeft);
-        if (parameters().hDrainLRate >= 0)
-        {
-            qWarning("warning: h.drain.l.rate=%.3e has been overridden drain.rate=%.3e"
-                     " for the left hole drain in solar cell",
-                     parameters().hDrainLRate, parameters().drainRate);
-            m_drains.last()->setRate(parameters().hDrainLRate);
-        }
-        else
-        {
-            m_drains.last()->setRate(parameters().drainRate);
-        }
-
-        m_drains.push_back(new ElectronDrainAgent(refWorld, Grid::Right, this));
-        m_eDrains.push_back(m_drains.last());
-        m_drains.last()->setPotential(parameters().voltageRight);
-        if (parameters().eDrainRRate >= 0)
-        {
-            qWarning("warning: e.drain.r.rate=%.3e has been overridden drain.rate=%.3e"
-                     " for the right electron drain in solar cell",
-                     parameters().eDrainRRate, parameters().drainRate);
-            m_drains.last()->setRate(parameters().eDrainRRate);
-        }
-        else
-        {
-            m_drains.last()->setRate(parameters().drainRate);
-        }
-
-        m_drains.push_back(new HoleDrainAgent(refWorld, Grid::Right, this));
-        m_hDrains.push_back(m_drains.last());
-        m_drains.last()->setPotential(parameters().voltageRight);
-        if (parameters().hDrainRRate >= 0)
-        {
-            qWarning("warning: h.drain.r.rate=%.3e has been overridden drain.rate=%.3e"
-                     " for the right hole drain in solar cell",
-                     parameters().hDrainRRate, parameters().drainRate);
-            m_drains.last()->setRate(parameters().hDrainRRate);
-        }
-        else
-        {
-            m_drains.last()->setRate(parameters().drainRate);
-        }
-
-        // Create Recombination Agent
-        m_recombinationAgent = new RecombinationAgent(refWorld, this);
-        m_drains.push_back(m_recombinationAgent);
-        m_xDrains.push_back(m_drains.last());
-        m_drains.last()->setRate(parameters().recombinationRate);
-        m_drains.last()->setPotential(0.0);
-    }
-    else
-    {
-        qFatal("simulation.type(%s) must be transistor or solarcell",qPrintable(parameters().simulationType));
-    }
-
-    foreach( FluxAgent *flux, m_sources )
-    {
-        m_fluxAgents.push_back(flux);
-    }
-
-    foreach( FluxAgent *flux, m_drains )
-    {
-        m_fluxAgents.push_back(flux);
-    }
-
-    // Set previous flux state
-    if (configInfo.fluxInfo.size() > 0)
-    {
-        if (configInfo.fluxInfo.size() % 2 != 0 ||
-            configInfo.fluxInfo.size() != 2*m_fluxAgents.size())
-        {
-            qWarning("warning: [FluxInfo] has an invalid size for this simulation.type (expected %d values, found %d)",
-                     2*m_fluxAgents.size(), configInfo.fluxInfo.size());
-            if (configInfo.fluxInfo.size() > 2*m_fluxAgents.size())
-            {
-                qWarning("warning: the excess values will be ignored...");
-            }
-            else
-            {
-                qWarning("warning: missing values will be set to zero...");
-            }
-        }
-        int j = 0;
-        for (int i = 0; i < m_fluxAgents.size(); i++)
-        {
-            if (j < configInfo.fluxInfo.size())
-            {
-                m_fluxAgents.at(i)->setAttempts(configInfo.fluxInfo.at(j));
-            }
-            else
-            {
-                qWarning("warning: missing [FluxInfo] attempts for fluxAgent %s",
-                         qPrintable(m_fluxAgents.at(i)->objectName()));
-            }
-
-            if ((j + 1) < configInfo.fluxInfo.size())
-            {
-                m_fluxAgents.at(i)->setSuccesses(configInfo.fluxInfo.at(j+1));
-            }
-            else
-            {
-                qWarning("warning: missing [FluxInfo] successes for fluxAgent %s",
-                         qPrintable(m_fluxAgents.at(i)->objectName()));
-            }
-            j += 2;
-        }
-    }
+    // set FluxInfo
+    setFluxInfo(configInfo.fluxInfo);
 
     // Create Logger
     m_logger = new Logger(refWorld, this);
@@ -707,6 +632,267 @@ void World::placeHoles(const QList<int>& siteIDs)
                        maxTries);
             }
         }
+    }
+}
+
+void World::createSources()
+{
+    World &refWorld = *this;
+
+    // Left electron source
+    m_electronSourceAgentLeft = new ElectronSourceAgent(refWorld, Grid::Left, this);
+    m_sources.push_back(m_electronSourceAgentLeft);
+    m_eSources.push_back(m_electronSourceAgentLeft);
+    m_fluxAgents.push_back(m_electronSourceAgentLeft);
+
+    // Right electron source
+    m_electronSourceAgentRight = new ElectronSourceAgent(refWorld, Grid::Right, this);
+    m_sources.push_back(m_electronSourceAgentRight);
+    m_eSources.push_back(m_electronSourceAgentRight);
+    m_fluxAgents.push_back(m_electronSourceAgentRight);
+
+    // Left hole source
+    m_holeSourceAgentLeft = new HoleSourceAgent(refWorld, Grid::Left, this);
+    m_sources.push_back(m_holeSourceAgentLeft);
+    m_hSources.push_back(m_holeSourceAgentLeft);
+    m_fluxAgents.push_back(m_holeSourceAgentLeft);
+
+    // Right hole source
+    m_holeSourceAgentRight = new HoleSourceAgent(refWorld, Grid::Right, this);
+    m_sources.push_back(m_holeSourceAgentRight);
+    m_hSources.push_back(m_holeSourceAgentRight);
+    m_fluxAgents.push_back(m_holeSourceAgentRight);
+
+    // Exciton source
+    m_excitonSourceAgent = new ExcitonSourceAgent(refWorld, this);
+    m_sources.push_back(m_excitonSourceAgent);
+    m_xSources.push_back(m_excitonSourceAgent);
+    m_fluxAgents.push_back(m_excitonSourceAgent);
+
+    // Set up rates
+    if (parameters().simulationType == "transistor")
+    {
+        if (parameters().eSourceLRate >= 0)
+        {
+            m_electronSourceAgentLeft->setRate(parameters().eSourceLRate);
+        }
+        else
+        {
+            m_electronSourceAgentLeft->setRate(parameters().sourceRate);
+        }
+    }
+    else if (parameters().simulationType == "solarcell")
+    {
+        m_electronSourceAgentRight->setRateSmartly(parameters().eSourceRRate, 1.0);
+        m_electronSourceAgentLeft->setRateSmartly(parameters().eSourceLRate, 1.0);
+        m_holeSourceAgentRight->setRateSmartly(parameters().hSourceRRate, 1.0);
+        m_holeSourceAgentLeft->setRateSmartly(parameters().hSourceLRate, 1.0);
+        m_excitonSourceAgent->setRateSmartly(parameters().generationRate, parameters().sourceRate);
+
+        // Scale the recombination.rate according to the area of the simulation cell
+        if ( parameters().sourceScaleArea > 0 && parameters().sourceScaleArea != m_electronGrid->xyPlaneArea())
+        {
+            double oldRate = m_excitonSourceAgent->rate();
+            double scaleFactor = m_electronGrid->xyPlaneArea() / double(parameters().sourceScaleArea);
+            double newRate = oldRate * scaleFactor;
+            m_excitonSourceAgent->setRate(newRate);
+        }
+    }
+    else
+    {
+        qFatal("unknown simulation.type - can not create sources");
+    }
+
+    qWarning("warning: e.source.r.rate is %.3g", m_electronSourceAgentRight->rate());
+    qWarning("warning: e.source.l.rate is %.3g", m_electronSourceAgentLeft->rate());
+    qWarning("warning: h.source.r.rate is %.3g", m_holeSourceAgentRight->rate());
+    qWarning("warning: h.source.l.rate is %.3g", m_holeSourceAgentLeft->rate());
+    qWarning("warning: generation.rate is %.3g", m_excitonSourceAgent->rate());
+}
+
+void World::createDrains()
+{
+    World &refWorld = *this;
+
+    // Left electron drain
+    m_electronDrainAgentLeft  = new ElectronDrainAgent(refWorld, Grid::Left, this);
+    m_drains.push_back(m_electronDrainAgentLeft);
+    m_eDrains.push_back(m_electronDrainAgentLeft);
+    m_fluxAgents.push_back(m_electronDrainAgentLeft);
+
+    // Right electron drain
+    m_electronDrainAgentRight = new ElectronDrainAgent(refWorld, Grid::Right, this);
+    m_drains.push_back(m_electronDrainAgentRight);
+    m_eDrains.push_back(m_electronDrainAgentRight);
+    m_fluxAgents.push_back(m_electronDrainAgentRight);
+
+    // Left hole drain
+    m_holeDrainAgentLeft = new HoleDrainAgent(refWorld, Grid::Left, this);
+    m_drains.push_back(m_holeDrainAgentLeft);
+    m_hDrains.push_back(m_holeDrainAgentLeft);
+    m_fluxAgents.push_back(m_holeDrainAgentLeft);
+
+    // Right hole drain
+    m_holeDrainAgentRight = new HoleDrainAgent(refWorld, Grid::Right, this);
+    m_drains.push_back(m_holeDrainAgentRight);
+    m_hDrains.push_back(m_holeDrainAgentRight);
+    m_fluxAgents.push_back(m_holeDrainAgentRight);
+
+    // Exciton drain
+    m_recombinationAgent = new RecombinationAgent(refWorld, this);
+    m_drains.push_back(m_recombinationAgent);
+    m_xDrains.push_back(m_recombinationAgent);
+    m_fluxAgents.push_back(m_recombinationAgent);
+
+    if (parameters().simulationType == "transistor")
+    {
+        m_electronDrainAgentRight->setRateSmartly(parameters().eDrainRRate, parameters().drainRate);
+    }
+    else if (parameters().simulationType == "solarcell")
+    {
+        m_electronDrainAgentRight->setRateSmartly(parameters().eDrainRRate, parameters().drainRate);
+        m_electronDrainAgentLeft->setRateSmartly(parameters().eDrainLRate, parameters().drainRate);
+        m_holeDrainAgentRight->setRateSmartly(parameters().hDrainRRate, parameters().drainRate);
+        m_holeDrainAgentLeft->setRateSmartly(parameters().hDrainLRate, parameters().drainRate);
+        m_recombinationAgent->setRate(parameters().recombinationRate);
+    }
+    else
+    {
+        qFatal("unknown simulation.type - can not create drains");
+    }
+
+    qWarning("warning: e.drain.r.rate = %.3g", m_electronDrainAgentRight->rate());
+    qWarning("warning: e.drain.l.rate = %.3g", m_electronDrainAgentLeft->rate());
+    qWarning("warning: h.drain.r.rate = %.3g", m_holeDrainAgentRight->rate());
+    qWarning("warning: h.drain.l.rate = %.3g", m_holeDrainAgentLeft->rate());
+    qWarning("warning: recombination.rate = %.3g", m_recombinationAgent->rate());
+}
+
+void World::setFluxInfo(const QList<quint64> &fluxInfo)
+{
+    if (fluxInfo.size() == 0)
+    {
+        return;
+    }
+
+    QString format; QTextStream stream(&format);
+    stream << "Legacy checkpoint file format (Transistor)" << '\n';
+    stream << "[FluxInfo]" << '\n';
+    stream << "0 : number of entries (=4)" << '\n';
+    stream << "1 : ESL attempt" << '\n';
+    stream << "2 : ESL success" << '\n';
+    stream << "3 : EDR attempt" << '\n';
+    stream << "4 : EDL success" << '\n';
+    stream << '\n';
+    stream << "Legacy checkpoint file format (SolarCell)" << '\n';
+    stream << "[FluxInfo]" << '\n';
+    stream << "0 : number of entries (=10..12)" << '\n';
+    stream << "1 : XS  attempt" << '\n';
+    stream << "2 : XS  success" << '\n';
+    stream << "3 : EDL attempt" << '\n';
+    stream << "4 : EDL success" << '\n';
+    stream << "5 : HDL attempt" << '\n';
+    stream << "6 : HDL success" << '\n';
+    stream << "7 : EDR attempt" << '\n';
+    stream << "8 : EDR success" << '\n';
+    stream << "9 : HDR attempt" << '\n';
+    stream << "10: HDR success" << '\n';
+    stream << "11: XD  attempt (may not be present)" << '\n';
+    stream << "12: XD  success (may not be present)" << '\n';
+    stream << '\n';
+    stream << "Current checkpoint file format (Both)" << '\n';
+    stream << "[FluxInfo]" << '\n';
+    stream << "0 : number of entries (=10..12)" << '\n';
+    stream << "1 : ESL attempt" << '\n';
+    stream << "2 : ESL success" << '\n';
+    stream << "3 : ESR attempt" << '\n';
+    stream << "4 : ESR success" << '\n';
+    stream << "5 : HSL attempt" << '\n';
+    stream << "6 : HSL success" << '\n';
+    stream << "7 : HSR attempt" << '\n';
+    stream << "8 : HSR success" << '\n';
+    stream << "9 : XS  attempt" << '\n';
+    stream << "10: XS  success" << '\n';
+    stream << "11: EDL attempt" << '\n';
+    stream << "12: EDL success" << '\n';
+    stream << "13: EDR attempt" << '\n';
+    stream << "14: EDR success" << '\n';
+    stream << "15: HDL attempt" << '\n';
+    stream << "16: HDL success" << '\n';
+    stream << "17: HDR attempt" << '\n';
+    stream << "18: HDR success" << '\n';
+    stream << "19: XD  attempt" << '\n';
+    stream << "20: XD  success" << '\n';
+    stream.flush();
+
+    if (fluxInfo.size() == 4 && parameters().simulationType == "transistor")
+    {
+        m_electronSourceAgentLeft->setAttempts(fluxInfo[0]);
+        m_electronSourceAgentLeft->setSuccesses(fluxInfo[1]);
+
+        m_electronDrainAgentRight->setAttempts(fluxInfo[2]);
+        m_electronDrainAgentRight->setSuccesses(fluxInfo[3]);
+    }
+    else if ((fluxInfo.size() == 10 || fluxInfo.size() == 12) &&
+             parameters().simulationType == "solarcell")
+    {
+        m_excitonSourceAgent->setAttempts(fluxInfo[0]);
+        m_excitonSourceAgent->setSuccesses(fluxInfo[1]);
+
+        m_electronDrainAgentLeft->setAttempts(fluxInfo[2]);
+        m_electronDrainAgentLeft->setSuccesses(fluxInfo[3]);
+
+        m_holeDrainAgentLeft->setAttempts(fluxInfo[4]);
+        m_holeDrainAgentLeft->setSuccesses(fluxInfo[5]);
+
+        m_electronDrainAgentRight->setAttempts(fluxInfo[6]);
+        m_electronDrainAgentRight->setSuccesses(fluxInfo[7]);
+
+        m_holeDrainAgentRight->setAttempts(fluxInfo[8]);
+        m_holeDrainAgentRight->setSuccesses(fluxInfo[9]);
+
+        if (fluxInfo.size() == 12)
+        {
+            m_recombinationAgent->setAttempts(fluxInfo[10]);
+            m_recombinationAgent->setSuccesses(fluxInfo[11]);
+        }
+    }
+    else if (fluxInfo.size() == 20)
+    {
+        m_electronSourceAgentLeft->setAttempts(fluxInfo[0]);
+        m_electronSourceAgentLeft->setSuccesses(fluxInfo[1]);
+
+        m_electronSourceAgentRight->setAttempts(fluxInfo[2]);
+        m_electronSourceAgentRight->setSuccesses(fluxInfo[3]);
+
+        m_holeSourceAgentLeft->setAttempts(fluxInfo[4]);
+        m_holeSourceAgentLeft->setSuccesses(fluxInfo[5]);
+
+        m_holeSourceAgentRight->setAttempts(fluxInfo[6]);
+        m_holeSourceAgentRight->setSuccesses(fluxInfo[7]);
+
+        m_excitonSourceAgent->setAttempts(fluxInfo[8]);
+        m_excitonSourceAgent->setSuccesses(fluxInfo[9]);
+
+        m_electronDrainAgentLeft->setAttempts(fluxInfo[10]);
+        m_electronDrainAgentLeft->setSuccesses(fluxInfo[11]);
+
+        m_electronDrainAgentRight->setAttempts(fluxInfo[12]);
+        m_electronDrainAgentRight->setSuccesses(fluxInfo[13]);
+
+        m_holeDrainAgentLeft->setAttempts(fluxInfo[14]);
+        m_holeDrainAgentLeft->setSuccesses(fluxInfo[15]);
+
+        m_holeDrainAgentRight->setAttempts(fluxInfo[16]);
+        m_holeDrainAgentRight->setSuccesses(fluxInfo[17]);
+
+        m_recombinationAgent->setAttempts(fluxInfo[18]);
+        m_recombinationAgent->setSuccesses(fluxInfo[19]);
+    }
+    else
+    {
+        qFatal("%s\ndo not recognize [FluxInfo] format... (of size %d, for simulation.type=%s)",
+               qPrintable(format), fluxInfo.size(), qPrintable(parameters().simulationType));
     }
 }
 

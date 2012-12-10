@@ -58,6 +58,12 @@ public:
     void save(const QString& fileName = "%stub.parm");
 
     /**
+     * @brief Get a reference to a variable by name
+     * @param name the name of the variable
+     */
+    Variable& getVariable(const QString& key);
+
+    /**
      * @brief Write the parameters to a std::ostream in a "key=value" fashion
      */
     friend std::ostream& operator<<(std::ostream &stream, const KeyValueParser &keyValueParser);

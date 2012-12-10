@@ -140,7 +140,11 @@ void ChargeAgent::decideFuture()
                 break;
             }
         }
-        // Shouldn't happen reject the move
+        else
+        {
+            qFatal("can not cast pointer to DrainAgent");
+        }
+        // Reject the move
         m_fSite = m_site;
         break;
     }

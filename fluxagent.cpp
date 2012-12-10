@@ -146,6 +146,25 @@ void FluxAgent::setPotential(double potential)
 
 void FluxAgent::setRate(double rate)
 {
+    if (rate < 0)
+    {
+        qFatal("negative rate set for %s", qPrintable(this->objectName()));
+    }
+    m_probability = rate;
+}
+
+void FluxAgent::setRateSmartly(double rate, double dflt)
+{
+    if (rate < 0)
+    {
+        if (dflt >= 0)
+        {
+            m_probability = dflt;
+            return;
+        }
+        qFatal("negative rate smartly set for %s",
+               qPrintable(this->objectName()));
+    }
     m_probability = rate;
 }
 

@@ -28,15 +28,15 @@ FluxWriter::FluxWriter(World &world, const QString &name, QObject *parent)
     {
         m_stream << QString("%1:attempt").arg(flux->objectName());
         m_stream << QString("%1:success").arg(flux->objectName());
-        m_stream << QString("%1:probability").arg(flux->objectName());
-        m_stream << QString("%1:rate").arg(flux->objectName());
+        //m_stream << QString("%1:probability").arg(flux->objectName());
+        //m_stream << QString("%1:rate").arg(flux->objectName());
     }
     m_stream << "electron:count"
-             << "electron:percentage"
-             << "electron:reached"
+             //<< "electron:percentage"
+             //<< "electron:reached"
              << "hole:count"
-             << "hole:percentage"
-             << "hole:reached"
+             //<< "hole:percentage"
+             //<< "hole:reached"
              << "real:time"
              << newline;
     m_stream.flush();
@@ -364,14 +364,15 @@ void FluxWriter::write()
     m_stream << m_world.parameters().currentStep;
     foreach(FluxAgent *flux, fluxAgents)
     {
-        m_stream << flux->attempts() << flux->successes() << flux->successProbability() << flux->successRate();
+        m_stream << flux->attempts() << flux->successes();
+        // << flux->successProbability() << flux->successRate();
     }
     m_stream << m_world.numElectronAgents()
-             << m_world.percentElectronAgents()
-             << m_world.reachedElectronAgents()
+             //<< m_world.percentElectronAgents()
+             //<< m_world.reachedElectronAgents()
              << m_world.numHoleAgents()
-             << m_world.percentHoleAgents()
-             << m_world.reachedHoleAgents()
+             //<< m_world.percentHoleAgents()
+             //<< m_world.reachedHoleAgents()
              << m_world.parameters().simulationStart.msecsTo(now)
              << newline;
     m_stream.flush();

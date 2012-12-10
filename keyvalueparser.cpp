@@ -62,9 +62,15 @@ KeyValueParser::KeyValueParser(World &world, QObject *parent) :
     registerVariable("temperature.kelvin", m_parameters.temperatureKelvin);
 
     registerVariable("source.rate", m_parameters.sourceRate);
+    registerVariable("e.source.l.rate", m_parameters.eSourceLRate);
+    registerVariable("e.source.r.rate", m_parameters.eSourceRRate);
+    registerVariable("h.source.l.rate", m_parameters.hSourceLRate);
+    registerVariable("h.source.r.rate", m_parameters.hSourceRRate);
+    registerVariable("generation.rate", m_parameters.generationRate);
     registerVariable("source.metropolis", m_parameters.sourceMetropolis);
     registerVariable("source.coulomb", m_parameters.sourceCoulomb);
     registerVariable("source.scale.area", m_parameters.sourceScaleArea);
+    registerVariable("balance.charges", m_parameters.balanceCharges);
 
     registerVariable("drain.rate", m_parameters.drainRate);
     registerVariable("e.drain.l.rate", m_parameters.eDrainLRate);
@@ -183,6 +189,15 @@ void KeyValueParser::save(const QString& fileName)
     }
     stream.flush();
     handle.close();
+}
+
+Variable& KeyValueParser::getVariable(const QString& key)
+{
+    if (!m_variableMap.contains(key))
+    {
+        qFatal("invalid variable key : %s", qPrintable(key));
+    }
+    return *m_variableMap[key];
 }
 
 std::ostream& operator<<(std::ostream& stream, const KeyValueParser &keyValueParser)

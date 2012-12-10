@@ -158,19 +158,37 @@ struct SimulationParameters
     //! the rate at which all sources inject charges
     qreal sourceRate;
 
+    //! the rate at which the left electron source injects charges (overrides default)
+    qreal eSourceLRate;
+
+    //! the rate at which the right electron source injects charges (overrides default)
+    qreal eSourceRRate;
+
+    //! the rate at which the left hole source injects charges (overrides default)
+    qreal hSourceLRate;
+
+    //! the rate at which the right hole source injects charges (overrides default)
+    qreal hSourceRRate;
+
+    //! the rate at which the exciton source injects charges (overrides default)
+    qreal generationRate;
+
+    //! if true, try to keep the number of charges in the simulation balanced
+    bool balanceCharges;
+
     //! the rate at which all drains accept charges (default, used when eDrainL, etc. are < 0)
     qreal drainRate;
 
-    //! the rate at which the left electron drain accept charges (overrides default)
+    //! the rate at which the left electron drain accepts charges (overrides default)
     qreal eDrainLRate;
 
-    //! the rate at which the right electron drain accept charges (overrides default)
+    //! the rate at which the right electron drain accepts charges (overrides default)
     qreal eDrainRRate;
 
-    //! the rate at which the left hole drain accept charges (overrides default)
+    //! the rate at which the left hole drain accepts charges (overrides default)
     qreal hDrainLRate;
 
-    //! the rate at which the right hole drain accept charges (overrides default)
+    //! the rate at which the right hole drain accepts charges (overrides default)
     qreal hDrainRRate;
 
     //! if true, try to use OpenCL to speed up Coulomb interaction calculations
@@ -300,6 +318,13 @@ struct SimulationParameters
         temperatureKelvin      (300.0),
 
         sourceRate             (0.90),
+        eSourceLRate           (-1.0),
+        eSourceRRate           (-1.0),
+        hSourceLRate           (-1.0),
+        hSourceRRate           (-1.0),
+        generationRate         (0.001),
+        balanceCharges         (false),
+
         drainRate              (0.90),
         eDrainLRate            (-1.0),
         eDrainRRate            (-1.0),
@@ -421,6 +446,46 @@ inline void checkSimulationParameters(SimulationParameters& par)
         qFatal("source.rate(%f) < 0 || > 1.0",par.sourceRate);
     }
 
+    if (par.eSourceLRate >= 0.0)
+    {
+        if (par.eSourceLRate < 0.0 || par.eSourceLRate > 1.0 )
+        {
+            qFatal("e.source.l.rate(%f) < 0 || > 1.0", par.eSourceLRate);
+        }
+    }
+
+    if (par.eSourceRRate >= 0.0)
+    {
+        if (par.eSourceRRate < 0.0 || par.eSourceRRate > 1.0 )
+        {
+            qFatal("e.source.r.rate(%f) < 0 || > 1.0", par.eSourceRRate);
+        }
+    }
+
+    if (par.hSourceLRate >= 0.0)
+    {
+        if (par.hSourceLRate < 0.0 || par.hSourceLRate > 1.0 )
+        {
+            qFatal("h.source.l.rate(%f) < 0 || > 1.0", par.hSourceLRate);
+        }
+    }
+
+    if (par.hSourceRRate >= 0.0)
+    {
+        if (par.hSourceRRate < 0.0 || par.hSourceRRate > 1.0 )
+        {
+            qFatal("h.source.r.rate(%f) < 0 || > 1.0", par.hSourceRRate);
+        }
+    }
+
+    if (par.generationRate >= 0.0)
+    {
+        if (par.generationRate < 0.0 || par.generationRate > 1.0 )
+        {
+            qFatal("x.source.rate(%f) < 0 || > 1.0", par.generationRate);
+        }
+    }
+
     if (par.drainRate < 0.0 || par.drainRate > 1.0 )
     {
         qFatal("drain.rate(%f) < 0 || > 1.0",par.drainRate);
@@ -532,6 +597,11 @@ inline void checkSimulationParameters(SimulationParameters& par)
     if (par.openclThreshold <= 0)
     {
         qFatal("opencl.threshold must be >= 0");
+    }
+
+    if (par.balanceCharges && par.simulationType != "solarcell")
+    {
+        qFatal("balance.charges == true, yet simulation.type != solarcell");
     }
 }
 

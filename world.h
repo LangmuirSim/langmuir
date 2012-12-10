@@ -17,11 +17,15 @@ class KeyValueParser;
 class Potential;
 class FluxAgent;
 class DrainAgent;
+class HoleDrainAgent;
+class ElectronDrainAgent;
 class RecombinationAgent;
 class Simulation;
 class ChargeAgent;
 class SourceAgent;
+class HoleSourceAgent;
 class ExcitonSourceAgent;
+class ElectronSourceAgent;
 class CheckPointer;
 class OpenClHelper;
 struct SimulationParameters;
@@ -141,9 +145,49 @@ public:
     QList<FluxAgent*>& fluxes();
 
     /**
+     * @brief get the right ElectronSourceAgent
+     */
+    ElectronSourceAgent& electronSourceAgentRight();
+
+    /**
+     * @brief get the left ElectronSourceAgent
+     */
+    ElectronSourceAgent& electronSourceAgentLeft();
+
+    /**
+     * @brief get the right HoleSourceAgent
+     */
+    HoleSourceAgent& holeSourceAgentRight();
+
+    /**
+     * @brief get the left HoleSourceAgent
+     */
+    HoleSourceAgent& holeSourceAgentLeft();
+
+    /**
      * @brief get the RecombinationAgent
      */
     ExcitonSourceAgent& excitonSourceAgent();
+
+    /**
+     * @brief get the right ElectronDrainAgent
+     */
+    ElectronDrainAgent& electronDrainAgentRight();
+
+    /**
+     * @brief get the left ElectronDrainAgent
+     */
+    ElectronDrainAgent& electronDrainAgentLeft();
+
+    /**
+     * @brief get the right HoleDrainAgent
+     */
+    HoleDrainAgent& holeDrainAgentRight();
+
+    /**
+     * @brief get the left HoleDrainAgent
+     */
+    HoleDrainAgent& holeDrainAgentLeft();
 
     /**
      * @brief get the RecombinationAgent
@@ -206,9 +250,9 @@ public:
     int maxChargeAgents();
 
     /**
-     * @brief get the max number of ChargeAgents allowed
+     * @brief get the max number of ChargeAgents & charged defects
      */
-    int maxCharges();
+    int maxChargeAgentsAndChargedDefects();
 
     /**
      * @brief get the max number of Defects allowed
@@ -236,9 +280,24 @@ public:
     int numChargeAgents();
 
     /**
-     * @brief get the current number of ChargeAgents
+     * @brief The number of electrons - holes
      */
-    int numCharges();
+    int electronsMinusHoles();
+
+    /**
+     * @brief The number of holes - electrons
+     */
+    int holesMinusElectrons();
+
+    /**
+     * @brief true when electrons and holes are balanced
+     */
+    bool chargesAreBalanced();
+
+    /**
+     * @brief get the current number of ChargeAgents & charged defects
+     */
+    int numChargeAgentsAndChargedDefects();
 
     /**
      * @brief get the current number of Defects
@@ -274,6 +333,21 @@ public:
      * @brief get the percent of ElectronAgents reached, of the total grid volume
      */
     double percentElectronAgents();
+
+    /**
+     * @brief check if the maximum number of electrons has been reached
+     */
+    bool atMaxElectrons();
+
+    /**
+     * @brief check if the maximum number of holes has been reached
+     */
+    bool atMaxHoles();
+
+    /**
+     * @brief check if the maximum number of charges has been reached
+     */
+    bool atMaxCharges();
 
 private:
     /**
@@ -332,9 +406,49 @@ private:
     QList<FluxAgent*> m_fluxAgents;
 
     /**
+     * @brief pointer to right ElectronDrainAgent
+     */
+    ElectronSourceAgent *m_electronSourceAgentRight;
+
+    /**
+     * @brief pointer to left ElectronDrainAgent
+     */
+    ElectronSourceAgent *m_electronSourceAgentLeft;
+
+    /**
+     * @brief pointer to right HoleDrainAgent
+     */
+    HoleSourceAgent *m_holeSourceAgentRight;
+
+    /**
+     * @brief pointer to left HoleDrainAgent
+     */
+    HoleSourceAgent *m_holeSourceAgentLeft;
+
+    /**
      * @brief pointer to ExcitonSourceAgent, used for injecting Excitons
      */
     ExcitonSourceAgent *m_excitonSourceAgent;
+
+    /**
+     * @brief pointer to right ElectronDrainAgent
+     */
+    ElectronDrainAgent *m_electronDrainAgentRight;
+
+    /**
+     * @brief pointer to left ElectronDrainAgent
+     */
+    ElectronDrainAgent *m_electronDrainAgentLeft;
+
+    /**
+     * @brief pointer to right HoleDrainAgent
+     */
+    HoleDrainAgent *m_holeDrainAgentRight;
+
+    /**
+     * @brief pointer to left HoleDrainAgent
+     */
+    HoleDrainAgent *m_holeDrainAgentLeft;
 
     /**
      * @brief pointer to electron/hole RecombinationAgent, used for removing Excitons
@@ -464,6 +578,21 @@ private:
      * then they are placed randomly.
      */
     void placeHoles(const QList<int>& siteIDs = QList<int>());
+
+    /**
+     * @brief create SourceAgents
+     */
+    void createSources();
+
+    /**
+     * @brief create DrainAgents
+     */
+    void createDrains();
+
+    /**
+     * @brief set attempts / successes for sources / drains
+     */
+    void setFluxInfo(const QList<quint64> &fluxInfo);
 
     /**
      * @brief initialize all objects

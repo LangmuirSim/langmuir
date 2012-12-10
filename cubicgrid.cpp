@@ -2,6 +2,7 @@
 #include <cmath>
 #include "world.h"
 #include "parameters.h"
+#include "drainagent.h"
 
 namespace Langmuir
 {
@@ -11,10 +12,12 @@ Grid::Grid(World &world, QObject *parent)
     m_xSize = m_world.parameters().gridX;
     m_ySize = m_world.parameters().gridY;
     m_zSize = m_world.parameters().gridZ;
-    m_xyPlaneArea = m_world.parameters().gridY*m_world.parameters().gridX;
-    m_yzPlaneArea = m_world.parameters().gridY*m_world.parameters().gridZ;
-    m_xzPlaneArea = m_world.parameters().gridX*m_world.parameters().gridZ;
-    m_volume = m_world.parameters().gridY*m_world.parameters().gridX*m_world.parameters().gridZ;
+    m_xyPlaneArea = m_world.parameters().gridY * m_world.parameters().gridX;
+    m_yzPlaneArea = m_world.parameters().gridY * m_world.parameters().gridZ;
+    m_xzPlaneArea = m_world.parameters().gridX * m_world.parameters().gridZ;
+    m_volume = m_world.parameters().gridY *
+               m_world.parameters().gridX *
+               m_world.parameters().gridZ;
     m_specialAgentCount = 0;
     m_specialAgentReserve = 5*7;
     m_agents.fill(0, m_volume+m_specialAgentReserve);
@@ -442,63 +445,28 @@ QVector<int> Grid::neighborsSite(int site, int hoppingRange)
     }
 
     // Now for the drains....
-    // Left
-    if(x == 0)
+    if (x == 0)
     {
-        foreach(Agent* agent, m_specialAgents[Grid::Left])
+        foreach (Agent *agent, getSpecialAgentList(Left))
         {
-            nList.push_back(agent->getCurrentSite());
+            if (agent->getType() == Agent::Drain)
+            {
+                nList.push_back(agent->getCurrentSite());
+            }
         }
     }
-    // Right
+
     if(x == m_xSize - 1)
     {
-        foreach(Agent* agent, m_specialAgents[Grid::Right])
+        foreach (Agent *agent, getSpecialAgentList(Right))
         {
-            nList.push_back(agent->getCurrentSite());
+            if (agent->getType() == Agent::Drain)
+            {
+                nList.push_back(agent->getCurrentSite());
+            }
         }
     }
-//    foreach (int s, nList)
-//    {
-//        qDebug() << qPrintable(QString("SITE:     s(%1)     x(%2)     y(%3)     z(%4)     t(%5)")
-//                               .arg(s,3)
-//                               .arg(getIndexX(s),3)
-//                               .arg(getIndexY(s),3)
-//                               .arg(getIndexZ(s),3)
-//                               .arg(Agent::toQString(m_agentType[s])));
-//    }
-//    // Bottom
-//    if(row == 0)
-//    {
-//        foreach(Agent* agent, m_specialAgents[Grid::Top])
-//        {
-//            nList.push_back(agent->getCurrentSite());
-//        }
-//    }
-//    // Top
-//    if(row == m_ySize - 1)
-//    {
-//        foreach(Agent* agent, m_specialAgents[Grid::Bottom])
-//        {
-//            nList.push_back(agent->getCurrentSite());
-//        }
-//    }
-//    // Back
-//    if(lay == 0)
-//    {
-//        foreach(Agent* agent, m_specialAgents[Grid::Back])
-//        {
-//            nList.push_back(agent->getCurrentSite());
-//        }
-//    }
-//    // Front
-//    if(lay == m_zSize - 1)
-//    {
-//        foreach(Agent* agent, m_specialAgents[Grid::Front])
-//        {
-//            nList.push_back(agent->getCurrentSite());
-//        }
-//    }
+
     return nList;
 }
 
@@ -643,14 +611,14 @@ void Grid::unregisterSpecialAgent(Agent *agent, Grid::CubeFace cubeFace)
 void Grid::registerAgent(Agent *agent)
 {
     int site = agent->getCurrentSite();
-    if(m_agents[site] == 0 && m_agentType[site] == Agent::Empty)
+    if((m_agents[site] == 0) && (m_agentType[site] == Agent::Empty))
     {
         m_agents[site] = agent;
         m_agentType[site] = agent->getType();
     }
     else
     {
-        qFatal("can not register agent: site is already occupied");
+        qFatal("can not register agent: site %d is invalid", site);
     }
     QVector<int> neighbors = neighborsSite(site, m_world.parameters().hoppingRange);
     agent->setNeighbors(neighbors);

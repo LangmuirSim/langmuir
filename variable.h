@@ -66,6 +66,9 @@ public:
     //! Operator overload to output 'key = value' to QTextStream
     friend QTextStream& operator<<(QTextStream& stream, const Variable &variable);
 
+    //! Operator overload to output 'key = value' to QDebug
+    friend QDebug operator<<(QDebug dbg, const Variable &variable);
+
     //! Operator overload to output to output 'key = value' to std::ofstream
     friend std::ostream& operator<<(std::ostream &stream, Variable &variable);
 
@@ -283,6 +286,16 @@ inline QTextStream& operator<<(QTextStream& stream, const Variable& variable)
 {
     variable.write(stream);
     return stream;
+}
+
+//! overload operator to write keyValue() to a QDebug
+inline QDebug operator<<(QDebug dbg, const Variable &variable)
+{
+    QString string; QTextStream stream(&string);
+    stream << variable;
+    stream.flush();
+    dbg.nospace() << qPrintable(string);
+    return dbg.space();
 }
 
 //! Operator overload to output to output 'key = value' to std::ostream
