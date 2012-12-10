@@ -32,7 +32,7 @@ KeyValueParser::KeyValueParser(World &world, QObject *parent) :
     registerVariable("output.ids.on.encounter", m_parameters.outputIdsOnEncounter);
     registerVariable("output.coulomb", m_parameters.outputCoulomb);
     registerVariable("output.step.chk", m_parameters.outputStepChk);
-    registerVariable("output.chk.tp", m_parameters.outputChkTP);
+    registerVariable("output.chk.trap.potential", m_parameters.outputChkTrapPotential);
     registerVariable("output.potential", m_parameters.outputPotential);
 
     registerVariable("output.xyz", m_parameters.outputXyz);

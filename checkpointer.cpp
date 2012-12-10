@@ -167,7 +167,12 @@ void CheckPointer::save(const QString& fileName)
     saveHoles(stream)          << '\n';
     saveDefects(stream)        << '\n';
     saveTraps(stream)          << '\n';
-    saveTrapPotentials(stream) << '\n';
+
+    if (!m_world.parameters().outputChkTrapPotential)
+    {
+        saveTrapPotentials(stream) << '\n';
+    }
+
     saveFluxState(stream)      << '\n';
     saveRandomState(stream)    << '\n';
     saveParameters(stream);
@@ -533,12 +538,6 @@ std::ostream& CheckPointer::saveTraps(std::ostream &stream)
 
 std::ostream& CheckPointer::saveTrapPotentials(std::ostream &stream)
 {
-    // Do not output trap potentials if their output is turned off
-    if (!m_world.parameters().outputChkTP)
-    {
-        return stream;
-    }
-
     // Get the section name
     const QMetaObject &QMO = CheckPointer::staticMetaObject;
     QMetaEnum QME = QMO.enumerator(QMO.indexOfEnumerator("Section"));

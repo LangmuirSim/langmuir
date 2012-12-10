@@ -93,7 +93,7 @@ struct SimulationParameters
     qint32 outputStepChk;
 
     //! output trap potentials in checkpoint files
-    bool outputChkTP;
+    bool outputChkTrapPotential;
 
     //! output grid potential at the start of the simulation, includes the trap potential
     bool outputPotential;
@@ -294,7 +294,7 @@ struct SimulationParameters
         outputIdsOnDelete      (false),
         outputCoulomb          (0),
         outputStepChk          (1),
-        outputChkTP            (true),
+        outputChkTrapPotential (true),
         outputPotential        (false),
         outputIsOn             (true),
 
