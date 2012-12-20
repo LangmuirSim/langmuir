@@ -62,6 +62,9 @@ struct SimulationParameters
     //! turn on Coulomb interactions between ChargeAgents
     bool coulombCarriers;
 
+    //! multiply Coulomb terms by erf[r/(sigma sqrt[2])]; nothing happens if its zero
+    qreal coulombGaussianSigma;
+
     //! the charge of defect sites
     qint32 defectsCharge;
 
@@ -282,6 +285,7 @@ struct SimulationParameters
         gridX                  (128),
 
         coulombCarriers        (false),
+        coulombGaussianSigma   (0.0),
         defectsCharge          (0),
 
         outputXyz              (0),
@@ -606,6 +610,19 @@ inline void checkSimulationParameters(SimulationParameters& par)
     if (par.balanceCharges && par.simulationType != "solarcell")
     {
         qFatal("balance.charges == true, yet simulation.type != solarcell");
+    }
+
+    if (par.coulombGaussianSigma > 0)
+    {
+        if (par.gridX == 1 || par.gridY == 1 || par.gridZ == 1)
+        {
+            qFatal("coulomb.gaussian.sigma > 0, yet the simulation is not 3D");
+        }
+        if(qMin(qMin(par.gridX, par.gridY), par.gridZ)
+                < 3 * par.coulombGaussianSigma)
+        {
+            qWarning("warning: 3 * coulomb.gaussian.sigma <= qMin(grid.x, grid.y, grid.z)");
+        }
     }
 }
 

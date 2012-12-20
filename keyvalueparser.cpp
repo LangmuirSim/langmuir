@@ -59,6 +59,7 @@ KeyValueParser::KeyValueParser(World &world, QObject *parent) :
     registerVariable("voltage.left", m_parameters.voltageLeft);
     registerVariable("slope.z", m_parameters.slopeZ);
     registerVariable("coulomb.carriers", m_parameters.coulombCarriers);
+    registerVariable("coulomb.gaussian.sigma", m_parameters.coulombGaussianSigma);
     registerVariable("defects.charge", m_parameters.defectsCharge);
     registerVariable("temperature.kelvin", m_parameters.temperatureKelvin);
 
