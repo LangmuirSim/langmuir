@@ -246,9 +246,24 @@ QList<double>& World::trapSitePotentials()
     return m_trapSitePotentials;
 }
 
-boost::multi_array<double,3>& World::interactionEnergies()
+boost::multi_array<double,3>& World::R1()
 {
-    return m_interactionEnergies;
+    return m_R1;
+}
+
+boost::multi_array<double,3>& World::R2()
+{
+    return m_R2;
+}
+
+boost::multi_array<double,3>& World::iR()
+{
+    return m_iR;
+}
+
+boost::multi_array<double,3>& World::eR()
+{
+    return m_eR;
 }
 
 boost::multi_array<double,3>& World::couplingConstants()
@@ -442,6 +457,7 @@ void World::initialize(const QString &fileName)
 
     // Save the seed that has been used
     m_parameters->randomSeed = m_rand->seed();
+    qDebug() << "wanring: random.seed is" << parameters().randomSeed;
 
     // Create Electron Grid
     m_electronGrid = new Grid(refWorld, this);
@@ -501,7 +517,7 @@ void World::initialize(const QString &fileName)
     potential().setPotentialTraps(configInfo.traps,configInfo.trapPotentials);
 
     // precalculate and store coulomb interaction energies
-    potential().updateInteractionEnergies();
+    potential().precalculateArrays();
 
     // precalculate and store coupling constants
     potential().updateCouplingConstants();

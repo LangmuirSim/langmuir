@@ -1,6 +1,6 @@
 #ifndef WORLD_H
 #define WORLD_H
-#define BOOST_DISABLE_ASSERTS
+//#define BOOST_DISABLE_ASSERTS
 
 #include <QtCore>
 #include <QtGui>
@@ -220,9 +220,24 @@ public:
     QList<double>& trapSitePotentials();
 
     /**
-     * @brief get the array of precomputed Coulomb interaction energies
+     * @brief get the array of precomputed r-squared values
      */
-    boost::multi_array<double,3>& interactionEnergies();
+    boost::multi_array<double,3>& R1();
+
+    /**
+     * @brief get the array of precomputed r values
+     */
+    boost::multi_array<double,3>& R2();
+
+    /**
+     * @brief get the array of precomputed inverse-r values
+     */
+    boost::multi_array<double,3>& iR();
+
+    /**
+     * @brief get the array of precomputed erf(r/(sqrt(2)*sigma))
+     */
+    boost::multi_array<double,3>& eR();
 
     /**
      * @brief get the coupling constants
@@ -516,11 +531,32 @@ private:
     QList<double> m_trapSitePotentials;
 
     /**
-     * @brief array of precomputed Coulomb interaction energies
+     * @brief array of precomputed r-squared values
      *
-     * This array is indexed by dx, dy, dz values.
+     * This array is indexed by dx, dy, dz values, and r is in grid-units
      */
-    boost::multi_array<double,3> m_interactionEnergies;
+    boost::multi_array<double,3> m_R2;
+
+    /**
+     * @brief array of precomputed r values
+     *
+     * This array is indexed by dx, dy, dz values, and r is in grid-units
+     */
+    boost::multi_array<double,3> m_R1;
+
+    /**
+     * @brief array of precomputed inverse-r values
+     *
+     * This array is indexed by dx, dy, dz values, and r is in grid-units
+     */
+    boost::multi_array<double,3> m_iR;
+
+    /**
+     * @brief array of precomputed erf(r/(s*sqrt(2)) values
+     *
+     * This array is indexed by dx, dy, dz values, and r is in grid-units
+     */
+    boost::multi_array<double,3> m_eR;
 
     /**
      * @brief array of coupling constants

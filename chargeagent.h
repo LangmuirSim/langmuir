@@ -82,6 +82,9 @@ public:
      */
     void coulombGPU();
 
+    //! compare results for CPU and GPU Coulomb (assumes kernel was called)
+    void compareCoulomb();
+
     //! Get the grid this ChargeAgent exists in
     Grid& getGrid();
 

@@ -84,7 +84,7 @@ struct SimulationParameters
     bool outputXyzT;
 
     //! output mode for xyz file (if 0, particle count varies; if 1, particle count is constant using "phantom particles")
-    bool outputXyzMode;
+    qint32 outputXyzMode;
 
     //! output carrier lifetime and pathlength when they are deleted
     bool outputIdsOnDelete;

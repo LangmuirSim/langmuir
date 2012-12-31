@@ -128,14 +128,14 @@ double ElectronSourceAgent::energyChange(int site)
     double p2 = m_grid.potential(site);
     if (m_world.parameters().sourceCoulomb)
     {
-        p2 += m_world.potential().coulombPotentialHoles(site);
-        p2 += m_world.potential().coulombImageXPotentialHoles(site);
-        p2 += m_world.potential().coulombPotentialElectrons(site);
-        p2 += m_world.potential().coulombImageXPotentialElectrons(site);
+        p2 += m_world.potential().coulombH(site);
+        p2 += m_world.potential().coulombImageH(site);
+        p2 += m_world.potential().coulombE(site);
+        p2 += m_world.potential().coulombImageE(site);
         if (m_world.parameters().defectsCharge != 0)
         {
-            p2 += m_world.potential().coulombPotentialDefects(site);
-            p2 += m_world.potential().coulombImageXPotentialDefects(site);
+            p2 += m_world.potential().coulombD(site);
+            p2 += m_world.potential().coulombImageD(site);
         }
     }
     return p1-p2; // its backwards because q=-1 and dE = q*(p2-p1)= p1-p2
@@ -147,14 +147,14 @@ double HoleSourceAgent::energyChange(int site)
     double p2 = m_grid.potential(site);
     if (m_world.parameters().sourceCoulomb)
     {
-        p2 += m_world.potential().coulombPotentialHoles(site);
-        p2 += m_world.potential().coulombImageXPotentialHoles(site);
-        p2 += m_world.potential().coulombPotentialElectrons(site);
-        p2 += m_world.potential().coulombImageXPotentialElectrons(site);
+        p2 += m_world.potential().coulombH(site);
+        p2 += m_world.potential().coulombImageH(site);
+        p2 += m_world.potential().coulombE(site);
+        p2 += m_world.potential().coulombImageE(site);
         if (m_world.parameters().defectsCharge != 0)
         {
-            p2 += m_world.potential().coulombPotentialDefects(site);
-            p2 += m_world.potential().coulombImageXPotentialDefects(site);
+            p2 += m_world.potential().coulombD(site);
+            p2 += m_world.potential().coulombImageD(site);
         }
     }
     return p2-p1;

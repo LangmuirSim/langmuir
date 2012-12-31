@@ -55,6 +55,16 @@ public:
     void launchCoulombKernel2();
 
     /**
+     * @brief Kernel1 calculates the coulomb potential with erf at \b every site.
+     */
+    void launchGaussKernel1();
+
+    /**
+     * @brief Kernel2 calculates the coulomb potential with erf at current and future sites only
+     */
+    void launchGaussKernel2();
+
+    /**
      * @brief Does exactly what it says (host means the memory on the CPU)
      * @param index position in host vectors
      * @param site serial site-id
@@ -82,19 +92,6 @@ public:
     void compareHostAndDeviceForAllCarriers();
 
     /**
-     * @brief Compare GPU and CPU results
-     * @param i index of site
-     */
-    void compareHostAndDeviceAtSite(int i);
-
-    /**
-     * @brief Compare GPU and CPU results
-     * @param i index of site
-     * @param charges list of charges
-     */
-    void compareHostAndDeviceForCarrier(int i, QList< ChargeAgent * > &charges);
-
-    /**
      * @brief Turn on/off OpenCL in a smart-way
      * @param on True if on
      * @return The on/off status
@@ -107,28 +104,38 @@ private:
     /**
      * @brief Reference to World object
      */
-    World                       &m_world;
+    World &m_world;
 
 #ifdef LANGMUIR_OPEN_CL
     /**
      * @brief An OpenCL context is like a set of parameters for OpenCL (compare to an OpenGL context)
      */
-    cl::Context                  m_context;
+    cl::Context m_context;
 
     /**
      * @brief A Queue to store a bunch of commands to OpenCL to execute (in our case, the queue is in serial mode)
      */
-    cl::CommandQueue             m_queue;
+    cl::CommandQueue m_queue;
 
     /**
-     * @brief An integer identifying Kernel1, which is just a function that runs on the GPU
+     * @brief Coulomb Kernel 1
      */
-    cl::Kernel                   m_coulombK1;
+    cl::Kernel m_coulomb1K;
 
     /**
-     * @brief An integer identifying Kernel2, which is just a function that runs on the GPU
+     * @brief Gaussian Kernel 1
      */
-    cl::Kernel                   m_coulombK2;
+    cl::Kernel m_guass1K;
+
+    /**
+     * @brief Coulomb Kernel 2
+     */
+    cl::Kernel m_coulomb2K;
+
+    /**
+     * @brief Gaussian Kernel 2
+     */
+    cl::Kernel m_guass2K;
 
     /**
      * @brief Memory on the host (CPU) to store site-ids
@@ -141,32 +148,32 @@ private:
      * is slow.  You would think that the ChargeAgent's data is continuous in memory, but
      * offset by some amount between instances, for a particular member.
      */
-    QVector<int>                 m_sHost;
+    QVector<int> m_sHost;
 
     /**
      * @brief Memory on the host (CPU) to store charge values
      */
-    QVector<int>                 m_qHost;
+    QVector<int> m_qHost;
 
     /**
      * @brief Memory on the host (CPU) to store output values
      */
-    QVector<double>              m_oHost;
+    QVector<double> m_oHost;
 
     /**
      * @brief Memory on the device (GPU) to store site-ids. It is in the global memory of the device
      */
-    cl::Buffer                   m_sDevice;
+    cl::Buffer m_sDevice;
 
     /**
      * @brief Memory on the device (GPU) to store charge values. It is in the global memory of the device
      */
-    cl::Buffer                   m_qDevice;
+    cl::Buffer m_qDevice;
 
     /**
      * @brief Memory on the device (GPU) to store output values. It is in the global memory of the device
      */
-    cl::Buffer                   m_oDevice;
+    cl::Buffer m_oDevice;
 
     /**
      * @brief Offset between current and future output values in m_oDevice or m_oHost.
@@ -174,7 +181,7 @@ private:
      * For example, if the output for current sites starts at index 0 and runs up to \b offset.
      * Then, the output for future sites starts at \b offset and runs up to \b 2 \b offset.
      */
-    int                          m_offset;
+    int m_offset;
 #endif // LANGMUIR_OPEN_CL
 
 };

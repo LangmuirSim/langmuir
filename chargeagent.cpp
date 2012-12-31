@@ -32,7 +32,7 @@ ElectronAgent::ElectronAgent(World &world, int site, QObject *parent)
 HoleAgent::HoleAgent(World &world, int site, QObject *parent)
     : ChargeAgent(Agent::Hole, world, world.holeGrid(), site, parent)
 {
-    m_charge = 1;
+    m_charge = +1;
     m_grid.registerAgent(this);
 }
 
@@ -216,30 +216,54 @@ void ChargeAgent::coulombCPU()
 {
     double p1 = 0;
     double p2 = 0;
+    double self = m_world.iR()[1][0][0] * m_charge *
+                  m_world.parameters().electrostaticPrefactor;
 
-    // Electrons
-    p1 += m_world.potential().coulombPotentialElectrons(m_site);
-    p2 += m_world.potential().coulombPotentialElectrons(m_fSite);
+    // Gaussian charges
+    if (m_world.parameters().coulombGaussianSigma > 0)
+    {
+        // Electrons
+        p1 += m_world.potential().gaussE(m_site);
+        p2 += m_world.potential().gaussE(m_fSite);
 
-    // Holes
-    p1 += m_world.potential().coulombPotentialHoles(m_site);
-    p2 += m_world.potential().coulombPotentialHoles(m_fSite);
+        // Holes
+        p1 += m_world.potential().gaussH(m_site);
+        p2 += m_world.potential().gaussH(m_fSite);
+
+        // Charged defects
+        if(m_world.parameters().defectsCharge != 0)
+        {
+            p1 += m_world.potential().gaussD(m_site);
+            p2 += m_world.potential().gaussD(m_fSite);
+        }
+    }
+    // Normal charges
+    else
+    {
+        // Electrons
+        p1 += m_world.potential().coulombE(m_site);
+        p2 += m_world.potential().coulombE(m_fSite);
+
+        // Holes
+        p1 += m_world.potential().coulombH(m_site);
+        p2 += m_world.potential().coulombH(m_fSite);
+
+        // Charged defects
+        if(m_world.parameters().defectsCharge != 0)
+        {
+            p1 += m_world.potential().coulombD(m_site);
+            p2 += m_world.potential().coulombD(m_fSite);
+        }
+    }
 
     // Remove self interaction
-    p2 -= m_world.interactionEnergies()[1][0][0] * m_charge;
-
-    // Charged defects
-    if(m_world.parameters().defectsCharge != 0)
-    {
-        p1 += m_world.potential().coulombPotentialDefects(m_site);
-        p2 += m_world.potential().coulombPotentialDefects(m_fSite);
-    }
+    p2 -= self;
 
     //When holes and electrons on on the same site the interaction is not zero
     p2 += bindingPotential(m_fSite);
     p1 += bindingPotential(m_site);
 
-    m_de = m_charge *(p2 - p1);
+    m_de = m_charge * (p2 - p1);
 }
 
 void ChargeAgent::coulombGPU()
@@ -252,19 +276,149 @@ void ChargeAgent::coulombGPU()
     p2 += m_world.opencl().getOutputHostFuture(m_openClID);
 
     // Remove self interaction
-    p2 -= m_world.interactionEnergies()[1][0][0] * m_charge;
+    p2 -= m_world.iR()[1][0][0] * m_charge *
+          m_world.parameters().electrostaticPrefactor;
 
     //When holes and electrons on on the same site the interaction is not zero
     p2 += bindingPotential(m_fSite);
     p1 += bindingPotential(m_site);
 
-    //Check the answer!
-    //coulombCPU();
-    //double GPU = m_charge *(p2 - p1);
-    //double CPU = m_de;
-    //qDebug() << GPU << CPU << fabs(GPU-CPU);
-
     m_de = m_charge *(p2 - p1);
+}
+
+void ChargeAgent::compareCoulomb()
+{
+    double SELF = m_world.iR()[1][0][0] * m_charge *
+                  m_world.parameters().electrostaticPrefactor;
+
+    // GPU
+    double GPU1 = m_world.opencl().getOutputHost(m_openClID);
+    double GPU2 = m_world.opencl().getOutputHostFuture(m_openClID) - SELF;
+    double GPU  = m_charge * (GPU2 - GPU1);
+
+    // Electrons
+    double CPU1_E = 0.0;
+    double CPU2_E = 0.0;
+
+    // Holes
+    double CPU1_H = 0.0;
+    double CPU2_H = 0.0;
+
+    // Charged defects
+    double CPU1_D = 0.0;
+    double CPU2_D = 0.0;
+
+    if (m_world.parameters().coulombGaussianSigma > 0)
+    {
+        // Electrons
+        CPU1_E = m_world.potential().gaussE(m_site);
+        CPU2_E = m_world.potential().gaussE(m_fSite);
+
+        // Holes
+        CPU1_H = m_world.potential().gaussH(m_site);
+        CPU2_H = m_world.potential().gaussH(m_fSite);
+
+        // Charged defects
+        if(m_world.parameters().defectsCharge != 0)
+        {
+            CPU1_D = m_world.potential().gaussD(m_site);
+            CPU2_D = m_world.potential().gaussD(m_fSite);
+        }
+    }
+    else
+    {
+        // Electrons
+        CPU1_E = m_world.potential().coulombE(m_site);
+        CPU2_E = m_world.potential().coulombE(m_fSite);
+
+        // Holes
+        CPU1_H = m_world.potential().coulombH(m_site);
+        CPU2_H = m_world.potential().coulombH(m_fSite);
+
+        // Charged defects
+        if(m_world.parameters().defectsCharge != 0)
+        {
+            CPU1_D = m_world.potential().coulombD(m_site);
+            CPU2_D = m_world.potential().coulombD(m_fSite);
+        }
+    }
+
+    // CPU
+    double CPU1 = CPU1_E + CPU1_H + CPU1_D;
+    double CPU2 = CPU2_E + CPU2_H + CPU2_D - SELF;
+    double CPU  = m_charge * (CPU2 - CPU1);
+
+    // CHANGE
+    double DIFF   = GPU  - CPU;
+    double DIFF1  = GPU1 - CPU1;
+    double DIFF2  = GPU2 - CPU2;
+    double PDIFF  = fabs(DIFF )/(0.5 *(fabs(CPU )+ fabs(GPU ))) * 100.0;
+    double PDIFF1 = fabs(DIFF1)/(0.5 *(fabs(CPU1)+ fabs(GPU1))) * 100.0;
+    double PDIFF2 = fabs(DIFF2)/(0.5 *(fabs(CPU2)+ fabs(GPU2))) * 100.0;
+
+    // RATIO
+    double RATIO  = GPU  / CPU ;
+    double RATIO1 = GPU1 / CPU1;
+    double RATIO2 = GPU2 / CPU2;
+
+    int    w =  23;
+    int    p =  15;
+    char fmt = 'e';
+
+    qDebug() << qPrintable(QString("TYPE_1 : %1")
+                           .arg(toQString(m_grid.agentType(m_site))));
+    qDebug() << qPrintable(QString("SITE_1 : %2, %3, %4, %5")
+                           .arg(m_site, 4)
+                           .arg(m_grid.getIndexX(m_site), 4)
+                           .arg(m_grid.getIndexY(m_site), 4)
+                           .arg(m_grid.getIndexZ(m_site), 4));
+    qDebug() << qPrintable(QString("TYPE_2 : %1")
+                           .arg(toQString(m_grid.agentType(m_fSite))));
+    qDebug() << qPrintable(QString("SITE_2 : %2, %3, %4, %5")
+                           .arg(m_fSite, 4)
+                           .arg(m_grid.getIndexX(m_fSite), 4)
+                           .arg(m_grid.getIndexY(m_fSite), 4)
+                           .arg(m_grid.getIndexZ(m_fSite), 4));
+    qDebug() << qPrintable(QString("CPU    : %1").arg(CPU, 23, 'e', 15));
+    qDebug() << qPrintable(QString("V_1    : %1 (E=%2, H=%3, D=%4)")
+                           .arg(CPU1  , w, fmt, p)
+                           .arg(CPU1_E, w, fmt, p)
+                           .arg(CPU1_H, w, fmt, p)
+                           .arg(CPU1_D, w, fmt, p));
+    qDebug() << qPrintable(QString("V_2    : %1 (E=%2, H=%3, D=%4)")
+                           .arg(CPU2  , w, fmt, p)
+                           .arg(CPU2_E, w, fmt, p)
+                           .arg(CPU2_H, w, fmt, p)
+                           .arg(CPU2_D, w, fmt, p));
+    qDebug() << qPrintable(QString("GPU    : %1")
+                           .arg(GPU   , w, fmt, p));
+    qDebug() << qPrintable(QString("V_1    : %1")
+                           .arg(GPU1  , w, fmt, p));
+    qDebug() << qPrintable(QString("V_2    : %1")
+                           .arg(GPU2  , w, fmt, p));
+    qDebug() << qPrintable(QString("DIFF   : %1 (%2 %)")
+                           .arg( DIFF , w, fmt, p)
+                           .arg(PDIFF , w, fmt, p));
+    qDebug() << qPrintable(QString("DIFF_1 : %1 (%2 %)")
+                           .arg( DIFF1, w, fmt, p)
+                           .arg(PDIFF1, w, fmt, p));
+    qDebug() << qPrintable(QString("DIFF_2 : %1 (%2 %)")
+                           .arg( DIFF2, w, fmt, p)
+                           .arg(PDIFF2, w, fmt, p));
+    qDebug() << qPrintable(QString("RATIO  : %1")
+                           .arg(RATIO , w, fmt, p));
+    qDebug() << qPrintable(QString("RATIO1 : %1")
+                           .arg(RATIO1, w, fmt, p));
+    qDebug() << qPrintable(QString("RATIO2 : %1")
+                           .arg(RATIO2, w, fmt, p));
+
+    if(DIFF > 1e-4 || PDIFF1 > 1e-4 || PDIFF2 > 1e-4)
+    {
+        qFatal("warning: CPU and GPU disagree for %s %d",
+                 qPrintable(toQString(m_type)),
+                 m_openClID);
+    }
+    qDebug() << "--------------------------------------------------------------------------------";
 }
 
 double HoleAgent::bindingPotential(int site)

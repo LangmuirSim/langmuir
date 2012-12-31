@@ -50,13 +50,30 @@ void Simulation::performIterations(int nIterations)
             // Calculate the coulomb interactions in parallel some way or another
             if (m_world.parameters().useOpenCL && m_world.numChargeAgents() > m_world.parameters().openclThreshold)
             {
-                    // Use OpenCL if there are a lot of charges
+                // Use OpenCL if there are a lot of charges
+                if (m_world.parameters().coulombGaussianSigma > 0)
+                {
+                    m_world.opencl().launchGaussKernel2();
+                }
+                else
+                {
                     m_world.opencl().launchCoulombKernel2();
+                }
 
-                    QFutureSynchronizer<void> sync;
-                    sync.addFuture(QtConcurrent::map(electrons, Simulation::chargeAgentCoulombInteractionQtConcurrentGPU));
-                    sync.addFuture(QtConcurrent::map(holes, Simulation::chargeAgentCoulombInteractionQtConcurrentGPU));
-                    sync.waitForFinished();
+                // Turn this on to check the GPU vs CPU
+                // TRUST THE GPU - if it gives the wrong answer it is most likely
+                // the information passed to it is wrong some how, or something was
+                // changed in the CPU version. There is like a 99.9999% chance
+                // something is messed up on the CPU side - I have spent days/hours
+                // being tormented by some sublte bug, and it always turns out to
+                // be something wrong with the CPU functions (and for some reason
+                // its always something Marcus coded)
+                // m_world.opencl().compareHostAndDeviceForAllCarriers();
+
+                QFutureSynchronizer<void> sync;
+                sync.addFuture(QtConcurrent::map(electrons, Simulation::chargeAgentCoulombInteractionQtConcurrentGPU));
+                sync.addFuture(QtConcurrent::map(holes, Simulation::chargeAgentCoulombInteractionQtConcurrentGPU));
+                sync.waitForFinished();
             }
             else
             {

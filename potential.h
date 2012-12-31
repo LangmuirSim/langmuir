@@ -52,9 +52,9 @@ public:
         );
 
     /**
-     * @brief pre-calculates e/(4 pi epsilon epsilon_0 r) in units of eV * nm
+     * @brief pre-calculates r2, r, and 1/r
      */
-    void updateInteractionEnergies();
+    void precalculateArrays();
 
     /**
      * @brief pre-calculates coupling constants
@@ -65,37 +65,73 @@ public:
      * @brief calculates Coulomb potential from electrons at specific grid site
      * @param site the site of interest
      */
-    double coulombPotentialElectrons(int site);
+    double coulombE(int site_i);
 
     /**
      * @brief calculates Coulomb image-potential from electrons at specific grid site
      * @param site the site of interest
      */
-    double coulombImageXPotentialElectrons(int site);
+    double coulombImageE(int site_i);
+
+    /**
+     * @brief calculates Coulomb potential from electrons at specific grid site, assuming gaussians
+     * @param site the site of interest
+     */
+    double gaussE(int site_i);
+
+    /**
+     * @brief calculates Coulomb image-potential from electrons at specific grid site, assuming gaussians
+     * @param site the site of interest
+     */
+    double gaussImageE(int site_i);
 
     /**
      * @brief calculates Coulomb potential from holes at specific grid site
      * @param site the site of interest
      */
-    double coulombPotentialHoles(int site);
+    double coulombH(int site_i);
 
     /**
      * @brief calculates Coulomb image-potential from holes at specific grid site
      * @param site the site of interest
      */
-    double coulombImageXPotentialHoles(int site);
+    double coulombImageH(int site_i);
+
+    /**
+     * @brief calculates Coulomb potential from holes at specific grid site, assuming gaussians
+     * @param site the site of interest
+     */
+    double gaussH(int site);
+
+    /**
+     * @brief calculates Coulomb image-potential from holes at specific grid site, assuming gaussians
+     * @param site the site of interest
+     */
+    double gaussImageH(int site);
 
     /**
      * @brief calculates Coulomb potential from charged defects at specific grid site
      * @param site the site of interest
      */
-    double coulombPotentialDefects(int site);
+    double coulombD(int site_i);
 
     /**
      * @brief calculates Coulomb image-potential from charged defects at specific grid site
      * @param site the site of interest
      */
-    double coulombImageXPotentialDefects(int site);
+    double coulombImageD(int site_i);
+
+    /**
+     * @brief calculates Coulomb potential from charged defects at specific grid site, assuming gaussians
+     * @param site the site of interest
+     */
+    double gaussD(int site_i);
+
+    /**
+     * @brief calculates Coulomb image-potential from charged defects at specific grid site, assuming gaussians
+     * @param site the site of interest
+     */
+    double gaussImageD(int site_i);
 
     /**
      * @brief calculate the potential at a specific site, including all contributions
@@ -103,12 +139,14 @@ public:
      * @param grid the grid
      * @param useCoulomb include coulomb interactions
      * @param useImage include coulomb image-interactions
+     * @param useGauss assume charges are spherical Gaussians
      * @return
      */
     double potentialAtSite(int site,
                            Grid *grid = 0,
                            bool useCoulomb = false,
-                           bool useImage = false);
+                           bool useImage = false,
+                           bool useGauss = false);
 private:
     /**
      * @brief reference to the World
