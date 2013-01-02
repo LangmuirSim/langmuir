@@ -337,7 +337,7 @@ double Potential::coulombE(int site_i)
     qint32 cutoff = m_world.parameters().electrostaticCutoff;
     boost::multi_array<double, 3>& R1 = m_world.R1();
     boost::multi_array<double, 3>& iR = m_world.iR();
-    boost::multi_array<double, 3>& eR = m_world.eR();
+    //boost::multi_array<double, 3>& eR = m_world.eR();
     QList<ChargeAgent*>& charges = m_world.electrons();
     Grid &grid = m_world.electronGrid();
 
@@ -370,7 +370,7 @@ double Potential::coulombImageE(int site_i)
     qint32 cutoff = m_world.parameters().electrostaticCutoff;
     boost::multi_array<double, 3>& R1 = m_world.R1();
     boost::multi_array<double, 3>& iR = m_world.iR();
-    boost::multi_array<double, 3>& eR = m_world.eR();
+    //boost::multi_array<double, 3>& eR = m_world.eR();
     QList<ChargeAgent*>& charges = m_world.electrons();
     Grid &grid = m_world.electronGrid();
 
@@ -469,7 +469,7 @@ double Potential::coulombH(int site_i)
     qint32 cutoff = m_world.parameters().electrostaticCutoff;
     boost::multi_array<double, 3>& R1 = m_world.R1();
     boost::multi_array<double, 3>& iR = m_world.iR();
-    boost::multi_array<double, 3>& eR = m_world.eR();
+    //boost::multi_array<double, 3>& eR = m_world.eR();
     QList<ChargeAgent*>& charges = m_world.holes();
     Grid &grid = m_world.holeGrid();
 
@@ -502,7 +502,7 @@ double Potential::coulombImageH(int site_i)
     qint32 cutoff = m_world.parameters().electrostaticCutoff;
     boost::multi_array<double, 3>& R1 = m_world.R1();
     boost::multi_array<double, 3>& iR = m_world.iR();
-    boost::multi_array<double, 3>& eR = m_world.eR();
+    //boost::multi_array<double, 3>& eR = m_world.eR();
     QList<ChargeAgent*>& charges = m_world.holes();
     Grid &grid = m_world.holeGrid();
 
