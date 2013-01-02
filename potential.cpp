@@ -345,7 +345,7 @@ double Potential::coulombE(int site_i)
 
     for (int i = 0; i < charges.size(); i++)
     {
-        Q_CHECK_PTR(charges[i]);
+        //Q_CHECK_PTR(charges[i]);
         ChargeAgent& charge = *charges[i];
         int site_j = charge.getCurrentSite();
 
@@ -378,7 +378,7 @@ double Potential::coulombImageE(int site_i)
 
     for (int i = 0; i < charges.size(); i++)
     {
-        Q_CHECK_PTR(charges[i]);
+        //Q_CHECK_PTR(charges[i]);
         ChargeAgent& charge = *charges[i];
         int site_j = charge.getCurrentSite();
 
@@ -411,7 +411,7 @@ double Potential::gaussE(int site_i)
 
     for (int i = 0; i < charges.size(); i++)
     {
-        Q_CHECK_PTR(charges[i]);
+        //Q_CHECK_PTR(charges[i]);
         ChargeAgent& charge = *charges[i];
         int site_j = charge.getCurrentSite();
 
@@ -444,7 +444,7 @@ double Potential::gaussImageE(int site_i)
 
     for (int i = 0; i < charges.size(); i++)
     {
-        Q_CHECK_PTR(charges[i]);
+        //Q_CHECK_PTR(charges[i]);
         ChargeAgent& charge = *charges[i];
         int site_j = charge.getCurrentSite();
 
@@ -477,7 +477,7 @@ double Potential::coulombH(int site_i)
 
     for (int i = 0; i < charges.size(); i++)
     {
-        Q_CHECK_PTR(charges[i]);
+        //Q_CHECK_PTR(charges[i]);
         ChargeAgent& charge = *charges[i];
         int site_j = charge.getCurrentSite();
 
@@ -510,7 +510,7 @@ double Potential::coulombImageH(int site_i)
 
     for (int i = 0; i < charges.size(); i++)
     {
-        Q_CHECK_PTR(charges[i]);
+        //Q_CHECK_PTR(charges[i]);
         ChargeAgent& charge = *charges[i];
         int site_j = charge.getCurrentSite();
 
@@ -543,7 +543,7 @@ double Potential::gaussH(int site_i)
 
     for (int i = 0; i < charges.size(); i++)
     {
-        Q_CHECK_PTR(charges[i]);
+        //Q_CHECK_PTR(charges[i]);
         ChargeAgent& charge = *charges[i];
         int site_j = charge.getCurrentSite();
 
@@ -576,7 +576,7 @@ double Potential::gaussImageH(int site_i)
 
     for (int i = 0; i < charges.size(); i++)
     {
-        Q_CHECK_PTR(charges[i]);
+        //Q_CHECK_PTR(charges[i]);
         ChargeAgent& charge = *charges[i];
         int site_j = charge.getCurrentSite();
 
