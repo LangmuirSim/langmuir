@@ -266,14 +266,14 @@ boost::multi_array<double,3>& World::eR()
     return m_eR;
 }
 
+boost::multi_array<double, 3>& World::sI()
+{
+    return m_sI;
+}
+
 boost::multi_array<double,3>& World::couplingConstants()
 {
     return m_couplingConstants;
-}
-
-double World::coupling(int dx, int dy, int dz)
-{
-    return m_couplingConstants[dx][dy][dz];
 }
 
 int World::maxElectronAgents()

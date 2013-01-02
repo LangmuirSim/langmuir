@@ -105,10 +105,10 @@ void ChargeAgent::decideFuture()
         pd += m_de;
 
         // Calculate the coupling constant...
-        int dx = m_grid.xDistancei(m_site,m_fSite);
-        int dy = m_grid.yDistancei(m_site,m_fSite);
-        int dz = m_grid.zDistancei(m_site,m_fSite);
-        double coupling = m_world.coupling(dx,dy,dz);
+        int dx = m_grid.xDistancei(m_site, m_fSite);
+        int dy = m_grid.yDistancei(m_site, m_fSite);
+        int dz = m_grid.zDistancei(m_site, m_fSite);
+        double coupling = m_world.couplingConstants()[dx][dy][dz];
 
         // Metropolis criterion
         if(m_world.randomNumberGenerator().metropolisWithCoupling(
@@ -216,8 +216,12 @@ void ChargeAgent::coulombCPU()
 {
     double p1 = 0;
     double p2 = 0;
-    double self = m_world.iR()[1][0][0] * m_charge *
-                  m_world.parameters().electrostaticPrefactor;
+
+    // Compute self interaction
+    int dx = m_grid.xDistancei(m_site, m_fSite);
+    int dy = m_grid.yDistancei(m_site, m_fSite);
+    int dz = m_grid.zDistancei(m_site, m_fSite);
+    double self = m_world.sI()[dx][dy][dz] * m_charge;
 
     // Gaussian charges
     if (m_world.parameters().coulombGaussianSigma > 0)
@@ -275,9 +279,14 @@ void ChargeAgent::coulombGPU()
     p1 += m_world.opencl().getOutputHost(m_openClID);
     p2 += m_world.opencl().getOutputHostFuture(m_openClID);
 
+    // Compute self interaction
+    int dx = m_grid.xDistancei(m_site, m_fSite);
+    int dy = m_grid.yDistancei(m_site, m_fSite);
+    int dz = m_grid.zDistancei(m_site, m_fSite);
+    double self = m_world.sI()[dx][dy][dz] * m_charge;
+
     // Remove self interaction
-    p2 -= m_world.iR()[1][0][0] * m_charge *
-          m_world.parameters().electrostaticPrefactor;
+    p2 -= self;
 
     //When holes and electrons on on the same site the interaction is not zero
     p2 += bindingPotential(m_fSite);

@@ -234,18 +234,21 @@ void Potential::precalculateArrays()
     int max_x = m_world.parameters().electrostaticCutoff + 1;
     int max_y = m_world.parameters().electrostaticCutoff + 1;
     int max_z = m_world.parameters().electrostaticCutoff + 1;
+    int max_h = m_world.parameters().hoppingRange + 1;
 
     boost::multi_array<double, 3>& R1 = m_world.R1();
     boost::multi_array<double, 3>& R2 = m_world.R2();
     boost::multi_array<double, 3>& iR = m_world.iR();
     boost::multi_array<double, 3>& eR = m_world.eR();
+    boost::multi_array<double, 3>& sI = m_world.sI();
 
     R1.resize(boost::extents[max_x][max_y][max_z]);
     R2.resize(boost::extents[max_x][max_y][max_z]);
     iR.resize(boost::extents[max_x][max_y][max_z]);
     eR.resize(boost::extents[max_x][max_y][max_z]);
+    sI.resize(boost::extents[max_h][max_h][max_h]);
 
-    // Now calculate the numbers we need
+    // precalculate r1, r2, ri, and set erf to 1.0
     for(int dx = 0; dx < max_x; ++dx)
     {
         for(int dy = 0; dy < max_y; ++dy)
@@ -268,8 +271,9 @@ void Potential::precalculateArrays()
                 eR[dx][dy][dz] = 1.0;
             }
         }
-    }
+    }  
 
+    // pre-calculate erf
     if (m_world.parameters().coulombGaussianSigma > 0.0)
     {
         double factor = 1.0 / (sqrt(2.0) *
@@ -286,25 +290,38 @@ void Potential::precalculateArrays()
             }
         }
     }
+
+    // pre-calculate self interactions
+    double prefactor = m_world.parameters().electrostaticPrefactor;
+
+    for (int dx = 0; dx < max_h; dx++)
+    {
+        for (int dy = 0; dy < max_h; dy++)
+        {
+            for (int dz = 0; dz < max_h; dz++)
+            {
+                // note : eR[dx][dy][dz] = 1.0 if sigma was 0
+                sI[dx][dy][dz] = prefactor * iR[dx][dy][dz] * eR[dx][dy][dz];
+            }
+        }
+    }
 }
 
 void Potential::updateCouplingConstants()
 {
     //These values are used for moving between sites
     boost::multi_array<double, 3>& constants = m_world.couplingConstants();
-    constants.resize(boost::extents
-                     [m_world.parameters().hoppingRange+1]
-            [m_world.parameters().hoppingRange+1]
-            [m_world.parameters().hoppingRange+1]);
+    int max_h = m_world.parameters().hoppingRange + 1;
+    constants.resize(boost::extents[max_h][max_h][max_h]);
 
-    //Assuming coupling(r=1) is 1/3 and coupling(r=2) is 1/27 for now
+    //Assuming coupling(r=1) is 1/3 and coupling(r=2) is 1/27
     double c1 = 1.0 /  3.0;
     double c2 = 1.0 / 27.0;
-    for (int dx = 0; dx < m_world.parameters().hoppingRange + 1; dx++)
+    for (int dx = 0; dx < max_h; dx++)
     {
-        for (int dy = 0; dy < m_world.parameters().hoppingRange + 1; dy++)
+        for (int dy = 0; dy < max_h; dy++)
         {
-            for (int dz = 0; dz < m_world.parameters().hoppingRange + 1; dz++)
+            for (int dz = 0; dz < max_h; dz++)
             {
                 double r = sqrt(dx*dx + dy*dy + dz*dz);
                 double c = c1 * pow(3.0, r - 1) * pow(c2, r - 1);
@@ -320,23 +337,27 @@ double Potential::coulombE(int site_i)
     qint32 cutoff = m_world.parameters().electrostaticCutoff;
     boost::multi_array<double, 3>& R1 = m_world.R1();
     boost::multi_array<double, 3>& iR = m_world.iR();
+    boost::multi_array<double, 3>& eR = m_world.eR();
+    QList<ChargeAgent*>& charges = m_world.electrons();
     Grid &grid = m_world.electronGrid();
 
     double potential = 0.0;
 
-    foreach(ChargeAgent *agent, m_world.electrons())
+    for (int i = 0; i < charges.size(); i++)
     {
-        int site_j = agent->getCurrentSite();
+        Q_CHECK_PTR(charges[i]);
+        ChargeAgent& charge = *charges[i];
+        int site_j = charge.getCurrentSite();
 
         int dx = grid.xDistancei(site_i, site_j);
         int dy = grid.yDistancei(site_i, site_j);
         int dz = grid.zDistancei(site_i, site_j);
 
-        if ((dx < cutoff) && (dz < cutoff) && (dy < cutoff))
+        if ((dx < cutoff) && (dy < cutoff) && (dz < cutoff))
         {
             if (R1[dx][dy][dz] < cutoff)
             {
-                potential += (iR[dx][dy][dz] * agent->charge());
+                potential += (iR[dx][dy][dz] * charge.charge());
             }
         }
     }
@@ -349,23 +370,27 @@ double Potential::coulombImageE(int site_i)
     qint32 cutoff = m_world.parameters().electrostaticCutoff;
     boost::multi_array<double, 3>& R1 = m_world.R1();
     boost::multi_array<double, 3>& iR = m_world.iR();
+    boost::multi_array<double, 3>& eR = m_world.eR();
+    QList<ChargeAgent*>& charges = m_world.electrons();
     Grid &grid = m_world.electronGrid();
 
     double potential = 0.0;
 
-    foreach(ChargeAgent *agent, m_world.electrons())
+    for (int i = 0; i < charges.size(); i++)
     {
-        int site_j = agent->getCurrentSite();
+        Q_CHECK_PTR(charges[i]);
+        ChargeAgent& charge = *charges[i];
+        int site_j = charge.getCurrentSite();
 
         int dx = grid.xImageDistancei(site_i, site_j);
         int dy = grid.yDistancei(site_i, site_j);
         int dz = grid.zDistancei(site_i, site_j);
 
-        if ((dx < cutoff) && (dz < cutoff) && (dy < cutoff))
+        if ((dx < cutoff) && (dy < cutoff) && (dz < cutoff))
         {
             if (R1[dx][dy][dz] < cutoff)
             {
-                potential -= (iR[dx][dy][dz] * agent->charge());
+                potential -= (iR[dx][dy][dz] * charge.charge());
             }
         }
     }
@@ -379,23 +404,26 @@ double Potential::gaussE(int site_i)
     boost::multi_array<double, 3>& R1 = m_world.R1();
     boost::multi_array<double, 3>& iR = m_world.iR();
     boost::multi_array<double, 3>& eR = m_world.eR();
+    QList<ChargeAgent*>& charges = m_world.electrons();
     Grid &grid = m_world.electronGrid();
 
     double potential = 0.0;
 
-    foreach(ChargeAgent *agent, m_world.electrons())
+    for (int i = 0; i < charges.size(); i++)
     {
-        int site_j = agent->getCurrentSite();
+        Q_CHECK_PTR(charges[i]);
+        ChargeAgent& charge = *charges[i];
+        int site_j = charge.getCurrentSite();
 
         int dx = grid.xDistancei(site_i, site_j);
         int dy = grid.yDistancei(site_i, site_j);
         int dz = grid.zDistancei(site_i, site_j);
 
-        if ((dx < cutoff) && (dz < cutoff) && (dy < cutoff))
+        if ((dx < cutoff) && (dy < cutoff) && (dz < cutoff))
         {
             if (R1[dx][dy][dz] < cutoff)
             {
-                potential += (iR[dx][dy][dz] * agent->charge() * eR[dx][dy][dz]);
+                potential += (iR[dx][dy][dz] * charge.charge() * eR[dx][dy][dz]);
             }
         }
     }
@@ -409,23 +437,26 @@ double Potential::gaussImageE(int site_i)
     boost::multi_array<double, 3>& R1 = m_world.R1();
     boost::multi_array<double, 3>& iR = m_world.iR();
     boost::multi_array<double, 3>& eR = m_world.eR();
+    QList<ChargeAgent*>& charges = m_world.electrons();
     Grid &grid = m_world.electronGrid();
 
     double potential = 0.0;
 
-    foreach(ChargeAgent *agent, m_world.electrons())
+    for (int i = 0; i < charges.size(); i++)
     {
-        int site_j = agent->getCurrentSite();
+        Q_CHECK_PTR(charges[i]);
+        ChargeAgent& charge = *charges[i];
+        int site_j = charge.getCurrentSite();
 
         int dx = grid.xImageDistancei(site_i, site_j);
         int dy = grid.yDistancei(site_i, site_j);
         int dz = grid.zDistancei(site_i, site_j);
 
-        if ((dx < cutoff) && (dz < cutoff) && (dy < cutoff))
+        if ((dx < cutoff) && (dy < cutoff) && (dz < cutoff))
         {
             if (R1[dx][dy][dz] < cutoff)
             {
-                potential -= (iR[dx][dy][dz] * agent->charge() * eR[dx][dy][dz]);
+                potential -= (iR[dx][dy][dz] * charge.charge() * eR[dx][dy][dz]);
             }
         }
     }
@@ -438,23 +469,27 @@ double Potential::coulombH(int site_i)
     qint32 cutoff = m_world.parameters().electrostaticCutoff;
     boost::multi_array<double, 3>& R1 = m_world.R1();
     boost::multi_array<double, 3>& iR = m_world.iR();
+    boost::multi_array<double, 3>& eR = m_world.eR();
+    QList<ChargeAgent*>& charges = m_world.holes();
     Grid &grid = m_world.holeGrid();
 
     double potential = 0.0;
 
-    foreach(ChargeAgent *agent, m_world.holes())
+    for (int i = 0; i < charges.size(); i++)
     {
-        int site_j = agent->getCurrentSite();
+        Q_CHECK_PTR(charges[i]);
+        ChargeAgent& charge = *charges[i];
+        int site_j = charge.getCurrentSite();
 
         int dx = grid.xDistancei(site_i, site_j);
         int dy = grid.yDistancei(site_i, site_j);
         int dz = grid.zDistancei(site_i, site_j);
 
-        if ((dx < cutoff) && (dz < cutoff) && (dy < cutoff))
+        if ((dx < cutoff) && (dy < cutoff) && (dz < cutoff))
         {
             if (R1[dx][dy][dz] < cutoff)
             {
-                potential += (iR[dx][dy][dz] * agent->charge());
+                potential += (iR[dx][dy][dz] * charge.charge());
             }
         }
     }
@@ -467,23 +502,27 @@ double Potential::coulombImageH(int site_i)
     qint32 cutoff = m_world.parameters().electrostaticCutoff;
     boost::multi_array<double, 3>& R1 = m_world.R1();
     boost::multi_array<double, 3>& iR = m_world.iR();
+    boost::multi_array<double, 3>& eR = m_world.eR();
+    QList<ChargeAgent*>& charges = m_world.holes();
     Grid &grid = m_world.holeGrid();
 
     double potential = 0.0;
 
-    foreach(ChargeAgent *agent, m_world.holes())
+    for (int i = 0; i < charges.size(); i++)
     {
-        int site_j = agent->getCurrentSite();
+        Q_CHECK_PTR(charges[i]);
+        ChargeAgent& charge = *charges[i];
+        int site_j = charge.getCurrentSite();
 
         int dx = grid.xImageDistancei(site_i, site_j);
         int dy = grid.yDistancei(site_i, site_j);
         int dz = grid.zDistancei(site_i, site_j);
 
-        if ((dx < cutoff) && (dz < cutoff) && (dy < cutoff))
+        if ((dx < cutoff) && (dy < cutoff) && (dz < cutoff))
         {
             if (R1[dx][dy][dz] < cutoff)
             {
-                potential -= (iR[dx][dy][dz] * agent->charge());
+                potential -= (iR[dx][dy][dz] * charge.charge());
             }
         }
     }
@@ -497,23 +536,26 @@ double Potential::gaussH(int site_i)
     boost::multi_array<double, 3>& R1 = m_world.R1();
     boost::multi_array<double, 3>& iR = m_world.iR();
     boost::multi_array<double, 3>& eR = m_world.eR();
+    QList<ChargeAgent*>& charges = m_world.holes();
     Grid &grid = m_world.holeGrid();
 
     double potential = 0.0;
 
-    foreach(ChargeAgent *agent, m_world.holes())
+    for (int i = 0; i < charges.size(); i++)
     {
-        int site_j = agent->getCurrentSite();
+        Q_CHECK_PTR(charges[i]);
+        ChargeAgent& charge = *charges[i];
+        int site_j = charge.getCurrentSite();
 
         int dx = grid.xDistancei(site_i, site_j);
         int dy = grid.yDistancei(site_i, site_j);
         int dz = grid.zDistancei(site_i, site_j);
 
-        if ((dx < cutoff) && (dz < cutoff) && (dy < cutoff))
+        if ((dx < cutoff) && (dy < cutoff) && (dz < cutoff))
         {
             if (R1[dx][dy][dz] < cutoff)
             {
-                potential += (iR[dx][dy][dz] * agent->charge() * eR[dx][dy][dz]);
+                potential += (iR[dx][dy][dz] * charge.charge() * eR[dx][dy][dz]);
             }
         }
     }
@@ -527,23 +569,26 @@ double Potential::gaussImageH(int site_i)
     boost::multi_array<double, 3>& R1 = m_world.R1();
     boost::multi_array<double, 3>& iR = m_world.iR();
     boost::multi_array<double, 3>& eR = m_world.eR();
+    QList<ChargeAgent*>& charges = m_world.holes();
     Grid &grid = m_world.holeGrid();
 
     double potential = 0.0;
 
-    foreach(ChargeAgent *agent, m_world.holes())
+    for (int i = 0; i < charges.size(); i++)
     {
-        int site_j = agent->getCurrentSite();
+        Q_CHECK_PTR(charges[i]);
+        ChargeAgent& charge = *charges[i];
+        int site_j = charge.getCurrentSite();
 
         int dx = grid.xImageDistancei(site_i, site_j);
         int dy = grid.yDistancei(site_i, site_j);
         int dz = grid.zDistancei(site_i, site_j);
 
-        if ((dx < cutoff) && (dz < cutoff) && (dy < cutoff))
+        if ((dx < cutoff) && (dy < cutoff) && (dz < cutoff))
         {
             if (R1[dx][dy][dz] < cutoff)
             {
-                potential -= (iR[dx][dy][dz] * agent->charge() * eR[dx][dy][dz]);
+                potential -= (iR[dx][dy][dz] * charge.charge() * eR[dx][dy][dz]);
             }
         }
     }
@@ -558,6 +603,7 @@ double Potential::coulombD(int site_i)
     boost::multi_array<double, 3>& R1 = m_world.R1();
     boost::multi_array<double, 3>& iR = m_world.iR();
     Grid &grid = m_world.electronGrid();
+
     double potential = 0.0;
 
     if (charge == 0)
@@ -565,8 +611,10 @@ double Potential::coulombD(int site_i)
         return potential;
     }
 
-    foreach(qint32 site_j, m_world.defectSiteIDs())
+    for (int i = 0; i < m_world.defectSiteIDs().size(); i++)
     {
+        int site_j = m_world.defectSiteIDs()[i];
+
         int dx = grid.xDistancei(site_i, site_j);
         int dy = grid.yDistancei(site_i, site_j);
         int dz = grid.zDistancei(site_i, site_j);
@@ -598,8 +646,10 @@ double Potential::coulombImageD(int site_i)
         return potential;
     }
 
-    foreach(qint32 site_j, m_world.defectSiteIDs())
+    for (int i = 0; i < m_world.defectSiteIDs().size(); i++)
     {
+        int site_j = m_world.defectSiteIDs()[i];
+
         int dx = grid.xImageDistancei(site_i, site_j);
         int dy = grid.yDistancei(site_i, site_j);
         int dz = grid.zDistancei(site_i, site_j);
@@ -631,8 +681,10 @@ double Potential::gaussD(int site_i)
         return potential;
     }
 
-    foreach(qint32 site_j, m_world.defectSiteIDs())
+    for (int i = 0; i < m_world.defectSiteIDs().size(); i++)
     {
+        int site_j = m_world.defectSiteIDs()[i];
+
         int dx = grid.xDistancei(site_i, site_j);
         int dy = grid.yDistancei(site_i, site_j);
         int dz = grid.zDistancei(site_i, site_j);
@@ -664,8 +716,10 @@ double Potential::gaussImageD(int site_i)
         return potential;
     }
 
-    foreach(qint32 site_j, m_world.defectSiteIDs())
+    for (int i = 0; i < m_world.defectSiteIDs().size(); i++)
     {
+        int site_j = m_world.defectSiteIDs()[i];
+
         int dx = grid.xImageDistancei(site_i, site_j);
         int dy = grid.yDistancei(site_i, site_j);
         int dz = grid.zDistancei(site_i, site_j);
@@ -680,59 +734,6 @@ double Potential::gaussImageD(int site_i)
     }
 
     return (potential * m_world.parameters().electrostaticPrefactor);
-}
-
-double Potential::potentialAtSite(int site, Grid *grid, bool useCoulomb,
-                                  bool useImage, bool useGauss)
-{
-    double p1 = 0;
-    if(grid)
-    {
-        p1 += grid->potential(site);
-    }
-    if(useCoulomb)
-    {
-        if (useGauss)
-        {
-            p1 += gaussE(site);
-            p1 += gaussH(site);
-            if(m_world.parameters().defectsCharge != 0)
-            {
-                p1 += gaussD(site);
-            }
-        }
-        else
-        {
-            p1 += coulombE(site);
-            p1 += coulombH(site);
-            if(m_world.parameters().defectsCharge != 0)
-            {
-                p1 += coulombD(site);
-            }
-        }
-    }
-    if(useImage)
-    {
-        if (useGauss)
-        {
-            p1 += gaussImageE(site);
-            p1 += gaussImageH(site);
-            if(m_world.parameters().defectsCharge != 0)
-            {
-                p1 += gaussImageD(site);
-            }
-        }
-        else
-        {
-            p1 += coulombImageE(site);
-            p1 += coulombImageH(site);
-            if(m_world.parameters().defectsCharge != 0)
-            {
-                p1 += coulombImageD(site);
-            }
-        }
-    }
-    return p1;
 }
 
 }

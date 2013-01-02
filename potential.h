@@ -1,7 +1,9 @@
 #ifndef POTENTIALNEW_H
 #define POTENTIALNEW_H
+#define BOOST_DISABLE_ASSERTS
 
 #include <QObject>
+#include "boost/multi_array.hpp"
 
 namespace Langmuir
 {
@@ -133,20 +135,6 @@ public:
      */
     double gaussImageD(int site_i);
 
-    /**
-     * @brief calculate the potential at a specific site, including all contributions
-     * @param site the site of interest
-     * @param grid the grid
-     * @param useCoulomb include coulomb interactions
-     * @param useImage include coulomb image-interactions
-     * @param useGauss assume charges are spherical Gaussians
-     * @return
-     */
-    double potentialAtSite(int site,
-                           Grid *grid = 0,
-                           bool useCoulomb = false,
-                           bool useImage = false,
-                           bool useGauss = false);
 private:
     /**
      * @brief reference to the World

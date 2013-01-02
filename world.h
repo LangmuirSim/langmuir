@@ -1,6 +1,6 @@
 #ifndef WORLD_H
 #define WORLD_H
-//#define BOOST_DISABLE_ASSERTS
+#define BOOST_DISABLE_ASSERTS
 
 #include <QtCore>
 #include <QtGui>
@@ -240,14 +240,14 @@ public:
     boost::multi_array<double,3>& eR();
 
     /**
-     * @brief get the coupling constants
+     * @brief get the self interactions
      */
-    boost::multi_array<double,3>& couplingConstants();
+    boost::multi_array<double, 3>& sI();
 
     /**
-     * @brief get the coupling constant corresponding to moving a certain distance
+     * @brief get the coupling constants
      */
-    double coupling(int dx, int dy, int dz);
+    boost::multi_array<double,3>& couplingConstants();   
 
     /**
      * @brief get the max number of ElectronAgents allowed
@@ -557,6 +557,14 @@ private:
      * This array is indexed by dx, dy, dz values, and r is in grid-units
      */
     boost::multi_array<double,3> m_eR;
+
+    /**
+     * @brief self interaction, which is 1/(4 pi e e0 r), with r=1 grid unit
+     * When a charge at it's future site interacts with other charges at their
+     * current site, the charge will interact with it's own current site.  So,
+     * this value needs to be subtracted off.
+     */
+    boost::multi_array<double, 3> m_sI;
 
     /**
      * @brief array of coupling constants
