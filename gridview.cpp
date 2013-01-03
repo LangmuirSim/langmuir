@@ -291,7 +291,7 @@ void GridViewGL::updatePointBuffers()
         int site = holes.at(i)->getCurrentSite();
         pointBuffer2[i * 4 + 0] = grid.getIndexX(site)+ 0.5;
         pointBuffer2[i * 4 + 1] = grid.getIndexY(site)+ 0.5;
-        pointBuffer2[i * 4 + 2] =(grid.getIndexZ(site)+ 0.75)* thickness;
+        pointBuffer2[i * 4 + 2] =(grid.getIndexZ(site)+ 0.5)* thickness;
     }
     carriersMinus->update(pointBuffer1, electrons.size()* 4);
     carriersPlus->update(pointBuffer2, holes.size()* 4);
