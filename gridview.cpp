@@ -88,7 +88,7 @@ GridViewGL::GridViewGL(const QGLFormat &format, QWidget * parent, QString input)
     delta.setX(5.0);
     delta.setY(5.0);
     delta.setZ(25.0);
-    thickness = 2.0;
+    thickness = 1.0;
     fov = 60.0;
     pause = true;
     recording = false;
@@ -283,7 +283,7 @@ void GridViewGL::updatePointBuffers()
         int site = electrons.at(i)->getCurrentSite();
         pointBuffer1[i * 4 + 0] = grid.getIndexX(site)+ 0.5;
         pointBuffer1[i * 4 + 1] = grid.getIndexY(site)+ 0.5;
-        pointBuffer1[i * 4 + 2] =(grid.getIndexZ(site)+ 0.5)* thickness;
+        pointBuffer1[i * 4 + 2] =(grid.getIndexZ(site)+ 0.25)* thickness;
     }
     QList<ChargeAgent*> &holes = pWorld->holes();
     for(int i = 0; i < holes.size(); i++)
@@ -291,7 +291,7 @@ void GridViewGL::updatePointBuffers()
         int site = holes.at(i)->getCurrentSite();
         pointBuffer2[i * 4 + 0] = grid.getIndexX(site)+ 0.5;
         pointBuffer2[i * 4 + 1] = grid.getIndexY(site)+ 0.5;
-        pointBuffer2[i * 4 + 2] =(grid.getIndexZ(site)+ 0.5)* thickness;
+        pointBuffer2[i * 4 + 2] =(grid.getIndexZ(site)+ 0.75)* thickness;
     }
     carriersMinus->update(pointBuffer1, electrons.size()* 4);
     carriersPlus->update(pointBuffer2, holes.size()* 4);

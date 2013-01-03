@@ -1,6 +1,11 @@
 #include "gridview.h"
 #include <QtGui>
-
+/**
+ * LangmuirView was a side project to see if I could visulize the simulation
+ * in real time with OpenGL.  I won't lie, the code is not that well written.
+ * I didn't really understand how Qt worked, OpenGL, or GUI programming.  It
+ * works for now, but will probably break in the future.
+ */
 using namespace Langmuir;
 
 int main(int argc, char **argv)

@@ -432,9 +432,10 @@ void ChargeAgent::compareCoulomb()
 
 double HoleAgent::bindingPotential(int site)
 {
-    if(m_world.holeGrid().agentType(site)== Agent::Electron)
+    if(m_world.electronGrid().agentType(site)== Agent::Electron)
     {
-        return -0.5;
+        return -m_world.sI()[1][0][0];
+        //return -0.5;
     }
     return 0.0;
 }
@@ -443,7 +444,8 @@ double ElectronAgent::bindingPotential(int site)
 {
     if(m_world.holeGrid().agentType(site)== Agent::Hole)
     {
-        return 0.5;
+        return m_world.sI()[1][0][0];
+        //return 0.5;
     }
     return 0.0;
 }
