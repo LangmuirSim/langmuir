@@ -158,6 +158,9 @@ struct SimulationParameters
     //! the potential on the left side of the grid, used in setting up an electric field
     qreal voltageLeft;
 
+    //! the energy change (eV) when a hole/electron pair goes from the same site to adjacent sites
+    qreal excitonBinding;
+
     //! the temperature used in the boltzmann factor
     qreal temperatureKelvin;
 
@@ -323,6 +326,7 @@ struct SimulationParameters
 
         voltageRight           (0.00),
         voltageLeft            (0.00),
+        excitonBinding         (0.00),
         temperatureKelvin      (300.0),
 
         sourceRate             (0.90),

@@ -434,7 +434,7 @@ double HoleAgent::bindingPotential(int site)
 {
     if(m_world.electronGrid().agentType(site)== Agent::Electron)
     {
-        return -m_world.sI()[1][0][0];
+        return m_world.sI()[1][0][0] - m_world.parameters().excitonBinding;
         //return -0.5;
     }
     return 0.0;
@@ -444,7 +444,7 @@ double ElectronAgent::bindingPotential(int site)
 {
     if(m_world.holeGrid().agentType(site)== Agent::Hole)
     {
-        return m_world.sI()[1][0][0];
+        return m_world.sI()[1][0][0] + m_world.parameters().excitonBinding;
         //return 0.5;
     }
     return 0.0;
