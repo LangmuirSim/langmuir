@@ -301,7 +301,7 @@ struct SimulationParameters
         outputIdsOnDelete      (false),
         outputCoulomb          (0),
         outputStepChk          (1),
-        outputChkTrapPotential (true),
+        outputChkTrapPotential (false),
         outputPotential        (false),
         outputIsOn             (true),
 
