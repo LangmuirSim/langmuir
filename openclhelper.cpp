@@ -333,11 +333,11 @@ void OpenClHelper::launchCoulombKernel1()
         m_queue.enqueueWriteBuffer(m_qDevice, CL_TRUE, 0, totalCharges*sizeof(int), &m_qHost[0]);
         m_queue.enqueueNDRangeKernel(m_coulomb1K, cl::NDRange(0, 0, 0),
                                      cl::NDRange(m_world.parameters().gridX * m_world.parameters().workX,
-                                                  m_world.parameters().gridY* m_world.parameters().workY,
-                                                  m_world.parameters().gridZ * m_world.parameters().workZ),
+                                                 m_world.parameters().gridY * m_world.parameters().workY,
+                                                 m_world.parameters().gridZ * m_world.parameters().workZ),
                                      cl::NDRange(m_world.parameters().workX,
-                                                  m_world.parameters().workY,
-                                                  m_world.parameters().workZ));
+                                                 m_world.parameters().workY,
+                                                 m_world.parameters().workZ));
         m_queue.enqueueReadBuffer(m_oDevice, CL_TRUE, 0, m_oHost.size()*sizeof(double), &m_oHost[0]);
         m_queue.finish();
     }
@@ -465,8 +465,11 @@ void OpenClHelper::launchCoulombKernel2()
 
         m_queue.enqueueWriteBuffer(m_sDevice, CL_TRUE, 0,(totalCharges)*sizeof(int), &m_sHost[0]);
         m_queue.enqueueWriteBuffer(m_qDevice, CL_TRUE, 0,(totalCharges)*sizeof(int), &m_qHost[0]);
-        m_queue.enqueueNDRangeKernel(m_coulomb2K, cl::NDRange(0), cl::NDRange(totalCharges*m_world.parameters().workSize), cl::NDRange(m_world.parameters().workSize));
-        m_queue.enqueueReadBuffer(m_oDevice, CL_TRUE, 0, m_oHost.size()*sizeof(double), &m_oHost[0]);
+        m_queue.enqueueNDRangeKernel(m_coulomb2K,
+                                     cl::NDRange(0),
+                                     cl::NDRange(totalCharges*m_world.parameters().workSize),
+                                     cl::NDRange(m_world.parameters().workSize));
+        m_queue.enqueueReadBuffer(m_oDevice, CL_TRUE, 0, (totalCharges)*sizeof(double), &m_oHost[0]);
         m_queue.finish();
     }
     catch(cl::Error& error)
@@ -536,8 +539,11 @@ void OpenClHelper::launchGaussKernel2()
 
         m_queue.enqueueWriteBuffer(m_sDevice, CL_TRUE, 0,(totalCharges)*sizeof(int), &m_sHost[0]);
         m_queue.enqueueWriteBuffer(m_qDevice, CL_TRUE, 0,(totalCharges)*sizeof(int), &m_qHost[0]);
-        m_queue.enqueueNDRangeKernel(m_guass2K, cl::NDRange(0), cl::NDRange(totalCharges * m_world.parameters().workSize), cl::NDRange(m_world.parameters().workSize));
-        m_queue.enqueueReadBuffer(m_oDevice, CL_TRUE, 0, m_oHost.size()*sizeof(double), &m_oHost[0]);
+        m_queue.enqueueNDRangeKernel(m_guass2K,
+                                     cl::NDRange(0),
+                                     cl::NDRange(totalCharges*m_world.parameters().workSize),
+                                     cl::NDRange(m_world.parameters().workSize));
+        m_queue.enqueueReadBuffer(m_oDevice, CL_TRUE, 0, (totalCharges)*sizeof(double), &m_oHost[0]);
         m_queue.finish();
     }
     catch(cl::Error& error)

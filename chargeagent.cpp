@@ -365,6 +365,10 @@ void ChargeAgent::compareCoulomb()
     double PDIFF1 = fabs(DIFF1)/(0.5 *(fabs(CPU1)+ fabs(GPU1))) * 100.0;
     double PDIFF2 = fabs(DIFF2)/(0.5 *(fabs(CPU2)+ fabs(GPU2))) * 100.0;
 
+    bool FAILED  = DIFF   > 1e-4;
+    bool FAILED1 = PDIFF1 > 1e-4;
+    bool FAILED2 = PDIFF2 > 1e-4;
+
     // RATIO
     double RATIO  = GPU  / CPU ;
     double RATIO1 = GPU1 / CPU1;
@@ -414,14 +418,40 @@ void ChargeAgent::compareCoulomb()
     qDebug() << qPrintable(QString("DIFF_2 : %1 (%2 %)")
                            .arg( DIFF2, w, fmt, p)
                            .arg(PDIFF2, w, fmt, p));
-    qDebug() << qPrintable(QString("RATIO  : %1")
+    if (FAILED)
+    {
+        qDebug() << qPrintable(QString("RATIO  : %1 FAILED!!!")
                            .arg(RATIO , w, fmt, p));
-    qDebug() << qPrintable(QString("RATIO1 : %1")
-                           .arg(RATIO1, w, fmt, p));
-    qDebug() << qPrintable(QString("RATIO2 : %1")
-                           .arg(RATIO2, w, fmt, p));
+    }
+    else
+    {
+        qDebug() << qPrintable(QString("RATIO  : %1 PASSED")
+                           .arg(RATIO , w, fmt, p));
+    }
 
-    if(DIFF > 1e-4 || PDIFF1 > 1e-4 || PDIFF2 > 1e-4)
+    if (FAILED1)
+    {
+        qDebug() << qPrintable(QString("RATIO1 : %1 FAILED!!!")
+                           .arg(RATIO1, w, fmt, p));
+    }
+    else
+    {
+        qDebug() << qPrintable(QString("RATIO1 : %1 PASSED")
+                           .arg(RATIO1, w, fmt, p));
+    }
+
+    if (FAILED2)
+    {
+        qDebug() << qPrintable(QString("RATIO2 : %1 FAILED!!!")
+                           .arg(RATIO2, w, fmt, p));
+    }
+    else
+    {
+        qDebug() << qPrintable(QString("RATIO2 : %1 PASSED")
+                           .arg(RATIO2, w, fmt, p));
+    }
+
+    if(FAILED || FAILED1 || FAILED2)
     {
         qFatal("warning: CPU and GPU disagree for %s %d",
                  qPrintable(toQString(m_type)),
