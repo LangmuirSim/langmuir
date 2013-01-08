@@ -1,5 +1,6 @@
 bin/
 build/
+debug/
 CMakeLists.txt.user
 doc/
 copy_to_frank.py
