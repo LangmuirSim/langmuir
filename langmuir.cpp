@@ -62,7 +62,7 @@ void alterMaxThreads(SimulationParameters &par)
 int main (int argc, char *argv[])
 {
     // Create stdout
-    QTextStream qout(stdout);
+    // QTextStream qout(stdout);
 
     // Get the current time
     QDateTime begin = QDateTime::currentDateTime();
@@ -125,9 +125,9 @@ int main (int argc, char *argv[])
         sim.performIterations (par.iterationsPrint);
 
         // Output to the screen
-        progress(qout, par) << '\r'; qout.flush();
+        // progress(qout, par) << '\r'; qout.flush();
     }
-    progress(qout, par) << '\n'; qout.flush();
+    // progress(qout, par) << '\n'; qout.flush();
 
     // Output some stuff
     if (par.outputIsOn)
