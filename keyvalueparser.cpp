@@ -90,6 +90,7 @@ KeyValueParser::KeyValueParser(World &world, QObject *parent) :
     registerVariable("work.z", m_parameters.workZ);
     registerVariable("work.size", m_parameters.workSize);
     registerVariable("opencl.threshold", m_parameters.openclThreshold);
+    registerVariable("opencl.device.id", m_parameters.openclDeviceID);
     registerVariable("max.threads", m_parameters.maxThreads);
 
     registerVariable("boltzmann.constant", m_parameters.boltzmannConstant, Variable::Constant);

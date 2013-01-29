@@ -41,7 +41,7 @@ void OpenClHelper::initializeOpenCL()
         m_context = cl::Context(devices, contextProperties, NULL, NULL, &err);
 
         //obtain command queue
-        m_queue = cl::CommandQueue(m_context, devices[0], 0, &err);
+        m_queue = cl::CommandQueue(m_context, devices[m_world.parameters().openclDeviceID], 0, &err);
         err = m_queue.finish();
 
         //obtain kernel source

@@ -218,6 +218,9 @@ struct SimulationParameters
     //! the minimum number of charges that must be present to use OpenCL
     qint32 openclThreshold;
 
+    //! the device to choose if there are multiple
+    qint32 openclDeviceID;
+
     //! physical constant, the boltzmann constant
     qreal boltzmannConstant;
 
@@ -349,6 +352,7 @@ struct SimulationParameters
         workZ                  (4),
         workSize               (256),
         openclThreshold        (256),
+        openclDeviceID         (0),
 
         boltzmannConstant      (1.3806504e-23),
         dielectricConstant     (3.5),
@@ -609,6 +613,11 @@ inline void checkSimulationParameters(SimulationParameters& par)
     if (par.openclThreshold <= 0)
     {
         qFatal("opencl.threshold must be >= 0");
+    }
+
+    if (par.openclDeviceID <= 0)
+    {
+        qFatal("opencl.device.id must be >= 0");
     }
 
     if (par.balanceCharges && par.simulationType != "solarcell")
