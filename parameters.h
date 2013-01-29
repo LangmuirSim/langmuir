@@ -615,7 +615,7 @@ inline void checkSimulationParameters(SimulationParameters& par)
         qFatal("opencl.threshold must be >= 0");
     }
 
-    if (par.openclDeviceID <= 0)
+    if (par.openclDeviceID < 0)
     {
         qFatal("opencl.device.id must be >= 0");
     }
