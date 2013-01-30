@@ -30,15 +30,14 @@ void OpenClHelper::initializeOpenCL()
         err = cl::Platform::get(&platforms);
         if(platforms.size()<= 0){ throw cl::Error(-1, "can not find any platforms!"); }
 
-        //obtain devices
-        cl::vector<cl::Device> devices;
-        err = platforms[0].getDevices(CL_DEVICE_TYPE_GPU, &devices);
-        if(devices.size()<= 0){ throw cl::Error(-1, "can not find any devices!"); }
-
         //obtain context
         cl_context_properties contextProperties[3] =
         { CL_CONTEXT_PLATFORM,(cl_context_properties)platforms[0](), 0 };
-        m_context = cl::Context(devices, contextProperties, NULL, NULL, &err);
+        m_context = cl::Context(CL_DEVICE_TYPE_GPU, contextProperties, NULL, NULL, &err);
+
+        //obtain devices
+        cl::vector<cl::Device> devices = m_context.getInfo<CL_CONTEXT_DEVICES>(&err);
+        if(devices.size()<= 0){ throw cl::Error(-1, "can not find any devices!"); }
 
         //obtain command queue
         m_queue = cl::CommandQueue(m_context, devices[m_world.parameters().openclDeviceID], 0, &err);
