@@ -260,6 +260,10 @@ void OpenClHelper::initializeOpenCL()
     {
         qDebug("%s (%d)", error.what(), error.err());
         m_world.parameters().okCL = false;
+        if (m_world.parameters().useOpenCL)
+        {
+            qFatal("exiting because there were OpenCL errors and use.opencl=True");
+        }
         return;
     }
     m_world.parameters().okCL = true;
