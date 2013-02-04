@@ -22,9 +22,9 @@
 
 #### NOTES ####
 * ON MAC
-  *  cmake -DCMAKE_OSX_ARCHITECTURES=i386 ../
+  *  cmake -DCMAKE_OSX_ARCHITECTURES=x86_64 ../
 * OPENCL
-  *  cmake -DOPENCL_INCLUDE_DIRS=...
+  *  cmake -DOPENCL_INCLUDE_DIRS=..
 * Documentation
   *  open doc/html/index.html in a web browser
 
