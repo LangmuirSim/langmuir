@@ -447,7 +447,7 @@ std::istream& CheckPointer::loadFluxState(std::istream &stream, ConfigurationInf
     {
         stream >> token;
         checkStream(stream, QString("expected flux %1 of %2").arg(i+1).arg(size));
-        unsigned int value = token.toUInt(&ok);
+        quint64 value = token.toULongLong(&ok);
         if (!ok)
         {
             qFatal("stream error: can not convert %s to unsigned int\n\t"
