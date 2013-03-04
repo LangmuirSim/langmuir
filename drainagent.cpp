@@ -71,6 +71,10 @@ RecombinationAgent::RecombinationAgent(World &world, QObject *parent)
 void RecombinationAgent::guessProbability()
 {
     m_probability = (m_world.parameters().recombinationRate * m_world.parameters().currentStep) / m_attempts;
+    if (m_probability <= m_world.parameters().recombinationRate)
+    {
+        m_probability = m_world.parameters().recombinationRate;
+    }
 }
 
 bool DrainAgent::tryToAccept(ChargeAgent *charge)
