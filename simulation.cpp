@@ -216,7 +216,7 @@ void Simulation::performRecombinations()
 {
     if (m_world.parameters().simulationType == "solarcell")
     {
-        if (m_world.parameters().recombinationRate > 0 || (m_world.parameters().outputIdsOnEncounter && m_world.parameters().outputIsOn))
+        if (m_world.parameters().recombinationRate > 0)
         {
             foreach (ChargeAgent *charge, m_world.electrons())
             {

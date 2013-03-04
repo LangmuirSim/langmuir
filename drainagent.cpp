@@ -144,7 +144,9 @@ bool RecombinationAgent::tryToAccept(ChargeAgent *charge)
             else
             {
                 // We need to make a new neighborlist
-                QVector<int> constructed_neighbors = m_grid.neighborsSite(charge->getCurrentSite(), m_world.parameters().recombinationRange);
+                QVector<int> constructed_neighbors = m_grid.neighborsSite(
+                            charge->getCurrentSite(),
+                            m_world.parameters().recombinationRange);
 
                 // Loop over the neighbors and check if charges are there
                 foreach (int otherSite, constructed_neighbors)
@@ -163,10 +165,12 @@ bool RecombinationAgent::tryToAccept(ChargeAgent *charge)
     if (neighbors.size() > 0)
     {
         // Randomly choose which neighboring site to recombine with
-        int recombiningSite = neighbors[m_world.randomNumberGenerator().integer(0, neighbors.size()-1)];
+        int recombiningSite = neighbors[m_world.randomNumberGenerator().integer(
+                    0, neighbors.size()-1)];
 
         // Get the other ChargeAgent
-        ChargeAgent *other = dynamic_cast<ChargeAgent*>(charge->otherGrid().agentAddress(recombiningSite));
+        ChargeAgent *other = dynamic_cast<ChargeAgent*>(
+                    charge->otherGrid().agentAddress(recombiningSite));
 
         // Make sure things are OK with the other ChargeAgent
         if (!other)
@@ -174,76 +178,28 @@ bool RecombinationAgent::tryToAccept(ChargeAgent *charge)
              qFatal("dynamic cast from Agent* to ChargeAgent* has failed during recombination");
         }
 
-        // Attempt recombination only if we should...
-        if (m_world.parameters().recombinationRate > 0)
+        // Recombination already happened
+        if (other->removed())
         {
-            // Output encounters & recombine
-            if (m_world.parameters().outputIdsOnEncounter)
-            {
-                // Try to recombine
-                m_attempts += 1;
-                if(shouldTransport(recombiningSite))
-                {
-                    // RecombinationAgent has succeeded
-                    m_successes += 1;
-
-                    // Remove both charges
-                    charge->setRemoved(true);
-                    other->setRemoved(true);
-
-                    // Report encounter
-                    m_world.logger().reportExciton(*charge, *other, true);
-
-                    // A recombination occured
-                    return true;
-                }
-                // Report encounter
-                m_world.logger().reportExciton(*charge, *other, false);
-
-                // No recombination occured
-                return false;
-            }
-            // Just recombine
-            else
-            {
-                // Try to recombine
-                m_attempts += 1;
-                if(shouldTransport(recombiningSite))
-                {
-                    // RecombinationAgent has succeeded
-                    m_successes += 1;
-
-                    // Remove both charges
-                    charge->setRemoved(true);
-                    other->setRemoved(true);
-
-                    // A recombination occured
-                    return true;
-                }
-                // No recombination occured
-                return false;
-            }
+            return false;
         }
-        // (recombination.rate <= 0)
-        else
+
+        // Try to recombine
+        m_attempts += 1;
+
+        if(shouldTransport(recombiningSite))
         {
-            // Just output encounters
-            if (m_world.parameters().outputIdsOnEncounter)
-            {
-                // Report encounter
-                m_world.logger().reportExciton(*charge, *other, false);
+            // RecombinationAgent has succeeded
+            m_successes += 1;
 
-                // No recombination occured
-                return false;
-            }
-            // Why is this function even being called
-            else
-            {
-                qFatal("the recombination agent is calling tryToAccept when the recombination.rate"
-                       "<= 0 && output.ids.on.encounter == false");
-            }
+            // Remove both charges
+            charge->setRemoved(true);
+            other->setRemoved(true);
+
+            // A recombination occured
+            return true;
         }
-        // This should never ever ever never ever ever never ever happen
+        // No recombination occured
         return false;
     }
     // No charges to recombine with found
