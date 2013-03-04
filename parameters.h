@@ -637,6 +637,11 @@ inline void checkSimulationParameters(SimulationParameters& par)
             qWarning("warning: 3 * coulomb.gaussian.sigma <= qMin(grid.x, grid.y, grid.z)");
         }
     }
+
+    if (par.outputIdsOnEncounter)
+    {
+        qFatal("output.ids.on.encouter is deprecated");
+    }
 }
 
 }
