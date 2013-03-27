@@ -66,8 +66,7 @@ void Simulation::performIterations(int nIterations)
                 // changed in the CPU version. There is like a 99.9999% chance
                 // something is messed up on the CPU side - I have spent days/hours
                 // being tormented by some sublte bug, and it always turns out to
-                // be something wrong with the CPU functions (and for some reason
-                // its always something Marcus coded)
+                // be something wrong with the CPU functions
                 // m_world.opencl().compareHostAndDeviceForAllCarriers();
 
                 QFutureSynchronizer<void> sync;
