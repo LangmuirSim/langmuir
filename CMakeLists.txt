@@ -28,6 +28,7 @@ SET(PROJECT_SOURCES
     keyvalueparser.cpp
     checkpointer.cpp
     tolerance.cpp
+    pbsgpuparser.cpp
 )
 
 SET(PROJECT_HEADERS
@@ -50,6 +51,7 @@ SET(PROJECT_HEADERS
     variable.h
     checkpointer.h
     tolerance.h
+    pbsgpuparser.h
 )
 
 SET(PROJECT_MOC_HEADERS_1
@@ -68,6 +70,7 @@ SET(PROJECT_MOC_HEADERS_1
     variable.h
     checkpointer.h
     tolerance.h
+    pbsgpuparser.h
 )
 
 SET(PROJECT_MOC_HEADERS_2

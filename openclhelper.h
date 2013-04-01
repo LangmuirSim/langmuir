@@ -1,7 +1,6 @@
 #ifndef OPENCLHELPER_H
 #define OPENCLHELPER_H
 #define __CL_ENABLE_EXCEPTIONS
-#define __NO_STD_VECTOR
 
 #ifdef LANGMUIR_OPEN_CL
 #include "cl.hpp"
@@ -108,9 +107,19 @@ private:
 
 #ifdef LANGMUIR_OPEN_CL
     /**
+     * @brief An OpenCL platform is the vendor (Intel, NVIDIA, AMD, etc)
+     */
+    cl::Platform m_platform;
+
+    /**
      * @brief An OpenCL context is like a set of parameters for OpenCL (compare to an OpenGL context)
      */
     cl::Context m_context;
+
+    /**
+     * @brief The GPU
+     */
+    cl::Device m_device;
 
     /**
      * @brief A Queue to store a bunch of commands to OpenCL to execute (in our case, the queue is in serial mode)
