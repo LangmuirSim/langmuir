@@ -70,7 +70,7 @@ RecombinationAgent::RecombinationAgent(World &world, QObject *parent)
 
 void RecombinationAgent::guessProbability()
 {
-    if ((m_attemps > 0) && (m_world.parameters().currentStep > 0))
+    if ((m_attempts > 0) && (m_world.parameters().currentStep > 0))
     {
         m_probability = (m_world.parameters().recombinationRate * m_world.parameters().currentStep) / m_attempts;
     }
