@@ -272,7 +272,7 @@ void Simulation::balanceCharges()
         tries += 1;
         if (tries > 1024)
         {
-            qFatal("can not balance electrons");
+            qFatal("message: can not balance electrons");
         }
     }
 
@@ -304,7 +304,7 @@ void Simulation::balanceCharges()
         tries += 1;
         if (tries > 1024)
         {
-            qFatal("can not balance holes");
+            qFatal("message: can not balance holes");
         }
     }
 //    for (unsigned int i = 0;

@@ -142,7 +142,7 @@ void ChargeAgent::decideFuture()
         }
         else
         {
-            qFatal("can not cast pointer to DrainAgent");
+            qFatal("message: can not cast pointer to DrainAgent");
         }
         // Reject the move
         m_fSite = m_site;
@@ -453,7 +453,7 @@ void ChargeAgent::compareCoulomb()
 
     if(FAILED || FAILED1 || FAILED2)
     {
-        qFatal("warning: CPU and GPU disagree for %s %d",
+        qFatal("message: CPU and GPU disagree for %s %d",
                  qPrintable(toQString(m_type)),
                  m_openClID);
     }

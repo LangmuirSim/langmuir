@@ -52,7 +52,7 @@ void OpenClHelper::initializeOpenCL()
         QFile file(":/resources/kernel.cl");
         if(!file.open(QIODevice::ReadOnly))
         {
-            qWarning("warning: error opening file: :/resources.kernel.cl");
+            qDebug("message: error opening file: :/resources.kernel.cl");
             throw cl::Error(-1, "OpenCL Error!");
         }
         QByteArray lines = file.readAll();
@@ -146,11 +146,11 @@ void OpenClHelper::initializeOpenCL()
     }
     catch(cl::Error& error)
     {
-        qDebug("%s (%d)", error.what(), error.err());
+        qDebug("message: %s (%d)", error.what(), error.err());
         m_world.parameters().okCL = false;
         if (m_world.parameters().useOpenCL)
         {
-            qFatal("OpenCL errors, yet use.opencl=True");
+            qFatal("message: OpenCL errors, yet use.opencl=True");
         }
         return;
     }
@@ -165,13 +165,13 @@ bool OpenClHelper::toggleOpenCL(bool on)
         if(!(m_world.parameters().okCL))
         {
             m_world.parameters().useOpenCL = false;
-            qDebug("can not use openCL - openCL has been turned off");
+            qDebug("message: can not use openCL - openCL has been turned off");
             return false;
         }
         if(!(m_world.parameters().coulombCarriers))
         {
             m_world.parameters().useOpenCL = false;
-            qDebug("coulomb interactions are off - disabling openCL");
+            qDebug("message: coulomb interactions are off - disabling openCL");
             return false;
         }
         m_world.parameters().useOpenCL = true;
@@ -253,8 +253,8 @@ void OpenClHelper::launchCoulombKernel1()
     }
     catch(cl::Error& error)
     {
-        qWarning("%s(%d)", error.what(), error.err());
-        qFatal("Fatal OpenCl fatal error when calling coulomb1");
+        qDebug("message: %s(%d)", error.what(), error.err());
+        qFatal("message: Fatal OpenCl fatal error when calling coulomb1");
         return;
     }
 #endif //LANGMUIR_OPEN_CL
@@ -329,8 +329,8 @@ void OpenClHelper::launchGaussKernel1()
     }
     catch(cl::Error& error)
     {
-        qWarning("%s(%d)", error.what(), error.err());
-        qFatal("Fatal OpenCl fatal error when calling gauss1");
+        qDebug("message: %s(%d)", error.what(), error.err());
+        qFatal("message: Fatal OpenCl fatal error when calling gauss1");
         return;
     }
 #endif //LANGMUIR_OPEN_CL
@@ -416,8 +416,8 @@ void OpenClHelper::launchCoulombKernel2()
     }
     catch(cl::Error& error)
     {
-        qWarning("%s(%d)", error.what(), error.err());
-        qFatal("Fatal OpenCl fatal error when calling coulomb2");
+        qDebug("message: %s(%d)", error.what(), error.err());
+        qFatal("message: Fatal OpenCl fatal error when calling coulomb2");
         return;
     }
 #endif //LANGMUIR_OPEN_CL
@@ -503,8 +503,8 @@ void OpenClHelper::launchGaussKernel2()
     }
     catch(cl::Error& error)
     {
-        qWarning("%s(%d)", error.what(), error.err());
-        qFatal("Fatal OpenCl fatal error when calling gauss2");
+        qDebug("message: %s(%d)", error.what(), error.err());
+        qFatal("message: Fatal OpenCl fatal error when calling gauss2");
         return;
     }
 #endif //LANGMUIR_OPEN_CL

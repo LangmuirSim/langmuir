@@ -268,7 +268,7 @@ template <class T> inline void TypedVariable<T>::read(const QString& token)
 {
     if (m_mode.testFlag(Constant))
     {
-        qWarning("warning: ignoring constant; key: %s, token: %s",
+        qDebug("message: ignoring constant; key: %s, token: %s",
                  qPrintable(m_key),qPrintable(token));
         return;
     }
@@ -316,7 +316,7 @@ template <> inline void TypedVariable<qreal>::convert(const QString& token, qrea
 {
     bool ok = false;
     result = token.toDouble(&ok);
-    if (!ok) qFatal("can not convert to double: %s", qPrintable(token));
+    if (!ok) qFatal("message: can not convert to double: %s", qPrintable(token));
 }
 
 //! convert to float
@@ -324,7 +324,7 @@ template <> inline void TypedVariable<float>::convert(const QString& token, floa
 {
     bool ok = false;
     result = token.toFloat(&ok);
-    if (!ok) qFatal("can not convert to double: %s", qPrintable(token));
+    if (!ok) qFatal("message: can not convert to double: %s", qPrintable(token));
 }
 
 //! convert to bool
@@ -343,7 +343,7 @@ template <> inline void TypedVariable<bool>::convert(const QString& token, bool&
     {
         bool ok = false;
         result = token.toInt(&ok);
-        if (!ok) qFatal("can not convert to bool: %s", qPrintable(token));
+        if (!ok) qFatal("message: can not convert to bool: %s", qPrintable(token));
     }
 }
 
@@ -352,7 +352,7 @@ template <> inline void TypedVariable<qint32>::convert(const QString& token, qin
 {
     bool ok = false;
     result = token.toInt(&ok);
-    if (!ok) qFatal("can not convert to int: %s", qPrintable(token));
+    if (!ok) qFatal("message: can not convert to int: %s", qPrintable(token));
 }
 
 //! convert to unsigned int
@@ -360,7 +360,7 @@ template <> inline void TypedVariable<quint32>::convert(const QString& token, qu
 {
     bool ok = false;
     result = token.toUInt(&ok);
-    if (!ok) qFatal("can not convert to unsigned int: %s", qPrintable(token));
+    if (!ok) qFatal("message: can not convert to unsigned int: %s", qPrintable(token));
 }
 
 //! convert to long long int
@@ -368,7 +368,7 @@ template <> inline void TypedVariable<qint64>::convert(const QString& token, qin
 {
     bool ok = false;
     result = token.toLongLong(&ok);
-    if (!ok) qFatal("can not convert to long long int: %s", qPrintable(token));
+    if (!ok) qFatal("message: can not convert to long long int: %s", qPrintable(token));
 }
 
 //! convert to unsigned long long int
@@ -376,7 +376,7 @@ template <> inline void TypedVariable<quint64>::convert(const QString& token, qu
 {
     bool ok = false;
     result = token.toULongLong(&ok);
-    if (!ok) qFatal("can not convert to unsigned long long int: %s", qPrintable(token));
+    if (!ok) qFatal("message: can not convert to unsigned long long int: %s", qPrintable(token));
 }
 
 //! convert to QDateTime, assumes data is a qint64 mSecsSinceEpoch
@@ -384,7 +384,7 @@ template <> inline void TypedVariable<QDateTime>::convert(const QString& token, 
 {
     bool ok = false;
     qint64 msecSinceEpoch = token.toLongLong(&ok);
-    if (!ok) qFatal("can not convert to QDateTime (expecting long long int): %s", qPrintable(token));
+    if (!ok) qFatal("message: can not convert to QDateTime (expecting long long int): %s", qPrintable(token));
     result = QDateTime::fromMSecsSinceEpoch(msecSinceEpoch);
 }
 

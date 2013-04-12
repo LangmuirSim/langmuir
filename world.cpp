@@ -457,7 +457,7 @@ void World::initialize(const QString &fileName)
 
     // Save the seed that has been used
     m_parameters->randomSeed = m_rand->seed();
-    qDebug() << "wanring: random.seed is" << parameters().randomSeed;
+    qDebug() << "message: random.seed is" << parameters().randomSeed;
 
     // Create Electron Grid
     m_electronGrid = new Grid(refWorld, this);
@@ -536,7 +536,7 @@ void World::placeDefects(const QList<int>& siteIDs)
 
     if (toBePlacedRandomly < 0)
     {
-        qFatal("can not place defects;\n\tmost likely the list "
+        qFatal("message: can not place defects;\n\tmost likely the list "
                "of defect site IDs exceeds the maximum "
                "given by defect.precentage");
     }
@@ -547,7 +547,7 @@ void World::placeDefects(const QList<int>& siteIDs)
         int site = siteIDs.at(i);
         if ( defectSiteIDs().contains(site) )
         {
-            qFatal("can not add defect;\n\tdefect already exists");
+            qFatal("message: can not add defect;\n\tdefect already exists");
         }
         electronGrid().registerDefect(site);
         holeGrid().registerDefect(site);
@@ -575,7 +575,7 @@ void World::placeDefects(const QList<int>& siteIDs)
 
         if (tries > maxTries)
         {
-            qFatal("can not seed defects;\n\texceeded max tries(%d)",
+            qFatal("message: can not seed defects;\n\texceeded max tries(%d)",
                    maxTries);
         }
     }
@@ -592,7 +592,7 @@ void World::placeElectrons(const QList<int>& siteIDs)
     {
         if (!source.tryToSeed(siteIDs[i]))
         {
-            qFatal("can not inject electron at site %d",
+            qFatal("message: can not inject electron at site %d",
                    siteIDs[i]);
         }
     }
@@ -609,7 +609,7 @@ void World::placeElectrons(const QList<int>& siteIDs)
             tries++;
             if (tries > maxTries)
             {
-                qFatal("can not seed electrons;\n\texceeded max tries(%d)",
+                qFatal("message: can not seed electrons;\n\texceeded max tries(%d)",
                        maxTries);
             }
         }
@@ -627,7 +627,7 @@ void World::placeHoles(const QList<int>& siteIDs)
     {
         if (!source.tryToSeed(siteIDs[i]))
         {
-            qFatal("can not inject hole at site %d",
+            qFatal("message: can not inject hole at site %d",
                    siteIDs[i]);
         }
     }
@@ -644,7 +644,7 @@ void World::placeHoles(const QList<int>& siteIDs)
             tries++;
             if (tries > maxTries)
             {
-                qFatal("can not seed holes;\n\texceeded max tries(%d)",
+                qFatal("message: can not seed holes;\n\texceeded max tries(%d)",
                        maxTries);
             }
         }
@@ -716,14 +716,14 @@ void World::createSources()
     }
     else
     {
-        qFatal("unknown simulation.type - can not create sources");
+        qFatal("message: unknown simulation.type - can not create sources");
     }
 
-    qWarning("warning: e.source.r.rate is %.3g", m_electronSourceAgentRight->rate());
-    qWarning("warning: e.source.l.rate is %.3g", m_electronSourceAgentLeft->rate());
-    qWarning("warning: h.source.r.rate is %.3g", m_holeSourceAgentRight->rate());
-    qWarning("warning: h.source.l.rate is %.3g", m_holeSourceAgentLeft->rate());
-    qWarning("warning: generation.rate is %.3g", m_excitonSourceAgent->rate());
+    qDebug("message: e.source.r.rate is %.3g", m_electronSourceAgentRight->rate());
+    qDebug("message: e.source.l.rate is %.3g", m_electronSourceAgentLeft->rate());
+    qDebug("message: h.source.r.rate is %.3g", m_holeSourceAgentRight->rate());
+    qDebug("message: h.source.l.rate is %.3g", m_holeSourceAgentLeft->rate());
+    qDebug("message: generation.rate is %.3g", m_excitonSourceAgent->rate());
 }
 
 void World::createDrains()
@@ -774,14 +774,14 @@ void World::createDrains()
     }
     else
     {
-        qFatal("unknown simulation.type - can not create drains");
+        qFatal("message: unknown simulation.type - can not create drains");
     }
 
-    qWarning("warning: e.drain.r.rate = %.3g", m_electronDrainAgentRight->rate());
-    qWarning("warning: e.drain.l.rate = %.3g", m_electronDrainAgentLeft->rate());
-    qWarning("warning: h.drain.r.rate = %.3g", m_holeDrainAgentRight->rate());
-    qWarning("warning: h.drain.l.rate = %.3g", m_holeDrainAgentLeft->rate());
-    qWarning("warning: recombination.rate = %.3g", m_recombinationAgent->rate());
+    qDebug("message: e.drain.r.rate = %.3g", m_electronDrainAgentRight->rate());
+    qDebug("message: e.drain.l.rate = %.3g", m_electronDrainAgentLeft->rate());
+    qDebug("message: h.drain.r.rate = %.3g", m_holeDrainAgentRight->rate());
+    qDebug("message: h.drain.l.rate = %.3g", m_holeDrainAgentLeft->rate());
+    qDebug("message: recombination.rate = %.3g", m_recombinationAgent->rate());
 }
 
 void World::setFluxInfo(const QList<quint64> &fluxInfo)
@@ -907,7 +907,7 @@ void World::setFluxInfo(const QList<quint64> &fluxInfo)
     }
     else
     {
-        qFatal("%s\ndo not recognize [FluxInfo] format... (of size %d, for simulation.type=%s)",
+        qFatal("message: %s\ndo not recognize [FluxInfo] format... (of size %d, for simulation.type=%s)",
                qPrintable(format), fluxInfo.size(), qPrintable(parameters().simulationType));
     }
 }

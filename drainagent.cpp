@@ -182,7 +182,7 @@ bool RecombinationAgent::tryToAccept(ChargeAgent *charge)
         // Make sure things are OK with the other ChargeAgent
         if (!other)
         {
-             qFatal("dynamic cast from Agent* to ChargeAgent* has failed during recombination");
+             qFatal("message: dynamic cast from Agent* to ChargeAgent* has failed during recombination");
         }
 
         // Recombination already happened
