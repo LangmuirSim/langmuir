@@ -36,27 +36,54 @@ QTextStream& progress(QTextStream &stream, SimulationParameters& par)
 
 void alterMaxThreads(SimulationParameters &par)
 {
-    if (par.maxThreads <= 0)
-    {
-        return;
-    }
-
     QThreadPool& threadPool = *QThreadPool::globalInstance();
     int maxThreadCount = threadPool.maxThreadCount();
 
-    if (par.maxThreads == maxThreadCount)
+    char * PBS_NODEFILE = getenv("PBS_NODEFILE");
+    int desiredThreadCount = 0;
+
+    if (PBS_NODEFILE == NULL)
     {
+        qDebug("message: $PBS_NODEFILE not found");
+        desiredThreadCount = par.maxThreads;
+    }
+    else
+    {
+        qDebug("message: $PBS_NODEFILE = %s", PBS_NODEFILE);
+        QString path = QString(PBS_NODEFILE);
+
+        QFile file;
+        file.setFileName(path);
+        if (!file.open(QIODevice::ReadOnly))
+        {
+            qFatal("message: could not open %s", qPrintable(path));
+        }
+
+        desiredThreadCount = 0;
+        while (!file.atEnd())
+        {
+            file.readLine();
+            desiredThreadCount += 1;
+        }
+
+        qDebug("message: ignoring SimulationParameters::maxThreads");
+    }
+
+    if (desiredThreadCount <= 0 || desiredThreadCount == maxThreadCount)
+    {
+        qDebug("message: QThreadPool::maxThreadCount set to %d",
+               threadPool.maxThreadCount());
         return;
     }
 
-    if (par.maxThreads > maxThreadCount)
+    if (desiredThreadCount > maxThreadCount)
     {
-        qWarning("warning: requesting more threads than recommended\n"
-                 "QThread::idealThreadCount = %d\n"
-                 "max.threads = %d", maxThreadCount, par.maxThreads);
+        qFatal("message: requested more threads than recommended %d > %d",
+               desiredThreadCount, maxThreadCount);
     }
 
-    threadPool.setMaxThreadCount(par.maxThreads);
+    threadPool.setMaxThreadCount(desiredThreadCount);
+    qDebug("message: QThreadPool::maxThreadCount set to %d", threadPool.maxThreadCount());
 }
 
 int main (int argc, char *argv[])
@@ -195,4 +222,6 @@ int main (int argc, char *argv[])
                 << newline
                 << flush;
     }
+
+    qDebug("message: Langmuir has exited successfully");
 }
