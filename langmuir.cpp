@@ -103,7 +103,7 @@ int main (int argc, char *argv[])
     QStringList args = app.arguments();
     if (args.size() != 2)
     {
-        qFatal("correct use is: langmuir input.dat");
+        qFatal("message: correct use is: langmuir input.dat");
     }
     QString inputFile = args.at(1);
 
@@ -144,6 +144,8 @@ int main (int argc, char *argv[])
             world.logger().saveGridPotential();
         }
     }
+
+    qDebug("message: performing iterations...");
 
     // Perform production steps
     for (int j = par.currentStep; j < par.iterationsReal; j += par.iterationsPrint)

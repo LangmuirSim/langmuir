@@ -24,7 +24,7 @@ void Tolerance::checkCritera()
 {
     if (m_criteria < 0 || m_criteria > 1)
     {
-        qFatal("invalid criteria for convergence: %f",m_criteria);
+        qFatal("message: invalid criteria for convergence: %f",m_criteria);
     }
 }
 

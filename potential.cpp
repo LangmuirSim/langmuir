@@ -73,7 +73,7 @@ void Potential::setPotentialTraps(const QList<int> &trapIDs,
 {
     if ( m_world.numTraps() != 0 )
     {
-        qFatal("traps have already been created");
+        qFatal("message: traps have already been created");
     }
 
     int toBePlacedTotal    = m_world.maxTraps();
@@ -122,14 +122,14 @@ void Potential::setPotentialTraps(const QList<int> &trapIDs,
             toBePlacedSeeds > toBePlacedTotal ||
             toBePlacedGrown > toBePlacedTotal)
     {
-        qFatal("invalid trap %s",qPrintable(message));
+        qFatal("message: invalid trap %s",qPrintable(message));
     }
 
     if ( toBePlacedForced > 0 &&
          trapPotentials.size() != 0 &&
          trapPotentials.size() != trapIDs.size() )
     {
-        qFatal("invalid trap %s\n forced number of ids (%d) "
+        qFatal("message: invalid trap %s\n forced number of ids (%d) "
                "does not match forced number of passed "
                "potentials (%d)",
                qPrintable(message),

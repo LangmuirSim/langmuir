@@ -190,7 +190,7 @@ QVector<int> Grid::sliceIndex(int xi, int xf, int yi, int yf, int zi, int zf)
          xi > m_xSize || yi > m_ySize || zi > m_zSize  ||
          xf > m_xSize || yf > m_ySize || zf > m_zSize)
     {
-        qFatal("invalid slice index range:(%d, %d, %d)->(%d, %d, %d)", xi, yi, zi, xf, yf, zf);
+        qFatal("message: invalid slice index range:(%d, %d, %d)->(%d, %d, %d)", xi, yi, zi, xf, yf, zf);
     }
     QVector<int> ndx;
     for(int i = xi; i < xf; i++){
@@ -439,7 +439,7 @@ QVector<int> Grid::neighborsSite(int site, int hoppingRange)
         }
         default:
         {
-            qFatal("invalid neighbor list size parameter : (%d)", hoppingRange);
+            qFatal("message: invalid neighbor list size parameter : (%d)", hoppingRange);
             break;
         }
     }
@@ -518,7 +518,7 @@ QVector<int> Grid::neighborsFace(Grid::CubeFace cubeFace)
 
     default:
     {
-        qFatal("can not generate neightbors for face; unknown face");
+        qFatal("message: can not generate neightbors for face; unknown face");
         return QVector<int>();
         break;
     }
@@ -559,14 +559,14 @@ void Grid::registerSpecialAgent(Agent *agent, Grid::CubeFace cubeFace)
 {
     if(m_specialAgentCount >= m_specialAgentReserve)
     {
-        qFatal("can not register special agent; exceeded the max special agents; %d >= %d",
+        qFatal("message: can not register special agent; exceeded the max special agents; %d >= %d",
                m_specialAgentCount,m_specialAgentReserve);
     }
 
     QList< Agent *>& specialAgents = getSpecialAgentList(cubeFace);
     if(specialAgents.contains(agent))
     {
-        qFatal("can not register special agent; agent address already found");
+        qFatal("message: can not register special agent; agent address already found");
     }
     specialAgents.push_back(agent);
 
@@ -578,7 +578,7 @@ void Grid::registerSpecialAgent(Agent *agent, Grid::CubeFace cubeFace)
     }
     else
     {
-        qFatal("can not register special agent: site is already occupied");
+        qFatal("message: can not register special agent: site is already occupied");
     }
 
     QVector<int> neighbors = neighborsFace(cubeFace);
@@ -593,14 +593,14 @@ void Grid::unregisterSpecialAgent(Agent *agent, Grid::CubeFace cubeFace)
     QList< Agent *>& specialAgents = getSpecialAgentList(cubeFace);
     if(!(specialAgents.count(agent)== 1))
     {
-        qFatal("can not unregister special agent; agent address not found");
+        qFatal("message: can not unregister special agent; agent address not found");
     }
     specialAgents.removeOne(agent);
 
     int site = agent->getCurrentSite();
     if(!(m_agents[site] == agent))
     {
-        qFatal("can not unregister special agent! pointers do not match");
+        qFatal("message: can not unregister special agent! pointers do not match");
     }
 
     m_agentType[site] = Agent::Empty;
@@ -618,7 +618,7 @@ void Grid::registerAgent(Agent *agent)
     }
     else
     {
-        qFatal("can not register agent: site %d is invalid", site);
+        qFatal("message: can not register agent: site %d is invalid", site);
     }
     QVector<int> neighbors = neighborsSite(site, m_world.parameters().hoppingRange);
     agent->setNeighbors(neighbors);
@@ -629,7 +629,7 @@ void Grid::unregisterAgent(Agent *agent)
     int site = agent->getCurrentSite();
     if(!(m_agents[site] == agent))
     {
-        qFatal("can not unregister agent! pointers do not match");
+        qFatal("message: can not unregister agent! pointers do not match");
     }
     m_agentType[site] = Agent::Empty;
     m_agents[site] = 0;
@@ -644,7 +644,7 @@ void Grid::registerDefect(int site)
     }
     else
     {
-        qFatal("can not register defect: site is already occupied");
+        qFatal("message: can not register defect: site is already occupied");
     }
 }
 
@@ -652,7 +652,7 @@ void Grid::unregisterDefect(int site)
 {
     if(m_agentType[site] != Agent::Defect || m_agents[site] != 0)
     {
-        qFatal("can not unregister defect! type does not match");
+        qFatal("message: can not unregister defect! type does not match");
     }
     m_agentType[site] = Agent::Empty;
     m_agents[site] = 0;

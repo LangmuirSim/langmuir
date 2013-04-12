@@ -45,7 +45,7 @@ OutputInfo::OutputInfo(const QString &name, const SimulationParameters *par)
     // make sure we generated a fileName and not a directory
     if (isDir())
     {
-        qFatal("can not generate file name:\n\t"
+        qFatal("message: can not generate file name:\n\t"
                "the file name is a directory:\n\t%s",
                qPrintable(absoluteFilePath()));
     }
@@ -53,7 +53,7 @@ OutputInfo::OutputInfo(const QString &name, const SimulationParameters *par)
     // make sure we didn't generate an empty file name
     if ( completeBaseName().isEmpty() )
     {
-        qFatal("can not generate file name:\n\t"
+        qFatal("message: can not generate file name:\n\t"
                "the file name is empty:\n\t%s",
                qPrintable(absoluteFilePath()));
     }
@@ -76,7 +76,7 @@ OutputStream::OutputStream(const QString &name,
     // give an error if we can't open the file
     if (!m_file.open(mode))
     {
-        qFatal("can not open file:\n\t%s",
+        qFatal("message: can not open file:\n\t%s",
                qPrintable(m_info.absoluteFilePath()));
     }
 
@@ -113,7 +113,7 @@ void backupFile(const QString& name)
     // give an error if we were passed a directory
     if (info.isDir())
     {
-        qFatal("backup failure: name is not a file\n\t%s",
+        qFatal("message: backup failure: name is not a file\n\t%s",
                  qPrintable(info.absoluteFilePath()));
     }
 
@@ -155,7 +155,7 @@ void backupFile(const QString& name)
     // give an error if we fail at moving the file
     if (!QFile::rename(info.absoluteFilePath(),newName))
     {
-        qFatal("backup failure:\n\t%s\n\t%s",
+        qFatal("message: backup failure:\n\t%s\n\t%s",
                  qPrintable(info.absoluteFilePath()),
                  qPrintable(newName));
     }

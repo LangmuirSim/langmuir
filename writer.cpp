@@ -317,7 +317,7 @@ void XYZWriter::write()
     }
     else
     {
-        qFatal("invalid output.xyz.mode encountered in XYZWriter");
+        qFatal("message: invalid output.xyz.mode encountered in XYZWriter");
     }
 }
 

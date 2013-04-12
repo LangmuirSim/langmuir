@@ -126,7 +126,7 @@ void KeyValueParser::parse(const QString &line)
     // Make sure there is only one '=' sign, if not, it is an error
     if (parsed.count('=') != 1)
     {
-        qFatal("parse error: missing equal sign\n\tline: %s",
+        qFatal("message: parse error: missing equal sign\n\tline: %s",
                qPrintable(line.trimmed()));
     }
 
@@ -136,7 +136,7 @@ void KeyValueParser::parse(const QString &line)
     // Make sure there are two parts
     if (tokens.size() != 2)
     {
-        qFatal("parse error: line does not split into two at equal sign\n\tline: %s",
+        qFatal("message: parse error: line does not split into two at equal sign\n\tline: %s",
                qPrintable(line.trimmed()));
     }
 
@@ -144,7 +144,7 @@ void KeyValueParser::parse(const QString &line)
     QString key = tokens.at(0).trimmed().toLower();
     if (key.isEmpty())
     {
-        qFatal("parse error: key is empty\n\tline: %s",
+        qFatal("message: parse error: key is empty\n\tline: %s",
                qPrintable(line.trimmed()));
     }
 
@@ -154,7 +154,7 @@ void KeyValueParser::parse(const QString &line)
     // Make sure we got a valid key
     if (it == m_variableMap.end())
     {
-        qFatal("parse error: invalid key\n\tline: %s",
+        qFatal("message: parse error: invalid key\n\tline: %s",
                qPrintable(line.trimmed()));
     }
 
@@ -163,7 +163,7 @@ void KeyValueParser::parse(const QString &line)
             .replace(QRegExp("^\"+"),"").replace(QRegExp("\"+$"),"");
     if (value.isEmpty())
     {
-        qWarning("warning! value is empty for key: %s",
+        qDebug("warning! value is empty for key: %s",
                qPrintable(key.trimmed()));
         return;
     }
@@ -179,7 +179,7 @@ void KeyValueParser::save(const QString& fileName)
     QFile handle(info.absoluteFilePath());
     if (!handle.open(QIODevice::WriteOnly|QIODevice::Text))
     {
-        qFatal("can not open file: %s", qPrintable(info.absoluteFilePath()));
+        qFatal("message: can not open file: %s", qPrintable(info.absoluteFilePath()));
     }
     QTextStream stream(&handle);
     stream << "[Parameters]";
@@ -199,7 +199,7 @@ Variable& KeyValueParser::getVariable(const QString& key)
 {
     if (!m_variableMap.contains(key))
     {
-        qFatal("invalid variable key : %s", qPrintable(key));
+        qFatal("message: invalid variable key : %s", qPrintable(key));
     }
     return *m_variableMap[key];
 }
