@@ -688,24 +688,27 @@ void World::createSources()
     // Set up rates
     if (parameters().simulationType == "transistor")
     {
-        if (parameters().eSourceLRate >= 0)
-        {
-            m_electronSourceAgentLeft->setRate(parameters().eSourceLRate);
-        }
-        else
-        {
-            m_electronSourceAgentLeft->setRate(parameters().sourceRate);
-        }
+        // Turn off excitons
+        m_excitonSourceAgent->setRate(0.0);
+
+        // Set rates
+        m_electronSourceAgentLeft->setRateSmartly(parameters().eSourceLRate, parameters().sourceRate);
+        m_electronSourceAgentRight->setRateSmartly(parameters().eSourceRRate, 0.0);
+        m_holeSourceAgentRight->setRateSmartly(parameters().hSourceRRate, 0.0);
+        m_holeSourceAgentLeft->setRateSmartly(parameters().hSourceLRate, 0.0);
     }
     else if (parameters().simulationType == "solarcell")
     {
-        m_electronSourceAgentRight->setRateSmartly(parameters().eSourceRRate, 1.0);
-        m_electronSourceAgentLeft->setRateSmartly(parameters().eSourceLRate, 1.0);
-        m_holeSourceAgentRight->setRateSmartly(parameters().hSourceRRate, 1.0);
-        m_holeSourceAgentLeft->setRateSmartly(parameters().hSourceLRate, 1.0);
+        // Turn on excitons
         m_excitonSourceAgent->setRateSmartly(parameters().generationRate, parameters().sourceRate);
 
-        // Scale the recombination.rate according to the area of the simulation cell
+        // Set other rates
+        m_electronSourceAgentRight->setRateSmartly(parameters().eSourceRRate, 0.0);
+        m_electronSourceAgentLeft->setRateSmartly(parameters().eSourceLRate, 0.0);
+        m_holeSourceAgentRight->setRateSmartly(parameters().hSourceRRate, 0.0);
+        m_holeSourceAgentLeft->setRateSmartly(parameters().hSourceLRate, 0.0);
+
+        // Scale the generation.rate according to the area of the simulation cell
         if ( parameters().sourceScaleArea > 0 && parameters().sourceScaleArea != m_electronGrid->xyPlaneArea())
         {
             double oldRate = m_excitonSourceAgent->rate();
@@ -719,11 +722,58 @@ void World::createSources()
         qFatal("message: unknown simulation.type - can not create sources");
     }
 
-    qDebug("message: e.source.r.rate is %.3g", m_electronSourceAgentRight->rate());
-    qDebug("message: e.source.l.rate is %.3g", m_electronSourceAgentLeft->rate());
-    qDebug("message: h.source.r.rate is %.3g", m_holeSourceAgentRight->rate());
-    qDebug("message: h.source.l.rate is %.3g", m_holeSourceAgentLeft->rate());
-    qDebug("message: generation.rate is %.3g", m_excitonSourceAgent->rate());
+    qDebug("message: e.source.r.rate = %.3g", m_electronSourceAgentRight->rate());
+    qDebug("message: e.source.l.rate = %.3g", m_electronSourceAgentLeft->rate());
+    qDebug("message: h.source.r.rate = %.3g", m_holeSourceAgentRight->rate());
+    qDebug("message: h.source.l.rate = %.3g", m_holeSourceAgentLeft->rate());
+    qDebug("message: generation.rate = %.3g", m_excitonSourceAgent->rate());
+
+    if ((m_electronSourceAgentRight->rate() == 0) &&
+        (m_electronSourceAgentLeft->rate() == 0) &&
+        (m_holeSourceAgentRight->rate() == 0) &&
+        (m_holeSourceAgentLeft->rate() == 0) &&
+        (m_excitonSourceAgent->rate() == 0))
+    {
+        qFatal("message: all sources have zero rate");
+    }
+
+    if (maxElectronAgents() == 0)
+    {
+        if (m_electronSourceAgentRight->rate() > 0)
+        {
+            qFatal("message: e.source.rate.r = %.3g, yet maxElectronAgents() == %d",
+                   m_electronSourceAgentRight->rate(), maxElectronAgents());
+        }
+        if (m_electronSourceAgentLeft->rate() > 0)
+        {
+            qFatal("message: e.source.rate.l = %.3g, yet maxElectronAgents() == %d",
+                   m_electronSourceAgentLeft->rate(), maxElectronAgents());
+        }
+        if (m_excitonSourceAgent->rate() > 0)
+        {
+            qFatal("message: generation.rate = %.3g, yet maxElectronAgents() == %d",
+                   m_excitonSourceAgent->rate(), maxElectronAgents());
+        }
+    }
+
+    if (maxHoleAgents() == 0)
+    {
+        if (m_holeSourceAgentRight->rate() > 0)
+        {
+            qFatal("message: h.source.rate.r = %.3g, yet maxHoleAgents() == %d",
+                   m_holeSourceAgentRight->rate(), maxHoleAgents());
+        }
+        if (m_holeSourceAgentLeft->rate() > 0)
+        {
+            qFatal("message: h.source.rate.l = %.3g, yet maxHoleAgents() == %d",
+                   m_holeSourceAgentLeft->rate(), maxHoleAgents());
+        }
+        if (m_excitonSourceAgent->rate() > 0)
+        {
+            qFatal("message: generation.rate = %.3g, yet maxHoleAgents() == %d",
+                   m_excitonSourceAgent->rate(), maxHoleAgents());
+        }
+    }
 }
 
 void World::createDrains()
@@ -762,15 +812,25 @@ void World::createDrains()
 
     if (parameters().simulationType == "transistor")
     {
+        // Turn off recombination
+        m_recombinationAgent->setRate(0.0);
+
+        // Set rates
         m_electronDrainAgentRight->setRateSmartly(parameters().eDrainRRate, parameters().drainRate);
+        m_electronDrainAgentLeft->setRateSmartly(parameters().eDrainLRate, 0.0);
+        m_holeDrainAgentRight->setRateSmartly(parameters().hDrainRRate, 0.0);
+        m_holeDrainAgentLeft->setRateSmartly(parameters().hDrainLRate, 0.0);
     }
     else if (parameters().simulationType == "solarcell")
     {
+        // Turn recombination on
+        m_recombinationAgent->setRate(parameters().recombinationRate);
+
+        // Set rates
         m_electronDrainAgentRight->setRateSmartly(parameters().eDrainRRate, parameters().drainRate);
         m_electronDrainAgentLeft->setRateSmartly(parameters().eDrainLRate, parameters().drainRate);
         m_holeDrainAgentRight->setRateSmartly(parameters().hDrainRRate, parameters().drainRate);
         m_holeDrainAgentLeft->setRateSmartly(parameters().hDrainLRate, parameters().drainRate);
-        m_recombinationAgent->setRate(parameters().recombinationRate);
     }
     else
     {
@@ -782,6 +842,37 @@ void World::createDrains()
     qDebug("message: h.drain.r.rate = %.3g", m_holeDrainAgentRight->rate());
     qDebug("message: h.drain.l.rate = %.3g", m_holeDrainAgentLeft->rate());
     qDebug("message: recombination.rate = %.3g", m_recombinationAgent->rate());
+
+    if ((m_electronDrainAgentRight->rate() == 0) &&
+        (m_electronDrainAgentLeft->rate() == 0) &&
+        (m_holeDrainAgentRight->rate() == 0) &&
+        (m_holeDrainAgentLeft->rate() == 0) &&
+        (m_recombinationAgent->rate() == 0))
+    {
+        qFatal("message: all drains have zero rate");
+    }
+
+    if (maxElectronAgents() > 0)
+    {
+        if ((m_electronDrainAgentRight->rate() <= 0) &&
+            (m_electronDrainAgentLeft->rate() <= 0) &&
+            (m_recombinationAgent->rate() <= 0))
+        {
+            qFatal("message: all electron drain rates are zero, yet maxElectronAgents() == %d",
+                   maxElectronAgents());
+        }
+    }
+
+    if (maxHoleAgents() > 0)
+    {
+        if ((m_holeDrainAgentRight->rate() <= 0) &&
+            (m_holeDrainAgentLeft->rate() <= 0) &&
+            (m_recombinationAgent->rate() <= 0))
+        {
+            qFatal("message: all hole drain rates are zero, yet maxElectronAgents() == %d",
+                   maxElectronAgents());
+        }
+    }
 }
 
 void World::setFluxInfo(const QList<quint64> &fluxInfo)

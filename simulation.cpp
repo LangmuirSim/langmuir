@@ -239,6 +239,9 @@ void Simulation::performInjections()
     else
     {
         m_world.electronSourceAgentLeft().tryToInject();
+        m_world.electronSourceAgentRight().tryToInject();
+        m_world.holeSourceAgentLeft().tryToInject();
+        m_world.holeSourceAgentRight().tryToInject();
     }
 }
 
