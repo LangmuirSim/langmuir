@@ -529,159 +529,310 @@ void World::initialize(const QString &fileName)
 
 void World::placeDefects(const QList<int>& siteIDs)
 {
+    qDebug("message: World::placeDefects");
+
     int num = numDefects();
     int max = maxDefects();
-    int toBePlaced = max - num;
+    int toBePlaced = max;
     int toBePlacedIDs = siteIDs.size();
     int toBeSeeded = toBePlaced - siteIDs.size();
     if (toBeSeeded < 0) toBeSeeded = 0;
     if (toBePlacedIDs < 0) toBePlacedIDs = 0;
 
-    qDebug("message: max defects = %d", max);
-    qDebug("message: num defects = %d", num);
-    qDebug("message: defects to be placed = %d", toBePlaced);
-    qDebug("message: defects in checkpoint = %d", toBePlacedIDs);
-    qDebug("message: defects to be seeded = %d", toBeSeeded);
+    qDebug("message: defects allowed = %d", max);
+
+    // Only call this function when there are no defects
+    if (num > 0) {
+        qDebug("message: defects found = %d", num);
+        qFatal("message: can not call World::placeDefects with found > 0");
+    }
 
     if ((toBePlaced < 0) || (toBePlaced > max))
     {
+        qDebug("message: defects to place = %d", toBePlaced);
         qFatal("message: invalid number of defects to be placed");
     }
 
     if ((toBePlacedIDs < 0) || (toBePlacedIDs > max))
     {
+        qDebug("message: defects in checkpoint = %d", toBePlacedIDs);
         qFatal("message: invalid number of defects in checkpoint");
     }
 
     if ((toBeSeeded < 0) || (toBeSeeded > max))
     {
+        qDebug("message: defects to seed = %d", toBeSeeded);
         qFatal("message: invalid number of defects to be seeded");
     }
 
     if (toBePlacedIDs + toBeSeeded != toBePlaced)
     {
+        qDebug("message: defects to place = %d", toBePlaced);
+        qDebug("message: defects in checkpoint = %d", toBePlacedIDs);
+        qDebug("message: defects to seed = %d", toBeSeeded);
         qFatal("message: inconsistant defect input");
     }
 
+    // Place the defects in the siteID list
     if (toBePlaced == 0) {
         qDebug("message: nothing to be done for defects");
         return;
     }
 
-    // Place the defects in the siteID list
-    qDebug("message: placing %d defects from checkpoint...", toBePlacedIDs);
-    for (int i = 0; i < toBePlacedIDs; i++)
-    {
-        int site = siteIDs.at(i);
-        if ( defectSiteIDs().contains(site) )
+    if (toBePlacedIDs > 0) {
+        qDebug("message: placing %d defects from checkpoint", toBePlacedIDs);
+        for (int i = 0; i < toBePlacedIDs; i++)
         {
-            qFatal("message: can not add defect;\n\tdefect already exists");
-        }
-        electronGrid().registerDefect(site);
-        holeGrid().registerDefect(site);
-        defectSiteIDs().push_back(site);
-        num++;
-    }
-
-    // Place the rest of the defects randomly
-    qDebug("message: seeding %d defects randomly...", toBeSeeded);
-    int tries = 0;
-    int maxTries = 10*(electronGrid().volume());
-    for(int i = num; i < max;)
-    {
-        tries++;
-        int site = randomNumberGenerator()
-                .integer(0,electronGrid().volume()-1);
-
-        if (!defectSiteIDs().contains(site))
-        {
+            int site = siteIDs.at(i);
+            if (defectSiteIDs().contains(site) )
+            {
+                qDebug("message: can not add defect");
+                qFatal("message: defect already exists");
+            }
             electronGrid().registerDefect(site);
             holeGrid().registerDefect(site);
             defectSiteIDs().push_back(site);
             num++;
-            i++;
-        }
-
-        if (tries > maxTries)
-        {
-            qFatal("message: can not seed defects;\n\texceeded max tries(%d)",
-                   maxTries);
         }
     }
+
+    // Place the rest of the defects randomly
+    if (toBeSeeded > 0)
+    {
+        int tries = 0;
+        int maxTries = 10 * (electronGrid().volume());
+
+        qDebug("message: seeding %d defects", toBeSeeded);
+        for(int i = num; i < max;)
+        {
+            tries++;
+            int site = randomNumberGenerator().integer(0, electronGrid().volume() - 1);
+
+            if (!defectSiteIDs().contains(site))
+            {
+                electronGrid().registerDefect(site);
+                holeGrid().registerDefect(site);
+                defectSiteIDs().push_back(site);
+                num++;
+                i++;
+            }
+
+            if (tries > maxTries)
+            {
+                qDebug("message: exceeded max tries (%d)", maxTries);
+                qFatal("message: can not seed defects");
+            }
+        }
+    }
+    qDebug("message: placed %d defects", numDefects());
 }
 
 void World::placeElectrons(const QList<int>& siteIDs)
 {
+    qDebug("message: World::placeElectrons");
+
+    // Only call this function when there are no electrons
+    int num = numElectronAgents();
+    if (num != 0) {
+        qDebug("message: found %d electrons", num);
+        qFatal("message: can not call World::placeElectrons()");
+    }
+
+    int max = maxElectronAgents();
+    int toBePlacedIDs = siteIDs.size();
+    int maxSeeded = max * parameters().seedCharges;
+    int toBeSeeded = maxSeeded - toBePlacedIDs;
+    if (toBeSeeded < 0) toBeSeeded = 0;
+    int toBePlaced = toBePlacedIDs + toBeSeeded;
+
+    qDebug("message: electrons allowed = %d", max);
+
+    // Only call this function when there are no electrons
+    if (num > 0) {
+        qDebug("message: electrons found = %d", num);
+        qFatal("message: can not call World::placeElectrons with found > 0");
+    }
+
+    if ((toBePlaced < 0) || (toBePlaced > max))
+    {
+        qDebug("message: electrons to place = %d", toBePlaced);
+        qFatal("message: invalid number of electrons to be placed");
+    }
+
+    if ((toBePlacedIDs < 0) || (toBePlacedIDs > max))
+    {
+        qDebug("message: electrons in checkpoint = %d", toBePlacedIDs);
+        qFatal("message: invalid number of electrons in checkpoint");
+    }
+
+    if ((toBeSeeded < 0) || (toBeSeeded > max))
+    {
+        qDebug("message: electrons to seed = %d", toBeSeeded);
+        qFatal("message: invalid number of electrons to be seeded");
+    }
+
+    if (toBePlacedIDs + toBeSeeded != toBePlaced)
+    {
+        qDebug("message: electrons to place = %d", toBePlaced);
+        qDebug("message: electrons in checkpoint = %d", toBePlacedIDs);
+        qDebug("message: electrons to seed = %d", toBeSeeded);
+        qFatal("message: inconsistant electrons input");
+    }
+
+    // Place the electrons in the siteID list
+    if (toBePlaced == 0) {
+        qDebug("message: nothing to be done for electrons");
+        return;
+    }
+
     // Create a Source Agent for placing electrons
     ElectronSourceAgent source(*this,Grid::NoFace);
     source.setRate(1.0);
 
     // Place the electrons in the site ID list
-    for (int i = 0; i < siteIDs.size(); i++)
+    if (toBePlacedIDs > 0)
     {
-        if (!source.tryToSeed(siteIDs[i]))
+        qDebug("message: placing %d electrons from checkpoint", toBePlacedIDs);
+        for (int i = 0; i < siteIDs.size(); i++)
         {
-            qFatal("message: can not inject electron at site %d",
-                   siteIDs[i]);
+            if (!source.tryToSeed(siteIDs[i]))
+            {
+                qFatal("message: can not inject electron at site %d",
+                       siteIDs[i]);
+            }
         }
     }
 
     // Place the rest of the electrons randomly if charge seeding is on
-    if (parameters().seedCharges != 0)
+    if (toBeSeeded > 0)
     {
-        int tries = 0;
-        int maxTries = 10*(electronGrid().volume());
-        for(int i = numElectronAgents();
-            i < maxElectronAgents() * parameters().seedCharges;)
+        qDebug("message: seeding %d electrons", toBeSeeded);
+        if (parameters().seedCharges != 0)
         {
-            if(source.tryToSeed()) { ++i; }
-            tries++;
-            if (tries > maxTries)
+            int tries = 0;
+            int maxTries = 10*(electronGrid().volume());
+            for(int i = numElectronAgents();
+                i < maxElectronAgents() * parameters().seedCharges;)
             {
-                qFatal("message: can not seed electrons;\n\texceeded max tries(%d)",
-                       maxTries);
+                if(source.tryToSeed()) { ++i; }
+                tries++;
+                if (tries > maxTries)
+                {
+                    qDebug("message: can not seed electrons");
+                    qFatal("exceeded max tries(%d)", maxTries);
+                }
             }
         }
     }
+
+    qDebug("message: placed %d electrons", numElectronAgents());
 }
 
 void World::placeHoles(const QList<int>& siteIDs)
 {
+    qDebug("message: World::placeHoles");
+
+    // Only call this function when there are no holes
+    int num = numHoleAgents();
+    if (num != 0) {
+        qDebug("message: found %d holes", num);
+        qFatal("message: can not call World::placeHoles()");
+    }
+
+    int max = maxHoleAgents();
+    int toBePlacedIDs = siteIDs.size();
+    int maxSeeded = max * parameters().seedCharges;
+    int toBeSeeded = maxSeeded - toBePlacedIDs;
+    if (toBeSeeded < 0) toBeSeeded = 0;
+    int toBePlaced = toBePlacedIDs + toBeSeeded;
+
+    qDebug("message: holes allowed = %d", max);
+
+    // Only call this function when there are no holes
+    if (num > 0) {
+        qDebug("message: holes found = %d", num);
+        qFatal("message: can not call World::placeHoles with found > 0");
+    }
+
+    if ((toBePlaced < 0) || (toBePlaced > max))
+    {
+        qDebug("message: holes to place = %d", toBePlaced);
+        qFatal("message: invalid number of holes to be placed");
+    }
+
+    if ((toBePlacedIDs < 0) || (toBePlacedIDs > max))
+    {
+        qDebug("message: holes in checkpoint = %d", toBePlacedIDs);
+        qFatal("message: invalid number of holes in checkpoint");
+    }
+
+    if ((toBeSeeded < 0) || (toBeSeeded > max))
+    {
+        qDebug("message: holes to seed = %d", toBeSeeded);
+        qFatal("message: invalid number of holes to be seeded");
+    }
+
+    if (toBePlacedIDs + toBeSeeded != toBePlaced)
+    {
+        qDebug("message: holes to place = %d", toBePlaced);
+        qDebug("message: holes in checkpoint = %d", toBePlacedIDs);
+        qDebug("message: holes to seed = %d", toBeSeeded);
+        qFatal("message: inconsistant holes input");
+    }
+
+    // Place the holes in the siteID list
+    if (toBePlaced == 0) {
+        qDebug("message: nothing to be done for holes");
+        return;
+    }
+
     // Create a Source Agent for placing holes
     HoleSourceAgent source(*this,Grid::NoFace);
     source.setRate(1.0);
 
     // Place the holes in the site ID list
-    for (int i = 0; i < siteIDs.size(); i++)
+    if (toBePlacedIDs > 0)
     {
-        if (!source.tryToSeed(siteIDs[i]))
+        qDebug("message: placing %d holes from checkpoint", toBePlacedIDs);
+        for (int i = 0; i < siteIDs.size(); i++)
         {
-            qFatal("message: can not inject hole at site %d",
-                   siteIDs[i]);
+            if (!source.tryToSeed(siteIDs[i]))
+            {
+                qFatal("message: can not inject hole at site %d",
+                       siteIDs[i]);
+            }
         }
     }
 
     // Place the rest of the holes randomly if charge seeding is on
-    if (parameters().seedCharges != 0)
+    if (toBeSeeded > 0)
     {
-        int tries = 0;
-        int maxTries = 10*(holeGrid().volume());
-        for(int i = numHoleAgents();
-            i < maxHoleAgents() * parameters().seedCharges;)
+        qDebug("message: seeding %d holes", toBeSeeded);
+        if (parameters().seedCharges != 0)
         {
-            if(source.tryToSeed()) { ++i; }
-            tries++;
-            if (tries > maxTries)
+            int tries = 0;
+            int maxTries = 10*(holeGrid().volume());
+            for(int i = numHoleAgents();
+                i < maxHoleAgents() * parameters().seedCharges;)
             {
-                qFatal("message: can not seed holes;\n\texceeded max tries(%d)",
-                       maxTries);
+                if(source.tryToSeed()) { ++i; }
+                tries++;
+                if (tries > maxTries)
+                {
+                    qDebug("message: can not seed electrons");
+                    qFatal("exceeded max tries(%d)", maxTries);
+                }
             }
         }
     }
+
+    qDebug("message: placed %d holes", numHoleAgents());
 }
 
 void World::createSources()
 {
+    qDebug("message: World::createSources");
+
     World &refWorld = *this;
 
     // Left electron source
@@ -807,6 +958,8 @@ void World::createSources()
 
 void World::createDrains()
 {
+    qDebug("message: World::createDrains");
+
     World &refWorld = *this;
 
     // Left electron drain
@@ -906,6 +1059,8 @@ void World::createDrains()
 
 void World::setFluxInfo(const QList<quint64> &fluxInfo)
 {
+    qDebug("message: World::setFluxInfo");
+
     if (fluxInfo.size() == 0)
     {
         return;

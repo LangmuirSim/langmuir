@@ -165,13 +165,14 @@ bool OpenClHelper::toggleOpenCL(bool on)
         if(!(m_world.parameters().okCL))
         {
             m_world.parameters().useOpenCL = false;
-            qDebug("message: can not use openCL - openCL has been turned off");
+            qDebug("message: can not use openCL");
             return false;
         }
         if(!(m_world.parameters().coulombCarriers))
         {
             m_world.parameters().useOpenCL = false;
-            qDebug("message: coulomb interactions are off - disabling openCL");
+            qDebug("message: coulomb interactions are off");
+            qDebug("message: disabling openCL");
             return false;
         }
         m_world.parameters().useOpenCL = true;
