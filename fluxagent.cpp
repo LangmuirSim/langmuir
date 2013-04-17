@@ -148,7 +148,7 @@ void FluxAgent::setRate(double rate)
 {
     if (rate < 0)
     {
-        qFatal("message: negative rate set for %s", qPrintable(this->objectName()));
+        qFatal("langmuir: negative rate set for %s", qPrintable(this->objectName()));
     }
     m_probability = rate;
 }
@@ -162,7 +162,7 @@ void FluxAgent::setRateSmartly(double rate, double dflt)
             m_probability = dflt;
             return;
         }
-        qFatal("message: negative rate smartly set for %s",
+        qFatal("langmuir: negative rate smartly set for %s",
                qPrintable(this->objectName()));
     }
     m_probability = rate;

@@ -105,7 +105,7 @@ template <typename T> void KeyValueParser::registerVariable(
 {
     if (m_variableMap.find(key) != m_variableMap.end())
     {
-        qFatal("message: variable already registered; key %s",
+        qFatal("langmuir: variable already registered; key %s",
                qPrintable(key));
     }
     m_variableMap.insert(key, new TypedVariable<T>(key,value,mode,this));

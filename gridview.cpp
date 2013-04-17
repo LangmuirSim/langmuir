@@ -71,7 +71,7 @@ GridViewGL::GridViewGL(const QGLFormat &format, QWidget * parent, QString input)
           }
           case QMessageBox::No: default:
           {
-            qDebug("message: set output.is.on to false");
+            qDebug("langmuir: set output.is.on to false");
             pWorld->parameters().outputIsOn = false;
             break;
           }
@@ -912,15 +912,15 @@ PointArray::PointArray(QObject *parent, QVector<float>& xyz): ColoredObject(pare
 
     if(!program.addShaderFromSourceCode(QGLShader::Vertex, vsource))
     {
-        qDebug("message: could not add vertex shader");
+        qDebug("langmuir: could not add vertex shader");
     }
     if(!program.addShaderFromSourceCode(QGLShader::Fragment, fsource))
     {
-        qDebug("message: could not add fragment shader");
+        qDebug("langmuir: could not add fragment shader");
     }
     if(!program.link())
     {
-        qDebug("message: could not link shaders");
+        qDebug("langmuir: could not link shaders");
     }
 
     vBuffer.setUsagePattern(QGLBuffer::DynamicDraw);

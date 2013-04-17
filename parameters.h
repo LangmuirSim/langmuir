@@ -395,78 +395,78 @@ inline void checkSimulationParameters(SimulationParameters& par)
     // simulation type
     if (!(QStringList()<<"transistor"<<"solarcell").contains(par.simulationType))
     {
-        qFatal("message: simulation.type(%s) must be transistor or solarcell",qPrintable(par.simulationType));
+        qFatal("langmuir: simulation.type(%s) must be transistor or solarcell",qPrintable(par.simulationType));
     }
 
     // grid size
     if (par.gridZ < 1)
     {
-        qFatal("message: grid.x(%d) >= 1",par.gridX);
+        qFatal("langmuir: grid.x(%d) >= 1",par.gridX);
     }
     if (par.gridY < 1)
     {
-        qFatal("message: grid.y(%d) >= 1",par.gridY);
+        qFatal("langmuir: grid.y(%d) >= 1",par.gridY);
     }
     if (par.gridX < 1)
     {
-        qFatal("message: grid.z(%d) >= 1",par.gridZ);
+        qFatal("langmuir: grid.z(%d) >= 1",par.gridZ);
     }
 
     // output
     if (par.iterationsPrint <= 0 )
     {
-        qFatal("message: iterations.print(%d) <= 0",par.iterationsPrint);
+        qFatal("langmuir: iterations.print(%d) <= 0",par.iterationsPrint);
     }
     if (par.iterationsReal < 0 )
     {
-        qFatal("message: iterations.real(%d) < 0",par.iterationsReal);
+        qFatal("langmuir: iterations.real(%d) < 0",par.iterationsReal);
     }
     if (par.iterationsReal % par.iterationsPrint != 0 )
     {
-        qFatal("message: iterations.real(%d) %% iterations.print(%d) != 0",par.iterationsReal,par.iterationsPrint);
+        qFatal("langmuir: iterations.real(%d) %% iterations.print(%d) != 0",par.iterationsReal,par.iterationsPrint);
     }
 
     // percentages
     if (par.electronPercentage < 0.0 || par.electronPercentage > 1.0 )
     {
-        qFatal("message: electron.pecentage(%f) < 0 || > 1.0",par.electronPercentage);
+        qFatal("langmuir: electron.pecentage(%f) < 0 || > 1.0",par.electronPercentage);
     }
 
     if (par.holePercentage     < 0.0 ||par. holePercentage     > 1.0 )
     {
-        qFatal("message: hole.pecentage(%f) < 0 || > 1.0",par.holePercentage);
+        qFatal("langmuir: hole.pecentage(%f) < 0 || > 1.0",par.holePercentage);
     }
 
     if (par.defectPercentage   < 0.0 || par.defectPercentage   > 1.0 )
     {
-        qFatal("message: defect.pecentage(%f) < 0 || > 1.0",par.defectPercentage);
+        qFatal("langmuir: defect.pecentage(%f) < 0 || > 1.0",par.defectPercentage);
     }
 
     if (par.trapPercentage     < 0.0 || par.trapPercentage     > 1.0 )
     {
-        qFatal("message: trap.pecentage(%f) < 0 || > 1.0",par.trapPercentage);
+        qFatal("langmuir: trap.pecentage(%f) < 0 || > 1.0",par.trapPercentage);
     }
 
     if (par.seedPercentage     < 0.0 || par.seedPercentage     > 1.0 )
     {
-        qFatal("message: seed.pecentage(%f) < 0 || > 1.0",par.seedPercentage);
+        qFatal("langmuir: seed.pecentage(%f) < 0 || > 1.0",par.seedPercentage);
     }
 
     if (par.defectPercentage > 1.00 - par.trapPercentage)
     {
-        qFatal("message: trap.percentage(%f) > 1.0 - trap.percentage(%f)",par.defectPercentage,par.trapPercentage);
+        qFatal("langmuir: trap.percentage(%f) > 1.0 - trap.percentage(%f)",par.defectPercentage,par.trapPercentage);
     }
 
     if (par.sourceRate < 0.0 || par.sourceRate > 1.0 )
     {
-        qFatal("message: source.rate(%f) < 0 || > 1.0",par.sourceRate);
+        qFatal("langmuir: source.rate(%f) < 0 || > 1.0",par.sourceRate);
     }
 
     if (par.eSourceLRate >= 0.0)
     {
         if (par.eSourceLRate < 0.0 || par.eSourceLRate > 1.0 )
         {
-            qFatal("message: e.source.l.rate(%f) < 0 || > 1.0", par.eSourceLRate);
+            qFatal("langmuir: e.source.l.rate(%f) < 0 || > 1.0", par.eSourceLRate);
         }
     }
 
@@ -474,7 +474,7 @@ inline void checkSimulationParameters(SimulationParameters& par)
     {
         if (par.eSourceRRate < 0.0 || par.eSourceRRate > 1.0 )
         {
-            qFatal("message: e.source.r.rate(%f) < 0 || > 1.0", par.eSourceRRate);
+            qFatal("langmuir: e.source.r.rate(%f) < 0 || > 1.0", par.eSourceRRate);
         }
     }
 
@@ -482,7 +482,7 @@ inline void checkSimulationParameters(SimulationParameters& par)
     {
         if (par.hSourceLRate < 0.0 || par.hSourceLRate > 1.0 )
         {
-            qFatal("message: h.source.l.rate(%f) < 0 || > 1.0", par.hSourceLRate);
+            qFatal("langmuir: h.source.l.rate(%f) < 0 || > 1.0", par.hSourceLRate);
         }
     }
 
@@ -490,7 +490,7 @@ inline void checkSimulationParameters(SimulationParameters& par)
     {
         if (par.hSourceRRate < 0.0 || par.hSourceRRate > 1.0 )
         {
-            qFatal("message: h.source.r.rate(%f) < 0 || > 1.0", par.hSourceRRate);
+            qFatal("langmuir: h.source.r.rate(%f) < 0 || > 1.0", par.hSourceRRate);
         }
     }
 
@@ -498,20 +498,20 @@ inline void checkSimulationParameters(SimulationParameters& par)
     {
         if (par.generationRate < 0.0 || par.generationRate > 1.0 )
         {
-            qFatal("message: x.source.rate(%f) < 0 || > 1.0", par.generationRate);
+            qFatal("langmuir: x.source.rate(%f) < 0 || > 1.0", par.generationRate);
         }
     }
 
     if (par.drainRate < 0.0 || par.drainRate > 1.0 )
     {
-        qFatal("message: drain.rate(%f) < 0 || > 1.0",par.drainRate);
+        qFatal("langmuir: drain.rate(%f) < 0 || > 1.0",par.drainRate);
     }
 
     if (par.eDrainLRate >= 0.0)
     {
         if (par.eDrainLRate < 0.0 || par.eDrainLRate > 1.0 )
         {
-            qFatal("message: e.drain.l.rate(%f) < 0 || > 1.0", par.eDrainLRate);
+            qFatal("langmuir: e.drain.l.rate(%f) < 0 || > 1.0", par.eDrainLRate);
         }
     }
 
@@ -519,7 +519,7 @@ inline void checkSimulationParameters(SimulationParameters& par)
     {
         if (par.eDrainRRate < 0.0 || par.eDrainRRate > 1.0 )
         {
-            qFatal("message: e.drain.r.rate(%f) < 0 || > 1.0", par.eDrainRRate);
+            qFatal("langmuir: e.drain.r.rate(%f) < 0 || > 1.0", par.eDrainRRate);
         }
     }
 
@@ -527,7 +527,7 @@ inline void checkSimulationParameters(SimulationParameters& par)
     {
         if (par.hDrainLRate < 0.0 || par.hDrainLRate > 1.0 )
         {
-            qFatal("message: h.drain.l.rate(%f) < 0 || > 1.0", par.hDrainLRate);
+            qFatal("langmuir: h.drain.l.rate(%f) < 0 || > 1.0", par.hDrainLRate);
         }
     }
 
@@ -535,112 +535,112 @@ inline void checkSimulationParameters(SimulationParameters& par)
     {
         if (par.hDrainRRate < 0.0 || par.hDrainRRate > 1.0 )
         {
-            qFatal("message: h.drain.r.rate(%f) < 0 || > 1.0", par.hDrainRRate);
+            qFatal("langmuir: h.drain.r.rate(%f) < 0 || > 1.0", par.hDrainRRate);
         }
     }
 
     if (par.seedCharges < 0.0 || par.seedCharges > 1.0 )
     {
-        qFatal("message: seed.charges(%f) < 0 || > 1.0",par.seedCharges);
+        qFatal("langmuir: seed.charges(%f) < 0 || > 1.0",par.seedCharges);
     }
 
     // other
     if (par.gaussianStdev < 0.00)
     {
-        qFatal("message: gaussian.stdev < 0.0");
+        qFatal("langmuir: gaussian.stdev < 0.0");
     }
     if (par.temperatureKelvin < 0.0)
     {
-        qFatal("message: temperature.kelvin < 0.0");
+        qFatal("langmuir: temperature.kelvin < 0.0");
     }
 
     if (par.defectsCharge != 0 && ! par.coulombCarriers)
     {
-        qFatal("message: defects.charge != 0 && coulomb.carriers = false");
+        qFatal("langmuir: defects.charge != 0 && coulomb.carriers = false");
     }
 
     if (par.hoppingRange < 0 || par.hoppingRange > 2)
     {
-        qFatal("message: hopping.range(%d) < 0 || > 2",par.hoppingRange);
+        qFatal("langmuir: hopping.range(%d) < 0 || > 2",par.hoppingRange);
     }
 
     if (!par.sourceMetropolis)
     {
         if (par.sourceCoulomb)
         {
-            qFatal("message: source.metropolis = false, yet source.coulomb = true");
+            qFatal("langmuir: source.metropolis = false, yet source.coulomb = true");
         }
     }
 
     if (par.recombinationRate < 0.0 || par.recombinationRate > 1.0 )
     {
-        qFatal("message: recombination.rate(%f) < 0 || > 1.0",par.recombinationRate);
+        qFatal("langmuir: recombination.rate(%f) < 0 || > 1.0",par.recombinationRate);
     }
 
     if (par.recombinationRate > 0 && par.simulationType != "solarcell")
     {
-        qFatal("message: recombination.rate(%f) > 0, yet simulation.type != solarcell",par.recombinationRate);
+        qFatal("langmuir: recombination.rate(%f) > 0, yet simulation.type != solarcell",par.recombinationRate);
     }
 
     if (par.recombinationRate && !((par.electronPercentage > 0) && (par.holePercentage > 0)))
     {
-        qFatal("message: recombination.rate(%f) > 0, yet electron.percentage = %.5f and hole.percentage = %.5f",
+        qFatal("langmuir: recombination.rate(%f) > 0, yet electron.percentage = %.5f and hole.percentage = %.5f",
                par.recombinationRate, par.electronPercentage, par.holePercentage);
     }
 
     if (par.outputIdsOnEncounter && (par.simulationType != "solarcell"))
     {
-        qFatal("message: output.ids.on.encounter == true, yet simulation.type != solarcell");
+        qFatal("langmuir: output.ids.on.encounter == true, yet simulation.type != solarcell");
     }
 
     if (par.outputIdsOnEncounter && !((par.electronPercentage > 0) && (par.holePercentage > 0)))
     {
-        qFatal("message: output.ids.on.encounter == true, yet electron.percentage = %.5f and hole.percentage = %.5f",
+        qFatal("langmuir: output.ids.on.encounter == true, yet electron.percentage = %.5f and hole.percentage = %.5f",
                par.electronPercentage, par.holePercentage);
     }
 
     if (((par.outputXyzE == false) && (par.outputXyzH == false) && (par.outputXyzD == false) && (par.outputXyzT == false)) && par.outputXyz > 0)
     {
-        qFatal("message: output.xyz > 0, yet output.xyz.e && output.xyz.h && output.xyz.d && output.xyz.t are all false");
+        qFatal("langmuir: output.xyz > 0, yet output.xyz.e && output.xyz.h && output.xyz.d && output.xyz.t are all false");
 
     }
 
     if (par.outputXyzMode < 0 || par.outputXyzMode > 1)
     {
-        qFatal("message: output.xyz.mode must be 0 or 1");
+        qFatal("langmuir: output.xyz.mode must be 0 or 1");
     }
 
     if (par.openclThreshold <= 0)
     {
-        qFatal("message: opencl.threshold must be >= 0");
+        qFatal("langmuir: opencl.threshold must be >= 0");
     }
 
     if (par.openclDeviceID < 0)
     {
-        qFatal("message: opencl.device.id must be >= 0");
+        qFatal("langmuir: opencl.device.id must be >= 0");
     }
 
     if (par.balanceCharges && par.simulationType != "solarcell")
     {
-        qFatal("message: balance.charges == true, yet simulation.type != solarcell");
+        qFatal("langmuir: balance.charges == true, yet simulation.type != solarcell");
     }
 
     if (par.coulombGaussianSigma > 0)
     {
         if (par.gridX == 1 || par.gridY == 1 || par.gridZ == 1)
         {
-            qFatal("message: coulomb.gaussian.sigma > 0, yet the simulation is not 3D");
+            qFatal("langmuir: coulomb.gaussian.sigma > 0, yet the simulation is not 3D");
         }
         if(qMin(qMin(par.gridX, par.gridY), par.gridZ)
                 < 3 * par.coulombGaussianSigma)
         {
-            qDebug("message: 3 * coulomb.gaussian.sigma <= qMin(grid.x, grid.y, grid.z)");
+            qDebug("langmuir: 3 * coulomb.gaussian.sigma <= qMin(grid.x, grid.y, grid.z)");
         }
     }
 
     if (par.outputIdsOnEncounter)
     {
-        qFatal("message: output.ids.on.encouter is deprecated");
+        qFatal("langmuir: output.ids.on.encouter is deprecated");
     }
 }
 

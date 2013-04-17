@@ -26,7 +26,7 @@ void CheckPointer::load(const QString &fileName, ConfigurationInfo &configInfo)
 
     if (!stream)
     {
-        qFatal("message: error opening file: %s",qPrintable(fileName));
+        qFatal("langmuir: error opening file: %s",qPrintable(fileName));
     }
 
     // Get the QMetaEnum object to map strings to the correct enum
@@ -55,13 +55,13 @@ void CheckPointer::load(const QString &fileName, ConfigurationInfo &configInfo)
             int eSection = QME.keyToValue(section.toLatin1().constData());
             if (eSection < 0)
             {
-                qDebug("message: invalid section encountered: %s", qPrintable(section));
-                qDebug("message: valid sections are:");
+                qDebug("langmuir: invalid section encountered: %s", qPrintable(section));
+                qDebug("langmuir: valid sections are:");
                 for (int i = 0; i < QME.keyCount(); i++)
                 {
-                    qDebug("message: [%s]",QME.key(i));
+                    qDebug("langmuir: [%s]",QME.key(i));
                 }
-                qFatal("message: exiting");
+                qFatal("langmuir: exiting");
             }
 
             // Load according to the section encountered
@@ -126,7 +126,7 @@ void CheckPointer::load(const QString &fileName, ConfigurationInfo &configInfo)
                     {
                         qDebug("\t\t[%s]",QME.key(i));
                     }
-                    qFatal("message: exiting");
+                    qFatal("langmuir: exiting");
                     break;
                 }
             }
@@ -138,12 +138,12 @@ void CheckPointer::load(const QString &fileName, ConfigurationInfo &configInfo)
     {
         if (readRandomState)
         {
-            qDebug("message: ignoring random.seed = %d",
+            qDebug("langmuir: ignoring random.seed = %d",
                      (unsigned int)m_world.parameters().randomSeed);
         }
         else
         {
-            qDebug("message: seeding random number generator with random.seed = %d",
+            qDebug("langmuir: seeding random number generator with random.seed = %d",
                      (unsigned int)m_world.parameters().randomSeed);
             m_world.randomNumberGenerator().seed(m_world.parameters().randomSeed);
         }
@@ -152,7 +152,7 @@ void CheckPointer::load(const QString &fileName, ConfigurationInfo &configInfo)
 
 void CheckPointer::save(const QString& fileName)
 {
-    //qDebug("message: saving checkpoint file: %d", m_world.parameters().currentStep);
+    //qDebug("langmuir: saving checkpoint file: %d", m_world.parameters().currentStep);
     OutputInfo info(fileName,&m_world.parameters());
 
     std::ofstream stream;
@@ -160,7 +160,7 @@ void CheckPointer::save(const QString& fileName)
 
     if (!stream)
     {
-        qFatal("message: error opening file: %s",qPrintable(fileName));
+        qFatal("langmuir: error opening file: %s",qPrintable(fileName));
     }
 
     saveElectrons(stream)      << '\n';
@@ -188,23 +188,23 @@ void CheckPointer::checkStream(std::istream& stream, const QString& message)
         {
             QString error = "stream error: std::ifstream.eof() == true";
             if (!message.isEmpty()) { error += QString("\n\t%1").arg(message); }
-            qFatal("message: %s",qPrintable(error));
+            qFatal("langmuir: %s",qPrintable(error));
         }
         if (stream.bad())
         {
             QString error = "stream error: std::ifstream.bad() == true";
             if (!message.isEmpty()) { error += QString("\n\t%1").arg(message); }
-            qFatal("message: %s",qPrintable(error));
+            qFatal("langmuir: %s",qPrintable(error));
         }
         if (stream.fail())
         {
             QString error = "stream error: std::ifstream.fail() == true";
             if (!message.isEmpty()) { error += QString("\n\t%1").arg(message); }
-            qFatal("message: %s",qPrintable(error));
+            qFatal("langmuir: %s",qPrintable(error));
         }
         QString error = "stream error: std::ifstream.good() == false";
         if (!message.isEmpty()) { error += QString("\n\t%1").arg(message); }
-        qFatal("message: %s",qPrintable(error));
+        qFatal("langmuir: %s",qPrintable(error));
     }
 }
 
@@ -222,7 +222,7 @@ std::istream& CheckPointer::loadElectrons(std::istream &stream, ConfigurationInf
     unsigned int size = token.toUInt(&ok);
     if (!ok)
     {
-        qFatal("message: stream error: can not convert %s to unsigned int\n\t"
+        qFatal("langmuir: stream error: can not convert %s to unsigned int\n\t"
                "expected number of electrons", qPrintable(token));
     }
 
@@ -234,7 +234,7 @@ std::istream& CheckPointer::loadElectrons(std::istream &stream, ConfigurationInf
         unsigned int value = token.toUInt(&ok);
         if (!ok)
         {
-            qFatal("message: stream error: can not convert %s to unsigned int\n\t"
+            qFatal("langmuir: stream error: can not convert %s to unsigned int\n\t"
                    "expected electron %d of %d", qPrintable(token),i+1,size);
         }
         configInfo.electrons.push_back(value);
@@ -258,7 +258,7 @@ std::istream& CheckPointer::loadHoles(std::istream &stream, ConfigurationInfo &c
     unsigned int size = token.toUInt(&ok);
     if (!ok)
     {
-        qFatal("message: stream error: can not convert %s to unsigned int\n\t"
+        qFatal("langmuir: stream error: can not convert %s to unsigned int\n\t"
                "expected number of holes", qPrintable(token));
     }
 
@@ -270,7 +270,7 @@ std::istream& CheckPointer::loadHoles(std::istream &stream, ConfigurationInfo &c
         unsigned int value = token.toUInt(&ok);
         if (!ok)
         {
-            qFatal("message: stream error: can not convert %s to unsigned int\n\t"
+            qFatal("langmuir: stream error: can not convert %s to unsigned int\n\t"
                    "expected hole %d of %d", qPrintable(token),i+1,size);
         }
         configInfo.holes.push_back(value);
@@ -294,7 +294,7 @@ std::istream& CheckPointer::loadDefects(std::istream &stream, ConfigurationInfo 
     unsigned int size = token.toUInt(&ok);
     if (!ok)
     {
-        qFatal("message: stream error: can not convert %s to unsigned int\n\t"
+        qFatal("langmuir: stream error: can not convert %s to unsigned int\n\t"
                "expected number of defects", qPrintable(token));
     }
 
@@ -306,7 +306,7 @@ std::istream& CheckPointer::loadDefects(std::istream &stream, ConfigurationInfo 
         unsigned int value = token.toUInt(&ok);
         if (!ok)
         {
-            qFatal("message: stream error: can not convert %s to unsigned int\n\t"
+            qFatal("langmuir: stream error: can not convert %s to unsigned int\n\t"
                    "expected defect %d of %d", qPrintable(token),i+1,size);
         }
         configInfo.defects.push_back(value);
@@ -330,7 +330,7 @@ std::istream& CheckPointer::loadTraps(std::istream &stream, ConfigurationInfo &c
     unsigned int size = token.toUInt(&ok);
     if (!ok)
     {
-        qFatal("message: stream error: can not convert %s to unsigned int\n\t"
+        qFatal("langmuir: stream error: can not convert %s to unsigned int\n\t"
                "expected number of traps", qPrintable(token));
     }
 
@@ -342,7 +342,7 @@ std::istream& CheckPointer::loadTraps(std::istream &stream, ConfigurationInfo &c
         unsigned int value = token.toUInt(&ok);
         if (!ok)
         {
-            qFatal("message: stream error: can not convert %s to unsigned int\n\t"
+            qFatal("langmuir: stream error: can not convert %s to unsigned int\n\t"
                    "expected trap %d of %d", qPrintable(token),i+1,size);
         }
         configInfo.traps.push_back(value);
@@ -366,7 +366,7 @@ std::istream& CheckPointer::loadTrapPotentials(std::istream &stream, Configurati
     unsigned int size = token.toUInt(&ok);
     if (!ok)
     {
-        qFatal("message: stream error: can not convert %s to unsigned int\n\t"
+        qFatal("langmuir: stream error: can not convert %s to unsigned int\n\t"
                "expected number of trap potentials", qPrintable(token));
     }
 
@@ -378,7 +378,7 @@ std::istream& CheckPointer::loadTrapPotentials(std::istream &stream, Configurati
         double value = token.toDouble(&ok);
         if (!ok)
         {
-            qFatal("message: stream error: can not convert %s to double\n\t"
+            qFatal("langmuir: stream error: can not convert %s to double\n\t"
                    "expected trap potential %d of %d", qPrintable(token),i+1,size);
         }
         configInfo.trapPotentials.push_back(value);
@@ -420,7 +420,7 @@ std::istream& CheckPointer::loadRandomState(std::istream &stream)
 {
     stream >> m_world.randomNumberGenerator();
     checkStream(stream, QString("expected random number generator state"));
-    qDebug("message: loaded a random number generator state");
+    qDebug("langmuir: loaded a random number generator state");
     return stream;
 }
 
@@ -438,7 +438,7 @@ std::istream& CheckPointer::loadFluxState(std::istream &stream, ConfigurationInf
     unsigned int size = token.toUInt(&ok);
     if (!ok)
     {
-        qFatal("message: stream error: can not convert %s to unsigned int\n\t"
+        qFatal("langmuir: stream error: can not convert %s to unsigned int\n\t"
                "expected number of fluxes * 2", qPrintable(token));
     }
 
@@ -450,7 +450,7 @@ std::istream& CheckPointer::loadFluxState(std::istream &stream, ConfigurationInf
         quint64 value = token.toULongLong(&ok);
         if (!ok)
         {
-            qFatal("message: stream error: can not convert %s to unsigned int\n\t"
+            qFatal("langmuir: stream error: can not convert %s to unsigned int\n\t"
                    "expected flux %d of %d", qPrintable(token),i+1,size);
         }
         configInfo.fluxInfo.push_back(value);
