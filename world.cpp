@@ -534,6 +534,15 @@ void World::placeDefects(const QList<int>& siteIDs)
     int toBePlacedUsingIDs = siteIDs.size();
     int toBePlacedRandomly = toBePlaced - siteIDs.size();
 
+    qDebug("message: max defects = %d", maxDefects());
+    qDebug("message: found %d defects", count);
+    qDebug("message: %d defects to be placed", toBePlaced);
+
+    if (toBePlaced == 0)
+    {
+        return;
+    }
+
     if (toBePlacedRandomly < 0)
     {
         qFatal("message: can not place defects;\n\tmost likely the list "
@@ -542,6 +551,7 @@ void World::placeDefects(const QList<int>& siteIDs)
     }
 
     // Place the defects in the siteID list
+    qDebug("message: %d defects to be placed using checkpoint info...", toBePlacedUsingIDs);
     for (int i = 0; i < toBePlacedUsingIDs; i++)
     {
         int site = siteIDs.at(i);
@@ -556,6 +566,7 @@ void World::placeDefects(const QList<int>& siteIDs)
     }
 
     // Place the rest of the defects randomly
+    qDebug("message: %d defects to be placed randomly...", toBePlacedRandomly);
     int tries = 0;
     int maxTries = 10*(electronGrid().volume());
     for(int i = count; i < maxDefects();)
