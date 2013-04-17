@@ -139,6 +139,7 @@ void Potential::setPotentialTraps(const QList<int> &trapIDs,
         {
             for (int i = 0; i < toBePlacedForced; i++)
             {
+                traps.push_back(trapIDs.at(i));
                 potentials.push_back(trapPotentials.at(i));
             }
         }
@@ -146,6 +147,7 @@ void Potential::setPotentialTraps(const QList<int> &trapIDs,
         {
             for (int i = 0; i < toBePlacedForced; i++)
             {
+                traps.push_back(trapIDs.at(i));
                 potentials.push_back(m_world.parameters().trapPotential);
             }
         }
