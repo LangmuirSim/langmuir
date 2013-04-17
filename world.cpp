@@ -457,7 +457,7 @@ void World::initialize(const QString &fileName)
 
     // Save the seed that has been used
     m_parameters->randomSeed = m_rand->seed();
-    qDebug() << "message: random.seed is" << parameters().randomSeed;
+    qDebug() << "langmuir: random.seed is" << parameters().randomSeed;
 
     // Create Electron Grid
     m_electronGrid = new Grid(refWorld, this);
@@ -529,130 +529,310 @@ void World::initialize(const QString &fileName)
 
 void World::placeDefects(const QList<int>& siteIDs)
 {
-    int count = numDefects();
-    int toBePlaced = maxDefects() - count;
-    int toBePlacedUsingIDs = siteIDs.size();
-    int toBePlacedRandomly = toBePlaced - siteIDs.size();
+    qDebug("langmuir: World::placeDefects");
 
-    if (toBePlacedRandomly < 0)
+    int num = numDefects();
+    int max = maxDefects();
+    int toBePlaced = max;
+    int toBePlacedIDs = siteIDs.size();
+    int toBeSeeded = toBePlaced - siteIDs.size();
+    if (toBeSeeded < 0) toBeSeeded = 0;
+    if (toBePlacedIDs < 0) toBePlacedIDs = 0;
+
+    qDebug("langmuir: defects allowed = %d", max);
+
+    // Only call this function when there are no defects
+    if (num > 0) {
+        qDebug("langmuir: defects found = %d", num);
+        qFatal("langmuir: can not call World::placeDefects with found > 0");
+    }
+
+    if ((toBePlaced < 0) || (toBePlaced > max))
     {
-        qFatal("message: can not place defects;\n\tmost likely the list "
-               "of defect site IDs exceeds the maximum "
-               "given by defect.precentage");
+        qDebug("langmuir: defects to place = %d", toBePlaced);
+        qFatal("langmuir: invalid number of defects to be placed");
+    }
+
+    if ((toBePlacedIDs < 0) || (toBePlacedIDs > max))
+    {
+        qDebug("langmuir: defects in checkpoint = %d", toBePlacedIDs);
+        qFatal("langmuir: invalid number of defects in checkpoint");
+    }
+
+    if ((toBeSeeded < 0) || (toBeSeeded > max))
+    {
+        qDebug("langmuir: defects to seed = %d", toBeSeeded);
+        qFatal("langmuir: invalid number of defects to be seeded");
+    }
+
+    if (toBePlacedIDs + toBeSeeded != toBePlaced)
+    {
+        qDebug("langmuir: defects to place = %d", toBePlaced);
+        qDebug("langmuir: defects in checkpoint = %d", toBePlacedIDs);
+        qDebug("langmuir: defects to seed = %d", toBeSeeded);
+        qFatal("langmuir: inconsistant defect input");
     }
 
     // Place the defects in the siteID list
-    for (int i = 0; i < toBePlacedUsingIDs; i++)
-    {
-        int site = siteIDs.at(i);
-        if ( defectSiteIDs().contains(site) )
-        {
-            qFatal("message: can not add defect;\n\tdefect already exists");
-        }
-        electronGrid().registerDefect(site);
-        holeGrid().registerDefect(site);
-        defectSiteIDs().push_back(site);
-        count++;
+    if (toBePlaced == 0) {
+        qDebug("langmuir: nothing to be done for defects");
+        return;
     }
 
-    // Place the rest of the defects randomly
-    int tries = 0;
-    int maxTries = 10*(electronGrid().volume());
-    for(int i = count; i < maxDefects();)
-    {
-        tries++;
-        int site = randomNumberGenerator()
-                .integer(0,electronGrid().volume()-1);
-
-        if (!defectSiteIDs().contains(site))
+    if (toBePlacedIDs > 0) {
+        qDebug("langmuir: placing %d defects from checkpoint", toBePlacedIDs);
+        for (int i = 0; i < toBePlacedIDs; i++)
         {
+            int site = siteIDs.at(i);
+            if (defectSiteIDs().contains(site) )
+            {
+                qDebug("langmuir: can not add defect");
+                qFatal("langmuir: defect already exists");
+            }
             electronGrid().registerDefect(site);
             holeGrid().registerDefect(site);
             defectSiteIDs().push_back(site);
-            count++;
-            i++;
-        }
-
-        if (tries > maxTries)
-        {
-            qFatal("message: can not seed defects;\n\texceeded max tries(%d)",
-                   maxTries);
+            num++;
         }
     }
+
+    // Place the rest of the defects randomly
+    if (toBeSeeded > 0)
+    {
+        int tries = 0;
+        int maxTries = 10 * (electronGrid().volume());
+
+        qDebug("langmuir: seeding %d defects", toBeSeeded);
+        for(int i = num; i < max;)
+        {
+            tries++;
+            int site = randomNumberGenerator().integer(0, electronGrid().volume() - 1);
+
+            if (!defectSiteIDs().contains(site))
+            {
+                electronGrid().registerDefect(site);
+                holeGrid().registerDefect(site);
+                defectSiteIDs().push_back(site);
+                num++;
+                i++;
+            }
+
+            if (tries > maxTries)
+            {
+                qDebug("langmuir: exceeded max tries (%d)", maxTries);
+                qFatal("langmuir: can not seed defects");
+            }
+        }
+    }
+    qDebug("langmuir: placed %d defects", numDefects());
 }
 
 void World::placeElectrons(const QList<int>& siteIDs)
 {
+    qDebug("langmuir: World::placeElectrons");
+
+    // Only call this function when there are no electrons
+    int num = numElectronAgents();
+    if (num != 0) {
+        qDebug("langmuir: found %d electrons", num);
+        qFatal("langmuir: can not call World::placeElectrons()");
+    }
+
+    int max = maxElectronAgents();
+    int toBePlacedIDs = siteIDs.size();
+    int maxSeeded = max * parameters().seedCharges;
+    int toBeSeeded = maxSeeded - toBePlacedIDs;
+    if (toBeSeeded < 0) toBeSeeded = 0;
+    int toBePlaced = toBePlacedIDs + toBeSeeded;
+
+    qDebug("langmuir: electrons allowed = %d", max);
+
+    // Only call this function when there are no electrons
+    if (num > 0) {
+        qDebug("langmuir: electrons found = %d", num);
+        qFatal("langmuir: can not call World::placeElectrons with found > 0");
+    }
+
+    if ((toBePlaced < 0) || (toBePlaced > max))
+    {
+        qDebug("langmuir: electrons to place = %d", toBePlaced);
+        qFatal("langmuir: invalid number of electrons to be placed");
+    }
+
+    if ((toBePlacedIDs < 0) || (toBePlacedIDs > max))
+    {
+        qDebug("langmuir: electrons in checkpoint = %d", toBePlacedIDs);
+        qFatal("langmuir: invalid number of electrons in checkpoint");
+    }
+
+    if ((toBeSeeded < 0) || (toBeSeeded > max))
+    {
+        qDebug("langmuir: electrons to seed = %d", toBeSeeded);
+        qFatal("langmuir: invalid number of electrons to be seeded");
+    }
+
+    if (toBePlacedIDs + toBeSeeded != toBePlaced)
+    {
+        qDebug("langmuir: electrons to place = %d", toBePlaced);
+        qDebug("langmuir: electrons in checkpoint = %d", toBePlacedIDs);
+        qDebug("langmuir: electrons to seed = %d", toBeSeeded);
+        qFatal("langmuir: inconsistant electrons input");
+    }
+
+    // Place the electrons in the siteID list
+    if (toBePlaced == 0) {
+        qDebug("langmuir: nothing to be done for electrons");
+        return;
+    }
+
     // Create a Source Agent for placing electrons
     ElectronSourceAgent source(*this,Grid::NoFace);
     source.setRate(1.0);
 
     // Place the electrons in the site ID list
-    for (int i = 0; i < siteIDs.size(); i++)
+    if (toBePlacedIDs > 0)
     {
-        if (!source.tryToSeed(siteIDs[i]))
+        qDebug("langmuir: placing %d electrons from checkpoint", toBePlacedIDs);
+        for (int i = 0; i < siteIDs.size(); i++)
         {
-            qFatal("message: can not inject electron at site %d",
-                   siteIDs[i]);
+            if (!source.tryToSeed(siteIDs[i]))
+            {
+                qFatal("langmuir: can not inject electron at site %d",
+                       siteIDs[i]);
+            }
         }
     }
 
     // Place the rest of the electrons randomly if charge seeding is on
-    if (parameters().seedCharges != 0)
+    if (toBeSeeded > 0)
     {
-        int tries = 0;
-        int maxTries = 10*(electronGrid().volume());
-        for(int i = numElectronAgents();
-            i < maxElectronAgents() * parameters().seedCharges;)
+        qDebug("langmuir: seeding %d electrons", toBeSeeded);
+        if (parameters().seedCharges != 0)
         {
-            if(source.tryToSeed()) { ++i; }
-            tries++;
-            if (tries > maxTries)
+            int tries = 0;
+            int maxTries = 10*(electronGrid().volume());
+            for(int i = numElectronAgents();
+                i < maxElectronAgents() * parameters().seedCharges;)
             {
-                qFatal("message: can not seed electrons;\n\texceeded max tries(%d)",
-                       maxTries);
+                if(source.tryToSeed()) { ++i; }
+                tries++;
+                if (tries > maxTries)
+                {
+                    qDebug("langmuir: can not seed electrons");
+                    qFatal("exceeded max tries(%d)", maxTries);
+                }
             }
         }
     }
+
+    qDebug("langmuir: placed %d electrons", numElectronAgents());
 }
 
 void World::placeHoles(const QList<int>& siteIDs)
 {
+    qDebug("langmuir: World::placeHoles");
+
+    // Only call this function when there are no holes
+    int num = numHoleAgents();
+    if (num != 0) {
+        qDebug("langmuir: found %d holes", num);
+        qFatal("langmuir: can not call World::placeHoles()");
+    }
+
+    int max = maxHoleAgents();
+    int toBePlacedIDs = siteIDs.size();
+    int maxSeeded = max * parameters().seedCharges;
+    int toBeSeeded = maxSeeded - toBePlacedIDs;
+    if (toBeSeeded < 0) toBeSeeded = 0;
+    int toBePlaced = toBePlacedIDs + toBeSeeded;
+
+    qDebug("langmuir: holes allowed = %d", max);
+
+    // Only call this function when there are no holes
+    if (num > 0) {
+        qDebug("langmuir: holes found = %d", num);
+        qFatal("langmuir: can not call World::placeHoles with found > 0");
+    }
+
+    if ((toBePlaced < 0) || (toBePlaced > max))
+    {
+        qDebug("langmuir: holes to place = %d", toBePlaced);
+        qFatal("langmuir: invalid number of holes to be placed");
+    }
+
+    if ((toBePlacedIDs < 0) || (toBePlacedIDs > max))
+    {
+        qDebug("langmuir: holes in checkpoint = %d", toBePlacedIDs);
+        qFatal("langmuir: invalid number of holes in checkpoint");
+    }
+
+    if ((toBeSeeded < 0) || (toBeSeeded > max))
+    {
+        qDebug("langmuir: holes to seed = %d", toBeSeeded);
+        qFatal("langmuir: invalid number of holes to be seeded");
+    }
+
+    if (toBePlacedIDs + toBeSeeded != toBePlaced)
+    {
+        qDebug("langmuir: holes to place = %d", toBePlaced);
+        qDebug("langmuir: holes in checkpoint = %d", toBePlacedIDs);
+        qDebug("langmuir: holes to seed = %d", toBeSeeded);
+        qFatal("langmuir: inconsistant holes input");
+    }
+
+    // Place the holes in the siteID list
+    if (toBePlaced == 0) {
+        qDebug("langmuir: nothing to be done for holes");
+        return;
+    }
+
     // Create a Source Agent for placing holes
     HoleSourceAgent source(*this,Grid::NoFace);
     source.setRate(1.0);
 
     // Place the holes in the site ID list
-    for (int i = 0; i < siteIDs.size(); i++)
+    if (toBePlacedIDs > 0)
     {
-        if (!source.tryToSeed(siteIDs[i]))
+        qDebug("langmuir: placing %d holes from checkpoint", toBePlacedIDs);
+        for (int i = 0; i < siteIDs.size(); i++)
         {
-            qFatal("message: can not inject hole at site %d",
-                   siteIDs[i]);
+            if (!source.tryToSeed(siteIDs[i]))
+            {
+                qFatal("langmuir: can not inject hole at site %d",
+                       siteIDs[i]);
+            }
         }
     }
 
     // Place the rest of the holes randomly if charge seeding is on
-    if (parameters().seedCharges != 0)
+    if (toBeSeeded > 0)
     {
-        int tries = 0;
-        int maxTries = 10*(holeGrid().volume());
-        for(int i = numHoleAgents();
-            i < maxHoleAgents() * parameters().seedCharges;)
+        qDebug("langmuir: seeding %d holes", toBeSeeded);
+        if (parameters().seedCharges != 0)
         {
-            if(source.tryToSeed()) { ++i; }
-            tries++;
-            if (tries > maxTries)
+            int tries = 0;
+            int maxTries = 10*(holeGrid().volume());
+            for(int i = numHoleAgents();
+                i < maxHoleAgents() * parameters().seedCharges;)
             {
-                qFatal("message: can not seed holes;\n\texceeded max tries(%d)",
-                       maxTries);
+                if(source.tryToSeed()) { ++i; }
+                tries++;
+                if (tries > maxTries)
+                {
+                    qDebug("langmuir: can not seed electrons");
+                    qFatal("exceeded max tries(%d)", maxTries);
+                }
             }
         }
     }
+
+    qDebug("langmuir: placed %d holes", numHoleAgents());
 }
 
 void World::createSources()
 {
+    qDebug("langmuir: World::createSources");
+
     World &refWorld = *this;
 
     // Left electron source
@@ -688,24 +868,27 @@ void World::createSources()
     // Set up rates
     if (parameters().simulationType == "transistor")
     {
-        if (parameters().eSourceLRate >= 0)
-        {
-            m_electronSourceAgentLeft->setRate(parameters().eSourceLRate);
-        }
-        else
-        {
-            m_electronSourceAgentLeft->setRate(parameters().sourceRate);
-        }
+        // Turn off excitons
+        m_excitonSourceAgent->setRate(0.0);
+
+        // Set rates
+        m_electronSourceAgentLeft->setRateSmartly(parameters().eSourceLRate, parameters().sourceRate);
+        m_electronSourceAgentRight->setRateSmartly(parameters().eSourceRRate, 0.0);
+        m_holeSourceAgentRight->setRateSmartly(parameters().hSourceRRate, 0.0);
+        m_holeSourceAgentLeft->setRateSmartly(parameters().hSourceLRate, 0.0);
     }
     else if (parameters().simulationType == "solarcell")
     {
-        m_electronSourceAgentRight->setRateSmartly(parameters().eSourceRRate, 1.0);
-        m_electronSourceAgentLeft->setRateSmartly(parameters().eSourceLRate, 1.0);
-        m_holeSourceAgentRight->setRateSmartly(parameters().hSourceRRate, 1.0);
-        m_holeSourceAgentLeft->setRateSmartly(parameters().hSourceLRate, 1.0);
+        // Turn on excitons
         m_excitonSourceAgent->setRateSmartly(parameters().generationRate, parameters().sourceRate);
 
-        // Scale the recombination.rate according to the area of the simulation cell
+        // Set other rates
+        m_electronSourceAgentRight->setRateSmartly(parameters().eSourceRRate, 0.0);
+        m_electronSourceAgentLeft->setRateSmartly(parameters().eSourceLRate, 0.0);
+        m_holeSourceAgentRight->setRateSmartly(parameters().hSourceRRate, 0.0);
+        m_holeSourceAgentLeft->setRateSmartly(parameters().hSourceLRate, 0.0);
+
+        // Scale the generation.rate according to the area of the simulation cell
         if ( parameters().sourceScaleArea > 0 && parameters().sourceScaleArea != m_electronGrid->xyPlaneArea())
         {
             double oldRate = m_excitonSourceAgent->rate();
@@ -716,18 +899,67 @@ void World::createSources()
     }
     else
     {
-        qFatal("message: unknown simulation.type - can not create sources");
+        qFatal("langmuir: unknown simulation.type - can not create sources");
     }
 
-    qDebug("message: e.source.r.rate is %.3g", m_electronSourceAgentRight->rate());
-    qDebug("message: e.source.l.rate is %.3g", m_electronSourceAgentLeft->rate());
-    qDebug("message: h.source.r.rate is %.3g", m_holeSourceAgentRight->rate());
-    qDebug("message: h.source.l.rate is %.3g", m_holeSourceAgentLeft->rate());
-    qDebug("message: generation.rate is %.3g", m_excitonSourceAgent->rate());
+    qDebug("langmuir: e.source.r.rate = %.3g", m_electronSourceAgentRight->rate());
+    qDebug("langmuir: e.source.l.rate = %.3g", m_electronSourceAgentLeft->rate());
+    qDebug("langmuir: h.source.r.rate = %.3g", m_holeSourceAgentRight->rate());
+    qDebug("langmuir: h.source.l.rate = %.3g", m_holeSourceAgentLeft->rate());
+    qDebug("langmuir: generation.rate = %.3g", m_excitonSourceAgent->rate());
+
+    if ((m_electronSourceAgentRight->rate() == 0) &&
+        (m_electronSourceAgentLeft->rate() == 0) &&
+        (m_holeSourceAgentRight->rate() == 0) &&
+        (m_holeSourceAgentLeft->rate() == 0) &&
+        (m_excitonSourceAgent->rate() == 0))
+    {
+        qFatal("langmuir: all sources have zero rate");
+    }
+
+    if (maxElectronAgents() == 0)
+    {
+        if (m_electronSourceAgentRight->rate() > 0)
+        {
+            qFatal("langmuir: e.source.rate.r = %.3g, yet maxElectronAgents() == %d",
+                   m_electronSourceAgentRight->rate(), maxElectronAgents());
+        }
+        if (m_electronSourceAgentLeft->rate() > 0)
+        {
+            qFatal("langmuir: e.source.rate.l = %.3g, yet maxElectronAgents() == %d",
+                   m_electronSourceAgentLeft->rate(), maxElectronAgents());
+        }
+        if (m_excitonSourceAgent->rate() > 0)
+        {
+            qFatal("langmuir: generation.rate = %.3g, yet maxElectronAgents() == %d",
+                   m_excitonSourceAgent->rate(), maxElectronAgents());
+        }
+    }
+
+    if (maxHoleAgents() == 0)
+    {
+        if (m_holeSourceAgentRight->rate() > 0)
+        {
+            qFatal("langmuir: h.source.rate.r = %.3g, yet maxHoleAgents() == %d",
+                   m_holeSourceAgentRight->rate(), maxHoleAgents());
+        }
+        if (m_holeSourceAgentLeft->rate() > 0)
+        {
+            qFatal("langmuir: h.source.rate.l = %.3g, yet maxHoleAgents() == %d",
+                   m_holeSourceAgentLeft->rate(), maxHoleAgents());
+        }
+        if (m_excitonSourceAgent->rate() > 0)
+        {
+            qFatal("langmuir: generation.rate = %.3g, yet maxHoleAgents() == %d",
+                   m_excitonSourceAgent->rate(), maxHoleAgents());
+        }
+    }
 }
 
 void World::createDrains()
 {
+    qDebug("langmuir: World::createDrains");
+
     World &refWorld = *this;
 
     // Left electron drain
@@ -762,30 +994,73 @@ void World::createDrains()
 
     if (parameters().simulationType == "transistor")
     {
+        // Turn off recombination
+        m_recombinationAgent->setRate(0.0);
+
+        // Set rates
         m_electronDrainAgentRight->setRateSmartly(parameters().eDrainRRate, parameters().drainRate);
+        m_electronDrainAgentLeft->setRateSmartly(parameters().eDrainLRate, 0.0);
+        m_holeDrainAgentRight->setRateSmartly(parameters().hDrainRRate, 0.0);
+        m_holeDrainAgentLeft->setRateSmartly(parameters().hDrainLRate, 0.0);
     }
     else if (parameters().simulationType == "solarcell")
     {
+        // Turn recombination on
+        m_recombinationAgent->setRate(parameters().recombinationRate);
+
+        // Set rates
         m_electronDrainAgentRight->setRateSmartly(parameters().eDrainRRate, parameters().drainRate);
         m_electronDrainAgentLeft->setRateSmartly(parameters().eDrainLRate, parameters().drainRate);
         m_holeDrainAgentRight->setRateSmartly(parameters().hDrainRRate, parameters().drainRate);
         m_holeDrainAgentLeft->setRateSmartly(parameters().hDrainLRate, parameters().drainRate);
-        m_recombinationAgent->setRate(parameters().recombinationRate);
     }
     else
     {
-        qFatal("message: unknown simulation.type - can not create drains");
+        qFatal("langmuir: unknown simulation.type - can not create drains");
     }
 
-    qDebug("message: e.drain.r.rate = %.3g", m_electronDrainAgentRight->rate());
-    qDebug("message: e.drain.l.rate = %.3g", m_electronDrainAgentLeft->rate());
-    qDebug("message: h.drain.r.rate = %.3g", m_holeDrainAgentRight->rate());
-    qDebug("message: h.drain.l.rate = %.3g", m_holeDrainAgentLeft->rate());
-    qDebug("message: recombination.rate = %.3g", m_recombinationAgent->rate());
+    qDebug("langmuir: e.drain.r.rate = %.3g", m_electronDrainAgentRight->rate());
+    qDebug("langmuir: e.drain.l.rate = %.3g", m_electronDrainAgentLeft->rate());
+    qDebug("langmuir: h.drain.r.rate = %.3g", m_holeDrainAgentRight->rate());
+    qDebug("langmuir: h.drain.l.rate = %.3g", m_holeDrainAgentLeft->rate());
+    qDebug("langmuir: recombination.rate = %.3g", m_recombinationAgent->rate());
+
+    if ((m_electronDrainAgentRight->rate() == 0) &&
+        (m_electronDrainAgentLeft->rate() == 0) &&
+        (m_holeDrainAgentRight->rate() == 0) &&
+        (m_holeDrainAgentLeft->rate() == 0) &&
+        (m_recombinationAgent->rate() == 0))
+    {
+        qFatal("langmuir: all drains have zero rate");
+    }
+
+    if (maxElectronAgents() > 0)
+    {
+        if ((m_electronDrainAgentRight->rate() <= 0) &&
+            (m_electronDrainAgentLeft->rate() <= 0) &&
+            (m_recombinationAgent->rate() <= 0))
+        {
+            qFatal("langmuir: all electron drain rates are zero, yet maxElectronAgents() == %d",
+                   maxElectronAgents());
+        }
+    }
+
+    if (maxHoleAgents() > 0)
+    {
+        if ((m_holeDrainAgentRight->rate() <= 0) &&
+            (m_holeDrainAgentLeft->rate() <= 0) &&
+            (m_recombinationAgent->rate() <= 0))
+        {
+            qFatal("langmuir: all hole drain rates are zero, yet maxElectronAgents() == %d",
+                   maxElectronAgents());
+        }
+    }
 }
 
 void World::setFluxInfo(const QList<quint64> &fluxInfo)
 {
+    qDebug("langmuir: World::setFluxInfo");
+
     if (fluxInfo.size() == 0)
     {
         return;
@@ -907,7 +1182,7 @@ void World::setFluxInfo(const QList<quint64> &fluxInfo)
     }
     else
     {
-        qFatal("message: %s\ndo not recognize [FluxInfo] format... (of size %d, for simulation.type=%s)",
+        qFatal("langmuir: %s\ndo not recognize [FluxInfo] format... (of size %d, for simulation.type=%s)",
                qPrintable(format), fluxInfo.size(), qPrintable(parameters().simulationType));
     }
 }

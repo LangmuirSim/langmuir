@@ -16,6 +16,7 @@ Potential::Potential(World &world, QObject *parent)
 
 void Potential::setPotentialZero()
 {
+    qDebug("langmuir: setting potential to zero");
     for(int i = 0; i < m_world.electronGrid().volume(); i++)
     {
         m_world.electronGrid().setPotential(i, 0);
@@ -31,6 +32,7 @@ void Potential::setPotentialLinear()
     double m  =(VR - VL) / LX;
     double b  = VL;
 
+    qDebug("langmuir: adding a linear potential with slope %.3g V/nm", m);
     for(int i = 0; i < m_world.electronGrid().xSize(); i++)
     {
         for(int j = 0; j < m_world.electronGrid().ySize(); j++)
@@ -53,6 +55,7 @@ void Potential::setPotentialGate()
         return;
     }
 
+    qDebug("langmuir: adding gate potential with slope %.3g", m_world.parameters().slopeZ);
     for(int i = 0; i < m_world.electronGrid().xSize(); i++)
     {
         for(int j = 0; j < m_world.electronGrid().ySize(); j++)
@@ -71,9 +74,11 @@ void Potential::setPotentialGate()
 void Potential::setPotentialTraps(const QList<int> &trapIDs,
                                   const QList<double> &trapPotentials)
 {
+    qDebug("langmuir: Potential::setPotentialTraps");
+
     if ( m_world.numTraps() != 0 )
     {
-        qFatal("message: traps have already been created");
+        qFatal("langmuir: traps have already been created");
     }
 
     int toBePlacedTotal    = m_world.maxTraps();
@@ -96,21 +101,11 @@ void Potential::setPotentialTraps(const QList<int> &trapIDs,
         toBePlacedGrown = 0;
     }
 
-    QString message =
-            QString("parameters:               \n"
-                    "        total: %1         \n"
-                    "       forced: %2         \n"
-                    "       random: %3         \n"
-                    "       seeded: %4         \n"
-                    "        grown: %5         \n"
-                    "                          \n"
-                    " total  = forced + random \n"
-                    " random = seeded + grown  \n")
-            .arg(toBePlacedTotal,20)
-            .arg(toBePlacedForced,20)
-            .arg(toBePlacedRandomly,20)
-            .arg(toBePlacedSeeds,20)
-            .arg(toBePlacedGrown,20);
+    qDebug("langmuir: total traps allowed = %d", toBePlacedTotal);
+    qDebug("langmuir: traps in checkpoint = %d", toBePlacedForced);
+    qDebug("langmuir: traps to be placed randomly = %d", toBePlacedRandomly);
+    qDebug("langmuir: traps to act as seeds = %d", toBePlacedSeeds);
+    qDebug("langmuir: traps to be grown = %d", toBePlacedGrown);
 
     if (toBePlacedTotal < 0 ||
             toBePlacedForced < 0 ||
@@ -122,19 +117,14 @@ void Potential::setPotentialTraps(const QList<int> &trapIDs,
             toBePlacedSeeds > toBePlacedTotal ||
             toBePlacedGrown > toBePlacedTotal)
     {
-        qFatal("message: invalid trap %s",qPrintable(message));
+        qFatal("langmuir: invalid trap parameters");
     }
 
     if ( toBePlacedForced > 0 &&
          trapPotentials.size() != 0 &&
          trapPotentials.size() != trapIDs.size() )
     {
-        qFatal("message: invalid trap %s\n forced number of ids (%d) "
-               "does not match forced number of passed "
-               "potentials (%d)",
-               qPrintable(message),
-               trapIDs.size(),
-               trapPotentials.size());
+        qFatal("langmuir: trapPotential and trap arrays different sizes in checkpoint file");
     }
 
     // We do not alter the grid potential until we are done
@@ -142,84 +132,108 @@ void Potential::setPotentialTraps(const QList<int> &trapIDs,
     QList<int>         traps;
 
     // First, place the forced traps
-    for (int i = 0; i < toBePlacedForced; i++)
+    if (toBePlacedForced > 0)
     {
+        qDebug("langmuir: placing %d traps in checkpoint file", toBePlacedForced);
         if (trapPotentials.size() != 0)
         {
-            potentials.push_back(trapPotentials.at(i));
+            for (int i = 0; i < toBePlacedForced; i++)
+            {
+                traps.push_back(trapIDs.at(i));
+                potentials.push_back(trapPotentials.at(i));
+            }
         }
         else
         {
-            potentials.push_back(m_world.parameters().trapPotential);
+            for (int i = 0; i < toBePlacedForced; i++)
+            {
+                traps.push_back(trapIDs.at(i));
+                potentials.push_back(m_world.parameters().trapPotential);
+            }
         }
-        traps.push_back(trapIDs.at(i));
     }
 
     // Now place traps randomly
     QList<double> randomPotentials;
     QList<int> randomIDs;
 
-    // Place the seeds
-    int progress = 0;
-    while (progress < toBePlacedSeeds)
+    // Place homogeneous traps
+    if (toBePlacedRandomly > 0)
     {
-        int s = m_world.randomNumberGenerator().integer(0,
-                    m_world.electronGrid().volume() - 1);
-        if ( ! randomIDs.contains(s) && ! traps.contains(s) )
+        // Place the seeds
+        if (toBePlacedSeeds > 0)
         {
-            randomIDs.push_back(s);
-            randomPotentials.push_back(m_world.parameters().trapPotential);
-            ++progress;
+            qDebug("langmuir: placing %d seeds", toBePlacedSeeds);
+            int progress = 0;
+            while (progress < toBePlacedSeeds)
+            {
+                int s = m_world.randomNumberGenerator().integer(0,
+                            m_world.electronGrid().volume() - 1);
+                if ( ! randomIDs.contains(s) && ! traps.contains(s) )
+                {
+                    randomIDs.push_back(s);
+                    randomPotentials.push_back(m_world.parameters().trapPotential);
+                    ++progress;
+                }
+            }
         }
-    }
 
-    // Place the grown (if 0, does nothing)
-    progress = 0;
-    while (progress < toBePlacedGrown)
-    {
-        int trapSeedIndex = m_world.randomNumberGenerator().integer(0,
-                                randomIDs.size() - 1);
-        int trapSeedSite = randomIDs.at(trapSeedIndex);
-        QVector<int> trapSeedNeighbors = m_world.electronGrid().neighborsSite(
-                                trapSeedSite, 1);
-
-        int newTrapIndex = m_world.randomNumberGenerator().integer(0,
-                                trapSeedNeighbors.size() - 1);
-        int newTrapSite = trapSeedNeighbors[newTrapIndex];
-        if(m_world.electronGrid().agentType(newTrapSite)!= Agent::Source &&
-           m_world.electronGrid().agentType(newTrapSite)!= Agent::Drain &&
-           m_world.holeGrid().agentType(newTrapSite)!= Agent::Source &&
-           m_world.holeGrid().agentType(newTrapSite)!= Agent::Drain &&
-           !randomIDs.contains(newTrapSite) &&
-           !traps.contains(newTrapSite))
+        // Place the grown (if 0, does nothing)
+        if (toBePlacedGrown > 0)
         {
-            randomIDs.push_back(newTrapSite);
-            randomPotentials.push_back(m_world.parameters().trapPotential);
-            ++progress;
+            qDebug("langmuir: growing %d traps", toBePlacedGrown);
+            int progress = 0;
+            while (progress < toBePlacedGrown)
+            {
+                int trapSeedIndex = m_world.randomNumberGenerator().integer(0,
+                                        randomIDs.size() - 1);
+                int trapSeedSite = randomIDs.at(trapSeedIndex);
+                QVector<int> trapSeedNeighbors = m_world.electronGrid().neighborsSite(
+                                        trapSeedSite, 1);
+
+                int newTrapIndex = m_world.randomNumberGenerator().integer(0,
+                                        trapSeedNeighbors.size() - 1);
+                int newTrapSite = trapSeedNeighbors[newTrapIndex];
+                if(m_world.electronGrid().agentType(newTrapSite)!= Agent::Source &&
+                   m_world.electronGrid().agentType(newTrapSite)!= Agent::Drain &&
+                   m_world.holeGrid().agentType(newTrapSite)!= Agent::Source &&
+                   m_world.holeGrid().agentType(newTrapSite)!= Agent::Drain &&
+                   !randomIDs.contains(newTrapSite) &&
+                   !traps.contains(newTrapSite))
+                {
+                    randomIDs.push_back(newTrapSite);
+                    randomPotentials.push_back(m_world.parameters().trapPotential);
+                    ++progress;
+                }
+            }
         }
-    }
 
-    // Apply a deviation to the trap energies (only the randomly generated ones)
-    if(abs(m_world.parameters().gaussianStdev)> 0)
-    {
-        for(int i = 0; i < randomIDs.size(); i++)
+        // Apply a deviation to the trap energies (only the randomly generated ones)
+        if(abs(m_world.parameters().gaussianStdev) > 0)
         {
-            double v = m_world.randomNumberGenerator().normal(0,
-                            m_world.parameters().gaussianStdev);
-            randomPotentials[i] = randomPotentials[i] + v;
+            qDebug("langmuir: applying std to randomly placed traps");
+            for(int i = 0; i < randomIDs.size(); i++)
+            {
+                double v = m_world.randomNumberGenerator().normal(0,
+                                m_world.parameters().gaussianStdev);
+                randomPotentials[i] = randomPotentials[i] + v;
+            }
+        }
+
+        // Copy traps
+        for (int i = 0; i < randomIDs.size(); i++)
+        {
+            traps.push_back(randomIDs.at(i));
+            potentials.push_back(randomPotentials.at(i));
         }
     }
 
     // Save the trap ids and potentials
-    for (int i = 0; i < randomIDs.size(); i++)
-    {
-        traps.push_back(randomIDs.at(i));
-        potentials.push_back(randomPotentials.at(i));
-    }
     m_world.trapSiteIDs() = traps;
     m_world.trapSitePotentials() = potentials;
 
     // Now update the grids
+    qDebug("langmuir: updating grid with trap info");
     for (int i = 0; i < traps.size(); i++)
     {
         int s = traps.at(i);
@@ -231,6 +245,8 @@ void Potential::setPotentialTraps(const QList<int> &trapIDs,
 
 void Potential::precalculateArrays()
 {
+    qDebug("langmuir: precalculating interactions");
+
     int max_x = m_world.parameters().electrostaticCutoff + 1;
     int max_y = m_world.parameters().electrostaticCutoff + 1;
     int max_z = m_world.parameters().electrostaticCutoff + 1;

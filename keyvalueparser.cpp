@@ -126,7 +126,7 @@ void KeyValueParser::parse(const QString &line)
     // Make sure there is only one '=' sign, if not, it is an error
     if (parsed.count('=') != 1)
     {
-        qFatal("message: parse error: missing equal sign\n\tline: %s",
+        qFatal("langmuir: parse error: missing equal sign\n\tline: %s",
                qPrintable(line.trimmed()));
     }
 
@@ -136,7 +136,7 @@ void KeyValueParser::parse(const QString &line)
     // Make sure there are two parts
     if (tokens.size() != 2)
     {
-        qFatal("message: parse error: line does not split into two at equal sign\n\tline: %s",
+        qFatal("langmuir: parse error: line does not split into two at equal sign\n\tline: %s",
                qPrintable(line.trimmed()));
     }
 
@@ -144,7 +144,7 @@ void KeyValueParser::parse(const QString &line)
     QString key = tokens.at(0).trimmed().toLower();
     if (key.isEmpty())
     {
-        qFatal("message: parse error: key is empty\n\tline: %s",
+        qFatal("langmuir: parse error: key is empty\n\tline: %s",
                qPrintable(line.trimmed()));
     }
 
@@ -154,7 +154,7 @@ void KeyValueParser::parse(const QString &line)
     // Make sure we got a valid key
     if (it == m_variableMap.end())
     {
-        qFatal("message: parse error: invalid key\n\tline: %s",
+        qFatal("langmuir: parse error: invalid key\n\tline: %s",
                qPrintable(line.trimmed()));
     }
 
@@ -179,7 +179,7 @@ void KeyValueParser::save(const QString& fileName)
     QFile handle(info.absoluteFilePath());
     if (!handle.open(QIODevice::WriteOnly|QIODevice::Text))
     {
-        qFatal("message: can not open file: %s", qPrintable(info.absoluteFilePath()));
+        qFatal("langmuir: can not open file: %s", qPrintable(info.absoluteFilePath()));
     }
     QTextStream stream(&handle);
     stream << "[Parameters]";
@@ -199,7 +199,7 @@ Variable& KeyValueParser::getVariable(const QString& key)
 {
     if (!m_variableMap.contains(key))
     {
-        qFatal("message: invalid variable key : %s", qPrintable(key));
+        qFatal("langmuir: invalid variable key : %s", qPrintable(key));
     }
     return *m_variableMap[key];
 }

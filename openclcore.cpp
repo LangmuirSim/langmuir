@@ -71,9 +71,9 @@ QStringList OpenCLCore::PLATFORM_EXTENSIONS()
     catch (cl::Error error)
     {
         // something has gone wrong
-        qDebug("message: CL_ERROR %d", error.err());
-        qDebug("message: %s", error.what());
-        qDebug("message: can not use OpenCL");
+        qDebug("langmuir: CL_ERROR %d", error.err());
+        qDebug("langmuir: %s", error.what());
+        qDebug("langmuir: can not use OpenCL");
 
         // not ok to use OpenCL
         m_ok = false;
@@ -92,9 +92,9 @@ QString OpenCLCore::PLATFORM_PROFILE()
     catch (cl::Error error)
     {
         // something has gone wrong
-        qDebug("message: CL_ERROR %d", error.err());
-        qDebug("message: %s", error.what());
-        qDebug("message: can not use OpenCL");
+        qDebug("langmuir: CL_ERROR %d", error.err());
+        qDebug("langmuir: %s", error.what());
+        qDebug("langmuir: can not use OpenCL");
 
         // not ok to use OpenCL
         m_ok = false;
@@ -113,9 +113,9 @@ QString OpenCLCore::PLATFORM_VERSION()
     catch (cl::Error error)
     {
         // something has gone wrong
-        qDebug("message: CL_ERROR %d", error.err());
-        qDebug("message: %s", error.what());
-        qDebug("message: can not use OpenCL");
+        qDebug("langmuir: CL_ERROR %d", error.err());
+        qDebug("langmuir: %s", error.what());
+        qDebug("langmuir: can not use OpenCL");
 
         // not ok to use OpenCL
         m_ok = false;
@@ -134,9 +134,9 @@ QString OpenCLCore::PLATFORM_VENDOR()
     catch (cl::Error error)
     {
         // something has gone wrong
-        qDebug("message: CL_ERROR %d", error.err());
-        qDebug("message: %s", error.what());
-        qDebug("message: can not use OpenCL");
+        qDebug("langmuir: CL_ERROR %d", error.err());
+        qDebug("langmuir: %s", error.what());
+        qDebug("langmuir: can not use OpenCL");
 
         // not ok to use OpenCL
         m_ok = false;
@@ -155,9 +155,9 @@ QString OpenCLCore::PLATFORM_NAME()
     catch (cl::Error error)
     {
         // something has gone wrong
-        qDebug("message: CL_ERROR %d", error.err());
-        qDebug("message: %s", error.what());
-        qDebug("message: can not use OpenCL");
+        qDebug("langmuir: CL_ERROR %d", error.err());
+        qDebug("langmuir: %s", error.what());
+        qDebug("langmuir: can not use OpenCL");
 
         // not ok to use OpenCL
         m_ok = false;
@@ -183,7 +183,7 @@ void OpenCLCore::initialize()
             {
                 throw cl::Error(m_error, "empty platform vector");
             }
-            qDebug("message: multiple platforms found");
+            qDebug("langmuir: multiple platforms found");
         }
         m_platform = platforms[0];
 
@@ -210,9 +210,9 @@ void OpenCLCore::initialize()
     catch (cl::Error error)
     {
         // something has gone wrong
-        qDebug("message: CL_ERROR %d", error.err());
-        qDebug("message: %s", error.what());
-        qDebug("message: can not use OpenCL");
+        qDebug("langmuir: CL_ERROR %d", error.err());
+        qDebug("langmuir: %s", error.what());
+        qDebug("langmuir: can not use OpenCL");
 
         // not ok to use OpenCL
         m_ok = false;

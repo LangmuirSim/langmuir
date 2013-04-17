@@ -44,19 +44,19 @@ void alterMaxThreads(SimulationParameters &par)
 
     if (PBS_NODEFILE == NULL)
     {
-        qDebug("message: $PBS_NODEFILE not found");
+        qDebug("langmuir: $PBS_NODEFILE not found");
         desiredThreadCount = par.maxThreads;
     }
     else
     {
-        qDebug("message: $PBS_NODEFILE = %s", PBS_NODEFILE);
+        qDebug("langmuir: $PBS_NODEFILE = %s", PBS_NODEFILE);
         QString path = QString(PBS_NODEFILE);
 
         QFile file;
         file.setFileName(path);
         if (!file.open(QIODevice::ReadOnly))
         {
-            qFatal("message: could not open %s", qPrintable(path));
+            qFatal("langmuir: could not open %s", qPrintable(path));
         }
 
         desiredThreadCount = 0;
@@ -66,24 +66,24 @@ void alterMaxThreads(SimulationParameters &par)
             desiredThreadCount += 1;
         }
 
-        qDebug("message: ignoring SimulationParameters::maxThreads");
+        qDebug("langmuir: ignoring SimulationParameters::maxThreads");
     }
 
     if (desiredThreadCount <= 0 || desiredThreadCount == maxThreadCount)
     {
-        qDebug("message: QThreadPool::maxThreadCount set to %d",
+        qDebug("langmuir: QThreadPool::maxThreadCount set to %d",
                threadPool.maxThreadCount());
         return;
     }
 
     if (desiredThreadCount > maxThreadCount)
     {
-        qFatal("message: requested more threads than recommended %d > %d",
+        qFatal("langmuir: requested more threads than recommended %d > %d",
                desiredThreadCount, maxThreadCount);
     }
 
     threadPool.setMaxThreadCount(desiredThreadCount);
-    qDebug("message: QThreadPool::maxThreadCount set to %d", threadPool.maxThreadCount());
+    qDebug("langmuir: QThreadPool::maxThreadCount set to %d", threadPool.maxThreadCount());
 }
 
 int main (int argc, char *argv[])
@@ -103,7 +103,7 @@ int main (int argc, char *argv[])
     QStringList args = app.arguments();
     if (args.size() != 2)
     {
-        qFatal("message: correct use is: langmuir input.dat");
+        qFatal("langmuir: correct use is: langmuir input.dat");
     }
     QString inputFile = args.at(1);
 
@@ -145,7 +145,7 @@ int main (int argc, char *argv[])
         }
     }
 
-    qDebug("message: performing iterations...");
+    qDebug("langmuir: performing iterations...");
 
     // Perform production steps
     for (int j = par.currentStep; j < par.iterationsReal; j += par.iterationsPrint)
@@ -225,5 +225,5 @@ int main (int argc, char *argv[])
                 << flush;
     }
 
-    qDebug("message: Langmuir has exited successfully");
+    qDebug("langmuir: Langmuir has exited successfully");
 }

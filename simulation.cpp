@@ -239,6 +239,9 @@ void Simulation::performInjections()
     else
     {
         m_world.electronSourceAgentLeft().tryToInject();
+        m_world.electronSourceAgentRight().tryToInject();
+        m_world.holeSourceAgentLeft().tryToInject();
+        m_world.holeSourceAgentRight().tryToInject();
     }
 }
 
@@ -272,7 +275,7 @@ void Simulation::balanceCharges()
         tries += 1;
         if (tries > 1024)
         {
-            qFatal("message: can not balance electrons");
+            qFatal("langmuir: can not balance electrons");
         }
     }
 
@@ -304,7 +307,7 @@ void Simulation::balanceCharges()
         tries += 1;
         if (tries > 1024)
         {
-            qFatal("message: can not balance holes");
+            qFatal("langmuir: can not balance holes");
         }
     }
 //    for (unsigned int i = 0;

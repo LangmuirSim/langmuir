@@ -122,7 +122,7 @@ QDataStream& operator<<(QDataStream& stream, Random& random)
     sstream << *random.twister;
     if (sstream.fail() || sstream.bad())
     {
-        qFatal("message: can not save state of random number generator to QDataStream; "
+        qFatal("langmuir: can not save state of random number generator to QDataStream; "
                "std::stringstream has failed on write");
     }
     QList<quint64> state;
@@ -132,7 +132,7 @@ QDataStream& operator<<(QDataStream& stream, Random& random)
     {
         if (sstream.fail() || sstream.bad())
         {
-            qFatal("message: can not save state of random number generator to QDataStream; "
+            qFatal("langmuir: can not save state of random number generator to QDataStream; "
                    "std::stringstream has failed on read");
         }
         state.push_back(value);
@@ -154,19 +154,19 @@ QDataStream& operator>>(QDataStream& stream, Random& random)
     }
     case QDataStream::ReadPastEnd:
     {
-        qFatal("message: can not load state of random number generator from QDataStream, random.seed: "
+        qFatal("langmuir: can not load state of random number generator from QDataStream, random.seed: "
                "QDataStream::ReadPastEnd");
         break;
     }
     case QDataStream::ReadCorruptData:
     {
-        qFatal("message: can not load state of random number generator from QDataStream, random.seed: "
+        qFatal("langmuir: can not load state of random number generator from QDataStream, random.seed: "
                "QDataStream::ReadCorruptData");
         break;
     }
     default:
     {
-        qFatal("message: can not load state of random number generator from QDataStream, random.seed: "
+        qFatal("langmuir: can not load state of random number generator from QDataStream, random.seed: "
                "QDataStream::Status unknown");
     break;
     }
@@ -181,19 +181,19 @@ QDataStream& operator>>(QDataStream& stream, Random& random)
     }
     case QDataStream::ReadPastEnd:
     {
-        qFatal("message: can not load state of random number generator from QDataStream: "
+        qFatal("langmuir: can not load state of random number generator from QDataStream: "
                "QDataStream::ReadPastEnd");
         break;
     }
     case QDataStream::ReadCorruptData:
     {
-        qFatal("message: can not load state of random number generator from QDataStream: "
+        qFatal("langmuir: can not load state of random number generator from QDataStream: "
                "QDataStream::ReadCorruptData");
         break;
     }
     default:
     {
-        qFatal("message: can not load state of random number generator from QDataStream: "
+        qFatal("langmuir: can not load state of random number generator from QDataStream: "
                "QDataStream::Status unknown");
     break;
     }
@@ -204,14 +204,14 @@ QDataStream& operator>>(QDataStream& stream, Random& random)
         sstream << state.at(i) << " ";
         if (sstream.fail() || sstream.bad())
         {
-            qFatal("message: can not load state of random number generator from QDataStream; "
+            qFatal("langmuir: can not load state of random number generator from QDataStream; "
                    "std::stringstream has failed on write");
         }
     }
     sstream >> *random.twister;
     if (sstream.fail() || sstream.bad())
     {
-        qFatal("message: can not load state of random number generator from QDataStream; "
+        qFatal("langmuir: can not load state of random number generator from QDataStream; "
                "std::stringstream has failed on read");
     }
     return stream;
@@ -223,7 +223,7 @@ QTextStream& operator<<(QTextStream& stream, Random& random)
     sstream << *random.twister;
     if (sstream.fail() || sstream.bad())
     {
-        qFatal("message: can not save state of random number generator to QTextStream; "
+        qFatal("langmuir: can not save state of random number generator to QTextStream; "
                "std::stringstream has failed on write");
     }
     QList<quint64> state;
@@ -233,7 +233,7 @@ QTextStream& operator<<(QTextStream& stream, Random& random)
     {
         if (sstream.fail() || sstream.bad())
         {
-            qFatal("message: can not save state of random number generator to QTextStream; "
+            qFatal("langmuir: can not save state of random number generator to QTextStream; "
                    "std::stringstream has failed on read");
         }
         state.push_back(value);
@@ -259,19 +259,19 @@ QTextStream& operator>>(QTextStream& stream, Random& random)
     }
     case QTextStream::ReadPastEnd:
     {
-        qFatal("message: can not load state of random number generator from QTextStream, random.seed: "
+        qFatal("langmuir: can not load state of random number generator from QTextStream, random.seed: "
                "QTextStream::ReadPastEnd");
         break;
     }
     case QTextStream::ReadCorruptData:
     {
-        qFatal("message: can not load state of random number generator from QTextStream, random.seed: "
+        qFatal("langmuir: can not load state of random number generator from QTextStream, random.seed: "
                "QTextStream::ReadCorruptData");
         break;
     }
     default:
     {
-        qFatal("message: can not load state of random number generator from QTextStream, random.seed: "
+        qFatal("langmuir: can not load state of random number generator from QTextStream, random.seed: "
                "QTextStream::Status unknown");
     break;
     }
@@ -286,19 +286,19 @@ QTextStream& operator>>(QTextStream& stream, Random& random)
     }
     case QTextStream::ReadPastEnd:
     {
-        qFatal("message: can not load state of random number generator from QTextStream, state.size(): "
+        qFatal("langmuir: can not load state of random number generator from QTextStream, state.size(): "
                "QTextStream::ReadPastEnd");
         break;
     }
     case QTextStream::ReadCorruptData:
     {
-        qFatal("message: can not load state of random number generator from QTextStream, state.size(): "
+        qFatal("langmuir: can not load state of random number generator from QTextStream, state.size(): "
                "QTextStream::ReadCorruptData");
         break;
     }
     default:
     {
-        qFatal("message: can not load state of random number generator from QTextStream, state.size(): "
+        qFatal("langmuir: can not load state of random number generator from QTextStream, state.size(): "
                "QTextStream::Status unknown");
     break;
     }
@@ -316,19 +316,19 @@ QTextStream& operator>>(QTextStream& stream, Random& random)
         }
         case QTextStream::ReadPastEnd:
         {
-            qFatal("message: can not load state of random number generator from QTextStream: state.at(%d)"
+            qFatal("langmuir: can not load state of random number generator from QTextStream: state.at(%d)"
                    "QTextStream::ReadPastEnd",i);
             break;
         }
         case QTextStream::ReadCorruptData:
         {
-            qFatal("message: can not load state of random number generator from QTextStream: state.at(%d)"
+            qFatal("langmuir: can not load state of random number generator from QTextStream: state.at(%d)"
                    "QTextStream::ReadCorruptData",i);
             break;
         }
         default:
         {
-            qFatal("message: can not load state of random number generator from QTextStream: state.at(%d)"
+            qFatal("langmuir: can not load state of random number generator from QTextStream: state.at(%d)"
                    "QTextStream::Status unknown",i);
         break;
         }
@@ -336,14 +336,14 @@ QTextStream& operator>>(QTextStream& stream, Random& random)
         sstream << value << " ";
         if (sstream.fail() || sstream.bad())
         {
-            qFatal("message: can not load state of random number generator from QTextStream; state.at(%d)"
+            qFatal("langmuir: can not load state of random number generator from QTextStream; state.at(%d)"
                    "std::stringstream has failed on write", i);
         }
     }
     sstream >> *random.twister;
     if (sstream.fail() || sstream.bad())
     {
-        qFatal("message: can not load state of random number generator from QTextStream; "
+        qFatal("langmuir: can not load state of random number generator from QTextStream; "
                "std::stringstream has failed on read");
     }
     return stream;
@@ -361,13 +361,13 @@ std::istream& operator>>(std::istream& stream, Random& random)
     stream >> random.m_seed;
     if (stream.fail() || stream.bad() || stream.eof())
     {
-        qFatal("message: can not load state of random number generator; random.m_seed\n"
+        qFatal("langmuir: can not load state of random number generator; random.m_seed\n"
                "std::ifstream has failed on write");
     }
     stream >> *random.twister;
     if (stream.fail() || stream.bad() || stream.eof())
     {
-        qFatal("message: can not load state of random number generator; twister\n"
+        qFatal("langmuir: can not load state of random number generator; twister\n"
                "std::ifstream has failed on write");
     }
     return stream;
