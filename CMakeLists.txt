@@ -14,7 +14,6 @@ ENDIF(COMPILE_TEST)
 SET(PROJECT_SOURCES
     simulation.cpp
     openclhelper.cpp
-    openclcore.cpp
     writer.cpp
     chargeagent.cpp
     drainagent.cpp
@@ -42,8 +41,6 @@ SET(PROJECT_HEADERS
     writer.h
     potential.h
     openclhelper.h
-    openclcore.h
-    openclbuffer.h
     rand.h
     sourceagent.h
     simulation.h
@@ -59,8 +56,6 @@ SET(PROJECT_MOC_HEADERS_1
     cubicgrid.h
     writer.h
     openclhelper.h
-    openclcore.h
-    openclbuffer.h
     potential.h
     simulation.h
     world.h
