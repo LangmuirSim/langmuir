@@ -73,6 +73,7 @@ void alterMaxThreads(SimulationParameters &par)
     {
         qDebug("langmuir: QThreadPool::maxThreadCount set to %d",
                threadPool.maxThreadCount());
+        par.maxThreads = threadPool.maxThreadCount();
         return;
     }
 
@@ -84,6 +85,7 @@ void alterMaxThreads(SimulationParameters &par)
 
     threadPool.setMaxThreadCount(desiredThreadCount);
     qDebug("langmuir: QThreadPool::maxThreadCount set to %d", threadPool.maxThreadCount());
+    par.maxThreads = threadPool.maxThreadCount();
 }
 
 int main (int argc, char *argv[])
