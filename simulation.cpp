@@ -154,10 +154,10 @@ void Simulation::performIterations(int nIterations)
     }
 
     // Update RecombinationAgent probability
-    if (m_world.parameters().simulationType == "solarcell")
-    {
-        m_world.recombinationAgent().guessProbability();
-    }
+    // if (m_world.parameters().simulationType == "solarcell")
+    // {
+    //    m_world.recombinationAgent().guessProbability();
+    // }
 
     // Save output
     if (m_world.parameters().outputIsOn)
