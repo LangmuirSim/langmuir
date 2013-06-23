@@ -3,10 +3,23 @@ import numpy as _np
 
 class ColumnMetaData:
     """
+    Class to store meta data about output files and parameters.
+    
+    :param name: parameter name
+    :param key: alias
+    :param dflt: default value
+    :param units: unit string
+    :param fmt: format string
+    :param calculated: if calculated by Langmuir
+    
+    :type name: str
+    :type key: str
+    :type dflt: object
+    :type units: str
+    :type fmt: str
+    :type calculated: bool
     """
     def __init__(self, name, key, pytype, dflt, units, fmt, calculated):
-        """
-        """
         self.name       = name
         self.key        = key
         self.pytype     = pytype
@@ -37,27 +50,26 @@ class ColumnMetaData:
 
 class ColumnList:
     """
+    List of :class:`ColumnMetaData`
     """
     def __init__(self):
-        """
-        """
         self.columns = []
 
     def append(self, column):
         """
+        Append a column.
+        
+        :param column: column object
+        :type column: :class:`ColumnMetaData`
         """
         self.columns.append(column)
 
     def __getitem__(self, index):
-        """
-        """
         if isinstance(index, str):
             index = self.names.index(index)
         return self.columns[index]
 
     def _init(self):
-        """
-        """
         self.names = [col.name for col in self.columns]
         self.keys = [col.key for col in self.columns]
         self.pytypes = [col.pytype for col in self.columns]

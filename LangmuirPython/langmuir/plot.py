@@ -16,23 +16,9 @@ def mtext(s):
     """
     return r'$\mathtt{%s}$' % s
 
-class ScalarFormatter(_mpl.ticker.ScalarFormatter):
-    def __init__(self, func=lambda x : x, *args, **kwargs):
-        _mpl.ticker.ScalarFormatter.__init__(self, *args, **kwargs)
-        self._useMathText = False
-        self._useOffset = False
-        self.func = func
-
-    def format_data(self, value):
-        s = _mpl.ticker.ScalarFormatter.format_data(self, value)
-        return self.func(s.replace('$', ''))
-
-    def pprint_val(self, x):
-        s = _mpl.ticker.ScalarFormatter.pprint_val(self, x)
-        return self.func(s.replace('$', ''))
-
 def convert(ifile, ofile, density=300):
-    command = r'convert -density %d -quality 100%% %s %s' % (density, ifile, ofile)
+    command = r'convert -density %d -quality 100%% %s %s' % (density, ifile,
+                                                             ofile)
     _os.system(command)
 
 def crop(name, border=10):
@@ -120,14 +106,6 @@ colors['b2'] = '#0247fe'
 colors['p1'] = '#3d01a4'
 colors['p2'] = '#8601af'
 colors['p3'] = '#a7194b'
-
-#def subplots(nrows=1, ncols=1, w=8, h=8, l=1.5, r=0.5, b=1.5, t=0.5, ws=0, hs=0):
-#    """wrapper around subplots using absolute values instead of fractional"""
-#    fig, axes = _plt.subplots(nrows=nrows, ncols=ncols, figsize=(w, h))
-#    w, h = float(w), float(h)
-#    _plt.subplots_adjust(left=l/w, right=(w-r)/w, bottom=b/h, top=(h-t)/h,
-#        wspace=ws, hspace=hs)
-#    return fig, axes
 
 def subplots(w=6, h=6, l=1.75, r=0.5, t=1.0, b=1.25, twinx=False):
     w = float(l + w + r)

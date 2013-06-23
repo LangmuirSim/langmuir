@@ -1,11 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-.. module:: solar
-    :platform: Unix
-    :synopsis: A module for plotting iv curve of solar cell simulation.
-
-.. moduleauthor:: Adam Gagorik <adam.gagorik@gmail.com>
-"""
 import matplotlib as mpl
 mpl.rc('text', usetex=True)
 mpl.rc('text.latex', preamble=[r'\usepackage{tabu}'])

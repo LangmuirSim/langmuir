@@ -1,12 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Fri May 10 08:07:05 2013
-
-@author: adam
-"""
 import matplotlib.pyplot as plt
-import matplotlib as mpl
-import numpy as np
 import langmuir
 import argparse
 import os

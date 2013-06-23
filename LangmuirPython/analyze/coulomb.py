@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Feb  8 08:26:00 2013
-
 @author: adam
 """
 
@@ -134,10 +132,10 @@ if __name__ == '__main__':
     work = os.getcwd()
     opts = get_arguments()
     chk  = langmuir.checkpoint.load(opts.input)
-    grid = langmuir.grid.grid_from_checkpoint(chk)
-    mesh = grid.precalculate_mesh()
+    grid = langmuir.grid.Grid.checkpoint(chk)
+    mesh = langmuir.grid.Mesh(grid)
     pref = langmuir.common.prefactor / 3.5
-    indx = langmuir.grid.IndexMapper(grid.shape)
+    indx = langmuir.grid.IndexMapper(grid.px, grid.py, grid.pz)
 
     os.chdir('/home/adam/Desktop')
     print 'computing electron coulomb energy'

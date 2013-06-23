@@ -1,10 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Feb  4 08:39:33 2013
-
-@author: adam
-"""
-
 import numpy as np
 import langmuir
 import argparse
@@ -31,7 +25,7 @@ if __name__ == '__main__':
     work = os.getcwd()
     opts = get_arguments()
     chk  = langmuir.checkpoint.load(opts.input)
-    grid = langmuir.grid.grid_from_checkpoint(chk)
+    grid = langmuir.grid.Grid.checkpoint(chk)
 
     if chk.traps:
         print 'found traps'

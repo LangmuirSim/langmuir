@@ -1,10 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Thu Jul  5 08:31:30 2012
-
-@author: adam
-"""
-
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import langmuir
@@ -54,7 +48,7 @@ def get_cmap():
 def plot2D():
 
     chk  = langmuir.checkpoint.load(opts.input)
-    grid = langmuir.grid.grid_from_checkpoint(chk)
+    grid = langmuir.grid.Grid.checkpoint(chk)
     cmap = get_cmap()
 
     if chk.trapPotentials:
@@ -85,20 +79,21 @@ def plot2D():
 
     if opts.elecs:
         try:
-            x, y = zip(*[(x, y) for x, y, z in zip(elec_xyzv.site_x,
-                         elec_xyzv.site_y, elec_xyzv.site_z)
-                             if z == opts.zlevel])
-            plt.plot(x, y, marker='o', mfc=ecolor, mec=eline, ls='none',
-                     ms=4, alpha=1)
+            x_vals, y_vals = zip(*[(x_val, y_val) for x_val, y_val, z_val
+                in zip(elec_xyzv.site_x_ids, elec_xyzv.site_y_ids,
+                       elec_xyzv.site_z_ids) if z_val == opts.zlevel])
+            plt.plot(x_vals, y_vals, marker='o', mfc=ecolor, mec=eline,
+                     ls='none', ms=4, alpha=1)
         except:
             print 'warning : no electrons to plot'
 
     if opts.holes:
         try:
-            x, y = zip(*[(x, y) for x, y, z in zip(hole_xyzv.site_x,
-                hole_xyzv.site_y, hole_xyzv.site_z) if z == opts.zlevel])
-            plt.plot(x, y, marker='o', mfc=hcolor, mec=hline, ls='none',
-                     ms=4, alpha=1)
+            x_vals, y_vals = zip(*[(x_val, y_val) for x_val, y_val, z_val
+                in zip(hole_xyzv.site_x_ids, hole_xyzv.site_y_ids,
+                       hole_xyzv.site_z_ids) if z_val == opts.zlevel])
+            plt.plot(x_vals, y_vals, marker='o', mfc=hcolor, mec=hline,
+                     ls='none', ms=4, alpha=1)
         except:
             print 'warning : no holes to plot'
 
@@ -107,8 +102,8 @@ def plot2D():
     plt.gca().yaxis.set_major_locator(mpl.ticker.MultipleLocator(64))
     plt.gca().yaxis.set_minor_locator(mpl.ticker.MultipleLocator(32))
 
-    plt.xlim(0, grid.xlength)
-    plt.ylim(0, grid.ylength)
+    plt.xlim(0, grid.px)
+    plt.ylim(0, grid.py)
 
     plt.xlabel('x (nm)')
     plt.ylabel('y (nm)')

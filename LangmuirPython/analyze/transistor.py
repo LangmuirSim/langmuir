@@ -1,11 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-.. module:: ivplot
-    :platform: Unix
-    :synopsis: A module to plot iv curve.
-
-.. moduleauthor:: Adam Gagorik <adam.gagorik@gmail.com>
-"""
 import matplotlib.pyplot as plt
 import argparse
 import langmuir
