@@ -1,0 +1,5 @@
+fit
+===
+
+.. automodule:: fit
+    :members:
