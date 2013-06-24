@@ -3,6 +3,5 @@ build/
 debug/
 CMakeLists.txt.user
 doc/
-CL
 .spyderworkspace
 *.pyc
