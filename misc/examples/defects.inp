@@ -12,7 +12,7 @@ output.is.on            = false
 iterations.print        = 5
 
 electron.percentage     = 0.10
-hole.percentage         = 0.10
+hole.percentage         = 0.00
 seed.charges            = 0.00
 
 defect.percentage       = 0.08
