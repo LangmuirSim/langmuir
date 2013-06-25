@@ -1,0 +1,286 @@
+\newpage
+\section{Input Files}
+\label{sec:input}
+This section contains information on the format of \Langmuir input files.
+Input files are just text files that you can edit with any text editor.
+However, be warned that input files can be very long if they contain
+    information on traps.
+In this case, it is best to use a text editor capable of dealing with
+    very large files.
+Input files can also be manipulated using \LangmuirPython, as discussed
+    in section ~\ref{sec:python}.
+In \Langmuir, input files and checkpoint files are the same thing.
+Periodically, a running simulation will save a checkpoint file.
+You can use this checkpoint file to extend the simulation or change
+    its parameters.
+The \verb|#| symbol serves as a comment inside the input file.
+Any text after the \verb|#| symbol is ignored.
+The input file is divided into sections.
+Sections always start with a header.
+The valid section headers are shown below.
+
+\begin{itemize}
+    \item \verb|[Electrons]|
+    \item \verb|[Holes]|
+    \item \verb|[Defects]|
+    \item \verb|[Traps]|
+    \item \verb|[TrapPotentials]|
+    \item \verb|[FluxState]|
+    \item \verb|[RandomState]|
+    \item \verb|[Parameters]|
+\end{itemize}
+
+The only required section is the \verb|[Parameters]| section,
+    and it must be the last section in the input file.
+Other sections do not have to be in any particular order.
+Example input files are found in section~\ref{ssec:examples}.
+
+\subsection{Site IDs}
+    \label{ssec:sites}
+    The position of an agent in the grid can be thought of as a 3-tuple
+        of integers ($x_{i}$, $y_{i}$, $z_{i}$).
+    This 3-tuple can be hashed into a single number called
+        the site-id, $s_{i}$.
+    The dimensions of the grid are $L_{x}$, $L_{y}$, and $L_{z}$.
+    Note that $L_{x}$, $L_{y}$, and $L_{z}$ are the \verb|grid.x|,
+        \verb|grid.y|, and \verb|grid.z| parameters discussed in
+        section~\ref{ssec:parameters}.
+    The following equations hold for site-ids, where all quantities
+        are integers, and integer division applies.
+
+    \begin{alignat}{3}
+        \label{eqn:xrange}
+        & 0 \leq & x_{i} < & L_{x} & x_{i} =& s_{i} \% L_{x} \\
+        \label{eqn:yrange}
+        & 0 \leq & y_{i} < & L_{y} & y_{i} =& s_{i} / L_{x} - (s_{i}/(L_{x}L_{y})) L_{y} \\
+        \label{eqn:zrange}
+        & 0 \leq & z_{i} < & L_{z} & z_{i} =& s_{i} / (L_{x}L_{y}) \\
+        \label{eqn:srange}
+        & 0 \leq & s_{i} < & L_{x} L_{y} L_{z} \quad & s_{i} =& L_{x} (y_{i} + z_{i} L_{y})+ x_{i}
+    \end{alignat}
+
+\newpage
+\subsection{Agents}
+    \label{ssec:agents}
+    Electrons, holes, defects, and traps all follow the same format.
+    Note that these sections are for providing information on
+        electrons, etc.\ already present in the system before the
+        simulation starts.
+    This is typically the case when extending a run, or placing
+        traps at well defined locations.
+    You may leave these sections out.
+    \Langmuir has the ability to place traps, defects, and carriers
+        randomly if desired (see section~\ref{ssec:parameters}).
+
+    It is very important that the parameters
+        \verb|electron.percentage|, \verb|hole.percentage|,
+        \verb|defect.percentage|, and \verb|trap.percentage|
+        are consistent with these sections.
+    For example, while the number of electrons in the \verb|Electrons|
+        section can be less than the maximum number of electrons
+        allowed by \verb|electron.percentage|, it can not exceed
+        the max.
+    If there is a problem, \langmuir will raise an error.
+
+    The first line is the section header written in square brakets.
+    The next line is always the number of elements to be read by
+        \langmuir.
+    For example, for the electrons, the second line is the number of
+        electrons.
+    The remaining lines are the site-ids for electrons, holes, defects,
+        and traps.
+    Site-id's are discussed in section~\ref{ssec:sites}.
+
+    \begin{bashcode*}{gobble=8}
+        [Electrons]    # section header
+        2              # number of electrons
+        100            # site-id of electron 1
+        200            # site-id of electron 2
+        [Holes]        # section header
+        0              # number of holes
+        [Defects]      # section header
+        0              # number of defects
+        [Traps]        # section header
+        0              # number of traps
+    \end{bashcode*}
+
+\subsection{Trap Potentials}
+    \label{ssec:trap}
+    The \verb|[TrapPotentials]| section is very similar in structure to
+        the \verb|[Trap]| section.
+    The only difference is that instead of site-ids, one lists the
+        trap potentials in units of \si{eV}.
+    If present, the \verb|[TrapPotentials]| section must be the same
+        size as the \verb|[Traps]| section.
+    Note that if all traps have the same value, then this section
+        can be omitted.
+    In this case, the value used for trap potential is taken from the
+        \verb|trap.potential| parameter (see section~\ref{ssec:parameters}).
+
+    \begin{bashcode*}{gobble=8}
+        [TrapPotentials]    # section header
+        2                   # number of traps
+        0.50                # trap potential of trap 1
+        0.50                # trap potential of trap 2
+    \end{bashcode*}
+
+\newpage
+\subsection{Flux State}
+    \label{ssec:flux}
+    The \verb|[FluxState]| is a list of 20 integers detailing the
+        number of attempts and successes made by a flux agent.
+    Examples of flux agents are the sources and drains.
+    There are 10 different flux agents in \Langmuir.
+    There are 2 source agents and 2 drain agents at $x_{i} = 0$ and
+        $x_{i} = L_{x} - 1$, making a total of 8.
+    The remaining 2 are an exciton source, and a recombination drain.
+    You probably never have to edit this section.
+
+    \begin{bashcode*}{gobble=8}
+        # The codes should hopefully be easy to figure out...
+        # ESLA = Electron Source Left Attempt
+        # XDS  = Recombination Drain Success
+        # etc...
+        [FluxState]    # section header
+        20             # number of flux agents
+        0              # ESLA
+        0              # ESLS
+        0              # ESRA
+        0              # ESRS
+        0              # HSLA
+        0              # HSLS
+        0              # HSRA
+        0              # HSRS
+        0              # XSA
+        0              # XSS
+        0              # EDLA
+        0              # EDLS
+        0              # EDRA
+        0              # EDRS
+        0              # HDLA
+        0              # HDLS
+        0              # HDRA
+        0              # HDRS
+        0              # XDA
+        0              # XDS
+    \end{bashcode*}
+
+\subsection{Random State}
+    \label{ssec:random}
+    The \verb|[RandomState]| is a very long list of integers that
+        describe the exact state of the random number generator.
+    Due to limitations of the combination of boost, stdlib, and qt,
+        it must be on one line.
+    You should never have to edit this section, other than deleting it.
+
+    \begin{bashcode*}{gobble=8}
+        [RandomState] # section header
+        1371835351 1524755492 3319441753 617340572... # list of numbers
+    \end{bashcode*}
+
+\newpage
+\subsection{Parameters}
+    \label{ssec:parameters}
+    The parameters section is a list of \verb|key=value| pairs that
+        alter the behavior of the simulation.
+    This section will often be the only section in an input file.
+    It must be present, and it must be the last section in the text
+        file.
+    Below is a list of parameters and their descriptions.
+    
+    \input{sections/parameters}
+
+\newpage
+\subsection{Examples}
+    \label{ssec:examples}
+    This section contains sample input files.
+
+    \subsubsection{Transistor}
+    \begin{bashcode*}{gobble=8}
+        [Parameters]
+        simulation.type         = transistor
+
+        grid.x                  = 1024
+        grid.y                  = 256
+        grid.z                  = 1
+
+        iterations.real         = 500000
+        iterations.print        = 1000
+
+        electron.percentage     = 0.10
+        seed.charges            = 1.00      # speed up equilibration
+
+        voltage.right           = 5.00
+        voltage.left            = 0.00
+
+        coulomb.carriers        = true
+        use.opencl              = true
+    \end{bashcode*}
+
+    \subsubsection{Solar Cell}
+    \begin{bashcode*}{gobble=8}
+        [Parameters]
+        simulation.type         = solarcell
+
+        grid.x                  = 256
+        grid.y                  = 256
+        grid.z                  = 1
+
+        iterations.real         = 20000000  # much longer than transistor
+        iterations.print        = 1000
+
+        electron.percentage     = 0.10
+        hole.percentage         = 0.10
+
+        trap.percentage         = 0.50
+        trap.potential          = 0.50
+        seed.percentage         = 0.10
+
+        voltage.right           = 9.00
+        voltage.left            = 0.00
+
+        source.rate             = 1e-3
+        recombination.rate      = 1e-4
+
+        coulomb.carriers        = true
+        use.opencl              = true
+    \end{bashcode*}
+
+    \newpage
+    \subsubsection{Scan}
+    Set a variable equal to a list of values.  This works for any variable.
+    See section~\ref{sec:python}.
+    \begin{bashcode*}{gobble=8}
+        [Parameters]
+        ...
+        voltage.right = [-2.0, -1.5, -1.0, -0.8, -0.6, -0.4, -0.2, 0.0]
+        ...
+    \end{bashcode*}   
+    To generate input files.
+    \begin{bashcode*}{gobble=8}
+        adam@work: python scan.py --real 500000 --print 1000 --mode gen
+    \end{bashcode*}
+    To run \Langmuir in real time.
+    \begin{bashcode*}{gobble=8}
+        adam@work: python scan.py --real 500000 --print 1000 --mode scan
+    \end{bashcode*}
+    
+    \subsubsection{Traps}
+    \begin{bashcode*}{gobble=8}
+        [Parameters]
+        ...
+        trap.percentage         = 0.50 # 50-percent traps
+        seed.percentage         = 0.10 # 10-percent seeds
+        trap.potential          = 0.05 #
+        ...
+    \end{bashcode*} 
+
+    \subsubsection{Defects}
+    \begin{bashcode*}{gobble=8}
+        [Parameters]
+        ...
+        defect.percentage       = 0.50 # 50-percent defects
+        defect.charge           = 0    # neutral defects
+        ...
+    \end{bashcode*}
+    

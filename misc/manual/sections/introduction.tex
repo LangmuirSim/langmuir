@@ -1,0 +1,14 @@
+\newpage
+\section{Introduction}
+\label{sec:introduction}
+\Langmuir is a program written in c++ for the simulation of charge transport
+    in organic semiconductors.
+The simulation works by using Monte Carlo to predict the movement of charge
+    carriers on a grid.
+Each site on the grid represents an organic semiconducting molecule, and
+    charge carriers, such as electrons or holes, can occupy the sites.
+During each step of the simulation, all charge carriers propose hopping moves
+    to adjacent sites, and use the Metropolis criterion to decide the acceptance
+    rate.
+\Langmuir monitors the flux of charge carriers in and out of the system,
+    allowing the calculation of quantities such as current and mobility.

@@ -1,0 +1,48 @@
+\newpage
+\section{Usage}
+\label{sec:usage}
+
+\subsection{Langmuir}
+    \label{ssec:langmuir}
+    \Langmuir is generally run inside a terminal.
+    \begin{bashcode*}{gobble=8}
+        adam@work: langmuir input.inp
+    \end{bashcode*}
+    Note that the \langmuir command must be on your path.
+    There is only one argument, the full path to the input file.
+    However, note that \Langmuir will write output files to the directory it is
+        called from.
+    The format of the input file is discussed in section~\ref{sec:input}.
+    Often you will run \Langmuir on a cluster.
+    Details on how to run \Langmuir on a cluster, as well as sample batch
+        scripts are included in section~\ref{sec:batch}.
+
+\subsection{LangmuirView}
+    \label{ssec:langmuirview}
+    \LangmuirView is used to watch simulations graphically in real
+        time with a GUI.
+    \LangmuirView can be run from a terminal.
+    \begin{bashcode*}{gobble=8}
+        adam@work: langmuirView input.inp
+    \end{bashcode*}    
+    Note that the \langmuirView command must be on your path.
+    Unlike the \langmuir command, the input file argument is optional.
+    If no input file is given, then \LangmuirView will open a file dialogue
+        for you to choose the location of an input file.
+    An example of \LangmuirView is shown in Figure~\ref{fig:langmuirview}.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.3]{/langmuirView_0.png}
+        \caption{\label{fig:langmuirview}
+            LangmuirView example.
+        }
+    \end{figure}
+    \LangmuirView is a tool to be used to aid in understanding
+        and communication to others, for example, to make movies or
+        screen shots.
+    To perform actual simulations you should use \Langmuir from the
+        command line, as discussed in section ~\ref{ssec:langmuir}.
+    This is because \LangmuirView is limited by the size of the
+        simulation and the production of output data.
+    Do not attempt to use \LangmuirView with large systems that
+        produce a large amount of output data.

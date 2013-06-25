@@ -1,0 +1,129 @@
+\newpage
+\section{Batch Files}
+\label{sec:batch}
+Details on how to run \Langmuir on a cluster are discussed in this section.
+
+\subsection{Cluster Commands}
+\label{ssec:cluster}
+
+\begin{bashcode*}{gobble=4}
+    # show the jobs
+    qstat
+\end{bashcode*}
+
+\begin{bashcode*}{gobble=4}
+    # submit a batch script
+    qsub -N jobname run.batch
+\end{bashcode*}
+
+\subsection{Hutchison}
+\label{ssec:hutch}
+On \url{hutchison.chem.pitt.edu}, one can use the submitLangmuir command.
+
+\begin{bashcode*}{gobble=4}
+    submitLangmuir jobname job.inp
+\end{bashcode*}
+
+\noindent
+Or you can use a batch script such as the one below.
+\begin{bashcode*}{gobble=4}
+    #!/bin/sh                                                                                                                                                                                                    
+    #$ -S /bin/bash
+    #$ -pe mpi 4
+    #$ -R y
+    #$ -cwd
+    
+    INPUT=$1
+    WORK=$2
+    BIN=/usr/local/bin
+    EXE=langmuir
+    SCRATCH=/scratch/${USER}/${JOB_ID}
+    
+    if [ -d /scratch/${USER} ]; then 
+    touch /scratch/${USER}
+    else
+    mkdir /scratch/${USER}
+    fi
+    
+    mkdir ${SCRATCH}
+    
+    if [ -f ${INPUT} ]; then 
+    cp ${INPUT} ${SCRATCH}
+    else
+    exit 
+    fi
+    
+    cd ${SCRATCH}
+    ${BIN}/${EXE} ${INPUT}
+    
+    gzip ${SCRATCH}/* -rv
+    cp -r ${SCRATCH}/* ${WORK}
+\end{bashcode*}
+
+\newpage
+\subsection{Frank}
+On \url{frank.sam.pitt.edu}, use the following batch script.
+Make sure to set the path to langmuir in the \verb|BIN| variable.
+
+\begin{bashcode*}{gobble=4}
+    #!/bin/bash
+    #PBS -q gpu
+    #PBS -l nodes=1:ppn=3:gpus=1
+    #PBS -l mem=4gb
+    #PBS -l walltime=72:00:00
+    BIN=/home/ghutchison/agg7/bin
+    EXE=langmuir
+    NME=sim.inp
+    module load cuda/4.2
+    module load boost
+    module load qt
+    cd $PBS_O_WORKDIR
+    $BIN/$EXE $NME
+\end{bashcode*}
+
+\subsection{Scan}
+Sometimes, instead of running a single \langmuir simulation, one may want
+    to scan over many values of a variable.
+In the \LangmuirPython module (see section~\ref{sec:python}), there is a script
+    called scan.py.
+This script (scan.py) lets python guide the scanning of a working variable.
+For example, one can scan \verb|voltage.right| to create an IV curve.
+Instead of setting a variable in the input file to a single value, set it to
+    a list of values.
+\begin{bashcode*}{gobble=4}
+    voltage.right = [-1.0, -2.0, -3.0]
+\end{bashcode*}
+Actually, scan.py can parse any valid python statement, including numpy.
+\begin{bashcode*}{gobble=4}
+    voltage.right = [float(i) for i in range(0, 100, 10)]
+\end{bashcode*}
+\begin{bashcode*}{gobble=4}
+    voltage.right = np.linspace(0, 100, 10)
+\end{bashcode*}
+Multiple working variables are not supported.
+You must use an altered batch script to run scan.py.
+Make sure the script correctly sets the \verb|$PYTHONPATH| to point to
+    \LangmuirPython.
+Below is an example batch script for \verb|frank.sam.pitt.edu|.
+\begin{bashcode*}{gobble=4}
+    #!/bin/bash                  
+    #PBS -q gpu                                                                            
+    #PBS -l nodes=1:ppn=4:gpus=1                                                           
+    #PBS -l mem=4gb                                                                        
+    #PBS -l walltime=36:00:00                                                              
+                                                                                        
+    BIN=/home/ghutchison/agg7/bin                                                          
+    EXE=scan.py                                                                            
+    NME=sim.inp                                                                            
+                                                                                        
+    module load cuda/4.2                                                                   
+    module load python                                                                     
+    module load boost                                                                      
+    module load qt                                                                         
+                                                                                        
+    export PYTHONPATH=$PYTHONPATH:/home/ghutchison/agg7/LangmuirPython                     
+                                                                                        
+    cd $PBS_O_WORKDIR                                                                      
+    python $BIN/$EXE --real 7500000 --print 1000 --fmt '%+.1f' --mode scan
+\end{bashcode*}
+

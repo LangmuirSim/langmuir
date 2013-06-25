@@ -1,0 +1,412 @@
+\bgroup
+\NewDocumentCommand{\titles}{}{%
+    keyword & type & default & description \\
+    \tabucline[1pt]{-}
+}
+\NewDocumentCommand{\parameter}{m m m m}{%
+    \texttt{#1} & \textbf{#2} & #3 & #4 \\
+    \tabucline{-}    
+}
+\vspace{\baselineskip}
+\noindent
+\tabulinesep=8pt
+\extrarowsep=1pt
+\begin{tabu} to \textwidth {|[1pt]X[3lm]|X[1rm]|X[1rm]|X[5lm]|[1pt]}
+\savetabu{parm}
+\tabucline[1pt]{-}
+\titles 
+\parameter{simulation.type}{string}{transistor}{%
+    solarcell or transistor - changes the behavior of the sources and drains.
+}
+\parameter{random.seed}{int}{0}{%
+    if 0, then use the current time, else seed the random number generator.
+}
+\tabucline[1pt]{-}
+\end{tabu}
+
+\vspace{\baselineskip}
+\noindent
+\begin{tabu}{\usetabu{parm}}
+\tabucline[1pt]{-}
+\titles
+\parameter{grid.z}{int}{1}{%
+    The height of the device, or number of sites in the z-direction (layers).
+}
+\parameter{grid.y}{int}{128}{%
+    The width of device, or number of sites in the y-direction.
+}
+\parameter{grid.x}{int}{128}{%
+    The length of device, or number of sites in the x-direction
+        (source to drain).
+}
+\parameter{hopping.range}{int}{1}{%
+    The number of adjacent sites to consider as neighbors when hopping.
+}
+\tabucline[1pt]{-}
+\end{tabu}
+
+\vspace{\baselineskip}
+\noindent
+\begin{tabu}{\usetabu{parm}}
+\tabucline[1pt]{-}
+\titles
+\parameter{iterations.real}{int}{1000}{%
+    The number of simulation steps, including equilibration.
+    It is up to you to remove the equilibration steps from the output.
+}
+\parameter{iterations.print}{int}{10}{%
+    The number of steps between printing output
+}
+\parameter{current.step}{int}{0}{%
+    The starting step of the simulation.  Needed for checkpoint files.
+}
+\tabucline[1pt]{-}
+\end{tabu}
+
+\vspace{\baselineskip}
+\noindent
+\begin{tabu}{\usetabu{parm}}
+\tabucline[1pt]{-}
+\titles
+\parameter{output.is.on}{bool}{True}{%
+    Create output files.
+    It is useful to turn off the output when using \LangmuirView.
+}
+\parameter{output.precision}{int}{15}{%
+    The number of digits to print for numbers in various output files.
+}
+\parameter{output.width}{int}{23}{%
+    The width of columns in the output file.
+}
+\parameter{output.stub}{string}{out}{%
+    The naming scheme of output files.
+    For example, if stub is ``out'', then the output files are ``out.dat'',
+    ``out.chk'', etc.
+}
+\parameter{output.ids.on.delete}{bool}{False}{%
+    Save carrier lifetime and path length to a file when the carrier reaches
+    a drain.
+    This can make very large files.
+}
+\parameter{output.ids.on.encounter}{bool}{False}{%
+    Save carrier lifetime and path length to a file when the carrier forms
+    an exciton.
+    This can make very large files.
+}
+\parameter{output.coulomb}{int}{0}{%
+    Output the Coulomb energy of the entire grid every \texttt{iterations.print}
+        $\times$ \texttt{output.coulomb} steps.
+    If \texttt{output.coulomb} $<$ 0, then save the Coulomb energy when then
+        the simulation finishes.        
+    This requires OpenCL.
+    If the grid is too large it may not work if the GPU is too small.
+}
+\parameter{output.step.chk}{int}{1}{%
+    Output checkpoint files every \texttt{iterations.print} $\times$
+        \texttt{output.step.chk}.
+    When there is a large number of trap sites, writing checkpoint files
+        will slow the simulation down.
+    Use this parameter to make sure checkpoint files are written far less often
+        than the \texttt{iterations.print} value.
+}
+\parameter{output.chk.trap.potential}{bool}{False}{%
+    Suppress the writing of trap potentials to the checkpoint file.
+    It is redundant and slow to output trap potentials when they are all
+        the same value.
+}
+\parameter{output.potential}{bool}{False}{%
+    Output the potential of the entire grid at the start of the simulation.
+    This grid potential does not include the trap potential or the Coulomb
+        interactions.
+}
+\tabucline[1pt]{-}
+\end{tabu}
+
+\vspace{\baselineskip}
+\noindent
+\begin{tabu}{\usetabu{parm}}
+\tabucline[1pt]{-}
+\titles
+\parameter{output.xyz}{int}{0}{%
+    Output carrier locations to an xyz file every \texttt{iterations.print}
+    $\times$ \texttt{output.xyz}.
+    This file will be large.
+    This file will not open easily in VMD without the use of a VMD extension
+        because the number of particles can change.
+    There is a \texttt{vmd.init} file in the \Langmuir source directory to
+        help with opening this file.
+}
+\parameter{output.xyz.e}{bool}{True}{%
+    Output the electrons to the xyz file.
+}
+\parameter{output.xyz.h}{bool}{True}{%
+    Output the holes to the xyz file.
+}
+\parameter{output.xyz.d}{bool}{True}{%
+    Output the defects to the xyz file.
+}
+\parameter{output.xyz.t}{bool}{True}{%
+    Output the traps to the xyz file.
+    When there are tons of traps, the size of the xyz file can become
+        too large to handle.
+    You should suppress the output of traps to the xyz file in this case.
+}
+\parameter{output.xyz.mode}{int}{0}{%
+    When 0, the number of particles between frames in the xyz file can vary.
+    If 1, the number of particles is kept constant using ``phantom particles''
+}
+\tabucline[1pt]{-}
+\end{tabu}
+
+\vspace{\baselineskip}
+\noindent
+\begin{tabu}{\usetabu{parm}}
+\tabucline[1pt]{-}
+\titles
+\parameter{image.traps}{bool}{False}{%
+    Save a png of the traps at the start.
+    Assumes \texttt{grid.z} = 1.
+}
+\parameter{image.defects}{bool}{False}{%
+    Save a png of the defects at the start.
+    Assumes \texttt{grid.z} = 1.
+}
+\parameter{image.carriers}{int}{0}{%
+    Save a png of the carriers every \texttt{iterations.print} $\times$
+        \texttt{image.carriers}.
+    If \texttt{image.carriers} $<$ 0, then save the png when then
+        the simulation finishes.    
+    Assumes \texttt{grid.z} = 1.
+}
+\tabucline[1pt]{-}
+\end{tabu}
+
+\vspace{\baselineskip}
+\noindent
+\begin{tabu}{\usetabu{parm}}
+\tabucline[1pt]{-}
+\titles
+\parameter{electron.percentage}{float}{0.01}{%
+    Sets the maximum number of allowed electrons to be the volume of the grid
+        times this percentage.
+    Between 0 and 1.
+}
+\parameter{hole.percentage}{float}{0.0}{%
+    Sets the maximum number of allowed holes to be the volume of the grid
+        times this percentage.
+    Between 0 and 1.        
+}
+\parameter{seed.charges}{float}{0.0}{%
+    The fraction of the maximum electrons/holes to place randomly at the
+        beginning of the simulation.
+    Between 0 and 1.
+    This helps with equilibration in transistors.
+    Have not tested this in solar cells.
+}
+\tabucline[1pt]{-}
+\end{tabu}
+
+\vspace{\baselineskip}
+\noindent
+\begin{tabu}{\usetabu{parm}}
+\tabucline[1pt]{-}
+\titles
+\parameter{defect.percentage}{float}{0.0}{%
+    Sets the maximum number of defects to be the volume of the grid
+        times this percentage.
+    Between 0 and 1.
+    Defects are placed randomly at the start.
+}
+\parameter{defects.charge}{int}{0}{%
+    The charge of defects.
+    If 0, then defects are not included in Coulomb calculations.
+}
+\tabucline[1pt]{-}
+\end{tabu}
+
+\vspace{\baselineskip}
+\noindent
+\begin{tabu}{\usetabu{parm}}
+\tabucline[1pt]{-}
+\titles
+\parameter{trap.percentage}{float}{0.0}{%
+    Sets the maximum number of traps to be the volume of the grid
+        times this percentage.
+    Between 0 and 1.
+    Traps are placed randomly.
+}
+\parameter{seed.percentage}{float}{1.0}{%
+    The fraction of the traps to place as seeds.
+    Remaining traps are grown around these seeds.
+    Between 0 and 1.
+}
+\parameter{trap.potential}{float}{0.1}{%
+    The trap energy to use for randomly placed traps.
+}
+\parameter{gaussian.stdev}{float}{0.0}{%
+    Standard deviations of random noise to be added to randomly placed traps.
+}
+\tabucline[1pt]{-}
+\end{tabu}
+
+\vspace{\baselineskip}
+\noindent
+\begin{tabu}{\usetabu{parm}}
+\tabucline[1pt]{-}
+\titles
+\parameter{voltage.right}{float}{0.0}{%
+    The voltage of the drain electrode.
+}
+\parameter{voltage.left}{float}{0.0}{%
+    The voltage of the source electrode.
+    Keep this zero and alter \texttt{voltage.right}.
+}
+\parameter{exciton.binding}{float}{0.0}{%
+    The energy of interaction when a hole and electron are on the same site.
+}
+\parameter{slope.z}{float}{0.0}{%
+    The voltage change along the z direction due to a gate electrode.
+}
+\parameter{coulomb.carriers}{bool}{False}{%
+    Turn on Coulomb interactions.
+}
+\parameter{coulomb.gaussian.sigma}{float}{0.0}{%
+    The standard deviation of smeared out Gaussian charges.
+    If 0, then point charges are used.
+    Assumes \texttt{grid.z} > 1.
+}
+\parameter{temperature.kelvin}{float}{300.0}{%
+    The temperature used in the Boltzmann factor.
+}
+\tabucline[1pt]{-}
+\end{tabu}
+
+\vspace{\baselineskip}
+\noindent
+\begin{tabu}{\usetabu{parm}}
+\tabucline[1pt]{-}
+\titles
+\parameter{source.rate}{float}{0.9}{%
+    Default probability to inject charges.
+    Between 0 and 1.
+}
+\parameter{e.source.l.rate}{float}{-1.0}{%
+    Injection rate of electrons from the left.
+    Overrides \texttt{source.rate}.
+    Ignored if $<$ 0.
+}
+\parameter{e.source.r.rate}{float}{-1.0}{%
+    Injection rate of electrons from the right.
+    Overrides \texttt{source.rate}.
+    Ignored if $<$ 0.
+}
+\parameter{h.source.l.rate}{float}{-1.0}{%
+    Injection rate of holes from the left.
+    Overrides \texttt{source.rate}.
+    Ignored if $<$ 0.
+}
+\parameter{h.source.r.rate}{float}{-1.0}{%
+    Injection rate of holes from the right.
+    Overrides \texttt{source.rate}.
+    Ignored if $<$ 0.
+}
+\parameter{generation.rate}{float}{0.001}{%
+    Injection rate of excitons.
+    Overrides \texttt{source.rate}.
+    Ignored if $<$ 0.
+}
+\parameter{balance.charges}{bool}{False}{%
+    Try to keep the number of electrons and holes equal.
+    Not physical.
+}
+\parameter{source.metropolis}{bool}{False}{%
+    Override source injection probability with a metropolis criterion
+        involving site energy.
+}
+\parameter{source.coulomb}{bool}{False}{%
+    Include coulomb interactions with image charges in the metropolis
+        criterion.
+}
+\parameter{source.scale.area}{float}{65536.0}{%
+    Scale the generation rate by dividing by this value and multiplying by
+        the xy-area of the system.
+}
+\tabucline[1pt]{-}
+\end{tabu}
+
+\vspace{\baselineskip}
+\noindent
+\begin{tabu}{\usetabu{parm}}
+\tabucline[1pt]{-}
+\titles
+\parameter{drain.rate}{float}{0.9}{%
+    Default probability to accept charges.
+    Between 0 and 1.
+}
+\parameter{e.drain.l.rate}{float}{-1.0}{%
+    Acceptance rate of electrons on the left.
+    Overrides \texttt{drain.rate}.
+    Ignored if $<$ 0.
+}
+\parameter{e.drain.r.rate}{float}{-1.0}{%
+    Acceptance rate of electrons on the right.
+    Overrides \texttt{drain.rate}.
+    Ignored if $<$ 0.
+}
+\parameter{h.drain.l.rate}{float}{-1.0}{%
+    Acceptance rate of holes on the left.
+    Overrides \texttt{drain.rate}.
+    Ignored if $<$ 0.
+}
+\parameter{h.drain.r.rate}{float}{-1.0}{%
+    Acceptance rate of holes on the right.
+    Overrides \texttt{drain.rate}.
+    Ignored if $<$ 0.
+}
+\parameter{recombination.rate}{float}{0.0}{%
+    Probability to recombine excitons.
+    Note - it is not really a rate like the others because
+    the number of excitons in the system is hard to predict.
+}
+\parameter{recombination.range}{int}{0}{%
+    Number of adjacent sites to consider during recombination.
+}
+\tabucline[1pt]{-}
+\end{tabu}
+
+\vspace{\baselineskip}
+\noindent
+\begin{tabu}{\usetabu{parm}}
+\tabucline[1pt]{-}
+\titles
+\parameter{use.opencl}{bool}{False}{%
+}
+\parameter{work.x}{int}{4}{%
+    The number of x-threads in a 3D work group.  Only used for
+        \texttt{output.coulomb}.
+}
+\parameter{work.y}{int}{4}{%
+    The number of y-threads in a 3D work group.  Only used for
+        \texttt{output.coulomb}.
+}
+\parameter{work.z}{int}{4}{%
+    The number of z-threads in a 3D work group.  Only used for
+        \texttt{output.coulomb}.
+}
+\parameter{work.size}{int}{256}{%
+    The number of threads in a 1D work group.
+}
+\parameter{opencl.threshold}{int}{256}{%
+    The number of charges that must be present before turning on OpenCL.
+}
+\parameter{opencl.device.id}{int}{0}{%
+    The id of the GPU to use when more than one is present.
+}
+\parameter{max.threads}{int}{-1}{%
+    The max number of CPU threads allowed.
+    If < 0, then use all available threads.
+}
+\tabucline[1pt]{-}
+\end{tabu}
+
+\egroup

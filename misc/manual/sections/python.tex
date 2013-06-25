@@ -1,0 +1,112 @@
+\newpage
+\section{Langmuir Python}
+\label{sec:python}
+There is a python project called \LangmuirPython, that aids in the
+    construction of input files, the running
+    of simulations, and the analysis of output files.
+The use of \LangmuirPython in not required.
+There is documentation in the code.
+A pdf and/or html webpage of the documentation can be generated with Sphinx.
+Simply navigate to the \LangmuirPython doc directory, and use the Makefile.
+Sphinx must be installed.
+
+\subsection{Installation}
+    \LangmuirPython uses a number of python modules that may not be
+        included in standard python distributions.
+    You should make an effort to install these python modules, for
+        example, using pip.
+    If modules are missing, an effort has been made to disable certain
+        features of the \langmuir module.
+    \begin{itemize}
+        \item numpy
+        \item scipy
+        \item matplotlib
+        \item pandas
+        \item quantities
+        \item vtk (optional)
+    \end{itemize}
+
+    To install \LangmuirPython, you must do one of the following.
+    \begin{enumerate}
+        \item Put the path to LangmuirPython on your \$PYTHONPATH.
+            \begin{bashcode*}{gobble=16}
+                # $PYTHONPATH must be set inside batch scripts or bashrc
+                export PYTHONPATH=$PYTHONPATH:/path/to/LangmuirPython
+            \end{bashcode*}
+        \item Use the setup.py script in the LangmuirPython directory.
+            \begin{bashcode*}{gobble=16}
+                adam@work: cd /path/to/LangmuirPython
+
+                # to install locally
+                adam@work: python setup.py install --user
+
+                # to install globally (need root password)
+                adam@work: python setup.py install
+            \end{bashcode*}
+    \end{enumerate}
+
+\subsection{Usage}
+    To use the \langmuir module in python you must import it.
+    \begin{pythoncode*}{gobble=8}
+        >>> import langmuir as lm
+    \end{pythoncode*}
+
+    The checkpoint submodule is very useful for manipulating inputs
+        file from python.
+    \begin{pythoncode*}{gobble=8}
+        >>> import langmuir as lm
+        >>> chk = lm.checkpoint.load('out.chk')
+        >>> chk.electrons = [] # delete electrons
+        >>> chk['iterations.real'] += 100000
+        >>> chk.save('sim.inp')
+    \end{pythoncode*}
+
+    The usage of most scripts can be determined by using the -h or
+        --help command line flag.
+    \begin{bashcode*}{gobble=8}
+        adam@work: python /path/to/LangmuirPython/utils/scan.py --help
+    \end{bashcode*}
+
+    Some scripts should be pointed out.
+    \begin{itemize}
+        \item \verb|/utils/scan.py|
+            \begin{bashcode*}{gobble=16}
+                # --mode scan actually runs langmuir
+                # the output of one simulation serves as the input of the next
+                # sim.inp has a working variable set to a list of values
+                # example: voltage.right = [1, 2, 3, 4, 5]
+                adam@work: python scan.py --real 500000 --mode scan sim.inp
+
+                # --mode gen generates simulations input
+                adam@work: python scan.py --real 500000 --mode gen sim.inp
+            \end{bashcode*}
+        \item \verb|/analyze/combine.py|
+            \begin{bashcode*}{gobble=16}
+                # combines the output of "parts"
+                adam@work: python combine.py -r
+            \end{bashcode*}
+        \item \verb|/analyze/gather.py|
+            \begin{bashcode*}{gobble=16}
+                # gathers output from simulations
+                # use this inside a "run" directory
+                adam@work: python gather.py -r --equil 10000
+            \end{bashcode*}
+    \end{itemize}
+
+    A lot of the scripts rely on you structuring your simulations.
+    \begin{bashcode*}{gobble=8}
+        system/
+            run.0/
+                voltage.right_+0.0/
+                    part.0/
+                        out.dat
+                        out.chk
+                    part.1/
+                        ...
+                    ...
+                voltage.right_+0.1/
+                ...
+            run.1/
+            run.2/
+            ...
+    \end{bashcode*}

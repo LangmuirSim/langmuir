@@ -1,0 +1,28 @@
+\section{Usage}
+\label{sec:usage}
+
+\subsection{Langmuir}
+    \label{ssec:langmuir}
+    \Langmuir is generally run inside a terminal, as shown in
+        listing~\ref{lst:langmuir}.
+    There is only one argument, the full path to the input file.
+    However, note that \Langmuir will write output files to the directory it is
+        called from.
+    The format of the input file is discussed in section~\ref{sec:input}.
+    Often you will run \langmuir on a cluster.
+    Details on how to run \langmuir on a cluster, as well as sample batch
+        scripts are included in section~\ref{sec:batch}.    
+    \begin{listing}[H]
+        \centering
+        \begin{minipage}{0.5\textwidth}
+            \begin{bashcode*}{gobble=12}
+                adam@work: langmuir input.inp
+            \end{bashcode*}
+        \end{minipage}
+        \caption{\label{lst:langmuir}
+            Basic usage of \langmuir from a terminal.
+        }
+    \end{listing}
+
+\subsection{LangmuirView}
+    \label{ssec:langmuirview}

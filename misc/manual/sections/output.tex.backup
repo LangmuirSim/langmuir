@@ -1,0 +1,212 @@
+\newpage
+\section{Output Files}
+\label{sec:output}
+
+\subsection{Standard Output Files}
+    \Langmuir will always output the following files.
+    The name of the output file is controlled with the \texttt{output.stub}
+        parameter.
+    The generation of output can be turned off with the \texttt{output.is.on}
+        parameter.
+    \begin{itemize}
+        \item out.dat
+        \item out.chk
+        \item out.parm
+    \end{itemize}
+    If \Langmuir finishes successfully, then additional files may appear.
+    \begin{itemize}
+        \item out.time
+    \end{itemize}
+    \Langmuir also writes information to the screen of what it is doing.
+    On a cluster this information is often captured by the stderr file.
+
+    \subsubsection{out.chk}
+        This is the checkpoint file.
+        The format of this file is discussed in section~\ref{sec:input}.
+        Checkpoint files allow one to extend a simulation or change its
+            parameters.
+        They can easily be manipulated in a text editor or using \LangmuirPython
+            (see section~\ref{sec:python}).
+        Checkpoint files are output every \texttt{iterations.print} $\times$
+            \texttt{output.step.chk} steps.
+        
+        It may be useful to structure your simulation directories to reflect
+            the idea of ``parts'' of a simulation.
+        The \LangmuirPython script combine.py allows you to combine the output
+            of the various parts.
+        In the example below, the checkpoint file from \texttt{part.0} is used
+            as the input file of \texttt{part.1}.
+        \begin{bashcode*}{gobble=12}
+            simulation/
+                part.0/
+                    out.dat
+                    out.chk
+                part.1/
+                    out.dat
+                    out.chk
+        \end{bashcode*}
+
+    \subsubsection{out.parm}
+        This is a condensed input-like file that contains only the
+            \verb|[Parameters]| section (see section~\ref{sec:input}).
+        The file is produced only once, at the start of a simulation.
+        It can be faster to parse this file in scripts than a full blown
+            checkpoint file with many traps.
+
+    \subsubsection{out.dat}
+        This is the main output file of \Langmuir.
+        Every \texttt{iterations.print}, statistics from the simulation are
+            written to this file.
+        The output columns are named at the top of the file.
+        \begin{bashcode*}{gobble=12}
+            simulation:time  # step (ps)
+            eSourceL:success # success count
+            eSourceL:attempt # attempt count
+            ...
+            electron:count   # number of electrons
+            hole:count       # number of holes
+            real:time        # clock time (ms)
+        \end{bashcode*}
+        There is a success and attempt column for each of the 10 FluxAgents.
+        
+        Various quantities can be computed from these statistics.
+        These quantities are not computed by \Langmuir, it is left up to the
+            simulator in post-analysis stage.
+        To calculate the probability of a FluxAgent, divide the successes by
+            the attempts.
+        \begin{equation}
+            P = \frac{S}{A} \times 100\%
+        \end{equation}
+        To calculate the rate of a FluxAgent, divide the success by the step.
+        \begin{equation}
+            R = \frac{S}{T} \quad[\si{\per\pico\second}]
+        \end{equation}
+        To calculate the current of a FluxAgent, multiply the rate by e and
+            convert to nA.
+        \begin{equation}
+            I = e \times R \quad[\si{\coulomb\per\pico\second}]
+        \end{equation}
+        Current is calculated from the success rate of drains.
+        When simulations contain multiple drains for different carrier types,
+            care must be taken when calculating the current.
+        $S_{eDL}$ is the success rate of the electron drain on the left.
+        $S_{eDR}$ is the success rate of the electron drain on the right.
+        $S_{hDL}$ is the success rate of the hole drain on the left.
+        $S_{hDR}$ is the success rate of the hole drain on the right.
+        The current is defined to be positive for the movement of electrons to
+            right.
+        \begin{equation}
+            I = \frac{(S_{eDR} - S_{eDL}) + (S_{hDL} - S_{hDR})}{T} \times e
+        \end{equation}
+        
+        To account for equilibration, one must subtract the line containing
+            the start of ``production steps'' (chosen by the simulator) from
+            the ending line of the simulation.
+        This process was removed from \Langmuir to simplify the generation of
+            checkpoint files.
+        For example, consider a system where the ElectronSourceAgent has a
+            success rate of $100$ at $100000$ steps into the simulation and a
+            success rate of $500$ at $500000$ steps into the simulation,
+            the end of the simulation.
+        To account for $100000$ steps of equilibration, the final success rate
+            will be $500 - 100 = 400$.
+        This operation must be applied for every column of the output file.
+        The \LangmuirPython script gather.py performs this operation on
+            the files produced by combine.py.
+        
+    \subsubsection{out.time}
+        This file contains the total time taken to perform the simulation
+            in various units.
+        The file is only written at the end of a simulation.
+        If \Langmuir fails to finish, timing information is also present
+            in \texttt{out.dat}.
+
+\subsection{Additional Output Files}
+    If \Langmuir is run on a cluster, various cluster related files may also appear.
+    \begin{itemize}
+        \item stdout files
+        \item stderr files
+    \end{itemize}
+    Images of the grid can be produced using various input parameters
+        (see section~\ref{ssec:parameters}).
+    \begin{itemize}
+        \item out-traps.png
+        \item out-defects.png
+        \item out-\%step-electrons.png
+        \item out-\%step-holes.png
+        \item out-\%step-carriers.png
+        \item out-\%step-all.png
+    \end{itemize}
+    Information on energy and potential may be produced
+        (see section~\ref{ssec:parameters}).
+    \begin{itemize}
+        \item out.grid
+        \item out-\%step.coulomb
+    \end{itemize}
+    Information on carrier lifetime and path length may be produced
+        (see section~\ref{ssec:parameters}).
+    \begin{itemize}
+        \item out-carriers.dat
+        \item out-excitons.dat
+    \end{itemize}
+    Finally, the trajectory of carriers can be produced.
+    \begin{itemize}
+        \item out.xyz
+    \end{itemize}
+    
+    \subsubsection{*.png}
+        These are just crappy png files produced using Qt.
+        There are much better ways of making pictures.
+        For example, you can use \LangmuirPython to use information
+            in a checkpoint file to draw a picture with matplotlib.
+        Also, the \LangmuirPython chk2vtk.py will produce vtk files that can
+            be opened in various programs, such as paraview or mayavi.
+    
+    \subsubsection{out.coulomb}
+        This file contains the following columns.
+        \begin{bashcode*}{gobble=12}
+            s # site-id
+            x # x-value
+            y # y-value
+            z # z-value
+            v # potential
+        \end{bashcode*}
+        It is useful to produce contour maps of this data in python with
+            matplotlib.
+        If you really want to see things in 3D you can make contour iso-surfaces
+            in other programs, such as paraview.            
+        \begin{pythoncode*}{gobble=12}
+            from scipy.iterpolate import griddata
+            import matplotlib.pyplot as plt
+            import numpy as np
+            
+            data = np.genfromtxt('out.coulomb', names=True)
+            x, y, z, v = data['x'], data['y'], data['z'], data['v']
+            
+            # data must be put on a mesh to plot it
+            mesh_x, mesh_y, mesh_z = np.mgrid[0:64:1, 0:64:1, 0:1:1]
+            mesh_v = griddata((x, y, z), v, (mesh_x, mesh_y, mesh_z))
+            
+            # we can only view things in 2D
+            mesh_x = mesh_x[:,:,0]
+            mesh_y = mesh_y[:,:,0]
+            mesh_v = mesh_v[:,:,0]
+            
+            plt.contour(mesh_x, mesh_y, mesh_v, 32)
+            plt.show()
+        \end{pythoncode*}
+
+    \subsubsection{out.grid}
+        This file is very similar to \texttt{out.coulomb}.
+        \begin{bashcode*}{gobble=12}
+            s # site-id
+            x # x-value
+            y # y-value
+            z # z-value
+            e # electron grid potential
+            h # hole grid potential
+        \end{bashcode*}
+
+    \subsubsection{out-carriers.dat}
+    
+    \subsubsection{out-excitons.dat}

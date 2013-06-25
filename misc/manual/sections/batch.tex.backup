@@ -1,0 +1,82 @@
+\newpage
+\section{Batch Files}
+\label{sec:batch}
+Details on how to run \Langmuir on a cluster are discussed in this section.
+
+\subsection{Cluster Commands}
+\label{ssec:cluster}
+
+\begin{bashcode*}{gobble=4}
+    # show the jobs (Hutchison Cluster)
+    qstat
+\end{bashcode*}
+
+\begin{bashcode*}{gobble=4}
+    # submit a batch script
+    qsub -N jobname run.batch
+\end{bashcode*}
+
+\subsection{Hutchison}
+\label{ssec:hutch}
+On \url{hutchison.chem.pitt.edu}, one can use the submitLangmuir command.
+
+\begin{bashcode*}{gobble=4}
+    submitLangmuir jobname job.inp
+\end{bashcode*}
+
+\noindent
+Or you can use a batch script such as the one below.
+\begin{bashcode*}{gobble=4}
+    #!/bin/sh                                                                                                                                                                                                    
+    #$ -S /bin/bash
+    #$ -pe mpi 4
+    #$ -R y
+    #$ -cwd
+    
+    INPUT=$1
+    WORK=$2
+    BIN=/usr/local/bin
+    EXE=langmuir
+    SCRATCH=/scratch/${USER}/${JOB_ID}
+    
+    if [ -d /scratch/${USER} ]; then 
+    touch /scratch/${USER}
+    else
+    mkdir /scratch/${USER}
+    fi
+    
+    mkdir ${SCRATCH}
+    
+    if [ -f ${INPUT} ]; then 
+    cp ${INPUT} ${SCRATCH}
+    else
+    exit 
+    fi
+    
+    cd ${SCRATCH}
+    ${BIN}/${EXE} ${INPUT}
+    
+    gzip ${SCRATCH}/* -rv
+    cp -r ${SCRATCH}/* ${WORK}
+\end{bashcode*}
+
+\newpage
+\subsection{Frank}
+On \url{frank.sam.pitt.edu}, use the following batch script.
+Make sure to set the path to langmuir in the \verb|BIN| variable.
+
+\begin{bashcode*}{gobble=4}
+    #!/bin/bash
+    #PBS -q gpu
+    #PBS -l nodes=1:ppn=3:gpus=1
+    #PBS -l mem=4gb
+    #PBS -l walltime=72:00:00
+    BIN=/home/ghutchison/agg7/bin
+    EXE=langmuir
+    NME=sim.inp
+    module load cuda/4.2
+    module load boost
+    module load qt
+    cd $PBS_O_WORKDIR
+    $BIN/$EXE $NME
+\end{bashcode*}
