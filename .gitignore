@@ -3,5 +3,7 @@ build/
 debug/
 CMakeLists.txt.user
 doc/
-.spyderworkspace
+*spyder*
+pull-work
+pull-home
 *.pyc
