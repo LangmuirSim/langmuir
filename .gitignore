@@ -7,3 +7,17 @@ doc/
 pull-work
 pull-home
 *.pyc
+*.log
+*.aux
+*.aux.make
+*.auxbbl.make
+*.auxtarget.make
+*.d
+*.fls
+*.log
+*.out
+*.out.make
+*.pdf
+*.toc
+*.toc.make
+*.temp
