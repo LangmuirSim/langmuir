@@ -380,31 +380,61 @@
 \tabucline[1pt]{-}
 \titles
 \parameter{use.opencl}{bool}{False}{%
+    Use OpenCL for Coulomb calculations.
 }
 \parameter{work.x}{int}{4}{%
-    The number of x-threads in a 3D work group.  Only used for
-        \texttt{output.coulomb}.
+    The number of x-threads in a 3D work group.
+    Only used for \texttt{output.coulomb}.
+    The total size of a work group is
+        $W = \mathtt{work.x} \times \mathtt{work.y} \times \mathtt{work.z}$.
+    The total size of the grid is
+        $G = \mathtt{grid.x} \times \mathtt{grid.y} \times \mathtt{grid.z}$.
+    The total number of threads used by the 3D kernel is $T = G\times W$.
+    The 3D kernel will fail if you exceed the limitations of the GPU.
+    This could be fixed by dividing the grid into sections and using
+        multiple GPU's or multiple calls to one GPU.
+    The max $W$ allowed on GTX460 is $1024$.
+    The max $T$ allowed on GTX460 is $1024 \times 1024 \times 64$.
+    Therefore, the maximum number of grid sites that could be handled is
+        $65536 = 256^{2}$.
 }
 \parameter{work.y}{int}{4}{%
-    The number of y-threads in a 3D work group.  Only used for
-        \texttt{output.coulomb}.
+    The number of y-threads in a 3D work group.
+    See \texttt{work.x} for more info.
 }
 \parameter{work.z}{int}{4}{%
-    The number of z-threads in a 3D work group.  Only used for
-        \texttt{output.coulomb}.
+    The number of z-threads in a 3D work group.
+    See \texttt{work.x} for more info.
 }
 \parameter{work.size}{int}{256}{%
-    The number of threads in a 1D work group.
+    The number of threads $W$ in a 1D work group.
+    The total number of threads used during a coulomb calculation is
+        $T = N\times W$, where $N$ is the total number of charges.
+    It is unlikely you will exceed the total number of allowed threads
+        on the GPU.
+    For magical reasons, this parameter seems to be optimal at $256$.
+    The maximum value of $W$ on a GTX460 is $1024$.
+    The maximum number of threads on a GTX460 is $1024\times1024\times64$.
+    Therefore, the maximum number of charges allowed when $W = 256$ is
+        $N = 262144$.
 }
 \parameter{opencl.threshold}{int}{256}{%
     The number of charges that must be present before turning on OpenCL.
+    OpenCL will be slower than the CPU for small numbers of charges.
 }
 \parameter{opencl.device.id}{int}{0}{%
-    The id of the GPU to use when more than one is present.
+    The id of the GPU to use when more than one is present.  Currently
+    this parameter is ignored.  The GPU chosen defaults to 0, unless
+    a PBS\_GPUFILE is found, in which case the GPU used is chosen by PBS.
+    The id of the GPU chosen is saved to this variable.
 }
 \parameter{max.threads}{int}{-1}{%
     The max number of CPU threads allowed.
-    If < 0, then use all available threads.
+    If $<$ 0, then use the number of threads recommended by QtConcurrent.
+    However, if $<0$ and a PBS\_NODEFILE is found, then the number of threads
+        is chosen by PBS.
+    \LangmuirView currently ignores this parameter and uses the number
+        of threads recommended by QtConcurrent.
 }
 \tabucline[1pt]{-}
 \end{tabu}

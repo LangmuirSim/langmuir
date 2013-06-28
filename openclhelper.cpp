@@ -38,6 +38,9 @@ void OpenClHelper::initializeOpenCL()
         devices.push_back(all_devices.at(parser.gpu()));
         m_device = devices.at(0);
 
+        //save gpu id used
+        m_world.parameters().openclDeviceID = parser.gpu();
+
         //obtain context
         cl_context_properties contextProperties[3] = {
             CL_CONTEXT_PLATFORM,(cl_context_properties)platforms[0](), 0
