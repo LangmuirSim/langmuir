@@ -9,7 +9,8 @@ import argparse
 import os
 
 def get_arguments(args=None):
-    parser = argparse.ArgumentParser()
+    desc = "make plots of charge counts vs time"
+    parser = argparse.ArgumentParser(description=desc)
     parser.add_argument(dest='ifiles', nargs='*', default=[], type=str,
                help='input file name')
     parser.add_argument('--tunit', type=str, default='ns',
