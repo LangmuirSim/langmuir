@@ -9,7 +9,7 @@
  * @param msecs timeout time
  * @return altered file name
  */
-QString gunzip(QString fileName, int msecs=300000);
+QString gunzip(QString fileName, bool *wasZipped = NULL);
 
 /**
  * @brief gzip a file using QProcess
@@ -17,6 +17,6 @@ QString gunzip(QString fileName, int msecs=300000);
  * @param msecs timeout time
  * @return altered file name
  */
-QString gzip (QString fileName, int msecs=300000);
+QString gzip (QString fileName);
 
 #endif // GZIPPER_H

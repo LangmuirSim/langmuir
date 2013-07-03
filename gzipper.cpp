@@ -5,8 +5,10 @@
 #include <QString>
 #include <QDebug>
 
-QString gunzip(QString fileName, int msecs)
+QString gunzip(QString fileName, bool *wasZipped)
 {
+    if (wasZipped) { *wasZipped = false; }
+
     QFileInfo info(fileName);
     if (!info.exists())
     {
@@ -21,15 +23,15 @@ QString gunzip(QString fileName, int msecs)
     }
 
     QProcess proc;
-    qDebug("langmuir: uncompressing %s", qPrintable(info.fileName()));
+    qDebug("langmuir: decompressing %s", qPrintable(info.fileName()));
     proc.start("gunzip", QStringList() << fileName);
 
-    if (!proc.waitForStarted(msecs))
+    if (!proc.waitForStarted(300000))
     {
         qFatal("langmuir: QProcess took too long to start");
     }
 
-    if (!proc.waitForFinished(msecs))
+    if (!proc.waitForFinished(300000))
     {
         qFatal("langmuir: QProcess took too long to finish");
     }
@@ -39,11 +41,13 @@ QString gunzip(QString fileName, int msecs)
         qFatal("langmuir: QProcess has failed (%d)", proc.exitCode());
     }
 
-    qDebug("langmuir: uncompression complete");
+    qDebug("langmuir: decompression complete");
+
+    if (wasZipped) { *wasZipped = true; }
     return info.completeBaseName();
 }
 
-QString gzip (QString fileName, int msecs)
+QString gzip (QString fileName)
 {
     QFileInfo info(fileName);
     if (!info.exists())
@@ -62,12 +66,12 @@ QString gzip (QString fileName, int msecs)
     qDebug("langmuir: compressing %s", qPrintable(info.fileName()));
     proc.start("gzip", QStringList() << fileName);
 
-    if (!proc.waitForStarted(msecs))
+    if (!proc.waitForStarted(300000))
     {
         qFatal("langmuir: QProcess took too long to start");
     }
 
-    if (!proc.waitForFinished(msecs))
+    if (!proc.waitForFinished(300000))
     {
         qFatal("langmuir: QProcess took too long to finish");
     }

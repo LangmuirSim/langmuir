@@ -5,6 +5,7 @@
 #include "rand.h"
 #include "keyvalueparser.h"
 #include "fluxagent.h"
+#include "gzipper.h"
 
 #include <fstream>
 #include <limits>
@@ -20,9 +21,13 @@ CheckPointer::CheckPointer(World &world, QObject *parent) :
 
 void CheckPointer::load(const QString &fileName, ConfigurationInfo &configInfo)
 {
+    // Unzip the input file
+    bool wasZipped = false;
+    QString unzipped = gunzip(fileName, &wasZipped);
+
     // Open the stream
     std::ifstream stream;
-    stream.open(fileName.toLatin1().constData());
+    stream.open(unzipped.toLatin1().constData());
 
     if (!stream)
     {
@@ -36,6 +41,7 @@ void CheckPointer::load(const QString &fileName, ConfigurationInfo &configInfo)
     // We need to be careful with the random number generator
     bool readRandomState = false;
 
+    qDebug("langmuir: reading input file");
     while (!stream.eof())
     {
         // Expecting a section header
@@ -147,6 +153,12 @@ void CheckPointer::load(const QString &fileName, ConfigurationInfo &configInfo)
                      (unsigned int)m_world.parameters().randomSeed);
             m_world.randomNumberGenerator().seed(m_world.parameters().randomSeed);
         }
+    }
+
+    // zip the input file
+    if (wasZipped)
+    {
+        gzip(unzipped);
     }
 }
 
