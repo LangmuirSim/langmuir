@@ -28,6 +28,7 @@ SET(PROJECT_SOURCES
     checkpointer.cpp
     tolerance.cpp
     pbsgpuparser.cpp
+    gzipper.cpp
 )
 
 SET(PROJECT_HEADERS
@@ -49,6 +50,7 @@ SET(PROJECT_HEADERS
     checkpointer.h
     tolerance.h
     pbsgpuparser.h
+    gzipper.h
 )
 
 SET(PROJECT_MOC_HEADERS_1
