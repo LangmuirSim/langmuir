@@ -492,7 +492,7 @@ class IVLineS(IVLine):
         self.i_sc = self.ifit(0) * units.iunits
         self.p_th = units.rescale(self.v_oc * self.i_sc, units.punits)
 
-        self.v_mp = self.pfit.minimize(self.s, return_y=False) * units.vunits
+        self.v_mp = self.pfit.minimize(0.66 * self.v_oc, return_y=False) * units.vunits
         self.i_mp = self.ifit(float(self.v_mp)) * units.iunits
         self.p_mp = units.rescale(self.i_mp * self.v_mp, units.punits)
 
