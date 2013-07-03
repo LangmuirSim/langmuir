@@ -4,6 +4,7 @@
 #include <QProcess>
 #include <QString>
 #include <QDebug>
+#include <QDir>
 
 QString gunzip(QString fileName, bool *wasZipped)
 {
@@ -13,13 +14,13 @@ QString gunzip(QString fileName, bool *wasZipped)
     if (!info.exists())
     {
         qDebug("langmuir: %s does not exist", qPrintable(info.fileName()));
-        return info.fileName();
+        return info.absoluteFilePath();
     }
 
     if (info.suffix() != "gz")
     {
         qDebug("langmuir: %s is not gzipped", qPrintable(info.fileName()));
-        return info.fileName();
+        return info.absoluteFilePath();
     }
 
     QProcess proc;
@@ -44,7 +45,7 @@ QString gunzip(QString fileName, bool *wasZipped)
     qDebug("langmuir: decompression complete");
 
     if (wasZipped) { *wasZipped = true; }
-    return info.completeBaseName();
+    return info.absoluteDir().absoluteFilePath(info.completeBaseName());
 }
 
 QString gzip (QString fileName)
@@ -53,13 +54,13 @@ QString gzip (QString fileName)
     if (!info.exists())
     {
         qDebug("langmuir: %s does not exist", qPrintable(info.fileName()));
-        return info.fileName();
+        return info.absoluteFilePath();
     }
 
     if (info.suffix() == "gz")
     {
         qDebug("langmuir: %s is already gzipped", qPrintable(info.fileName()));
-        return info.fileName();
+        return info.absoluteFilePath();
     }
 
     QProcess proc;
@@ -82,5 +83,5 @@ QString gzip (QString fileName)
     }
 
     qDebug("langmuir: compression complete");
-    return info.fileName().append(".gz");
+    return info.absoluteDir().absoluteFilePath(info.fileName().append(".gz"));
 }
