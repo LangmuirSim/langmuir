@@ -35,6 +35,11 @@ try:
 except ImportError:
     print >> sys.stderr, 'langmuir: can not load quantities'
 
+try:
+    import vtk
+except ImportError:
+    print >> sys.stderr, 'langmuir: can not load vtk'
+
 if locals().has_key('sp'):
     import fit
 else:
@@ -49,3 +54,9 @@ if locals().has_key('pd') and locals().has_key('units') and locals().has_key('fi
     import ivline
 else:
     print >> sys.stderr, 'langmuir: disabled module langmuir.ivline'
+
+if locals().has_key('vtk') and locals().has_key('np'):
+    import vtkutils
+else:
+    print >> sys.stderr, 'langmuir: disabled module langmuir.vtkutils'
+
