@@ -1,6 +1,7 @@
 bin/
 build/
 debug/
+test/
 CMakeLists.txt.user
 doc/
 *spyder*
