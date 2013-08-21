@@ -86,13 +86,13 @@ SET(PROJECT_DATA
 
 ################################################################################
 
-SET(QT_MIN_VERSION 4.0.1)
+#SET(QT_MIN_VERSION 4.0.1)
 
 IF(${COMPILE_LANGMUIR_VIEW})
     SET(QT_USE_QTOPENGL TRUE)
 ENDIF(${COMPILE_LANGMUIR_VIEW})
 
-FIND_PACKAGE(Qt4 REQUIRED)
+FIND_PACKAGE(Qt REQUIRED)
 
 INCLUDE(${QT_USE_FILE})
 
