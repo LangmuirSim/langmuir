@@ -40,7 +40,7 @@ def cfactor(u1, u2):
     return float(u1.rescale(u2))
 
 def plot1():
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 8), sharey=True,
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 9), sharey=True,
           sharex=True)
 
     cmap = mpl.cm.get_cmap('gist_rainbow')
@@ -74,7 +74,7 @@ def plot1():
         handles.append(plt.Rectangle((0, 0), 1, 1, fc=colors[i], lw=0))
 
     plt.locator_params(nbins=6)
-    plt.ticklabel_format(scilimits=(-4, 4))
+    #plt.ticklabel_format(scilimits=(-4, 4))
     plt.xlim(0, pkl.index[-1])
     plt.legend(handles, labels, prop=dict(size='small'), loc='upper left',
         bbox_transform=ax2.transAxes, bbox_to_anchor=(1, 1))
@@ -91,10 +91,10 @@ def plot1():
     plt.subplots_adjust(right=0.85)
 
     if opts.save:
-        plt.savefig('charges.pdf')
+        lm.plot.save('charges.pdf')
 
 def plot2(bmin=0, bmax=None, bins=100):
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 8), sharey=True,
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 9), sharey=True,
           sharex=True)
 
     cmap = mpl.cm.get_cmap('gist_rainbow')
@@ -128,22 +128,22 @@ def plot2(bmin=0, bmax=None, bins=100):
         pkl = pkl.set_index('simulation:time')
 
         plt.sca(ax1)
-        pkl['electron:count'].hist(color=colors[i], bins=bins,
+        plt.hist(pkl['electron:count'], color=colors[i], bins=bins,
             range=(bmin, bmax), alpha=0.75, lw=0, histtype='stepfilled',
             label='sim%d' % (i + 1))
-        pkl['electron:count'].hist(color='k', bins=bins, range=(bmin, bmax),
-            alpha=1, lw=1, histtype='step')
+        plt.hist(pkl['electron:count'], color='k', bins=bins,
+            range=(bmin, bmax), alpha=1, lw=1, histtype='step')
 
         plt.sca(ax2)
-        pkl['hole:count'].hist(color=colors[i], bins=bins,
+        plt.hist(pkl['hole:count'], color=colors[i], bins=bins,
             range=(bmin, bmax), alpha=0.75, lw=0, histtype='stepfilled',
             label='sim%d' % (i + 1))
-        pkl['hole:count'].hist(color='k', bins=bins, range=(bmin, bmax),
-            alpha=1, lw=1, histtype='step')
+        plt.hist(pkl['hole:count'], color='k', bins=bins,
+            range=(bmin, bmax), alpha=1, lw=1, histtype='step')
 
     plt.sca(ax1)
     plt.locator_params(nbins=5)
-    plt.ticklabel_format(scilimits=(-4, 4))
+    #plt.ticklabel_format(scilimits=(-4, 4))
     plt.legend(prop=dict(size='small'), bbox_transform=ax2.transAxes,
                bbox_to_anchor=(1, 1), loc='upper left')
     plt.xlim(bmin, bmax)
@@ -163,7 +163,118 @@ def plot2(bmin=0, bmax=None, bins=100):
     plt.subplots_adjust(right=0.85)
 
     if opts.save:
-        plt.savefig('charges_hist.pdf')
+        lm.plot.save('charges_hist.pdf')
+
+def plot3(bmin=0, bmax=None, bins=100):
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(16, 9),
+          sharey=False, sharex=False)
+
+    cmap = mpl.cm.get_cmap('gist_rainbow')
+    colors = [cmap(v) for v in np.linspace(0, 1, len(opts.ifiles))]
+
+    eavg = []
+    estd = []
+    havg = []
+    hstd = []
+    davg = []
+    dstd = []
+    cavg = []
+    cstd = []
+    for i, pkl in enumerate(opts.ifiles):
+        print '(%2d/%2d): %s ' % (i, len(opts.ifiles),
+            os.path.relpath(pkl, work))
+        pkl = lm.analyze.load_pkl(pkl)
+
+        pkl['simulation:time'] *= cfactor('ps', opts.tunit)
+        pkl['simulation:time'].apply(lambda x : int(x))
+        pkl = pkl.set_index('simulation:time')
+
+        pkl['carrier:count'] = pkl['electron:count'] + pkl['hole:count']
+        pkl['carrier:difference'] = pkl['electron:count'] - pkl['hole:count']
+
+        eavg.append(pkl['electron:count'].mean())
+        estd.append(pkl['electron:count'].std())
+
+        havg.append(pkl['hole:count'].mean())
+        hstd.append(pkl['hole:count'].std())
+
+        davg.append(pkl['carrier:difference'].mean())
+        dstd.append(pkl['carrier:difference'].std())
+
+        cavg.append(pkl['carrier:count'].mean())
+        cstd.append(pkl['carrier:count'].std())
+
+    x = range(len(eavg))
+
+    plt.sca(ax1)
+    plt.plot(x, eavg, color='k')
+    for xi in x:
+        plt.errorbar(xi, eavg[xi], yerr=estd[xi], color=colors[xi], marker='o',
+            label='sim%d' % (xi + 1))
+
+    plt.sca(ax2)
+    plt.errorbar(x, havg, color='k')
+    for xi in x:
+        plt.errorbar(xi, havg[xi], yerr=hstd[xi], color=colors[xi], marker='o')
+
+    plt.sca(ax3)
+    plt.errorbar(x, cavg, color='k')
+    for xi in x:
+        plt.errorbar(xi, cavg[xi], yerr=cstd[xi], color=colors[xi], marker='o')
+
+    plt.sca(ax4)
+    plt.errorbar(x, davg, color='k')
+    for xi in x:
+        plt.errorbar(xi, davg[xi], yerr=dstd[xi], color=colors[xi], marker='o')
+
+    plt.sca(ax1)
+    plt.legend(prop=dict(size='small'), bbox_transform=ax2.transAxes,
+               bbox_to_anchor=(1, 1), loc='upper left')
+
+    ymax = max(cavg) + max(cstd)
+
+    plt.sca(ax1)
+    #plt.ticklabel_format(scilimits=(-4, 4))
+    plt.locator_params(nbins=5)
+    plt.title('electrons')
+    plt.grid()
+    plt.xlim(0, len(x)-1)
+    plt.ylim(ymax=ymax)
+    lm.plot.zoom(t=0, b=0)
+    
+    plt.sca(ax2)
+    #plt.ticklabel_format(scilimits=(-4, 4))
+    plt.locator_params(nbins=5)    
+    plt.title('holes')
+    plt.grid()
+    plt.xlim(0, len(x)-1)
+    plt.ylim(ymax=ymax)
+    lm.plot.zoom(t=0, b=0)
+    
+    plt.sca(ax3)
+    #plt.ticklabel_format(scilimits=(-4, 4))
+    plt.locator_params(nbins=5)    
+    plt.title('sum')
+    plt.xlabel('simulation')
+    plt.grid()
+    plt.xlim(0, len(x)-1)
+    plt.ylim(ymax=ymax)
+    lm.plot.zoom(t=0, b=0)
+    
+    plt.sca(ax4)
+    plt.ticklabel_format(scilimits=(-4, 4))
+    plt.locator_params(nbins=5)    
+    plt.xlabel('simulation')
+    plt.title('difference')
+    plt.grid()
+    plt.xlim(0, len(x)-1)
+    plt.ylim(-25, 25)
+    lm.plot.zoom(t=0, b=0)
+    plt.tight_layout()
+    plt.subplots_adjust(right=0.85)
+
+    if opts.save:
+        lm.plot.save('charges_line.pdf')
 
 if __name__ == '__main__':
     work = os.getcwd()
@@ -171,6 +282,7 @@ if __name__ == '__main__':
 
     plot1()
     plot2()
+    plot3()
 
     if opts.show:
         plt.show()
