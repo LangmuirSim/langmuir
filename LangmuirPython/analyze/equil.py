@@ -47,7 +47,6 @@ def plot1(ycol='drain:current', title='Drain Current', oname='equil1.pdf',
     colors = [cmap(v) for v in np.linspace(0, 1, len(opts.ifiles))]
 
     handles, labels = [], []
-
     for i, pkl in enumerate(opts.ifiles):
         print '(%2d/%2d): %s ' % (i, len(opts.ifiles),
             os.path.relpath(pkl, work))
@@ -70,7 +69,9 @@ def plot1(ycol='drain:current', title='Drain Current', oname='equil1.pdf',
     plt.locator_params(nbins=6)
     plt.ticklabel_format(scilimits=(-4, 4))
     plt.xlim(0, pkl.index[-1])
+
     plt.ylim(ymin, ymax)
+
     plt.legend(handles, labels, prop=dict(size='small'), loc='upper left',
         bbox_transform=ax1.transAxes, bbox_to_anchor=(1, 1))
 
