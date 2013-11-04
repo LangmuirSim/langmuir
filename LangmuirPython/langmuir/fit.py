@@ -173,7 +173,7 @@ class Fit:
             func = lambda x : -1.0 * self.__call__(x)
         else:
             func = self.__call__
-        _kwargs = dict(func=func, ranges=[(a, b)], disp=False)
+        _kwargs = dict(func=func, ranges=[(a, b)])
         _kwargs.update(**kwargs)
         x = float(_optimize.brute(**_kwargs)[0])
         if return_y:
