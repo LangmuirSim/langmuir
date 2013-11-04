@@ -195,6 +195,11 @@ class Parameters(dict):
         """
         for col in langmuir.database.parameters:
             self[col.name] = col.dflt
+    
+    def set_empty(self):
+        for col in langmuir.database.parameters:
+            if not col.name in self.keys():
+                self[col.name] = col.dflt
 
     def _is_valid_key(self, key):
         return key in _valid_keys
