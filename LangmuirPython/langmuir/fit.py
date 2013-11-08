@@ -313,10 +313,17 @@ class Fit:
 
     def _calculate_rsquared(self):
         """calculate correlation coeff"""
-        A = _np.average(self.y)
-        N = _np.sum((self(self.x) - A)**2)
-        D = _np.sum((self.y - A)**2)
-        self.r2 = N/D
+        ym  = _np.average(self.y)
+        yi  = self.y
+        fi  = self(self.x)
+        SSR = _np.sum((yi - fi)**2)
+        SST = _np.sum((yi - ym)**2)
+        self.r2 = 1.0 - SSR/SST
+        #A = _np.average(self.y)
+        #N = _np.sum((self(self.x) - A)**2)
+        #D = _np.sum((self.y - A)**2)
+        #print N/D
+        #self.r2 = N/D
 
     def __str__(self):
         d = self.summary()
@@ -496,6 +503,31 @@ class FitTanh(Fit):
 
 lookup['tanh'] = FitTanh
 
+class FitLog(Fit):
+    r""":math:`a \tanh(b x + c) + d`"""
+    def __init__(self, x, y, popt=None, yerr=None):
+
+        def func(x, a=1, b=1, c=0, d=0):
+            return a * _np.log(b * x + c) + d
+
+        Fit.__init__(self, x, y, func, popt, yerr)
+
+        self._fit()
+        self.a = self.popt[0]
+        self.b = self.popt[1]
+        self.c = self.popt[2]
+        self.d = self.popt[3]
+
+    def derivative(self, x, **kwargs):
+        """analytic derivative of function"""
+        return self.a * self.b * (self.b * x + self.c)
+
+    def summary(self):
+        """create a summary :py:obj:`dict`"""
+        return dict(a=self.a, b=self.b, c=self.c, d=self.d, r2=self.r2)
+
+lookup['log'] = FitLog
+
 class FitXTanh(Fit):
     r""":math:`a x \tanh(b x + c) + d`"""
     def __init__(self, x, y, popt=None, yerr=None):
@@ -633,3 +665,48 @@ class FitCos(Fit):
         return dict(a=self.a, b=self.b, c=self.c, d=self.d, r2=self.r2)
 
 lookup['cos'] = FitCos
+
+class FitLinearZero(Fit):
+    r""":math:`mx`"""
+    def __init__(self, x, y, popt=None, yerr=None):
+
+        def func(x, m=1):
+            return m * x
+
+        Fit.__init__(self, x, y, func, popt, yerr)
+
+        self._fit()
+        self.m = self.popt[0]
+
+    def derivative(self, x, **kwargs):
+        """analytic derivative of function"""
+        return self.m
+
+    def summary(self):
+        """create a summary :py:obj:`dict`"""
+        return dict(self.m, r2=self.r2)
+
+lookup['linear_zero'] = FitLinearZero
+
+class FitQuadraticZero(Fit):
+    r""":math:`mx`"""
+    def __init__(self, x, y, popt=None, yerr=None):
+
+        def func(x, a=1, b=1):
+            return a * x * x + b * x
+
+        Fit.__init__(self, x, y, func, popt, yerr)
+
+        self._fit()
+        self.a = self.popt[0]
+        self.b = self.popt[1]
+
+    def derivative(self, x, **kwargs):
+        """analytic derivative of function"""
+        return 2 * self.a * x + self.b
+
+    def summary(self):
+        """create a summary :py:obj:`dict`"""
+        return dict(self.a, self.b, r2=self.r2)
+
+lookup['quadratic_zero'] = FitQuadraticZero
