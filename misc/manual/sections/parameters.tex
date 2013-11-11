@@ -5,7 +5,7 @@
 }
 \NewDocumentCommand{\parameter}{m m m m}{%
     \texttt{#1} & \textbf{#2} & #3 & #4 \\
-    \tabucline{-}    
+    \tabucline{-}
 }
 \vspace{\baselineskip}
 \noindent
@@ -14,7 +14,7 @@
 \begin{tabu} to \textwidth {|[1pt]X[3lm]|X[1rm]|X[1rm]|X[5lm]|[1pt]}
 \savetabu{parm}
 \tabucline[1pt]{-}
-\titles 
+\titles
 \parameter{simulation.type}{string}{transistor}{%
     solarcell or transistor - changes the behavior of the sources and drains.
 }
@@ -97,7 +97,7 @@
     Output the Coulomb energy of the entire grid every \texttt{iterations.print}
         $\times$ \texttt{output.coulomb} steps.
     If \texttt{output.coulomb} $<$ 0, then save the Coulomb energy when then
-        the simulation finishes.        
+        the simulation finishes.
     This requires OpenCL.
     If the grid is too large it may not work if the GPU is too small.
 }
@@ -175,7 +175,7 @@
     Save a png of the carriers every \texttt{iterations.print} $\times$
         \texttt{image.carriers}.
     If \texttt{image.carriers} $<$ 0, then save the png when then
-        the simulation finishes.    
+        the simulation finishes.
     Assumes \texttt{grid.z} = 1.
 }
 \tabucline[1pt]{-}
@@ -194,7 +194,7 @@
 \parameter{hole.percentage}{float}{0.0}{%
     Sets the maximum number of allowed holes to be the volume of the grid
         times this percentage.
-    Between 0 and 1.        
+    Between 0 and 1.
 }
 \parameter{seed.charges}{float}{0.0}{%
     The fraction of the maximum electrons/holes to place randomly at the
@@ -273,7 +273,7 @@
 \parameter{coulomb.gaussian.sigma}{float}{0.0}{%
     The standard deviation of smeared out Gaussian charges.
     If 0, then point charges are used.
-    Assumes \texttt{grid.z} > 1.
+    Assumes \texttt{grid.z} $>$ 1.
 }
 \parameter{temperature.kelvin}{float}{300.0}{%
     The temperature used in the Boltzmann factor.
