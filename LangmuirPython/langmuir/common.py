@@ -348,9 +348,9 @@ def command_script(paths, name=None, stub='run', command=None):
     if not command:
         print >> handle, '#    submitLangmuir $1 sim.inp'
         print >> handle, ''
-        print >> handle, '     cp $FILE .'
+        print >> handle, '#    cp $FILE .'
         print >> handle, ''
-        print >> handle, '     qsub -N $1 run.batch'
+        print >> handle, '#    qsub -N $1 run.batch'
         print >> handle, ''
         print >> handle, '#    langmuir sim.inp'
         print >> handle, ''
