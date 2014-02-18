@@ -1,5 +1,0 @@
-checkpoint
-==========
-
-.. automodule:: checkpoint
-    :members:

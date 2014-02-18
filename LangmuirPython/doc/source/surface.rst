@@ -1,5 +1,0 @@
-surface
-=======
-
-.. automodule:: surface
-    :members:

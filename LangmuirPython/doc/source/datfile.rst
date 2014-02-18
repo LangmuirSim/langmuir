@@ -1,5 +1,0 @@
-datfile
-=======
-
-.. automodule:: datfile
-    :members:

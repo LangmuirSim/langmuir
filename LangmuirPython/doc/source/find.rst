@@ -1,5 +1,0 @@
-find
-====
-
-.. automodule:: find
-    :members:

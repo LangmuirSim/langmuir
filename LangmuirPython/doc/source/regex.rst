@@ -1,5 +1,0 @@
-regex
-=====
-
-.. automodule:: regex
-    :members:

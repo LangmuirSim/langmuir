@@ -1,5 +1,0 @@
-ivline
-======
-
-.. automodule:: ivline
-    :members:
