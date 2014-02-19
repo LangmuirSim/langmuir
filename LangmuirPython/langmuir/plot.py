@@ -54,18 +54,20 @@ def save(name, border=10, **kwargs):
     crop(name, border)
 
 def subplots(nrows=1, ncols=1, w=6, h=6, l=1.5, r=0.5, t=0.5, b=1.5,
-             ws=None, hs=None, **kwargs):
+             ws=0.0, hs=0.0, **kwargs):
     """
     Wrapper around pyplot.subplots that uses absolute numbers for widths, etc.
     """
-    w = float(l + ncols*w + r)
-    h = float(b + nrows*h + t)
-    _kwargs = dict(figsize=(w, h))
+    fw = float(l + ncols*w + (ncols-1)*ws + r)
+    fh = float(b + nrows*h + (nrows-1)*hs + t)
+    ws = float(ws) / w
+    hs = float(hs) / h
+    _kwargs = dict(figsize=(fw, fh))
     _kwargs.update(**kwargs)
     fig, axes = plt.subplots(nrows, ncols, **_kwargs)
-    _kwargs = dict(left=l/w, right=(w-r)/w, bottom=b/h, top=(h-t)/h)
-    if not ws is None: _kwargs.update(wspace=float(ws)/w)
-    if not hs is None: _kwargs.update(hspace=float(hs)/h)
+    _kwargs = dict(left=l/fw, right=(fw-r)/fw, bottom=b/fh, top=(fh-t)/fh)
+    _kwargs.update(wspace=float(ws))
+    _kwargs.update(hspace=float(hs))
     plt.subplots_adjust(**_kwargs)
     return fig, axes
 
