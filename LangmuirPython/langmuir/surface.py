@@ -83,7 +83,7 @@ def save_vti(handle, values, origin=None, spacing=None, name='values'):
         origin = [0 for i in range(len(values.shape))]
 
     if spacing is None:
-        spacing = [0 for i in range(len(values.shape))]
+        spacing = [1.0 for i in range(len(values.shape))]
 
     data_source = vtk.vtkImageData()
     data_source.SetDimensions(*values.shape)
