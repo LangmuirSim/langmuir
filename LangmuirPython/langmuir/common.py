@@ -35,7 +35,7 @@ def zhandle(handle, mode='rb'):
 def format_string(s, **kwargs):
     return s.format(**kwargs).strip('-_')
 
-def format_output(s='{stub}-{name}.{ext}', stub='', name='out', ext='dat',
+def format_output(s='{stub}_{name}.{ext}', stub='', name='out', ext='dat',
     **kwargs):
     ext = ext.lstrip('.')
     _kwargs = dict(stub=stub, name=name, ext=ext)
