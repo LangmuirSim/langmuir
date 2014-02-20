@@ -16,25 +16,34 @@ Morph between two surfaces.
 def get_arguments(args=None):
     parser = argparse.ArgumentParser()
     parser.description = desc
-    parser.add_argument(dest='ifile1', default='image1.npy', type=str,
-        nargs='?', metavar='input', help='input file 1')
-    parser.add_argument(dest='ifile2', default='image2.npy', type=str,
-        nargs='?', metavar='input', help='input file 2')
+    
+    parser.add_argument(dest='ifile1', type=str, metavar='input',
+        help='input file 1')
+    parser.add_argument(dest='ifile2', type=str, metavar='input',
+        help='input file 2')
+
     parser.add_argument('--stub', default='', type=str, metavar='stub',
         help='output file stub')
+
     parser.add_argument('--format', default='{stub}_{name}_{i}.{ext}',
         type=str, help='format of file names: use {stub},{i},{x},{y},{ext}')
+
     parser.add_argument('--func', default='x', type=str, metavar='str',
         help='interpolating polynomial as a string, for example: np.sin(x)')
+
     parser.add_argument('--xvalues', default='np.linspace(0, 1, 10)',
         type=str, nargs='*', metavar='str',
         help='x-values as a string, for example: np.linspace(0, 1, 10)')
+
     parser.add_argument('--nolmap', action='store_false',
         help='do not map yvalues to [0,1]')
+
     parser.add_argument('--vtk', action='store_true', help='save vtk files ' +
         'for paraview animation')
+
     parser.add_argument('--show', action='store_true', help='show mpl plot')
     parser.add_argument('--save', action='store_true', help='save mpl plot')
+
     opts = parser.parse_args(args)
 
     if not os.path.exists(opts.ifile1):
@@ -80,9 +89,9 @@ if __name__ == '__main__':
 
     for i, (x, y) in enumerate(zip(opts.xvalues, opts.yvalues)):
         handle = lm.common.format_output(opts.format,
-            stub=opts.stub, name='morph', ext='npy', i=i, x=x, y=y)
+            stub=opts.stub, name='morph', ext='pkl', i=i, x=x, y=y)
         s = x * surf2 + (1 - x) * surf1
-        np.save(handle, s)
+        lm.surface.save(handle, s)
         print 'x = %.3f, f = %.3f saved: %s' % (x, y, handle)
 
         if opts.vtk:

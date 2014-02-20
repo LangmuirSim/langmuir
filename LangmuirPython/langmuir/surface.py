@@ -115,26 +115,38 @@ def save(handle, obj, *args, **kwargs):
     stub, ext = lm.common.splitext(handle)
 
     if ext == '.pkl':
-        lm.common.save_pkl(obj, handle, *args, **kwargs)
+        lm.common.save_pkl(obj, handle, **kwargs)
         return handle
 
     if ext == '.npy':
-        np.save(handle, obj, *args, **kwargs)
+        np.save(handle, obj, **kwargs)
         return handle
 
     if ext == '.vti':
-        lm.surface.save_vti(handle, obj, *args, **kwargs)
+        lm.surface.save_vti(handle, obj, **kwargs)
         return handle
 
     if ext == '.csv':
         _kwargs = dict(fmt='%+.18e', sep=',')
         _kwargs.update(**kwargs)
-        np.savetxt(handle, obj, *args, **kwargs)
+        try:
+            np.savetxt(handle, obj, **_kwargs)
+        except TypeError:
+            handle = lm.common.zhandle(handle, 'wb')
+            print >> handle, '# ' + ' '.join([str(s) for s in obj.shape])
+            obj = np.reshape(obj, obj.size)
+            np.savetxt(handle, obj, **_kwargs)
         return handle
 
-    _kwargs = dict(fmt='%+.18e', sep=',')
+    _kwargs = dict(fmt='%+.18e', delimiter=',')
     _kwargs.update(**kwargs)
-    np.savetxt(handle, obj, *args, **kwargs)
+    try:
+        np.savetxt(handle, obj, **_kwargs)
+    except TypeError:
+        handle = lm.common.zhandle(handle, 'wb')
+        print >> handle, '# ' + ' '.join([str(s) for s in obj.shape])        
+        obj = np.reshape(obj, obj.size)        
+        np.savetxt(handle, obj, **_kwargs)
     return handle
 
 def threshold(a, v=0, v0=0, v1=1, copy=False):

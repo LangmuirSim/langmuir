@@ -15,15 +15,20 @@ Perform RDF on surface or KPFM image.  This script takes some time.
 def get_arguments(args=None):
     parser = argparse.ArgumentParser()
     parser.description = desc
-    parser.add_argument(dest='ifile', default='image.pkl', type=str,
-        nargs='?', metavar='input', help='input file')
+
+    parser.add_argument(dest='ifile', type=str, metavar='input',
+        help='input file')
+
     parser.add_argument('--stub', default='', type=str, metavar='stub',
         help='output file stub')
+
     opts = parser.parse_args(args)
+
     if not os.path.exists(opts.ifile):
         parser.print_help()
         print >> sys.stderr, '\nfile does not exist: %s' % opts.ifile
         sys.exit(-1)
+
     return opts
 
 if __name__ == '__main__':

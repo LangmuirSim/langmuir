@@ -15,20 +15,26 @@ Create surface using convolution.
 def get_arguments(args=None):
     parser = argparse.ArgumentParser()
     parser.description = desc
+    
     parser.add_argument(dest='xsize', type=int, metavar='grid.x',
                         help='grid.x')
     parser.add_argument(dest='ysize', type=int, metavar='grid.y',
                         help='grid.y')
     parser.add_argument(dest='zsize', type=int, metavar='grid.z',
                         help='grid.z')
+
     parser.add_argument('--stub', default='', type=str, metavar='stub',
                         help='output file stub')
+
     parser.add_argument('--noise', default='uniform', type=str, metavar='str',
                         choices=['uniform', 'gaussian'], help='noise function')
+
     parser.add_argument('--kernel', default='gaussian', type=str,
         metavar='str', choices=['gaussian', 'random'], help='kernel function')
+
     parser.add_argument('--spacing', default=1.0, type=float, metavar='float',
                         help='kernel spacing')
+
     parser.add_argument('--sigma', default=None, metavar='float', type=float,
                         help='same as --sx # --sy # --sz #')
     parser.add_argument('--sx', default=None, metavar='float', type=float,
@@ -37,8 +43,13 @@ def get_arguments(args=None):
                         help='sigma.y for gaussian kernel')
     parser.add_argument('--sz', default=None, metavar='float', type=float,
                         help='sigma.z for gaussian kernel')
+
     parser.add_argument('--seed', default=None, type=int, metavar='int',
                         help='random number seed')
+
+    parser.add_argument('--ext', default='pkl', type=str, metavar='str',
+        choices=['pkl', 'npy', 'dat', 'txt', 'csv'], help='output file type')
+
     opts = parser.parse_args(args)
 
     if opts.kernel == 'gaussian':
@@ -76,14 +87,14 @@ if __name__ == '__main__':
     isotropic = lm.surface.Isotropic(grid, kernel, rfunc, verbose=True)
     print isotropic
 
-    handle = lm.common.format_output(stub=opts.stub, name='image', ext='npy')
+    handle = lm.common.format_output(stub=opts.stub, name='image', ext=opts.ext)
     print 'saved: %s' % handle
-    np.save(handle, isotropic.z_image)
+    lm.surface.save(handle, isotropic.z_image)
 
-    handle = lm.common.format_output(stub=opts.stub, name='noise', ext='npy')
+    handle = lm.common.format_output(stub=opts.stub, name='noise', ext=opts.ext)
     print 'saved: %s' % handle
-    np.save(handle, isotropic.z_noise)
+    lm.surface.save(handle, isotropic.z_noise)
 
-    handle = lm.common.format_output(stub=opts.stub, name='kernel', ext='npy')
+    handle = lm.common.format_output(stub=opts.stub, name='kernel', ext=opts.ext)
     print 'saved: %s' % handle
-    np.save(handle, isotropic.kernel.v)
+    lm.surface.save(handle, isotropic.kernel.v)

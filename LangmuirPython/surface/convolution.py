@@ -31,8 +31,8 @@ def get_arguments(args=None):
     parser.add_argument('--mode', type=str, default='same', metavar='str',
         choices=['full', 'valid', 'same'], help='see scipy.signal.convolve')
 
-    parser.add_argument('--fmt', type=str, default='npy', metavar='str',
-        choices=['npy', 'pkl', 'txt', 'dat', 'csv'], help='output format')
+    parser.add_argument('--ext', default='pkl', type=str, metavar='str',
+        choices=['pkl', 'npy', 'dat', 'txt', 'csv'], help='output file type')
 
     opts = parser.parse_args(args)
 
@@ -55,6 +55,6 @@ if __name__ == '__main__':
         result = signal.convolve(imageA, imageB, mode=opts.mode)
         name   = 'convolution'
 
-    handle = lm.common.format_output(stub=opts.stub, name=name, ext='npy')
+    handle = lm.common.format_output(stub=opts.stub, name=name, ext=opts.ext)
     print 'saved: %s' % handle
     np.save(handle, result)

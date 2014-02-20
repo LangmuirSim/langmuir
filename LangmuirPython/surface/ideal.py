@@ -31,28 +31,36 @@ Create surface using ideal function.
 def get_arguments(args=None):
     parser = argparse.ArgumentParser()
     parser.description = desc
+    
     parser.add_argument(dest='xsize', type=int, metavar='grid.x',
                         help='grid.x')
     parser.add_argument(dest='ysize', type=int, metavar='grid.y',
                         help='grid.y')
     parser.add_argument(dest='zsize', type=int, metavar='grid.z',
                         help='grid.z')
+
     parser.add_argument(dest='xwidth', type=int, metavar='int',
                         help='size of bands, x-direction: 2*lambda.x')
     parser.add_argument(dest='ywidth', type=int, metavar='int',
                         help='size of bands, y-direction: 2*lambda.y')
     parser.add_argument(dest='zwidth', type=int, metavar='int',
                         help='size of bands, z-direction: 2*lambda.z')
+
     parser.add_argument(dest='surface', type=str, metavar='str',
                         choices=surfaces.keys(), help='surface type')
+
     parser.add_argument('--stub', default='', type=str, metavar='stub',
                         help='output file stub')
+
     parser.add_argument('--spacing', default=1.0, type=float, metavar='float',
                         help='grid spacing')
+
     parser.add_argument('--threshold', default=0.0, type=float,
                         metavar='float', help='threshold value')
-    parser.add_argument('--vtk', action='store_true', help='save vtk files' +
-        'for paraview')
+
+    parser.add_argument('--ext', default='pkl', type=str, metavar='str',
+        choices=['pkl', 'npy', 'dat', 'txt', 'csv'], help='output file type')
+
     opts = parser.parse_args(args)
 
     if any([not opts.xsize % opts.xwidth == 0,
@@ -83,6 +91,6 @@ if __name__ == '__main__':
 
     surface = surfaces[opts.surface](grid.mx, grid.my, grid.mz, wx, wy, wz)
 
-    handle = lm.common.format_output(stub=opts.stub, name='image', ext='npy')
+    handle = lm.common.format_output(stub=opts.stub, name='image', ext=opts.ext)
     print 'saved: %s' % handle
     np.save(handle, surface)
