@@ -25,11 +25,68 @@ def zhandle(handle, mode='rb'):
     :param handle: filename
     :type handle: str
     """
-    if isinstance(handle, str):
-        if '.gz' in handle:
+    try:
+        if handle.endswith('.gz'):
             handle = gzip.open(handle, mode)
         else:
             handle = open(handle, mode)
+    except AttributeError:
+        pass
+    return handle
+
+def splitext(handle, *args, **kwargs):
+    """
+    Extract stub and extension from a file object or string.
+    
+    :param handle: filename
+    :type handle: str
+    """
+    try:        
+        return os.path.splitext(handle, *args, **kwargs)
+    except AttributeError:
+        try:
+            return os.path.splitext(handle.name, *args, **kwargs)
+        except AttributeError:
+            return '', ''
+
+def load_pkl(handle, max_objs=256):
+    """
+    Load max objs from a pkl file
+    """
+    handle = zhandle(handle, 'rb')
+    objs = []
+    for i in range(max_objs + 1):
+        if i == max_objs:
+            raise RuntimeError('too many objects loaded from pkl file')
+        try:
+            obj = pickle.load(handle)
+            objs.append(obj)
+        except EOFError:
+            break
+    objs = tuple(objs)
+    if not objs:
+        raise RuntimeError('no objects in pkl file')
+    elif len(objs) == 1:
+        return objs[0]
+    return objs
+
+def load_pkls(pkls):
+    """
+    Load a set of pkls into a list.
+    """
+    if isinstance(pkls, str):
+        pkls = [pkls]
+    panel = []
+    for i, pkl in enumerate(pkls):
+        panel.append(load_pkl(pkl))
+    return panel
+
+def save_pkl(obj, handle):
+    """
+    Save obj to a pkl file.
+    """
+    handle = zhandle(handle, 'wb')
+    pickle.dump(obj, handle, pickle.HIGHEST_PROTOCOL)
     return handle
 
 def format_string(s, **kwargs):
@@ -88,46 +145,6 @@ def compare_lists(list1, list2):
         results['valid'] = False
 
     return results
-
-def load_pkl(handle, max_objs=10):
-    """
-    Load max objs from a pkl file
-    """
-    handle = zhandle(handle, 'rb')
-    objs = []
-    for i in range(max_objs + 1):
-        if i == max_objs:
-            raise RuntimeError('too many objects loaded from pkl file')
-        try:
-            obj = pickle.load(handle)
-            objs.append(obj)
-        except EOFError:
-            break
-    objs = tuple(objs)
-    if not objs:
-        raise RuntimeError('no objects in pkl file')
-    elif len(objs) == 1:
-        return objs[0]
-    return objs
-
-def load_pkls(pkls):
-    """
-    Load a set of pkls into a list.
-    """
-    if isinstance(pkls, str):
-        pkls = [pkls]
-    panel = []
-    for i, pkl in enumerate(pkls):
-        panel.append(load_pkl(pkl))
-    return panel
-
-def save_pkl(obj, handle):
-    """
-    Save obj to a pkl file.
-    """
-    handle = zhandle(handle, 'wb')
-    pickle.dump(obj, handle, pickle.HIGHEST_PROTOCOL)
-    return handle
 
 def command_script(paths, name=None, stub='run', command=None):
     """
