@@ -4,7 +4,6 @@
 """
 import langmuir as lm
 import numpy as np
-import os
 
 try:
     import scipy.special as special
@@ -15,7 +14,7 @@ try:
 except ImportError:
     pass
 
-def load_ascii(handle, dims=2):
+def load_ascii(handle, square=False, cube=False, shape=None, **kwargs):
     """
     Wrapper around np.loadtxt.
     If data is 1D, it is reshaped according to dims.
@@ -24,23 +23,24 @@ def load_ascii(handle, dims=2):
         dims = 3; w = l = h  shape = (w, h, l)
     """
     # load the data
-    image = np.loadtxt(handle)
+    image = np.loadtxt(handle, **kwargs)
 
-    # fix the data if it is 1D
-    if len(image.shape) == 1:
-        assert image.shape[0] == image.size
-        if dims == 2:
-            try:
-                size = int(np.sqrt(image.size))
-                image = np.reshape(image, (size, size))
-            except ValueError:
-                raise RuntimeError, 'can not reshape data'
-        if dims == 3:
-            try:
-                size = int(special.cbrt(image.size))
-                image = np.reshape(image, (size, size, size))
-            except ValueError:
-                raise RuntimeError, 'can not reshape data'
+    if square:
+        try:
+            size = int(np.sqrt(image.size))
+            image = np.reshape(image, (size, size))
+        except ValueError:
+            raise RuntimeError, 'can not reshape data'
+
+    if cube:
+        try:
+            size = int(special.cbrt(image.size))
+            image = np.reshape(image, (size, size, size))
+        except ValueError:
+            raise RuntimeError, 'can not reshape data'
+
+    if not shape is None:
+        image = np.reshape(image, shape)
 
     # force data to be 3D
     if len(image.shape) == 1:
@@ -50,23 +50,19 @@ def load_ascii(handle, dims=2):
 
     return image
 
-def load(handle, dims=2):
+def load(handle, *args, **kwargs):
     """
     Load surface from file.
     """
-    if isinstance(handle, str):
-        stub, ext = os.path.splitext(handle)
-    else:
-        handle = lm.common.zhandle(handle)
-        stub, ext = os.path.splitext(handle.name)
+    stub, ext = lm.common.splitext(handle)
 
     if ext == '.pkl':
-        return lm.common.load_pkl(handle)
+        return lm.common.load_pkl(handle, *args, **kwargs)
 
     if ext == '.npy':
-        return np.load(handle)
+        return np.load(handle, *args, **kwargs)
 
-    return lm.surface.load_ascii(handle, dims)
+    return lm.surface.load_ascii(handle, *args, **kwargs)
 
 def save_vti(handle, values, origin=None, spacing=None, name='values'):
     try:
@@ -108,6 +104,38 @@ def save_vti(handle, values, origin=None, spacing=None, name='values'):
     writer.Write()
 
     return True
+
+def save(handle, obj, *args, **kwargs):
+    """
+    Save object to a file.  Takes into account the file extension.
+
+    :param handle: filename
+    :param obj: object to save
+    """
+    stub, ext = lm.common.splitext(handle)
+
+    if ext == '.pkl':
+        lm.common.save_pkl(obj, handle, *args, **kwargs)
+        return handle
+
+    if ext == '.npy':
+        np.save(handle, obj, *args, **kwargs)
+        return handle
+
+    if ext == '.vti':
+        lm.surface.save_vti(handle, obj, *args, **kwargs)
+        return handle
+
+    if ext == '.csv':
+        _kwargs = dict(fmt='%+.18e', sep=',')
+        _kwargs.update(**kwargs)
+        np.savetxt(handle, obj, *args, **kwargs)
+        return handle
+
+    _kwargs = dict(fmt='%+.18e', sep=',')
+    _kwargs.update(**kwargs)
+    np.savetxt(handle, obj, *args, **kwargs)
+    return handle
 
 def threshold(a, v=0, v0=0, v1=1, copy=False):
     """
