@@ -62,4 +62,4 @@ if __name__ == '__main__':
 
     handle = lm.common.format_output(stub=opts.stub, name='fft', ext='pkl')
     lm.common.save_pkl(results, handle)
-    print 'saved: %s' % handle.name
+    print 'saved: %s' % handle
