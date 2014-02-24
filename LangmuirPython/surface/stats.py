@@ -34,9 +34,14 @@ def get_arguments(args=None):
 
     return opts
 
+def fix_value(value, tol=1e-99):
+    if value < tol:
+        return 0.0
+    return value
+
 if __name__ == '__main__':
     work = os.getcwd()
-    opts = get_arguments()
+    opts = get_arguments([r'/home/adam/Dropbox/Shared/Paula/analyze/data/P3HT_011312_2_height.txt'])
 
     x = lm.surface.load(opts.inputA)
     y = lm.surface.load(opts.inputB)
@@ -83,8 +88,8 @@ if __name__ == '__main__':
 
     results = collections.OrderedDict()
 
-    results['x_path'] = os.path.abspath(opts.inputA)
-    results['y_path'] = os.path.abspath(opts.inputB)
+    results['x_path'] = os.path.basename(opts.inputA)
+    results['y_path'] = os.path.basename(opts.inputB)
 
     results['x'] = x
     results['y'] = y
@@ -174,3 +179,7 @@ if __name__ == '__main__':
     handle = lm.common.format_output(stub=opts.stub, name='stats', ext='pkl')
     print 'saved: %s' % handle
     lm.common.save_pkl(results, handle)
+
+    handle = lm.common.format_output(stub=opts.stub, name='stats', ext='dat')
+    with open(handle, 'w') as ohandle:
+        ohandle.write(fmt.getvalue().format(w=15, p=8, **results))
