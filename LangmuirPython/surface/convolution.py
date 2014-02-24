@@ -4,7 +4,7 @@
 """
 import scipy.signal as signal
 import langmuir as lm
-import numpy as np
+import collections
 import argparse
 import os
 
@@ -25,14 +25,8 @@ def get_arguments(args=None):
     parser.add_argument('--stub', default='', type=str, metavar='stub',
         help='output file stub')
 
-    parser.add_argument('--corr', action='store_true',
-        help='perform correlation instead of convolution')
-
     parser.add_argument('--mode', type=str, default='same', metavar='str',
         choices=['full', 'valid', 'same'], help='see scipy.signal.convolve')
-
-    parser.add_argument('--ext', default='pkl', type=str, metavar='str',
-        choices=['pkl', 'npy', 'dat', 'txt', 'csv'], help='output file type')
 
     opts = parser.parse_args(args)
 
@@ -48,13 +42,15 @@ if __name__ == '__main__':
     imageA = lm.surface.load(opts.inputA)
     imageB = lm.surface.load(opts.inputB)
 
-    if opts.corr:
-        result = signal.correlate(imageA, imageB, mode=opts.mode)
-        name   = 'correlation'
-    else:
-        result = signal.convolve(imageA, imageB, mode=opts.mode)
-        name   = 'convolution'
+    corr = signal.correlate(imageA, imageB, mode=opts.mode)
+    conv = signal.convolve(imageA, imageB, mode=opts.mode)
 
-    handle = lm.common.format_output(stub=opts.stub, name=name, ext=opts.ext)
-    print 'saved: %s' % handle
-    np.save(handle, result)
+    results = collections.OrderedDict()
+    results['x'] = imageA
+    results['y'] = imageB
+    results['corr'] = corr
+    results['conv'] = conv
+
+    handle = lm.common.format_output(stub=opts.stub, name='conv', ext='pkl')
+    lm.common.save_pkl(results, handle)
+    print 'saved: %s' % handle    
