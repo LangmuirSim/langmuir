@@ -41,7 +41,7 @@ def fix_value(value, tol=1e-99):
 
 if __name__ == '__main__':
     work = os.getcwd()
-    opts = get_arguments([r'/home/adam/Dropbox/Shared/Paula/analyze/data/P3HT_011312_2_height.txt'])
+    opts = get_arguments()
 
     x = lm.surface.load(opts.inputA)
     y = lm.surface.load(opts.inputB)
