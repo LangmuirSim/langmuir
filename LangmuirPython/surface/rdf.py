@@ -4,6 +4,7 @@
 """
 import langmuir as lm
 import numpy as np
+import collections
 import argparse
 import sys
 import os
@@ -57,8 +58,12 @@ if __name__ == '__main__':
             print '%.5f %%' % ((i + 1)/float(grid.size))
     print '%.5f %%' % (1)
 
+    results = collections.OrderedDict()
+    results['surface'] = image
+    results['r1'] = mesh.r1
+    results['w1'] = w1
+    results['w2'] = w2
+
     handle = lm.common.format_output(stub=opts.stub, name='rdf', ext='pkl')
-    handle = lm.common.save_pkl(mesh.r1, handle)
-    handle = lm.common.save_pkl(w1, handle)
-    handle = lm.common.save_pkl(w2, handle)
-    print 'saved: %s {r1, w1, w2}' % handle.name
+    lm.common.save_pkl(results, handle)
+    print 'saved: %s' % handle.name

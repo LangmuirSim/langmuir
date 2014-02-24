@@ -3,6 +3,7 @@
 @author: adam
 """
 import langmuir as lm
+import collections
 import argparse
 import sys
 import os
@@ -14,19 +15,19 @@ Perform FFT on surface or KPFM image.
 def get_arguments(args=None):
     parser = argparse.ArgumentParser()
     parser.description = desc
-    
+
     parser.add_argument(dest='ifile', type=str, metavar='input',
         help='input file')
-    
+
     parser.add_argument('--stub', default='', type=str, metavar='stub',
         help='output file stub')
-    
+
     parser.add_argument('--nodetrend', action='store_true',
         help='do not subtract average from signal')
-    
+
     parser.add_argument('--window', action='store_true',
         help='multiply signal by hamming window')
-    
+
     opts = parser.parse_args(args)
 
     if not os.path.exists(opts.ifile):
@@ -48,14 +49,17 @@ if __name__ == '__main__':
     fft   = lm.surface.FFT3D(grid.mx, grid.my, grid.mz, image,
         detrend=not opts.nodetrend, window=opts.window)
 
+    results = collections.OrderedDict()
+    results['x'] = fft.x
+    results['y'] = fft.y
+    results['z'] = fft.z
+    results['s'] = fft.s
+    results['u'] = fft.u
+    results['v'] = fft.v
+    results['w'] = fft.w
+    results['f'] = fft.fft
+    results['p'] = fft.power
+
     handle = lm.common.format_output(stub=opts.stub, name='fft', ext='pkl')
-    handle = lm.common.save_pkl(fft.x, handle)
-    handle = lm.common.save_pkl(fft.y, handle)
-    handle = lm.common.save_pkl(fft.z, handle)
-    handle = lm.common.save_pkl(fft.s, handle)
-    handle = lm.common.save_pkl(fft.u, handle)
-    handle = lm.common.save_pkl(fft.v, handle)
-    handle = lm.common.save_pkl(fft.w, handle)
-    handle = lm.common.save_pkl(fft.fft, handle)
-    handle = lm.common.save_pkl(fft.power, handle)
-    print 'saved: %s {x, y, z, s, u, v, w, fft, power}' % handle.name
+    lm.common.save_pkl(results, handle)
+    print 'saved: %s' % handle.name
