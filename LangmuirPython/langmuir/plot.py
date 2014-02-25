@@ -198,6 +198,12 @@ def errorbar(x, y, color='r', **kwargs):
     _kwargs.update(**kwargs)
     return plt.errorbar(x, y, **_kwargs)
 
+def title(s, x=0.5, y=1.025, **kwargs):
+    axis = plt.gca()
+    _kwargs = dict(transform=axis.transAxes, ha='center', va='bottom')
+    _kwargs.update(**kwargs)
+    plt.text(x, y, s, **_kwargs)
+
 def transformA(x, y, a=None):
     """
     transform angle from data to screen coordinates
