@@ -7,6 +7,7 @@ import pickle
 import gzip
 import sys
 import os
+import re
 
 try:
     from scipy.misc import comb
@@ -90,7 +91,7 @@ def save_pkl(obj, handle):
     return handle
 
 def format_string(s, **kwargs):
-    return s.format(**kwargs).strip('-_')
+    return re.sub('_\.', '.', s.format(**kwargs).strip('-_'))
 
 def format_output(s='{stub}_{name}.{ext}', stub='', name='out', ext='dat',
     **kwargs):
