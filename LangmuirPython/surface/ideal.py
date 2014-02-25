@@ -40,11 +40,11 @@ def get_arguments(args=None):
                         help='grid.z')
 
     parser.add_argument(dest='xwidth', type=int, metavar='int',
-                        help='size of bands, x-direction: 2*lambda.x')
+                        help='size of bands, x-direction: lambda.x')
     parser.add_argument(dest='ywidth', type=int, metavar='int',
-                        help='size of bands, y-direction: 2*lambda.y')
+                        help='size of bands, y-direction: lambda.y')
     parser.add_argument(dest='zwidth', type=int, metavar='int',
-                        help='size of bands, z-direction: 2*lambda.z')
+                        help='size of bands, z-direction: lambda.z')
 
     parser.add_argument(dest='surface', type=str, metavar='str',
                         choices=surfaces.keys(), help='surface type')
@@ -54,9 +54,6 @@ def get_arguments(args=None):
 
     parser.add_argument('--spacing', default=1.0, type=float, metavar='float',
                         help='grid spacing')
-
-    parser.add_argument('--threshold', default=0.0, type=float,
-                        metavar='float', help='threshold value')
 
     parser.add_argument('--ext', default='pkl', type=str, metavar='str',
         choices=['pkl', 'npy', 'dat', 'txt', 'csv'], help='output file type')
@@ -81,9 +78,9 @@ if __name__ == '__main__':
     grid.refine(1.0/opts.spacing)
     print grid
 
-    wx = lm.surface.WaveDimensions(grid.lx, grid.lx/(2*opts.xwidth))
-    wy = lm.surface.WaveDimensions(grid.ly, grid.ly/(2*opts.ywidth))
-    wz = lm.surface.WaveDimensions(grid.lz, grid.lz/(2*opts.zwidth))
+    wx = lm.surface.WaveDimensions(grid.lx, grid.lx/(opts.xwidth))
+    wy = lm.surface.WaveDimensions(grid.ly, grid.ly/(opts.ywidth))
+    wz = lm.surface.WaveDimensions(grid.lz, grid.lz/(opts.zwidth))
 
     print wx
     print wy
@@ -93,4 +90,4 @@ if __name__ == '__main__':
 
     handle = lm.common.format_output(stub=opts.stub, name='image', ext=opts.ext)
     print 'saved: %s' % handle
-    np.save(handle, surface)
+    lm.surface.save(handle, surface)
