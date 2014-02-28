@@ -38,6 +38,14 @@ class CheckPoint(object):
         if handle:
             self.load(handle)
 
+    @classmethod
+    def from_grid(cls, grid):
+        chk = cls()
+        chk['grid.x'] = grid.nx
+        chk['grid.y'] = grid.ny
+        chk['grid.z'] = grid.nz
+        return chk
+
     @property
     def electrons(self):
         return self._electrons
@@ -58,6 +66,7 @@ class CheckPoint(object):
     @traps.setter
     def traps(self, value):
         self._traps = list(value)
+        self.fix_traps()
 
     @property
     def defects(self):
@@ -195,6 +204,21 @@ class CheckPoint(object):
         self['random.seed'] = 0
         self._random_state = []
         self._flux_state = []
+    
+    def update(self, *args, **kwargs):
+        """
+        Update parameters.
+        """
+        if args:
+            _args = []
+            for arg in args:
+                if isinstance(arg, lm.checkpoint.CheckPoint):
+                    self._parameters.update(arg.parameters)
+                else:
+                    _args.append(arg)
+        else:
+            _args = args
+        self._parameters.update(*_args, **kwargs)
 
     def _load_values(self, handle, type_=int):
         """
