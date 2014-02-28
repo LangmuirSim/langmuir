@@ -3,7 +3,6 @@ build/
 debug/
 test/
 CMakeLists.txt.user
-doc/
 *spyder*
 pull-work
 pull-home
