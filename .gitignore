@@ -17,7 +17,6 @@ pull-home
 *.log
 *.out
 *.out.make
-*.pdf
 *.toc
 *.toc.make
 *.temp
