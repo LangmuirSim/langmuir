@@ -16,11 +16,15 @@ except ImportError:
 
 def load_ascii(handle, square=False, cube=False, shape=None, **kwargs):
     """
-    Wrapper around np.loadtxt.
-    If data is 1D, it is reshaped according to dims.
-        dims = 1; w          shape = (w, 1, 1)
-        dims = 2; w = h      shape = (w, h, 1)
-        dims = 3; w = l = h  shape = (w, h, l)
+    Wrapper around np.loadtxt.  Forces data to be at least 3 dimensions.
+    
+    :param square: reshape as if data is NxN
+    :param cube: reshape as if data is NxNxN
+    :parm shape: reshape data
+    
+    :param square: bool
+    :param cube: bool
+    :param shape: list
     """
     # load the data
     image = np.loadtxt(handle, **kwargs)
