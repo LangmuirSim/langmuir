@@ -29,7 +29,7 @@ def get_arguments(args=None):
     parser.add_argument('--level', default=0, type=int, metavar='int',
         help='index of plane')
 
-    parser.add_argument('--figure', default=(6.0, 6.0, 1.5, 1.0, 1.0, 1.5),
+    parser.add_argument('--figure', default=(6.0, 6.0, 1.5, 1.5, 1.0, 1.5),
         help='figure dimensions (w, h, l, r, t, b)')
 
     parser.add_argument('--title'   , default='')
@@ -56,7 +56,7 @@ def get_arguments(args=None):
     parser.add_argument('--labelsize', default=None)
     parser.add_argument('--ticksize' , default=None)
     parser.add_argument('--titlesize', default=None)
-    
+
     parser.add_argument('--colorbar', action='store_true',
         help='show colorbar')
     parser.add_argument('--clabel', default='', type=str, metavar='str',
