@@ -155,6 +155,16 @@ def dat(*args, **kwargs):
     _kwargs.update(**kwargs)
     return find(*args, **_kwargs)
 
+def txts(*args, **kwargs):
+    _kwargs = dict(ext='txt*', exclude_dirs=True, single=False)
+    _kwargs.update(**kwargs)
+    return find(*args, **_kwargs)
+
+def txt(*args, **kwargs):
+    _kwargs = dict(ext='txt*', exclude_dirs=True, single=True)
+    _kwargs.update(**kwargs)
+    return find(*args, **_kwargs)
+
 def pkls(*args, **kwargs):
     _kwargs = dict(ext='pkl*', exclude_dirs=True, single=False)
     _kwargs.update(**kwargs)
