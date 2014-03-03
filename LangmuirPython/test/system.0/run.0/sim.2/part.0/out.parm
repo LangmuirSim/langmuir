@@ -1,0 +1,7 @@
+[Parameters]
+iterations.print = 1
+current.step     = 10
+voltage.right    = 2.0
+grid.x           = 128
+grid.y           = 128
+grid.z           = 1
