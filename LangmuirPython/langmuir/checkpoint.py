@@ -3,7 +3,13 @@
 @author: adam
 """
 import langmuir as lm
+import numpy as np
 import collections
+
+try:
+    import scipy.ndimage as ndimage
+except ImportError:
+    pass
 
 class CheckPoint(object):
     """
@@ -40,10 +46,45 @@ class CheckPoint(object):
 
     @classmethod
     def from_grid(cls, grid):
+        """
+        Create checkpoint file from grid object.
+        """
         chk = cls()
         chk['grid.x'] = grid.nx
         chk['grid.y'] = grid.ny
         chk['grid.z'] = grid.nz
+        return chk
+
+    @classmethod
+    def from_image(cls, image, *args, **kwargs):
+        """
+        Create checkpoint from image file.  You can also pass another
+        checkpoint object, a dictionary, or key=value pairs.  The parameters
+        will be updated accordingly.
+
+        :param image: name of image file
+
+        :type image: str
+        """
+        if isinstance(image, str):
+            image = ndimage.imread(image, flatten=True).astype(dtype=int)
+
+        image = np.rot90(image, -1)
+
+        image = np.expand_dims(image, 2)
+        image = lm.surface.linear_mapping(image, 1, 0)
+        image = lm.surface.threshold(image, v=0.5)
+
+        xsize, ysize, zsize = image.shape
+        grid = lm.grid.Grid(xsize, ysize, zsize)
+
+        chk = lm.checkpoint.CheckPoint.from_grid(grid)
+
+        chk.update(*args, **kwargs)
+
+        traps = lm.grid.IndexMapper.map_mesh(grid, image, value=1.0)
+        chk.traps = traps
+
         return chk
 
     @property
@@ -204,10 +245,13 @@ class CheckPoint(object):
         self['random.seed'] = 0
         self._random_state = []
         self._flux_state = []
-    
+
     def update(self, *args, **kwargs):
         """
-        Update parameters.
+        Update parameters.  You can pass other checkpoint objects, python
+        dictionaries, or key=value pairs.  Since Langmuir uses dots in
+        parameter names, underscores are replaced by dots in they key=value
+        pairs.
         """
         if args:
             _args = []
@@ -218,7 +262,16 @@ class CheckPoint(object):
                     _args.append(arg)
         else:
             _args = args
-        self._parameters.update(*_args, **kwargs)
+
+        _kwargs = {}
+        for key, value in kwargs.iteritems():
+            if isinstance(value, lm.checkpoint.CheckPoint):
+                print '!'
+                self._parameters.update(value.parameters)
+            else:
+                _kwargs[key] = value
+
+        self._parameters.update(*_args, **_kwargs)
 
     def _load_values(self, handle, type_=int):
         """
