@@ -3,7 +3,11 @@
 #define BOOST_DISABLE_ASSERTS
 
 #include <QObject>
+
+#pragma GCC diagnostic push
+#pragma GCC system_header
 #include "boost/multi_array.hpp"
+#pragma GCC diagnostic pop
 
 namespace Langmuir
 {

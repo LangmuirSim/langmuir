@@ -5,7 +5,11 @@
 #include <QDataStream>
 #include <QTextStream>
 
+#pragma GCC diagnostic push
+#pragma GCC system_header
 #include <boost/random.hpp>
+#pragma GCC diagnostic pop
+
 #include <ctime>
 
 namespace Langmuir

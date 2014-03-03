@@ -31,7 +31,7 @@ def create_scripts(path):
 
 create_scripts('utils')
 create_scripts('analyze')
-create_scripts('surface')
+#create_scripts('surface')
 
 print ''
 print '*' * 80

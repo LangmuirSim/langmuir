@@ -4,7 +4,11 @@
 
 #include <QtCore>
 #include <QtGui>
+
+#pragma GCC diagnostic push
+#pragma GCC system_header
 #include "boost/multi_array.hpp"
+#pragma GCC diagnostic pop
 
 namespace Langmuir
 {
