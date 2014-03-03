@@ -5,6 +5,7 @@
 import langmuir as lm
 import collections
 import StringIO
+import re
 
 try:
     import numpy as np
@@ -206,10 +207,14 @@ class Parameters(collections.OrderedDict):
 
     def __setitem__(self, key, value):
         try:
-            assert key in parameters.keys()
+            if not key in parameters.keys():
+                new_key = re.sub('_', '.', key)
+            else:
+                new_key = key
+            assert new_key in parameters.keys()
         except AssertionError:
             raise KeyError('invalid parameter: %s' % key)
-        super(Parameters, self).__setitem__(key, value)
+        super(Parameters, self).__setitem__(new_key, value)
 
     def __str__(self):
         s = StringIO.StringIO()
