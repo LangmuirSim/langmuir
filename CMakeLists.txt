@@ -87,6 +87,7 @@ SET(PROJECT_DATA
 ################################################################################
 
 #SET(QT_MIN_VERSION 4.0.1)
+SET(DESIRED_QT_VERSION 4.8)
 
 IF(${COMPILE_LANGMUIR_VIEW})
     SET(QT_USE_QTOPENGL TRUE)
