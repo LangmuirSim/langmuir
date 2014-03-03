@@ -1,7 +1,6 @@
 bin/
 build/
 debug/
-test/
 CMakeLists.txt.user
 *spyder*
 pull-work
