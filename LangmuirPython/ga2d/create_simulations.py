@@ -34,7 +34,19 @@ if __name__ == '__main__':
     opts = get_arguments()
     pngs = lm.find.pngs(work)
 
-    sims = os.path.join(work, 'simulations')
+    def sort_by(x):
+        x = os.path.splitext(os.path.basename(x))[0]
+        x = x.split('-')
+        for i, val in enumerate(x):
+            try:
+                x[i] = int(val)
+            except ValueError:
+                x[i] = val
+        return x
+    
+    pngs.sort(key=sort_by)
+
+    sims = os.path.join(work, 'sims')
     if os.path.exists(sims):
         shutil.rmtree(sims)
     os.mkdir(sims)
@@ -66,6 +78,8 @@ if __name__ == '__main__':
 
         paths.append(path)
 
+    paths.sort(key=sort_by)
+
     os.chdir(sims)
-    lm.common.command_script(paths, name='submit')
+    lm.common.command_script(paths, name='submit', stub='surf')
     os.chdir(work)
