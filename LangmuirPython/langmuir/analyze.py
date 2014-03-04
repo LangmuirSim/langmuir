@@ -143,7 +143,7 @@ class Stats(object):
             self.kurt = stats.kurtosis(array, 0, bias=False)
             self.kurt_z, self.kurt_p = stats.kurtosistest(array, 0)
 
-        except NameError:
+        except:
             self.skew   = 0.0
             self.skew_z = 0.0
             self.skew_p = 0.0
