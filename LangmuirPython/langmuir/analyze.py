@@ -136,22 +136,6 @@ class Stats(object):
         self.avg    = np.average(array)
         self.std    = np.std(array)
 
-        try:
-            self.skew = stats.skew(array, 0, bias=False)
-            self.skew_z, self.skew_p = stats.skewtest(array, 0)
-
-            self.kurt = stats.kurtosis(array, 0, bias=False)
-            self.kurt_z, self.kurt_p = stats.kurtosistest(array, 0)
-
-        except:
-            self.skew   = 0.0
-            self.skew_z = 0.0
-            self.skew_p = 0.0
-
-            self.kurt   = 0.0
-            self.kurt_z = 0.0
-            self.kurt_p = 0.0
-
     def to_dict(self):
         """
         Get summary of stats.
@@ -162,9 +146,6 @@ class Stats(object):
         d['%srng' % self.prefix] = float(self.rng)
         d['%savg' % self.prefix] = float(self.max)
         d['%sstd' % self.prefix] = float(self.max)
-        d['%sskw' % self.prefix] = float(self.skw)
-        d['%sskz' % self.prefix] = float(self.skz)
-        d['%sskp' % self.prefix] = float(self.skp)
         return d
 
     def __str__(self):
@@ -174,6 +155,4 @@ class Stats(object):
         print >> s, r'{self.prefix}rng  = {self.rng:{fmt}}'
         print >> s, r'{self.prefix}avg  = {self.avg:{fmt}}'
         print >> s, r'{self.prefix}std  = {self.std:{fmt}}'
-        print >> s, r'{self.prefix}skew = {self.skew:{fmt}}; p={self.skew_p:{fmt}}'
-        print >> s, r'{self.prefix}kurt = {self.kurt:{fmt}}; p={self.kurt_p:{fmt}}'
         return s.getvalue().format(fmt='+.5f', self=self)
