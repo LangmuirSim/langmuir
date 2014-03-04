@@ -8,6 +8,11 @@ import numpy as np
 import collections
 import StringIO
 
+try:
+    import scipy.stats as stats
+except ImportError:
+    pass
+
 fluxes = ['eSourceL', 'eSourceR', 'hSourceL', 'hSourceR', 'eDrainL', 'eDrainR',
     'hDrainL', 'hDrainR', 'xSource', 'xDrain']
 
@@ -119,34 +124,56 @@ class Stats(object):
 
     >>> s = Stats([1, 2, 3, 4, 5])
     """
-    def __init__(self, array):
+    def __init__(self, array, prefix=''):
         """
         :param array: array like object
         :type array: list
         """
-        self.max  = np.amax(array)
-        self.min  = np.amin(array)
-        self.rng  = abs(self.max - self.min)
-        self.avg  = np.average(array)
-        self.std  = np.std(array)
+        self.prefix = prefix
+        self.max    = np.amax(array)
+        self.min    = np.amin(array)
+        self.rng    = abs(self.max - self.min)
+        self.avg    = np.average(array)
+        self.std    = np.std(array)
 
-    def to_dict(self, prefix=''):
+        try:
+            self.skew = stats.skew(array, 0, bias=False)
+            self.skew_z, self.skew_p = stats.skewtest(array, 0)
+
+            self.kurt = stats.kurtosis(array, 0, bias=False)
+            self.kurt_z, self.kurt_p = stats.kurtosistest(array, 0)
+
+        except NameError:
+            self.skew   = 0.0
+            self.skew_z = 0.0
+            self.skew_p = 0.0
+
+            self.kurt   = 0.0
+            self.kurt_z = 0.0
+            self.kurt_p = 0.0
+
+    def to_dict(self):
         """
         Get summary of stats.
         """
         d = collections.OrderedDict()
-        d['%smax' % prefix] = float(self.max)
-        d['%smin' % prefix] = float(self.min)
-        d['%srng' % prefix] = float(self.rng)
-        d['%savg' % prefix] = float(self.max)
-        d['%sstd' % prefix] = float(self.max)
+        d['%smax' % self.prefix] = float(self.max)
+        d['%smin' % self.prefix] = float(self.min)
+        d['%srng' % self.prefix] = float(self.rng)
+        d['%savg' % self.prefix] = float(self.max)
+        d['%sstd' % self.prefix] = float(self.max)
+        d['%sskw' % self.prefix] = float(self.skw)
+        d['%sskz' % self.prefix] = float(self.skz)
+        d['%sskp' % self.prefix] = float(self.skp)
         return d
 
     def __str__(self):
         s = StringIO.StringIO()
-        print >> s, r'{self.name}max = {self.max:+.5e}'
-        print >> s, r'{self.name}min = {self.min:+.5e}'
-        print >> s, r'{self.name}rng = {self.rng:+.5e}'
-        print >> s, r'{self.name}avg = {self.avg:+.5e}'
-        print >> s, r'{self.name}std = {self.std:+.5e}'
-        return s.getvalue()
+        print >> s, r'{self.prefix}max  = {self.max:{fmt}}'
+        print >> s, r'{self.prefix}min  = {self.min:{fmt}}'
+        print >> s, r'{self.prefix}rng  = {self.rng:{fmt}}'
+        print >> s, r'{self.prefix}avg  = {self.avg:{fmt}}'
+        print >> s, r'{self.prefix}std  = {self.std:{fmt}}'
+        print >> s, r'{self.prefix}skew = {self.skew:{fmt}}; p={self.skew_p:{fmt}}'
+        print >> s, r'{self.prefix}kurt = {self.kurt:{fmt}}; p={self.kurt_p:{fmt}}'
+        return s.getvalue().format(fmt='+.5f', self=self)
