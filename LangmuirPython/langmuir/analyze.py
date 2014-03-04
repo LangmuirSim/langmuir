@@ -4,6 +4,9 @@
 """
 import langmuir as lm
 import pandas as pd
+import numpy as np
+import collections
+import StringIO
 
 fluxes = ['eSourceL', 'eSourceR', 'hSourceL', 'hSourceR', 'eDrainL', 'eDrainR',
     'hDrainL', 'hDrainR', 'xSource', 'xDrain']
@@ -99,3 +102,51 @@ def equilibrate(obj, last, equil=None):
         return last
     equil = obj.xs(obj.index[equil])
     return last - equil
+
+class Stats(object):
+    """
+    Compute various statistics of an array like object.
+
+    ======== ==========================
+    Attr     Description
+    ======== ==========================
+    **max**  max of data
+    **min**  min of data
+    **rng**  range of data
+    **avg**  average of data
+    **std**  standard deviation of data
+    ======== ==========================
+
+    >>> s = Stats([1, 2, 3, 4, 5])
+    """
+    def __init__(self, array):
+        """
+        :param array: array like object
+        :type array: list
+        """
+        self.max  = np.amax(array)
+        self.min  = np.amin(array)
+        self.rng  = abs(self.max - self.min)
+        self.avg  = np.average(array)
+        self.std  = np.std(array)
+
+    def to_dict(self, prefix=''):
+        """
+        Get summary of stats.
+        """
+        d = collections.OrderedDict()
+        d['%smax' % prefix] = float(self.max)
+        d['%smin' % prefix] = float(self.min)
+        d['%srng' % prefix] = float(self.rng)
+        d['%savg' % prefix] = float(self.max)
+        d['%sstd' % prefix] = float(self.max)
+        return d
+
+    def __str__(self):
+        s = StringIO.StringIO()
+        print >> s, r'{self.name}max = {self.max:+.5e}'
+        print >> s, r'{self.name}min = {self.min:+.5e}'
+        print >> s, r'{self.name}rng = {self.rng:+.5e}'
+        print >> s, r'{self.name}avg = {self.avg:+.5e}'
+        print >> s, r'{self.name}std = {self.std:+.5e}'
+        return s.getvalue()
