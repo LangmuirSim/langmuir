@@ -67,7 +67,7 @@ def fix_boolean(string):
     :type string: str
 
     >>> print lm.regex.fix_boolean('true false True False true false')
-    True false True False True false
+    True False True False True false
     """
     fixed = regex_false.sub('False', string)
     fixed = regex_true.sub('True', string)
