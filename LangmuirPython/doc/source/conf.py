@@ -254,3 +254,4 @@ intersphinx_mapping['matplotlib'] = (r'http://matplotlib.sourceforge.net', None)
 autodoc_default_members = ['members', 'undoc-members', 'show-inheritance']
 autodoc_member_order = 'bysource'
 autoclass_content = 'both'
+show_authors = True
