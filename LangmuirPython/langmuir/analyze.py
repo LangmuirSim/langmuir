@@ -22,6 +22,25 @@ try:
 except ImportError:
     ifactor = 160.21764869999996
 
+def create_panel(frames, index=None):
+    """
+    Turn a list of :py:class:`pandas.DataFrame` into a
+    :py:class:`pandas.Panel`.
+
+    :param frames: list of :py:class:`pandas.DataFrame`
+    :param index: major axis labels
+
+    :type frames: list
+    :type index: list
+
+    >>> data1 = lm.common.load_pkl('run.0/calculated.pkl.gz')
+    >>> data2 = lm.common.load_pkl('run.1/calculated.pkl.gz')
+    >>> panel = create_panel([data1, data2], index=[0, 1])
+    """
+    if index is None:
+        index = range(len(objs))
+    return pd.Panel({i : frame for i, frame in zip(index, frames)})
+
 def combine(objs):
     """
     Combine a set of panda's DataFrames into a single DataFrame
