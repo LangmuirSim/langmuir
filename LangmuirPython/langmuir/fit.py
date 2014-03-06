@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-"""A set of classes used to fit 2D data.
+"""
+.. note::
+    Functions for fitting 2D data.
 
 .. moduleauthor:: Adam Gagorik <adam.gagorik@gmail.com>
 """

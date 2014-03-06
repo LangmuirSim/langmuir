@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-@author: adam
+.. note::
+    Functions for performing file searching.
+
+.. moduleauthor:: Adam Gagorik <adam.gagorik@gmail.com>
 """
 import langmuir as lm
 import glob
@@ -210,7 +213,7 @@ def inps(*args, **kwargs):
 
     :param args: see :func:`find`
     :param kwargs: see :func:`find`
-    
+
     >>> inps = lm.find.inps('.')
     """
     _kwargs = dict(ext='inp*', exclude_dirs=True, single=False)
@@ -223,7 +226,7 @@ def inp(*args, **kwargs):
 
     :param args: see :func:`find`
     :param kwargs: see :func:`find`
-    
+
     >>> inp = lm.find.inp('.')
     """
     _kwargs = dict(ext='inp*', exclude_dirs=True, single=True)
@@ -236,7 +239,7 @@ def chks(*args, **kwargs):
 
     :param args: see :func:`find`
     :param kwargs: see :func:`find`
-    
+
     >>> chks = lm.find.chks('.')
     """
     _kwargs = dict(ext='chk*', exclude_dirs=True, single=False)
@@ -249,7 +252,7 @@ def chk(*args, **kwargs):
 
     :param args: see :func:`find`
     :param kwargs: see :func:`find`
-    
+
     >>> chk = lm.find.chk('.')
     """
     _kwargs = dict(ext='chk*', exclude_dirs=True, single=True)
@@ -262,7 +265,7 @@ def parms(*args, **kwargs):
 
     :param args: see :func:`find`
     :param kwargs: see :func:`find`
-    
+
     >>> parms = lm.find.parms('.')
     """
     _kwargs = dict(ext='parm*', exclude_dirs=True, single=False)
@@ -275,7 +278,7 @@ def parm(*args, **kwargs):
 
     :param args: see :func:`find`
     :param kwargs: see :func:`find`
-    
+
     >>> parm = lm.find.parm('.')
     """
     _kwargs = dict(ext='parm*', exclude_dirs=True, single=True)
@@ -288,7 +291,7 @@ def dats(*args, **kwargs):
 
     :param args: see :func:`find`
     :param kwargs: see :func:`find`
-    
+
     >>> dats = lm.find.dats('.')
     """
     _kwargs = dict(ext='dat*', exclude_dirs=True, single=False)
@@ -301,7 +304,7 @@ def dat(*args, **kwargs):
 
     :param args: see :func:`find`
     :param kwargs: see :func:`find`
-    
+
     >>> dat = lm.find.dat('.')
     """
     _kwargs = dict(ext='dat*', exclude_dirs=True, single=True)
@@ -314,7 +317,7 @@ def txts(*args, **kwargs):
 
     :param args: see :func:`find`
     :param kwargs: see :func:`find`
-    
+
     >>> txts = lm.find.txts('.')
     """
     _kwargs = dict(ext='txt*', exclude_dirs=True, single=False)
@@ -327,7 +330,7 @@ def txt(*args, **kwargs):
 
     :param args: see :func:`find`
     :param kwargs: see :func:`find`
-    
+
     >>> txt = lm.find.txt('.')
     """
     _kwargs = dict(ext='txt*', exclude_dirs=True, single=True)
@@ -340,7 +343,7 @@ def pkls(*args, **kwargs):
 
     :param args: see :func:`find`
     :param kwargs: see :func:`find`
-    
+
     >>> pkls = lm.find.pkls('.')
     """
     _kwargs = dict(ext='pkl*', exclude_dirs=True, single=False)
@@ -353,7 +356,7 @@ def pkl(*args, **kwargs):
 
     :param args: see :func:`find`
     :param kwargs: see :func:`find`
-    
+
     >>> pkl = lm.find.pkl('.')
     """
     _kwargs = dict(ext='pkl*', exclude_dirs=True, single=True)
@@ -366,7 +369,7 @@ def pngs(*args, **kwargs):
 
     :param args: see :func:`find`
     :param kwargs: see :func:`find`
-    
+
     >>> pngs = lm.find.pngs('.')
     """
     _kwargs = dict(ext='png*', exclude_dirs=True, single=False)
@@ -379,7 +382,7 @@ def png(*args, **kwargs):
 
     :param args: see :func:`find`
     :param kwargs: see :func:`find`
-    
+
     >>> png = lm.find.png('.')
     """
     _kwargs = dict(ext='png*', exclude_dirs=True, single=True)

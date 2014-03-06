@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-@author: adam
+.. note::
+    Functions for calculating surfaces and analyzing them.
+
+.. moduleauthor:: Adam Gagorik <adam.gagorik@gmail.com>
 """
 import langmuir as lm
 import numpy as np
@@ -17,11 +20,11 @@ except ImportError:
 def load_ascii(handle, square=False, cube=False, shape=None, **kwargs):
     """
     Wrapper around np.loadtxt.  Forces data to be at least 3 dimensions.
-    
+
     :param square: reshape as if data is NxN
     :param cube: reshape as if data is NxNxN
     :parm shape: reshape data
-    
+
     :param square: bool
     :param cube: bool
     :param shape: list
@@ -148,8 +151,8 @@ def save(handle, obj, *args, **kwargs):
         np.savetxt(handle, obj, **_kwargs)
     except TypeError:
         handle = lm.common.zhandle(handle, 'wb')
-        print >> handle, '# ' + ' '.join([str(s) for s in obj.shape])        
-        obj = np.reshape(obj, obj.size)        
+        print >> handle, '# ' + ' '.join([str(s) for s in obj.shape])
+        obj = np.reshape(obj, obj.size)
         np.savetxt(handle, obj, **_kwargs)
     return handle
 

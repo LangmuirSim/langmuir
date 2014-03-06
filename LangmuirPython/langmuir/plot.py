@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-@author: adam
+.. note::
+    Functions for plotting.
+
+.. moduleauthor:: Adam Gagorik <adam.gagorik@gmail.com>
 """
 import matplotlib.pyplot as plt
 import matplotlib as mpl

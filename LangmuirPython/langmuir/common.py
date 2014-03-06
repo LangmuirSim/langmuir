@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-@author: adam
+.. note::
+    Utility functions.
+
+.. moduleauthor:: Adam Gagorik <adam.gagorik@gmail.com>
 """
 import collections
 import pickle
@@ -38,11 +41,11 @@ def zhandle(handle, mode='rb'):
 def splitext(handle, *args, **kwargs):
     """
     Extract stub and extension from a file object or string.
-    
+
     :param handle: filename
     :type handle: str
     """
-    try:        
+    try:
         return os.path.splitext(handle, *args, **kwargs)
     except AttributeError:
         try:
