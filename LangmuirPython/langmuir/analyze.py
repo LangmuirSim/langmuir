@@ -133,7 +133,7 @@ class Stats(object):
         self.max    = np.amax(array)
         self.min    = np.amin(array)
         self.rng    = abs(self.max - self.min)
-        self.avg    = np.average(array)
+        self.avg    = np.mean(array)
         self.std    = np.std(array)
 
     def to_dict(self):
