@@ -142,6 +142,10 @@ class IVCurve(object):
             a = lm.analyze.Stats(self.a, 'a')
             j = lm.analyze.Stats(self.j, 'j')
             r = lm.analyze.Stats(self.r, 'r')
+            ierr = lm.analyze.Stats(self.ierr, 'ierr')
+            jerr = lm.analyze.Stats(self.jerr, 'jerr')
+            perr = lm.analyze.Stats(self.perr, 'perr')
+            rerr = lm.analyze.Stats(self.rerr, 'rerr')
 
         self.stats = stats
 
@@ -231,12 +235,16 @@ class IVCurve(object):
         Get data as dict.
         """
         d = collections.OrderedDict()
-        d['v'] = self.v
-        d['i'] = self.i
-        d['p'] = self.p
-        d['a'] = self.a
-        d['j'] = self.j
-        d['r'] = self.r
+        d['v'   ] = self.v
+        d['i'   ] = self.i
+        d['ierr'] = self.ierr
+        d['p'   ] = self.p
+        d['perr'] = self.perr
+        d['a'   ] = self.a
+        d['j'   ] = self.j
+        d['jerr'] = self.jerr
+        d['r'   ] = self.r
+        d['rerr'] = self.rerr
         return d
 
     def to_dataframe(self):
@@ -255,9 +263,12 @@ class IVCurve(object):
         """
         handle = lm.common.zhandle(handle, 'wb')
         frame = self.to_dataframe()
-        _kwargs = dict(index=False)
+        _kwargs = dict(index=True)
         _kwargs.update(**kwargs)
         frame.to_csv(handle, **_kwargs)
+        handle.write('#\n')
+        series = self.to_series()
+        series.to_csv(handle, **_kwargs)
 
     def summary(self):
         """
@@ -270,7 +281,18 @@ class IVCurve(object):
         d.update(self.stats.a.to_dict())
         d.update(self.stats.j.to_dict())
         d.update(self.stats.r.to_dict())
+        d.update(self.stats.ierr.to_dict())
+        d.update(self.stats.jerr.to_dict())
+        d.update(self.stats.perr.to_dict())
+        d.update(self.stats.rerr.to_dict())
         return d
+
+    def to_series(self):
+        """
+        Convert data into a :py:class:`pandas.Series`
+        """
+        d = self.summary()
+        return pd.Series(d, index=d.keys())
 
     def save_pkl(self, handle):
         """
@@ -454,10 +476,10 @@ class IVCurveSolar(IVCurve):
         Fit using power series.
         """
         self.ifit = lm.fit.FitPower(self.v, self.i,
-            popt=None, yerr=self.ierr, order=order, **kwargs)
+            popt=None, yerr=self.ierr, order=order)
 
         self.jfit = lm.fit.FitPower(self.v, self.j,
-            popt=None, yerr=self.jerr, order=order, **kwargs)
+            popt=None, yerr=self.jerr, order=order)
 
         if recycle:
             p_popt = self.ifit.popt
@@ -469,23 +491,23 @@ class IVCurveSolar(IVCurve):
         order = order + 1
 
         self.pfit = lm.fit.FitPower(self.v, self.p,
-            popt=p_popt, yerr=self.perr, order=order, **kwargs)
+            popt=p_popt, yerr=self.perr, order=order)
 
         self.rfit = lm.fit.FitPower(self.v, self.r,
-            popt=r_popt, yerr=self.rerr, order=order, **kwargs)
+            popt=r_popt, yerr=self.rerr, order=order)
 
     def _fit_tanh(self, recycle=False, **kwargs):
         """
         Fit using hyperbolic tangent.
         """
-        i_popt = [self.istats.min, 1, -self.v_shift, 0]
-        j_popt = [self.jstats.min, 1, -self.v_shift, 0]
+        i_popt = [self.stats.i.min, 1, -self.v_shift, 0]
+        j_popt = [self.stats.j.min, 1, -self.v_shift, 0]
 
         self.ifit = lm.fit.FitTanh(self.v, self.i, popt=i_popt,
-            yerr=self.ierr, **kwargs)
+            yerr=self.ierr)
 
         self.jfit = lm.fit.FitTanh(self.v, self.j, popt=j_popt,
-            yerr=self.jerr, **kwargs)
+            yerr=self.jerr)
 
         if recycle:
             p_popt = self.ifit.popt
@@ -495,23 +517,23 @@ class IVCurveSolar(IVCurve):
             r_popt = j_popt
 
         self.pfit = lm.fit.FitXTanh(self.v, self.p, popt=p_popt,
-            yerr=self.perr, **kwargs)
+            yerr=self.perr)
 
         self.rfit = lm.fit.FitXTanh(self.v, self.r, popt=r_popt,
-            yerr=self.rerr, **kwargs)
+            yerr=self.rerr)
 
     def _fit_erf(self, recycle=False, **kwargs):
         """
         Fit using error function.
         """
-        i_popt = [self.istats.min, 1, -self.v_shift, 0]
-        j_popt = [self.jstats.min, 1, -self.v_shift, 0]
+        i_popt = [self.stats.i.min, 1, -self.v_shift, 0]
+        j_popt = [self.stats.j.min, 1, -self.v_shift, 0]
 
         self.ifit = lm.fit.FitErf(self.v, self.i, popt=i_popt,
-            yerr=self.ierr, **kwargs)
+            yerr=self.ierr)
 
         self.jfit = lm.fit.FitErf(self.v, self.j, popt=j_popt,
-            yerr=self.jerr, **kwargs)
+            yerr=self.jerr)
 
         if recycle:
             p_popt = self.ifit.popt
@@ -521,10 +543,10 @@ class IVCurveSolar(IVCurve):
             r_popt = j_popt
 
         self.pfit = lm.fit.FitXErf(self.v, self.p, popt=p_popt,
-            yerr=self.perr, **kwargs)
+            yerr=self.perr)
 
         self.rfit = lm.fit.FitXErf(self.v, self.r, popt=r_popt,
-            yerr=self.rerr, **kwargs)
+            yerr=self.rerr)
 
     def _fit_interp1d(self, recycle=False, kind='cubic', **kwargs):
         """
@@ -547,16 +569,16 @@ class IVCurveSolar(IVCurve):
         Fit using spline.
         """
         self.ifit = lm.fit.FitUnivariateSpline(self.v, self.i,
-            popt=None, yerr=self.ierr, k=k, **kwargs)
+            popt=None, yerr=self.ierr, k=k)
 
         self.jfit = lm.fit.FitUnivariateSpline(self.v, self.j,
-            popt=None, yerr=self.jerr, k=k, **kwargs)
+            popt=None, yerr=self.jerr, k=k)
 
         self.pfit = lm.fit.FitUnivariateSpline(self.v, self.p,
-            popt=None, yerr=self.perr, k=k, **kwargs)
+            popt=None, yerr=self.perr, k=k)
 
         self.rfit = lm.fit.FitUnivariateSpline(self.v, self.r,
-            popt=None, yerr=self.rerr, k=k, **kwargs)
+            popt=None, yerr=self.rerr, k=k)
 
     def __str__(self):
         s = StringIO.StringIO()
@@ -568,4 +590,4 @@ class IVCurveSolar(IVCurve):
         print >> s, '  {self.string.p_th} = {self.p_th:{fmt}} {self.string.p}'
         print >> s, '  {self.string.p_mp} = {self.p_mp:{fmt}} {self.string.p}'
         print >> s, '  {self.string.fill} = {self.fill:{fmt}} {self.string.f}'
-        return s.getvalue().format(self=self, fmt='+.8f')
+        return s.getvalue().format(self=self, fmt='12.8f')
