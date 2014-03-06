@@ -49,7 +49,7 @@ if 'pd' in locals():
     import analyze
 
 if 'pint' in locals():
-    import ivline
+    import ivcurve
 
 if 'plt' in locals():
     import plot
