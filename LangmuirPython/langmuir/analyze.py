@@ -1,6 +1,19 @@
 # -*- coding: utf-8 -*-
 """
-@author: adam
+.. note::
+    Functions for analyzing Langmuir output.
+
+    1.  Combine each part of a simulation with :py:func:`combine`
+    2.  Calculate the current with :py:func:`calculate`
+    3.  Extract the result with :py:func:`equilibrate`
+    4.  Average over runs with :py:func:`create_panel`
+
+.. seealso::
+
+    1.  :download:`combine.py <../../analyze/combine.py>`
+    2.  :download:`gather.py <../../analyze/gather.py>`
+
+.. moduleauthor:: Adam Gagorik <adam.gagorik@gmail.com>
 """
 import langmuir as lm
 import pandas as pd
@@ -43,7 +56,16 @@ def create_panel(frames, index=None):
 
 def combine(objs):
     """
-    Combine a set of panda's DataFrames into a single DataFrame
+    Combine a set of panda's DataFrames into a single DataFrame.  The idea
+    is that each DataFrame holds data from a part of some series of data.
+    The index of each part should be the *simulation:time*.
+
+    :param objs: list of :py:class:`pandas.DataFrame`
+    :type objs: list
+
+    >>> data1 = lm.datfile.load('part.0/out.dat.gz')
+    >>> data2 = lm.datfile.load('part.1/out.dat.gz')
+    >>> combined = lm.analyze.combine([data1, data2])
     """
     try:
         assert isinstance(objs, list)
@@ -76,7 +98,14 @@ def combine(objs):
 
 def calculate(obj):
     """
-    Compute all flux.
+    Compute all flux statistics.  Calculates current using, for example,
+    the number of carriers exiting a drain.
+
+    :param obj: data
+    :type obj: :py:class:`pandas.DataFrame`
+
+    >>> data = lm.common.load_pkl('combined.pkl.gz')
+    >>> data = lm.analyze.calculate(data)
     """
     for flux in fluxes:
         a = flux + ':attempt'
@@ -120,6 +149,16 @@ def calculate(obj):
 def equilibrate(obj, last, equil=None):
     """
     Get the difference between two steps.
+
+    :param obj: data
+    :param last: index of last step
+    :param equil: index of first step
+
+    :type obj: :py:class:`pandas.DataFrame`
+    :type last: int
+    :type equil: int
+
+    >>> data = lm.analyze.equilibrate(data, last=-1, equil=-1000)
     """
     last = obj.xs(obj.index[last])
     if equil is None:
@@ -131,15 +170,15 @@ class Stats(object):
     """
     Compute various statistics of an array like object.
 
-    ======== ==========================
+    ======== ==================
     Attr     Description
-    ======== ==========================
-    **max**  max of data
-    **min**  min of data
-    **rng**  range of data
-    **avg**  average of data
-    **std**  standard deviation of data
-    ======== ==========================
+    ======== ==================
+    **max**  max
+    **min**  min
+    **rng**  range
+    **avg**  average
+    **std**  standard deviation
+    ======== ==================
 
     >>> s = Stats([1, 2, 3, 4, 5])
     """
