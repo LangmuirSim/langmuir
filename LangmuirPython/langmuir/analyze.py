@@ -21,17 +21,12 @@ import numpy as np
 import collections
 import StringIO
 
-try:
-    import scipy.stats as stats
-except ImportError:
-    pass
-
 fluxes = ['eSourceL', 'eSourceR', 'hSourceL', 'hSourceR', 'eDrainL', 'eDrainR',
     'hDrainL', 'hDrainR', 'xSource', 'xDrain']
 
 try:
-    import quantities as units
-    ifactor = float((units.e / units.ps).rescale(units.nA))
+    import scipy.constants as constants
+    ifactor = constants.e * 1e21
 except ImportError:
     ifactor = 160.21764869999996
 
@@ -51,7 +46,7 @@ def create_panel(frames, index=None):
     >>> panel = create_panel([data1, data2], index=[0, 1])
     """
     if index is None:
-        index = range(len(objs))
+        index = range(len(frames))
     return pd.Panel({i : frame for i, frame in zip(index, frames)})
 
 def combine(objs):
@@ -158,6 +153,7 @@ def equilibrate(obj, last, equil=None):
     :type last: int
     :type equil: int
 
+    >>> data = lm.common.load_pkl('combined.pkl.gz')
     >>> data = lm.analyze.equilibrate(data, last=-1, equil=-1000)
     """
     last = obj.xs(obj.index[last])
