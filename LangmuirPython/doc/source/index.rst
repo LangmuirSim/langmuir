@@ -15,8 +15,8 @@ Getting Started
 Modules
 ~~~~~~~
 
-LangmuirPython/langmuir
-***********************
+langmuir
+********
 
 .. toctree::
     :maxdepth: 2
@@ -24,23 +24,11 @@ LangmuirPython/langmuir
     modules/common
     modules/regex
     modules/find
-
-.. toctree::
-    :maxdepth: 2
-
     modules/checkpoint
     modules/parameters
     modules/datfile
-
-.. toctree::
-    :maxdepth: 2
-
     modules/surface
     modules/grid
-
-.. toctree::
-    :maxdepth: 2
-
     modules/analyze
     modules/ivcurve
     modules/plot
@@ -51,8 +39,8 @@ LangmuirPython/langmuir
 Scripts
 ~~~~~~~
 
-LangmuirPython/analyze
-**********************
+analyze
+*******
 
 .. toctree::
     :maxdepth: 2
@@ -61,6 +49,20 @@ LangmuirPython/analyze
     scripts/analyze/calculate
     scripts/analyze/gather
     scripts/analyze/solar
+
+generators
+**********
+
+.. toctree::
+    :maxdepth: 2
+
+    scripts/ga2d/generators/tristripe
+    scripts/ga2d/generators/triangle
+    scripts/ga2d/generators/curves
+    scripts/ga2d/generators/lines
+    scripts/ga2d/generators/iso
+    scripts/ga2d/generators/dla
+    scripts/ga2d/generators/npyToPng
 
 ----
 

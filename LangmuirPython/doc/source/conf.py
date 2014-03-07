@@ -18,6 +18,7 @@ import sys, os
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath(r'../../langmuir/'))
 sys.path.append(os.path.abspath(r'../../analyze/'))
+sys.path.append(os.path.abspath(r'../../ga2d/generators'))
 sys.path.append(os.path.abspath('sphinxext'))
 
 # -- General configuration -----------------------------------------------------

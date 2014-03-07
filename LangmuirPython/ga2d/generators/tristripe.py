@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
 """
-@author: Geoff Hutchison
-"""
+tristripe.py
+============
 
+.. argparse::
+    :module: tristripe
+    :func: create_parser
+    :prog: tristripe.py
+
+.. moduleauthor:: Geoff Hutchison <geoffh@pitt.edu>
+"""
 from PIL import Image
-import random
-import math
 import argparse
 import os
 
@@ -13,13 +18,12 @@ desc = """
 make triangle stripes (horizontal triangles)
 """
 
-def get_arguments(args=None):
+def create_parser():
     parser = argparse.ArgumentParser()
     parser.description = desc
 
-    parser.add_argument(dest='ofile', default="None",
-                        type=str, metavar='output', nargs='?',
-                        help='output file')
+    parser.add_argument(dest='ofile', default=None, type=str, nargs='?',
+        metavar='output', help='output file')
 
     parser.add_argument(dest='width', default=256, type=int, metavar='dim.x',
                         nargs='?', help='dim.x')
@@ -30,8 +34,11 @@ def get_arguments(args=None):
     parser.add_argument(dest='period', default=32, type=int, metavar='period',
                         nargs='?', help='number of triangles along the image')
 
-    opts = parser.parse_args()
+    return parser
 
+def get_arguments(args=None):
+    parser = create_parser()
+    opts = parser.parse_args(args)
     return opts
 
 def makeTriStripes(image, periods = 8):
@@ -50,7 +57,6 @@ def makeTriStripes(image, periods = 8):
                 if sY > int(x * slope) and sY < int(offset - x*slope):
                     image.putpixel((x,y), 255)
 
-
 if __name__ == '__main__':
     work = os.getcwd()
     opts = get_arguments()
@@ -58,7 +64,7 @@ if __name__ == '__main__':
     # create a black and white image
     image = Image.new("L", (opts.width, opts.height))
 
-    if opts.ofile == "None":
+    if opts.ofile is None:
         opts.ofile = "TriStripe-%d.png" % (opts.period)
 
     makeTriStripes(image, opts.period)

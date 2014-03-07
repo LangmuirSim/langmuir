@@ -1,0 +1,2 @@
+.. automodule:: lines
+    :members:
