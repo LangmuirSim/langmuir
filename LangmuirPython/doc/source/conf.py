@@ -19,6 +19,8 @@ import sys, os
 sys.path.insert(0, os.path.abspath(r'../../langmuir/'))
 sys.path.append(os.path.abspath(r'../../analyze/'))
 sys.path.append(os.path.abspath(r'../../surface/'))
+sys.path.append(os.path.abspath(r'../../utils/'))
+sys.path.append(os.path.abspath(r'../../convert/'))
 sys.path.append(os.path.abspath(r'../../ga2d/generators'))
 sys.path.append(os.path.abspath('sphinxext'))
 

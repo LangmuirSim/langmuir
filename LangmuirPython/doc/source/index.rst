@@ -18,41 +18,17 @@ Modules
 langmuir
 ********
 
-miscellaneous
-^^^^^^^^^^^^^
-
 .. toctree::
     :maxdepth: 2
 
     modules/common
     modules/regex
     modules/find
-
-files
-^^^^^
-
-.. toctree::
-    :maxdepth: 2
-
     modules/checkpoint
     modules/parameters
     modules/datfile
-
-meshes
-^^^^^^
-
-.. toctree::
-    :maxdepth: 2
-
     modules/surface
     modules/grid
-
-analysis
-^^^^^^^^
-
-.. toctree::
-    :maxdepth: 2
-
     modules/analyze
     modules/ivcurve
     modules/plot
@@ -77,26 +53,36 @@ analyze
 surface
 *******
 
-generation
-^^^^^^^^^^
-
 .. toctree::
     :maxdepth: 2
 
     scripts/surface/isotropic
     scripts/surface/ideal
     scripts/surface/morph
-
-analysis
-^^^^^^^^
-
-.. toctree::
-    :maxdepth: 2
-
     scripts/surface/convolution
     scripts/surface/stats
     scripts/surface/fft
     scripts/surface/rdf
+
+convert
+*******
+
+.. toctree::
+    :maxdepth: 2
+
+    scripts/convert/chk2vtk
+    scripts/convert/image2chk
+    scripts/convert/chk2csv
+
+utils
+*****
+
+.. toctree::
+    :maxdepth: 2
+
+    scripts/utils/compare
+    scripts/utils/reset
+    scripts/utils/scan
 
 ga2d
 ****

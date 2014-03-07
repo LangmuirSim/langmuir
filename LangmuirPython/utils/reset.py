@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
 """
-@author: adam
+reset.py
+========
+
+.. argparse::
+    :module: reset
+    :func: create_parser
+    :prog: reset.py
+
+.. moduleauthor:: Adam Gagorik <adam.gagorik@gmail.com>
 """
 import langmuir as lm
 import argparse
@@ -10,7 +18,7 @@ desc = """
 Reset a checkpoint file to be more like a new simulation.
 """
 
-def get_arguments(args=None):
+def create_parser():
     parser = argparse.ArgumentParser()
     parser.description = desc
     parser.add_argument(dest='ifile', default='sim.inp', type=str, nargs='?',
@@ -27,6 +35,10 @@ def get_arguments(args=None):
                         help='delete defects')
     parser.add_argument('--nofix', action='store_true', default=False,
                         help='do not fix traps')
+    return parser
+
+def get_arguments(args=None):
+    parser = create_parser()
     opts = parser.parse_args(args)
     if opts.ofile is None:
         opts.ofile = opts.ifile
