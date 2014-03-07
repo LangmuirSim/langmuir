@@ -64,7 +64,6 @@ def growImage(image, pixToAdd = -1):
                     break
 
 if __name__ == '__main__':
-
     work = os.getcwd()
     opts = get_arguments()
 

@@ -12,8 +12,8 @@ desc = """
 diffusion limited aggregation fractal images
 """
 
-dimX = 128
-dimY = 128
+dimX = 256
+dimY = 256
 # create a black and white image
 image = Image.new("L", (dimX, dimY))
 
@@ -32,7 +32,8 @@ ny = [ 0, 0, -1, 1,  0, 0, -1, 1,  0, 0, -1, 1,  0 ]
 nbrs = len(nx)
 
 particles = 0
-maxParticles = dimX * dimY / 2
+#maxParticles = dimX * dimY / 3
+maxParticles = 19500
 
 initialX = dimX / 16 # updated as we launch more particles
 
