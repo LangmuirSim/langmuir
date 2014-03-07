@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
 """
-@author: adam
+solar.py
+========
+
+.. argparse::
+    :module: solar
+    :func: create_parser
+    :prog: solar.py
+
+.. moduleauthor:: Adam Gagorik <adam.gagorik@gmail.com>
 """
 import langmuir as lm
 import argparse
@@ -10,7 +18,7 @@ desc = """
 Script to analyze solar cell IV curve.
 """
 
-def get_arguments(args=None):
+def create_parser():
     parser = argparse.ArgumentParser()
     parser.description = desc
 
@@ -49,7 +57,10 @@ def get_arguments(args=None):
                         help='open matplotlib window')
     parser.add_argument('--plot', action='store_true', default=False,
                         help='plot iv curves')
+    return parser
 
+def get_arguments(args=None):
+    parser = create_parser()
     opts = parser.parse_args(args)
 
     if opts.show:

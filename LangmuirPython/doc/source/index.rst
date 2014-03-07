@@ -10,8 +10,13 @@ Getting Started
 * pandas
 * matplotlib
 
+----
+
 Modules
 ~~~~~~~
+
+LangmuirPython/langmuir
+***********************
 
 .. toctree::
     :maxdepth: 2
@@ -41,13 +46,23 @@ Modules
     modules/plot
     modules/fit
 
+----
+
 Scripts
 ~~~~~~~
+
+LangmuirPython/analyze
+**********************
 
 .. toctree::
     :maxdepth: 2
 
-    scripts/combine
+    scripts/analyze/combine
+    scripts/analyze/calculate
+    scripts/analyze/gather
+    scripts/analyze/solar
+
+----
 
 Index
 ~~~~~

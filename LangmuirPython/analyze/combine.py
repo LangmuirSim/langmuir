@@ -6,7 +6,7 @@ combine.py
 .. argparse::
     :module: combine
     :func: create_parser
-    :prog: combine
+    :prog: combine.py
 
 .. code-block:: bash
 
