@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-@author: adam
+.. note::
+    Functions for performing calculations on grids.
+
+.. moduleauthor:: Adam Gagorik <adam.gagorik@gmail.com>
 """
 import langmuir as lm
 import numpy as np

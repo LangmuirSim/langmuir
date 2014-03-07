@@ -23,6 +23,13 @@ try:
 except ImportError:
     print 'missing: pandas'
 
+try:
+    import pint
+    units = pint.UnitRegistry()
+    Quantity = units.Quantity
+except ImportError:
+    print 'missing: units'
+
 if 'np' in locals():
     import checkpoint
     import parameters
@@ -40,6 +47,9 @@ if 'sp' in locals():
 if 'pd' in locals():
     import datfile
     import analyze
+
+if 'pint' in locals():
+    import ivcurve
 
 if 'plt' in locals():
     import plot

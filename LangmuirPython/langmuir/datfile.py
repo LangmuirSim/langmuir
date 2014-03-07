@@ -1,5 +1,8 @@
 """
-@author: adam
+.. note::
+    Functions for opening Langmuir output files.
+
+.. moduleauthor:: Adam Gagorik <adam.gagorik@gmail.com>
 """
 import langmuir as lm
 import pandas as pd

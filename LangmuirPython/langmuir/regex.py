@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-@author: adam
+.. note::
+    Functions for string parsing.
+
+.. moduleauthor:: Adam Gagorik <adam.gagorik@gmail.com>
 """
 import langmuir as lm
 import re
@@ -38,7 +41,7 @@ def numbers(string, pytype=float):
     :type string: str
     :type index: int
     :type pytype: type
-    
+
     >>> print lm.regex.numbers('asdfasdfa1.231e10asdf1209asd asd0912 sdaf9 81')
     [12310000000.0, 1209.0, 912.0, 9.0, 81.0]
     """
@@ -50,7 +53,7 @@ def strip_comments(string):
 
     :param string: string
     :type string: str
-    
+
     >>> print lm.regex.strip_comments('hello # goodbye')
     hello
     """
@@ -62,9 +65,9 @@ def fix_boolean(string):
 
     :param string: string
     :type string: str
-    
+
     >>> print lm.regex.fix_boolean('true false True False true false')
-    True false True False True false
+    True False True False True false
     """
     fixed = regex_false.sub('False', string)
     fixed = regex_true.sub('True', string)

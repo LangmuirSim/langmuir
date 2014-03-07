@@ -39,6 +39,7 @@ Module List
     :maxdepth: 2
 
     analyze
+    ivcurve
     plot
     fit
 

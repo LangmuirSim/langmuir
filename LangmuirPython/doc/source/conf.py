@@ -243,8 +243,15 @@ texinfo_documents = [
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'http://docs.python.org/': None}
+#intersphinx_mapping = {'http://docs.python.org/': None}
+intersphinx_mapping = {}
+intersphinx_mapping['python'] = (r'http://docs.python.org/', None)
+intersphinx_mapping['numpy' ] = (r'http://docs.scipy.org/doc/numpy/', None)
+#intersphinx_mapping['scipy'] = (r'http://docs.scipy.org/doc/scipy/', None)
+intersphinx_mapping['pandas'] = (r'http://pandas.pydata.org/pandas-docs/stable/', None)
+intersphinx_mapping['matplotlib'] = (r'http://matplotlib.sourceforge.net', None)
 
 autodoc_default_members = ['members', 'undoc-members', 'show-inheritance']
 autodoc_member_order = 'bysource'
 autoclass_content = 'both'
+show_authors = True

@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-@author: adam
+.. note::
+    Functions for opening, editing, and saving Langmuir checkpoint files.
+
+.. moduleauthor:: Adam Gagorik <adam.gagorik@gmail.com>
 """
 import langmuir as lm
 import numpy as np
@@ -13,7 +16,7 @@ except ImportError:
 
 class CheckPoint(object):
     """
-    A class to open lm checkpoint files.
+    A class to open Langmuir checkpoint files.
 
     ========================= =======================================
     **Attribute**             **Description**
