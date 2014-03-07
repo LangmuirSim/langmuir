@@ -1,0 +1,2 @@
+.. automodule:: combine
+    :members:

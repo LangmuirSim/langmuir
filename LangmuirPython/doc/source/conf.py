@@ -16,7 +16,9 @@ import sys, os
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath('../../langmuir'))
+sys.path.insert(0, os.path.abspath(r'../../langmuir/'))
+sys.path.append(os.path.abspath(r'../../analyze/'))
+sys.path.append(os.path.abspath('sphinxext'))
 
 # -- General configuration -----------------------------------------------------
 
@@ -33,7 +35,9 @@ extensions = [
     'sphinx.ext.pngmath',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
-    'matplotlib.sphinxext.plot_directive'
+    'matplotlib.sphinxext.plot_directive',
+    'inheritance_diagram',
+    'sphinxarg.ext'
 ]
 
 # Add any paths that contain templates here, relative to this directory.

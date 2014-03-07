@@ -2,18 +2,16 @@
 Langmuir Python
 ===============
 
-===============
 Getting Started
-===============
+~~~~~~~~~~~~~~~
 
 * numpy
 * scipy
 * pandas
 * matplotlib
 
-===========
-Module List
-===========
+Modules
+~~~~~~~
 
 .. toctree::
     :maxdepth: 2
@@ -43,9 +41,16 @@ Module List
     modules/plot
     modules/fit
 
-==================
-Indices and tables
-==================
+Scripts
+~~~~~~~
+
+.. toctree::
+    :maxdepth: 2
+
+    scripts/combine
+
+Index
+~~~~~
 
 * :ref:`genindex`
 * :ref:`modindex`
