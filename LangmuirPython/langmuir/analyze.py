@@ -10,8 +10,8 @@
 
 .. seealso::
 
-    1.  :download:`combine.py <../../analyze/combine.py>`
-    2.  :download:`gather.py <../../analyze/gather.py>`
+    1.  :download:`combine.py <../../../analyze/combine.py>`
+    2.  :download:`gather.py <../../../analyze/gather.py>`
 
 .. moduleauthor:: Adam Gagorik <adam.gagorik@gmail.com>
 """

@@ -18,30 +18,30 @@ Module List
 .. toctree::
     :maxdepth: 2
 
-    common
-    regex
-    find
+    modules/common
+    modules/regex
+    modules/find
 
 .. toctree::
     :maxdepth: 2
 
-    checkpoint
-    parameters
-    datfile
+    modules/checkpoint
+    modules/parameters
+    modules/datfile
 
 .. toctree::
     :maxdepth: 2
 
-    surface
-    grid
+    modules/surface
+    modules/grid
 
 .. toctree::
     :maxdepth: 2
 
-    analyze
-    ivcurve
-    plot
-    fit
+    modules/analyze
+    modules/ivcurve
+    modules/plot
+    modules/fit
 
 ==================
 Indices and tables
