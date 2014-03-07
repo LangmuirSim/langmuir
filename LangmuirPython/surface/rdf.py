@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
 """
-@author: adam
+rdf.py
+======
+
+.. argparse::
+    :module: rdf
+    :func: create_parser
+    :prog: rdf.py
+
+.. moduleauthor:: Adam Gagorik <adam.gagorik@gmail.com>
 """
 import langmuir as lm
 import numpy as np
@@ -13,7 +21,7 @@ desc = """
 Perform RDF on surface or KPFM image.  This script takes some time.
 """
 
-def get_arguments(args=None):
+def create_parser():
     parser = argparse.ArgumentParser()
     parser.description = desc
 
@@ -23,13 +31,11 @@ def get_arguments(args=None):
     parser.add_argument('--stub', default='', type=str, metavar='stub',
         help='output file stub')
 
+    return parser
+
+def get_arguments(args=None):
+    parser = create_parser()
     opts = parser.parse_args(args)
-
-    if not os.path.exists(opts.ifile):
-        parser.print_help()
-        print >> sys.stderr, '\nfile does not exist: %s' % opts.ifile
-        sys.exit(-1)
-
     return opts
 
 if __name__ == '__main__':

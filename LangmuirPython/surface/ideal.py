@@ -1,10 +1,17 @@
 # -*- coding: utf-8 -*-
 """
-@author: adam
+ideal.py
+========
+
+.. argparse::
+    :module: ideal
+    :func: create_parser
+    :prog: ideal
+
+.. moduleauthor:: Adam Gagorik <adam.gagorik@gmail.com>
 """
 import langmuir as lm
 import collections
-import numpy as np
 import argparse
 import sys
 import os
@@ -28,10 +35,10 @@ desc = """
 Create surface using ideal function.
 """
 
-def get_arguments(args=None):
+def create_parser():
     parser = argparse.ArgumentParser()
     parser.description = desc
-    
+
     parser.add_argument(dest='xsize', type=int, metavar='grid.x',
                         help='grid.x')
     parser.add_argument(dest='ysize', type=int, metavar='grid.y',
@@ -58,6 +65,10 @@ def get_arguments(args=None):
     parser.add_argument('--ext', default='pkl', type=str, metavar='str',
         choices=['pkl', 'npy', 'dat', 'txt', 'csv'], help='output file type')
 
+    return parser
+
+def get_arguments(args=None):
+    parser = create_parser()
     opts = parser.parse_args(args)
 
     if any([not opts.xsize % opts.xwidth == 0,

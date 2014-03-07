@@ -18,17 +18,41 @@ Modules
 langmuir
 ********
 
+miscellaneous
+^^^^^^^^^^^^^
+
 .. toctree::
     :maxdepth: 2
 
     modules/common
     modules/regex
     modules/find
+
+files
+^^^^^
+
+.. toctree::
+    :maxdepth: 2
+
     modules/checkpoint
     modules/parameters
     modules/datfile
+
+meshes
+^^^^^^
+
+.. toctree::
+    :maxdepth: 2
+
     modules/surface
     modules/grid
+
+analysis
+^^^^^^^^
+
+.. toctree::
+    :maxdepth: 2
+
     modules/analyze
     modules/ivcurve
     modules/plot
@@ -50,8 +74,35 @@ analyze
     scripts/analyze/gather
     scripts/analyze/solar
 
+surface
+*******
+
+generation
+^^^^^^^^^^
+
+.. toctree::
+    :maxdepth: 2
+
+    scripts/surface/isotropic
+    scripts/surface/ideal
+    scripts/surface/morph
+
+analysis
+^^^^^^^^
+
+.. toctree::
+    :maxdepth: 2
+
+    scripts/surface/convolution
+    scripts/surface/stats
+    scripts/surface/fft
+    scripts/surface/rdf
+
+ga2d
+****
+
 generators
-**********
+^^^^^^^^^^
 
 .. toctree::
     :maxdepth: 2

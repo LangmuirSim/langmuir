@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
 """
-@author: adam
+convolution.py
+==============
+
+.. argparse::
+    :module: convolution
+    :func: create_parser
+    :prog: convolution.py
+
+.. moduleauthor:: Adam Gagorik <adam.gagorik@gmail.com>
 """
 import scipy.signal as signal
 import langmuir as lm
@@ -12,7 +20,7 @@ desc = """
 Convolute two data sets.
 """
 
-def get_arguments(args=None):
+def create_parser():
     parser = argparse.ArgumentParser()
     parser.description = desc
 
@@ -28,6 +36,10 @@ def get_arguments(args=None):
     parser.add_argument('--mode', type=str, default='same', metavar='str',
         choices=['full', 'valid', 'same'], help='see scipy.signal.convolve')
 
+    return parser
+
+def get_arguments(args=None):
+    parser = create_parser()
     opts = parser.parse_args(args)
 
     if opts.inputB is None:
@@ -53,4 +65,4 @@ if __name__ == '__main__':
 
     handle = lm.common.format_output(stub=opts.stub, name='conv', ext='pkl')
     lm.common.save_pkl(results, handle)
-    print 'saved: %s' % handle    
+    print 'saved: %s' % handle
