@@ -1,39 +1,49 @@
 # -*- coding: utf-8 -*-
 """
-@author: Geoff Hutchison
+ga_analyze.py
+=============
+
+.. argparse::
+    :module: ga_analyze
+    :func: create_parser
+    :prog: ga_analyze.py
+
+.. moduleauthor:: Geoff Hutchison <geoffh@pitt.edu>
 """
 import argparse
 import os
-import sys
 
 from scipy import ndimage, misc
 import numpy as np
-from numbapro import jit
 
 from collections import deque
 
-desc = """
-analysis of images
-"""
+desc = r"""
+Analysis of images.
+""".lstrip()
 
-def get_arguments(args=None):
+def create_parser():
     parser = argparse.ArgumentParser()
     parser.description = desc
 
     parser.add_argument(dest='ifile', type=str, metavar='input',
         help='input file')
 
-    opts = parser.parse_args()
+    return parser
 
-    if not os.path.exists(opts.ifile):
-        parser.print_help()
-        print >> sys.stderr, '\nfile does not exist: %s' % opts.ifile
-        sys.exit(-1)
-
+def get_arguments(args=None):
+    parser = create_parser()
+    opts = parser.parse_args(args)
     return opts
 
 # from http://scipy-lectures.github.io/advanced/image_processing/
 def disk_structure(n):
+    """
+    .. todo:: comment function
+    
+    :param n: ?
+    :type n: int
+    """
     struct = np.zeros((2 * n + 1, 2 * n + 1))
     x, y = np.indices((2 * n + 1, 2 * n + 1))
     mask = (x - n)**2 + (y - n)**2 <= n**2
@@ -42,6 +52,15 @@ def disk_structure(n):
 
 # from http://scipy-lectures.github.io/advanced/image_processing/
 def granulometry(data, sizes=None):
+    """
+    .. todo:: comment function
+    
+    :param data: ?
+    :param sizes: ?
+    
+    :type data: :py:class:`numpy.ndarray`
+    :type sizes: tuple
+    """
     s = max(data.shape)
     if sizes == None:
         sizes = range(1, s/2, 2)
@@ -50,6 +69,12 @@ def granulometry(data, sizes=None):
     return granulo
 
 def average_domain_size(image):
+    """
+    .. todo:: comment function
+    
+    :param image: data
+    :type image: :py:class:`numpy.ndarray`
+    """
     # get the average size of domains (i.e., distance from center of domain to other phase)
     # first use ndimage to label each domain
     labels, nb_labels = ndimage.label(image)
@@ -59,11 +84,18 @@ def average_domain_size(image):
     # get the Euclidian distance to the other phase
     dists = ndimage.distance_transform_edt(image)
     # for each domain, get the maximum distance (i.e., the size of that domain)
-    max = ndimage.measurements.maximum(dists, labels, index=np.arange(1, nb_labels + 1))
+    imax = ndimage.measurements.maximum(dists, labels,
+        index=np.arange(1, nb_labels + 1))
     # return the mean of the max array
-    return np.mean(max)
+    return np.mean(imax)
 
 def interface_size(image):
+    """
+    .. todo:: comment function
+    
+    :param image: data
+    :type image: :py:class:`numpy.ndarray`
+    """    
     # loop through the image to count the number of interfaces
     interface = 0
 
@@ -87,6 +119,12 @@ def interface_size(image):
     return interface
 
 def transfer_distance(original):
+    """
+    .. todo:: comment function
+    
+    :param original: data
+    :type original: :py:class:`numpy.ndarray`
+    """    
     # the image will come in with row-major order (i.e., numpy)
     # but we're thinking of this as a graphic, with column, row
     image = np.rot90(original)

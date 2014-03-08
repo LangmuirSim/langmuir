@@ -1,32 +1,36 @@
 # -*- coding: utf-8 -*-
 """
-@author: Geoff Hutchison
+grow.py
+=======
+
+.. argparse::
+    :module: grow
+    :func: create_parser
+    :prog: grow.py
+
+.. moduleauthor:: Geoff Hutchison <geoffh@pitt.edu>
 """
-import argparse
-import os
-import random
 from PIL import Image
-import sys
+import argparse
+import random
+import os
 
-desc = """
-append particles to an existing image
-(adds fractal disorder to white boundaries)
-"""
+desc = r"""
+Append particles to an image (adds fractal disorder to white boundaries).
+""".lstrip()
 
-def get_arguments(args=None):
+def create_parser():
     parser = argparse.ArgumentParser()
     parser.description = desc
 
     parser.add_argument(dest='ifile', type=str, metavar='input',
         help='input file')
 
-    opts = parser.parse_args()
+    return parser
 
-    if not os.path.exists(opts.ifile):
-        parser.print_help()
-        print >> sys.stderr, '\nfile does not exist: %s' % opts.ifile
-        sys.exit(-1)
-
+def get_arguments(args=None):
+    parser = create_parser()
+    opts = parser.parse_args(args)
     return opts
 
 def growImage(image, pixToAdd = -1):

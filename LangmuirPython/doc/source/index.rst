@@ -74,13 +74,18 @@ utils
 ga2d
 ****
 
+.. toctree::
+    :maxdepth: 2
+
+    scripts/ga2d
+
 generators
 ^^^^^^^^^^
 
 .. toctree::
     :maxdepth: 2
 
-    scripts/ga2d
+    scripts/generators
 
 ----
 

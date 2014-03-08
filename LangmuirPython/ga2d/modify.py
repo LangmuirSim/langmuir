@@ -1,19 +1,24 @@
 # -*- coding: utf-8 -*-
 """
-@author: Geoff Hutchison
+modify.py
+=========
+
+.. argparse::
+    :module: modify
+    :func: create_parser
+    :prog: modify.py
+
+.. moduleauthor:: Geoff Hutchison <geoffh@pitt.edu>
 """
+from scipy import misc, ndimage
 import argparse
 import os
-import sys
-from scipy import misc, ndimage
-import numpy as np
-import random
 
-desc = """
-mix two images and re-threshold
-"""
+desc = r"""
+Mix two images and re-threshold.
+""".lstrip()
 
-def get_arguments(args=None):
+def create_parser():
     parser = argparse.ArgumentParser()
     parser.description = desc
 
@@ -23,18 +28,11 @@ def get_arguments(args=None):
     parser.add_argument(dest='ifile2', type=str, metavar='input2',
         help='input file #2')
 
-    opts = parser.parse_args()
+    return parser
 
-    if not os.path.exists(opts.ifile1):
-        parser.print_help()
-        print >> sys.stderr, '\nfile does not exist: %s' % opts.ifile1
-        sys.exit(-1)
-
-    if not os.path.exists(opts.ifile2):
-        parser.print_help()
-        print >> sys.stderr, '\nfile does not exist: %s' % opts.ifile2
-        sys.exit(-1)
-
+def get_arguments(args=None):
+    parser = create_parser()
+    opts = parser.parse_args(args)
     return opts
 
 def threshold(image):

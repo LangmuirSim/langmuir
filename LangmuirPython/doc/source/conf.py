@@ -21,7 +21,8 @@ sys.path.append(os.path.abspath(r'../../analyze/'))
 sys.path.append(os.path.abspath(r'../../surface/'))
 sys.path.append(os.path.abspath(r'../../utils/'))
 sys.path.append(os.path.abspath(r'../../convert/'))
-sys.path.append(os.path.abspath(r'../../ga2d/generators'))
+sys.path.append(os.path.abspath(r'../../ga2d/'))
+sys.path.append(os.path.abspath(r'../../ga2d/generators/'))
 sys.path.append(os.path.abspath('sphinxext'))
 
 # -- General configuration -----------------------------------------------------
@@ -272,3 +273,4 @@ autodoc_default_members = ['members', 'undoc-members', 'show-inheritance']
 autodoc_member_order = 'bysource'
 autoclass_content = 'both'
 show_authors = True
+todo_include_todos = True

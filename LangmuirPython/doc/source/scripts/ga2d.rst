@@ -1,21 +1,12 @@
-.. automodule:: tristripe
+.. automodule:: ga_analyze
     :members:
 
-.. automodule:: triangle
+.. automodule:: modify
     :members:
 
-.. automodule:: curves
+.. automodule:: grow
     :members:
 
-.. automodule:: lines
-    :members:
-
-.. automodule:: iso
-    :members:
-
-.. automodule:: dla
-    :members:
-
-.. automodule:: npyToPng
+.. automodule:: ga
     :members:
 

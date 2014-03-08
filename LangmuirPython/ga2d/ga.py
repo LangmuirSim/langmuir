@@ -1,56 +1,59 @@
 # -*- coding: utf-8 -*-
 """
-@author: Geoff Hutchison
+ga.py
+=====
+
+.. argparse::
+    :module: ga
+    :func: create_parser
+    :prog: ga.py
+
+.. moduleauthor:: Geoff Hutchison <geoffh@pitt.edu>
 """
-import argparse
-import os
-import sys
-import glob
+import scipy.misc as misc
 import numpy as np
-from scipy import misc, ndimage
+import argparse
 import heapq
 import random
 import math
+import glob
+import os
 
 from multiprocessing import Pool
 import time
 
 # our code
-import analyze
+import ga_analyze as analyze
 import modify
 
-
 desc = """
-genetic algorithm design of 2D morphologies
-"""
+Genetic algorithm design of 2D morphologies.
+""".lstrip()
 
-def get_arguments(args=None):
+def create_parser():
     parser = argparse.ArgumentParser()
     parser.description = desc
 
     parser.add_argument(dest='dir', type=str, metavar='directory',
         help='initial directory')
 
-    parser.add_argument(dest='population', default=32, type=int, metavar='population',
-                        nargs='?', help='size of population')
+    parser.add_argument(dest='population', default=32, type=int, nargs='?',
+        metavar='population', help='size of population')
 
-    parser.add_argument(dest='generations', default=16, type=int, metavar='generations',
-                        nargs='?', help='# of generations')
+    parser.add_argument(dest='generations', default=16, type=int, nargs='?',
+        metavar='generations', help='# of generations')
 
-    parser.add_argument(dest='children', default=10, type=int,
-                        metavar='children', nargs='?',
-                        help='# of children to create each generation')
+    parser.add_argument(dest='children', default=10, type=int, nargs='?',
+        metavar='children', help='# of children to create each generation')
 
-    parser.add_argument(dest='mutability', default=8, type=int, metavar='children',
-                        nargs='?', help='# of items to mutate each generation')
+    parser.add_argument(dest='mutability', default=8, type=int, nargs='?',
+        metavar='children', help='# of items to mutate each generation')
 
-    opts = parser.parse_args()
+    return parser
 
-    if not os.path.exists(opts.dir):
-        parser.print_help()
-        print >> sys.stderr, '\ndirectory does not exist: %s' % opts.dir
-        sys.exit(-1)
-
+def get_arguments(args=None):
+    parser = create_parser()
+    opts = parser.parse_args(args)
     return opts
 
 def score(filename):
@@ -65,8 +68,11 @@ def score(filename):
     ads2 = analyze.average_domain_size(inverted)
 
     avg_domain = (ads1 + ads2) / 2.0
+
     # penalize if there's a huge difference between the two domain sizes
     penalty = abs(ads1 - ads2) / avg_domain
+    # TODO : use the penalty
+
     # we're arbitrarily claiming 13 nm as the best domain size
     domain_score = 10.0 - ((avg_domain - 13.0)**2)/15.0
 
