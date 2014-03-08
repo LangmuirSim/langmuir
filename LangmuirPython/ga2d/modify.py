@@ -36,18 +36,53 @@ def get_arguments(args=None):
     return opts
 
 def threshold(image):
+    """
+    .. todo:: comment function
+    
+    :param image: data
+    :type image: :py:class:`numpy.ndarray`
+    """        
     return (image > image.mean())
 
 def blend_and_threshold(image1, image2, ratio = 0.5):
+    """
+    .. todo:: comment function
+    
+    :param image1: data1
+    :param image2: data2
+    :param ratio: mixing ratio
+
+    :type image1: :py:class:`numpy.ndarray`
+    :type image2: :py:class:`numpy.ndarray`
+    :type ratio: float
+    """
     mixed = (ratio * image1 + (1.0 - ratio)*image2)
     image = ndimage.uniform_filter(mixed, size=2)
     return threshold(image)
 
 def gblur_and_threshold(image, radius):
+    """
+    .. todo:: comment function
+    
+    :param image: data
+    :param radius: kernel radius
+
+    :type image1: :py:class:`numpy.ndarray`
+    :type radius: float
+    """    
     output = ndimage.gaussian_filter(image, sigma=radius)
     return threshold(output)
 
 def ublur_and_threshold(image, radius):
+    """
+    .. todo:: comment function
+    
+    :param image: data
+    :param radius: kernel radius
+
+    :type image1: :py:class:`numpy.ndarray`
+    :type radius: float
+    """        
     output = ndimage.uniform_filter(image, size=radius)
     return threshold(output)
 

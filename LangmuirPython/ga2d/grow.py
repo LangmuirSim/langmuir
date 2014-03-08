@@ -34,6 +34,15 @@ def get_arguments(args=None):
     return opts
 
 def growImage(image, pixToAdd = -1):
+    """
+    .. todo:: comment function
+    
+    :param image: data
+    :param pixToAdd: ?
+
+    :type image: :py:class:`numpy.ndarray`
+    :type pixToAdd: int
+    """    
     # neighbor pixel directions
     nx = [-1, 1,  0, 0]
     ny = [ 0, 0, -1, 1]

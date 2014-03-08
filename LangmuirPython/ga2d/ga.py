@@ -57,6 +57,12 @@ def get_arguments(args=None):
     return opts
 
 def score(filename):
+    """
+    .. todo:: comment function
+    
+    :param filename: image file name
+    :type filename: str
+    """
     # TODO: Make this physically and empirically based!
     image = misc.imread(filename)
 
@@ -86,6 +92,15 @@ def score(filename):
     return value
 
 def score_filenames(filenames, pool=None):
+    """
+    .. todo:: comment function
+    
+    :param filenames: image file names
+    :param pool: ?
+
+    :type filename: list of str
+    :type pool: ?
+    """    
     # analyze all these files and push into a list of (score, filename) tuples
     start = time.time()
 #    scores = forkmap.map(score, filenames)
