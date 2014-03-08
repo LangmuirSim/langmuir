@@ -45,10 +45,7 @@ analyze
 .. toctree::
     :maxdepth: 2
 
-    scripts/analyze/combine
-    scripts/analyze/calculate
-    scripts/analyze/gather
-    scripts/analyze/solar
+    scripts/analyze
 
 surface
 *******
@@ -56,13 +53,7 @@ surface
 .. toctree::
     :maxdepth: 2
 
-    scripts/surface/isotropic
-    scripts/surface/ideal
-    scripts/surface/morph
-    scripts/surface/convolution
-    scripts/surface/stats
-    scripts/surface/fft
-    scripts/surface/rdf
+    scripts/surface
 
 convert
 *******
@@ -70,9 +61,7 @@ convert
 .. toctree::
     :maxdepth: 2
 
-    scripts/convert/chk2vtk
-    scripts/convert/image2chk
-    scripts/convert/chk2csv
+    scripts/convert
 
 utils
 *****
@@ -80,9 +69,7 @@ utils
 .. toctree::
     :maxdepth: 2
 
-    scripts/utils/compare
-    scripts/utils/reset
-    scripts/utils/scan
+    scripts/utils
 
 ga2d
 ****
@@ -93,13 +80,7 @@ generators
 .. toctree::
     :maxdepth: 2
 
-    scripts/ga2d/generators/tristripe
-    scripts/ga2d/generators/triangle
-    scripts/ga2d/generators/curves
-    scripts/ga2d/generators/lines
-    scripts/ga2d/generators/iso
-    scripts/ga2d/generators/dla
-    scripts/ga2d/generators/npyToPng
+    scripts/ga2d
 
 ----
 

@@ -1,2 +1,0 @@
-.. automodule:: convolution
-    :members:

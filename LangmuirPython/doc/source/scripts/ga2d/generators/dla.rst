@@ -1,2 +1,0 @@
-.. automodule:: dla
-    :members:
