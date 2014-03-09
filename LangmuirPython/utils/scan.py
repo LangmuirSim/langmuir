@@ -1,4 +1,15 @@
 # -*- coding: utf-8 -*-
+"""
+scan.py
+=======
+
+.. argparse::
+    :module: scan
+    :func: create_parser
+    :prog: scan.py
+
+.. moduleauthor:: Adam Gagorik <adam.gagorik@gmail.com>
+"""
 from subprocess import check_call
 import langmuir as lm
 import numpy as np
@@ -14,7 +25,7 @@ scan a working variable - simply set a parameter in the input file equal to
 a python list or numpy array.  For example, voltage.right = [-1, -2, -3]
 """
 
-def get_arguments(args=None):
+def create_parser():
     parser = argparse.ArgumentParser(description=desc)
 
     parser.add_argument(dest='template', default='sim.inp', nargs='?',
@@ -54,6 +65,10 @@ def get_arguments(args=None):
     parser.add_argument('--fmt', default=None, type=str,
         help='value format string in stub')
 
+    return parser
+
+def get_arguments(args=None):
+    parser = create_parser()
     opts = parser.parse_args(args)
 
     if opts.key == 'None':

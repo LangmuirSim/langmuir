@@ -1,7 +1,16 @@
 # -*- coding: utf-8 -*-
 """
-@author: Geoff Hutchison
+modify.py
+=========
+
+.. argparse::
+    :module: modify
+    :func: create_parser
+    :prog: modify.py
+
+.. moduleauthor:: Geoff Hutchison <geoffh@pitt.edu>
 """
+
 import argparse
 import os
 import sys
@@ -11,10 +20,10 @@ import random
 import math
 
 desc = """
-mix two images and re-threshold
+Mix two images and re-threshold or perform other mutations.
 """
 
-def get_arguments(args=None):
+def create_parser():
     parser = argparse.ArgumentParser()
     parser.description = desc
 
@@ -32,21 +41,64 @@ def get_arguments(args=None):
         print >> sys.stderr, '\nfile does not exist: %s' % opts.ifile1
         sys.exit(-1)
 
+    return parser
+
+def get_arguments(args=None):
+    parser = create_parser()
+    opts = parser.parse_args(args)
     return opts
 
 def threshold(image):
+    """
+    .. todo:: comment function
+    
+    :param image: data
+    :type image: :py:class:`numpy.ndarray`
+    """        
     return (image > image.mean())
 
 def blend_and_threshold(image1, image2, ratio = 0.5, radius=1):
+    """
+    .. todo:: comment function
+    
+    :param image1: data1
+    :param image2: data2
+    :param ratio: mixing ratio
+    :param radius: size of blur kernel to use after mixing
+
+    :type image1: :py:class:`numpy.ndarray`
+    :type image2: :py:class:`numpy.ndarray`
+    :type ratio: float
+    :type radius: float
+    """
+
     mixed = (ratio * image1 + (1.0 - ratio)*image2)
     image = ndimage.uniform_filter(mixed, size=radius)
     return threshold(image)
 
 def gblur_and_threshold(image, radius=1):
+    """
+    .. todo:: comment function
+
+    :param image: data
+    :param radius: kernel radius
+
+    :type image1: :py:class:`numpy.ndarray`
+    :type radius: float
+    """
     output = ndimage.gaussian_filter(image, sigma=radius)
     return threshold(output)
 
-def ublur_and_threshold(image, radius=1):
+def ublur_and_threshold(image, radius = 1):
+    """
+    .. todo:: comment function
+    
+    :param image: data
+    :param radius: kernel radius
+
+    :type image1: :py:class:`numpy.ndarray`
+    :type radius: float
+    """        
     output = ndimage.uniform_filter(image, size=radius)
     return threshold(output)
 

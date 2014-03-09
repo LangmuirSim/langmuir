@@ -2,50 +2,95 @@
 Langmuir Python
 ===============
 
-===============
 Getting Started
-===============
+~~~~~~~~~~~~~~~
 
 * numpy
 * scipy
 * pandas
 * matplotlib
 
-===========
-Module List
-===========
+----
+
+Modules
+~~~~~~~
+
+langmuir
+********
 
 .. toctree::
     :maxdepth: 2
 
-    common
-    regex
-    find
+    modules/common
+    modules/regex
+    modules/find
+    modules/checkpoint
+    modules/parameters
+    modules/datfile
+    modules/surface
+    modules/grid
+    modules/analyze
+    modules/ivcurve
+    modules/plot
+    modules/fit
+
+----
+
+Scripts
+~~~~~~~
+
+analyze
+*******
 
 .. toctree::
     :maxdepth: 2
 
-    checkpoint
-    parameters
-    datfile
+    scripts/analyze
+
+surface
+*******
 
 .. toctree::
     :maxdepth: 2
 
-    surface
-    grid
+    scripts/surface
+
+convert
+*******
 
 .. toctree::
     :maxdepth: 2
 
-    analyze
-    ivcurve
-    plot
-    fit
+    scripts/convert
 
-==================
-Indices and tables
-==================
+utils
+*****
+
+.. toctree::
+    :maxdepth: 2
+
+    scripts/utils
+
+ga2d
+****
+
+.. toctree::
+    :maxdepth: 2
+
+    scripts/ga2d
+
+generators
+^^^^^^^^^^
+
+.. toctree::
+    :maxdepth: 2
+
+    scripts/generators
+
+----
+
+Index
+~~~~~
 
 * :ref:`genindex`
 * :ref:`modindex`

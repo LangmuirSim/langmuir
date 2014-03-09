@@ -1,22 +1,43 @@
 # -*- coding: utf-8 -*-
 """
-@author: adam
+combine.py
+==========
+
+.. argparse::
+    :module: combine
+    :func: create_parser
+    :prog: combine.py
+
+.. code-block:: bash
+
+    adam@work:~$ ls
+    part.0 part.1
+    adam@work:~$ python combine -r
+    (  1/  1) : .
+    adam@work:~$ ls
+    combined.pkl.gz part.0 part.1
+
+.. moduleauthor:: Adam Gagorik <adam.gagorik@gmail.com>
 """
 import langmuir as lm
 import itertools
 import argparse
 import os
 
-desc = """
+desc = r"""
 Combine the output of a series of dat files.  The dat files should be in a
 series of directories labeled part.0, part.1, part.2, etc.
-""".lstrip()
+"""
 
-def get_arguments(args=None):
+def create_parser():
     parser = argparse.ArgumentParser()
     parser.description = desc
     parser.add_argument('-r', action='store_true',
        help='search recursivly for parts')
+    return parser
+
+def get_arguments(args=None):
+    parser = create_parser()
     opts = parser.parse_args(args)
     return opts
 

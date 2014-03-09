@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
 """
-@author: adam
+stats.py
+========
+
+.. argparse::
+    :module: stats
+    :func: create_parser
+    :prog: stats.py
+
+.. moduleauthor:: Adam Gagorik <adam.gagorik@gmail.com>
 """
 import scipy.stats as stats
 import langmuir as lm
@@ -14,7 +22,7 @@ desc = """
 Compute avg, std, min, max, rng, corrcoeffs, skew, kurtosis for data sets.
 """
 
-def get_arguments(args=None):
+def create_parser():
     parser = argparse.ArgumentParser()
     parser.description = desc
 
@@ -27,6 +35,10 @@ def get_arguments(args=None):
     parser.add_argument('--stub', default='', type=str, metavar='stub',
         help='output file stub')
 
+    return parser
+
+def get_arguments(args=None):
+    parser = create_parser()
     opts = parser.parse_args(args)
 
     if opts.inputB is None:

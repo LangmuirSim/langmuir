@@ -1,64 +1,71 @@
 # -*- coding: utf-8 -*-
 """
-@author: Geoff Hutchison
+ga.py
+=====
+
+.. argparse::
+    :module: ga
+    :func: create_parser
+    :prog: ga.py
+
+.. moduleauthor:: Geoff Hutchison <geoffh@pitt.edu>
 """
-import argparse
-import os
-import sys
-import glob
+import scipy.misc as misc
 import numpy as np
-from scipy import misc, ndimage
+import argparse
 import heapq
 import random
 import math
+import glob
+import os
 
 from multiprocessing import Pool
 import time
 
 # our code
-import analyze
+import ga_analyze as analyze
 import modify
 import grow
 
-
 desc = """
-genetic algorithm design of 2D morphologies
+Genetic algorithm design of 2D morphologies.
 """
 
-# TODO: Build a score cache
-#  so we don't rebuild the score every time we start
-#   or for files that aren't modified
-
-def get_arguments(args=None):
+def create_parser():
     parser = argparse.ArgumentParser()
     parser.description = desc
 
     parser.add_argument(dest='dir', type=str, metavar='directory',
         help='initial directory')
 
-    parser.add_argument(dest='population', default=32, type=int, metavar='population',
-                        nargs='?', help='size of population')
+    parser.add_argument(dest='population', default=32, type=int, nargs='?',
+        metavar='population', help='size of population')
 
-    parser.add_argument(dest='generations', default=16, type=int, metavar='generations',
-                        nargs='?', help='# of generations')
+    parser.add_argument(dest='generations', default=16, type=int, nargs='?',
+        metavar='generations', help='# of generations')
 
-    parser.add_argument(dest='children', default=10, type=int,
-                        metavar='children', nargs='?',
-                        help='# of children to create each generation')
+    parser.add_argument(dest='children', default=10, type=int, nargs='?',
+        metavar='children', help='# of children to create each generation')
 
-    parser.add_argument(dest='mutability', default=8, type=int, metavar='children',
-                        nargs='?', help='# of items to mutate each generation')
+    parser.add_argument(dest='mutability', default=8, type=int, nargs='?',
+        metavar='children', help='# of items to mutate each generation')
 
-    opts = parser.parse_args()
+    return parser
 
-    if not os.path.exists(opts.dir):
-        parser.print_help()
-        print >> sys.stderr, '\ndirectory does not exist: %s' % opts.dir
-        sys.exit(-1)
-
+def get_arguments(args=None):
+    parser = create_parser()
+    opts = parser.parse_args(args)
     return opts
 
 def score(filename):
+    """
+    .. todo:: comment function
+    
+    :param filename: image file name
+    :type filename: str
+
+    :return float: score (ideally as an estimated maximum power)
+    """
     # TODO: Make this physically and empirically based!
     image = misc.imread(filename)
 
@@ -74,6 +81,7 @@ def score(filename):
     ads2 = analyze.average_domain_size(inverted)
 
     avg_domain = (ads1 + ads2) / 2.0
+
     # penalize if there's a huge difference between the two domain sizes
     #penalty = abs(ads1 - ads2) / avg_domain
 
@@ -89,6 +97,15 @@ def score(filename):
     return scale * (4497.2167 - 107.4394*ads1 + 85.3286*ads2 - 0.1855*isize - 10.9523*td + 169.7597*connectivity)
 
 def score_filenames(filenames, pool=None):
+    """
+    .. todo:: comment function
+    
+    :param filenames: image file names
+    :param pool: multiprocessing thread pool
+
+    :type filename: list of str
+    :type pool: ?
+    """    
     # analyze all these files and push into a list of (score, filename) tuples
     start = time.time()
 
@@ -244,16 +261,15 @@ if __name__ == '__main__':
             elif mutation == 6:
                 # rescale smaller
                 image = modify.shrink(image)
-            # shift
-            # swap slices
-
+            # shift?
+            # swap slices?
             misc.imsave(file, image)
 
         # create a new batch of scores
         print "Scoring Generation ", generation
         scores = score_filenames(rescore_list, pool)
         for i in range(len(oldFiles)):
-            scores.append( (oldScores[i], oldFiles[i]))
+            scores.append( (oldScores[i], oldFiles[i]) )
         heapq.heapify(scores)
         print "Top Score: ", heapq.nlargest(1, scores)
         print "Worst Score: ", heapq.nsmallest(1, scores)

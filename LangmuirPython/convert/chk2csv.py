@@ -1,4 +1,15 @@
 # -*- coding: utf-8 -*-
+"""
+chk2csv.py
+==========
+
+.. argparse::
+    :module: chk2csv
+    :func: create_parser
+    :prog: chk2csv.py
+
+.. moduleauthor:: Adam Gagorik <adam.gagorik@gmail.com>
+"""
 import langmuir as lm
 import pandas as pd
 import collections
@@ -10,13 +21,17 @@ desc = \
 Create csv files using data in checkpoint file.
 """
 
-def get_arguments(args=None):
+def create_parser():
     parser = argparse.ArgumentParser(description=desc)
     parser.add_argument(dest='input', help='input file name')
     parser.add_argument('--stub', default='', type=str,
                         help='output file name stub')
     parser.add_argument('--positions', action='store_true',
                         help='use true positions')
+    return parser
+
+def get_arguments(args=None):
+    parser = create_parser()
     opts = parser.parse_args(args)
     return opts
 

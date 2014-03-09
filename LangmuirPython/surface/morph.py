@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
 """
-@author: adam
+morph.py
+========
+
+.. argparse::
+    :module: morph
+    :func: create_parser
+    :prog: morph.py
+
+.. moduleauthor:: Adam Gagorik <adam.gagorik@gmail.com>
 """
 import matplotlib.pyplot as plt
 import langmuir as lm
@@ -13,10 +21,10 @@ desc = """
 Morph between two surfaces.
 """
 
-def get_arguments(args=None):
+def create_parser():
     parser = argparse.ArgumentParser()
     parser.description = desc
-    
+
     parser.add_argument(dest='ifile1', type=str, metavar='input',
         help='input file 1')
     parser.add_argument(dest='ifile2', type=str, metavar='input',
@@ -44,6 +52,10 @@ def get_arguments(args=None):
     parser.add_argument('--show', action='store_true', help='show mpl plot')
     parser.add_argument('--save', action='store_true', help='save mpl plot')
 
+    return parser
+
+def get_arguments(args=None):
+    parser = create_parser()
     opts = parser.parse_args(args)
 
     if not os.path.exists(opts.ifile1):

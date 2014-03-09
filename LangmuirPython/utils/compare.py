@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
 """
-@author: adam
+compare.py
+==========
+
+.. argparse::
+    :module: compare
+    :func: create_parser
+    :prog: compare.py
+
+.. moduleauthor:: Adam Gagorik <adam.gagorik@gmail.com>
 """
 import langmuir as lm
 import argparse
@@ -10,7 +18,7 @@ desc = """
 Compare two checkpoint files.
 """
 
-def get_arguments(args=None):
+def create_parser():
     parser = argparse.ArgumentParser()
     parser.description = desc
     parser.add_argument(dest='chk1', default=None, type=str, metavar='chk1',
@@ -19,6 +27,10 @@ def get_arguments(args=None):
                         help='checkpoint file 2')
     parser.add_argument('--reset', default=False, action='store_true',
                         help='reset checkpoint files first')
+    return parser
+
+def get_arguments(args=None):
+    parser = create_parser()
     opts = parser.parse_args(args)
     return opts
 

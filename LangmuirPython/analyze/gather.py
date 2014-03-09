@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
 """
-@author: adam
+gather.py
+=========
+
+.. argparse::
+    :module: gather
+    :func: create_parser
+    :prog: gather.py
+
+.. moduleauthor:: Adam Gagorik <adam.gagorik@gmail.com>
 """
 import langmuir as lm
 import pandas as pd
@@ -13,7 +21,7 @@ Gather the output of a series of pickles.  The pickes should have been made
 using 'combine.py'.
 """.lstrip()
 
-def get_arguments(args=None):
+def create_parser():
     parser = argparse.ArgumentParser()
     parser.description = desc
     parser.add_argument('--stub', default='gathered', type=str,
@@ -24,6 +32,10 @@ def get_arguments(args=None):
                         help='equil step')
     parser.add_argument('-g', action='store_true',
        help='gathered output is grouped by os.dirname')
+    return parser
+
+def get_arguments(args=None):
+    parser = create_parser()
     opts = parser.parse_args(args)
     return opts
 

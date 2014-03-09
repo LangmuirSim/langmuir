@@ -1,4 +1,15 @@
 # -*- coding: utf-8 -*-
+"""
+chk2vtk.py
+==========
+
+.. argparse::
+    :module: chk2vtk
+    :func: create_parser
+    :prog: chk2vtk.py
+
+.. moduleauthor:: Adam Gagorik <adam.gagorik@gmail.com>
+"""
 import langmuir as lm
 import numpy as np
 import argparse
@@ -12,11 +23,15 @@ Use a program such as paraview or mayavi to create contour isosurfaces of
 the vtu files, and glyphs of the vti files.
 """
 
-def get_arguments(args=None):
+def create_parser():
     parser = argparse.ArgumentParser(description=desc)
     parser.add_argument(dest='input', help='input file name')
     parser.add_argument('--stub', default='', type=str,
                         help='output file name stub')
+    return parser
+
+def get_arguments(args=None):
+    parser = create_parser()
     opts = parser.parse_args(args)
     return opts
 

@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
 """
-@author: adam
+calculate.py
+============
+
+.. argparse::
+    :module: calculate
+    :func: create_parser
+    :prog: calculate.py
+
+.. moduleauthor:: Adam Gagorik <adam.gagorik@gmail.com>
 """
 import langmuir as lm
 import argparse
@@ -10,7 +18,7 @@ desc = """
 Calculate the current in a dat (or pkl) file.
 """
 
-def get_arguments(args=None):
+def create_parser():
     parser = argparse.ArgumentParser()
     parser.description = desc
     parser.add_argument(dest='ifile', default=None, type=str, nargs='?',
@@ -23,6 +31,10 @@ def get_arguments(args=None):
                         help='save pkl file')
     parser.add_argument('--excel', action='store_true', default=False,
                         help='save excel file (slow)')
+    return parser
+
+def get_arguments(args=None):
+    parser = create_parser()
     opts = parser.parse_args(args)
 
     if not True in [opts.pkl, opts.csv, opts.excel]:

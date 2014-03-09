@@ -1,18 +1,25 @@
 # -*- coding: utf-8 -*-
 """
-@author: adam
+fft.py
+======
+
+.. argparse::
+    :module: fft
+    :func: create_parser
+    :prog: fft.py
+
+.. moduleauthor:: Adam Gagorik <adam.gagorik@gmail.com>
 """
 import langmuir as lm
 import collections
 import argparse
-import sys
 import os
 
 desc = """
 Perform FFT on surface or KPFM image.
 """
 
-def get_arguments(args=None):
+def create_parser():
     parser = argparse.ArgumentParser()
     parser.description = desc
 
@@ -28,13 +35,11 @@ def get_arguments(args=None):
     parser.add_argument('--window', action='store_true',
         help='multiply signal by hamming window')
 
+    return parser
+
+def get_arguments(args=None):
+    parser = create_parser()
     opts = parser.parse_args(args)
-
-    if not os.path.exists(opts.ifile):
-        parser.print_help()
-        print >> sys.stderr, '\nfile does not exist: %s' % opts.ifile
-        sys.exit(-1)
-
     return opts
 
 if __name__ == '__main__':

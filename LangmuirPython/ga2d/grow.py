@@ -1,37 +1,52 @@
 # -*- coding: utf-8 -*-
 """
-@author: Geoff Hutchison
+grow.py
+=======
+
+.. argparse::
+    :module: grow
+    :func: create_parser
+    :prog: grow.py
+
+.. moduleauthor:: Geoff Hutchison <geoffh@pitt.edu>
 """
+
 import argparse
-import os
 import random
 from PIL import Image
 import sys
 from scipy import ndimage
 import numpy as np
+import os
 
 desc = """
-append particles to an existing image
-(adds fractal disorder to white boundaries)
+Append particles to an image (adds fractal disorder to white boundaries).
 """
 
-def get_arguments(args=None):
+def create_parser():
     parser = argparse.ArgumentParser()
     parser.description = desc
 
     parser.add_argument(dest='ifile', type=str, metavar='input',
         help='input file')
 
-    opts = parser.parse_args()
+    return parser
 
-    if not os.path.exists(opts.ifile):
-        parser.print_help()
-        print >> sys.stderr, '\nfile does not exist: %s' % opts.ifile
-        sys.exit(-1)
-
+def get_arguments(args=None):
+    parser = create_parser()
+    opts = parser.parse_args(args)
     return opts
 
 def grow_image(image, pixToAdd = -1):
+    """
+    .. todo:: comment function
+    
+    :param image: data
+    :param pixToAdd: number of points to grow, -1 for automatic detection of 50:50 mix
+
+    :type image: :py:class:`numpy.ndarray`
+    :type pixToAdd: int
+    """    
     # neighbor pixel directions
     nx = [-1, 1,  0, 0]
     ny = [ 0, 0, -1, 1]

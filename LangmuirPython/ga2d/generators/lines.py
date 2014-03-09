@@ -1,10 +1,16 @@
 # -*- coding: utf-8 -*-
 """
-@author: Geoff Hutchison
-"""
+lines.py
+========
 
+.. argparse::
+    :module: lines
+    :func: create_parser
+    :prog: lines.py
+
+.. moduleauthor:: Geoff Hutchison <geoffh@pitt.edu>
+"""
 from PIL import Image
-import random
 import argparse
 import os
 
@@ -12,7 +18,7 @@ desc = """
 make simple lines (for fractal growing)
 """
 
-def get_arguments(args=None):
+def create_parser():
     parser = argparse.ArgumentParser()
     parser.description = desc
 
@@ -28,12 +34,14 @@ def get_arguments(args=None):
     parser.add_argument(dest='thickness', default=1, type=int, metavar='thickness',
                         nargs='?', help='thickness of the bands, in pixels')
 
-    parser.add_argument(dest='ofile', default="None",
-                        type=str, metavar='output', nargs='?',
-                        help='output file')
+    parser.add_argument(dest='ofile', default=None, type=str, nargs='?',
+        metavar='output', help='output file')
 
-    opts = parser.parse_args()
+    return parser
 
+def get_arguments(args=None):
+    parser = create_parser()
+    opts = parser.parse_args(args)
     return opts
 
 def makeLines(image, thickness = 1, spacing = 12):
@@ -61,7 +69,7 @@ if __name__ == '__main__':
     # create a black and white image
     image = Image.new("L", (opts.width, opts.height))
 
-    if opts.ofile == "None":
+    if opts.ofile is None:
         opts.ofile = "Lines-%d.png" % (opts.spacing)
 
     makeLines(image, opts.thickness, opts.spacing)

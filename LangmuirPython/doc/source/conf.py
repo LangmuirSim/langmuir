@@ -16,7 +16,14 @@ import sys, os
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath('../../langmuir'))
+sys.path.insert(0, os.path.abspath(r'../../langmuir/'))
+sys.path.append(os.path.abspath(r'../../analyze/'))
+sys.path.append(os.path.abspath(r'../../surface/'))
+sys.path.append(os.path.abspath(r'../../utils/'))
+sys.path.append(os.path.abspath(r'../../convert/'))
+sys.path.append(os.path.abspath(r'../../ga2d/'))
+sys.path.append(os.path.abspath(r'../../ga2d/generators/'))
+sys.path.append(os.path.abspath('sphinxext'))
 
 # -- General configuration -----------------------------------------------------
 
@@ -25,7 +32,18 @@ sys.path.insert(0, os.path.abspath('../../langmuir'))
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.intersphinx', 'sphinx.ext.todo', 'sphinx.ext.coverage', 'sphinx.ext.pngmath', 'sphinx.ext.viewcode']
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.todo',
+    'sphinx.ext.coverage',
+    'sphinx.ext.pngmath',
+    'sphinx.ext.ifconfig',
+    'sphinx.ext.viewcode',
+    'matplotlib.sphinxext.plot_directive',
+    'inheritance_diagram',
+    'sphinxarg.ext'
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -255,3 +273,4 @@ autodoc_default_members = ['members', 'undoc-members', 'show-inheritance']
 autodoc_member_order = 'bysource'
 autoclass_content = 'both'
 show_authors = True
+todo_include_todos = True
