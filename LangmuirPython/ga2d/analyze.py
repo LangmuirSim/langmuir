@@ -2,35 +2,17 @@
 """
 @author: Geoff Hutchison
 """
-import argparse
 import os
 import sys
 
 from scipy import ndimage, misc
 import numpy as np
-from numbapro import jit
 
 from collections import deque
 
 desc = """
 analysis of images
 """
-
-def get_arguments(args=None):
-    parser = argparse.ArgumentParser()
-    parser.description = desc
-
-    parser.add_argument(dest='ifile', type=str, metavar='input',
-        help='input file')
-
-    opts = parser.parse_args()
-
-    if not os.path.exists(opts.ifile):
-        parser.print_help()
-        print >> sys.stderr, '\nfile does not exist: %s' % opts.ifile
-        sys.exit(-1)
-
-    return opts
 
 # from http://scipy-lectures.github.io/advanced/image_processing/
 def disk_structure(n):
@@ -159,20 +141,26 @@ def transfer_distance(original):
     return avgDistance, connectivityFraction
 
 if __name__ == '__main__':
-    work = os.getcwd()
-    opts = get_arguments()
 
-    image = misc.imread(opts.ifile)
+    for filename in sys.argv[1:]:
+        image = misc.imread(filename)
 
-    isize = interface_size(image)
+        isize = interface_size(image)
 
-    # get the domain size of the normal phase
-    # then invert the image to get the second domain size
-    ads1 = average_domain_size(image)
-    inverted = (image < image.mean()).astype(np.uint8)
-    ads2 = average_domain_size(inverted)
+        # get the domain size of the normal phase
+        # then invert the image to get the second domain size
+        ads1 = average_domain_size(image)
+        inverted = (image < image.mean())
+        ads2 = average_domain_size(inverted)
 
-    # transfer distances
-    # connectivity
-    td, connectivity = transfer_distance(image)
-    print ads1, ads2, isize, td, connectivity
+        avg_domain = (ads1 + ads2) / 2.0
+        penalty = abs(ads1 - ads2) / avg_domain
+
+        # fraction of phase one
+        phase1 = np.count_nonzero(image)
+        fraction = phase1 / image.size
+
+        # transfer distances
+        # connectivity
+        td, connectivity = transfer_distance(image)
+        print filename, ads1, ads2, isize, td, connectivity, fraction, penalty

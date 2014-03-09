@@ -18,11 +18,16 @@ import time
 # our code
 import analyze
 import modify
+import grow
 
 
 desc = """
 genetic algorithm design of 2D morphologies
 """
+
+# TODO: Build a score cache
+#  so we don't rebuild the score every time we start
+#   or for files that aren't modified
 
 def get_arguments(args=None):
     parser = argparse.ArgumentParser()
@@ -57,32 +62,36 @@ def score(filename):
     # TODO: Make this physically and empirically based!
     image = misc.imread(filename)
 
+    width, height = image.shape
+    if width != 256 or height != 256:
+        print "Size Error: ", filename
+
     isize = analyze.interface_size(image)
     ads1 = analyze.average_domain_size(image)
 
     # we now need to invert the image to get the second domain size
-    inverted = (image < image.mean()).astype(np.uint8)
+    inverted = (image < image.mean())
     ads2 = analyze.average_domain_size(inverted)
 
     avg_domain = (ads1 + ads2) / 2.0
     # penalize if there's a huge difference between the two domain sizes
-    penalty = abs(ads1 - ads2) / avg_domain
-    # we're arbitrarily claiming 13 nm as the best domain size
-    domain_score = 10.0 - ((avg_domain - 13.0)**2)/15.0
+    #penalty = abs(ads1 - ads2) / avg_domain
 
     # transfer distances
     # connectivity
     td, connectivity = analyze.transfer_distance(image)
 
-    value = float(domain_score) * float(isize * connectivity / td)
-    if math.isnan(value):
-        value = 0.0
-    return value
+    # fraction of phase one
+    nonzero = np.count_nonzero(image)
+    fraction = float(nonzero) / float(image.size)
+    scale = 4.0*fraction*(1.0 - fraction)
+
+    return scale * (4497.2167 - 107.4394*ads1 + 85.3286*ads2 - 0.1855*isize - 10.9523*td + 169.7597*connectivity)
 
 def score_filenames(filenames, pool=None):
     # analyze all these files and push into a list of (score, filename) tuples
     start = time.time()
-#    scores = forkmap.map(score, filenames)
+
     if pool == None:
         scores = map(score, filenames)
     else:
@@ -107,15 +116,25 @@ if __name__ == '__main__':
 
     print "Initial Filenames: ", len(filenames)
 
-    # score the initial population
-    print "Scoring Initial Files"
-    scores = score_filenames(filenames, pool)
+    # check for a cache
+    scores = []
+    if os.path.exists('score.cache'):
+        with open('score.cache') as cache:
+            for line in cache:
+                fileScore, filename = line.split()
+                scores.append( (float(fileScore), filename) )
+
+    # if needed, score the initial population
+    if len(filenames) != len(scores):
+        print "Re-scoring Initial Files"
+        scores = score_filenames(filenames, pool)
+        print "Caching initial scores"
+        with open('score.cache', 'w') as cache:
+            for fileScore, file in scores:
+                cache.write("%8.3f %s\n" % (fileScore, file))
+
+    # turn it into a (small) heap to easily remove the low scores
     heapq.heapify(scores)
-
-    # print the initial scores
-    for fileScore, file in scores:
-        print fileScore, file
-
     while len(scores) > opts.population:
         heapq.heappop(scores)
     # ok, now only the best (maximum) X items in scores remain
@@ -157,13 +176,23 @@ if __name__ == '__main__':
             population += 1
             misc.imsave(childName, child)
 
+        # make a copy of the files to be re-scored
+        rescore_list = list(filenames)
+
         # Copy over the parents to the new generation (for mutation)
+        # keep track of their old scores.. if they don't mutate
+        #  .. we'll re-use it
+        oldScores = []
+        oldFiles = []
         while len(scores):
             fileScore, file = heapq.heappop(scores)
             # copy the existing files before mutations
             image = misc.imread(file)
             newName = "%s/%d.png" % (path, population)
             filenames.append(newName)
+            # save the score and the new name
+            oldScores.append(fileScore)
+            oldFiles.append(newName)
             population += 1
             misc.imsave(newName, image)
 
@@ -171,30 +200,60 @@ if __name__ == '__main__':
         print "Mutating"
         for i in range(opts.mutability):
             file = random.choice(filenames)
+
+            # if this is in oldscores, remove it.. need to rescore
+            try:
+                index = oldFiles.index(file)
+                del oldFiles[index]
+                del oldScores[index]
+            except ValueError:
+                pass
+            # add this to the list to rescore
+            if file not in rescore_list:
+                rescore_list.append(file)
+
             image = misc.imread(file)
 
-            mutation = random.randrange(2)
+            mutation = random.randrange(6)
             if mutation == 0:
+                # gaussian blur
                 image = modify.gblur_and_threshold(image, random.choice([1,2,3,4,5]))
             elif mutation == 1:
+                # uniform blur
                 image = modify.ublur_and_threshold(image, random.choice([1,2,3,4,5]))
             elif mutation == 2:
+                # invert
                 inverted = (image < image.mean())
                 image = inverted
-            # sharpen?
-            # grow (edges)
-            # add noise
+            elif mutation == 3:
+                # add noise
+                noise = np.random.random( image.shape )
+                child = modify.blend_and_threshold(image, noise)
+                image = child
+            elif mutation == 4:
+                # grow edges
+                nonzero = np.count_nonzero(image)
+                phase = 0
+                if nonzero > image.size / 2:
+                    phase = 255
+                child = grow.grow_ndimage(image, phase)
+                image = child
+            elif mutation == 5:
+                # rescale larger
+                image = modify.grow(image)
+            elif mutation == 6:
+                # rescale smaller
+                image = modify.shrink(image)
             # shift
             # swap slices
-            # rescale
-            #   shrink and tile
-            #   grow x and/or y
 
             misc.imsave(file, image)
 
         # create a new batch of scores
         print "Scoring Generation ", generation
-        scores = score_filenames(filenames, pool)
+        scores = score_filenames(rescore_list, pool)
+        for i in range(len(oldFiles)):
+            scores.append( (oldScores[i], oldFiles[i]))
         heapq.heapify(scores)
         print "Top Score: ", heapq.nlargest(1, scores)
         print "Worst Score: ", heapq.nsmallest(1, scores)

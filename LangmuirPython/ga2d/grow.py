@@ -7,6 +7,8 @@ import os
 import random
 from PIL import Image
 import sys
+from scipy import ndimage
+import numpy as np
 
 desc = """
 append particles to an existing image
@@ -29,7 +31,7 @@ def get_arguments(args=None):
 
     return opts
 
-def growImage(image, pixToAdd = -1):
+def grow_image(image, pixToAdd = -1):
     # neighbor pixel directions
     nx = [-1, 1,  0, 0]
     ny = [ 0, 0, -1, 1]
@@ -63,10 +65,50 @@ def growImage(image, pixToAdd = -1):
                     pix += 1
                     break
 
+def grow_ndimage(image, phase = 0, pixToAdd = -1):
+    if phase != 0:
+        inverted = (image < image.mean())
+        image = inverted
+
+    # neighbor pixel directions
+    nx = [-1, 1,  0, 0]
+    ny = [ 0, 0, -1, 1]
+    nbrs = len(nx)
+
+    width, height = image.shape
+    if pixToAdd == -1:
+        pixToAdd = width * height / 2
+
+    # how many are currently set
+    pix = np.count_nonzero(image)
+
+    while pix < pixToAdd:
+        x = random.randrange(width)
+        y = random.randrange(height)
+        if image[x,y] > 0:
+            for i in range(nbrs):
+                # x, y is set, so try to find an empty neighbor
+                k = random.randrange(nbrs)
+                xn = x + nx[k]
+                yn = y + ny[k]
+                if xn < 0 or xn > width - 1 or yn < 0 or yn > height - 1:
+                    continue
+                if image[xn,yn] == 0:
+                    image[xn,yn] = 255
+                    pix += 1
+                    break
+
+    if phase != 0:
+        # re-invert to get the original phases
+        inverted = (image < image.mean())
+        image = inverted
+
+    return image
+
 if __name__ == '__main__':
     work = os.getcwd()
     opts = get_arguments()
 
     image = Image.open(opts.ifile)
-    growImage(image)
+    grow_image(image)
     image.save(opts.ifile, "PNG")

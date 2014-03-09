@@ -41,9 +41,8 @@ def get_arguments(args=None):
 def makeIsotropic(width, height, radius = 4):
     # floating point between 0.0 - 1.0
     noise = np.random.random( (width, height) )
-    scaled = ndimage.gaussian_filter(noise, sigma = radius) * 255.0
+    scaled = ndimage.gaussian_filter(noise, sigma = radius)
     return (scaled > scaled.mean())
-#    return modify.threshold(scaled.astype(np.uint8))
 
 if __name__ == '__main__':
     work = os.getcwd()
