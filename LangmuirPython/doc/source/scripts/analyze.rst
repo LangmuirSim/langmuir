@@ -7,5 +7,8 @@
 .. automodule:: gather
     :members:
 
+.. automodule:: equil
+    :members:
+
 .. automodule:: solar
     :members:
