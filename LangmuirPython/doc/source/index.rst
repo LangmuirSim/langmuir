@@ -28,6 +28,7 @@ langmuir
     modules/parameters
     modules/datfile
     modules/surface
+    modules/vtkutils
     modules/grid
     modules/analyze
     modules/ivcurve
