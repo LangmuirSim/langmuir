@@ -30,6 +30,11 @@ try:
 except ImportError:
     print 'missing: units'
 
+try:
+    import vtk
+except ImportError:
+    print 'missing: vtk'
+
 if 'np' in locals():
     import checkpoint
     import parameters
@@ -53,3 +58,6 @@ if 'pint' in locals():
 
 if 'plt' in locals():
     import plot
+
+if 'vtk' in locals():
+    import vtkutils
