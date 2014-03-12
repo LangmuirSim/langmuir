@@ -7,6 +7,7 @@
 import langmuir as lm
 import numpy as np
 import vtk
+import os
 
 def create_image_data(nx, ny, nz, dx=1.0, dy=1.0, dz=1.0, ox=0, oy=0, oz=0):
     """
@@ -82,6 +83,37 @@ def create_image_data_from_array(array, *args, **kwargs):
         image_data.SetScalarComponentFromFloat(xi, yi, zi, 0, vi)
 
     return image_data
+
+def save_image_data(handle, image_data):
+    """
+    Save vtkImageData to XML file.
+
+    :param handle: file name
+    :param image_data: source
+
+    :type handle: str
+    :type iamge_data: :py:class:`vtk.vtkImageData`
+
+    >>> image_data = create_image_data(32, 32, 32)
+    >>> save_image_data('test.vit', image_data)
+    """
+    stub, ext = os.path.splitext(handle)
+    handle = stub + '.vti'
+    writer = vtk.vtkXMLImageDataWriter()
+    writer.SetInput(image_data)
+    writer.SetFileName(handle)
+    writer.Write()
+
+def load_image_data(handle):
+    """
+    Load vtkImageData from XML file.
+
+    :param handle: file name
+    :type handle: str
+    """
+    reader = vtk.vtkXMLImageDataReader()
+    reader.SetFileName(handle)
+    return reader.GetOutput()
 
 def pipe(i, o):
     """
@@ -196,7 +228,11 @@ if __name__ == '__main__':
     wave = lm.surface.WaveDimensions(grid.lx, 2)
     surf = lm.surface.gyroid(grid.mx, grid.my, grid.mz, wave, wave, wave)
 
-    image_data = create_image_data_from_array(surf)
+    #image_data = create_image_data_from_array(surf)
+    #save_image_data(r'/home/adam/Desktop/test.vti', image_data)
+
+    image_data = load_image_data(r'/home/adam/Desktop/test.vti')
     cubes = filter_marching_cubes(image_data)
-    curve = filter_curvature(cubes, mode='gaussian')
-    show(curve)
+    show(cubes)
+    #curve = filter_curvature(cubes, mode='gaussian')
+    #show(curve)
