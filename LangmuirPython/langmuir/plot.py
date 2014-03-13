@@ -444,8 +444,8 @@ class PeakFinder:
                 self.message('can not select %s' % event.artist)
 
             try:
-                self.x_data.size
-                self.y_data.size
+                assert hasattr(self.x_data, 'size')
+                assert hasattr(self.y_data, 'size')
                 self.axis = event.artist.get_axes()
                 self.message('selected %s' % event.artist)
             except:

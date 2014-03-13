@@ -68,7 +68,7 @@ class Fit:
         ys = self(xs)
         _kwargs = dict(color='k', lw=1, ls='-')
         _kwargs.update(**kwargs)
-        _plt.plot(xs, ys, **_kwargs)[0]
+        _plt.plot(xs, ys, **_kwargs)
 
     def text(self, s, x, y=None, transform=None, rotate=False,
              draw_behind=True, **kwargs):
