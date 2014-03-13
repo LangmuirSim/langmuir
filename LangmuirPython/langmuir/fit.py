@@ -435,14 +435,14 @@ class FitLagrange(Fit):
     """
     Fit to lagrange interpolating spline.  It sucks.
     """
-    def __init__(self, x, y, popt=None, yerr=None, **kwargs):
+    def __init__(self, x, y, popt=None, yerr=None):
         Fit.__init__(self, x, y, None, None, yerr)
-        self._fit(**kwargs)
+        self._fit()
         self.xmin = _np.amin(x)
         self.xmax = _np.amax(x)
 
-    def _fit(self, **kwargs):
-        self.func = _interpolate.lagrange(self.x, self.y, **kwargs)
+    def _fit(self):
+        self.func = _interpolate.lagrange(self.x, self.y)
         self.__call__ = self.func
         self._calculate_rsquared()
 

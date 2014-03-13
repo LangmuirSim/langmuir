@@ -103,7 +103,7 @@ def tail(handle, n=1, mode='python'):
 
     return None
 
-def splitext(handle, *args, **kwargs):
+def splitext(handle):
     """
     Extract stub and extension from a file object or string.
 
@@ -118,10 +118,10 @@ def splitext(handle, *args, **kwargs):
     ('out', '.dat')
     """
     try:
-        return os.path.splitext(handle, *args, **kwargs)
+        return os.path.splitext(handle)
     except AttributeError:
         try:
-            return os.path.splitext(handle.name, *args, **kwargs)
+            return os.path.splitext(handle.name)
         except AttributeError:
             return '', ''
 

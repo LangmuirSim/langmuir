@@ -113,7 +113,7 @@ def load(handle, rot90=-1, **kwargs):
         return make_3D(lm.common.load_pkl(handle, **kwargs))
 
     if ext == '.npy':
-        return make_3D(np.load(handle, **kwargs))
+        return make_3D(np.load(handle))
 
     if ext in ['.csv', '.txt', '.dat']:
         return lm.surface.load_ascii(handle, **kwargs)
@@ -175,11 +175,11 @@ def save(handle, obj, zlevel=0, **kwargs):
     stub, ext = lm.common.splitext(handle)
 
     if ext == '.pkl':
-        lm.common.save_pkl(obj, handle, **kwargs)
+        lm.common.save_pkl(obj, handle)
         return handle
 
     if ext == '.npy':
-        np.save(handle, obj, **kwargs)
+        np.save(handle, obj)
         return handle
 
     if ext == '.vti':
