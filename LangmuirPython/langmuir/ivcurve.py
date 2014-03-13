@@ -397,6 +397,10 @@ class IVCurveSolar(IVCurve):
         self.j_mp = 0.0
         self.r_mp = 0.0
         self.fill = 0.0
+        self.ifit = None
+        self.pfit = None
+        self.jfit = None
+        self.rfit = None
         if kwargs:
             self.calculate(**kwargs)
 

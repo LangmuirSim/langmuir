@@ -282,6 +282,9 @@ class WaveDimensions:
     def __init__(self, L=2 * np.pi, n=1):
         self.L = L
         self.n = n
+        self.k = 0.0
+        self.nubar = 0.0
+        self.wavelength = 0.0
         self.calc()
 
     def calc(self, L=None, n=None):
@@ -768,7 +771,7 @@ def isotropic(x, y, z, wx, wy, wz, full=True):
 
 class FFT(object):
     def __init__(self):
-        pass
+        self.window = None
 
     @staticmethod
     def _delta(a, s0, s1):

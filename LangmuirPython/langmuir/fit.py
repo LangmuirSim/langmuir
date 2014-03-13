@@ -39,6 +39,7 @@ class Fit:
         """
         self.x = _np.array(x)
         self.y = _np.array(y)
+        self.r2 = 0.0
         self.func = func
         self.popt = popt
         self.yerr = yerr
@@ -67,7 +68,7 @@ class Fit:
         ys = self(xs)
         _kwargs = dict(color='k', lw=1, ls='-')
         _kwargs.update(**kwargs)
-        self.fit_line = _plt.plot(xs, ys, **_kwargs)[0]
+        _plt.plot(xs, ys, **_kwargs)[0]
 
     def text(self, s, x, y=None, transform=None, rotate=False,
              draw_behind=True, **kwargs):
@@ -308,7 +309,7 @@ class Fit:
         popt, pcov = _optimize.curve_fit(self.func, self.x, self.y, self.popt,
                                          self.yerr)
         self.popt = popt
-        self.__call__ = lambda x : self.func(x, *self.popt)
+        setattr(self, '__call__', lambda x: self.func(x, *self.popt))
         self._calculate_rsquared()
 
     def _calculate_rsquared(self):
@@ -324,6 +325,9 @@ class Fit:
         #D = _np.sum((self.y - A)**2)
         #print N/D
         #self.r2 = N/D
+
+    def __call__(self, *args, **kwargs):
+        return None
 
     def __str__(self):
         d = self.summary()
@@ -344,7 +348,7 @@ class FitPower(Fit):
     def _fit(self, order):
         self.popt = _np.polyfit(self.x, self.y, order, w=self.yerr)
         self.func = _np.poly1d(self.popt)
-        self.__call__ = self.func
+        setattr(self, '__call__', self.func)
         self._calculate_rsquared()
 
     def summary(self):
@@ -408,7 +412,7 @@ class FitInterp1D(Fit):
         _kwargs = dict(kind='cubic', fill_value=_np.nan, bounds_error=False)
         _kwargs.update(**kwargs)
         self.func = _interpolate.interp1d(self.x, self.y, **_kwargs)
-        self.__call__ = self.func
+        setattr(self, '__call__', func)
         self._calculate_rsquared()
 
 class FitUnivariateSpline(Fit):
@@ -428,7 +432,7 @@ class FitUnivariateSpline(Fit):
         _kwargs = dict(k=5)
         _kwargs.update(**kwargs)
         self.func = _interpolate.UnivariateSpline(self.x, self.y, **_kwargs)
-        self.__call__ = self.func
+        setattr(self, '__call__', func)
         self._calculate_rsquared()
 
 class FitLagrange(Fit):
@@ -443,7 +447,7 @@ class FitLagrange(Fit):
 
     def _fit(self):
         self.func = _interpolate.lagrange(self.x, self.y)
-        self.__call__ = self.func
+        setattr(self, '__call__', func)
         self._calculate_rsquared()
 
 class FitBarycentric(Fit):
