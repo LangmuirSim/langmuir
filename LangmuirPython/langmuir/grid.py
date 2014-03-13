@@ -105,7 +105,7 @@ class Grid(object):
         if factor == 1:
             return
 
-        if (factor <= 0):
+        if factor <= 0:
             dx = 1.0
             dy = 1.0
             dz = 1.0
@@ -283,23 +283,23 @@ class Grid(object):
 
     @property
     def shape(self):
-        return (self._nx, self._ny, self._nz)
+        return self._nx, self._ny, self._nz
 
     @property
     def extent(self):
-        return (0, self._nx - 1, 0, self._ny - 1, 0, self._nz - 1)
+        return 0, self._nx - 1, 0, self._ny - 1, 0, self._nz - 1
 
     @property
     def bounds(self):
-        return (0, self._nx, 0, self._ny, 0, self._nz)
+        return 0, self._nx, 0, self._ny, 0, self._nz
 
     @property
     def origin(self):
-        return (self._x0, self._y0, self._z0)
+        return self._x0, self._y0, self._z0
 
     @property
     def spacing(self):
-        return (self._dx, self._dy, self._dz)
+        return self._dx, self._dy, self._dz
 
     def __str__(self):
         s = StringIO.StringIO()

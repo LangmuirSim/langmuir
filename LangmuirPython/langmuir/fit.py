@@ -365,7 +365,7 @@ class FitLinear(FitPower):
         self.b = float(self.popt[1])
         self.a = _np.rad2deg(_np.arctan2(self.m, 1))
         self.elabel = r'$\mathtt{y=%g x %+g}$' % (self.m, self.b)
-        self.alabel = r'$\mathtt{%.2f^{\circ}}$' % (self.a)
+        self.alabel = r'$\mathtt{%.2f^{\circ}}$' % self.a
         self.mlabel = r'$\mathtt{%g}$' % self.m
 
     def derivative(self, x, **kwargs):

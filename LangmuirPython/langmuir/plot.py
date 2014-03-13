@@ -527,14 +527,14 @@ class PeakFinder:
                 x, y = x_val, self.prop_xtext_loc
             transform = mpl.transforms.blended_transform_factory(
                 self.axis.transData, self.axis.transAxes)
-            ref.append(self.axis.text(x, y, self.prop_xtext_fmt % (x_val),
+            ref.append(self.axis.text(x, y, self.prop_xtext_fmt % x_val,
                 transform=transform, **self.prop_xtext))
 
         if self.plot_ytext:
             transform = mpl.transforms.blended_transform_factory(
                 self.axis.transAxes, self.axis.transData)
             ref.append(self.axis.text(self.prop_ytext_loc, y_val,
-                self.prop_ytext_fmt % (y_val), transform=transform,
+                self.prop_ytext_fmt % y_val, transform=transform,
                 **self.prop_ytext))
 
         self.refs.append(ref)
