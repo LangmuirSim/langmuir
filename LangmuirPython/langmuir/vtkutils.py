@@ -55,6 +55,8 @@ def create_image_data_from_array(array, *args, **kwargs):
     .. seealso:: :py:func:`create_image_data`
     """
     ndims = len(array.shape)
+    nx, ny, nz = 1, 1, 1
+
     if ndims > 3 or ndims <= 0:
         raise ValueError, 'data dimension(%d) not supported' % ndims
 
