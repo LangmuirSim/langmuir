@@ -412,7 +412,6 @@ def slice_path(path, regex):
         if not regex.match(item) is None:
             assert i + 1 <= len(path)
             return os.path.join(os.sep, *path[:i + 1])
-            break
     raise RuntimeError('can not slice path on run')
 
 def slice_part(path):
