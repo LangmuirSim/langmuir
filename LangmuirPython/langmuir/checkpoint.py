@@ -239,6 +239,9 @@ class CheckPoint(object):
 
         :param keep_elecs: do not delete electrons
         :param keep_holes: do not delete holes
+
+        :type keep_elecs: bool
+        :type keep_holes: bool
         """
         if not keep_elecs:
             self._electrons = []
@@ -314,6 +317,9 @@ class CheckPoint(object):
     def has_key(self, key, *args, **kwargs):
         """
         Check if key exists in parameters.
+
+        :return: True if key found
+        :rtype: :py:obj:`bool`
         """
         return self._parameters.has_key(key, *args, **kwargs)
 
@@ -389,6 +395,9 @@ def load(handle):
     :param handle: filename or file object
     :type handle: str
 
+    :return: checkpoint object
+    :rtype: :py:class:`Checkpoint`
+
     >>> chk = lm.checkpoint.load('out.chk')
     """
     if isinstance(handle, CheckPoint):
@@ -401,6 +410,9 @@ def load_last(work, **kwargs):
 
     :param work: directory to look in
     :type work: str
+
+    :return: checkpoint object
+    :rtype: :py:class:`Checkpoint`
 
     >>> chk = lm.checkpoint.load_last('/home/adam/simulations')
     """
@@ -420,7 +432,12 @@ def compare(chk1, chk2):
     :type chk_i: lm.checkpoint.CheckPoint
     :type chk_j: lm.checkpoint.CheckPoint
 
-    :returns: dict, bool
+    :returns: a dictionary of results
+    :rtype: :py:class:`collections.OrderedDict`
+
+    .. seealso::
+        :py:meth:`common.compare_dicts`
+        :py:meth:`common.compare_lists`
     """
     results = collections.OrderedDict()
 

@@ -14,8 +14,28 @@ try:
     import scipy.ndimage as ndimage
     import scipy.signal as signal
     import scipy.stats as stats
+    import scipy.misc as misc
 except ImportError:
     pass
+
+def make_3D(array):
+    """
+    Force the numpy array passed to be 3D via :py:func:`np.expand_dims`.
+
+    :param array: numpy array
+    :type array: :py:class:`numpy.ndarray`
+    """
+    ndims = len(array.shape)
+    if ndims >= 3:
+        return array
+
+    if ndims == 2:
+        return np.expand_dims(array, 2)
+
+    if ndims == 1:
+        return np.expand_dims(np.expand_dims(array, 1), 1)
+
+    raise RuntimeError, 'can not expand dimensions'
 
 def load_ascii(handle, square=False, cube=False, shape=None, **kwargs):
     """
@@ -50,74 +70,107 @@ def load_ascii(handle, square=False, cube=False, shape=None, **kwargs):
         image = np.reshape(image, shape)
 
     # force data to be 3D
-    if len(image.shape) == 1:
-        image = np.expand_dims(np.expand_dims(image, 1), 1)
-    if len(image.shape) == 2:
-        image = np.expand_dims(image, 2)
+    return make_3D(image)
 
-    return image
-
-def load(handle, *args, **kwargs):
+def load(handle, rot90=-1, **kwargs):
     """
-    Load surface from file.
+    Load surface from file.  Takes into account the file extension.
+
+    ===== ===============================
+    *ext* *func*
+    ===== ===============================
+    pkl   :py:meth:`common.load_pkl`
+    npy   :py:func:`numpy.load`
+    csv   :py:meth:`surface.load_ascii`
+    txt   :py:meth:`surface.load_ascii`
+    dat   :py:meth:`surface.load_ascii`
+    png   :py:meth:`scipy.ndimage.imread`
+    jpg   :py:meth:`scipy.ndimage.imread`
+    jpeg  :py:meth:`scipy.ndimage.imread`
+    ===== ===============================
+
+    :param handle: filename
+    :param rot90: number of times to rotate image by 90 degrees
+
+    :type handle: str
+    :type rot90: int
+
+    :return: image
+    :rtype: :py:class:`numpy.ndarray`
+
+    .. warning::
+        image file (png, jpg, etc) data is forced into range [0,255].
+
+    .. warning::
+        data is always made 3D via :py:func:`numpy.expand_dims`
+
+    .. warning::
+        image data is rotated by -90 degrees.
     """
     stub, ext = lm.common.splitext(handle)
 
     if ext == '.pkl':
-        return lm.common.load_pkl(handle, *args, **kwargs)
+        return make_3D(lm.common.load_pkl(handle, **kwargs))
 
     if ext == '.npy':
-        return np.load(handle, *args, **kwargs)
+        return make_3D(np.load(handle, **kwargs))
 
-    return lm.surface.load_ascii(handle, *args, **kwargs)
+    if ext in ['.csv', '.txt', '.dat']:
+        return lm.surface.load_ascii(handle, **kwargs)
 
-def save_vti(handle, values, origin=None, spacing=None, name='values'):
-    try:
-        import vtk
-    except ImportError:
-        return False
+    if ext in ['.png', '.jpg', '.jpeg']:
+        _kwargs = dict(flatten=True)
+        _kwargs.update(**kwargs)
+        image = ndimage.imread(handle, **_kwargs)
+        image = np.rot90(image, rot90)
+        return make_3D(image)
 
-    extent = []
-    for i in range(len(values.shape)):
-        extent.append(0)
-        extent.append(values.shape[i] - 1)
+    raise RuntimeError, 'ext=%s not supported' % ext
 
-    if origin is None:
-        origin = [0 for i in range(len(values.shape))]
+def save_vti(handle, array, **kwargs):
+    """
+    Save numpy array to vtkImageData XML file.  You can open it in paraview.
 
-    if spacing is None:
-        spacing = [1.0 for i in range(len(values.shape))]
+    :param handle: filename
+    :param array: data
 
-    data_source = vtk.vtkImageData()
-    data_source.SetDimensions(*values.shape)
-    data_source.SetExtent(*extent)
-    data_source.SetOrigin(*origin)
-    data_source.SetSpacing(*spacing)
+    :type handle: str
+    :type array: :py:class:`numpy.ndarray`
+    """
+    vtkImageData = lm.vtkutils.create_image_data_from_array(array, **kwargs)
+    lm.vtkutils.save_image_data(handle, vtkImageData)
 
-    point_data_array = vtk.vtkDoubleArray()
-    point_data_array.SetNumberOfComponents(1)
-    point_data_array.SetNumberOfValues(values.size)
-    point_data_array.SetName(name)
-
-    for i, ((xi, yi, zi), vi) in enumerate(np.ndenumerate(values)):
-        point_id = data_source.ComputePointId((xi, yi, zi))
-        point_data_array.SetValue(point_id, vi)
-
-    data_source.GetPointData().AddArray(point_data_array)
-
-    writer = vtk.vtkXMLImageDataWriter()
-    writer.SetFileName(handle)
-    writer.SetInput(data_source)
-    writer.Write()
-
-    return True
-
-def save(handle, obj, *args, **kwargs):
+def save(handle, obj, zlevel=0, **kwargs):
     """
     Save object to a file.  Takes into account the file extension.
 
+    ===== ===================================
+    *ext* *func*
+    ===== ===================================
+    pkl   :py:meth:`common.load_pkl`
+    npy   :py:func:`numpy.load`
+    vti   :py:meth:`vtkutils.save_image_data`
+    csv   :py:meth:`surface.load_ascii`
+    txt   :py:meth:`surface.load_ascii`
+    dat   :py:meth:`surface.load_ascii`
+    png   :py:meth:`scipy.misc.imsave`
+    jpg   :py:meth:`scipy.misc.imsave`
+    jpeg  :py:meth:`scipy.misc.imsave`
+    ===== ===================================
+
     :param handle: filename
     :param obj: object to save
+    :param zlevel: slice z-index
+
+    :type handle: str
+    :type array: :py:class:`numpy.ndarray`
+    :type zlevel: int
+
+    .. warning::
+        image file (png, jpg, etc) data is forced into range [0,255].
+
+    .. warning::
+        if ndims is 3 and an image file is being saved, only a slice is saved.
     """
     stub, ext = lm.common.splitext(handle)
 
@@ -133,7 +186,7 @@ def save(handle, obj, *args, **kwargs):
         lm.surface.save_vti(handle, obj, **kwargs)
         return handle
 
-    if ext == '.csv':
+    if ext in ['.csv', '.txt', '.dat']:
         _kwargs = dict(fmt='%+.18e', sep=',')
         _kwargs.update(**kwargs)
         try:
@@ -145,16 +198,13 @@ def save(handle, obj, *args, **kwargs):
             np.savetxt(handle, obj, **_kwargs)
         return handle
 
-    _kwargs = dict(fmt='%+.18e', delimiter=',')
-    _kwargs.update(**kwargs)
-    try:
-        np.savetxt(handle, obj, **_kwargs)
-    except TypeError:
-        handle = lm.common.zhandle(handle, 'wb')
-        print >> handle, '# ' + ' '.join([str(s) for s in obj.shape])
-        obj = np.reshape(obj, obj.size)
-        np.savetxt(handle, obj, **_kwargs)
-    return handle
+    if ext in ['.png', '.jpg', '.jpeg']:
+        if len(obj.shape) > 2:
+            obj = obj[:,:,zlevel]
+        misc.imsave(handle, obj)
+        return handle
+
+    raise RuntimeError, 'ext=%s not supported' % ext
 
 def threshold(a, v=0, v0=0, v1=1, copy=False):
     """

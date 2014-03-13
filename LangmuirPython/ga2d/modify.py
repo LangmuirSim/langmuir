@@ -33,34 +33,37 @@ def create_parser():
     parser.add_argument(dest='ifile2', default="None", type=str,
                         metavar='input2', nargs='?',
                         help='input file #2')
+    return parser
 
-    opts = parser.parse_args()
+def get_arguments(args=None):
+    parser = create_parser()
+    opts = parser.parse_args(args)
 
     if not os.path.exists(opts.ifile1):
         parser.print_help()
         print >> sys.stderr, '\nfile does not exist: %s' % opts.ifile1
         sys.exit(-1)
 
-    return parser
+    if not os.path.exists(opts.ifile2):
+        parser.print_help()
+        print >> sys.stderr, '\nfile does not exist: %s' % opts.ifile2
+        sys.exit(-1)
 
-def get_arguments(args=None):
-    parser = create_parser()
-    opts = parser.parse_args(args)
     return opts
 
 def threshold(image):
     """
     .. todo:: comment function
-    
+
     :param image: data
     :type image: :py:class:`numpy.ndarray`
-    """        
+    """
     return (image > image.mean())
 
 def blend_and_threshold(image1, image2, ratio = 0.5, radius=1):
     """
     .. todo:: comment function
-    
+
     :param image1: data1
     :param image2: data2
     :param ratio: mixing ratio
@@ -92,13 +95,13 @@ def gblur_and_threshold(image, radius=1):
 def ublur_and_threshold(image, radius = 1):
     """
     .. todo:: comment function
-    
+
     :param image: data
     :param radius: kernel radius
 
     :type image1: :py:class:`numpy.ndarray`
     :type radius: float
-    """        
+    """
     output = ndimage.uniform_filter(image, size=radius)
     return threshold(output)
 

@@ -3,12 +3,9 @@
 ga_analyze.py
 =============
 
-.. argparse::
-    :module: ga_analyze
-    :prog: ga_analyze.py
-
 .. moduleauthor:: Geoff Hutchison <geoffh@pitt.edu>
 """
+import sys
 import os
 
 from scipy import ndimage, misc
@@ -24,7 +21,7 @@ Analysis of images for GA processing.
 def disk_structure(n):
     """
     .. todo:: comment function
-    
+
     :param n: ?
     :type n: int
     """
@@ -38,10 +35,10 @@ def disk_structure(n):
 def granulometry(data, sizes=None):
     """
     .. todo:: comment function
-    
+
     :param data: ?
     :param sizes: ?
-    
+
     :type data: :py:class:`numpy.ndarray`
     :type sizes: tuple
     """
@@ -55,7 +52,7 @@ def granulometry(data, sizes=None):
 def average_domain_size(image):
     """
     .. todo:: comment function
-    
+
     :param image: data
     :type image: :py:class:`numpy.ndarray`
     """
@@ -76,10 +73,10 @@ def average_domain_size(image):
 def interface_size(image):
     """
     .. todo:: comment function
-    
+
     :param image: data
     :type image: :py:class:`numpy.ndarray`
-    """    
+    """
     # loop through the image to count the number of interfaces
     interface = 0
 
@@ -105,10 +102,10 @@ def interface_size(image):
 def transfer_distance(original):
     """
     .. todo:: comment function
-    
+
     :param original: data
     :type original: :py:class:`numpy.ndarray`
-    """    
+    """
     # the image will come in with row-major order (i.e., numpy)
     # but we're thinking of this as a graphic, with column, row
     image = np.rot90(original)

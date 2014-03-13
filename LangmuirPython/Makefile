@@ -9,35 +9,41 @@ install-user:
 build:
 	python setup.py build
 
+clean:
+	rm -rf ./build
+
+pyc:
+	-find . -name \*.pyc | xargs rm
+
 pdf:
 	$(MAKE) -C ./doc latexpdf
 
 html:
 	$(MAKE) -C ./doc html
 
+doc: html latex
+
 show: html
 	gnome-www-browser ./doc/build/html/index.html
 
-clean:
+clean-doc:
 	$(MAKE) -C ./doc clean
-	rm -rf ./build
-
-doc: html latex
 
 bin:
 	python ./misc/make_bin.py
 
 help:
 	@echo "Makefile Targets"
-	@echo "\tmake build"
-	@echo "\tmake install"
-	@echo "\tmake install-user"
-	@echo "\tmake clean"
-	@echo "\tmake pdf"
-	@echo "\tmake html"
-	@echo "\tmake show"
-	@echo "\tmake help"
-	@echo "\tmake bin"
+	@echo " make build        : compile module"
+	@echo " make install      : install module for root"
+	@echo " make install-user : install module for user"
+	@echo " make clean        : clean build"
+	@echo " make pdf          : build docs pdflatex"
+	@echo " make html         : build docs html"
+	@echo " make show         : build docs html + open web browser"
+	@echo " make clean-doc    : clean docs"
+	@echo " make bin          : create scripts"
+	@echo " make help         : show this message"
 
 .PHONY: html
 .PHONY: latex

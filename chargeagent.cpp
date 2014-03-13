@@ -218,10 +218,10 @@ void ChargeAgent::coulombCPU()
     double p2 = 0;
 
     // Compute self interaction
-    int dx = m_grid.xDistancei(m_site, m_fSite);
-    int dy = m_grid.yDistancei(m_site, m_fSite);
-    int dz = m_grid.zDistancei(m_site, m_fSite);
-    double self = m_world.sI()[dx][dy][dz] * m_charge;
+    //int dx = m_grid.xDistancei(m_site, m_fSite);
+    //int dy = m_grid.yDistancei(m_site, m_fSite);
+    //int dz = m_grid.zDistancei(m_site, m_fSite);
+    double self = m_world.sI()[1][0][0] * m_charge;
 
     // Gaussian charges
     if (m_world.parameters().coulombGaussianSigma > 0)
@@ -280,10 +280,10 @@ void ChargeAgent::coulombGPU()
     p2 += m_world.opencl().getOutputHostFuture(m_openClID);
 
     // Compute self interaction
-    int dx = m_grid.xDistancei(m_site, m_fSite);
-    int dy = m_grid.yDistancei(m_site, m_fSite);
-    int dz = m_grid.zDistancei(m_site, m_fSite);
-    double self = m_world.sI()[dx][dy][dz] * m_charge;
+    //int dx = m_grid.xDistancei(m_site, m_fSite);
+    //int dy = m_grid.yDistancei(m_site, m_fSite);
+    //int dz = m_grid.zDistancei(m_site, m_fSite);
+    double self = m_world.sI()[1][0][0] * m_charge;
 
     // Remove self interaction
     p2 -= self;

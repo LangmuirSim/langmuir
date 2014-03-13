@@ -221,6 +221,12 @@ class TestSurface(unittest.TestCase):
         surf = lm.surface.sin_x(grid.mx, grid.my, grid.mz, wave, wave, wave)
         lm.surface.FFT3D(grid.mx, grid.my, grid.mz, surf)
 
+class TestCommon(unittest.TestCase):
+    def test_tail(self):
+        tokens = lm.common.tail(test_dat1).strip().split()
+        self.assertEquals(tokens[0], '10')
+        self.assertEquals(tokens[-1], '100')
+
 if __name__ == '__main__':
     print 'running tests.'
     unittest.main()
