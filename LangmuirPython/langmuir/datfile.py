@@ -4,7 +4,6 @@
 
 .. moduleauthor:: Adam Gagorik <adam.gagorik@gmail.com>
 """
-import langmuir as lm
 import pandas as pd
 import collections
 
