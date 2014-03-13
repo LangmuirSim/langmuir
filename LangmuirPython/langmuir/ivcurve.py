@@ -302,6 +302,7 @@ class IVCurve(object):
         :type handle: str
         """
         results = self.to_dict()
+        results.update(self.summary())
         lm.common.save_pkl(results, handle)
 
 class IVCurveSolar(IVCurve):
