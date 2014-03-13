@@ -558,10 +558,10 @@ class PeakFinder:
 
         func = np.poly1d(fit)
         a, b, c = fit
-        x = - b / (2*a)
+        x = - b / (2 * a)
         y = func(x)
         s = 1.025
-        if x >= s*xmin and x <= s*xmax and y >= s*ymin and y <= s*ymax:
+        if s * xmin <= x <= s * xmax and s * ymin <= y <= s * ymax:
             return x, y
         return None, None
 
