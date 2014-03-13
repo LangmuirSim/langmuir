@@ -12,6 +12,7 @@ regex_comments = re.compile(r'\s*#.*$')
 regex_false    = re.compile(r'false', re.IGNORECASE)
 regex_true     = re.compile(r'true', re.IGNORECASE)
 regex_number   = re.compile(r'((?:[-\+]?\d+\.?\d*)(?:[eE](?:[-\+])?\d+)?)')
+regex_run      = re.compile(r'.*run\.(\d+).*')
 
 def number(string, index=0, pytype=float):
     """
@@ -67,8 +68,23 @@ def fix_boolean(string):
     :type string: str
 
     >>> print lm.regex.fix_boolean('true false True False true false')
-    True False True False True false
+    True False True False True False
     """
     fixed = regex_false.sub('False', string)
     fixed = regex_true.sub('True', string)
     return fixed
+
+def run(string):
+    """
+    Extract run from string.
+
+    :param string: str
+    :type string: str
+
+    >>> print lm.regex.run('run.2')
+    2
+    """
+    try:
+        return int(regex_run.findall(string)[0])
+    except IndexError:
+        return 0
