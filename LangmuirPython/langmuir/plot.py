@@ -448,7 +448,7 @@ class PeakFinder:
                 assert hasattr(self.y_data, 'size')
                 self.axis = event.artist.get_axes()
                 self.message('selected %s' % event.artist)
-            except:
+            except AssertionError:
                 self.x_data = None
                 self.y_data = None
                 self.axis = None
