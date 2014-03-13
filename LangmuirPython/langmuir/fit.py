@@ -315,11 +315,11 @@ class Fit:
     def _calculate_rsquared(self):
         """calculate correlation coeff"""
         ym  = _np.average(self.y)
-        yi  = self.y
-        fi  = self(self.x)
-        SSR = _np.sum((yi - fi)**2)
-        SST = _np.sum((yi - ym)**2)
-        self.r2 = 1.0 - SSR/SST
+        yi  = _np.asanyarray(self.y)
+        fi  = _np.asanyarray(self.x)
+        ssr = _np.sum((yi - fi) ** 2)
+        sst = _np.sum((yi - ym) ** 2)
+        self.r2 = 1.0 - ssr / sst
         #A = _np.average(self.y)
         #N = _np.sum((self(self.x) - A)**2)
         #D = _np.sum((self.y - A)**2)
@@ -343,12 +343,12 @@ class FitPower(Fit):
     def __init__(self, x, y, order=1, popt=None, yerr=None):
         Fit.__init__(self, x, y, None, popt, yerr)
         self._fit(order)
-        self.derivative = self.__call__.deriv()
 
     def _fit(self, order):
         self.popt = _np.polyfit(self.x, self.y, order, w=self.yerr)
         self.func = _np.poly1d(self.popt)
         setattr(self, '__call__', self.func)
+        setattr(self, 'derivative', self.func.deriv())
         self._calculate_rsquared()
 
     def summary(self):

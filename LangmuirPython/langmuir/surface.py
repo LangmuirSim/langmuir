@@ -16,7 +16,12 @@ try:
     import scipy.stats as stats
     import scipy.misc as misc
 except ImportError:
-    pass
+    special = None
+    fftpack = None
+    ndimage = None
+    signal = None
+    stats = None
+    misc = None
 
 def make_3D(array):
     """
@@ -61,7 +66,7 @@ def load_ascii(handle, square=False, cube=False, shape=None, **kwargs):
 
     if cube:
         try:
-            size = int(special.cbrt(image.size))
+            size = int(image.size ** (1.0 / 3.0))
             image = np.reshape(image, (size, size, size))
         except ValueError:
             raise RuntimeError, 'can not reshape data'
@@ -665,15 +670,11 @@ class Isotropic(object):
     """
     Performs convolution of random noise with a kernel to make morphology.
 
-    :param xsize: x grid points
-    :param ysize: y grid points
-    :param zsize: z grid points
+    :param grid: grid
     :param kernel: Kernel instance
     :param rfunc: function that produces random numbers in range [-0.5,0.5]
 
-    :type xsize: int
-    :type ysize: int
-    :type zsize: int
+    :type grid: :py:class:`surface.Grid`
     :type kernel: Kernel
     :type rfunc: func
     """

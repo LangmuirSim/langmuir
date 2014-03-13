@@ -36,11 +36,9 @@ def numbers(string, pytype=float):
     Find all numbers in a string and convert them.
 
     :param string: string
-    :param index: which regex group to match
     :param pytype: python type to convert to
 
     :type string: str
-    :type index: int
     :type pytype: type
 
     >>> print lm.regex.numbers('asdfasdfa1.231e10asdf1209asd asd0912 sdaf9 81')

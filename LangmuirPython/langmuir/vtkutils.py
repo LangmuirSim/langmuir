@@ -92,7 +92,7 @@ def save_image_data(handle, image_data):
     :param image_data: source
 
     :type handle: str
-    :type iamge_data: :py:class:`vtk.vtkImageData`
+    :type image_data: :py:class:`vtk.vtkImageData`
 
     >>> image_data = create_image_data(32, 32, 32)
     >>> save_image_data('test.vit', image_data)
@@ -188,10 +188,10 @@ def filter_curvature(vtkObject, mode='gaussian'):
     Create vtkCurvatures filter on vtkObject.
 
     :param vtkObject: input
-    :param isovalue: contour value
+    :param mode: gaussian or mean
 
-    :param vtkObject: :py:class:`vtk.vtkObject`
-    :type isovalue: float
+    :type vtkObject: :py:class:`vtk.vtkObject`
+    :type mode: str
 
     >>> image_data = create_image_data_from_array(surf)
     >>> cubes = filter_marching_cubes(image_data)

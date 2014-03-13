@@ -85,11 +85,15 @@ def multiple_locator(axis=None, x=None, y=None, s=None, which='major'):
     if not s is None and x is None: x = s
     if not s is None and y is None: y = s
     if which in ['major', 'both']:
-        if x: axis.xaxis.set_major_locator(mpl.ticker.MultipleLocator(x))
-        if y: axis.yaxis.set_major_locator(mpl.ticker.MultipleLocator(y))
+        if x:
+            axis.xaxis.set_major_locator(mpl.ticker.MultipleLocator(x))
+        if y:
+            axis.yaxis.set_major_locator(mpl.ticker.MultipleLocator(y))
     if which in ['minor', 'both']:
-        if x: axis.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(x))
-        if y: axis.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(y))
+        if x:
+            axis.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(x))
+        if y:
+            axis.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(y))
 
 def maxn_locator(axis=None, x=None, y=None, s=None, which='major'):
     """
@@ -99,11 +103,15 @@ def maxn_locator(axis=None, x=None, y=None, s=None, which='major'):
     if not s is None and x is None: x = s
     if not s is None and y is None: y = s
     if which in ['major', 'both']:
-        if x: axis.xaxis.set_major_locator(mpl.ticker.MaxNLocator(x))
-        if y: axis.yaxis.set_major_locator(mpl.ticker.MaxNLocator(y))
+        if x:
+            axis.xaxis.set_major_locator(mpl.ticker.MaxNLocator(x))
+        if y:
+            axis.yaxis.set_major_locator(mpl.ticker.MaxNLocator(y))
     if which in ['minor', 'both']:
-        if x: axis.xaxis.set_minor_locator(mpl.ticker.MaxNLocator(x))
-        if y: axis.yaxis.set_minor_locator(mpl.ticker.MaxNLocator(y))
+        if x:
+            axis.xaxis.set_minor_locator(mpl.ticker.MaxNLocator(x))
+        if y:
+            axis.yaxis.set_minor_locator(mpl.ticker.MaxNLocator(y))
 
 def scilimits(*args, **kwargs):
     """

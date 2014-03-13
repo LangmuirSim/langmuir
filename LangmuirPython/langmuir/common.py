@@ -70,7 +70,6 @@ def tail(handle, n=1, mode='python'):
     :param n: lines
     :param mode: python or subprocess
 
-    :type handle: str
     :type n: int
     :type mode: str
 
@@ -85,7 +84,7 @@ def tail(handle, n=1, mode='python'):
     else:
         if not isinstance(handle, str):
             try:
-                 handle = handle.name
+                handle = handle.name
             except AttributeError:
                 pass
 
@@ -108,7 +107,6 @@ def splitext(handle):
     Extract stub and extension from a file object or string.
 
     :param handle: filename
-    :type handle: str
 
     :return: stub and ext
     :rtype: :py:obj:`str`, :py:obj:`str`

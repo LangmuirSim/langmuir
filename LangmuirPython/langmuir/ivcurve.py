@@ -92,7 +92,6 @@ class IVCurve(object):
         :type i: :py:class:`numpy.ndarray`
         :type v: :py:class:`numpy.ndarray`
         :type a: :py:class:`numpy.ndarray` or :py:class:`float`
-        :type e: :py:class:`numpy.ndarray` or None
 
         >>> v = np.linspace(0, 100, 10)
         >>> i = np.tanh(v)
@@ -169,8 +168,8 @@ class IVCurve(object):
         """
         Construct IV curve from pandas DataFrame.
 
-        :param panel: dataframe object
-        :type panel: :py:class:`pandas.DataFrame`
+        :param frame: dataframe object
+        :type frame: :py:class:`pandas.DataFrame`
 
         >>> frame = lm.common.load_pkl('calculated.pkl.gz')
         >>> ivcurve = lm.ivcurve.IVCurve(frame)
