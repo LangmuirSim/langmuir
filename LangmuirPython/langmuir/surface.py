@@ -71,46 +71,18 @@ def load(handle, *args, **kwargs):
 
     return lm.surface.load_ascii(handle, *args, **kwargs)
 
-def save_vti(handle, values, origin=None, spacing=None, name='values'):
-    try:
-        import vtk
-    except ImportError:
-        return False
+def save_vti(handle, array, **kwargs):
+    """
+    Save numpy array to vtkImageData XML file.  You can open it in paraview.
 
-    extent = []
-    for i in range(len(values.shape)):
-        extent.append(0)
-        extent.append(values.shape[i] - 1)
+    :param handle: filename
+    :param array: data
 
-    if origin is None:
-        origin = [0 for i in range(len(values.shape))]
-
-    if spacing is None:
-        spacing = [1.0 for i in range(len(values.shape))]
-
-    data_source = vtk.vtkImageData()
-    data_source.SetDimensions(*values.shape)
-    data_source.SetExtent(*extent)
-    data_source.SetOrigin(*origin)
-    data_source.SetSpacing(*spacing)
-
-    point_data_array = vtk.vtkDoubleArray()
-    point_data_array.SetNumberOfComponents(1)
-    point_data_array.SetNumberOfValues(values.size)
-    point_data_array.SetName(name)
-
-    for i, ((xi, yi, zi), vi) in enumerate(np.ndenumerate(values)):
-        point_id = data_source.ComputePointId((xi, yi, zi))
-        point_data_array.SetValue(point_id, vi)
-
-    data_source.GetPointData().AddArray(point_data_array)
-
-    writer = vtk.vtkXMLImageDataWriter()
-    writer.SetFileName(handle)
-    writer.SetInput(data_source)
-    writer.Write()
-
-    return True
+    :type handle: str
+    :type array: :py:class:`numpy.ndarray`
+    """
+    vtkImageData = lm.vtkutils.create_image_data_from_array(array, **kwargs)
+    lm.vtkutils.save_image_data(handle, vtkImageData)
 
 def save(handle, obj, *args, **kwargs):
     """
