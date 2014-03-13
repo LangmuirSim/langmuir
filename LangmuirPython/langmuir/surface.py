@@ -129,9 +129,9 @@ def save(handle, obj, *args, **kwargs):
     csv   :py:meth:`surface.load_ascii`
     txt   :py:meth:`surface.load_ascii`
     dat   :py:meth:`surface.load_ascii`
-    png   :py:meth:`scipy.ndimage.imread`
-    jpg   :py:meth:`scipy.ndimage.imread`
-    jpeg  :py:meth:`scipy.ndimage.imread`
+    png   :py:meth:`scipy.misc.imsave`
+    jpg   :py:meth:`scipy.misc.imsave`
+    jpeg  :py:meth:`scipy.misc.imsave`
     ===== ===================================
 
     :param handle: filename
