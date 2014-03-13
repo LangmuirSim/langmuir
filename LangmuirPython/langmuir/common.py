@@ -64,7 +64,7 @@ def zhandle(handle, mode='rb'):
 def tail(handle, n=1, mode='python'):
     """
     Return last n lines of a file.  The python version is much faster than
-    a system call.
+    a system call.  The python version works on gzipped files.
 
     :param handle: filename
     :param n: lines
