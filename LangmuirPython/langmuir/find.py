@@ -451,3 +451,24 @@ def slice_run(path):
     '/system/run'
     """
     return slice_path(path, 'run')
+
+def slice_system(path):
+    """
+    Return dirname of path where system directory is.
+
+    :param path: path to parse
+    :type path: str
+
+    >>> print slice_path('r/system/run/sim/part')
+    '/system'
+    """
+    return os.path.dirname(slice_run(path))
+
+def extract_system(path):
+    """
+    Extract system name from path.
+
+    :param path: path to parse
+    :type path: str
+    """
+    return os.path.basename(slice_system(path))
