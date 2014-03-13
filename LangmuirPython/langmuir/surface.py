@@ -833,7 +833,7 @@ class FFT1D(FFT):
 
     def __str__(self):
         s  = '[FFT1D]\n'
-        s += '  %-6s = %s, %s\n' % ('shape', (self.n0))
+        s += '  %-6s = %s\n' % ('shape', self.n0)
         return s
 
 class FFT2D(FFT):
@@ -907,7 +907,7 @@ class FFT2D(FFT):
 
     def __str__(self):
         s  = '[FFT2D]\n'
-        s += '  %-6s = %s, %s\n' % ('shape', (self.n0, self.n1))
+        s += '  %-6s = %s, %s\n' % ('shape', self.n0, self.n1)
         return s
 
 class FFT3D(FFT):
@@ -994,5 +994,5 @@ class FFT3D(FFT):
 
     def __str__(self):
         s  = '[FFT3D]\n'
-        s += '  %-6s = %s, %s\n' % ('shape', (self.n0, self.n1, self.n2))
+        s += '  %-6s = %s, %s, %s\n' % ('shape', self.n0, self.n1, self.n2)
         return s

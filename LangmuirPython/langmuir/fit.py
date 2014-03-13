@@ -357,8 +357,8 @@ class FitLinear(FitPower):
     r""":math:`m x + b`"""
     def __init__(self, x, y, popt=None, yerr=None):
         FitPower.__init__(self, x, y, 1, popt, yerr)
-        self.m = self.popt[0]
-        self.b = self.popt[1]
+        self.m = float(self.popt[0])
+        self.b = float(self.popt[1])
         self.a = _np.rad2deg(_np.arctan2(self.m, 1))
         self.elabel = r'$\mathtt{y=%g x %+g}$' % (self.m, self.b)
         self.alabel = r'$\mathtt{%.2f^{\circ}}$' % (self.a)
