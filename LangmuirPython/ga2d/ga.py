@@ -103,13 +103,13 @@ def score_filenames(filenames, pool=None):
     :param filenames: image file names
     :param pool: multiprocessing thread pool
 
-    :type filename: list of str
+    :type filenames: list of str
     :type pool: ?
     """    
     # analyze all these files and push into a list of (score, filename) tuples
     start = time.time()
 
-    if pool == None:
+    if pool is None:
         scores = map(score, filenames)
     else:
         scores = pool.map(score, filenames)

@@ -43,7 +43,7 @@ def granulometry(data, sizes=None):
     :type sizes: tuple
     """
     s = max(data.shape)
-    if sizes == None:
+    if sizes is None:
         sizes = range(1, s/2, 2)
     granulo = [ndimage.binary_opening(data,
                structure=disk_structure(n)).sum() for n in sizes]
