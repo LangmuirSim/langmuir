@@ -5,6 +5,7 @@
 
 .. moduleauthor:: Adam Gagorik <adam.gagorik@gmail.com>
 """
+from subprocess import check_output, CalledProcessError
 import collections
 import pickle
 import gzip
@@ -37,6 +38,45 @@ def zhandle(handle, mode='rb'):
     except AttributeError:
         pass
     return handle
+
+def tail(handle, n=1, mode='python'):
+    """
+    Return last n lines of a file.  The python version is much faster than
+    a system call.
+
+    :param handle: filename
+    :param n: lines
+    :param mode: python or subprocess
+
+    :type handle: str
+    :type n: int
+    :type mode: str
+
+    >>> lines = tail('out.dat', 1)
+    """
+    if mode == 'python':
+        lines = [l.rstrip() for l in collections.deque(
+            zhandle(handle, 'rb'), n)]
+    else:
+        if not isinstance(handle, str):
+            try:
+                 handle = handle.name
+            except AttributeError:
+                pass
+
+        command = 'tail -n {n:d} {handle}'.format(n=n, handle=handle)
+
+        try:
+            lines = check_output(command.strip().split())
+        except (CalledProcessError, OSError):
+            return tail(handle, n, mode='python')
+
+    if lines:
+        if len(lines) == 1:
+            return lines[0]
+        return lines
+
+    return None
 
 def splitext(handle, *args, **kwargs):
     """
