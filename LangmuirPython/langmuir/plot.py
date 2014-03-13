@@ -533,19 +533,22 @@ class PeakFinder:
         self.draw()
 
 
-    def find_ymax(self, x_data, y_data):
+    @staticmethod
+    def find_ymax(x_data, y_data):
         i = np.argmax(y_data)
         x = x_data[i]
         y = y_data[i]
         return x, y
 
-    def find_ymin(self, x_data, y_data):
+    @staticmethod
+    def find_ymin(x_data, y_data):
         i = np.argmin(y_data)
         x = x_data[i]
         y = y_data[i]
         return x, y
 
-    def find_extrema(self, x_data, y_data):
+    @staticmethod
+    def find_extrema(x_data, y_data):
         if x_data.size == 1 and y_data.size == 1:
             return x_data[0], y_data[0]
 
@@ -608,7 +611,8 @@ class PeakFinder:
         else:
             self.message('no peaks')
 
-    def message(self, string):
+    @staticmethod
+    def message(string):
         print 'PeakFinder : %s' % string
 
     def draw(self):

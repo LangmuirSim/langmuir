@@ -770,7 +770,8 @@ class FFT(object):
     def __init__(self):
         pass
 
-    def _delta(self, a, s0, s1):
+    @staticmethod
+    def _delta(a, s0, s1):
         a = np.asanyarray(a)
         try:
             delta = abs(a[s1] - a[s0])
