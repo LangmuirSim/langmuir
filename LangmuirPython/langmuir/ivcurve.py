@@ -489,7 +489,7 @@ class IVCurveSolar(IVCurve):
             p_popt = None
             r_popt = None
 
-        order = order + 1
+        order += 1
 
         self.pfit = lm.fit.FitPower(self.v, self.p,
             popt=p_popt, yerr=self.perr, order=order)

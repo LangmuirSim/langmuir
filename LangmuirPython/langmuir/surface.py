@@ -654,8 +654,8 @@ class GaussianKernel(Kernel):
 
     def __str__(self):
         s = '[Kernel]\n'
-        s = s + '  %-7s = %s\n' % ('shape', self.v.shape)
-        s = s + '  %-7s = %s\n' % ('spacing', self.spacing)
+        s += '  %-7s = %s\n' % ('shape', self.v.shape)
+        s += '  %-7s = %s\n' % ('spacing', self.spacing)
         return s
 
 class Isotropic(object):
@@ -723,12 +723,12 @@ class Isotropic(object):
 
     def __str__(self):
         s = '[Isotropic]\n'
-        s = s + '  %-6s = %s, %s\n' % ('grid', self.grid.shape,
-            self.z_grid.shape  )
-        s = s + '  %-6s = %s, %s\n' % ('noise', self.noise.shape,
-            self.z_noise.shape )
-        s = s + '  %-6s = %s, %s\n' % ('image', self.image.shape,
-            self.z_image.shape )
+        s += '  %-6s = %s, %s\n' % ('grid', self.grid.shape,
+                                    self.z_grid.shape  )
+        s += '  %-6s = %s, %s\n' % ('noise', self.noise.shape,
+                                    self.z_noise.shape )
+        s += '  %-6s = %s, %s\n' % ('image', self.image.shape,
+                                    self.z_image.shape )
         return s
 
 def f_isotropic(x, y, z, sx, sy, sz, full=False):

@@ -118,9 +118,9 @@ def zoom(axis=None, factor=0.05, l=None, r=None, t=None, b=None):
     if t == None: t = factor
     if b == None: b = factor
     l = 0 - l
-    r = 1 + r
+    r += 1
     b = 0 - b
-    t = 1 + t
+    t += 1
     transform = lambda x,y : axis.transData.inverted().transform(
         axis.transAxes.transform((x,y)))
     xmin, ymin = transform(l,b)
@@ -296,8 +296,8 @@ class BarPlot(object):
         if bottom:
             y0 = 0.0
         x0, y0 = taxes.inverted().transform(blend.transform((x0, y0)))
-        x0 = x0 - 0.5 * w
-        y0 = y0 - 0.5 * h
+        x0 -= 0.5 * w
+        y0 -= 0.5 * h
         line_kwargs = dict(transform=taxes, clip_on=False, zorder=zorder + 1,
                            color='k', lw=2, ls='-')
         rect_kwargs = dict(transform=taxes, clip_on=False, zorder=zorder,
