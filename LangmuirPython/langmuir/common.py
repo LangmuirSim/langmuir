@@ -37,7 +37,7 @@ except ImportError:
         bc = [1 for i in range(0,k+1)]
         for j in range(1, N - k + 1):
             for i in range(1, k + 1):
-                bc[i] = bc[i-1] + bc[i]
+                bc[i] += bc[i - 1]
         return bc[k]
 
 def zhandle(handle, mode='rb'):
