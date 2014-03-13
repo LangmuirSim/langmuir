@@ -6,5 +6,5 @@ setup(name         = "Langmuir Python",
       author       = "Adam Gagorik",
       author_email = "adam.gagorik@gmail.com",
       packages     = ["langmuir"],
-      requires     = ['numpy', 'scipy']
+      requires     = ['numpy', 'scipy', 'matplotlib', 'pandas']
 )
