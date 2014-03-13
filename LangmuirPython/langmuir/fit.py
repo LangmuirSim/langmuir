@@ -412,7 +412,7 @@ class FitInterp1D(Fit):
         _kwargs = dict(kind='cubic', fill_value=_np.nan, bounds_error=False)
         _kwargs.update(**kwargs)
         self.func = _interpolate.interp1d(self.x, self.y, **_kwargs)
-        setattr(self, '__call__', func)
+        setattr(self, '__call__', self.func)
         self._calculate_rsquared()
 
 class FitUnivariateSpline(Fit):
@@ -432,7 +432,7 @@ class FitUnivariateSpline(Fit):
         _kwargs = dict(k=5)
         _kwargs.update(**kwargs)
         self.func = _interpolate.UnivariateSpline(self.x, self.y, **_kwargs)
-        setattr(self, '__call__', func)
+        setattr(self, '__call__', self.func)
         self._calculate_rsquared()
 
 class FitLagrange(Fit):
@@ -447,7 +447,7 @@ class FitLagrange(Fit):
 
     def _fit(self):
         self.func = _interpolate.lagrange(self.x, self.y)
-        setattr(self, '__call__', func)
+        setattr(self, '__call__', self.func)
         self._calculate_rsquared()
 
 class FitBarycentric(Fit):
