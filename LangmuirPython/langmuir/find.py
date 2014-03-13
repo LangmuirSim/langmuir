@@ -47,7 +47,8 @@ def find(work, r=False, single=True, absolute=True, stub='*', ext=None,
     work = os.path.expanduser(work)
 
     search = stub
-    if not ext == None: search += '.%s' % ext.rstrip('.')
+    if not ext is None:
+        search += '.%s' % ext.rstrip('.')
 
     result  = []
 
@@ -68,7 +69,7 @@ def find(work, r=False, single=True, absolute=True, stub='*', ext=None,
     if not absolute:
         result = [os.path.relpath(i,work) for i in result]
 
-    if not sort_by == None:
+    if not sort_by is None:
         result.sort(key=sort_by)
 
     if single:

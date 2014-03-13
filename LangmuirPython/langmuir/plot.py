@@ -116,10 +116,10 @@ def zoom(axis=None, factor=0.05, l=None, r=None, t=None, b=None):
     Zoom out.
     """
     if axis is None: axis = plt.gca()
-    if l == None: l = factor
-    if r == None: r = factor
-    if t == None: t = factor
-    if b == None: b = factor
+    if l is None: l = factor
+    if r is None: r = factor
+    if t is None: t = factor
+    if b is None: b = factor
     l = 0 - l
     r += 1
     b = 0 - b
@@ -377,7 +377,7 @@ class PeakFinder:
         self.prop_ytext_loc = 1.02
 
         self.handle = handle
-        if self.handle == None:
+        if self.handle is None:
             self.handle = 'peaks.dat'
 
         self.callback = callback

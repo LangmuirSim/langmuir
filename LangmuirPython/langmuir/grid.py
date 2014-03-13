@@ -237,17 +237,17 @@ class Grid(object):
 
     @property
     def mx(self):
-        if self._mx == None:
+        if self._mx is None:
             self._create_mgrid()
         return self._mx
     @property
     def my(self):
-        if self._my == None:
+        if self._my is None:
             self._create_mgrid()
         return self._my
     @property
     def mz(self):
-        if self._mz == None:
+        if self._mz is None:
             self._create_mgrid()
         return self._mz
     @property
@@ -259,17 +259,17 @@ class Grid(object):
 
     @property
     def ox(self):
-        if self._ox == None:
+        if self._ox is None:
             self._create_ogrid()
         return self._ox
     @property
     def oy(self):
-        if self._oy == None:
+        if self._oy is None:
             self._create_ogrid()
         return self._oy
     @property
     def oz(self):
-        if self._oz == None:
+        if self._oz is None:
             self._create_ogrid()
         return self._oz
     @property
