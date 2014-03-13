@@ -562,8 +562,7 @@ class PrecalculatedMesh:
 
         return q * potential
 
-    def distances(self, xi_ids, yi_ids, zi_ids, xj_ids=[], yj_ids=[],
-                  zj_ids=[]):
+    def distances(self, xi_ids, yi_ids, zi_ids, xj_ids=None, yj_ids=None, zj_ids=None):
         """
         Compute all distances between i's, or compute all distances between
         i's and j's
@@ -585,6 +584,15 @@ class PrecalculatedMesh:
         >>> mesh = lm.grid.PrecalculatedMesh(grid)
         >>> dist = mesh.distances(0, 0, 0, 1, 1, 1)
         """
+        if not xj_ids:
+            xj_ids = []
+
+        if not yj_ids:
+            yj_ids = []
+
+        if not zj_ids:
+            zj_ids = []
+
         xi_ids = np.asarray(xi_ids)
         yi_ids = np.asarray(yi_ids)
         zi_ids = np.asarray(zi_ids)
