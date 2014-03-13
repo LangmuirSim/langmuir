@@ -5,5 +5,6 @@ setup(name         = "Langmuir Python",
       description  = "Langmuir Python",
       author       = "Adam Gagorik",
       author_email = "adam.gagorik@gmail.com",
-      packages     = ["langmuir"]
+      packages     = ["langmuir"],
+      requires     = ['numpy', 'scipy']
 )
