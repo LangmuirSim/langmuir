@@ -14,6 +14,9 @@ import sys
 import os
 
 class colors:
+    def __init__(self):
+        pass
+
     r1 = '#fe2712'
     r2 = '#fd5308'
     o1 = '#fb9902'

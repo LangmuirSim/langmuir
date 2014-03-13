@@ -31,6 +31,9 @@ class IVCurve(object):
         :py:class:`IVCurveSolar`
     """
     class units:
+        def __init__(self):
+            pass
+
         try:
             i = units.nA
             v = units.V
@@ -47,6 +50,9 @@ class IVCurve(object):
             r = None
 
     class latex:
+        def __init__(self):
+            pass
+
         i = r'\ensuremath{nA}'
         v = r'\ensuremath{V}'
         p = r'\ensuremath{nW}'
@@ -55,6 +61,9 @@ class IVCurve(object):
         r = r'\ensuremath{mW\,cm^{-2}}'
 
     class string:
+        def __init__(self):
+            pass
+
         i = r'nA'
         v = r'V'
         p = r'nW'
@@ -63,6 +72,9 @@ class IVCurve(object):
         r = r'mW/cm**2'
 
     class columns:
+        def __init__(self):
+            pass
+
         i = r'drain:current'
         v = r'voltage.right'
         x = r'grid.x'
@@ -136,6 +148,9 @@ class IVCurve(object):
         self.rerr = np.asanyarray(self.rerr.magnitude)
 
         class stats:
+            def __init__(self):
+                pass
+
             i = lm.analyze.Stats(self.i, 'i')
             v = lm.analyze.Stats(self.v, 'v')
             p = lm.analyze.Stats(self.p, 'p')
@@ -323,6 +338,9 @@ class IVCurveSolar(IVCurve):
     """
 
     class latex(IVCurve.latex):
+        def __init__(self):
+            pass
+
         f    = r'\%'
         v_oc = r'\ensuremath{v_{oc}}'
         i_sc = r'\ensuremath{i_{sc}}'
@@ -337,6 +355,9 @@ class IVCurveSolar(IVCurve):
         fill = r'\ensuremath{FF}'
 
     class string(IVCurve.string):
+        def __init__(self):
+            pass
+
         f    = r'%'
         v_oc = r'v_oc'
         i_sc = r'i_sc'
