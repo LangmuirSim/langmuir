@@ -214,6 +214,15 @@ class TestFit(unittest.TestCase):
         self.assertAlmostEquals(f.m/m, 1.0, 0)
         self.assertAlmostEquals(f.b/b, 1.0, 0)
 
+    def test_fit_power(self):
+        x = np.linspace(-10, 10, 100)
+        y = 4.12 * x ** 2 + 3.45 * x + 1.23
+        y = y + np.random.normal(0, 0.05, y.size)
+        f = lm.fit.FitPower(x, y, 2)
+        self.assertAlmostEquals(f.popt[0], 4.12, 1)
+        self.assertAlmostEquals(f.popt[1], 3.45, 1)
+        self.assertAlmostEquals(f.popt[2], 1.23, 1)
+
 class TestSurface(unittest.TestCase):
     def test_FFT(self):
         grid = lm.grid.Grid(32, 32, 32)
