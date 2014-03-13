@@ -14,6 +14,7 @@ try:
     import scipy.ndimage as ndimage
     import scipy.signal as signal
     import scipy.stats as stats
+    import scipy.misc as misc
 except ImportError:
     pass
 
@@ -59,7 +60,28 @@ def load_ascii(handle, square=False, cube=False, shape=None, **kwargs):
 
 def load(handle, *args, **kwargs):
     """
-    Load surface from file.
+    Load surface from file.  Takes into account the file extension.
+
+    ===== ===============================
+    *ext* *func*
+    ===== ===============================
+    pkl   :py:meth:`common.load_pkl`
+    npy   :py:func:`numpy.load`
+    csv   :py:meth:`surface.load_ascii`
+    txt   :py:meth:`surface.load_ascii`
+    dat   :py:meth:`surface.load_ascii`
+    png   :py:meth:`scipy.ndimage.imread`
+    jpg   :py:meth:`scipy.ndimage.imread`
+    jpeg  :py:meth:`scipy.ndimage.imread`
+    ===== ===============================
+
+    :param handle: filename
+    :type handle: str
+
+    :return: image
+    :rtype: :py:class:`numpy.ndarray`
+
+    .. warning:: image file (png, jpg, etc) data is forced into range [0,255].
     """
     stub, ext = lm.common.splitext(handle)
 
@@ -69,7 +91,17 @@ def load(handle, *args, **kwargs):
     if ext == '.npy':
         return np.load(handle, *args, **kwargs)
 
-    return lm.surface.load_ascii(handle, *args, **kwargs)
+    if ext in ['.csv', '.txt', '.dat']:
+        return lm.surface.load_ascii(handle, *args, **kwargs)
+
+    if ext in ['.png', '.jpg', '.jpeg']:
+        _kwargs = dict(flatten=True)
+        _kwargs.update(**kwargs)
+        image = ndimage.imread(handle, *args, **_kwargs)
+        image = np.rot90(image, -1)
+        return image
+
+    raise RuntimeError, 'ext=%s not supported' % ext
 
 def save_vti(handle, array, **kwargs):
     """
@@ -88,8 +120,27 @@ def save(handle, obj, *args, **kwargs):
     """
     Save object to a file.  Takes into account the file extension.
 
+    ===== ===================================
+    *ext* *func*
+    ===== ===================================
+    pkl   :py:meth:`common.load_pkl`
+    npy   :py:func:`numpy.load`
+    vti   :py:meth:`vtkutils.save_image_data`
+    csv   :py:meth:`surface.load_ascii`
+    txt   :py:meth:`surface.load_ascii`
+    dat   :py:meth:`surface.load_ascii`
+    png   :py:meth:`scipy.ndimage.imread`
+    jpg   :py:meth:`scipy.ndimage.imread`
+    jpeg  :py:meth:`scipy.ndimage.imread`
+    ===== ===================================
+
     :param handle: filename
     :param obj: object to save
+
+    :type handle: str
+    :type array: :py:class:`numpy.ndarray`
+
+    .. warning:: image file (png, jpg, etc) data is forced into range [0,255].
     """
     stub, ext = lm.common.splitext(handle)
 
@@ -105,7 +156,7 @@ def save(handle, obj, *args, **kwargs):
         lm.surface.save_vti(handle, obj, **kwargs)
         return handle
 
-    if ext == '.csv':
+    if ext in ['.csv', '.txt', '.dat']:
         _kwargs = dict(fmt='%+.18e', sep=',')
         _kwargs.update(**kwargs)
         try:
@@ -117,16 +168,11 @@ def save(handle, obj, *args, **kwargs):
             np.savetxt(handle, obj, **_kwargs)
         return handle
 
-    _kwargs = dict(fmt='%+.18e', delimiter=',')
-    _kwargs.update(**kwargs)
-    try:
-        np.savetxt(handle, obj, **_kwargs)
-    except TypeError:
-        handle = lm.common.zhandle(handle, 'wb')
-        print >> handle, '# ' + ' '.join([str(s) for s in obj.shape])
-        obj = np.reshape(obj, obj.size)
-        np.savetxt(handle, obj, **_kwargs)
-    return handle
+    if ext in ['.png', '.jpg', '.jpeg']:
+        misc.imsave(handle, obj)
+        return handle
+
+    raise RuntimeError, 'ext=%s not supported' % ext
 
 def threshold(a, v=0, v0=0, v1=1, copy=False):
     """
