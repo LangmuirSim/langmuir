@@ -18,6 +18,25 @@ try:
 except ImportError:
     pass
 
+def make_3D(array):
+    """
+    Force the numpy array passed to be 3D via :py:func:`np.expand_dims`.
+
+    :param array: numpy array
+    :type array: :py:class:`numpy.ndarray`
+    """
+    ndims = len(array.shape)
+    if ndims >= 3:
+        return array
+
+    if ndims == 2:
+        return np.expand_dims(array, 2)
+
+    if ndims == 1:
+        return np.expand_dims(np.expand_dims(array, 1), 1)
+
+    raise RuntimeError, 'can not expand dimensions'
+
 def load_ascii(handle, square=False, cube=False, shape=None, **kwargs):
     """
     Wrapper around np.loadtxt.  Forces data to be at least 3 dimensions.
@@ -51,14 +70,9 @@ def load_ascii(handle, square=False, cube=False, shape=None, **kwargs):
         image = np.reshape(image, shape)
 
     # force data to be 3D
-    if len(image.shape) == 1:
-        image = np.expand_dims(np.expand_dims(image, 1), 1)
-    if len(image.shape) == 2:
-        image = np.expand_dims(image, 2)
+    return make_3D(image)
 
-    return image
-
-def load(handle, *args, **kwargs):
+def load(handle, rot90=-1, **kwargs):
     """
     Load surface from file.  Takes into account the file extension.
 
@@ -76,30 +90,40 @@ def load(handle, *args, **kwargs):
     ===== ===============================
 
     :param handle: filename
+    :param rot90: number of times to rotate image by 90 degrees
+
     :type handle: str
+    :type rot90: int
 
     :return: image
     :rtype: :py:class:`numpy.ndarray`
 
-    .. warning:: image file (png, jpg, etc) data is forced into range [0,255].
+    .. warning::
+        image file (png, jpg, etc) data is forced into range [0,255].
+
+    .. warning::
+        data is always made 3D via :py:func:`numpy.expand_dims`
+
+    .. warning::
+        image data is rotated by -90 degrees.
     """
     stub, ext = lm.common.splitext(handle)
 
     if ext == '.pkl':
-        return lm.common.load_pkl(handle, *args, **kwargs)
+        return make_3D(lm.common.load_pkl(handle, **kwargs))
 
     if ext == '.npy':
-        return np.load(handle, *args, **kwargs)
+        return make_3D(np.load(handle, **kwargs))
 
     if ext in ['.csv', '.txt', '.dat']:
-        return lm.surface.load_ascii(handle, *args, **kwargs)
+        return lm.surface.load_ascii(handle, **kwargs)
 
     if ext in ['.png', '.jpg', '.jpeg']:
         _kwargs = dict(flatten=True)
         _kwargs.update(**kwargs)
-        image = ndimage.imread(handle, *args, **_kwargs)
-        image = np.rot90(image, -1)
-        return image
+        image = ndimage.imread(handle, **_kwargs)
+        image = np.rot90(image, rot90)
+        return make_3D(image)
 
     raise RuntimeError, 'ext=%s not supported' % ext
 
@@ -116,7 +140,7 @@ def save_vti(handle, array, **kwargs):
     vtkImageData = lm.vtkutils.create_image_data_from_array(array, **kwargs)
     lm.vtkutils.save_image_data(handle, vtkImageData)
 
-def save(handle, obj, *args, **kwargs):
+def save(handle, obj, zlevel=0, **kwargs):
     """
     Save object to a file.  Takes into account the file extension.
 
@@ -136,11 +160,17 @@ def save(handle, obj, *args, **kwargs):
 
     :param handle: filename
     :param obj: object to save
+    :param zlevel: slice z-index
 
     :type handle: str
     :type array: :py:class:`numpy.ndarray`
+    :type zlevel: int
 
-    .. warning:: image file (png, jpg, etc) data is forced into range [0,255].
+    .. warning::
+        image file (png, jpg, etc) data is forced into range [0,255].
+
+    .. warning::
+        if ndims is 3 and an image file is being saved, only a slice is saved.
     """
     stub, ext = lm.common.splitext(handle)
 
@@ -169,6 +199,8 @@ def save(handle, obj, *args, **kwargs):
         return handle
 
     if ext in ['.png', '.jpg', '.jpeg']:
+        if len(obj.shape) > 2:
+            obj = obj[:,:,zlevel]
         misc.imsave(handle, obj)
         return handle
 
