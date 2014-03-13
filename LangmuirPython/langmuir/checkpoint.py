@@ -12,7 +12,8 @@ import collections
 try:
     import scipy.ndimage as ndimage
 except ImportError:
-    pass
+    ndimage = None
+
 
 class CheckPoint(object):
     """
@@ -36,14 +37,14 @@ class CheckPoint(object):
     """
 
     def __init__(self, handle=None):
-        self._electrons      = []
-        self._holes          = []
-        self._traps          = []
-        self._defects        = []
-        self._potentials     = []
-        self._flux_state     = []
-        self._random_state   = []
-        self._parameters     = lm.parameters.Parameters()
+        self._electrons = []
+        self._holes = []
+        self._traps = []
+        self._defects = []
+        self._potentials = []
+        self._flux_state = []
+        self._random_state = []
+        self._parameters = lm.parameters.Parameters()
         if handle:
             self.load(handle)
 
@@ -93,6 +94,7 @@ class CheckPoint(object):
     @property
     def electrons(self):
         return self._electrons
+
     @electrons.setter
     def electrons(self, value):
         self._electrons = list(value)
@@ -100,6 +102,7 @@ class CheckPoint(object):
     @property
     def holes(self):
         return self._holes
+
     @holes.setter
     def holes(self, value):
         self._holes = list(value)
@@ -107,6 +110,7 @@ class CheckPoint(object):
     @property
     def traps(self):
         return self._traps
+
     @traps.setter
     def traps(self, value):
         self._traps = list(value)
@@ -115,6 +119,7 @@ class CheckPoint(object):
     @property
     def defects(self):
         return self._defects
+
     @defects.setter
     def defects(self, value):
         self._defects = list(value)
@@ -122,6 +127,7 @@ class CheckPoint(object):
     @property
     def potentials(self):
         return self._potentials
+
     @potentials.setter
     def potentials(self, value):
         self._potentials = list(value)
@@ -129,6 +135,7 @@ class CheckPoint(object):
     @property
     def flux_state(self):
         return self._flux_state
+
     @flux_state.setter
     def flux_state(self, value):
         self._flux_state = list(value)
@@ -136,6 +143,7 @@ class CheckPoint(object):
     @property
     def random_state(self):
         return self._random_state
+
     @random_state.setter
     def random_state(self, value):
         self._random_state = list(value)
@@ -173,7 +181,7 @@ class CheckPoint(object):
                 self._flux_state = self._load_values(handle, int)
             elif line == '[RandomState]':
                 self._random_state = [int(i.strip()) for i in
-                    handle.readline().strip().split()]
+                                      handle.readline().strip().split()]
             elif line == '[Parameters]':
                 self._parameters.load(handle)
             else:
@@ -233,7 +241,7 @@ class CheckPoint(object):
         self._random_state = []
         self._parameters.clear()
 
-    def reset(self, keep_elecs=False, keep_holes=False, traps=True, defects=True):
+    def reset(self, keep_elecs=False, keep_holes=False):
         """
         Reset a simulation.
 
@@ -259,50 +267,53 @@ class CheckPoint(object):
         parameter names, underscores are replaced by dots in they key=value
         pairs.
         """
-        if args:
-            _args = []
-            for arg in args:
-                if isinstance(arg, lm.checkpoint.CheckPoint):
-                    self._parameters.update(arg.parameters)
-                else:
-                    _args.append(arg)
-        else:
-            _args = args
-
-        _kwargs = {}
+        for arg in args:
+            try:
+                self._parameters.update(arg.parameters)
+            except AttributeError:
+                self._parameters.update(arg)
         for key, value in kwargs.iteritems():
-            if isinstance(value, lm.checkpoint.CheckPoint):
-                print '!'
+            try:
                 self._parameters.update(value.parameters)
-            else:
-                _kwargs[key] = value
+            except AttributeError:
+                self._parameters.update(key=value)
 
-        self._parameters.update(*_args, **_kwargs)
-
-    def _load_values(self, handle, type_=int):
+    @staticmethod
+    def _load_values(handle, type_):
         """
         Read lines from handle and convert them to type_.
+
+        :param handle: file handle
+        :param type_: type
         """
         count = int(handle.readline().strip())
         values = [type_(handle.readline().strip()) for i in range(count)]
         return values
 
-    def _save_values(self, handle, values):
+    @staticmethod
+    def _save_values(handle, values):
         """
         Write values to handle.
+
+        :param handle: file handle
+        :param values: list of values
         """
         print >> handle, len(values)
         for v in values:
             print >> handle, v
 
-    def _save_label(self, handle, label):
+    @staticmethod
+    def _save_label(handle, label):
         """
         Write section header to handle.
+
+        :param handle: fileane
+        :param label: section header
         """
         print >> handle, '[%s]' % label
 
     def __str__(self):
-        s  = ''
+        s = ''
         s += '[Electrons]     : %d\n' % len(self._electrons)
         s += '[Holes]         : %d\n' % len(self._holes)
         s += '[Traps]         : %d\n' % len(self._traps)
@@ -314,14 +325,14 @@ class CheckPoint(object):
         s += str(self._parameters)
         return s
 
-    def has_key(self, key, *args, **kwargs):
+    def has_key(self, key):
         """
         Check if key exists in parameters.
 
         :return: True if key found
         :rtype: :py:obj:`bool`
         """
-        return self._parameters.has_key(key, *args, **kwargs)
+        return key in self._parameters
 
     def fix_traps(self):
         """
@@ -350,20 +361,20 @@ class CheckPoint(object):
                 except KeyError:
                     value = 0.5
 
-            if not self._parameters.has_key('grid.x'):
+            if not 'grid.x' in self._parameters:
                 self['grid.x'] = 1
 
-            if not self._parameters.has_key('grid.y'):
+            if not 'grid.y' in self._parameters:
                 self['grid.y'] = 1
 
-            if not self._parameters.has_key('grid.z'):
+            if not 'grid.z' in self._parameters:
                 self['grid.z'] = 1
 
             volume = self['grid.x'] * self['grid.y'] * self['grid.z']
 
             if not size <= volume:
                 raise RuntimeError('number of traps exceeds volume: %d > %d'
-                    % (size, volume))
+                                   % (size, volume))
 
             percentage = (size + 0.25) / volume
 
@@ -388,6 +399,7 @@ class CheckPoint(object):
         """
         self._parameters[key] = value
 
+
 def load(handle):
     """
     Load checkpoint file.
@@ -403,6 +415,7 @@ def load(handle):
     if isinstance(handle, CheckPoint):
         return handle
     return CheckPoint(handle)
+
 
 def load_last(work, **kwargs):
     """
@@ -422,15 +435,16 @@ def load_last(work, **kwargs):
     last = lm.find.chks(work, **_kwargs)[-1]
     return load(last)
 
+
 def compare(chk1, chk2):
     """
     Rigorously compare to checkpoint files.
 
-    :param chk_i: checkpoint object 1
-    :param chk_j: checkpoint object 1
+    :param chk1: checkpoint object 1
+    :param chk2: checkpoint object 1
 
-    :type chk_i: lm.checkpoint.CheckPoint
-    :type chk_j: lm.checkpoint.CheckPoint
+    :type chk1: lm.checkpoint.CheckPoint
+    :type chk2: lm.checkpoint.CheckPoint
 
     :returns: a dictionary of results
     :rtype: :py:class:`collections.OrderedDict`

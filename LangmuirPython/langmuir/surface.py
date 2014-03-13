@@ -243,7 +243,6 @@ def linear_mapping(array, n=0.0, m=1.0):
     :param n: lower bound
     :param m: upper bound
 
-    :type array: list
     :type n: float
     :type m: float
     """
