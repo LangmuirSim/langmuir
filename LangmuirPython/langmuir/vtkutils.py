@@ -137,7 +137,7 @@ def pipe(i, o):
         else:
             o.SetInputData(i)
 
-def filter_marching_cubes(vtkObject, isovalue=0.0):
+def filter_marching_cubes(vtkObject, isovalue=1e-5):
     """
     Create vtkMarchingCubes filter on vtkObject.
 
@@ -159,6 +159,29 @@ def filter_marching_cubes(vtkObject, isovalue=0.0):
     cubes.ComputeNormalsOn()
 
     return cubes
+
+def filter_marching_squares(vtkObject, isovalue=1e-5):
+    """
+    Create vtkMarchingSquares filter on vtkObject.
+
+    :param vtkObject: input
+    :param isovalue: contour value
+
+    :param vtkObject: :py:class:`vtk.vtkObject`
+    :type isovalue: float
+
+    >>> image_data = create_image_data_from_array(surf)
+    >>> squares = filter_marching_cubes(image_data)
+    >>> show(squares)
+    """
+    squares = vtk.vtkMarchingSquares()
+    pipe(vtkObject, squares)
+
+    squares.SetValue(0, isovalue)
+    #squares.ComputeScalarsOn()
+    #squares.ComputeNormalsOn()
+
+    return squares
 
 def filter_curvature(vtkObject, mode='gaussian'):
     """
