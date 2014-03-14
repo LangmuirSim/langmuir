@@ -223,9 +223,9 @@ if __name__ == '__main__':
 
     two_pi = 2.0 * np.pi
 
-    u = two_pi * u
-    v = two_pi * v
-    w = two_pi * w
+    u *= two_pi
+    v *= two_pi
+    w *= two_pi
     k = np.sqrt(u**2 + v**2 + w**2)
 
     opts.klim = fix_limits(k, *opts.klim)

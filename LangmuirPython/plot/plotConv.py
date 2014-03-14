@@ -101,7 +101,7 @@ def calculate_bins(array):
     if brange[1] % 2 == 0:
         pass
     else:
-        brange[1] = brange[1] + 1
+        brange[1] += 1
     bins = int(brange[1] / bwidth)
     return bwidth, brange, bins
 

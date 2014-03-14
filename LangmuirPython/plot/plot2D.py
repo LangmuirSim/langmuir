@@ -178,8 +178,8 @@ if __name__ == '__main__':
             sys.exit(-1)
 
     if opts.units:
-        xlabel = xlabel + ' (%s)' % opts.units
-        ylabel = ylabel + ' (%s)' % opts.units
+        xlabel += ' (%s)' % opts.units
+        ylabel += ' (%s)' % opts.units
 
     fig, ax1 = lm.plot.subplots(1, 1, *opts.figure)
     smap = plt.contourf(x[s], y[s], image[s], opts.clevels, cmap=opts.cmap)

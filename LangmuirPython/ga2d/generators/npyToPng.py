@@ -51,6 +51,6 @@ if __name__ == '__main__':
         data = np.loadtxt(opts.ifile, dtype=np.uint8, delimiter=',')
 
     # scale the binary to a greyscale value
-    data = data * 255
+    data *= 255
 
     scipy.misc.imsave(opts.ofile, data)
