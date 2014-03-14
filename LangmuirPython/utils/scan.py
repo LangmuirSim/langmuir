@@ -206,6 +206,7 @@ class Scanner:
             self.values, sims)):
 
             last_index = this_index - 1
+            this_path = None
             last_sim = None
             this_chk = None
 

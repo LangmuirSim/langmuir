@@ -144,6 +144,11 @@ if __name__ == '__main__':
     if opts.threshold:
         image = lm.surface.threshold(image, v=opts.tvalue)
 
+    xlabel, ylabel = '', ''
+    x, y, s = None, None, None
+    xmin, xmax = None, None
+    ymin, ymax = None, None
+
     if opts.plane == 'xy':
         xlabel, ylabel = 'x', 'y'
         x, y = grid.mx, grid.my

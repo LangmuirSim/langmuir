@@ -47,7 +47,7 @@ if __name__ == '__main__':
 
     if ext == '.npy':
         data = np.load(opts.ifile)
-    elif ext == '.csv':
+    else:
         data = np.loadtxt(opts.ifile, dtype=np.uint8, delimiter=',')
 
     # scale the binary to a greyscale value
