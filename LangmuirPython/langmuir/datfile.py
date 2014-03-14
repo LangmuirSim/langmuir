@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 .. note::
     Functions for opening Langmuir output files.

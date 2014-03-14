@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 .. note::
     Functions for working with vtk
