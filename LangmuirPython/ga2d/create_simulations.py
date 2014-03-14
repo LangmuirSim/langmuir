@@ -11,23 +11,30 @@ desc = """
 Create simulations from images.
 """
 
+
 def get_arguments(args=None):
+    """
+    Get command line arguments.
+
+    :param args: list of argument strings
+    """
     parser = argparse.ArgumentParser()
     parser.description = desc
     parser.add_argument('--template', default='template.inp', type=str,
                         metavar='str', help='template input file')
-    opts = parser.parse_args(args)
+    options = parser.parse_args(args)
 
     try:
-        opts.template = lm.checkpoint.load(opts.template)
+        options.template = lm.checkpoint.load(options.template)
     except IOError as e:
-        if not opts.template == 'template.inp':
+        if not options.template == 'template.inp':
             raise e
-        opts.template = None
+        options.template = None
 
-    return opts
+    return options
 
-dfmt = "{name}_{chk[grid.x]}x{chk[grid.y]}x{chk[grid.z]}"
+
+default_format = "{name}_{chk[grid.x]}x{chk[grid.y]}x{chk[grid.z]}/run.0"
 
 if __name__ == '__main__':
     work = os.getcwd()
@@ -35,6 +42,10 @@ if __name__ == '__main__':
     pngs = lm.find.pngs(work)
 
     def sort_by(x):
+        """Sort by path.
+
+        :param x: path
+        """
         x = os.path.splitext(os.path.basename(x))[0]
         x = x.split('-')
         for i, val in enumerate(x):
@@ -43,7 +54,7 @@ if __name__ == '__main__':
             except ValueError:
                 x[i] = val
         return x
-    
+
     pngs.sort(key=sort_by)
 
     sims = os.path.join(work, 'sims')
@@ -65,13 +76,13 @@ if __name__ == '__main__':
 
         chk.fix_traps()
 
-        path = os.path.join(sims, dfmt.format(name=stub, chk=chk))
+        path = os.path.join(sims, default_format.format(name=stub, chk=chk))
         print path
 
         if os.path.exists(path):
             shutil.rmtree(path)
 
-        os.mkdir(path)
+        os.makedirs(path)
         os.chdir(path)
         chk.save('sim.inp')
         os.chdir(work)
