@@ -13,6 +13,7 @@ regex_false    = re.compile(r'false', re.IGNORECASE)
 regex_true     = re.compile(r'true', re.IGNORECASE)
 regex_number   = re.compile(r'((?:[-\+]?\d+\.?\d*)(?:[eE](?:[-\+])?\d+)?)')
 regex_run      = re.compile(r'.*run\.(\d+).*')
+regex_part     = re.compile(r'.*part\.(\d+).*')
 
 def number(string, index=0, pytype=float):
     """
@@ -84,5 +85,20 @@ def run(string):
     """
     try:
         return int(regex_run.findall(string)[0])
+    except IndexError:
+        return 0
+
+def part(string):
+    """
+    Extract part from string.
+
+    :param string: str
+    :type string: str
+
+    >>> print lm.regex.run('part.3')
+    3
+    """
+    try:
+        return int(regex_part.findall(string)[0])
     except IndexError:
         return 0
