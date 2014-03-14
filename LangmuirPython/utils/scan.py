@@ -270,7 +270,8 @@ class Scanner:
             if this_chk:
                 self.run(this_path)
 
-    def run(self, input_file):
+    @staticmethod
+    def run(input_file):
         """
         Run Langmuir on the input file and gzip the output
         """
