@@ -49,14 +49,14 @@ def makeIsotropic(width, height, radius = 4):
     # floating point between 0.0 - 1.0
     noise = np.random.random( (width, height) )
     scaled = ndimage.gaussian_filter(noise, sigma = radius)
-    return (scaled > scaled.mean())
+    return scaled > scaled.mean()
 
 if __name__ == '__main__':
     work = os.getcwd()
     opts = get_arguments()
 
     if opts.ofile is None:
-        opts.ofile = "Iso-%d.png" % (opts.radius)
+        opts.ofile = "Iso-%d.png" % opts.radius
 
     if opts.seed:
         np.random.seed(seed=opts.seed)
