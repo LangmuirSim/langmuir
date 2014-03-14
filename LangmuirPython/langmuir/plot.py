@@ -413,7 +413,7 @@ class PeakFinder:
                 self.message('callback function called')
                 try:
                     self.callback(self)
-                except:
+                except TypeError:
                     self.callback()
             else:
                 self.message('no callback function installed')

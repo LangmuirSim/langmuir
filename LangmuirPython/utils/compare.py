@@ -57,10 +57,10 @@ if __name__ == '__main__':
                     for k2, r2 in r1.iteritems():
                         try:
                             print '%-20s %-10s %-10s' % (k2, r2[0], r2[1])
-                        except:
+                        except TypeError:
                             print '%-20s %-10s' % (k2, r2)
                     print ''
-            except:
+            except KeyError:
                 pass
 
     print 'chk1: %s' % os.path.abspath(opts.chk1)

@@ -34,20 +34,12 @@ class IVCurve(object):
         def __init__(self):
             pass
 
-        try:
-            i = units.nA
-            v = units.V
-            p = units.nW
-            a = units.nm**2
-            j = units.mA/units.cm**2
-            r = units.mW/units.cm**2
-        except:
-            i = None
-            v = None
-            p = None
-            a = None
-            j = None
-            r = None
+        i = units.nA
+        v = units.V
+        p = units.nW
+        a = units.nm**2
+        j = units.mA/units.cm**2
+        r = units.mW/units.cm**2
 
     class latex:
         def __init__(self):
