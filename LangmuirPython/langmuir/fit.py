@@ -28,10 +28,7 @@ class Fit:
 
     .. warning:: Do not explicitly create Fit instance, its a base class.
 
-    >>> fit = Fit(xdata, ydata, func)
-    >>> x = np.linspace(0, 10, 100)
-    >>> y = fit(x)
-    >>> plt.plot(x, y, 'r-')
+    >>> fit = FitLinear([1, 2, 3], [4, 5, 6])
     """
 
     def __init__(self, x, y, func, popt=None, yerr=None):
@@ -58,6 +55,7 @@ class Fit:
         :type xmin: float
         :type xpoints: int
 
+        >>> fit = FitLinear([1, 2, 3], [4, 5, 6])
         >>> fit.plot(xmin=-1.0, xmax=1.0, xpoints=10, lw=2, color='blue')
         """
         if xmin is None:
@@ -91,6 +89,7 @@ class Fit:
         :type rotate: bool
         :type draw_behind: bool
 
+        >>> fit = FitLinear([1, 2, 3], [4, 5, 6])
         >>> fit.text('Hello!', 0.1, rotate=True, fontsize='large')
         """
         if transform is None:
@@ -138,6 +137,7 @@ class Fit:
         :type x0: float
         :type return_y: bool
 
+        >>> fit = FitLinear([1, 2, 3], [4, 5, 6])
         >>> xval, yval = fit.solve(y=0, x0=1.0)
         """
         _kwargs = dict()
@@ -168,6 +168,7 @@ class Fit:
         :type find_max: bool
         :type return_y: bool
 
+        >>> fit = FitLinear([1, 2, 3], [4, 5, 6])
         >>> xval, yval = fit.brute(a=-1, b=1)
         """
         if find_max:
@@ -200,6 +201,7 @@ class Fit:
         :type find_max: bool
         :type return_y: bool
 
+        >>> fit = FitLinear([1, 2, 3], [4, 5, 6])
         >>> xval, yval = fit.minimize(x0=0.1)
         """
         if find_max:
@@ -251,6 +253,7 @@ class Fit:
         :type xmin: float
         :type xpoints: int
 
+        >>> fit = FitLinear([1, 2, 3], [4, 5, 6])
         >>> func = fit.tangent(x=1.5)
         >>> print func(1.5)
         ... 0.0
@@ -274,6 +277,7 @@ class Fit:
         :type xmin: float
         :type xpoints: int
 
+        >>> fit = FitLinear([1, 2, 3], [4, 5, 6])
         >>> fit.plot_tangent(x=1.5, lw=2, color='blue')
         """
         f = self.tangent(x)

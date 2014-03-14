@@ -480,7 +480,7 @@ class PrecalculatedMesh:
     :type grid: :class:`Grid`
 
     >>> grid = lm.grid.Grid(5, 5, 5)
-    >>> mesh = lm.grid.Mesh(grid)
+    >>> mesh = lm.grid.PrecalculatedMesh(grid)
     """
     def __init__(self, grid):
         self.grid = grid

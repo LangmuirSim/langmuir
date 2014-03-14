@@ -6,12 +6,10 @@ ga_analyze.py
 .. moduleauthor:: Geoff Hutchison <geoffh@pitt.edu>
 """
 import sys
-import os
+from collections import deque
 
 from scipy import ndimage, misc
 import numpy as np
-
-from collections import deque
 
 desc = """
 Analysis of images for GA processing.

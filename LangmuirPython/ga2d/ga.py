@@ -10,17 +10,17 @@ ga.py
 
 .. moduleauthor:: Geoff Hutchison <geoffh@pitt.edu>
 """
-import scipy.misc as misc
-import numpy as np
 import argparse
 import heapq
 import random
-import math
 import glob
 import os
-
 from multiprocessing import Pool
 import time
+
+import scipy.misc as misc
+import numpy as np
+
 
 # our code
 import ga_analyze as analyze

@@ -10,12 +10,14 @@ rdf.py
 
 .. moduleauthor:: Adam Gagorik <adam.gagorik@gmail.com>
 """
-import langmuir as lm
-import numpy as np
 import collections
 import argparse
-import sys
 import os
+
+import numpy as np
+
+import langmuir as lm
+
 
 desc = """
 Perform RDF on surface or KPFM image.  This script takes some time.
