@@ -126,10 +126,10 @@ if __name__ == '__main__':
 
     # glob through the directories for PNG files
     filenames = []
-    for file in glob.iglob(opts.dir + "/*.png"):
-        filenames.append(file)
-    for file in glob.iglob(opts.dir + "*/*.png"):
-        filenames.append(file)
+    for handle in glob.iglob(opts.dir + "/*.png"):
+        filenames.append(handle)
+    for handle in glob.iglob(opts.dir + "*/*.png"):
+        filenames.append(handle)
 
     print "Initial Filenames: ", len(filenames)
 
@@ -147,8 +147,8 @@ if __name__ == '__main__':
         scores = score_filenames(filenames, pool)
         print "Caching initial scores"
         with open('score.cache', 'w') as cache:
-            for fileScore, file in scores:
-                cache.write("%8.3f %s\n" % (fileScore, file))
+            for fileScore, handle in scores:
+                cache.write("%8.3f %s\n" % (fileScore, handle))
 
     # turn it into a (small) heap to easily remove the low scores
     heapq.heapify(scores)
@@ -175,8 +175,8 @@ if __name__ == '__main__':
         # first create the children
         parents = heapq.nlargest(opts.children * 2, scores)
         parentFiles = []
-        for fileScore, file in parents:
-            parentFiles.append(file)
+        for fileScore, handle in parents:
+            parentFiles.append(handle)
 
         population = 0
         filenames = []
@@ -202,9 +202,9 @@ if __name__ == '__main__':
         oldScores = []
         oldFiles = []
         while len(scores):
-            fileScore, file = heapq.heappop(scores)
+            fileScore, handle = heapq.heappop(scores)
             # copy the existing files before mutations
-            image = misc.imread(file)
+            image = misc.imread(handle)
             newName = "%s/%d.png" % (path, population)
             filenames.append(newName)
             # save the score and the new name
@@ -216,20 +216,20 @@ if __name__ == '__main__':
         # TODO: Add more possible mutations
         print "Mutating"
         for i in range(opts.mutability):
-            file = random.choice(filenames)
+            handle = random.choice(filenames)
 
             # if this is in oldscores, remove it.. need to rescore
             try:
-                index = oldFiles.index(file)
+                index = oldFiles.index(handle)
                 del oldFiles[index]
                 del oldScores[index]
             except ValueError:
                 pass
             # add this to the list to rescore
-            if file not in rescore_list:
-                rescore_list.append(file)
+            if handle not in rescore_list:
+                rescore_list.append(handle)
 
-            image = misc.imread(file)
+            image = misc.imread(handle)
 
             mutation = random.randrange(6)
             if mutation == 0:
@@ -263,7 +263,7 @@ if __name__ == '__main__':
                 image = modify.shrink(image)
             # shift?
             # swap slices?
-            misc.imsave(file, image)
+            misc.imsave(handle, image)
 
         # create a new batch of scores
         print "Scoring Generation ", generation
