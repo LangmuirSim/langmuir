@@ -167,7 +167,10 @@ def plot_power():
         print 'saved: %s' % handle
         lm.plot.save(handle)
 
-def plot_stick(values, name, xlabel='', xlim=[None, None], **kwargs):
+def plot_stick(values, name, xlabel='', xlim=None, **kwargs):
+    if not xlim:
+        xlim = [None, None]
+
     fig, ax1 = lm.plot.subplots(1, 1, 6, 6, 1.5, 1, 1, 1.5)
 
     bins = calculate_bins(values, 0.01, *xlim)
