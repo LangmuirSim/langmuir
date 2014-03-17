@@ -6,12 +6,10 @@ ga_analyze.py
 .. moduleauthor:: Geoff Hutchison <geoffh@pitt.edu>
 """
 import sys
-import os
+from collections import deque
 
 from scipy import ndimage, misc
 import numpy as np
-
-from collections import deque
 
 desc = """
 Analysis of images for GA processing.
@@ -43,7 +41,7 @@ def granulometry(data, sizes=None):
     :type sizes: tuple
     """
     s = max(data.shape)
-    if sizes == None:
+    if sizes is None:
         sizes = range(1, s/2, 2)
     granulo = [ndimage.binary_opening(data,
                structure=disk_structure(n)).sum() for n in sizes]

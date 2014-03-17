@@ -54,7 +54,7 @@ def makeTriStripes(image, periods = 8):
                 y = sY + copy*offset
                 if y > height - 1:
                     break
-                if sY > int(x * slope) and sY < int(offset - x*slope):
+                if int(x * slope) < sY < int(offset - x*slope):
                     image.putpixel((x,y), 255)
 
 if __name__ == '__main__':
@@ -65,7 +65,7 @@ if __name__ == '__main__':
     image = Image.new("L", (opts.width, opts.height))
 
     if opts.ofile is None:
-        opts.ofile = "TriStripe-%d.png" % (opts.period)
+        opts.ofile = "TriStripe-%d.png" % opts.period
 
     makeTriStripes(image, opts.period)
     image.save(opts.ofile, "PNG")

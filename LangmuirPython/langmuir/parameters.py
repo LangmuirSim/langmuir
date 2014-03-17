@@ -13,12 +13,12 @@ import re
 try:
     import numpy as np
 except ImportError:
-    pass
+    np = None
 
 try:
     import pandas as pd
-except:
-    ImportError
+except ImportError:
+    pd = None
 
 Parameter = collections.namedtuple('Parameter',
     ['key', 'pytype', 'default', 'units', 'fmt'])

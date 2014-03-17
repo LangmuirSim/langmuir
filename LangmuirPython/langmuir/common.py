@@ -37,7 +37,7 @@ except ImportError:
         bc = [1 for i in range(0,k+1)]
         for j in range(1, N - k + 1):
             for i in range(1, k + 1):
-                bc[i] = bc[i-1] + bc[i]
+                bc[i] += bc[i - 1]
         return bc[k]
 
 def zhandle(handle, mode='rb'):
@@ -70,7 +70,6 @@ def tail(handle, n=1, mode='python'):
     :param n: lines
     :param mode: python or subprocess
 
-    :type handle: str
     :type n: int
     :type mode: str
 
@@ -85,7 +84,7 @@ def tail(handle, n=1, mode='python'):
     else:
         if not isinstance(handle, str):
             try:
-                 handle = handle.name
+                handle = handle.name
             except AttributeError:
                 pass
 
@@ -103,12 +102,11 @@ def tail(handle, n=1, mode='python'):
 
     return None
 
-def splitext(handle, *args, **kwargs):
+def splitext(handle):
     """
     Extract stub and extension from a file object or string.
 
     :param handle: filename
-    :type handle: str
 
     :return: stub and ext
     :rtype: :py:obj:`str`, :py:obj:`str`
@@ -118,10 +116,10 @@ def splitext(handle, *args, **kwargs):
     ('out', '.dat')
     """
     try:
-        return os.path.splitext(handle, *args, **kwargs)
+        return os.path.splitext(handle)
     except AttributeError:
         try:
-            return os.path.splitext(handle.name, *args, **kwargs)
+            return os.path.splitext(handle.name)
         except AttributeError:
             return '', ''
 

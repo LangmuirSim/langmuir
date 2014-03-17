@@ -16,7 +16,12 @@ try:
     import scipy.stats as stats
     import scipy.misc as misc
 except ImportError:
-    pass
+    special = None
+    fftpack = None
+    ndimage = None
+    signal = None
+    stats = None
+    misc = None
 
 def make_3D(array):
     """
@@ -61,7 +66,7 @@ def load_ascii(handle, square=False, cube=False, shape=None, **kwargs):
 
     if cube:
         try:
-            size = int(special.cbrt(image.size))
+            size = int(image.size ** (1.0 / 3.0))
             image = np.reshape(image, (size, size, size))
         except ValueError:
             raise RuntimeError, 'can not reshape data'
@@ -113,7 +118,7 @@ def load(handle, rot90=-1, **kwargs):
         return make_3D(lm.common.load_pkl(handle, **kwargs))
 
     if ext == '.npy':
-        return make_3D(np.load(handle, **kwargs))
+        return make_3D(np.load(handle))
 
     if ext in ['.csv', '.txt', '.dat']:
         return lm.surface.load_ascii(handle, **kwargs)
@@ -175,11 +180,11 @@ def save(handle, obj, zlevel=0, **kwargs):
     stub, ext = lm.common.splitext(handle)
 
     if ext == '.pkl':
-        lm.common.save_pkl(obj, handle, **kwargs)
+        lm.common.save_pkl(obj, handle)
         return handle
 
     if ext == '.npy':
-        np.save(handle, obj, **kwargs)
+        np.save(handle, obj)
         return handle
 
     if ext == '.vti':
@@ -243,7 +248,6 @@ def linear_mapping(array, n=0.0, m=1.0):
     :param n: lower bound
     :param m: upper bound
 
-    :type array: list
     :type n: float
     :type m: float
     """
@@ -283,6 +287,9 @@ class WaveDimensions:
     def __init__(self, L=2 * np.pi, n=1):
         self.L = L
         self.n = n
+        self.k = 0.0
+        self.nubar = 0.0
+        self.wavelength = 0.0
         self.calc()
 
     def calc(self, L=None, n=None):
@@ -655,23 +662,19 @@ class GaussianKernel(Kernel):
 
     def __str__(self):
         s = '[Kernel]\n'
-        s = s + '  %-7s = %s\n' % ('shape', self.v.shape)
-        s = s + '  %-7s = %s\n' % ('spacing', self.spacing)
+        s += '  %-7s = %s\n' % ('shape', self.v.shape)
+        s += '  %-7s = %s\n' % ('spacing', self.spacing)
         return s
 
 class Isotropic(object):
     """
     Performs convolution of random noise with a kernel to make morphology.
 
-    :param xsize: x grid points
-    :param ysize: y grid points
-    :param zsize: z grid points
+    :param grid: grid
     :param kernel: Kernel instance
     :param rfunc: function that produces random numbers in range [-0.5,0.5]
 
-    :type xsize: int
-    :type ysize: int
-    :type zsize: int
+    :type grid: :py:class:`surface.Grid`
     :type kernel: Kernel
     :type rfunc: func
     """
@@ -724,12 +727,12 @@ class Isotropic(object):
 
     def __str__(self):
         s = '[Isotropic]\n'
-        s = s + '  %-6s = %s, %s\n' % ('grid', self.grid.shape,
-            self.z_grid.shape  )
-        s = s + '  %-6s = %s, %s\n' % ('noise', self.noise.shape,
-            self.z_noise.shape )
-        s = s + '  %-6s = %s, %s\n' % ('image', self.image.shape,
-            self.z_image.shape )
+        s += '  %-6s = %s, %s\n' % ('grid', self.grid.shape,
+                                    self.z_grid.shape  )
+        s += '  %-6s = %s, %s\n' % ('noise', self.noise.shape,
+                                    self.z_noise.shape )
+        s += '  %-6s = %s, %s\n' % ('image', self.image.shape,
+                                    self.z_image.shape )
         return s
 
 def f_isotropic(x, y, z, sx, sy, sz, full=False):
@@ -769,9 +772,10 @@ def isotropic(x, y, z, wx, wy, wz, full=True):
 
 class FFT(object):
     def __init__(self):
-        pass
+        self.window = None
 
-    def _delta(self, a, s0, s1):
+    @staticmethod
+    def _delta(a, s0, s1):
         a = np.asanyarray(a)
         try:
             delta = abs(a[s1] - a[s0])
@@ -834,7 +838,7 @@ class FFT1D(FFT):
 
     def __str__(self):
         s  = '[FFT1D]\n'
-        s += '  %-6s = %s, %s\n' % ('shape', (self.n0))
+        s += '  %-6s = %s\n' % ('shape', self.n0)
         return s
 
 class FFT2D(FFT):
@@ -908,7 +912,7 @@ class FFT2D(FFT):
 
     def __str__(self):
         s  = '[FFT2D]\n'
-        s += '  %-6s = %s, %s\n' % ('shape', (self.n0, self.n1))
+        s += '  %-6s = %s, %s\n' % ('shape', self.n0, self.n1)
         return s
 
 class FFT3D(FFT):
@@ -995,5 +999,5 @@ class FFT3D(FFT):
 
     def __str__(self):
         s  = '[FFT3D]\n'
-        s += '  %-6s = %s, %s\n' % ('shape', (self.n0, self.n1, self.n2))
+        s += '  %-6s = %s, %s, %s\n' % ('shape', self.n0, self.n1, self.n2)
         return s

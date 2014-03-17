@@ -70,7 +70,7 @@ if __name__ == '__main__':
     image = Image.new("L", (opts.width, opts.height))
 
     if opts.ofile is None:
-        opts.ofile = "Lines-%d.png" % (opts.spacing)
+        opts.ofile = "Lines-%d.png" % opts.spacing
 
     makeLines(image, opts.thickness, opts.spacing)
     image.save(opts.ofile, "PNG")

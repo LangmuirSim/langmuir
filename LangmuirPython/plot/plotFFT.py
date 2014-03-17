@@ -167,7 +167,10 @@ def plot_power():
         print 'saved: %s' % handle
         lm.plot.save(handle)
 
-def plot_stick(values, name, xlabel='', xlim=[None, None], **kwargs):
+def plot_stick(values, name, xlabel='', xlim=None, **kwargs):
+    if not xlim:
+        xlim = [None, None]
+
     fig, ax1 = lm.plot.subplots(1, 1, 6, 6, 1.5, 1, 1, 1.5)
 
     bins = calculate_bins(values, 0.01, *xlim)
@@ -223,9 +226,9 @@ if __name__ == '__main__':
 
     two_pi = 2.0 * np.pi
 
-    u = two_pi * u
-    v = two_pi * v
-    w = two_pi * w
+    u *= two_pi
+    v *= two_pi
+    w *= two_pi
     k = np.sqrt(u**2 + v**2 + w**2)
 
     opts.klim = fix_limits(k, *opts.klim)

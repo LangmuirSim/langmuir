@@ -31,22 +31,20 @@ class IVCurve(object):
         :py:class:`IVCurveSolar`
     """
     class units:
-        try:
-            i = units.nA
-            v = units.V
-            p = units.nW
-            a = units.nm**2
-            j = units.mA/units.cm**2
-            r = units.mW/units.cm**2
-        except:
-            i = None
-            v = None
-            p = None
-            a = None
-            j = None
-            r = None
+        def __init__(self):
+            pass
+
+        i = units.nA
+        v = units.V
+        p = units.nW
+        a = units.nm**2
+        j = units.mA/units.cm**2
+        r = units.mW/units.cm**2
 
     class latex:
+        def __init__(self):
+            pass
+
         i = r'\ensuremath{nA}'
         v = r'\ensuremath{V}'
         p = r'\ensuremath{nW}'
@@ -55,6 +53,9 @@ class IVCurve(object):
         r = r'\ensuremath{mW\,cm^{-2}}'
 
     class string:
+        def __init__(self):
+            pass
+
         i = r'nA'
         v = r'V'
         p = r'nW'
@@ -63,6 +64,9 @@ class IVCurve(object):
         r = r'mW/cm**2'
 
     class columns:
+        def __init__(self):
+            pass
+
         i = r'drain:current'
         v = r'voltage.right'
         x = r'grid.x'
@@ -80,7 +84,6 @@ class IVCurve(object):
         :type i: :py:class:`numpy.ndarray`
         :type v: :py:class:`numpy.ndarray`
         :type a: :py:class:`numpy.ndarray` or :py:class:`float`
-        :type e: :py:class:`numpy.ndarray` or None
 
         >>> v = np.linspace(0, 100, 10)
         >>> i = np.tanh(v)
@@ -136,6 +139,9 @@ class IVCurve(object):
         self.rerr = np.asanyarray(self.rerr.magnitude)
 
         class stats:
+            def __init__(self):
+                pass
+
             i = lm.analyze.Stats(self.i, 'i')
             v = lm.analyze.Stats(self.v, 'v')
             p = lm.analyze.Stats(self.p, 'p')
@@ -154,8 +160,8 @@ class IVCurve(object):
         """
         Construct IV curve from pandas DataFrame.
 
-        :param panel: dataframe object
-        :type panel: :py:class:`pandas.DataFrame`
+        :param frame: dataframe object
+        :type frame: :py:class:`pandas.DataFrame`
 
         >>> frame = lm.common.load_pkl('calculated.pkl.gz')
         >>> ivcurve = lm.ivcurve.IVCurve(frame)
@@ -302,6 +308,7 @@ class IVCurve(object):
         :type handle: str
         """
         results = self.to_dict()
+        results.update(self.summary())
         lm.common.save_pkl(results, handle)
 
 class IVCurveSolar(IVCurve):
@@ -322,6 +329,9 @@ class IVCurveSolar(IVCurve):
     """
 
     class latex(IVCurve.latex):
+        def __init__(self):
+            pass
+
         f    = r'\%'
         v_oc = r'\ensuremath{v_{oc}}'
         i_sc = r'\ensuremath{i_{sc}}'
@@ -336,6 +346,9 @@ class IVCurveSolar(IVCurve):
         fill = r'\ensuremath{FF}'
 
     class string(IVCurve.string):
+        def __init__(self):
+            pass
+
         f    = r'%'
         v_oc = r'v_oc'
         i_sc = r'i_sc'
@@ -375,6 +388,10 @@ class IVCurveSolar(IVCurve):
         self.j_mp = 0.0
         self.r_mp = 0.0
         self.fill = 0.0
+        self.ifit = None
+        self.pfit = None
+        self.jfit = None
+        self.rfit = None
         if kwargs:
             self.calculate(**kwargs)
 
@@ -488,7 +505,7 @@ class IVCurveSolar(IVCurve):
             p_popt = None
             r_popt = None
 
-        order = order + 1
+        order += 1
 
         self.pfit = lm.fit.FitPower(self.v, self.p,
             popt=p_popt, yerr=self.perr, order=order)

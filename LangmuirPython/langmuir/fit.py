@@ -28,10 +28,7 @@ class Fit:
 
     .. warning:: Do not explicitly create Fit instance, its a base class.
 
-    >>> fit = Fit(xdata, ydata, func)
-    >>> x = np.linspace(0, 10, 100)
-    >>> y = fit(x)
-    >>> plt.plot(x, y, 'r-')
+    >>> fit = FitLinear([1, 2, 3], [4, 5, 6])
     """
 
     def __init__(self, x, y, func, popt=None, yerr=None):
@@ -39,6 +36,7 @@ class Fit:
         """
         self.x = _np.array(x)
         self.y = _np.array(y)
+        self.r2 = 0.0
         self.func = func
         self.popt = popt
         self.yerr = yerr
@@ -57,6 +55,7 @@ class Fit:
         :type xmin: float
         :type xpoints: int
 
+        >>> fit = FitLinear([1, 2, 3], [4, 5, 6])
         >>> fit.plot(xmin=-1.0, xmax=1.0, xpoints=10, lw=2, color='blue')
         """
         if xmin is None:
@@ -67,7 +66,7 @@ class Fit:
         ys = self(xs)
         _kwargs = dict(color='k', lw=1, ls='-')
         _kwargs.update(**kwargs)
-        self.fit_line = _plt.plot(xs, ys, **_kwargs)[0]
+        _plt.plot(xs, ys, **_kwargs)
 
     def text(self, s, x, y=None, transform=None, rotate=False,
              draw_behind=True, **kwargs):
@@ -90,6 +89,7 @@ class Fit:
         :type rotate: bool
         :type draw_behind: bool
 
+        >>> fit = FitLinear([1, 2, 3], [4, 5, 6])
         >>> fit.text('Hello!', 0.1, rotate=True, fontsize='large')
         """
         if transform is None:
@@ -137,6 +137,7 @@ class Fit:
         :type x0: float
         :type return_y: bool
 
+        >>> fit = FitLinear([1, 2, 3], [4, 5, 6])
         >>> xval, yval = fit.solve(y=0, x0=1.0)
         """
         _kwargs = dict()
@@ -167,6 +168,7 @@ class Fit:
         :type find_max: bool
         :type return_y: bool
 
+        >>> fit = FitLinear([1, 2, 3], [4, 5, 6])
         >>> xval, yval = fit.brute(a=-1, b=1)
         """
         if find_max:
@@ -199,6 +201,7 @@ class Fit:
         :type find_max: bool
         :type return_y: bool
 
+        >>> fit = FitLinear([1, 2, 3], [4, 5, 6])
         >>> xval, yval = fit.minimize(x0=0.1)
         """
         if find_max:
@@ -250,6 +253,7 @@ class Fit:
         :type xmin: float
         :type xpoints: int
 
+        >>> fit = FitLinear([1, 2, 3], [4, 5, 6])
         >>> func = fit.tangent(x=1.5)
         >>> print func(1.5)
         ... 0.0
@@ -273,6 +277,7 @@ class Fit:
         :type xmin: float
         :type xpoints: int
 
+        >>> fit = FitLinear([1, 2, 3], [4, 5, 6])
         >>> fit.plot_tangent(x=1.5, lw=2, color='blue')
         """
         f = self.tangent(x)
@@ -308,22 +313,25 @@ class Fit:
         popt, pcov = _optimize.curve_fit(self.func, self.x, self.y, self.popt,
                                          self.yerr)
         self.popt = popt
-        self.__call__ = lambda x : self.func(x, *self.popt)
+        setattr(self, '__call__', lambda x: self.func(x, *self.popt))
         self._calculate_rsquared()
 
     def _calculate_rsquared(self):
         """calculate correlation coeff"""
         ym  = _np.average(self.y)
-        yi  = self.y
-        fi  = self(self.x)
-        SSR = _np.sum((yi - fi)**2)
-        SST = _np.sum((yi - ym)**2)
-        self.r2 = 1.0 - SSR/SST
+        yi  = _np.asanyarray(self.y)
+        fi  = _np.asanyarray(self.x)
+        ssr = _np.sum((yi - fi) ** 2)
+        sst = _np.sum((yi - ym) ** 2)
+        self.r2 = 1.0 - ssr / sst
         #A = _np.average(self.y)
         #N = _np.sum((self(self.x) - A)**2)
         #D = _np.sum((self.y - A)**2)
         #print N/D
         #self.r2 = N/D
+
+    def __call__(self, *args, **kwargs):
+        return None
 
     def __str__(self):
         d = self.summary()
@@ -339,12 +347,12 @@ class FitPower(Fit):
     def __init__(self, x, y, order=1, popt=None, yerr=None):
         Fit.__init__(self, x, y, None, popt, yerr)
         self._fit(order)
-        self.derivative = self.__call__.deriv()
 
     def _fit(self, order):
         self.popt = _np.polyfit(self.x, self.y, order, w=self.yerr)
         self.func = _np.poly1d(self.popt)
-        self.__call__ = self.func
+        setattr(self, '__call__', self.func)
+        setattr(self, 'derivative', self.func.deriv())
         self._calculate_rsquared()
 
     def summary(self):
@@ -357,11 +365,11 @@ class FitLinear(FitPower):
     r""":math:`m x + b`"""
     def __init__(self, x, y, popt=None, yerr=None):
         FitPower.__init__(self, x, y, 1, popt, yerr)
-        self.m = self.popt[0]
-        self.b = self.popt[1]
+        self.m = float(self.popt[0])
+        self.b = float(self.popt[1])
         self.a = _np.rad2deg(_np.arctan2(self.m, 1))
         self.elabel = r'$\mathtt{y=%g x %+g}$' % (self.m, self.b)
-        self.alabel = r'$\mathtt{%.2f^{\circ}}$' % (self.a)
+        self.alabel = r'$\mathtt{%.2f^{\circ}}$' % self.a
         self.mlabel = r'$\mathtt{%g}$' % self.m
 
     def derivative(self, x, **kwargs):
@@ -408,7 +416,7 @@ class FitInterp1D(Fit):
         _kwargs = dict(kind='cubic', fill_value=_np.nan, bounds_error=False)
         _kwargs.update(**kwargs)
         self.func = _interpolate.interp1d(self.x, self.y, **_kwargs)
-        self.__call__ = self.func
+        setattr(self, '__call__', self.func)
         self._calculate_rsquared()
 
 class FitUnivariateSpline(Fit):
@@ -428,22 +436,22 @@ class FitUnivariateSpline(Fit):
         _kwargs = dict(k=5)
         _kwargs.update(**kwargs)
         self.func = _interpolate.UnivariateSpline(self.x, self.y, **_kwargs)
-        self.__call__ = self.func
+        setattr(self, '__call__', self.func)
         self._calculate_rsquared()
 
 class FitLagrange(Fit):
     """
     Fit to lagrange interpolating spline.  It sucks.
     """
-    def __init__(self, x, y, popt=None, yerr=None, **kwargs):
+    def __init__(self, x, y, popt=None, yerr=None):
         Fit.__init__(self, x, y, None, None, yerr)
-        self._fit(**kwargs)
+        self._fit()
         self.xmin = _np.amin(x)
         self.xmax = _np.amax(x)
 
-    def _fit(self, **kwargs):
-        self.func = _interpolate.lagrange(self.x, self.y, **kwargs)
-        self.__call__ = self.func
+    def _fit(self):
+        self.func = _interpolate.lagrange(self.x, self.y)
+        setattr(self, '__call__', self.func)
         self._calculate_rsquared()
 
 class FitBarycentric(Fit):

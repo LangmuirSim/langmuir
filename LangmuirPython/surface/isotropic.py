@@ -91,10 +91,10 @@ if __name__ == '__main__':
                                        spacing=opts.spacing)
     print kernel
 
-    if opts.noise == 'uniform':
-        rfunc = lambda size : np.random.random(size) - 0.5
-    elif opts.noise == 'gaussian':
+    if opts.noise == 'gaussian':
         rfunc = lambda size : np.random.normal(0.0, 1.0, size)
+    else:
+        rfunc = lambda size : np.random.random(size) - 0.5
 
     isotropic = lm.surface.Isotropic(grid, kernel, rfunc, verbose=True)
     print isotropic

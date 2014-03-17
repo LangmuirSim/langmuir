@@ -93,6 +93,9 @@ def get_arguments(args=None):
     return opts
 
 class parm:
+    def __init__(self):
+        pass
+
     vlabel = r'V $\mathtt{(V)}$'
 
 if __name__ == '__main__':

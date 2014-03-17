@@ -1,10 +1,10 @@
+# -*- coding: utf-8 -*-
 """
 .. note::
     Functions for opening Langmuir output files.
 
 .. moduleauthor:: Adam Gagorik <adam.gagorik@gmail.com>
 """
-import langmuir as lm
 import pandas as pd
 import collections
 

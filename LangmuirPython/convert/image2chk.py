@@ -10,11 +10,11 @@ image2chk.py
 
 .. moduleauthor:: Adam Gagorik <adam.gagorik@gmail.com>
 """
-import scipy.ndimage as ndimage
-import langmuir as lm
-import numpy as np
 import argparse
 import os
+
+import langmuir as lm
+
 
 desc = """
 Converts an image to trap data.

@@ -10,12 +10,14 @@ rdf.py
 
 .. moduleauthor:: Adam Gagorik <adam.gagorik@gmail.com>
 """
-import langmuir as lm
-import numpy as np
 import collections
 import argparse
-import sys
 import os
+
+import numpy as np
+
+import langmuir as lm
+
 
 desc = """
 Perform RDF on surface or KPFM image.  This script takes some time.
@@ -62,7 +64,7 @@ if __name__ == '__main__':
         w2[dx,dy,dz] += image[xj,yj,zj]
         if i % 100 == 0:
             print '%.5f %%' % ((i + 1)/float(grid.size))
-    print '%.5f %%' % (1)
+    print '%.5f %%' % 1
 
     results = collections.OrderedDict()
     results['image'] = image

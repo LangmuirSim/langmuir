@@ -58,7 +58,7 @@ def threshold(image):
     :param image: data
     :type image: :py:class:`numpy.ndarray`
     """
-    return (image > image.mean())
+    return image > image.mean()
 
 def blend_and_threshold(image1, image2, ratio = 0.5, radius=1):
     """
@@ -86,7 +86,7 @@ def gblur_and_threshold(image, radius=1):
     :param image: data
     :param radius: kernel radius
 
-    :type image1: :py:class:`numpy.ndarray`
+    :type image: :py:class:`numpy.ndarray`
     :type radius: float
     """
     output = ndimage.gaussian_filter(image, sigma=radius)
@@ -99,7 +99,7 @@ def ublur_and_threshold(image, radius = 1):
     :param image: data
     :param radius: kernel radius
 
-    :type image1: :py:class:`numpy.ndarray`
+    :type image: :py:class:`numpy.ndarray`
     :type radius: float
     """
     output = ndimage.uniform_filter(image, size=radius)

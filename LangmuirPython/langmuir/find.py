@@ -47,7 +47,8 @@ def find(work, r=False, single=True, absolute=True, stub='*', ext=None,
     work = os.path.expanduser(work)
 
     search = stub
-    if not ext == None: search += '.%s' % ext.rstrip('.')
+    if not ext is None:
+        search += '.%s' % ext.rstrip('.')
 
     result  = []
 
@@ -68,7 +69,7 @@ def find(work, r=False, single=True, absolute=True, stub='*', ext=None,
     if not absolute:
         result = [os.path.relpath(i,work) for i in result]
 
-    if not sort_by == None:
+    if not sort_by is None:
         result.sort(key=sort_by)
 
     if single:
@@ -411,7 +412,6 @@ def slice_path(path, regex):
         if not regex.match(item) is None:
             assert i + 1 <= len(path)
             return os.path.join(os.sep, *path[:i + 1])
-            break
     raise RuntimeError('can not slice path on run')
 
 def slice_part(path):
@@ -451,3 +451,24 @@ def slice_run(path):
     '/system/run'
     """
     return slice_path(path, 'run')
+
+def slice_system(path):
+    """
+    Return dirname of path where system directory is.
+
+    :param path: path to parse
+    :type path: str
+
+    >>> print slice_path('r/system/run/sim/part')
+    '/system'
+    """
+    return os.path.dirname(slice_run(path))
+
+def extract_system(path):
+    """
+    Extract system name from path.
+
+    :param path: path to parse
+    :type path: str
+    """
+    return os.path.basename(slice_system(path))

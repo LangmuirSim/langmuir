@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from distutils.core import setup
 
 setup(name         = "Langmuir Python",
@@ -5,5 +6,6 @@ setup(name         = "Langmuir Python",
       description  = "Langmuir Python",
       author       = "Adam Gagorik",
       author_email = "adam.gagorik@gmail.com",
-      packages     = ["langmuir"]
+      packages     = ["langmuir"],
+      requires     = ['numpy', 'scipy', 'matplotlib', 'pandas', 'PIL', 'pint']
 )

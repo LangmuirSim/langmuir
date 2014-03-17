@@ -22,13 +22,15 @@ import collections
 import StringIO
 
 fluxes = ['eSourceL', 'eSourceR', 'hSourceL', 'hSourceR', 'eDrainL', 'eDrainR',
-    'hDrainL', 'hDrainR', 'xSource', 'xDrain']
+          'hDrainL', 'hDrainR', 'xSource', 'xDrain']
 
 try:
-    import scipy.constants as constants
-    ifactor = constants.e * 1e21
+    from scipy.constants import e as _e
 except ImportError:
-    ifactor = 160.21764869999996
+    _e = 1.6021765650e-19
+
+ifactor = _e * 1e21
+
 
 def create_panel(frames, index=None):
     """
@@ -47,7 +49,8 @@ def create_panel(frames, index=None):
     """
     if index is None:
         index = range(len(frames))
-    return pd.Panel({i : frame for i, frame in zip(index, frames)})
+    return pd.Panel({i: frame for i, frame in zip(index, frames)})
+
 
 def combine(objs):
     """
@@ -90,6 +93,7 @@ def combine(objs):
     frame.index.name = None
 
     return lm.datfile.fix(frame)
+
 
 def calculate(obj):
     """
@@ -134,12 +138,12 @@ def calculate(obj):
     obj['carrier:count'] = obj['electron:count'] + obj['hole:count']
     obj['carrier:difference'] = obj['electron:count'] - obj['hole:count']
 
-    obj['speed'] = obj['real:time'].diff() / \
-        obj['simulation:time'].diff().astype(float)
+    obj['speed'] = obj['real:time'].diff() / obj['simulation:time'].diff().astype(float)
 
     obj = obj.fillna(value=0.0)
 
     return obj
+
 
 def equilibrate(obj, last, equil=None):
     """
@@ -162,6 +166,7 @@ def equilibrate(obj, last, equil=None):
     equil = obj.xs(obj.index[equil])
     return last - equil
 
+
 class Stats(object):
     """
     Compute various statistics of an array like object.
@@ -178,17 +183,18 @@ class Stats(object):
 
     >>> s = Stats([1, 2, 3, 4, 5])
     """
+
     def __init__(self, array, prefix=''):
         """
         :param array: array like object
         :type array: list
         """
         self.prefix = prefix
-        self.max    = np.amax(array)
-        self.min    = np.amin(array)
-        self.rng    = abs(self.max - self.min)
-        self.avg    = np.mean(array)
-        self.std    = np.std(array)
+        self.max = np.amax(array)
+        self.min = np.amin(array)
+        self.rng = abs(self.max - self.min)
+        self.avg = np.mean(array)
+        self.std = np.std(array)
 
     def to_dict(self):
         """

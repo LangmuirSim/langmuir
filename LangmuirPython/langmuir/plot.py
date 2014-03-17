@@ -14,6 +14,9 @@ import sys
 import os
 
 class colors:
+    def __init__(self):
+        pass
+
     r1 = '#fe2712'
     r2 = '#fd5308'
     o1 = '#fb9902'
@@ -82,11 +85,15 @@ def multiple_locator(axis=None, x=None, y=None, s=None, which='major'):
     if not s is None and x is None: x = s
     if not s is None and y is None: y = s
     if which in ['major', 'both']:
-        if x: axis.xaxis.set_major_locator(mpl.ticker.MultipleLocator(x))
-        if y: axis.yaxis.set_major_locator(mpl.ticker.MultipleLocator(y))
+        if x:
+            axis.xaxis.set_major_locator(mpl.ticker.MultipleLocator(x))
+        if y:
+            axis.yaxis.set_major_locator(mpl.ticker.MultipleLocator(y))
     if which in ['minor', 'both']:
-        if x: axis.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(x))
-        if y: axis.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(y))
+        if x:
+            axis.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(x))
+        if y:
+            axis.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(y))
 
 def maxn_locator(axis=None, x=None, y=None, s=None, which='major'):
     """
@@ -96,11 +103,15 @@ def maxn_locator(axis=None, x=None, y=None, s=None, which='major'):
     if not s is None and x is None: x = s
     if not s is None and y is None: y = s
     if which in ['major', 'both']:
-        if x: axis.xaxis.set_major_locator(mpl.ticker.MaxNLocator(x))
-        if y: axis.yaxis.set_major_locator(mpl.ticker.MaxNLocator(y))
+        if x:
+            axis.xaxis.set_major_locator(mpl.ticker.MaxNLocator(x))
+        if y:
+            axis.yaxis.set_major_locator(mpl.ticker.MaxNLocator(y))
     if which in ['minor', 'both']:
-        if x: axis.xaxis.set_minor_locator(mpl.ticker.MaxNLocator(x))
-        if y: axis.yaxis.set_minor_locator(mpl.ticker.MaxNLocator(y))
+        if x:
+            axis.xaxis.set_minor_locator(mpl.ticker.MaxNLocator(x))
+        if y:
+            axis.yaxis.set_minor_locator(mpl.ticker.MaxNLocator(y))
 
 def scilimits(*args, **kwargs):
     """
@@ -113,14 +124,14 @@ def zoom(axis=None, factor=0.05, l=None, r=None, t=None, b=None):
     Zoom out.
     """
     if axis is None: axis = plt.gca()
-    if l == None: l = factor
-    if r == None: r = factor
-    if t == None: t = factor
-    if b == None: b = factor
+    if l is None: l = factor
+    if r is None: r = factor
+    if t is None: t = factor
+    if b is None: b = factor
     l = 0 - l
-    r = 1 + r
+    r += 1
     b = 0 - b
-    t = 1 + t
+    t += 1
     transform = lambda x,y : axis.transData.inverted().transform(
         axis.transAxes.transform((x,y)))
     xmin, ymin = transform(l,b)
@@ -296,8 +307,8 @@ class BarPlot(object):
         if bottom:
             y0 = 0.0
         x0, y0 = taxes.inverted().transform(blend.transform((x0, y0)))
-        x0 = x0 - 0.5 * w
-        y0 = y0 - 0.5 * h
+        x0 -= 0.5 * w
+        y0 -= 0.5 * h
         line_kwargs = dict(transform=taxes, clip_on=False, zorder=zorder + 1,
                            color='k', lw=2, ls='-')
         rect_kwargs = dict(transform=taxes, clip_on=False, zorder=zorder,
@@ -374,7 +385,7 @@ class PeakFinder:
         self.prop_ytext_loc = 1.02
 
         self.handle = handle
-        if self.handle == None:
+        if self.handle is None:
             self.handle = 'peaks.dat'
 
         self.callback = callback
@@ -402,7 +413,7 @@ class PeakFinder:
                 self.message('callback function called')
                 try:
                     self.callback(self)
-                except:
+                except TypeError:
                     self.callback()
             else:
                 self.message('no callback function installed')
@@ -433,11 +444,11 @@ class PeakFinder:
                 self.message('can not select %s' % event.artist)
 
             try:
-                self.x_data.size
-                self.y_data.size
+                assert hasattr(self.x_data, 'size')
+                assert hasattr(self.y_data, 'size')
                 self.axis = event.artist.get_axes()
                 self.message('selected %s' % event.artist)
-            except:
+            except AssertionError:
                 self.x_data = None
                 self.y_data = None
                 self.axis = None
@@ -516,33 +527,36 @@ class PeakFinder:
                 x, y = x_val, self.prop_xtext_loc
             transform = mpl.transforms.blended_transform_factory(
                 self.axis.transData, self.axis.transAxes)
-            ref.append(self.axis.text(x, y, self.prop_xtext_fmt % (x_val),
+            ref.append(self.axis.text(x, y, self.prop_xtext_fmt % x_val,
                 transform=transform, **self.prop_xtext))
 
         if self.plot_ytext:
             transform = mpl.transforms.blended_transform_factory(
                 self.axis.transAxes, self.axis.transData)
             ref.append(self.axis.text(self.prop_ytext_loc, y_val,
-                self.prop_ytext_fmt % (y_val), transform=transform,
+                self.prop_ytext_fmt % y_val, transform=transform,
                 **self.prop_ytext))
 
         self.refs.append(ref)
         self.draw()
 
 
-    def find_ymax(self, x_data, y_data):
+    @staticmethod
+    def find_ymax(x_data, y_data):
         i = np.argmax(y_data)
         x = x_data[i]
         y = y_data[i]
         return x, y
 
-    def find_ymin(self, x_data, y_data):
+    @staticmethod
+    def find_ymin(x_data, y_data):
         i = np.argmin(y_data)
         x = x_data[i]
         y = y_data[i]
         return x, y
 
-    def find_extrema(self, x_data, y_data):
+    @staticmethod
+    def find_extrema(x_data, y_data):
         if x_data.size == 1 and y_data.size == 1:
             return x_data[0], y_data[0]
 
@@ -558,10 +572,10 @@ class PeakFinder:
 
         func = np.poly1d(fit)
         a, b, c = fit
-        x = - b / (2*a)
+        x = - b / (2 * a)
         y = func(x)
         s = 1.025
-        if x >= s*xmin and x <= s*xmax and y >= s*ymin and y <= s*ymax:
+        if s * xmin <= x <= s * xmax and s * ymin <= y <= s * ymax:
             return x, y
         return None, None
 
@@ -605,7 +619,8 @@ class PeakFinder:
         else:
             self.message('no peaks')
 
-    def message(self, string):
+    @staticmethod
+    def message(string):
         print 'PeakFinder : %s' % string
 
     def draw(self):

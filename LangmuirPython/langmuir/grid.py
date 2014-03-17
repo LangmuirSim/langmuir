@@ -19,12 +19,10 @@ class Grid(object):
     :param xsize: x points
     :param ysize: y points
     :param zsize: z points
-    :param mode: left, center, or right
 
     :type xsize: int
     :type ysize: int
     :type zsize: int
-    :type mode: str
     """
 
     def __init__(self, xsize, ysize, zsize):
@@ -107,7 +105,7 @@ class Grid(object):
         if factor == 1:
             return
 
-        if (factor <= 0):
+        if factor <= 0:
             dx = 1.0
             dy = 1.0
             dz = 1.0
@@ -237,17 +235,17 @@ class Grid(object):
 
     @property
     def mx(self):
-        if self._mx == None:
+        if self._mx is None:
             self._create_mgrid()
         return self._mx
     @property
     def my(self):
-        if self._my == None:
+        if self._my is None:
             self._create_mgrid()
         return self._my
     @property
     def mz(self):
-        if self._mz == None:
+        if self._mz is None:
             self._create_mgrid()
         return self._mz
     @property
@@ -259,17 +257,17 @@ class Grid(object):
 
     @property
     def ox(self):
-        if self._ox == None:
+        if self._ox is None:
             self._create_ogrid()
         return self._ox
     @property
     def oy(self):
-        if self._oy == None:
+        if self._oy is None:
             self._create_ogrid()
         return self._oy
     @property
     def oz(self):
-        if self._oz == None:
+        if self._oz is None:
             self._create_ogrid()
         return self._oz
     @property
@@ -285,23 +283,23 @@ class Grid(object):
 
     @property
     def shape(self):
-        return (self._nx, self._ny, self._nz)
+        return self._nx, self._ny, self._nz
 
     @property
     def extent(self):
-        return (0, self._nx - 1, 0, self._ny - 1, 0, self._nz - 1)
+        return 0, self._nx - 1, 0, self._ny - 1, 0, self._nz - 1
 
     @property
     def bounds(self):
-        return (0, self._nx, 0, self._ny, 0, self._nz)
+        return 0, self._nx, 0, self._ny, 0, self._nz
 
     @property
     def origin(self):
-        return (self._x0, self._y0, self._z0)
+        return self._x0, self._y0, self._z0
 
     @property
     def spacing(self):
-        return (self._dx, self._dy, self._dz)
+        return self._dx, self._dy, self._dz
 
     def __str__(self):
         s = StringIO.StringIO()
@@ -323,14 +321,6 @@ class Grid(object):
 class IndexMapper(object):
     """
     A class that maps between site indicies the Langmuir way.
-
-    :param xsize: x-dimension of grid, like grid.x
-    :param ysize: y-dimension of grid, like grid.y
-    :param zsize: z-dimension of grid, like grid.z
-
-    :type xsize: int
-    :type ysize: int
-    :type zsize: int
 
     >>> grid = lm.grid.Grid(10, 10, 10)
     >>> imap = lm.grid.IndexMapper(grid)
@@ -416,12 +406,12 @@ class XYZV:
     Put site values on a mesh using site ids.
 
     :param grid: grid object
-    :param site_ids: site indcies
-    :param site_values: site values
+    :param s: site indcies
+    :param v: site values
 
     :type grid: :class:`Grid`
-    :type site_ids: list
-    :type site_values: list or scalar
+    :type s: list
+    :type v: list or scalar
 
     >>> chk  = lm.checkpoint.load('out.chk')
     >>> grid = lm.grid.Grid.from_checkpoint(chk)
@@ -490,7 +480,7 @@ class PrecalculatedMesh:
     :type grid: :class:`Grid`
 
     >>> grid = lm.grid.Grid(5, 5, 5)
-    >>> mesh = lm.grid.Mesh(grid)
+    >>> mesh = lm.grid.PrecalculatedMesh(grid)
     """
     def __init__(self, grid):
         self.grid = grid
@@ -521,16 +511,16 @@ class PrecalculatedMesh:
         :param xi_ids: charge x-position(s)
         :param yi_ids: charge y-position(s)
         :param zi_ids: charge z-position(s)
-        :param xj_jds: energy x-position(s)
-        :param yj_jds: energy y-position(s)
-        :param zj_jds: energy z-position(s)
+        :param xj_ids: energy x-position(s)
+        :param yj_ids: energy y-position(s)
+        :param zj_ids: energy z-position(s)
         :param q: charge
         :type xi_ids: list, int
         :type yi_ids: list, int
         :type zi_ids: list, int
-        :type xi_jds: list, int
-        :type yi_jds: list, int
-        :type zi_jds: list, int
+        :type xi_ids: list, int
+        :type yi_ids: list, int
+        :type zi_ids: list, int
         :type q: int, float
 
         >>> grid = lm.grid.Grid(10, 10, 10)
@@ -562,8 +552,7 @@ class PrecalculatedMesh:
 
         return q * potential
 
-    def distances(self, xi_ids, yi_ids, zi_ids, xj_ids=[], yj_ids=[],
-                  zj_ids=[]):
+    def distances(self, xi_ids, yi_ids, zi_ids, xj_ids=None, yj_ids=None, zj_ids=None):
         """
         Compute all distances between i's, or compute all distances between
         i's and j's
@@ -571,20 +560,29 @@ class PrecalculatedMesh:
         :param xi_ids: initial x-position(s)
         :param yi_ids: initial y-position(s)
         :param zi_ids: initial z-position(s)
-        :param xj_jds: final x-position(s)
-        :param yj_jds: final y-position(s)
-        :param zj_jds: final z-position(s)
+        :param xj_ids: final x-position(s)
+        :param yj_ids: final y-position(s)
+        :param zj_ids: final z-position(s)
         :type xi_ids: list, int
         :type yi_ids: list, int
         :type zi_ids: list, int
-        :type xi_jds: list, int
-        :type yi_jds: list, int
-        :type zi_jds: list, int
+        :type xi_ids: list, int
+        :type yi_ids: list, int
+        :type zi_ids: list, int
 
         >>> grid = lm.grid.Grid(10, 10, 10)
         >>> mesh = lm.grid.PrecalculatedMesh(grid)
         >>> dist = mesh.distances(0, 0, 0, 1, 1, 1)
         """
+        if not xj_ids:
+            xj_ids = []
+
+        if not yj_ids:
+            yj_ids = []
+
+        if not zj_ids:
+            zj_ids = []
+
         xi_ids = np.asarray(xi_ids)
         yi_ids = np.asarray(yi_ids)
         zi_ids = np.asarray(zi_ids)

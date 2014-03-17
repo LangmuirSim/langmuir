@@ -144,6 +144,11 @@ if __name__ == '__main__':
     if opts.threshold:
         image = lm.surface.threshold(image, v=opts.tvalue)
 
+    xlabel, ylabel = '', ''
+    x, y, s = None, None, None
+    xmin, xmax = None, None
+    ymin, ymax = None, None
+
     if opts.plane == 'xy':
         xlabel, ylabel = 'x', 'y'
         x, y = grid.mx, grid.my
@@ -178,8 +183,8 @@ if __name__ == '__main__':
             sys.exit(-1)
 
     if opts.units:
-        xlabel = xlabel + ' (%s)' % opts.units
-        ylabel = ylabel + ' (%s)' % opts.units
+        xlabel += ' (%s)' % opts.units
+        ylabel += ' (%s)' % opts.units
 
     fig, ax1 = lm.plot.subplots(1, 1, *opts.figure)
     smap = plt.contourf(x[s], y[s], image[s], opts.clevels, cmap=opts.cmap)

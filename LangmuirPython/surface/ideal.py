@@ -89,9 +89,9 @@ if __name__ == '__main__':
     grid.refine(1.0/opts.spacing)
     print grid
 
-    wx = lm.surface.WaveDimensions(grid.lx, grid.lx/(opts.xwidth))
-    wy = lm.surface.WaveDimensions(grid.ly, grid.ly/(opts.ywidth))
-    wz = lm.surface.WaveDimensions(grid.lz, grid.lz/(opts.zwidth))
+    wx = lm.surface.WaveDimensions(grid.lx, grid.lx/ opts.xwidth)
+    wy = lm.surface.WaveDimensions(grid.ly, grid.ly/ opts.ywidth)
+    wz = lm.surface.WaveDimensions(grid.lz, grid.lz/ opts.zwidth)
 
     print wx
     print wy

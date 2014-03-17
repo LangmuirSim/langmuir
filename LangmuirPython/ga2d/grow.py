@@ -13,11 +13,11 @@ grow.py
 
 import argparse
 import random
-from PIL import Image
-import sys
-from scipy import ndimage
-import numpy as np
 import os
+
+from PIL import Image
+import numpy as np
+
 
 desc = """
 Append particles to an image (adds fractal disorder to white boundaries).
