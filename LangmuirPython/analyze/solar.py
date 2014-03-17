@@ -121,7 +121,7 @@ if __name__ == '__main__':
     if opts.plot:
         import matplotlib.pyplot as plt
 
-        fig, ax1 = lm.plot.subplots()
+        fig, ax1 = lm.plot.subplots(l=1.75, r=0.75)
 
         lm.plot.rectangle(0, 0, iv.v_oc, iv.i_sc, fc=lm.plot.colors.y1)
         lm.plot.rectangle(0, 0, iv.v_mp, iv.i_mp, fc='w', alpha=1)
