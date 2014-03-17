@@ -387,6 +387,8 @@ def command_script(paths, name=None, cwd=None, batch='run.batch', batch_dir=r'~/
 
         # lscan --real 10000000 --print 1000 --fmt '%+.1f' --stub '{{working}}_{{value}}' --mode gen --job "$1_{i}" {inp}
 
+        # sed -i 's/# \.\/submit/.\/submit/' submit
+
         # ./submit
     }}
 
