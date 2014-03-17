@@ -408,8 +408,6 @@ def command_script(paths, name=None, cwd=None, batch='run.batch', batch_dir=r'~/
         except TypeError:
             pass
 
-        print sim
-
         print >> sub_command, r'cd {path}'.format(path=os.path.relpath(path, cwd))
         if comment:
             print >> sub_command, r'# custom_command "{sim}"'.format(sim=sim)
