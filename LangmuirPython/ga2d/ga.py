@@ -80,7 +80,7 @@ def score(filename):
     inverted = (image < image.mean())
     ads2 = analyze.average_domain_size(inverted)
 
-    avg_domain = (ads1 + ads2) / 2.0
+    #avg_domain = (ads1 + ads2) / 2.0
 
     # penalize if there's a huge difference between the two domain sizes
     #penalty = abs(ads1 - ads2) / avg_domain
@@ -90,11 +90,12 @@ def score(filename):
     td, connectivity = analyze.transfer_distance(image)
 
     # fraction of phase one
-    nonzero = np.count_nonzero(image)
-    fraction = float(nonzero) / float(image.size)
-    scale = 4.0*fraction*(1.0 - fraction)
+    #nonzero = np.count_nonzero(image)
+    #fraction = float(nonzero) / float(image.size)
 
-    return scale * (4497.2167 - 107.4394*ads1 + 85.3286*ads2 - 0.1855*isize - 10.9523*td + 169.7597*connectivity)
+    # from initial 34 simulations with nonlinear regression
+    return 2769.2 + 14490.3*ads1^(-1.83108) -19177.8*ads1^(-2.10393) -3658.22*ads2^(-32.9136)\
+          -10.4209*ads2^1.06774 -0.676183*td -0.00012812*connectivity^(-14.8147)
 
 def score_filenames(filenames, pool=None):
     """

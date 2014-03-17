@@ -231,5 +231,6 @@ if __name__ == '__main__':
         # granulometry data
         g_list = granulometry(image, range(1, 6))
 
-        print filename, ads1, ads2, isize, td, connectivity, fraction, \
-            g_list[0], g_list[1], g_list[2], g_list[3], g_list[4]
+        formatted = "%s %8.4f %8.4f %d %8.4f %8.4f %8.4f %d %d %d %d %d"
+        print formatted % (filename, ads1, ads2, isize, td, connectivity, fraction, \
+            g_list[0], g_list[1], g_list[2], g_list[3], g_list[4])
