@@ -44,11 +44,6 @@ def get_arguments(args=None):
         print >> sys.stderr, '\nfile does not exist: %s' % opts.ifile1
         sys.exit(-1)
 
-    if not os.path.exists(opts.ifile2):
-        parser.print_help()
-        print >> sys.stderr, '\nfile does not exist: %s' % opts.ifile2
-        sys.exit(-1)
-
     return opts
 
 def threshold(image):
