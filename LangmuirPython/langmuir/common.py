@@ -7,6 +7,8 @@
 """
 from subprocess import check_output, CalledProcessError
 import collections
+import textwrap
+import StringIO
 import pickle
 import gzip
 import sys
@@ -330,63 +332,99 @@ def compare_lists(list1, list2):
 
     return results
 
-def command_script(paths, name=None, stub='run', command=None):
+def command_script(paths, name=None, cwd=None, batch='run.batch', batch_dir=r'~/templates', inp='sim.inp', comment=True,
+                   stub='{relpath}', stub_func=None, **kwargs):
     """
-    Create a handy bash script that loops over the paths.
+    Create a handy script.
 
     :param paths: list of paths
-    :param name: name of script
-    :param stub: jobname stub
-    :param command: command to insert at each directory
+    :param name: output file name
+    :param cwd: working directory
+    :param batch: batch file name
+    :param batch_dir: batch file directory
+    :param inp: input file name
+    :param comment: comment out custom command?
+    :param stub: job stub string
+    :param stub_func: post-process stub
 
     :type paths: list
     :type name: str
+    :type cwd: str
+    :type batch: str
+    :type batch_dir: str
+    :type inp: str
+    :type comment: str
     :type stub: str
-    :type command: str
+    :type stub_func: func
     """
-    work = os.getcwd()
-    if not name is None:
-        handle = open(name, 'w')
-    else:
-        handle = sys.stdout
+    if cwd is None:
+        cwd = os.getcwd()
 
-    print >> handle, r'#!/bin/bash'
-    print >> handle, ''
-    print >> handle, 'FILE=~/templates/run.batch'
-    print >> handle, ''
-    print >> handle, 'custom_command ()'
-    print >> handle, '{'
-    print >> handle, '    echo ""'
-    print >> handle, '    echo "%s"' % ('-' * 80)
-    print >> handle, '    echo `pwd`'
-    print >> handle, '    echo "$1"'
-    print >> handle, '    echo "%s"' % ('-' * 80)
-    print >> handle, '    echo ""'
-    print >> handle, ''
-    if not command:
-        print >> handle, '#    submitLangmuir $1 sim.inp'
-        print >> handle, ''
-        print >> handle, '#    cp $FILE .'
-        print >> handle, ''
-        print >> handle, '#    qsub -N $1 run.batch'
-        print >> handle, ''
-        print >> handle, '#    langmuir sim.inp'
-        print >> handle, ''
-        print >> handle, '#    grep "max.threads" sim.inp'
-        print >> handle, ''
-        print >> handle, "#    sed -i 's/\(grid\.z\s*=\s*\).*$/\\11/' sim.inp"
-        print >> handle, ''
-        print >> handle, '#    ./submit'
+    script = """
+    #!/bin/bash
+
+    FILE={batch_dir}/{batch}
+
+    custom_command()
+    {{
+        echo ""
+        echo "--------------------------------------------------------------------------------"
+        echo `pwd`
+        echo "$1"
+        echo "--------------------------------------------------------------------------------"
+
+        # submitLangmuir $1 {inp}
+
+        # cp $FILE .
+
+        # qsub -N $1 {batch}
+
+        # langmuir {inp}
+
+        # grep "max.threads" {inp}
+
+        # sed -i 's/\(grid\.z\s*=\s*\).*$/\\11/' {inp}
+
+        # lscan --real 10000000 --print 1000 --fmt '%+.1f' --stub '{{working}}_{{value}}' --mode gen --job '$1_' {inp}
+
+        # ./submit
+    }}
+
+    {command}
+    """
+
+    sub_command = StringIO.StringIO()
+    for i, path in enumerate(paths):
+
+        relpath = os.path.relpath(path, cwd)
+        dirname, basename = os.path.dirname(relpath), os.path.basename(relpath)
+
+        _kwargs = dict(i=i, path=path, relpath=relpath, dirname=dirname, basename=basename)
+        _kwargs.update(**kwargs)
+
+        sim = stub.format(**_kwargs)
+        try:
+            sim = stub_func(sim)
+        except TypeError:
+            pass
+
+        print sim
+
+        print >> sub_command, r'cd {path}'.format(path=os.path.relpath(path, cwd))
+        if comment:
+            print >> sub_command, r'# custom_command "{sim}"'.format(sim=sim)
+        else:
+            print >> sub_command, r'# custom_command "{sim}"'.format(sim=sim)
+        print >> sub_command, r'cd {path}'.format(path=os.path.relpath(cwd, path))
+        print >> sub_command, r''
+
+    sub_command = sub_command.getvalue().strip()
+
+    script = textwrap.dedent(script).strip('\n').format(command=sub_command, batch=batch, batch_dir=batch_dir, inp=inp)
+
+    if name is None:
+        print script
     else:
-        print >> handle, command
-    print >> handle, ''
-    print >> handle, '}'
-    print >> handle, ''
-    for i, sim in enumerate(paths):
-        print >> handle, r'cd %s' % os.path.relpath(sim, work)
-        print >> handle, r'custom_command "%s%d"' % (stub, i)
-        print >> handle, r'cd %s' % os.path.relpath(work, sim)
-        print >> handle, r''
-    if not name is None:
-        handle.close()
-        os.system('chmod +x %s' % name)
+        with open(name, 'w') as handle:
+            handle.write(script)
+        os.system('chmod +x {name}'.format(name=name))
