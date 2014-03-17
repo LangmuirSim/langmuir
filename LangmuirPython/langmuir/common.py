@@ -389,6 +389,10 @@ def command_script(paths, name=None, cwd=None, batch='run.batch', batch_dir=r'~/
 
         # sed -i 's/# \.\/submit/.\/submit/' submit
 
+        # sed -i 's/# cp/cp/' submit
+
+        # sed -i 's/# qsub/qsub/' submit
+
         # sed -i 's/# cus/cus/' submit
 
         # ./submit
