@@ -115,7 +115,7 @@ def shrink(image):
     start_y = random.randrange(tiled_height - height)
     return tiled[ start_x:start_x+256, start_y:start_y+256 ]
 
-def grow(image):
+def enlarge(image):
     width, height = image.shape
     zoom_x = random.random() + 1.0
     zoom_y = random.random() + 1.0

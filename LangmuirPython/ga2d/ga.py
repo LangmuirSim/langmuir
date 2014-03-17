@@ -257,7 +257,7 @@ if __name__ == '__main__':
                 image = child
             elif mutation == 5:
                 # rescale larger
-                image = modify.grow(image)
+                image = modify.enlarge(image)
             elif mutation == 6:
                 # rescale smaller
                 image = modify.shrink(image)

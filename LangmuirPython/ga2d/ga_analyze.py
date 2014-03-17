@@ -6,14 +6,25 @@ ga_analyze.py
 .. moduleauthor:: Geoff Hutchison <geoffh@pitt.edu>
 """
 import sys
-from collections import deque
-
+import argparse
 from scipy import ndimage, misc
 import numpy as np
+from collections import deque
 
 desc = """
 Analysis of images for GA processing.
 """
+
+def create_parser():
+    parser = argparse.ArgumentParser()
+    parser.description = desc
+
+    return parser
+
+def get_arguments(args=None):
+    parser = create_parser()
+    opts = parser.parse_args(args)
+    return opts
 
 # from http://scipy-lectures.github.io/advanced/image_processing/
 def disk_structure(n):
@@ -29,22 +40,29 @@ def disk_structure(n):
     struct[mask] = 1
     return struct.astype(np.bool)
 
+def square_structure(n):
+    """
+
+    """
+    struct = np.ones((n,n), dtype=np.bool)
+    return struct
+
 # from http://scipy-lectures.github.io/advanced/image_processing/
-def granulometry(data, sizes=None):
+def granulometry(image, sizes=None, structure=disk_structure):
     """
     .. todo:: comment function
 
-    :param data: ?
+    :param image: ?
     :param sizes: ?
 
     :type data: :py:class:`numpy.ndarray`
-    :type sizes: tuple
+    :type sizes: list[int]
     """
-    s = max(data.shape)
-    if sizes is None:
+    s = max(image.shape)
+    if sizes == None:
         sizes = range(1, s/2, 2)
-    granulo = [ndimage.binary_opening(data,
-               structure=disk_structure(n)).sum() for n in sizes]
+    granulo = [ndimage.binary_opening(image,
+               structure=structure(n)).sum() for n in sizes]
     return granulo
 
 def average_domain_size(image):
@@ -67,6 +85,14 @@ def average_domain_size(image):
         index=np.arange(1, nb_labels + 1))
     # return the mean of the max array
     return np.mean(imax)
+
+def box_counting_dimension(image):
+    # use granulometry for
+    dim = max(image.shape)
+    sizes = [ 1, 2, 4, 8 ]
+    grains = granulometry(image, sizes, structure=square_structure)
+
+    return np.polyfit(np.log(sizes), np.log(grains), 1)
 
 def interface_size(image):
     """
@@ -177,6 +203,9 @@ def transfer_distance(original):
 
 if __name__ == '__main__':
 
+    print "Filename, AvgDomainSize1, AvgDomainSize2, InterfaceSize, AvgTransferDist, Connectivity, PhaseRatio", \
+        "Granul1, Granul2, Granul3, Granul4, Granul5"
+
     for filename in sys.argv[1:]:
         image = misc.imread(filename)
 
@@ -193,9 +222,14 @@ if __name__ == '__main__':
 
         # fraction of phase one
         phase1 = np.count_nonzero(image)
-        fraction = phase1 / image.size
+        fraction = float(phase1) / float(image.size)
 
         # transfer distances
         # connectivity
         td, connectivity = transfer_distance(image)
-        print filename, ads1, ads2, isize, td, connectivity, fraction, penalty
+
+        # granulometry data
+        g_list = granulometry(image, range(1, 6))
+
+        print filename, ads1, ads2, isize, td, connectivity, fraction, \
+            g_list[0], g_list[1], g_list[2], g_list[3], g_list[4]
