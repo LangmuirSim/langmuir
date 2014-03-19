@@ -77,6 +77,25 @@ def load_ascii(handle, square=False, cube=False, shape=None, **kwargs):
     # force data to be 3D
     return make_3D(image)
 
+def load_chk(handle):
+    """
+    Load checkpoint file and convert traps into a surface.
+    """
+    chk = lm.checkpoint.load(handle)
+    chk.fix_traps()
+
+    grid = lm.grid.Grid.from_checkpoint(chk)
+
+    if chk.potentials:
+        xyzv = lm.grid.XYZV(grid, chk.traps, chk.potentials)
+    else:
+        if 'trap.potential' in chk.parameters:
+            xyzv = lm.grid.XYZV(grid, chk.traps, chk['trap.potential'])
+        else:
+            xyzv = lm.grid.XYZV(grid, chk.traps, chk['trap.potential'])
+
+    return make_3D(xyzv.mv)
+
 def load(handle, rot90=-1, **kwargs):
     """
     Load surface from file.  Takes into account the file extension.
@@ -86,6 +105,7 @@ def load(handle, rot90=-1, **kwargs):
     ===== ===============================
     pkl   :py:meth:`common.load_pkl`
     npy   :py:func:`numpy.load`
+    chk   :py:meth:`surface.load_chk`
     csv   :py:meth:`surface.load_ascii`
     txt   :py:meth:`surface.load_ascii`
     dat   :py:meth:`surface.load_ascii`
@@ -112,13 +132,16 @@ def load(handle, rot90=-1, **kwargs):
     .. warning::
         image data is rotated by -90 degrees.
     """
-    stub, ext = lm.common.splitext(handle)
+    stub, ext = lm.common.splitext(handle.rstrip('.gz'))
 
     if ext == '.pkl':
         return make_3D(lm.common.load_pkl(handle, **kwargs))
 
     if ext == '.npy':
         return make_3D(np.load(handle))
+
+    if ext == '.chk':
+        return lm.surface.load_chk(handle)
 
     if ext in ['.csv', '.txt', '.dat']:
         return lm.surface.load_ascii(handle, **kwargs)
