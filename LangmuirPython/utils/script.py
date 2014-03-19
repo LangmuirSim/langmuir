@@ -14,6 +14,7 @@ import langmuir as lm
 import argparse
 import sys
 import os
+import re
 
 desc = """
 Create a bash script for submitting simulations.
@@ -62,4 +63,6 @@ if __name__ == '__main__':
     for path in paths:
         print 'depth=%d : %s' % (lm.find.depth(path, work), os.path.relpath(path, work))
 
-    lm.common.command_script(paths, name=opts.name, stub=opts.stub, comment=opts.comment, **kwargs)
+    stub_func = lambda x : re.sub(os.sep, '_', x).strip(os.sep + '_')
+
+    lm.common.command_script(paths, name=opts.name, stub=opts.stub, stub_func=stub_func, comment=opts.comment, **kwargs)
