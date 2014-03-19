@@ -10,6 +10,18 @@ import glob
 import os
 import re
 
+def depth(path, relpath):
+    """
+    Calculate depth of path relative to relpath.
+
+    :param path: a path
+    :param relpath: another path
+
+    :type path: str
+    :type relpath: str
+    """
+    return os.path.relpath(os.path.abspath(path), os.path.abspath(relpath)).count(os.sep) + 1
+
 def find(work, r=False, single=True, absolute=True, stub='*', ext=None,
          exclude_dirs=False, exclude_files=False, sort_by=lm.regex.numbers,
          at_least_one=False, follow_links=False):
