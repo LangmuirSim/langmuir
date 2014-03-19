@@ -387,13 +387,13 @@ def command_script(paths, name=None, cwd=None, batch='run.batch', batch_dir=r'~/
 
         # lscan --real 10000000 --print 1000 --fmt '%+.1f' --stub '{{working}}_{{value}}' --mode gen --job "$1_{{i}}" {inp}
 
-        # sed -i 's/# \.\/submit/.\/submit/' submit
+        # sed -i 's/^\(\s*\)#\s*\.\/submit/\\1.\/submit/' submit
 
-        # sed -i 's/# cp/cp/' submit
+        # sed -i 's/^\(\s*\)#\s*cp/\\1cp/' submit
 
-        # sed -i 's/# qsub/qsub/' submit
+        # sed -i 's/^\(\s*\)#\s*qsub/\\1qsub/' submit
 
-        # sed -i 's/# cus/cus/' submit
+        # sed -i 's/^\(\s*\)#\s*cus/\\1cus/' submit
 
         # ./submit
     }}
@@ -420,7 +420,7 @@ def command_script(paths, name=None, cwd=None, batch='run.batch', batch_dir=r'~/
         if comment:
             print >> sub_command, r'# custom_command "{sim}"'.format(sim=sim)
         else:
-            print >> sub_command, r'# custom_command "{sim}"'.format(sim=sim)
+            print >> sub_command, r'custom_command "{sim}"'.format(sim=sim)
         print >> sub_command, r'cd {path}'.format(path=os.path.relpath(cwd, path))
         print >> sub_command, r''
 
