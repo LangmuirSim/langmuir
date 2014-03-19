@@ -1,0 +1,15 @@
+#!/bin/bash
+#PBS -q shared
+#PBS -l nodes=1:ppn=6
+#PBS -l mem=4gb
+#PBS -l walltime=24:00:00
+
+BIN=/home/ghutchison/agg7/bin
+EXE=langmuir
+INP=sim.inp
+
+module load boost
+module load qt
+
+cd $PBS_O_WORKDIR
+$BIN/$EXE $INP

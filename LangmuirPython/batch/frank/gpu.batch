@@ -1,0 +1,18 @@
+#!/bin/bash
+#PBS -q gpu
+#PBS -l nodes=1:ppn=3:gpus=1
+#PBS -l mem=4gb
+#PBS -l walltime=10:00:00
+
+BIN=/home/ghutchison/agg7/bin
+EXE=langmuir
+INP=sim.inp
+
+module load cuda/4.2
+module load boost
+module load qt
+
+cd $PBS_O_WORKDIR
+$BIN/$EXE $INP
+
+gzip -v ./*
