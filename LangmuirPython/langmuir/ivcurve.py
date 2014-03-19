@@ -602,9 +602,9 @@ class IVCurveSolar(IVCurve):
         print >> s, '[IVCurveSolar]'
         print >> s, '  {self.string.v_oc} = {self.v_oc:{fmt}} {self.string.v}'
         print >> s, '  {self.string.v_mp} = {self.v_mp:{fmt}} {self.string.v}'
-        print >> s, '  {self.string.i_sc} = {self.i_sc:{fmt}} {self.string.i}'
-        print >> s, '  {self.string.i_mp} = {self.i_mp:{fmt}} {self.string.i}'
-        print >> s, '  {self.string.p_th} = {self.p_th:{fmt}} {self.string.p}'
-        print >> s, '  {self.string.p_mp} = {self.p_mp:{fmt}} {self.string.p}'
+        print >> s, '  {self.string.i_sc} = {self.i_sc:{fmt}} {self.string.i} {self.j_sc:{fmt}} {self.string.j}'
+        print >> s, '  {self.string.i_mp} = {self.i_mp:{fmt}} {self.string.i} {self.j_mp:{fmt}} {self.string.j}'
+        print >> s, '  {self.string.p_th} = {self.p_th:{fmt}} {self.string.p} {self.r_th:{fmt}} {self.string.r}'
+        print >> s, '  {self.string.p_mp} = {self.p_mp:{fmt}} {self.string.p} {self.r_mp:{fmt}} {self.string.r}'
         print >> s, '  {self.string.fill} = {self.fill:{fmt}} {self.string.f}'
         return s.getvalue().format(self=self, fmt='12.8f')
