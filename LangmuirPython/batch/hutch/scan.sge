@@ -1,0 +1,38 @@
+#!/bin/sh
+#$ -S /bin/bash
+#$ -R y
+#$ -pe mpi 4
+#$ -o result.stdout
+#$ -e result.stderr
+#$ -cwd
+
+source /etc/profile
+
+export PYTHONPATH=$PYTHONPATH:/nfs/Users/adam/workspace/langmuir/LangmuirPython
+
+INPUT=sim.inp
+WORK=`pwd`
+EXE=/nfs/Users/adam/workspace/langmuir/LangmuirPython/utils/scan.py
+SCRATCH=/scratch/${USER}/${JOB_ID}
+
+# Set up the scratch directory if needed
+if [ -d /scratch/${USER} ]; then
+  touch /scratch/${USER}
+else
+  mkdir /scratch/${USER}
+fi
+
+mkdir ${SCRATCH}
+
+# Now copy the file into scratch
+if [ -f ${INPUT} ]; then
+  cp -r ./* ${SCRATCH}
+else
+  exit
+fi
+
+cd ${SCRATCH}
+
+python $EXE --real 10000000 --print 1000 --fmt '%+.1f' --mode scan ${INPUT}
+
+cp -r ${SCRATCH}/* ${WORK}
