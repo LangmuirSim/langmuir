@@ -4,6 +4,9 @@
 .. automodule:: ideal
     :members:
 
+.. automodule:: pepper
+    :members:
+
 .. automodule:: morph
     :members:
 
