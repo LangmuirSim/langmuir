@@ -126,6 +126,111 @@ def enlarge(image):
     start_y = random.randrange(child_height - height)
     return child[ start_x:start_x+256, start_y:start_y+256 ]
 
+def pepper(image, phase=0, count=0, percent=None, brush='point', overlap=False, maxTries=1e9):
+    """
+    Add pepper to image.
+
+    :param image: data
+    :param phase: phase ID (0, 1)
+    :param count: number of pixels to change
+    :param percent: percent of phase to change (overrides count!)
+    :param brush: which brush to use (point, square, square3, cross)
+    :param overlap: allow the brush to paint over existing pixels
+    """
+    # choose brush
+    brushes = {
+        'point': np.array([
+            [0, 0]
+        ]),
+
+        'square': np.array([
+            [0, 1], [1, 1],
+            [0, 0], [1, 0]
+        ]),
+
+        'square3': np.array([
+            [-1, 1], [0, 1], [1, 1],
+            [-1, 0], [0, 0], [1, 0],
+            [-1,-1], [0,-1], [1,-1]
+        ]),
+
+        'cross': np.array([
+                     [0, 1],
+            [-1, 0], [0, 0], [1, 0],
+                     [0,-1]
+        ]),
+    }
+    brush = brushes[brush]
+
+    # list of unique phases
+    phases = np.unique(image)
+    if phases.size > 2 or phases.size == 1:
+        raise ValueError, 'invalid number of phases in image: %d' % image.size
+
+    # list of possible sites ids that can be modified
+    x_i, y_i = np.where(image==phases[phase])
+    phase_size = x_i.size
+
+    # determine the number of pixels to change
+    if not percent is None:
+        assert 0 < percent < 1
+        count = int(phase_size * percent)
+
+    if count <= 0 or count > phase_size:
+        raise ValueError, 'invalid count: %d' % count
+
+    # add the pepper
+    pixels_changed, tries = 0, 0
+    while pixels_changed < count:
+        # choose a random site
+        i = np.random.randint(0, x_i.size - 1)
+
+        # apply brush to site
+        to_paint = brush + (x_i[i], y_i[i])
+        x_j, y_j = to_paint[:,0], to_paint[:,1]
+
+        # restrict sites to be in bounds of image
+        valid = ((x_j < image.shape[0]) & (x_j >= 0) &
+                 (y_j < image.shape[0]) & (y_j >= 0))
+        x_j = x_j[valid]
+        y_j = y_j[valid]
+
+        # restrict sites to lie within the paiting phase
+        valid = (image[x_j, y_j] == phases[phase])
+        x_j = x_j[valid]
+        y_j = y_j[valid]
+
+        # allow the brush to paint over
+        if overlap:
+            image[x_j, y_j] = phases[phase - 1]
+            pixels_changed += x_j.size
+
+        # or restrict brush to only paint where it 'fits'
+        elif x_j.size == brush.shape[0]:
+            image[x_j, y_j] = phases[phase - 1]
+            pixels_changed += x_j.size
+
+        # recalcualte which sites can be painted
+        x_i, y_i = np.where(image==phases[phase])
+        tries += 1
+
+        # only allow a certain number of tries
+        if tries >= maxTries:
+            raise RuntimeError, 'reached max tries in pepper: %d' % tries
+
+    return image
+
+def imshow(image):
+    """
+    Show image using matplotlib.
+    """
+    import matplotlib.pyplot as plt
+    plt.autumn()
+    plt.imshow(image)
+    plt.tick_params(label1On=False, tick1On=False, tick2On=False)
+    plt.tight_layout()
+    plt.show()
+
 if __name__ == '__main__':
     work = os.getcwd()
     opts = get_arguments()
