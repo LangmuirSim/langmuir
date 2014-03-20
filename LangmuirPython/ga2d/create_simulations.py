@@ -6,11 +6,10 @@ import langmuir as lm
 import argparse
 import shutil
 import os
-
+import re
 desc = """
 Create simulations from images.
 """
-
 
 def get_arguments(args=None):
     """
@@ -33,13 +32,12 @@ def get_arguments(args=None):
 
     return options
 
-
-default_format = "{name}_{chk[grid.x]}x{chk[grid.y]}x{chk[grid.z]}/run.0"
+default_format = "{name}/run.0"
 
 if __name__ == '__main__':
     work = os.getcwd()
     opts = get_arguments()
-    pngs = lm.find.pngs(work)
+    pngs = lm.find.pngs(work, r=True)
 
     def sort_by(x):
         """Sort by path.
@@ -64,8 +62,8 @@ if __name__ == '__main__':
 
     paths = []
     for png in pngs:
-        root, base = os.path.dirname(png), os.path.basename(png)
-        stub, ext = os.path.splitext(base)
+        relpath = os.path.relpath(png, work)
+        stub, ext = os.path.splitext(relpath)
 
         chk = lm.checkpoint.CheckPoint.from_image(png)
 
@@ -76,7 +74,7 @@ if __name__ == '__main__':
 
         chk.fix_traps()
 
-        path = os.path.join(sims, default_format.format(name=stub, chk=chk))
+        path = os.path.join(sims, default_format.format(name=stub))
         print path
 
         if os.path.exists(path):
@@ -92,5 +90,5 @@ if __name__ == '__main__':
     paths.sort(key=sort_by)
 
     os.chdir(sims)
-    lm.common.command_script(paths, name='submit', stub='surf')
+    lm.common.command_script(paths, name='submit', stub='{dirname}', stub_func=lambda x : re.sub(os.sep, '_', x))
     os.chdir(work)

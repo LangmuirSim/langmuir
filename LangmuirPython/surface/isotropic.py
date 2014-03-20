@@ -55,6 +55,13 @@ def create_parser():
     parser.add_argument('--seed', default=None, type=int, metavar='int',
                         help='random number seed')
 
+    parser.add_argument('--lmap', action='store_true', help='apply linear map')
+    parser.add_argument('--threshold', action='store_true', help='apply threshold')
+    parser.add_argument('--tvalue', type=float, default=0.0, help='threshold value')
+
+    parser.add_argument('--saven', action='store_true', help='save noise data')
+    parser.add_argument('--savek', action='store_true', help='save kernel data')
+
     parser.add_argument('--ext', default='pkl', type=str, metavar='str',
         choices=['pkl', 'npy', 'dat', 'txt', 'csv'], help='output file type')
 
@@ -99,14 +106,24 @@ if __name__ == '__main__':
     isotropic = lm.surface.Isotropic(grid, kernel, rfunc, verbose=True)
     print isotropic
 
+    if opts.lmap:
+        surface = lm.surface.linear_mapping(isotropic.z_image, 0, 1)
+    else:
+        surface = isotropic.z_image
+
+    if opts.threshold:
+        surface = lm.surface.threshold(surface, opts.tvalue)
+
     handle = lm.common.format_output(stub=opts.stub, name='image', ext=opts.ext)
     print 'saved: %s' % handle
-    lm.surface.save(handle, isotropic.z_image)
+    lm.surface.save(handle, surface)
 
-    handle = lm.common.format_output(stub=opts.stub, name='noise', ext=opts.ext)
-    print 'saved: %s' % handle
-    lm.surface.save(handle, isotropic.z_noise)
+    if opts.saven:
+        handle = lm.common.format_output(stub=opts.stub, name='noise', ext=opts.ext)
+        print 'saved: %s' % handle
+        lm.surface.save(handle, isotropic.z_noise)
 
-    handle = lm.common.format_output(stub=opts.stub, name='kernel', ext=opts.ext)
-    print 'saved: %s' % handle
-    lm.surface.save(handle, isotropic.kernel.v)
+    if opts.savek:
+        handle = lm.common.format_output(stub=opts.stub, name='kernel', ext=opts.ext)
+        print 'saved: %s' % handle
+        lm.surface.save(handle, isotropic.kernel.v)

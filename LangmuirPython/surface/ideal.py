@@ -62,6 +62,10 @@ def create_parser():
     parser.add_argument('--spacing', default=1.0, type=float, metavar='float',
                         help='grid spacing')
 
+    parser.add_argument('--lmap', action='store_true', help='apply linear map')
+    parser.add_argument('--threshold', action='store_true', help='apply threshold')
+    parser.add_argument('--tvalue', type=float, default=0.0, help='threshold value')
+
     parser.add_argument('--ext', default='pkl', type=str, metavar='str',
         choices=['pkl', 'npy', 'dat', 'txt', 'csv'], help='output file type')
 
@@ -98,6 +102,12 @@ if __name__ == '__main__':
     print wz
 
     surface = surfaces[opts.surface](grid.mx, grid.my, grid.mz, wx, wy, wz)
+
+    if opts.lmap:
+        surface = lm.surface.linear_mapping(surface, 0, 1)
+
+    if opts.threshold:
+        surface = lm.surface.threshold(surface, opts.tvalue)
 
     handle = lm.common.format_output(stub=opts.stub, name='image', ext=opts.ext)
     print 'saved: %s' % handle

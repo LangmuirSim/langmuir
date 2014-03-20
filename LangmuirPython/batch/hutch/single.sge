@@ -1,0 +1,34 @@
+#!/bin/sh
+#$ -S /bin/bash
+#$ -pe mpi 4
+#$ -R y
+#$ -o result.stdout
+#$ -e result.stderr
+#$ -cwd
+
+INPUT=sim.inp
+WORK=`pwd`
+SCRATCH=/scratch/${USER}/${JOB_ID}
+
+# Set up the scratch directory if needed
+if [ -d /scratch/${USER} ]; then
+  touch /scratch/${USER}
+else
+  mkdir /scratch/${USER}
+fi
+
+mkdir ${SCRATCH}
+
+# Now copy the file into scratch
+if [ -f ${INPUT} ]; then
+  cp ${INPUT} ${SCRATCH}
+else
+  exit
+fi
+
+cd ${SCRATCH}
+
+/usr/local/bin/langmuir ${INPUT}
+
+gzip ${SCRATCH}/* -rv
+cp -r ${SCRATCH}/* ${WORK}
