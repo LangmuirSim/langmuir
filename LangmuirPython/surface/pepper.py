@@ -41,6 +41,7 @@ def create_parser():
     parser.add_argument('--brush', type=str, metavar='str', default='point', choices=brushes.keys(),
         help='pepper brush type')
     parser.add_argument('--phase', type=int, metavar='int', default=0, help='phase ID')
+    parser.add_argument('--overlap', action='store_true', help='allow overlap')
 
     parser.add_argument('--show', action='store_true', help='show plot')
 
@@ -88,7 +89,7 @@ if __name__ == '__main__':
 
     print 'to_change: %d\n' % opts.count
 
-    pixels_changed = 0
+    pixels_changed, tries = 0, 0
     while pixels_changed < opts.count:
         i = np.random.randint(0, x_i.size - 1)
         to_paint = brushes[opts.brush] + (x_i[i], y_i[i], z_i[i])
@@ -108,12 +109,18 @@ if __name__ == '__main__':
         y_j = y_j[valid]
         z_j = z_j[valid]
 
-        if x_j.size == brushes[opts.brush].shape[0]:
+        if opts.overlap:
             image[x_j, y_j, z_j] = phases[opts.phase - 1]
+            pixels_changed += x_j.size
+        elif x_j.size == brushes[opts.brush].shape[0]:
+            image[x_j, y_j, z_j] = phases[opts.phase - 1]
+            pixels_changed += x_j.size
 
         x_i, y_i, z_i = np.where(image==phases[opts.phase])
+        tries += 1
 
-        pixels_changed += x_j.size
+        if tries > 1e9:
+            raise RuntimeError, 'exceeded max tried: %d' % maxTries
 
     print '[Changed]'
     print '  {0:10}: {1}'.format('pixels', pixels_changed)
