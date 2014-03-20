@@ -132,7 +132,10 @@ def load(handle, rot90=-1, **kwargs):
     .. warning::
         image data is rotated by -90 degrees.
     """
-    stub, ext = lm.common.splitext(handle.rstrip('.gz'))
+    if handle.endswith('.gz'):
+        stub, ext = lm.common.splitext(handle.rstrip('.gz'))
+    else:
+        stub, ext = lm.common.splitext(handle)
 
     if ext == '.pkl':
         return make_3D(lm.common.load_pkl(handle, **kwargs))
