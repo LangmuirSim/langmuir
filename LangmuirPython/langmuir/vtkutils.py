@@ -147,7 +147,7 @@ def filter_marching_cubes(vtkObject, isovalue=1e-5):
     :param vtkObject: input
     :param isovalue: contour value
 
-    :param vtkObject: :py:class:`vtk.vtkObject`
+    :type vtkObject: :py:class:`vtk.vtkObject`
     :type isovalue: float
 
     >>> image_data = create_image_data_from_array(surf)
@@ -185,6 +185,22 @@ def filter_marching_squares(vtkObject, isovalue=1e-5):
     #squares.ComputeNormalsOn()
 
     return squares
+
+def filter_marching(vtkObject, isovalue=1e-5):
+    """
+    Applies marching cubes or squares based on number of dimensions.
+
+    :param vtkObject: input
+    :param isovalue: contour value
+
+    :type vtkObject: :py:class:`vtk.vtkObject`
+    :type isovalue: float
+
+    .. seealso:: :py:func:`filter_marching_squares`, :py:func:`filter_marching_cubes`
+    """
+    if vtkObject.GetDimensions().count(1):
+        return filter_marching_squares(vtkObject, isovalue)
+    return filter_marching_cubes(vtkObject, isovalue)
 
 def filter_curvature(vtkObject, mode='gaussian'):
     """
