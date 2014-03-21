@@ -42,6 +42,7 @@ def create_parser():
         help='pepper brush type')
     parser.add_argument('--phase', type=int, metavar='int', default=0, help='phase ID')
     parser.add_argument('--overlap', action='store_true', help='allow overlap')
+    parser.add_argument('--total', action='store_true', help='compute count based on total system')
 
     parser.add_argument('--show', action='store_true', help='show plot')
 
@@ -85,7 +86,10 @@ if __name__ == '__main__':
 
     size = x_i.size
     if opts.count is None:
-        opts.count = int(opts.percent * size)
+        if opts.total:
+            opts.count = int(opts.percent * image.size)
+        else:
+            opts.count = int(opts.percent * size)
 
     print 'to_change: %d\n' % opts.count
 
