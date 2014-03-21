@@ -116,7 +116,7 @@ if __name__ == '__main__':
             image[x_j, y_j, z_j] = phases[opts.phase - 1]
             pixels_changed += x_j.size
 
-        x_i, y_i, z_i = np.where(image==phases[opts.phase])
+        #x_i, y_i, z_i = np.where(image==phases[opts.phase])
         tries += 1
 
         if tries > 1e9:
