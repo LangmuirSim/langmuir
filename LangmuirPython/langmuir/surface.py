@@ -106,6 +106,7 @@ def load(handle, rot90=-1, **kwargs):
     pkl   :py:meth:`common.load_pkl`
     npy   :py:func:`numpy.load`
     chk   :py:meth:`surface.load_chk`
+    inp   :py:meth:`surface.load_chk`
     csv   :py:meth:`surface.load_ascii`
     txt   :py:meth:`surface.load_ascii`
     dat   :py:meth:`surface.load_ascii`
@@ -143,7 +144,7 @@ def load(handle, rot90=-1, **kwargs):
     if ext == '.npy':
         return make_3D(np.load(handle))
 
-    if ext == '.chk':
+    if ext in ['.chk', '.inp']:
         return lm.surface.load_chk(handle)
 
     if ext in ['.csv', '.txt', '.dat']:
