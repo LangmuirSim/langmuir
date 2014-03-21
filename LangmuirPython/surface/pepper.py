@@ -124,7 +124,7 @@ if __name__ == '__main__':
         tries += 1
 
         if tries > 1e9:
-            raise RuntimeError, 'exceeded max tried: %d' % maxTries
+            raise RuntimeError, 'exceeded max tried: %d' % 1e9
 
     print '[Changed]'
     print '  {0:10}: {1}'.format('pixels', pixels_changed)
