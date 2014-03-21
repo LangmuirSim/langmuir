@@ -30,8 +30,12 @@ def get_arguments(args=None):
     opts = parser.parse_args(args)
     return opts
 
+def extract_system(pkl, data):
+    return os.path.relpath(pkl, work)
+    return os.path.relpath(lm.find.slice_system(pkl), work)
+
 extract = {}
-extract['system'] = lambda pkl, data: os.path.relpath(lm.find.slice_system(pkl), work)
+extract['system'] = extract_system
 extract['run'   ] = lambda pkl, data: lm.regex.run(pkl)
 
 columns = [
@@ -81,6 +85,7 @@ if __name__ == '__main__':
         table[column] = []
 
     for pkl in pkls:
+        print os.path.relpath(pkl, work)
         data = lm.common.load_pkl(pkl)
         for c in columns:
             if c in data:
