@@ -134,7 +134,7 @@ if __name__ == '__main__':
     info(image)
 
     stub, ext = lm.common.splitext(opts.ofile)
-    handle = lm.common.format_output(stub=stub, name='pepper', ext=ext)
+    handle = lm.common.format_output(stub=stub, name='', ext=ext)
     print 'saved: %s' % handle
     lm.surface.save(handle, image)
 
