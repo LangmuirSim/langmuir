@@ -42,6 +42,7 @@ def create_parser():
         help='pepper brush type')
     parser.add_argument('--phase', type=int, metavar='int', default=0, help='phase ID')
     parser.add_argument('--overlap', action='store_true', help='allow overlap')
+    parser.add_argument('--total', action='store_true', help='compute count based on total system')
 
     parser.add_argument('--show', action='store_true', help='show plot')
 
@@ -85,7 +86,10 @@ if __name__ == '__main__':
 
     size = x_i.size
     if opts.count is None:
-        opts.count = int(opts.percent * size)
+        if opts.total:
+            opts.count = int(opts.percent * image.size)
+        else:
+            opts.count = int(opts.percent * size)
 
     print 'to_change: %d\n' % opts.count
 
@@ -116,11 +120,11 @@ if __name__ == '__main__':
             image[x_j, y_j, z_j] = phases[opts.phase - 1]
             pixels_changed += x_j.size
 
-        x_i, y_i, z_i = np.where(image==phases[opts.phase])
+        #x_i, y_i, z_i = np.where(image==phases[opts.phase])
         tries += 1
 
         if tries > 1e9:
-            raise RuntimeError, 'exceeded max tried: %d' % maxTries
+            raise RuntimeError, 'exceeded max tried: %d' % 1e9
 
     print '[Changed]'
     print '  {0:10}: {1}'.format('pixels', pixels_changed)
@@ -130,7 +134,7 @@ if __name__ == '__main__':
     info(image)
 
     stub, ext = lm.common.splitext(opts.ofile)
-    handle = lm.common.format_output(stub=stub, name='pepper', ext=ext)
+    handle = lm.common.format_output(stub=stub, name='', ext=ext)
     print 'saved: %s' % handle
     lm.surface.save(handle, image)
 

@@ -106,6 +106,7 @@ def load(handle, rot90=-1, **kwargs):
     pkl   :py:meth:`common.load_pkl`
     npy   :py:func:`numpy.load`
     chk   :py:meth:`surface.load_chk`
+    inp   :py:meth:`surface.load_chk`
     csv   :py:meth:`surface.load_ascii`
     txt   :py:meth:`surface.load_ascii`
     dat   :py:meth:`surface.load_ascii`
@@ -143,7 +144,7 @@ def load(handle, rot90=-1, **kwargs):
     if ext == '.npy':
         return make_3D(np.load(handle))
 
-    if ext == '.chk':
+    if ext in ['.chk', '.inp']:
         return lm.surface.load_chk(handle)
 
     if ext in ['.csv', '.txt', '.dat']:
@@ -171,6 +172,22 @@ def save_vti(handle, array, **kwargs):
     vtkImageData = lm.vtkutils.create_image_data_from_array(array, **kwargs)
     lm.vtkutils.save_image_data(handle, vtkImageData)
 
+def save_chk(handle, array):
+    """
+    Save numpy array to Langmuir checkpoint file.
+
+    :param handle: filename
+    :param array: data
+
+    :type handle: str
+    :type array: :py:class:`numpy.ndarray`
+    """
+    grid = lm.grid.Grid(*array.shape)
+    chk = lm.checkpoint.CheckPoint.from_grid(grid)
+    traps = lm.grid.IndexMapper.map_mesh(grid, array)
+    chk.traps = traps
+    chk.save(handle)
+
 def save(handle, obj, zlevel=0, **kwargs):
     """
     Save object to a file.  Takes into account the file extension.
@@ -180,10 +197,10 @@ def save(handle, obj, zlevel=0, **kwargs):
     ===== ===================================
     pkl   :py:meth:`common.load_pkl`
     npy   :py:func:`numpy.load`
-    vti   :py:meth:`vtkutils.save_image_data`
-    csv   :py:meth:`surface.load_ascii`
-    txt   :py:meth:`surface.load_ascii`
-    dat   :py:meth:`surface.load_ascii`
+    vti   :py:meth:`surface.save_cti`
+    csv   :py:meth:`np.savetxt`
+    txt   :py:meth:`np.savetxt`
+    dat   :py:meth:`np.savetxt`
     png   :py:meth:`scipy.misc.imsave`
     jpg   :py:meth:`scipy.misc.imsave`
     jpeg  :py:meth:`scipy.misc.imsave`
@@ -215,6 +232,10 @@ def save(handle, obj, zlevel=0, **kwargs):
 
     if ext == '.vti':
         lm.surface.save_vti(handle, obj, **kwargs)
+        return handle
+
+    if ext in ['.chk', '.inp']:
+        lm.surface.save_chk(handle, obj)
         return handle
 
     if ext in ['.csv', '.txt', '.dat']:

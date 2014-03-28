@@ -394,6 +394,7 @@ class IndexMapper(object):
     @staticmethod
     def map_mesh(grid, mesh, value=1.0):
         imap  = IndexMapper(grid)
+        mesh  = lm.surface.linear_mapping(mesh, 0, 1)
         traps = []
         for i, ((xi, yi, zi), vi) in enumerate(np.ndenumerate(mesh)):
             if vi == value:

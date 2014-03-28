@@ -174,7 +174,8 @@ def pepper(image, phase=0, count=0, percent=None, brush='point', overlap=False, 
                      [0,-1]
         ]),
     }
-    brush = brushes[brush]
+    if brush in brushes:
+        brush = brushes[brush]
 
     # list of unique phases
     phases = np.unique(image)
