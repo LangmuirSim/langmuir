@@ -19,6 +19,8 @@ import numpy as np
 import random
 import math
 
+from PIL import Image
+
 desc = """
 Mix two images and re-threshold or perform other mutations.
 """
@@ -104,15 +106,21 @@ def shrink(image):
     width, height = image.shape
     shrink_x = random.uniform(0.25, 1.0)
     shrink_y = random.uniform(0.25, 1.0)
-    resized = misc.imresize(image, (shrink_x * width, shrink_y * height))
+    resized = misc.imresize(image, (int(shrink_x * width), int(shrink_y * height)) )
     # now we need to tile this thing
     mult_x = math.ceil(1.0 / shrink_x)
     mult_y = math.ceil(1.0 / shrink_y)
     tiled = np.tile(resized, (mult_x, mult_y))
     # now take a slice of width and height out of this thing
     tiled_width, tiled_height = tiled.shape
-    start_x = random.randrange(tiled_width - width)
-    start_y = random.randrange(tiled_height - height)
+    if tiled_width > width:
+        start_x = random.randrange(tiled_width - width)
+    else:
+        start_x = 0
+    if tiled_height > height:
+        start_y = random.randrange(tiled_height - height)
+    else:
+        start_y = 0
     return tiled[ start_x:start_x+256, start_y:start_y+256 ]
 
 def enlarge(image):
@@ -122,8 +130,14 @@ def enlarge(image):
     child = ndimage.interpolation.zoom(image, (zoom_x, zoom_y) )
     # now take a slice of width and height out of this thing
     child_width, child_height = child.shape
-    start_x = random.randrange(child_width - width)
-    start_y = random.randrange(child_height - height)
+    if child_width > width:
+        start_x = random.randrange(child_width - width)
+    else:
+        start_x = 0
+    if child_height > height:
+        start_y = random.randrange(child_height - height)
+    else:
+        start_y = 0
     return child[ start_x:start_x+256, start_y:start_y+256 ]
 
 def pepper(image, phase=0, count=0, percent=None, brush='point', overlap=False, maxTries=1e9):
@@ -231,15 +245,44 @@ def imshow(image):
     plt.tight_layout()
     plt.show()
 
+def roughen(image, fraction=0.5, dilation=0):
+    struct = ndimage.morphology.generate_binary_structure(2, 1)
+
+    # remove small noise with a binary closing
+    cleaned = ndimage.binary_closing(image, structure=struct)
+    # find the edge with a dilation
+    edge = np.logical_xor( cleaned, ndimage.binary_dilation(cleaned, structure=struct) )
+    # optionally dilate the edge (extending into both phases)
+    for i in range(dilation):
+        edge = ndimage.binary_dilation(edge, structure=struct)
+    # add noise to the edge sites
+    # this is probably inefficient, but it works
+    sites = int(np.count_nonzero(edge) * fraction)
+    x_nz, y_nz = edge.nonzero() # get all the nonzero indices
+    count  = 0
+    while count < sites:
+        x = random.choice(x_nz)
+        y = random.choice(y_nz)
+        if (edge[x,y] != 0):
+            edge[x, y] = 0 # invert one of these edge sites
+            count += 1
+    return np.logical_xor( image, edge )
+
 if __name__ == '__main__':
     work = os.getcwd()
     opts = get_arguments()
 
-    image1 = misc.imread(opts.ifile1)
+    image = Image.open(opts.ifile1)
+    image1 = misc.fromimage(image.convert("L"))
+
     if opts.ifile2 != "None":
         image2 = misc.imread(opts.ifile2)
         output = blend_and_threshold(image1, image2)
         misc.imsave("Blend.png", output)
     else:
-        output = ublur_and_threshold(image1, 3)
-        misc.imsave(opts.ifile1, output)
+#        output = ublur_and_threshold(image1, 3)
+#        output = ndimage.binary_closing(image1.astype(np.uint8), structure=ndimage.morphology.generate_binary_structure(2, 1) )
+        output = roughen(image1)
+        misc.imsave("output.png", output)
+        x = np.logical_xor(image1, output)
+        misc.imsave("xor.png", x)

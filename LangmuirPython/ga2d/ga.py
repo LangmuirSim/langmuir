@@ -17,8 +17,10 @@ import glob
 import os
 from multiprocessing import Pool
 import time
+import math
 
-import scipy.misc as misc
+from PIL import Image
+from scipy import ndimage, misc
 import numpy as np
 
 
@@ -48,7 +50,7 @@ def create_parser():
         metavar='children', help='# of children to create each generation')
 
     parser.add_argument(dest='mutability', default=8, type=int, nargs='?',
-        metavar='children', help='# of items to mutate each generation')
+        metavar='mutability', help='# of items to mutate each generation')
 
     return parser
 
@@ -64,23 +66,26 @@ def score(filename):
     :param filename: image file name
     :type filename: str
 
-    :return float: score (ideally as an estimated maximum power)
+    :return float: score (ideally as an estimated maximum power in W/(m^2))
     """
     # TODO: Make this physically and empirically based!
-    image = misc.imread(filename)
+
+    # this works around a weird bug in scipy.misc.imread with 1-bit images
+    pil_img = Image.open(filename)
+    image = misc.fromimage(pil_img.convert("L"))
 
     width, height = image.shape
     if width != 256 or height != 256:
         print "Size Error: ", filename
 
     isize = analyze.interface_size(image)
-    ads1 = analyze.average_domain_size(image)
+    ads1, std1 = analyze.average_domain_size(image)
 
     # we now need to invert the image to get the second domain size
     inverted = (image < image.mean())
-    ads2 = analyze.average_domain_size(inverted)
+    ads2, std2 = analyze.average_domain_size(inverted)
 
-    #avg_domain = (ads1 + ads2) / 2.0
+    ads = (ads1 + ads2) / 2.0
 
     # penalize if there's a huge difference between the two domain sizes
     #penalty = abs(ads1 - ads2) / avg_domain
@@ -89,13 +94,22 @@ def score(filename):
     # connectivity
     td, connectivity = analyze.transfer_distance(image)
 
-    # fraction of phase one
-    #nonzero = np.count_nonzero(image)
-    #fraction = float(nonzero) / float(image.size)
+    spots = np.logical_xor( image, ndimage.binary_erosion(image, structure=np.ones((2,2))) )
+    erosion = np.count_nonzero(spots)
+    spots = np.logical_xor( image, ndimage.binary_dilation(image, structure=np.ones((2,2))) )
+    dilation = np.count_nonzero(spots)
 
-    # from initial 34 simulations with nonlinear regression
-    return 2769.2 + 14490.3*ads1^(-1.83108) -19177.8*ads1^(-2.10393) -3658.22*ads2^(-32.9136)\
-          -10.4209*ads2^1.06774 -0.676183*td -0.00012812*connectivity^(-14.8147)
+    # fraction of phase one
+    nonzero = np.count_nonzero(image)
+    fraction = float(nonzero) / float(image.size)
+    phase_scale = 4*fraction*(1.0-fraction)
+
+    # from initial 74 simulations with nonlinear regression
+    score= 3790.73 -41.867*ads -7.32114*td -0.191631*erosion + 788.541*math.tanh(5.83*(connectivity - 0.698)) \
+           + 1.51379e-5*dilation**2
+    return phase_scale**2 * score
+    #return 2769.2 + 14490.3*pow(ads1,-1.83108) -19177.8*pow(ads1,-2.10393) -3658.22*pow(ads2,-32.9136)\
+    #      -10.4209*pow(ads2,1.06774) -0.676183*td -0.00012812*pow(connectivity,-14.8147)
 
 def score_filenames(filenames, pool=None):
     """
@@ -230,26 +244,28 @@ if __name__ == '__main__':
             if handle not in rescore_list:
                 rescore_list.append(handle)
 
-            image = misc.imread(handle)
+            # this works around a weird bug in scipy with 1-bit images
+            pil = Image.open(handle)
+            image = misc.fromimage(pil.convert("L"))
 
-            mutation = random.randrange(6)
+            mutation = random.randrange(8)
             if mutation == 0:
                 # gaussian blur
-                image = modify.gblur_and_threshold(image, random.choice([1,2,3,4,5]))
+                image = modify.gblur_and_threshold(image, random.choice([2,3,4,5]))
             elif mutation == 1:
                 # uniform blur
-                image = modify.ublur_and_threshold(image, random.choice([1,2,3,4,5]))
+                image = modify.ublur_and_threshold(image, random.choice([2,3,4,5]))
             elif mutation == 2:
                 # invert
                 inverted = (image < image.mean())
                 image = inverted
             elif mutation == 3:
-                # add noise
+                # add image-wide noise
                 noise = np.random.random( image.shape )
                 child = modify.blend_and_threshold(image, noise)
                 image = child
             elif mutation == 4:
-                # grow edges
+                # grow edges up to 50:50 mix
                 nonzero = np.count_nonzero(image)
                 phase = 0
                 if nonzero > image.size / 2:
@@ -257,13 +273,16 @@ if __name__ == '__main__':
                 child = grow.grow_ndimage(image, phase)
                 image = child
             elif mutation == 5:
+                # roughen the edges
+                image = modify.roughen(image)
+            elif mutation == 6:
                 # rescale larger
                 image = modify.enlarge(image)
-            elif mutation == 6:
+            elif mutation == 7:
                 # rescale smaller
                 image = modify.shrink(image)
-            # shift?
-            # swap slices?
+            # shift? - not useful
+            # swap slices? - not sure if this is useful
             misc.imsave(handle, image)
 
         # create a new batch of scores
