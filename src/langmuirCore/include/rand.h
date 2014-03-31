@@ -5,10 +5,12 @@
 #include <QDataStream>
 #include <QTextStream>
 
+#ifndef Q_MOC_RUN
 #pragma GCC diagnostic push
 #pragma GCC system_header
 #include <boost/random.hpp>
 #pragma GCC diagnostic pop
+#endif
 
 #include <ctime>
 

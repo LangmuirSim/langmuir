@@ -4,10 +4,12 @@
 
 #include <QObject>
 
+#ifndef Q_MOC_RUN
 #pragma GCC diagnostic push
 #pragma GCC system_header
 #include "boost/multi_array.hpp"
 #pragma GCC diagnostic pop
+#endif
 
 namespace Langmuir
 {

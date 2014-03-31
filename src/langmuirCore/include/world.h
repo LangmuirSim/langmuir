@@ -5,10 +5,12 @@
 #include <QtCore>
 #include <QtGui>
 
+#ifndef Q_MOC_RUN
 #pragma GCC diagnostic push
 #pragma GCC system_header
 #include "boost/multi_array.hpp"
 #pragma GCC diagnostic pop
+#endif
 
 namespace Langmuir
 {
@@ -38,8 +40,8 @@ struct SimulationParameters;
  * @brief A class to hold all objects in a simulation
  */
 class World : public QObject
-{  
-private:   
+{
+private:
     Q_OBJECT
     Q_DISABLE_COPY(World)
 
@@ -251,7 +253,7 @@ public:
     /**
      * @brief get the coupling constants
      */
-    boost::multi_array<double,3>& couplingConstants();   
+    boost::multi_array<double,3>& couplingConstants();
 
     /**
      * @brief get the max number of ElectronAgents allowed
