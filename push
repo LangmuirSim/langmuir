@@ -1,0 +1,8 @@
+#!/bin/bash
+echo "ORIGIN"
+echo "======"
+git push origin master
+echo ""
+echo "BITBUCKET"
+echo "========="
+git push bitbucket master
