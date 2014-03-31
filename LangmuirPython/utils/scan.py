@@ -152,8 +152,18 @@ class Scanner:
             print 'reversed working values!'
             self.values.reverse()
 
-        if not opts.fmt is None:
-            re.sub('{value}', '{value:{fmt}}', opts.stub)
+        if opts.fmt is None:
+            if 'voltage' in self.working:
+                opts.fmt = '+.2f'
+            elif 'percentage' in self.working:
+                opts.fmt = '+.2f'
+            else:
+                opts.fmt = ''
+        else:
+            opts.fmt = opts.fmt.strip(r'%')
+
+        if '{value}' in opts.stub:
+            opts.stub = re.sub('{value}', '{value:{fmt}}', opts.stub)
 
         self.checkpoint[self.working] = self.values[0]
 

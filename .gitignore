@@ -21,5 +21,3 @@ pull-home
 *.toc
 *.toc.make
 *.temp
-push
-pull

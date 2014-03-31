@@ -168,7 +168,7 @@ void CheckPointer::save(const QString& fileName)
     OutputInfo info(fileName,&m_world.parameters());
 
     std::ofstream stream;
-    stream.open(info.absoluteFilePath().toAscii().constData());
+    stream.open(info.absoluteFilePath().toLatin1().constData());
 
     if (!stream)
     {
