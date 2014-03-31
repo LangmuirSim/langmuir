@@ -50,6 +50,8 @@ endmacro(link_opengl)
 macro(find_qt4)
     message(STATUS "using qt4")
 
+    set(DESIRED_QT_VERSION 4 CACHE STRING "QT version number")
+
     if(OPENGL_FOUND)
         set(QT_USE_QTOPENGL TRUE)
     endif(OPENGL_FOUND)
