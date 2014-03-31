@@ -10,13 +10,14 @@ iso.py
 
 .. moduleauthor:: Geoff Hutchison <geoffh@pitt.edu>
 """
-from scipy import misc, ndimage
-import numpy as np
 import argparse
 import os
 
+from scipy import misc, ndimage
+import numpy as np
+
 desc = """
-gaussian noise for isotropic systems
+Generate isotropic two-phase 2D systems using Gaussian noise
 """
 
 def create_parser():
@@ -45,10 +46,29 @@ def get_arguments(args=None):
     opts = parser.parse_args(args)
     return opts
 
-def makeIsotropic(width, height, radius = 4):
+def makeIsotropic(width, height, radius=4):
+    """
+    Generate a 2D isotropic two-phase system using Gaussian random noise.
+    Before thresholding, the random noise is convoluted using a Gaussian blur
+    kernel of sigma "radius". The resulting data will have a 50:50 mixture as
+    a binary array (0, 1)
+
+    :param width: width of the resulting data
+    :param height: height of the resulting data
+    :param radius: size of the Gaussian blur kernel
+
+    :type width: int
+    :type height: int
+    :type radius: float
+
+    :return: morphology data
+    :rtype: :py:class:`numpy.ndarray`
+    """
     # floating point between 0.0 - 1.0
     noise = np.random.random( (width, height) )
-    scaled = ndimage.gaussian_filter(noise, sigma = radius)
+    # blur (vectorized code from ndimage)
+    scaled = ndimage.gaussian_filter(noise, sigma=radius)
+    # threshold, since the resulting blurred data may not have 50:50 mix
     return scaled > scaled.mean()
 
 if __name__ == '__main__':

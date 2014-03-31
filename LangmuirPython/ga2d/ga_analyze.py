@@ -7,16 +7,17 @@ ga_analyze.py
 """
 import sys
 import argparse
+from collections import deque
+
 from scipy import ndimage, misc
 import numpy as np
-from collections import deque
 from PIL import Image
 
 # our code
 import modify
 
 desc = """
-Analysis of images for GA processing.
+Image analysis for various "descriptors" of morphology performance. Allows rapid GA evolution of morphology images.
 """
 
 def create_parser():
@@ -33,10 +34,16 @@ def get_arguments(args=None):
 # from http://scipy-lectures.github.io/advanced/image_processing/
 def disk_structure(n):
     """
-    .. todo:: comment function
+    Generate a mathematical morphology structure kernel (i.e., a circle/disk)
+    of radius n
 
     :param n: radius of disk
     :type n: int
+
+    :return: structuring kernel
+    :rtype: :py:class:`numpy.ndarray`
+
+    .. seealso:: :func:`square_structure()`
     """
     struct = np.zeros((2 * n + 1, 2 * n + 1))
     x, y = np.indices((2 * n + 1, 2 * n + 1))
@@ -46,7 +53,16 @@ def disk_structure(n):
 
 def square_structure(n):
     """
+    Generate a mathematical morphology structure kernel (i.e., a square)
+    of size n
 
+    :param n: radius of disk
+    :type n: int
+
+    :return: structuring kernel
+    :rtype: :py:class:`numpy.ndarray`
+
+    .. seealso:: :func:`disk_structure()`
     """
     struct = np.ones((n,n), dtype=np.bool)
     return struct
@@ -56,11 +72,14 @@ def granulometry(image, sizes=None, structure=disk_structure):
     """
     .. todo:: comment function
 
-    :param image: ?
-    :param sizes: ?
+    :param image: data
+    :param sizes: list of particle sizes to test
 
     :type data: :py:class:`numpy.ndarray`
     :type sizes: list[int]
+
+    :return: list of particle counts at each size
+    :rtype: list[int]
     """
     s = max(image.shape)
     if sizes == None:
@@ -71,10 +90,13 @@ def granulometry(image, sizes=None, structure=disk_structure):
 
 def average_domain_size(image):
     """
-    .. todo:: comment function
+    Calculate the average domain size for the image (for the "true" phase)
 
     :param image: data
     :type image: :py:class:`numpy.ndarray`
+
+    :return mean and standard deviation of domain sizes
+    :rtype: tuple(int)
     """
     # get the average size of domains (i.e., distance from center of domain to other phase)
     # first use ndimage to label each domain
@@ -91,6 +113,17 @@ def average_domain_size(image):
     return np.mean(imax), np.std(imax)
 
 def box_counting_dimension(image):
+    """
+    Calculate the fractal dimension of the edges of the supplied image.
+
+    :param image: data
+    :type image: :py:class:`numpy.ndarray`
+
+    :return slope of best-fit line of the log-log plot
+    :rtype: int
+
+    .. seealso:: `Wikipedia <http://en.wikipedia.org/wiki/Minkowski–Bouligand_dimension>`_
+    """
     width, height = image.shape
     sizes = [ 2, 4, 8, 16, 32, 64 ]
     grains = []
@@ -107,10 +140,13 @@ def box_counting_dimension(image):
 
 def interface_size(image):
     """
-    .. todo:: comment function
+    Calculate the interfacial area (length for 2D images) between the phases.
 
     :param image: data
     :type image: :py:class:`numpy.ndarray`
+
+    :return total length of interface (in pixels)
+    :rtype int
     """
     # loop through the image to count the number of interfaces
     interface = 0
@@ -136,11 +172,20 @@ def interface_size(image):
 
 def transfer_distance(original):
     """
-    .. todo:: comment function
+    Calculate the connectivity of the two phases to the side electrodes and
+    the average "transfer distance" (i.e., the shortest distance a charge carrier
+    must travel to be collected at an electrode).
+
+    The transfer distances and connectivity fractions are calculated using a breadth-first
+    search from the electrodes left = white phase, right = black phase.
 
     :param original: data
     :type original: :py:class:`numpy.ndarray`
+
+    :return average transfer distance and connectivity fraction
+    :rtype tuple(float)
     """
+
     # the image will come in with row-major order (i.e., numpy)
     # but we're thinking of this as a graphic, with column, row
     image = np.rot90(original)
@@ -153,7 +198,7 @@ def transfer_distance(original):
     distances.shape = (width, height)
 
     # ok, so it's a deque not a queue..
-    # .. it still works similarly
+    # .. it still works for our purposes and Python doesn't have a queue
     work = deque()
     nx = [-1, 1,  0, 0]
     ny = [ 0, 0, -1, 1]
@@ -207,7 +252,7 @@ def transfer_distance(original):
             else:
                 unconnectedCount += 1
 
-    avgDistance = avgDistance / count
+    avgDistance = avgDistance / float(count)
     connectivityFraction = 1.0 - float(unconnectedCount) / float(width * height)
 
     return avgDistance, connectivityFraction

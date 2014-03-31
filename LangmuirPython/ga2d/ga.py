@@ -8,6 +8,8 @@ ga.py
     :func: create_parser
     :prog: ga.py
 
+.. todo:: Add a list/heap of the top 10-25 unique from all time
+
 .. moduleauthor:: Geoff Hutchison <geoffh@pitt.edu>
 """
 import argparse
@@ -22,7 +24,6 @@ import math
 from PIL import Image
 from scipy import ndimage, misc
 import numpy as np
-
 
 # our code
 import ga_analyze as analyze
@@ -61,16 +62,23 @@ def get_arguments(args=None):
 
 def score(filename):
     """
-    .. todo:: comment function
+    Score individual image files for the genetic algorithm.
+    The idea is to derive predictive factors for the langmuir performance
+    (i.e., max power) based on the connectivity, phase fractions, domain sizes,
+    etc. The scoring function should be based on multivariate fits from a database
+    of existing simulations. To ensure good results, use robust regression techniques
+    and cross-validate the best-fit.
     
     :param filename: image file name
     :type filename: str
 
-    :return float: score (ideally as an estimated maximum power in W/(m^2))
+    :return score (ideally as an estimated maximum power in W/(m^2))
+    :rtype float
     """
     # TODO: Make this physically and empirically based!
 
     # this works around a weird bug in scipy.misc.imread with 1-bit images
+    # open them with PIL as 8-bit greyscale "L" and then convert to ndimage
     pil_img = Image.open(filename)
     image = misc.fromimage(pil_img.convert("L"))
 
@@ -102,24 +110,23 @@ def score(filename):
     # fraction of phase one
     nonzero = np.count_nonzero(image)
     fraction = float(nonzero) / float(image.size)
-    phase_scale = 4*fraction*(1.0-fraction)
+    # scores zero at 0, 1 and maximum at 0.5
+    ps = fraction*(1.0-fraction)
 
-    # from initial 74 simulations with nonlinear regression
-    score= 3790.73 -41.867*ads -7.32114*td -0.191631*erosion + 788.541*math.tanh(5.83*(connectivity - 0.698)) \
-           + 1.51379e-5*dilation**2
-    return phase_scale**2 * score
-    #return 2769.2 + 14490.3*pow(ads1,-1.83108) -19177.8*pow(ads1,-2.10393) -3658.22*pow(ads2,-32.9136)\
-    #      -10.4209*pow(ads2,1.06774) -0.676183*td -0.00012812*pow(connectivity,-14.8147)
+    # from initial simulations with multivariate nonlinear regression
+    return (-55.7231) + (-949.391)*math.pow(ads, -2) + (-351.136)*math.pow(ads,0.5) + (-2.48402)*td \
+    + (-0.210322)*erosion + 965.507*math.tanh(5.83*(connectivity - 0.698)) + 1.69543e-5*dilation**2 \
+    + 60580.7*ps**2
 
 def score_filenames(filenames, pool=None):
     """
-    .. todo:: comment function
+    Score a list of files in parallel using the supplied processing pool
     
     :param filenames: image file names
     :param pool: multiprocessing thread pool
 
     :type filenames: list of str
-    :type pool: ?
+    :type pool: multiprocessing.pool.Pool
     """    
     # analyze all these files and push into a list of (score, filename) tuples
     start = time.time()

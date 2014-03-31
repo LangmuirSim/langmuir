@@ -8,17 +8,19 @@ modify.py
     :func: create_parser
     :prog: modify.py
 
+.. todo:: add argument flags to allow command-line access to all image mutations
+
 .. moduleauthor:: Geoff Hutchison <geoffh@pitt.edu>
 """
 
 import argparse
 import os
 import sys
-from scipy import misc, ndimage
-import numpy as np
 import random
 import math
 
+from scipy import misc, ndimage
+import numpy as np
 from PIL import Image
 
 desc = """
@@ -50,94 +52,139 @@ def get_arguments(args=None):
 
 def threshold(image):
     """
-    .. todo:: comment function
+    Threshold an image to return a binary :py:class:`numpy.ndarray`
+    with a 50:50 mix of two phases.
 
     :param image: data
     :type image: :py:class:`numpy.ndarray`
+
+    :return: modified image data
+    :rtype: :py:class:`numpy.ndarray`
     """
     return image > image.mean()
 
-def blend_and_threshold(image1, image2, ratio = 0.5, radius=1):
+def blend_and_threshold(image1, image2, ratio=0.5, radius=1):
     """
-    .. todo:: comment function
+    Mix two images, blur and threshold
 
     :param image1: data1
     :param image2: data2
-    :param ratio: mixing ratio
-    :param radius: size of blur kernel to use after mixing
+    :param ratio: mixing ratio (default is 50:50 mixture)
+    :param radius: size of uniform blur kernel to use after mixing (default is no blurring)
 
     :type image1: :py:class:`numpy.ndarray`
     :type image2: :py:class:`numpy.ndarray`
     :type ratio: float
     :type radius: float
-    """
 
+    :return: modified image data
+    :rtype: :py:class:`numpy.ndarray`
+    """
     mixed = (ratio * image1 + (1.0 - ratio)*image2)
     image = ndimage.uniform_filter(mixed, size=radius)
-    return threshold(image)
+    return image > image.mean()
 
 def gblur_and_threshold(image, radius=1):
     """
-    .. todo:: comment function
+    Blur an image with a Gaussian kernel of supplied radius
 
     :param image: data
-    :param radius: kernel radius
+    :param radius: kernel radius (default = no blurring)
 
     :type image: :py:class:`numpy.ndarray`
     :type radius: float
+
+    :return: modified image data
+    :rtype: :py:class:`numpy.ndarray`
     """
     output = ndimage.gaussian_filter(image, sigma=radius)
-    return threshold(output)
+    return image > image.mean()
 
 def ublur_and_threshold(image, radius = 1):
     """
-    .. todo:: comment function
+    Blur an image with a Uniform blur kernel of supplied radius
+    (the uniform filter better preserves edges/boundaries
 
     :param image: data
     :param radius: kernel radius
 
     :type image: :py:class:`numpy.ndarray`
     :type radius: float
+
+    :return: modified image data
+    :rtype: :py:class:`numpy.ndarray`
     """
     output = ndimage.uniform_filter(image, size=radius)
     return threshold(output)
 
-def shrink(image):
+def shrink(image, scale_x=0.0, scale_y=0.0):
+    """
+    Randomly shrink an image using different x and y scales. Re-tile and slice
+    the image to ensure the dimensions remain the same.
+
+    :param image: data
+    :param scale_x: x-dimension scale factor (or 0.0 for random choice)
+    :param scale_y: y-dimension scale factor (or 0.0 for random choice)
+
+    :type image: :py:class:`numpy.ndarray`
+    :type scale_x: float
+    :type scale_y: float
+
+    :return: modified image data
+    :rtype: :py:class:`numpy.ndarray`
+    """
     width, height = image.shape
-    shrink_x = random.uniform(0.25, 1.0)
-    shrink_y = random.uniform(0.25, 1.0)
-    resized = misc.imresize(image, (int(shrink_x * width), int(shrink_y * height)) )
-    # now we need to tile this thing
-    mult_x = math.ceil(1.0 / shrink_x)
-    mult_y = math.ceil(1.0 / shrink_y)
+    if scale_x <= 0.0 or scale_x > 1.0:
+        scale_x = random.uniform(0.25, 1.0)
+    if scale_y <= 0.0 or scale_y > 1.0:
+        scale_y = random.uniform(0.25, 1.0)
+    resized = misc.imresize(image, (int(scale_x * width), int(scale_y * height)) )
+    # now we need to tile this thing, so work out how many repeats are needed
+    mult_x = math.ceil(1.0 / scale_x)
+    mult_y = math.ceil(1.0 / scale_y)
     tiled = np.tile(resized, (mult_x, mult_y))
-    # now take a slice of width and height out of this thing
+
+    # now take a slice of width and height out of the re-tiled version
     tiled_width, tiled_height = tiled.shape
+    start_x = 0
     if tiled_width > width:
         start_x = random.randrange(tiled_width - width)
-    else:
-        start_x = 0
+    start_y = 0
     if tiled_height > height:
         start_y = random.randrange(tiled_height - height)
-    else:
-        start_y = 0
     return tiled[ start_x:start_x+256, start_y:start_y+256 ]
 
-def enlarge(image):
+def enlarge(image, zoom_x=0.0, zoom_y=0.0):
+    """
+    Randomly enlarge an image using different x and y scales. Slice the image to
+    ensure the dimensions remain the same.
+
+    :param image: data
+    :param zoom_x: x-dimension scale factor (or 0.0 for random choice)
+    :param zoom_y: y-dimension scale factor (or 0.0 for random choice)
+
+    :type image: :py:class:`numpy.ndarray`
+    :type zoom_x: float
+    :type zoom_y: float
+
+    :return: modified image data
+    :rtype: :py:class:`numpy.ndarray`
+    """
     width, height = image.shape
-    zoom_x = random.random() + 1.0
-    zoom_y = random.random() + 1.0
+    if zoom_x < 1.0:
+        zoom_x = random.random() + 1.0
+    if zoom_y < 1.0:
+        zoom_y = random.random() + 1.0
     child = ndimage.interpolation.zoom(image, (zoom_x, zoom_y) )
+
     # now take a slice of width and height out of this thing
     child_width, child_height = child.shape
+    start_x = 0
     if child_width > width:
         start_x = random.randrange(child_width - width)
-    else:
-        start_x = 0
+    start_y = 0
     if child_height > height:
         start_y = random.randrange(child_height - height)
-    else:
-        start_y = 0
     return child[ start_x:start_x+256, start_y:start_y+256 ]
 
 def pepper(image, phase=0, count=0, percent=None, brush='point', overlap=False, maxTries=1e9):
@@ -150,6 +197,9 @@ def pepper(image, phase=0, count=0, percent=None, brush='point', overlap=False, 
     :param percent: percent of phase to change (overrides count!)
     :param brush: which brush to use (point, square, square3, cross)
     :param overlap: allow the brush to paint over existing pixels
+
+    :return: modified image data
+    :rtype: :py:class:`numpy.ndarray`
     """
     # choose brush
     brushes = {
@@ -238,6 +288,10 @@ def pepper(image, phase=0, count=0, percent=None, brush='point', overlap=False, 
 def imshow(image):
     """
     Show image using matplotlib.
+
+    :param image: data
+
+    :type image: :py:class:`numpy.ndarray`
     """
     import matplotlib.pyplot as plt
     plt.autumn()
@@ -246,8 +300,27 @@ def imshow(image):
     plt.tight_layout()
     plt.show()
 
-def roughen(image, fraction=0.5, dilation=0):
-    struct = ndimage.morphology.generate_binary_structure(2, 1)
+def roughen(image, fraction=0.5, dilation=0, struct=None):
+    """
+    Roughen the edges of the two phases. Use a binary-closing and dilation
+    to find the edge between phases (ignoring pepper defects) and then flip
+    the phase of a fraction of the resulting edge sites.
+
+    :param image: data
+    :param fraction: percent of sites to flip
+    :param dilation: number of times to dilate (expand) the border
+    :param struct: structure used for the mathematical morphology operations
+
+    :type image: :py:class:`numpy.ndarray`
+    :type fraction: float
+    :type dilation: int
+    :type struct: :py:class:`numpy.ndarray`
+
+    :return: modified image data
+    :rtype: :py:class:`numpy.ndarray`
+    """
+    if struct==None:
+        struct = ndimage.morphology.generate_binary_structure(2, 1)
 
     # remove small noise with a binary closing
     cleaned = ndimage.binary_closing(image, structure=struct)

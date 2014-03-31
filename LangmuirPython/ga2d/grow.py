@@ -8,6 +8,8 @@ grow.py
     :func: create_parser
     :prog: grow.py
 
+.. todo:: merge with modify.py script
+
 .. moduleauthor:: Geoff Hutchison <geoffh@pitt.edu>
 """
 
@@ -17,6 +19,7 @@ import os
 
 from PIL import Image
 import numpy as np
+from scipy import misc
 
 
 desc = """
@@ -37,50 +40,21 @@ def get_arguments(args=None):
     opts = parser.parse_args(args)
     return opts
 
-def grow_image(image, pixToAdd = -1):
+def grow_ndimage(image, phase=0, pixToAdd=-1):
     """
     .. todo:: comment function
-    
+
     :param image: data
+    :param phase: grey level to grow into (i.e., default 0 = add white into black regions)
     :param pixToAdd: number of points to grow, -1 for automatic detection of 50:50 mix
 
     :type image: :py:class:`numpy.ndarray`
+    :type phase: int
     :type pixToAdd: int
-    """    
-    # neighbor pixel directions
-    nx = [-1, 1,  0, 0]
-    ny = [ 0, 0, -1, 1]
-    nbrs = len(nx)
 
-    (width, height) = image.size
-
-    if pixToAdd == -1:
-        pixToAdd = width * height / 2
-
-    # count how many are currently set
-    pix = 0
-    for x in range(width):
-        for y in range(height):
-            if image.getpixel((x, y)) > 0:
-                pix += 1
-
-    while pix < pixToAdd:
-        x = random.randrange(width)
-        y = random.randrange(height)
-        if image.getpixel((x,y)) > 0:
-            for i in range(nbrs):
-                # x, y is set, so try to find an empty neighbor
-                k = random.randrange(nbrs)
-                xn = x + nx[k]
-                yn = y + ny[k]
-                if xn < 0 or xn > width - 1 or yn < 0 or yn > height - 1:
-                    continue
-                if image.getpixel((xn,yn)) == 0:
-                    image.putpixel((xn,yn), 255)
-                    pix += 1
-                    break
-
-def grow_ndimage(image, phase = 0, pixToAdd = -1):
+    :return: modified image data
+    :rtype: :py:class:`numpy.ndarray`
+    """
     if phase != 0:
         inverted = (image < image.mean())
         image = inverted
@@ -98,9 +72,10 @@ def grow_ndimage(image, phase = 0, pixToAdd = -1):
     pix = np.count_nonzero(image)
 
     while pix < pixToAdd:
+        # pick a spot and see if it can be added
         x = random.randrange(width)
         y = random.randrange(height)
-        if image[x,y] > 0:
+        if image[x,y] != phase:
             for i in range(nbrs):
                 # x, y is set, so try to find an empty neighbor
                 k = random.randrange(nbrs)
@@ -108,7 +83,7 @@ def grow_ndimage(image, phase = 0, pixToAdd = -1):
                 yn = y + ny[k]
                 if xn < 0 or xn > width - 1 or yn < 0 or yn > height - 1:
                     continue
-                if image[xn,yn] == 0:
+                if image[xn,yn] == phase:
                     image[xn,yn] = 255
                     pix += 1
                     break
@@ -124,6 +99,8 @@ if __name__ == '__main__':
     work = os.getcwd()
     opts = get_arguments()
 
-    image = Image.open(opts.ifile)
-    grow_image(image)
-    image.save(opts.ifile, "PNG")
+    # this works around a weird bug in scipy with 1-bit images
+    pil = Image.open(opts.ifile)
+    image = misc.fromimage(pil.convert("L"))
+    image = grow_ndimage(image)
+    misc.imsave(opts.ifile, image)
