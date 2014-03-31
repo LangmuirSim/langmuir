@@ -10,10 +10,29 @@
 
 #include <QtCore>
 #include <QtGui>
-#include <QGLWidget>
-#include <QMatrix4x4>
-#include <QGLBuffer>
 #include <QGLShaderProgram>
+#include <QMatrix4x4>
+#include <QGLWidget>
+#include <QGLBuffer>
+
+#include <QDialogButtonBox>
+#include <QDesktopWidget>
+#include <QApplication>
+#include <QInputDialog>
+#include <QDockWidget>
+#include <QMessageBox>
+#include <QFileDialog>
+#include <QPushButton>
+#include <QMainWindow>
+#include <QStatusBar>
+
+#include <QDoubleSpinBox>
+#include <QColorDialog>
+#include <QGridLayout>
+#include <QLCDNumber>
+#include <QCheckBox>
+#include <QComboBox>
+#include <QLabel>
 
 namespace Langmuir
 {

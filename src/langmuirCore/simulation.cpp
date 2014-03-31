@@ -10,6 +10,11 @@
 #include "writer.h"
 #include "world.h"
 #include "rand.h"
+
+#ifdef LANGMUIR_USING_QT5
+#include <QtConcurrent/QtConcurrent>
+#endif
+
 namespace Langmuir
 {
 
