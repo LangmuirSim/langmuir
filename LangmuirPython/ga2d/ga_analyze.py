@@ -10,6 +10,10 @@ import argparse
 from scipy import ndimage, misc
 import numpy as np
 from collections import deque
+from PIL import Image
+
+# our code
+import modify
 
 desc = """
 Analysis of images for GA processing.
@@ -31,7 +35,7 @@ def disk_structure(n):
     """
     .. todo:: comment function
 
-    :param n: ?
+    :param n: radius of disk
     :type n: int
     """
     struct = np.zeros((2 * n + 1, 2 * n + 1))
@@ -84,13 +88,20 @@ def average_domain_size(image):
     imax = ndimage.measurements.maximum(dists, labels,
         index=np.arange(1, nb_labels + 1))
     # return the mean of the max array
-    return np.mean(imax)
+    return np.mean(imax), np.std(imax)
 
 def box_counting_dimension(image):
-    # use granulometry for
-    dim = max(image.shape)
-    sizes = [ 1, 2, 4, 8 ]
-    grains = granulometry(image, sizes, structure=square_structure)
+    width, height = image.shape
+    sizes = [ 2, 4, 8, 16, 32, 64 ]
+    grains = []
+    for size in sizes:
+        count = 0
+        for x in range(0, width, size):
+            for y in range(0, height, size):
+                nz = np.count_nonzero(image[x:x+size, y:y+size])
+                if nz != 0 and nz != size*size:
+                    count += 1
+        grains.append(count)
 
     return np.polyfit(np.log(sizes), np.log(grains), 1)
 
@@ -203,19 +214,21 @@ def transfer_distance(original):
 
 if __name__ == '__main__':
 
-    print "Filename, AvgDomainSize1, AvgDomainSize2, InterfaceSize, AvgTransferDist, Connectivity, PhaseRatio", \
-        "Granul1, Granul2, Granul3, Granul4, Granul5"
+    print "Filename, AvgDomainSize1, StdDevDom1, AvgDomainSize2, StdDevDom2, InterfaceSize, AvgTransferDist, "\
+        "Connectivity, PhaseRatio, BoxCDim, Granul1, Granul2, Granul3, Granul4, Granul5, Erosion, Dilation, "\
+        "Closure, Blur3"
 
     for filename in sys.argv[1:]:
-        image = misc.imread(filename)
+        pil_img = Image.open(filename)
+        image = misc.fromimage(pil_img.convert("L"))
 
         isize = interface_size(image)
 
         # get the domain size of the normal phase
         # then invert the image to get the second domain size
-        ads1 = average_domain_size(image)
+        ads1, std1 = average_domain_size(image)
         inverted = (image < image.mean())
-        ads2 = average_domain_size(inverted)
+        ads2, std2 = average_domain_size(inverted)
 
         avg_domain = (ads1 + ads2) / 2.0
         penalty = abs(ads1 - ads2) / avg_domain
@@ -231,6 +244,21 @@ if __name__ == '__main__':
         # granulometry data
         g_list = granulometry(image, range(1, 6))
 
-        formatted = "%s %8.4f %8.4f %d %8.4f %8.4f %8.4f %d %d %d %d %d"
-        print formatted % (filename, ads1, ads2, isize, td, connectivity, fraction, \
-            g_list[0], g_list[1], g_list[2], g_list[3], g_list[4])
+        # Fractal dimension by box counting -- get the slope of the log/log fit
+        bcd = box_counting_dimension(image)[0]*-1.0
+
+        # count the number of pepper defects
+        spots = np.logical_xor( image, ndimage.binary_erosion(image, structure=np.ones((2,2))) )
+        erosion_spots = np.count_nonzero(spots)
+        spots = np.logical_xor( image, ndimage.binary_dilation(image, structure=np.ones((2,2))) )
+        dilation_spots = np.count_nonzero(spots)
+        spots = np.logical_xor( image, ndimage.binary_closing(image, structure=ndimage.morphology.generate_binary_structure(2, 1)) )
+        closure_spots = np.count_nonzero(spots)
+
+        blur = modify.ublur_and_threshold(image, 3)
+        x = np.logical_xor(image, blur)
+        nzBlur = np.count_nonzero(x)
+
+        formatted = "%s %8.4f %8.4f %8.4f %8.4f %d %8.4f %8.4f %8.4f %8.4f %d %d %d %d %d %d %d %d %d"
+        print formatted % (filename, ads1, std1, ads2, std2, isize, td, connectivity, fraction, bcd, \
+            g_list[0], g_list[1], g_list[2], g_list[3], g_list[4], erosion_spots, dilation_spots, closure_spots, nzBlur)
