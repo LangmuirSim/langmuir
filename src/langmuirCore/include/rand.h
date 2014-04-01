@@ -6,10 +6,18 @@
 #include <QTextStream>
 
 #ifndef Q_MOC_RUN
+
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)
 #pragma GCC diagnostic push
 #pragma GCC system_header
+#endif
+
 #include <boost/random.hpp>
+
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)
 #pragma GCC diagnostic pop
+#endif
+
 #endif
 
 #include <ctime>
