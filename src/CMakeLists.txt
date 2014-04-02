@@ -19,7 +19,7 @@ endmacro(link_boost)
 macro(find_opencl)
     set(OPENCL_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/langmuirCore/include
         CACHE PATH "Path to a file")
-    find_package(OpenCL REQUIRED)
+    find_package(OpenCL)
     if(${OPENCL_FOUND})
         add_definitions(-DLANGMUIR_OPEN_CL)
         include_directories(${OPENCL_INCLUDE_DIRS})
