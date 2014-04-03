@@ -12,6 +12,7 @@ done.py
 """
 import langmuir as lm
 import argparse
+import sys
 import os
 
 desc = """
@@ -29,72 +30,92 @@ def get_arguments(args=None):
     opts = parser.parse_args(args)
     return opts
 
-def search(work, r=False):
-    dats = lm.find.dats(work, r=r)
-    chks = lm.find.chks(work, r=r)
-    dirs = [os.path.abspath(os.path.dirname(d)) for d in dats]
-    for chk in chks:
-        d = os.path.dirname(chk)
-        if not d in dirs:
-            dirs.append(d)
-    dirs.sort(key=lm.regex.numbers)
+def indent(string, level=0, **kwargs):
+    print '    ' * level + string.format(**kwargs)
 
-    chks = []
-    dats = []
-    for d in dirs:
-        try:
-            chk = os.path.relpath(lm.find.chk(d), work)
-        except (RuntimeError, TypeError):
-            chk = None
+def report_chk(chk):
+    chk = lm.checkpoint.load(chk)
+    try:
+        cstep = chk['current.step']
+    except KeyError:
+        cstep = '?'
 
-        try:
-            dat = os.path.relpath(lm.find.dat(d), work)
-        except (RuntimeError, TypeError):
-            dat = None
+    try:
+        tstep = chk['iterations.real']
+    except KeyError:
+        tstep = '?'
 
-        chks.append(chk)
-        dats.append(dat)
+    try:
+        percent = float(cstep)/float(tstep) * 100
+    except TypeError:
+        percent = 0.00
 
-    return chks, dats
+    done = False
+    if percent >= 100:
+        done=True
+
+    percent = '%.2f' % percent
+
+    return cstep, tstep, percent, done
+
+format_string = '{path} : cstep={cstep:>8} : tstep={tstep:>8} : percent={percent:>5} : done={done}'
+
+def loop_part(part, level=0):
+    chk = lm.find.chk(part)
+    cstep, tstep, percent, done = report_chk(chk)
+    indent(format_string, level=level, path=os.path.basename(part), cstep=cstep, tstep=tstep, percent=percent,
+           done=done)
+
+def loop_sim(sim, level=0):
+    indent('sim: {sim}', level=level, sim=os.path.basename(sim))
+    parts = lm.find.parts(sim)
+    for part in parts:
+        loop_part(part, level=level + 1)
+
+def loop_run(run, level=0):
+    indent('run: {run}', level=level, run=os.path.basename(run))
+    sims = lm.find.sims(run)
+    for sim in sims:
+        loop_sim(sim, level=level + 1)
+
+def loop_system(system, level=0):
+    indent('system: {system}', level=level, system=os.path.basename(system))
+    runs = lm.find.runs(system)
+    for run in runs:
+        loop_run(run, level=level + 1)
 
 if __name__ == '__main__':
     work = os.getcwd()
     opts = get_arguments()
 
-    chks, dats = search(work, r=opts.r)
-
-    if chks or dats:
-        print '{:>45}{:>10}{:>10}{:>10}'.format('path', 'current', 'total', 'percent')
-        print '-' * 80
-        for i, (chk, dat) in enumerate(zip(chks, dats)):
-            try:
-                path = os.path.dirname(chk)
-            except AttributeError:
-                try:
-                    path = os.path.dirname(dat)
-                except AttributeError:
-                    path = os.path.join(work, '???')
-            path = os.path.relpath(path, work)
-
-            chk = lm.checkpoint.load(chk)
-            try:
-                cstep = chk['current.step']
-            except KeyError:
-                cstep = None
-
-            try:
-                tstep = chk['iterations.real']
-            except KeyError:
-                tstep = None
-
-            try:
-                percent = float(cstep)/float(tstep) * 100
-            except TypeError:
-                percent = 0.00
-
-            print '{path:45}{cstep:10}{tstep:10}{percent:10.5f}'.format(**locals())
-
-            if i == 128:
-                break
+    systems = lm.find.systems(work, r=opts.r)
+    if not systems:
+        runs = lm.find.runs(work, r=opts.r)
+        if not runs:
+            sims = lm.find.sims(work, r=opts.r)
+            if not sims:
+                parts = lm.find.parts(work, r=opts.r)
+                if not parts:
+                    chks = lm.find.chks(work, r=opts.r)
+                    if not chks:
+                        dats = lm.find.dats(work, r=opts.r)
+                        if not dats:
+                            print 'can not find any simulations!'
+                            sys.exit(-1)
+                    else:
+                        for chk in chks:
+                            cstep, tstep, percent, done = report_chk(chk)
+                            indent(format_string, level=0, path=os.path.basename(chk), cstep=cstep,
+                                tstep=tstep, percent=percent, done=done)
+                else:
+                    for part in parts:
+                        loop_part(part)
+            else:
+                for sim in sims:
+                    loop_sim(sim)
+        else:
+            for run in runs:
+                loop_run(run)
     else:
-        print 'can not find any simulations (use -r)'
+        for system in systems:
+            loop_system(system)
