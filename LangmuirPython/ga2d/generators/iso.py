@@ -75,11 +75,11 @@ if __name__ == '__main__':
     work = os.getcwd()
     opts = get_arguments()
 
-    if opts.ofile is None:
-        opts.ofile = "Iso-%d.png" % opts.radius
-
     if opts.seed:
         np.random.seed(seed=opts.seed)
+
+    if opts.ofile is None:
+        opts.ofile = "iso-s%d-%d.png" % (opts.seed, opts.radius)
 
     output = makeIsotropic(opts.width, opts.height, opts.radius)
     misc.imsave(opts.ofile, output)
