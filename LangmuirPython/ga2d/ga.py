@@ -86,7 +86,7 @@ def score(filename):
     if width != 256 or height != 256:
         print "Size Error: ", filename
 
-    isize = analyze.interface_size(image)
+#    isize = analyze.interface_size(image)
     ads1, std1 = analyze.average_domain_size(image)
 
     # we now need to invert the image to get the second domain size
@@ -100,12 +100,12 @@ def score(filename):
 
     # transfer distances
     # connectivity
-    td, connectivity = analyze.transfer_distance(image)
+    td1, connect1, td2, connect2 = analyze.transfer_distance(image)
 
-    spots = np.logical_xor( image, ndimage.binary_erosion(image, structure=np.ones((2,2))) )
-    erosion = np.count_nonzero(spots)
-    spots = np.logical_xor( image, ndimage.binary_dilation(image, structure=np.ones((2,2))) )
-    dilation = np.count_nonzero(spots)
+#    spots = np.logical_xor( image, ndimage.binary_erosion(image, structure=np.ones((2,2))) )
+#    erosion = np.count_nonzero(spots)
+#    spots = np.logical_xor( image, ndimage.binary_dilation(image, structure=np.ones((2,2))) )
+#    dilation = np.count_nonzero(spots)
 
     # fraction of phase one
     nonzero = np.count_nonzero(image)
@@ -114,9 +114,10 @@ def score(filename):
     ps = fraction*(1.0-fraction)
 
     # from initial simulations with multivariate nonlinear regression
-    return (-55.7231) + (-949.391)*math.pow(ads, -2) + (-351.136)*math.pow(ads,0.5) + (-2.48402)*td \
-    + (-0.210322)*erosion + 965.507*math.tanh(5.83*(connectivity - 0.698)) + 1.69543e-5*dilation**2 \
-    + 60580.7*ps**2
+    return (-1096.6) + (-2539.26)*math.pow(ads, -2) + (-1215.72)*math.pow(ads,0.2) + \
+           2026.68*math.tanh(3*(connect1 - 0.45)) + 804.779*math.tanh(3*(connect2 - 0.45)) \
+           + (-1332.77)*connect1*connect2 \
+           + (-9.05167)*td1 + (-4.00668)*td2 + 3.97801e8*ps**8
 
 def score_filenames(filenames, pool=None):
     """
@@ -255,7 +256,7 @@ if __name__ == '__main__':
             pil = Image.open(handle)
             image = misc.fromimage(pil.convert("L"))
 
-            mutation = random.randrange(8)
+            mutation = random.randrange(7)
             if mutation == 0:
                 # gaussian blur
                 image = modify.gblur_and_threshold(image, random.choice([2,3,4,5]))
@@ -272,6 +273,15 @@ if __name__ == '__main__':
                 child = modify.blend_and_threshold(image, noise)
                 image = child
             elif mutation == 4:
+                # roughen the edges
+                image = modify.roughen(image)
+            elif mutation == 5:
+                # rescale larger
+                image = modify.enlarge(image)
+            elif mutation == 6:
+                # rescale smaller
+                image = modify.shrink(image)
+            elif mutation == 7:
                 # grow edges up to 50:50 mix
                 nonzero = np.count_nonzero(image)
                 phase = 0
@@ -279,15 +289,6 @@ if __name__ == '__main__':
                     phase = 255
                 child = grow.grow_ndimage(image, phase)
                 image = child
-            elif mutation == 5:
-                # roughen the edges
-                image = modify.roughen(image)
-            elif mutation == 6:
-                # rescale larger
-                image = modify.enlarge(image)
-            elif mutation == 7:
-                # rescale smaller
-                image = modify.shrink(image)
             # shift? - not useful
             # swap slices? - not sure if this is useful
             misc.imsave(handle, image)

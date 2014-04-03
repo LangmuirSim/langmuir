@@ -356,7 +356,27 @@ if __name__ == '__main__':
     else:
 #        output = ublur_and_threshold(image1, 3)
 #        output = ndimage.binary_closing(image1.astype(np.uint8), structure=ndimage.morphology.generate_binary_structure(2, 1) )
-        output = roughen(image1)
-        misc.imsave("output.png", output)
-        x = np.logical_xor(image1, output)
-        misc.imsave("xor.png", x)
+        output = morphology.skeletonize( (image1 > image1.mean()) )
+        misc.imsave("skel.png", output)
+        # get the distances
+        dists = ndimage.distance_transform_edt(image1)
+        # ok for all the nonzero in the skeleton, we get the distances
+        x_nz, y_nz = output.nonzero() # get all the nonzero indices
+        channels = []
+        for i in range(len(x_nz)):
+            x = x_nz[i]
+            y = y_nz[i]
+            channels.append(dists[x,y])
+
+        width4 = 0
+        width2 = 0
+        for i in channels:
+            if i <= 4:
+                width4 += 1
+            if i <= 2:
+                width2 += 1
+
+        print width4, width2
+
+#        x = np.logical_xor(image1, output)
+#        misc.imsave("xor.png", x)

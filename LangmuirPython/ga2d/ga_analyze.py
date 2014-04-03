@@ -8,10 +8,13 @@ ga_analyze.py
 import sys
 import argparse
 from collections import deque
+from multiprocessing import Pool
 
 from scipy import ndimage, misc
+from skimage import morphology
 import numpy as np
 from PIL import Image
+
 
 # our code
 import modify
@@ -182,7 +185,7 @@ def transfer_distance(original):
     :param original: data
     :type original: :py:class:`numpy.ndarray`
 
-    :return average transfer distance and connectivity fraction
+    :return average transfer distance and connectivity fraction (phase 1 and then phase 2)
     :rtype tuple(float)
     """
 
@@ -240,70 +243,129 @@ def transfer_distance(original):
                     # somehow found a shorter path
                     distances[xn,yn] = currentDist + 1
 
-    # compute the average distances
-    avgDistance = 0.0
-    count = 0
-    unconnectedCount = 0
+    # compute the average distances for each phase
+    avgDistance1 = 0.0
+    avgDistance2 = 0.0
+    count1 = 0
+    count2 = 0
+    unconnectedCount1 = 0
+    unconnectedCount2 = 0
     for x in range(width):
         for y in range(height):
-            if distances[x,y] >= 0.0:
-                avgDistance += distances[x,y]
-                count += 1
+            if image[x,y] != 0:
+                # white phase
+                if distances[x,y] >= 0.0:
+                    avgDistance1 += distances[x,y]
+                    count1 += 1
+                else:
+                    unconnectedCount1 += 1
             else:
-                unconnectedCount += 1
+                if distances[x,y] >= 0.0:
+                    avgDistance2 += distances[x,y]
+                    count2 += 1
+                else:
+                    unconnectedCount2 += 1
 
-    avgDistance = avgDistance / float(count)
-    connectivityFraction = 1.0 - float(unconnectedCount) / float(width * height)
+    if count1 != 0:
+        avgDistance1 = avgDistance1 / float(count1)
+    else:
+        avgDistance1 = 0
+    phase1 = np.count_nonzero(image)
+    connectivity1 = 1.0 - float(unconnectedCount1) / float(phase1)
 
-    return avgDistance, connectivityFraction
+    if count2 != 0:
+        avgDistance2 = avgDistance2 / float(count2)
+    else:
+        avgDistance2 = 0
+    connectivity2 = 1.0 - float(unconnectedCount2) / float(width * height - phase1)
+
+    return avgDistance1, connectivity1, avgDistance2, connectivity2
+
+def bottleneck_distribution(image):
+    """
+    Count the distribution of bottlenecks
+
+    :param image: data (binary)
+    :type image: :py:class:`numpy.ndarray`
+
+    :return count of bottlenecks of size 4 and size 2
+    :rtype tuple(int)
+    """
+    skel = morphology.skeletonize(image)
+    # get the distances
+    dists = ndimage.distance_transform_edt(image)
+    # ok for all the nonzero in the skeleton, we get the distances
+    x_nz, y_nz = skel.nonzero() # get all the nonzero indices
+    width4 = 0
+    width2 = 0
+    for i in range(len(x_nz)):
+        x = x_nz[i]
+        y = y_nz[i]
+
+        dist = dists[x,y]
+        if dist <= 4:
+            width4 += 1
+        if dist <= 2:
+            width2 += 1
+
+    return width4, width2
+
+def analyze(filename):
+    pil_img = Image.open(filename)
+    image = misc.fromimage(pil_img.convert("L"))
+
+    isize = interface_size(image)
+
+    # transfer distances
+    # connectivity
+    td1, connect1, td2, connect2 = transfer_distance(image)
+
+    # get the domain size of the white phase
+    # then invert the image to get the black domain size
+    image = (image > image.mean())
+    ads1, std1 = average_domain_size(image)
+    inverted = (image < image.mean())
+    ads2, std2 = average_domain_size(inverted)
+
+    # bottlenecks of phase1, phase2
+    b41, b21 = bottleneck_distribution(image)
+    b42, b22 = bottleneck_distribution(inverted)
+
+    # fraction of phase one
+    phase1 = np.count_nonzero(image)
+    fraction = float(phase1) / float(image.size)
+
+    # Fractal dimension by box counting -- get the slope of the log/log fit
+    bcd = -1.0* box_counting_dimension(image)[0]
+
+    # count the number of pepper defects
+    spots = np.logical_xor( image, ndimage.binary_erosion(image, structure=np.ones((2,2))) )
+    erosion_spots = np.count_nonzero(spots)
+    spots = np.logical_xor( image, ndimage.binary_dilation(image, structure=np.ones((2,2))) )
+    dilation_spots = np.count_nonzero(spots)
+    spots = np.logical_xor( image, ndimage.binary_closing(image, structure=ndimage.morphology.generate_binary_structure(2, 1)) )
+    closure_spots = np.count_nonzero(spots)
+
+    blur = modify.ublur_and_threshold(image, 3)
+    x = np.logical_xor(image, blur)
+    nzBlur = np.count_nonzero(x)
+    #               ads1  std1   ads2  std2 i  td1  con1   td2   con2  phase bcd   er dil clos blur
+    formatted = "%s %8.4f %8.4f %8.4f %8.4f %d %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %d %d %d %d %d %d %d %d"
+    return formatted % (filename, ads1, std1, ads2, std2, isize, td1, connect1, td2, connect2, fraction, bcd, \
+        b41, b21, b42, b22, erosion_spots, dilation_spots, closure_spots, nzBlur)
 
 if __name__ == '__main__':
+    # create a thread pool
+    pool = Pool()
 
-    print "Filename, AvgDomainSize1, StdDevDom1, AvgDomainSize2, StdDevDom2, InterfaceSize, AvgTransferDist, "\
-        "Connectivity, PhaseRatio, BoxCDim, Granul1, Granul2, Granul3, Granul4, Granul5, Erosion, Dilation, "\
-        "Closure, Blur3"
+    print "Filename AvgDomainSize1 StdDevDom1 AvgDomainSize2 StdDevDom2 InterfaceSize AvgTransDist1 " \
+        "Connect1 AvgTransDist2 Connect2 PhaseRatio BoxCDim " \
+        "Bottle4-1 Bottle2-1 Bottle4-2 Bottle2-2 Erosion Dilation Closure Blur3"
 
-    for filename in sys.argv[1:]:
-        pil_img = Image.open(filename)
-        image = misc.fromimage(pil_img.convert("L"))
+    if pool is None:
+        output = map(analyze, sys.argv[1:])
+    else:
+        output = pool.map(analyze, sys.argv[1:])
 
-        isize = interface_size(image)
-
-        # get the domain size of the normal phase
-        # then invert the image to get the second domain size
-        ads1, std1 = average_domain_size(image)
-        inverted = (image < image.mean())
-        ads2, std2 = average_domain_size(inverted)
-
-        avg_domain = (ads1 + ads2) / 2.0
-        penalty = abs(ads1 - ads2) / avg_domain
-
-        # fraction of phase one
-        phase1 = np.count_nonzero(image)
-        fraction = float(phase1) / float(image.size)
-
-        # transfer distances
-        # connectivity
-        td, connectivity = transfer_distance(image)
-
-        # granulometry data
-        g_list = granulometry(image, range(1, 6))
-
-        # Fractal dimension by box counting -- get the slope of the log/log fit
-        bcd = box_counting_dimension(image)[0]*-1.0
-
-        # count the number of pepper defects
-        spots = np.logical_xor( image, ndimage.binary_erosion(image, structure=np.ones((2,2))) )
-        erosion_spots = np.count_nonzero(spots)
-        spots = np.logical_xor( image, ndimage.binary_dilation(image, structure=np.ones((2,2))) )
-        dilation_spots = np.count_nonzero(spots)
-        spots = np.logical_xor( image, ndimage.binary_closing(image, structure=ndimage.morphology.generate_binary_structure(2, 1)) )
-        closure_spots = np.count_nonzero(spots)
-
-        blur = modify.ublur_and_threshold(image, 3)
-        x = np.logical_xor(image, blur)
-        nzBlur = np.count_nonzero(x)
-
-        formatted = "%s %8.4f %8.4f %8.4f %8.4f %d %8.4f %8.4f %8.4f %8.4f %d %d %d %d %d %d %d %d %d"
-        print formatted % (filename, ads1, std1, ads2, std2, isize, td, connectivity, fraction, bcd, \
-            g_list[0], g_list[1], g_list[2], g_list[3], g_list[4], erosion_spots, dilation_spots, closure_spots, nzBlur)
+    for line in output:
+        print line
