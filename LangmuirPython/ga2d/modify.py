@@ -12,7 +12,6 @@ modify.py
 
 .. moduleauthor:: Geoff Hutchison <geoffh@pitt.edu>
 """
-
 import argparse
 import os
 import sys
@@ -26,29 +25,6 @@ from PIL import Image
 desc = """
 Mix two images and re-threshold or perform other mutations.
 """
-
-def create_parser():
-    parser = argparse.ArgumentParser()
-    parser.description = desc
-
-    parser.add_argument(dest='ifile1', type=str, metavar='input1',
-        help='input file #1')
-
-    parser.add_argument(dest='ifile2', default=None, type=str,
-                        metavar='input2', nargs='?',
-                        help='input file #2')
-    return parser
-
-def get_arguments(args=None):
-    parser = create_parser()
-    opts = parser.parse_args(args)
-
-    if not os.path.exists(opts.ifile1):
-        parser.print_help()
-        print >> sys.stderr, '\nfile does not exist: %s' % opts.ifile1
-        sys.exit(-1)
-
-    return opts
 
 def threshold(image):
     """
@@ -341,6 +317,29 @@ def roughen(image, fraction=0.5, dilation=0, struct=None):
             edge[x, y] = 0 # invert one of these edge sites
             count += 1
     return np.logical_xor( image, edge )
+
+def create_parser():
+    parser = argparse.ArgumentParser()
+    parser.description = desc
+
+    parser.add_argument(dest='ifile1', type=str, metavar='input1',
+        help='input file #1')
+
+    parser.add_argument(dest='ifile2', default=None, type=str,
+                        metavar='input2', nargs='?',
+                        help='input file #2')
+    return parser
+
+def get_arguments(args=None):
+    parser = create_parser()
+    opts = parser.parse_args(args)
+
+    if not os.path.exists(opts.ifile1):
+        parser.print_help()
+        print >> sys.stderr, '\nfile does not exist: %s' % opts.ifile1
+        sys.exit(-1)
+
+    return opts
 
 if __name__ == '__main__':
     work = os.getcwd()
