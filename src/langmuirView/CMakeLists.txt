@@ -31,7 +31,7 @@ if(OPENGL_FOUND)
     find_qt()
 
     # TARGET
-    add_executable(${PROJECT_NAME} langmuirview.cpp ${SOURCES} ${HEADERS} ${RESOURCES} ${FORMS})
+    add_executable(${PROJECT_NAME} EXCLUDE_FROM_ALL langmuirview.cpp ${SOURCES} ${HEADERS} ${RESOURCES} ${FORMS})
 
     # LINK
     target_link_libraries(${PROJECT_NAME} langmuirCore)
@@ -41,7 +41,7 @@ if(OPENGL_FOUND)
     link_qt(${PROJECT_NAME})
 
     # INSTALL
-    install(TARGETS ${PROJECT_NAME} DESTINATION ${PROJECT_SOURCE_DIR}/bin)
+    # install(TARGETS ${PROJECT_NAME} DESTINATION ${PROJECT_SOURCE_DIR}/bin)
 else()
     message(STATUS "No OpenGL : langmuirView disabled")
 endif(OPENGL_FOUND)

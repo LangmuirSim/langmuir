@@ -6,10 +6,18 @@
 #include <QtGui>
 
 #ifndef Q_MOC_RUN
+
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)
 #pragma GCC diagnostic push
 #pragma GCC system_header
+#endif
+
 #include "boost/multi_array.hpp"
+
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)
 #pragma GCC diagnostic pop
+#endif
+
 #endif
 
 namespace Langmuir

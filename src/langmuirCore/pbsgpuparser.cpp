@@ -73,7 +73,7 @@ void PBSGPUParser::parse()
     while (!file.atEnd())
     {
         QString line = file.readLine().trimmed();
-        QRegExp regex("n(\\d+)-gpu(\\d+)");
+        QRegExp regex("\\D+(\\d+)-gpu(\\d+)");
         bool ok = true;
 
         if (regex.exactMatch(line))
