@@ -34,7 +34,7 @@ def create_parser():
     parser.add_argument(dest='ifile1', type=str, metavar='input1',
         help='input file #1')
 
-    parser.add_argument(dest='ifile2', default="None", type=str,
+    parser.add_argument(dest='ifile2', default=None, type=str,
                         metavar='input2', nargs='?',
                         help='input file #2')
     return parser
@@ -349,7 +349,7 @@ if __name__ == '__main__':
     image = Image.open(opts.ifile1)
     image1 = misc.fromimage(image.convert("L"))
 
-    if opts.ifile2 != "None":
+    if not opts.ifile2 is None:
         image2 = misc.imread(opts.ifile2)
         output = blend_and_threshold(image1, image2)
         misc.imsave("Blend.png", output)
