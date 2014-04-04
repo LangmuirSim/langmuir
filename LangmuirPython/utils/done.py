@@ -25,6 +25,7 @@ def create_parser():
     parser.description = desc
     parser.add_argument('-r', action='store_true', help='search recursivly')
     parser.add_argument('-d', action='store_true', help='show which simulations are not done')
+    parser.add_argument(dest='stub', default=None, nargs='?', help='regex for system searching')
     return parser
 
 def get_arguments(args=None):
@@ -35,11 +36,11 @@ def get_arguments(args=None):
 def indent(string, level=0, **kwargs):
     print '    ' * level + string.format(ccodes=ccodes, **kwargs)
 
-format_string = '(' + ccodes.f('path'   ) + '='  + ccodes.y('{path}'   ) + ') : ' + \
-                '(' + ccodes.f('cstep'  ) + '='  + ccodes.c('{cstep}'  ) + ') : ' + \
-                '(' + ccodes.f('tstep'  ) + '='  + ccodes.c('{tstep}'  ) + ') : ' + \
-                '(' + ccodes.f('percent') + '='  + ccodes.c('{percent}') + ') : ' + \
-                '(' + ccodes.f('done'   ) + '='  +          '{done}'     + ')'
+format_string = '(' + ccodes.f('path'   ) + '='  + ccodes.y('{path}'      ) + ') : ' + \
+                '(' + ccodes.f('cstep'  ) + '='  + ccodes.c('{cstep:>8}'  ) + ') : ' + \
+                '(' + ccodes.f('tstep'  ) + '='  + ccodes.c('{tstep:>8}'  ) + ') : ' + \
+                '(' + ccodes.f('percent') + '='  + ccodes.c('{percent:>6}') + ') : ' + \
+                '(' + ccodes.f('done'   ) + '='  +          '{done}'        + ')'
 
 def get_cstep(obj):
     try:
@@ -143,7 +144,11 @@ if __name__ == '__main__':
         'not_done' : []
     }
 
-    systems = lm.find.systems(work, r=opts.r)
+    systems = lm.find.systems(work, r=opts.r, stub=opts.stub)
+    if not systems and opts.stub:
+        print 'can not find any systems that match: %s' % opts.stub
+        sys.exit(-1)
+
     if not systems:
         runs = lm.find.runs(work, r=opts.r)
         if not runs:
