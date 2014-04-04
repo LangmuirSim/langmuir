@@ -1,6 +1,9 @@
 .. automodule:: compare
     :members:
 
+.. automodule:: extend
+    :members:
+
 .. automodule:: script
     :members:
 
@@ -8,4 +11,7 @@
     :members:
 
 .. automodule:: scan
+    :members:
+
+.. automodule:: done
     :members:

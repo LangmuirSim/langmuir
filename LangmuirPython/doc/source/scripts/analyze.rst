@@ -12,3 +12,7 @@
 
 .. automodule:: solar
     :members:
+
+.. automodule:: solar
+    :members:
+
