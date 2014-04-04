@@ -103,7 +103,7 @@ def find(work, r=False, single=True, absolute=True, stub='*', ext=None,
 
     return result
 
-def systems(work, **kwargs):
+def systems(work, stub=None, **kwargs):
     """
     Search for directories that contain "runs".
 
@@ -120,14 +120,22 @@ def systems(work, **kwargs):
     kwargs.update(r=True)
     work  = os.path.expanduser(work)
     runs  = lm.find.runs(work, **kwargs)
+
+    if not stub:
+        stub = '*'
+
+    stub = re.sub(r'\*', '.*', stub)
+    stub = re.compile(stub)
+
     found = []
     for r in runs:
         dirname = os.path.dirname(r)
-        if not dirname in found and not os.path.samefile(work, dirname):
-            found.append(dirname)
+        if stub.match(os.path.basename(dirname)):
+            if not dirname in found and not os.path.samefile(work, dirname):
+                found.append(dirname)
     return found
 
-def sims(work, **kwargs):
+def sims(work, stub=None, **kwargs):
     """
     Search for directories that contain "parts".
 
@@ -145,11 +153,19 @@ def sims(work, **kwargs):
     kwargs.update(r=True)
     work  = os.path.expanduser(work)
     parts = lm.find.parts(work, **kwargs)
+
+    if not stub:
+        stub = '*'
+
+    stub = re.sub(r'\*', '.*', stub)
+    stub = re.compile(stub)
+
     found = []
     for p in parts:
         dirname = os.path.dirname(p)
-        if not dirname in found and not os.path.samefile(work, dirname):
-            found.append(dirname)
+        if stub.match(os.path.basename(dirname)):
+            if not dirname in found and not os.path.samefile(work, dirname):
+                found.append(dirname)
     return found
 
 def runs(*args, **kwargs):
