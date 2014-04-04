@@ -86,9 +86,11 @@ def find(work, r=False, single=True, absolute=True, stub='*', ext=None,
 
     if single:
         if not len(result) == 1:
-            if len(result) == 0:
+            if len(result) == 0 and at_least_one:
                 raise RuntimeError('can not find %s in directory:\n\t%s'
                     % (search,work))
+            else:
+                return None
             raise RuntimeError('found multiple %s in directory:\n\t%s\n\t\t%s'
                 %(search,work,'\n\t\t'.join([os.path.relpath(i,work)
                                                 for i in result])))
