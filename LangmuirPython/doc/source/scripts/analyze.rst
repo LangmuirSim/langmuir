@@ -13,6 +13,6 @@
 .. automodule:: solar
     :members:
 
-.. automodule:: solar
+.. automodule:: table
     :members:
 
