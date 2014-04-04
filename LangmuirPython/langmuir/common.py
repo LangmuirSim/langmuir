@@ -434,3 +434,73 @@ def command_script(paths, name=None, cwd=None, batch='run.batch', batch_dir=r'~/
         with open(name, 'w') as handle:
             handle.write(script)
         os.system('chmod +x {name}'.format(name=name))
+
+class ColorCodes(object):
+    """
+    Provides ANSI terminal color codes which are gathered via the ``tput``
+    utility. That way, they are portable. If there occurs any error with
+    ``tput``, all codes are initialized as an empty string.
+    """
+    def __init__(self):
+        try:
+            self._bold    = check_output("tput bold".split())
+            self._reset   = check_output("tput sgr0".split())
+            self._cyan    = check_output("tput setaf 6".split())
+            self._magenta = check_output("tput setaf 5".split())
+            self._blue    = check_output("tput setaf 4".split())
+            self._yellow  = check_output("tput setaf 3".split())
+            self._green   = check_output("tput setaf 2".split())
+            self._red     = check_output("tput setaf 1".split())
+        except CalledProcessError:
+            self._bold    = ""
+            self._reset   = ""
+            self._cyan    = ""
+            self._magenta = ""
+            self._blue    = ""
+            self._yellow  = ""
+            self._green   = ""
+            self._red     = ""
+
+    def red(self, string):
+        return '{code}{string}{reset}'.format(code=self._red,
+            string=string, reset=self._reset)
+    def r(self, string):
+        return self.red(string)
+
+    def green(self, string):
+        return '{code}{string}{reset}'.format(code=self._green,
+            string=string, reset=self._reset)
+    def g(self, string):
+        return self.green(string)
+
+    def yellow(self, string):
+        return '{code}{string}{reset}'.format(code=self._yellow,
+            string=string, reset=self._reset)
+    def y(self, string):
+        return self.yellow(string)
+
+    def blue(self, string):
+        return '{code}{string}{reset}'.format(code=self._blue,
+            string=string, reset=self._reset)
+    def b(self, string):
+        return self.blue(string)
+
+    def magenta(self, string):
+        return '{code}{string}{reset}'.format(code=self._magenta,
+            string=string, reset=self._reset)
+    def m(self, string):
+        return self.magenta(string)
+
+    def cyan(self, string):
+        return '{code}{string}{reset}'.format(code=self._cyan,
+            string=string, reset=self._reset)
+    def c(self, string):
+        return self.cyan(string)
+
+    def bold(self, string):
+        return '{code}{string}{reset}'.format(code=self._bold,
+            string=string, reset=self._reset)
+    def f(self, string):
+        return self.bold(string)
+
+ccodes = ColorCodes()
