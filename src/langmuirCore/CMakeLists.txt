@@ -7,6 +7,7 @@ set(SOURCES
         rand.cpp
         gzipper.cpp
         pbsgpuparser.cpp
+        nodefileparser.cpp
 
         world.cpp
         simulation.cpp
@@ -29,6 +30,7 @@ set(HEADERS
         ./include/rand.h
         ./include/gzipper.h
         ./include/pbsgpuparser.h
+        ./include/nodefileparser.h
 
         ./include/world.h
         ./include/simulation.h
