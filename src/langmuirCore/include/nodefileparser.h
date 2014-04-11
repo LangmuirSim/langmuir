@@ -6,6 +6,7 @@
 #include <QString>
 #include <QObject>
 #include <QDebug>
+#include <QMap>
 
 namespace Langmuir {
 
@@ -18,57 +19,27 @@ class NodeFileParser : public QObject
 public:
     /**
      * @brief create NodeFileParser
-     * @param path path to NODEFILE
+     * @param nodefile path to NODEFILE
+     * @param gpufile path to GPUFILE
      */
-    explicit NodeFileParser(const QString& path="", QObject *parent = 0);
+    explicit NodeFileParser(const QString &nodefile = "", const QString &gpufile = "", QObject *parent = 0);
 
     /**
      * @brief set the path of the NODEFILE
      * @param path path to NODEFILE
      */
-    void setPath(const QString& path = "");
+    void setNodeFile(const QString& path = "");
 
     /**
-     * @brief set the default based on QThreadPool
+     * @brief set the path of the GPUFILE
+     * @param path path to GPUFILE
      */
-    void setDefault();
+    void setGPUFile(const QString& path = "");
 
     /**
-     * @brief get the list of cpu hostnames
+     * @brief parse the NODEFILE and GPUFILE
      */
-    const QStringList& names();
-
-    /**
-     * @brief get the list of cpu core counts
-     */
-    const QVector<int>& cores();
-
-    /**
-     * @brief get the cpu hostname by index
-     * @param i index
-     */
-    QString namesAt(int i);
-
-    /**
-     * @brief get the number of cores on a cpu by hostname
-     */
-    int coresAt(QString name);
-
-    /**
-     * @brief get the number of cores on a cpu by index
-     * @param i index
-     */
-    int coresAt(int i);
-
-    /**
-     * @brief get the total number of CPUs
-     */
-    int numHosts();
-
-    /**
-     * @brief get the total number of threads
-     */
-    int numProcesses();
+    void parse();
 
 private:
     //! list of cpu names
@@ -77,13 +48,39 @@ private:
     //! list of core counts per cpu
     QVector<int> m_cores;
 
+    //! list of gpu ids per cpu
+    QMap<QString,QVector<int> > m_gpus;
+
     //! path to NODEFILE
-    QString m_path;
+    QString m_nodefile;
+
+    //! path to GPUFILE
+    QString m_gpufile;
 
     /**
-     * @brief parse the NODEFILE
+     * @brief set the default based on QThreadPool
      */
-    void parse();
+    void setNodeDefault();
+
+    /**
+     * @brief set the default GPU
+     */
+    void setGPUDefault();
+
+    /**
+     * @brief parseNodeFile
+     */
+    void parseNodeFile();
+
+    /**
+     * @brief parseGPUFile
+     */
+    void parseGPUFile();
+
+    /**
+     * @brief check
+     */
+    void check();
 };
 
 }

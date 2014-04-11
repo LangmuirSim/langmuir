@@ -5,13 +5,14 @@
 
 namespace Langmuir {
 
-NodeFileParser::NodeFileParser(const QString &path, QObject *parent) :
+NodeFileParser::NodeFileParser(const QString &nodefile, const QString &gpufile, QObject *parent) :
     QObject(parent)
 {
-    setPath(path);
+    setNodeFile(nodefile);
+    setGPUFile(gpufile);
 }
 
-void NodeFileParser::setPath(const QString &path)
+void NodeFileParser::setNodeFile(const QString &path)
 {
     if (path.isEmpty())
     {
@@ -19,21 +20,42 @@ void NodeFileParser::setPath(const QString &path)
 
         if (PBS_NODEFILE == NULL)
         {
-            m_path = "";
+            m_nodefile = "";
         }
         else
         {
-            m_path = QString(PBS_NODEFILE);
+            m_nodefile = QString(PBS_NODEFILE);
         }
     }
     else
     {
-        m_path = path;
+        m_nodefile = path;
     }
-    parse();
 }
 
-void NodeFileParser::setDefault()
+void NodeFileParser::setGPUFile(const QString &path)
+{
+    if (path.isEmpty())
+    {
+        char * PBS_GPUFILE = getenv("PBS_GPUFILE");
+
+        if (PBS_GPUFILE == NULL)
+        {
+            m_gpufile = "";
+        }
+        else
+        {
+            m_gpufile = QString(PBS_GPUFILE);
+        }
+    }
+    else
+    {
+        m_gpufile = path;
+    }
+    parseGPUFile();
+}
+
+void NodeFileParser::setNodeDefault()
 {
     m_names.clear();
     m_cores.clear();
@@ -48,112 +70,92 @@ void NodeFileParser::setDefault()
         qPrintable(m_names.at(0)), m_cores.at(0));
 }
 
+void NodeFileParser::setGPUDefault()
+{
+}
+
 void NodeFileParser::parse()
 {
-    if (m_path.isEmpty())
+}
+
+void NodeFileParser::parseNodeFile()
+{
+    QFile file;
+    file.setFileName(m_nodefile);
+    if (!file.open(QIODevice::ReadOnly))
     {
-        setDefault();
+        qDebug("nodefile: can not open file: %s", qPrintable(m_nodefile));
         return;
     }
-    else
+
+    QRegExp regex("(\\w+)(:(\\d+))?(\\s*slots\\s*=\\s*(\\d+)\\s*)?.*$");
+    bool ok = true;
+
+    while (!file.atEnd())
     {
-        m_names.clear();
-        m_cores.clear();
+        QString line = file.readLine().trimmed();
 
-        QFile file;
-        file.setFileName(m_path);
-        if (!file.open(QIODevice::ReadOnly))
+        if (regex.exactMatch(line))
         {
-            qDebug("nodefile: can not open file: %s", qPrintable(m_path));
-            setDefault();
-            return;
+            QString name = regex.cap(1);
+
+            if (!m_names.contains(name)) {
+                m_names.append(name);
+                m_cores.append(0);
+            }
+
+            if (!regex.cap(3).isEmpty()) {
+                m_cores[m_names.indexOf(name)] += regex.cap(3).toInt(&ok);
+                if (!ok) {
+                    qFatal("nodefile: can not parse line: %s", qPrintable(line));
+                }
+                continue;
+            }
+
+            if (!regex.cap(5).isEmpty()) {
+                m_cores[m_names.indexOf(name)] += regex.cap(5).toInt(&ok);
+                if (!ok) {
+                    qFatal("nodefile: can not parse line: %s", qPrintable(line));
+                }
+                continue;
+            }
+
+            m_cores[m_names.indexOf(name)] += 1;
         }
-
-        QRegExp regex("(\\w+)(:(\\d+))?(\\s*slots\\s*=\\s*(\\d+)\\s*)?.*$");
-        bool ok = true;
-
-        while (!file.atEnd())
+        else
         {
-            QString line = file.readLine().trimmed();
-
-            if (regex.exactMatch(line))
-            {
-                QString name = regex.cap(1);
-
-                if (!m_names.contains(name)) {
-                    m_names.append(name);
-                    m_cores.append(0);
-                }
-
-                if (!regex.cap(3).isEmpty()) {
-                    m_cores[m_names.indexOf(name)] += regex.cap(3).toInt(&ok);
-                    if (!ok) {
-                        qFatal("nodefile: can not parse line: %s", qPrintable(line));
-                    }
-                    continue;
-                }
-
-                if (!regex.cap(5).isEmpty()) {
-                    m_cores[m_names.indexOf(name)] += regex.cap(5).toInt(&ok);
-                    if (!ok) {
-                        qFatal("nodefile: can not parse line: %s", qPrintable(line));
-                    }
-                    continue;
-                }
-
-                m_cores[m_names.indexOf(name)] += 1;
-            }
-            else
-            {
-                qFatal("nodefile: failed to match line! %s", qPrintable(line));
-            }
+            qFatal("nodefile: failed to match line! %s", qPrintable(line));
         }
     }
+}
 
-    for (int i = 0; i < m_names.size(); i++) {
-        qDebug("nodefile: %s cores=%d", qPrintable(m_names.at(i)), m_cores.at(i));
+void NodeFileParser::parseGPUFile()
+{
+    QFile file;
+    file.setFileName(m_gpufile);
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        qDebug("nodefile: can not open file: %s", qPrintable(m_nodefile));
+        return;
+    }
+
+    QRegExp regex1("^(\\w+)(:(\\d+))?-?.*$");
+    QRegExp regex2("^.*gpus?\\s*=?\\s*(\\d+).*$");
+    QRegExp regex3("^.*slots?\\s*=?\\s*(\\d+).*$");
+    bool ok = true;
+
+    while (!file.atEnd())
+    {
+        QString line = file.readLine().trimmed();
+
+        regex1.exactMatch(line);
+        regex2.exactMatch(line);
+        regex3.exactMatch(line);
     }
 }
 
-const QStringList& NodeFileParser::names()
+void NodeFileParser::check()
 {
-    return m_names;
-}
-
-const QVector<int>& NodeFileParser::cores()
-{
-    return m_cores;
-}
-
-QString NodeFileParser::namesAt(int i)
-{
-    return m_names.at(i);
-}
-
-int NodeFileParser::coresAt(QString name)
-{
-    return m_cores.at(m_names.indexOf(name));
-}
-
-int NodeFileParser::coresAt(int i)
-{
-    return m_cores.at(i);
-}
-
-int NodeFileParser::numHosts()
-{
-    return m_names.size();
-}
-
-int NodeFileParser::numProcesses()
-{
-    int processes = 0;
-
-    for (int i = 0; i < m_cores.size(); i++) {
-        processes += m_cores.at(i);
-    }
-
-    return processes;
 }
 
 }
