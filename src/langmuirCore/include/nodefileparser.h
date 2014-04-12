@@ -6,6 +6,7 @@
 #include <QString>
 #include <QObject>
 #include <QDebug>
+#include <QList>
 #include <QMap>
 
 namespace Langmuir {
@@ -22,34 +23,49 @@ public:
      * @param nodefile path to NODEFILE
      * @param gpufile path to GPUFILE
      */
-    explicit NodeFileParser(const QString &nodefile = "", const QString &gpufile = "", QObject *parent = 0);
+    explicit NodeFileParser(const QString& nodefile="", const QString& gpufile="", QObject *parent = 0);
 
     /**
-     * @brief set the path of the NODEFILE
-     * @param path path to NODEFILE
+     * @brief aquire the paths of the GPUFILE and the NODEFILE and parse them
+     * @param nodefile path to NODEFILE
+     * @param gpufile path to GPUFILE
+     *
+     * If nodefile is empty the enviroment variable PBS_NODEFILE is used.
+     * If gpufile is empty, the enviroment variable PBS_GPUFILE is used.
+     * If both paths remain empty, then setDefault() is used.
      */
-    void setNodeFile(const QString& path = "");
+    void setPaths(const QString& nodefile="", const QString& gpufile="");
 
     /**
-     * @brief set the path of the GPUFILE
-     * @param path path to GPUFILE
+     * @brief set the default based on QThreadPool and hostname
      */
-    void setGPUFile(const QString& path = "");
+    void setDefault();
 
     /**
-     * @brief parse the NODEFILE and GPUFILE
+     * @brief add cpu to records
+     * @param name name of cpu
      */
-    void parse();
+    void createNode(const QString &name, int cores=0, QList<int> gpus = QList<int>());
+
+    /**
+     * @brief clear the records
+     */
+    void clear();
+
+    /**
+     * @brief operator overload for QDebug
+     */
+    friend QDebug operator<<(QDebug dbg,const NodeFileParser& nfp);
 
 private:
     //! list of cpu names
     QStringList  m_names;
 
     //! list of core counts per cpu
-    QVector<int> m_cores;
+    QMap<QString,int> m_cores;
 
     //! list of gpu ids per cpu
-    QMap<QString,QVector<int> > m_gpus;
+    QMap<QString,QList<int> > m_gpus;
 
     //! path to NODEFILE
     QString m_nodefile;
@@ -58,29 +74,9 @@ private:
     QString m_gpufile;
 
     /**
-     * @brief set the default based on QThreadPool
+     * @brief parse NODEFILE or GPUFILE
      */
-    void setNodeDefault();
-
-    /**
-     * @brief set the default GPU
-     */
-    void setGPUDefault();
-
-    /**
-     * @brief parseNodeFile
-     */
-    void parseNodeFile();
-
-    /**
-     * @brief parseGPUFile
-     */
-    void parseGPUFile();
-
-    /**
-     * @brief check
-     */
-    void check();
+    void parse(QString &filename, bool ignoreCores = false, bool ignoreGPUs = true);
 };
 
 }

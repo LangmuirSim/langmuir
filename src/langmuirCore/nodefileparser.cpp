@@ -8,13 +8,13 @@ namespace Langmuir {
 NodeFileParser::NodeFileParser(const QString &nodefile, const QString &gpufile, QObject *parent) :
     QObject(parent)
 {
-    setNodeFile(nodefile);
-    setGPUFile(gpufile);
+    setPaths(nodefile, gpufile);
 }
 
-void NodeFileParser::setNodeFile(const QString &path)
+void NodeFileParser::setPaths(const QString &nodefile, const QString &gpufile)
 {
-    if (path.isEmpty())
+    // set the NODEFILE path
+    if (nodefile.isEmpty())
     {
         char * PBS_NODEFILE = getenv("PBS_NODEFILE");
 
@@ -29,13 +29,11 @@ void NodeFileParser::setNodeFile(const QString &path)
     }
     else
     {
-        m_nodefile = path;
+        m_nodefile = nodefile;
     }
-}
 
-void NodeFileParser::setGPUFile(const QString &path)
-{
-    if (path.isEmpty())
+    // set the GPUFILE path
+    if (gpufile.isEmpty())
     {
         char * PBS_GPUFILE = getenv("PBS_GPUFILE");
 
@@ -50,112 +48,172 @@ void NodeFileParser::setGPUFile(const QString &path)
     }
     else
     {
-        m_gpufile = path;
+        m_gpufile = gpufile;
     }
-    parseGPUFile();
+
+    // clear the records
+    clear();
+
+    // we have both files
+    if (!m_nodefile.isEmpty() && !m_gpufile.isEmpty())
+    {
+        parse(m_nodefile, false, true);
+        parse(m_gpufile , true, false);
+        return;
+    }
+
+    // we are missing the GPUFILE
+    if (m_gpufile.isEmpty() && !m_nodefile.isEmpty())
+    {
+        parse(m_nodefile, false, false);
+        return;
+    }
+
+    // we are missing the NODEFILE
+    if (m_nodefile.isEmpty() && !m_gpufile.isEmpty())
+    {
+        parse(m_gpufile , false, false);
+        return;
+    }
+
+    // we are missing both files
+    setDefault();
 }
 
-void NodeFileParser::setNodeDefault()
+void NodeFileParser::setDefault()
 {
-    m_names.clear();
-    m_cores.clear();
+    QString name = "node1";
 
     QThreadPool& threadPool = *QThreadPool::globalInstance();
     int maxThreadCount = threadPool.maxThreadCount();
 
-    m_names.append("node1");
-    m_cores.append(maxThreadCount);
-
-    qDebug("nodefile: setting defaults to hostname=%s, cores=%d",
-        qPrintable(m_names.at(0)), m_cores.at(0));
+    clear();
+    createNode("node1");
+    m_cores[name] = maxThreadCount;
 }
 
-void NodeFileParser::setGPUDefault()
+void NodeFileParser::createNode(const QString &name, int cores, QList<int> gpus)
 {
+    if (!m_names.contains(name))
+    {
+        m_names.append(name);
+    }
+
+    if (!m_cores.contains(name))
+    {
+        m_cores[name] = cores;
+    }
+
+    if (!m_gpus.contains(name))
+    {
+        m_gpus[name] = gpus;
+    }
 }
 
-void NodeFileParser::parse()
-{
-}
-
-void NodeFileParser::parseNodeFile()
+void NodeFileParser::parse(QString& filename, bool ignoreCores, bool ignoreGPUs)
 {
     QFile file;
-    file.setFileName(m_nodefile);
+    file.setFileName(filename);
     if (!file.open(QIODevice::ReadOnly))
     {
         qDebug("nodefile: can not open file: %s", qPrintable(m_nodefile));
         return;
     }
 
-    QRegExp regex("(\\w+)(:(\\d+))?(\\s*slots\\s*=\\s*(\\d+)\\s*)?.*$");
+    // expression to match name and core count
+    QRegExp regex1("^\\s*(\\w+)(:(\\d+))?.*\\s*(slots\\s*=\\s*(\\d+))?.*$");
+
+    // expression to match gpu count
+    QRegExp regex2("^.*gpus?\\s*=?\\s*(\\d+).*$");
+
     bool ok = true;
 
     while (!file.atEnd())
     {
         QString line = file.readLine().trimmed();
 
-        if (regex.exactMatch(line))
+        if (regex1.exactMatch(line))
         {
-            QString name = regex.cap(1);
+            // find the name of the node
+            QString name = regex1.cap(1);
+            createNode(name);
 
-            if (!m_names.contains(name)) {
-                m_names.append(name);
-                m_cores.append(0);
-            }
+            // the default number of cores when no pattern matches is 1
+            int cores = 1;
 
-            if (!regex.cap(3).isEmpty()) {
-                m_cores[m_names.indexOf(name)] += regex.cap(3).toInt(&ok);
-                if (!ok) {
-                    qFatal("nodefile: can not parse line: %s", qPrintable(line));
+            // look for core patterns
+            if (!regex1.cap(3).isEmpty())
+            {
+                // using the form name:cores
+                cores = regex1.cap(3).toInt(&ok);
+                if (!ok)
+                {
+                    qFatal("nodefile: can not parse name:(cores) in line: %s",
+                           qPrintable(line));
                 }
-                continue;
             }
-
-            if (!regex.cap(5).isEmpty()) {
-                m_cores[m_names.indexOf(name)] += regex.cap(5).toInt(&ok);
-                if (!ok) {
-                    qFatal("nodefile: can not parse line: %s", qPrintable(line));
+            else if (!regex1.cap(5).isEmpty())
+            {
+                // using the form slots=cores
+                cores = regex1.cap(5).toInt(&ok);
+                if (!ok)
+                {
+                    qFatal("nodefile: can not parse slots=(cores) in line: %s",
+                           qPrintable(line));
                 }
-                continue;
+            }
+            else if (ignoreCores)
+            {
+                // we ignore cores in the GPU file
+                cores = 0;
             }
 
-            m_cores[m_names.indexOf(name)] += 1;
+            // update the number of cores
+            m_cores[name] += cores;
+
+            // look for gpu patterns
+            if (!ignoreGPUs)
+            {
+                if (regex2.exactMatch(line))
+                {
+                    int gpu_id = regex2.cap(1).toInt(&ok);
+                    if (!ok)
+                    {
+                        qFatal("nodefile: can not parse -?gpus?=(id) in line: %s",
+                               qPrintable(line));
+                    }
+                    if (!m_gpus[name].contains(gpu_id))
+                    {
+                        m_gpus[name].append(gpu_id);
+                    }
+                }
+            }
         }
         else
         {
-            qFatal("nodefile: failed to match line! %s", qPrintable(line));
+            qFatal("nodefile: can not match line: %s", qPrintable(line));
         }
     }
 }
 
-void NodeFileParser::parseGPUFile()
+void NodeFileParser::clear()
 {
-    QFile file;
-    file.setFileName(m_gpufile);
-    if (!file.open(QIODevice::ReadOnly))
-    {
-        qDebug("nodefile: can not open file: %s", qPrintable(m_nodefile));
-        return;
-    }
-
-    QRegExp regex1("^(\\w+)(:(\\d+))?-?.*$");
-    QRegExp regex2("^.*gpus?\\s*=?\\s*(\\d+).*$");
-    QRegExp regex3("^.*slots?\\s*=?\\s*(\\d+).*$");
-    bool ok = true;
-
-    while (!file.atEnd())
-    {
-        QString line = file.readLine().trimmed();
-
-        regex1.exactMatch(line);
-        regex2.exactMatch(line);
-        regex3.exactMatch(line);
-    }
+    m_names.clear();
+    m_cores.clear();
+    m_gpus.clear();
 }
 
-void NodeFileParser::check()
+QDebug operator<<(QDebug dbg, const NodeFileParser& nfp)
 {
+    QString line = "%1 cores=%2 gpus=%3\n";
+
+    foreach(QString name, nfp.m_names)
+    {
+        dbg.nospace() << qPrintable(line.arg(name).arg(nfp.m_cores[name])
+            .arg(nfp.m_gpus[name].size()));
+    }
+
+    return dbg.nospace();
 }
 
 }
