@@ -57,6 +57,56 @@ public:
      */
     friend QDebug operator<<(QDebug dbg,const NodeFileParser& nfp);
 
+    /**
+     * @brief get the number of processes on all hosts
+     */
+    int numProc();
+
+    /**
+     * @brief get the number of processes on host
+     * @param name hostname
+     */
+    int numProc(const QString& name);
+
+    /**
+     * @brief get the number of processes on all hosts
+     */
+    const QMap<QString,int>& procs();
+
+    /**
+     * @brief get the number of gpus on all hosts
+     */
+    int numGPUS();
+
+    /**
+     * @brief get the number of gpus on host
+     * @param name hostname
+     */
+    int numGPUs(const QString& name);
+
+    /**
+     * @brief get the ith gpu id on host
+     * @param name hostname
+     * @param i index
+     */
+    int GPUid(const QString &name, int i);
+
+    /**
+     * @brief get the number of gpus on host
+     * @param name hostname
+     */
+    const QList<int>& gpus(const QString& name);
+
+    /**
+     * @brief get the number of hosts
+     */
+    int numCPUs();
+
+    /**
+     * @brief get the hostnames
+     */
+    const QStringList& cpus();
+
 private:
     //! list of cpu names
     QStringList  m_names;

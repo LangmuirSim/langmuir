@@ -216,4 +216,57 @@ QDebug operator<<(QDebug dbg, const NodeFileParser& nfp)
     return dbg.nospace();
 }
 
+int NodeFileParser::numProc()
+{
+    int count = 0;
+    foreach (QString name, m_names) {
+        count += m_cores[name];
+    }
+    return count;
+}
+
+int NodeFileParser::numProc(const QString& name)
+{
+    return m_cores[name];
+}
+
+const QMap<QString, int> &NodeFileParser::procs()
+{
+    return m_cores;
+}
+
+int NodeFileParser::numGPUS()
+{
+    int count = 0;
+    foreach (QString name, m_names) {
+        count += m_gpus[name].size();
+    }
+    return count;
+}
+
+int NodeFileParser::numGPUs(const QString& name)
+{
+    return m_gpus[name].size();
+}
+
+int NodeFileParser::GPUid(const QString &name, int i)
+{
+    return m_gpus[name].at(i);
+}
+
+const QList<int>& NodeFileParser::gpus(const QString& name)
+{
+    return m_gpus[name];
+}
+
+int NodeFileParser::numCPUs()
+{
+    return m_names.size();
+}
+
+const QStringList& NodeFileParser::cpus()
+{
+    return m_names;
+}
+
 }
