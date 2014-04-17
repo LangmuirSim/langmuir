@@ -60,7 +60,7 @@ if __name__ == '__main__':
                         except TypeError:
                             print '%-20s %-10s' % (k2, r2)
                     print ''
-            except KeyError:
+            except (KeyError, TypeError):
                 pass
 
     print 'chk1: %s' % os.path.abspath(opts.chk1)
