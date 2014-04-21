@@ -35,7 +35,15 @@
     </property>
     <addaction name="actionExit"/>
    </widget>
+   <widget class="QMenu" name="menuControl">
+    <property name="title">
+     <string>Control</string>
+    </property>
+    <addaction name="actionStart"/>
+    <addaction name="actionStop"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuControl"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionExit">
@@ -46,6 +54,22 @@
     <string>Esc</string>
    </property>
   </action>
+  <action name="actionStart">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Start</string>
+   </property>
+  </action>
+  <action name="actionStop">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Stop</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -53,6 +77,10 @@
    <extends>QWidget</extends>
    <header>langmuirviewer.h</header>
    <container>1</container>
+   <slots>
+    <slot>startAnimation()</slot>
+    <slot>stopAnimation()</slot>
+   </slots>
   </customwidget>
  </customwidgets>
  <resources/>
@@ -70,6 +98,38 @@
     <hint type="destinationlabel">
      <x>255</x>
      <y>255</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionStart</sender>
+   <signal>triggered()</signal>
+   <receiver>qglwidget</receiver>
+   <slot>startAnimation()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>255</x>
+     <y>257</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionStop</sender>
+   <signal>triggered()</signal>
+   <receiver>qglwidget</receiver>
+   <slot>stopAnimation()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>255</x>
+     <y>257</y>
     </hint>
    </hints>
   </connection>
