@@ -8,7 +8,6 @@ LangmuirViewer::LangmuirViewer(QWidget *parent) :
 
 void LangmuirViewer::init()
 {
-    setAxisIsDrawn();
 }
 
 void LangmuirViewer::draw()

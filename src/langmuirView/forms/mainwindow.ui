@@ -42,8 +42,17 @@
     <addaction name="actionStart"/>
     <addaction name="actionStop"/>
    </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="actionAxis"/>
+    <addaction name="actionGrid"/>
+    <addaction name="actionFPS"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuControl"/>
+   <addaction name="menuView"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
@@ -96,6 +105,30 @@
     <string>Stop</string>
    </property>
   </action>
+  <action name="actionAxis">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Axis</string>
+   </property>
+  </action>
+  <action name="actionGrid">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Grid</string>
+   </property>
+  </action>
+  <action name="actionFPS">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>FPS</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -106,6 +139,9 @@
    <slots>
     <slot>startAnimation()</slot>
     <slot>stopAnimation()</slot>
+    <slot>toggleAxisIsDrawn()</slot>
+    <slot>toggleGridIsDrawn()</slot>
+    <slot>toggleFPSIsDisplayed()</slot>
    </slots>
   </customwidget>
  </customwidgets>
@@ -190,6 +226,54 @@
     <hint type="destinationlabel">
      <x>255</x>
      <y>255</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionAxis</sender>
+   <signal>triggered()</signal>
+   <receiver>qglwidget</receiver>
+   <slot>toggleAxisIsDrawn()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>255</x>
+     <y>277</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionGrid</sender>
+   <signal>triggered()</signal>
+   <receiver>qglwidget</receiver>
+   <slot>toggleGridIsDrawn()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>255</x>
+     <y>277</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionFPS</sender>
+   <signal>triggered()</signal>
+   <receiver>qglwidget</receiver>
+   <slot>toggleFPSIsDisplayed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>255</x>
+     <y>277</y>
     </hint>
    </hints>
   </connection>
