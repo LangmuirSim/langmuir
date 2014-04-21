@@ -9,10 +9,11 @@ class LangmuirViewer : public QGLViewer
 public:
     explicit LangmuirViewer(QWidget *parent = 0);
 
-signals:
-
-public slots:
-
+protected:
+    virtual void draw();
+    virtual void init();
+    virtual void animate();
+    virtual QString helpString() const;
 };
 
 #endif // LANGMUIRVIEWER_H
