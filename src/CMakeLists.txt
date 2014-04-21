@@ -46,6 +46,17 @@ macro(link_opengl TARGET)
 endmacro(link_opengl)
 
 ################################################################################
+# Library : QGLViewer
+macro(find_qglviewer)
+    find_package(QGLViewer)
+    include_directories(${QGLVIEWER_INCLUDE_DIR})
+endmacro(find_qglviewer)
+
+macro(link_qglviewer TARGET)
+    target_link_libraries(${TARGET} ${QGLVIEWER_LIBRARIES})
+endmacro(link_qglviewer)
+
+################################################################################
 # Library: Qt4
 macro(find_qt4)
     message(STATUS "using qt4")
@@ -144,6 +155,10 @@ endmacro(link_qt)
 ################################################################################
 # projects
 add_subdirectory(langmuirCore)
+message("")
 add_subdirectory(langmuir)
+message("")
 add_subdirectory(langmuirView)
+message("")
 add_subdirectory(test)
+message("")
