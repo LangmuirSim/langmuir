@@ -14,6 +14,7 @@ set(HEADERS
 )
 
 set(RESOURCES
+    ./icons/icons.qrc
 )
 
 set(FORMS
