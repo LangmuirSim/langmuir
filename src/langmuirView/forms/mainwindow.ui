@@ -112,6 +112,9 @@
    <property name="text">
     <string>Axis</string>
    </property>
+   <property name="shortcut">
+    <string>A</string>
+   </property>
   </action>
   <action name="actionGrid">
    <property name="checkable">
@@ -120,6 +123,9 @@
    <property name="text">
     <string>Grid</string>
    </property>
+   <property name="shortcut">
+    <string>G</string>
+   </property>
   </action>
   <action name="actionFPS">
    <property name="checkable">
@@ -127,6 +133,9 @@
    </property>
    <property name="text">
     <string>FPS</string>
+   </property>
+   <property name="shortcut">
+    <string>F</string>
    </property>
   </action>
  </widget>
