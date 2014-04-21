@@ -4,17 +4,18 @@ cmake_minimum_required(VERSION 2.8)
 message(STATUS "Project: ${PROJECT_NAME}")
 
 set(SOURCES
-        gridview.cpp
+    mainwindow.cpp
 )
 
 set(HEADERS
-        ./include/gridview.h
+    ./include/mainwindow.h
 )
 
 set(RESOURCES
 )
 
 set(FORMS
+    ./forms/mainwindow.ui
 )
 
 # must have OpenGL
