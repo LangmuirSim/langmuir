@@ -4,10 +4,12 @@ cmake_minimum_required(VERSION 2.8)
 message(STATUS "Project: ${PROJECT_NAME}")
 
 set(SOURCES
+    langmuirviewer.cpp
     mainwindow.cpp
 )
 
 set(HEADERS
+    ./include/langmuirviewer.h
     ./include/mainwindow.h
 )
 

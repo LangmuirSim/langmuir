@@ -16,7 +16,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
-     <widget class="QGLWidget" name="qglwidget" native="true"/>
+     <widget class="LangmuirViewer" name="qglwidget" native="true"/>
     </item>
    </layout>
   </widget>
@@ -49,9 +49,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QGLWidget</class>
+   <class>LangmuirViewer</class>
    <extends>QWidget</extends>
-   <header>qglwidget.h</header>
+   <header>langmuirviewer.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

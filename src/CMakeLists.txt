@@ -67,6 +67,8 @@ macro(find_qt4)
         set(QT_USE_QTOPENGL TRUE)
     endif(OPENGL_FOUND)
 
+    set(QT_USE_QTXML TRUE)
+
     find_package(Qt REQUIRED)
 
     include(${QT_USE_FILE})
@@ -95,6 +97,7 @@ macro(find_qt5)
 
     find_package(Qt5Core REQUIRED)
     find_package(Qt5Gui REQUIRED)
+    find_package(Qt5Xml REQUIRED)
     find_package(Qt5Widgets REQUIRED)
     find_package(Qt5Concurrent REQUIRED)
     find_package(Qt5PrintSupport REQUIRED)
@@ -118,6 +121,7 @@ macro(link_qt5 TARGET)
 
     qt5_use_modules(${TARGET} Core)
     qt5_use_modules(${TARGET} Gui)
+    qt5_use_modules(${TARGET} Xml)
     qt5_use_modules(${TARGET} Widgets)
     qt5_use_modules(${TARGET} Concurrent)
     qt5_use_modules(${TARGET} PrintSupport)
