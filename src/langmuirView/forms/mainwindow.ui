@@ -73,7 +73,8 @@
    </property>
    <property name="icon">
     <iconset resource="../icons/icons.qrc">
-     <normaloff>:/icons/green.png</normaloff>:/icons/green.png</iconset>
+     <normaloff>:/icons/green.png</normaloff>
+     <disabledoff>:/icons/black.png</disabledoff>:/icons/green.png</iconset>
    </property>
    <property name="text">
     <string>Start</string>
@@ -88,7 +89,8 @@
    </property>
    <property name="icon">
     <iconset resource="../icons/icons.qrc">
-     <normaloff>:/icons/red.png</normaloff>:/icons/red.png</iconset>
+     <normaloff>:/icons/red.png</normaloff>
+     <disabledoff>:/icons/black.png</disabledoff>:/icons/red.png</iconset>
    </property>
    <property name="text">
     <string>Stop</string>
@@ -159,5 +161,40 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionStop</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>toggleStartStopStatus()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>255</x>
+     <y>255</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionStart</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>toggleStartStopStatus()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>255</x>
+     <y>255</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
+ <slots>
+  <slot>toggleStartStopStatus()</slot>
+ </slots>
 </ui>
