@@ -28,6 +28,7 @@ private:
     LangmuirViewer *m_viewer;
 
     void setIcon(QAction *action, QString themeIcon, QStyle::StandardPixmap standardPixmap);
+    void init();
 };
 
 #endif // MAINWINDOW_H

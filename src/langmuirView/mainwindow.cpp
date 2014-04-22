@@ -13,6 +13,11 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     m_viewer = ui->qglwidget;
+    init();
+}
+
+void MainWindow::init()
+{
     setIcon(ui->actionExit , "application-exit"    , QStyle::SP_DialogCloseButton);
     setIcon(ui->actionStart, "media-playback-start", QStyle::SP_MediaPlay);
     setIcon(ui->actionStop , "media-playback-stop" , QStyle::SP_MediaStop);
