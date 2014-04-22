@@ -2,6 +2,9 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QAction>
+#include <QStyle>
+#include <QIcon>
 
 namespace Ui {
 class MainWindow;
@@ -23,6 +26,8 @@ public slots:
 private:
     Ui::MainWindow *ui;
     LangmuirViewer *m_viewer;
+
+    void setIcon(QAction *action, QString themeIcon, QStyle::StandardPixmap standardPixmap);
 };
 
 #endif // MAINWINDOW_H

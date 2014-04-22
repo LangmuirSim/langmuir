@@ -80,11 +80,6 @@
    <property name="checkable">
     <bool>false</bool>
    </property>
-   <property name="icon">
-    <iconset resource="../icons/icons.qrc">
-     <normaloff>:/icons/green.png</normaloff>
-     <disabledoff>:/icons/black.png</disabledoff>:/icons/green.png</iconset>
-   </property>
    <property name="text">
     <string>Start</string>
    </property>
@@ -95,11 +90,6 @@
    </property>
    <property name="enabled">
     <bool>false</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="../icons/icons.qrc">
-     <normaloff>:/icons/red.png</normaloff>
-     <disabledoff>:/icons/black.png</disabledoff>:/icons/red.png</iconset>
    </property>
    <property name="text">
     <string>Stop</string>
@@ -154,9 +144,7 @@
    </slots>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="../icons/icons.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>actionExit</sender>
