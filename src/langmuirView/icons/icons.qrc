@@ -3,5 +3,8 @@
         <file>black.png</file>
         <file>green.png</file>
         <file>red.png</file>
+        <file>axis.png</file>
+        <file>fps.png</file>
+        <file>grid.png</file>
     </qresource>
 </RCC>

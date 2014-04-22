@@ -67,6 +67,10 @@
    </attribute>
    <addaction name="actionStart"/>
    <addaction name="actionStop"/>
+   <addaction name="separator"/>
+   <addaction name="actionAxis"/>
+   <addaction name="actionGrid"/>
+   <addaction name="actionFPS"/>
   </widget>
   <action name="actionExit">
    <property name="text">
@@ -99,8 +103,15 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/axis.png</normaloff>:/icons/axis.png</iconset>
+   </property>
    <property name="text">
     <string>Axis</string>
+   </property>
+   <property name="toolTip">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Display center axis.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="shortcut">
     <string>A</string>
@@ -110,8 +121,15 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/grid.png</normaloff>:/icons/grid.png</iconset>
+   </property>
    <property name="text">
     <string>Grid</string>
+   </property>
+   <property name="toolTip">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Display grid&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="shortcut">
     <string>G</string>
@@ -121,8 +139,15 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/fps.png</normaloff>:/icons/fps.png</iconset>
+   </property>
    <property name="text">
     <string>FPS</string>
+   </property>
+   <property name="toolTip">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Display FPS&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="shortcut">
     <string>F</string>
@@ -144,7 +169,9 @@
    </slots>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../icons/icons.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>actionExit</sender>
