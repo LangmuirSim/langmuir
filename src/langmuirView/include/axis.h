@@ -2,7 +2,6 @@
 #define AXIS_H
 
 #include "sceneobject.h"
-#include <QColor>
 
 class Axis : public SceneObject
 {
