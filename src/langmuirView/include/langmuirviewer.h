@@ -18,9 +18,9 @@ public slots:
     void setCornerAxisIsDrawn(bool draw = true);
 
 protected:
+    virtual void init();
     virtual void draw();
     virtual void postDraw();
-    virtual void init();
     virtual void animate();
     virtual QString helpString() const;
 
