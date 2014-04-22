@@ -23,9 +23,11 @@ void SceneObject::qColorToFloat4(QColor qcolor, float *color)
 
 void SceneObject::render()
 {
-    preDraw();
-    draw();
-    postDraw();
+    if (visible_) {
+        preDraw();
+        draw();
+        postDraw();
+    }
 }
 
 void SceneObject::init()
