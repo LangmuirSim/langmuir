@@ -5,6 +5,7 @@
 Axis::Axis(LangmuirViewer &viewer, QObject *parent) :
     SceneObject(viewer, parent)
 {
+    init();
 }
 
 void Axis::init() {

@@ -5,6 +5,7 @@
 SceneObject::SceneObject(LangmuirViewer &viewer, QObject *parent) :
     QObject(parent), m_viewer(viewer), init_(false)
 {
+    init();
 }
 
 void SceneObject::qColorToFloat3(QColor qcolor, float *color)
@@ -22,10 +23,6 @@ void SceneObject::qColorToFloat4(QColor qcolor, float *color)
 
 void SceneObject::render()
 {
-    if (!init_) {
-        init();
-        init_ = true;
-    }
     preDraw();
     draw();
     postDraw();
