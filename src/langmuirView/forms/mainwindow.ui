@@ -47,6 +47,7 @@
      <string>View</string>
     </property>
     <addaction name="actionAxis"/>
+    <addaction name="actionCornerAxis"/>
     <addaction name="actionGrid"/>
     <addaction name="actionFPS"/>
    </widget>
@@ -69,6 +70,7 @@
    <addaction name="actionStop"/>
    <addaction name="separator"/>
    <addaction name="actionAxis"/>
+   <addaction name="actionCornerAxis"/>
    <addaction name="actionGrid"/>
    <addaction name="actionFPS"/>
   </widget>
@@ -129,7 +131,7 @@
     <string>Grid</string>
    </property>
    <property name="toolTip">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Display grid&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Display grid.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="shortcut">
     <string>G</string>
@@ -147,10 +149,28 @@
     <string>FPS</string>
    </property>
    <property name="toolTip">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Display FPS&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Display FPS.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="shortcut">
     <string>F</string>
+   </property>
+  </action>
+  <action name="actionCornerAxis">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/axis.png</normaloff>:/icons/axis.png</iconset>
+   </property>
+   <property name="text">
+    <string>Corner Axis</string>
+   </property>
+   <property name="toolTip">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Display axis in lower left corner.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+A</string>
    </property>
   </action>
  </widget>
@@ -161,11 +181,14 @@
    <header>langmuirviewer.h</header>
    <container>1</container>
    <slots>
+    <signal>cornerAxisIsDrawnChanged(bool)</signal>
     <slot>startAnimation()</slot>
     <slot>stopAnimation()</slot>
     <slot>toggleAxisIsDrawn()</slot>
     <slot>toggleGridIsDrawn()</slot>
     <slot>toggleFPSIsDisplayed()</slot>
+    <slot>toggleCornerAxisIsDrawn()</slot>
+    <slot>updateGL()</slot>
    </slots>
   </customwidget>
  </customwidgets>
@@ -294,6 +317,38 @@
     <hint type="sourcelabel">
      <x>-1</x>
      <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>255</x>
+     <y>277</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionCornerAxis</sender>
+   <signal>triggered()</signal>
+   <receiver>qglwidget</receiver>
+   <slot>toggleCornerAxisIsDrawn()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>255</x>
+     <y>277</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>qglwidget</sender>
+   <signal>cornerAxisIsDrawnChanged(bool)</signal>
+   <receiver>qglwidget</receiver>
+   <slot>updateGL()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>255</x>
+     <y>277</y>
     </hint>
     <hint type="destinationlabel">
      <x>255</x>
