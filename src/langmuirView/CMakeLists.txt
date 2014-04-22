@@ -5,11 +5,13 @@ message(STATUS "Project: ${PROJECT_NAME}")
 
 set(SOURCES
     langmuirviewer.cpp
+    sceneobject.cpp
     mainwindow.cpp
 )
 
 set(HEADERS
     ./include/langmuirviewer.h
+    ./include/sceneobject.h
     ./include/mainwindow.h
 )
 
