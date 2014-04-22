@@ -1,13 +1,19 @@
 #ifndef SCENEOBJECT_H
 #define SCENEOBJECT_H
 
+#include <QVector>
 #include <QObject>
+#include <QColor>
+
+class LangmuirViewer;
 
 class SceneObject : public QObject
 {
     Q_OBJECT
 public:
-    explicit SceneObject(QObject *parent = 0);
+    explicit SceneObject(LangmuirViewer &viewer, QObject *parent = 0);
+    void qColorToFloat3(QColor qcolor, float *color);
+    void qColorToFloat4(QColor qcolor, float *color);
     bool isVisible();
     void render();
 
@@ -19,9 +25,14 @@ public slots:
     void setVisible(bool draw = true);
 
 protected:
+    virtual void init();
     virtual void draw();
     virtual void preDraw();
     virtual void postDraw();
+    LangmuirViewer &m_viewer;
+
+private:
+    bool init_;
     bool visible_;
 };
 

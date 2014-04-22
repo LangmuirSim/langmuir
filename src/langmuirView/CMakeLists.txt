@@ -7,12 +7,14 @@ set(SOURCES
     langmuirviewer.cpp
     sceneobject.cpp
     mainwindow.cpp
+    axis.cpp
 )
 
 set(HEADERS
     ./include/langmuirviewer.h
     ./include/sceneobject.h
     ./include/mainwindow.h
+    ./include/axis.h
 )
 
 set(RESOURCES
