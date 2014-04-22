@@ -2,8 +2,8 @@
 #include "langmuirviewer.h"
 #include <QDebug>
 
-SceneObject::SceneObject(LangmuirViewer &viewer, QObject *parent) :
-    QObject(parent), m_viewer(viewer), init_(false)
+SceneObject::SceneObject(LangmuirViewer &viewer, QObject *parent, bool visible) :
+    QObject(parent), m_viewer(viewer), visible_(visible)
 {
     init();
 }
@@ -55,10 +55,12 @@ void SceneObject::toggleVisible()
 {
     visible_ = ! visible_;
     emit visibleChanged(visible_);
+    m_viewer.updateGL();
 }
 
 void SceneObject::setVisible(bool draw)
 {
     visible_ = draw;
     emit visibleChanged(visible_);
+    m_viewer.updateGL();
 }

@@ -16,7 +16,7 @@ public:
         UpperRight
     };
 
-    explicit CornerAxis(LangmuirViewer &viewer, QObject *parent = 0);
+    explicit CornerAxis(LangmuirViewer &viewer, QObject *parent = 0, bool visible = true);
 
 signals:
     void locationChanged(Location);

@@ -2,8 +2,8 @@
 #include "axis.h"
 #include <QDebug>
 
-Axis::Axis(LangmuirViewer &viewer, QObject *parent) :
-    SceneObject(viewer, parent)
+Axis::Axis(LangmuirViewer &viewer, QObject *parent, bool visible) :
+    SceneObject(viewer, parent, visible)
 {
     init();
 }

@@ -7,7 +7,7 @@ class Axis : public SceneObject
 {
     Q_OBJECT
 public:
-    explicit Axis(LangmuirViewer &viewer, QObject *parent = 0);
+    explicit Axis(LangmuirViewer &viewer, QObject *parent = 0, bool visible = true);
 
 signals:
     void xColorChanged(QColor color);

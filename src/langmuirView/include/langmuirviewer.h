@@ -2,20 +2,16 @@
 #define LANGMUIRVIEWER_H
 
 #include <QGLViewer/qglviewer.h>
+#include "corneraxis.h"
 
 class LangmuirViewer : public QGLViewer
 {
     Q_OBJECT
 public:
     explicit LangmuirViewer(QWidget *parent = 0);
-    bool cornerAxisIsDrawn();
-
-signals:
-    void cornerAxisIsDrawnChanged(bool drawn);
 
 public slots:
-    void toggleCornerAxisIsDrawn();
-    void setCornerAxisIsDrawn(bool draw = true);
+    void toggleCornerAxisIsVisible();
 
 protected:
     virtual void init();
@@ -23,9 +19,7 @@ protected:
     virtual void postDraw();
     virtual void animate();
     virtual QString helpString() const;
-
-    bool cornerAxisIsDrawn_;
-    virtual void drawCornerAxis();
+    CornerAxis *m_cornerAxis;
 };
 
 #endif // LANGMUIRVIEWER_H
