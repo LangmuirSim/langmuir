@@ -88,6 +88,8 @@ macro(find_qt5)
     find_package(Qt5Concurrent REQUIRED)
     find_package(Qt5PrintSupport REQUIRED)
 
+    message(STATUS "Qt5Core: ${Qt5Core_VERSION_STRING}")
+
     include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
     set(CMAKE_AUTOMOC ON)
@@ -144,3 +146,4 @@ endmacro(link_qt)
 add_subdirectory(langmuirCore)
 add_subdirectory(langmuir)
 add_subdirectory(langmuirView)
+add_subdirectory(test)
