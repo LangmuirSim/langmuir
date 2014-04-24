@@ -160,12 +160,13 @@ def equilibrate(obj, last, equil=None):
     >>> data = lm.common.load_pkl('combined.pkl.gz')
     >>> data = lm.analyze.equilibrate(data, last=-1, equil=-1000)
     """
-    last = obj.xs(obj.index[last])
+#    sub = obj.iloc[equil:last]
+#    return sub.iloc[-1] - sub.iloc[0]
+    last = obj.iloc[last]
     if equil is None:
         return last
-    equil = obj.xs(obj.index[equil])
+    equil = obj.iloc[equil]
     return last - equil
-
 
 class Stats(object):
     """
