@@ -11,7 +11,7 @@ class SceneObject : public QObject
 {
     Q_OBJECT
 public:
-    explicit SceneObject(LangmuirViewer &viewer, QObject *parent = 0, bool visible = true);
+    explicit SceneObject(LangmuirViewer &viewer, QObject *parent = 0);
     void qColorToFloat3(QColor qcolor, float *color);
     void qColorToFloat4(QColor qcolor, float *color);
     bool isVisible();

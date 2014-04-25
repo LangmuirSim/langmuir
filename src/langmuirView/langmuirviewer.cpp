@@ -9,7 +9,7 @@ LangmuirViewer::LangmuirViewer(QWidget *parent) :
 
 void LangmuirViewer::init()
 {
-    m_cornerAxis = new CornerAxis(*this, this, false);
+    m_cornerAxis = new CornerAxis(*this, this);
 }
 
 void LangmuirViewer::draw()

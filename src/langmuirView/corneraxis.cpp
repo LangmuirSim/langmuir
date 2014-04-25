@@ -3,8 +3,8 @@
 
 #include <QDebug>
 
-CornerAxis::CornerAxis(LangmuirViewer &viewer, QObject *parent, bool visible) :
-    Axis(viewer, parent, visible)
+CornerAxis::CornerAxis(LangmuirViewer &viewer, QObject *parent) :
+    Axis(viewer, parent)
 {
     init();
 }

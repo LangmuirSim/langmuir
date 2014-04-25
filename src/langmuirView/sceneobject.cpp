@@ -2,8 +2,8 @@
 #include "langmuirviewer.h"
 #include <QDebug>
 
-SceneObject::SceneObject(LangmuirViewer &viewer, QObject *parent, bool visible) :
-    QObject(parent), m_viewer(viewer), visible_(visible)
+SceneObject::SceneObject(LangmuirViewer &viewer, QObject *parent) :
+    QObject(parent), m_viewer(viewer), visible_(true)
 {
     init();
 }
