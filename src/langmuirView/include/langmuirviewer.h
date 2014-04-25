@@ -4,6 +4,11 @@
 #include <QGLViewer/qglviewer.h>
 #include "corneraxis.h"
 
+namespace Langmuir {
+    class Simulation;
+    class World;
+}
+
 class LangmuirViewer : public QGLViewer
 {
     Q_OBJECT
@@ -12,6 +17,7 @@ public:
 
 public slots:
     void toggleCornerAxisIsVisible();
+    void open();
 
 protected:
     virtual void init();
@@ -20,6 +26,8 @@ protected:
     virtual void animate();
     virtual QString helpString() const;
     CornerAxis *m_cornerAxis;
+    Langmuir::Simulation *m_simulation;
+    Langmuir::World *m_world;
 };
 
 #endif // LANGMUIRVIEWER_H

@@ -35,3 +35,8 @@ void LangmuirViewer::toggleCornerAxisIsVisible()
 {
     m_cornerAxis->toggleVisible();
 }
+
+void LangmuirViewer::open()
+{
+    qDebug() << "open called";
+}

@@ -31,7 +31,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_actionOpen_triggered()
 {
-    qDebug() << "open clicked";
+    m_viewer->open();
 }
 
 void MainWindow::on_actionStart_triggered()
