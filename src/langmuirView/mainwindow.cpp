@@ -18,9 +18,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
 void MainWindow::init()
 {
-    setIcon(ui->actionExit , "application-exit"    , QStyle::SP_DialogCloseButton);
+    setIcon(ui->actionExit, "application-exit", QStyle::SP_DialogCloseButton);
     setIcon(ui->actionStart, "media-playback-start", QStyle::SP_MediaPlay);
-    setIcon(ui->actionStop , "media-playback-stop" , QStyle::SP_MediaStop);
+    setIcon(ui->actionStop, "media-playback-stop", QStyle::SP_MediaStop);
+    setIcon(ui->actionOpen, "document-open", QStyle::SP_DialogOpenButton);
 }
 
 MainWindow::~MainWindow()
@@ -38,6 +39,11 @@ void MainWindow::toggleStartStopStatus()
         ui->actionStart->setEnabled(true);
         ui->actionStop->setDisabled(true);
     }
+}
+
+void MainWindow::on_actionOpen_triggered()
+{
+    qDebug() << "open clicked";
 }
 
 void MainWindow::setIcon(QAction *action, QString themeIcon, QStyle::StandardPixmap standardPixmap)

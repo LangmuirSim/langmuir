@@ -22,6 +22,7 @@ public:
 
 public slots:
     void toggleStartStopStatus();
+    void on_actionOpen_triggered();
 
 private:
     Ui::MainWindow *ui;
