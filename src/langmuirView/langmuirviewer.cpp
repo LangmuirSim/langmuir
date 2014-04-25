@@ -1,6 +1,12 @@
 #include "langmuirviewer.h"
+#include "simulation.h"
+#include "world.h"
+
+#include <QFileDialog>
+#include <QString>
 #include <QColor>
 #include <QDebug>
+#include <QDir>
 
 LangmuirViewer::LangmuirViewer(QWidget *parent) :
     QGLViewer(parent)
@@ -38,5 +44,14 @@ void LangmuirViewer::toggleCornerAxisIsVisible()
 
 void LangmuirViewer::open()
 {
-    qDebug() << "open called";
+    QString fileName = QFileDialog::getOpenFileName(
+        this, tr("Open Input File"), QDir::currentPath());
+    if (!fileName.isEmpty()) {
+        load(fileName);
+    }
+}
+
+void LangmuirViewer::load(QString fileName)
+{
+    qDebug() << fileName;
 }

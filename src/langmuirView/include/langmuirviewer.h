@@ -18,6 +18,7 @@ public:
 public slots:
     void toggleCornerAxisIsVisible();
     void open();
+    void load(QString fileName);
 
 protected:
     virtual void init();
