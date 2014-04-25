@@ -29,21 +29,21 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::toggleStartStopStatus()
-{
-    if (ui->actionStart->isEnabled()) {
-        ui->actionStart->setEnabled(false);
-        ui->actionStop->setDisabled(false);
-    }
-    else {
-        ui->actionStart->setEnabled(true);
-        ui->actionStop->setDisabled(true);
-    }
-}
-
 void MainWindow::on_actionOpen_triggered()
 {
     qDebug() << "open clicked";
+}
+
+void MainWindow::on_actionStart_triggered()
+{
+    ui->actionStart->setEnabled(false);
+    ui->actionStop->setDisabled(false);
+}
+
+void MainWindow::on_actionStop_triggered()
+{
+    ui->actionStart->setEnabled(true);
+    ui->actionStop->setDisabled(true);
 }
 
 void MainWindow::setIcon(QAction *action, QString themeIcon, QStyle::StandardPixmap standardPixmap)

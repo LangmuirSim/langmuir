@@ -21,8 +21,9 @@ public:
     ~MainWindow();
 
 public slots:
-    void toggleStartStopStatus();
     void on_actionOpen_triggered();
+    void on_actionStart_triggered();
+    void on_actionStop_triggered();
 
 private:
     Ui::MainWindow *ui;
