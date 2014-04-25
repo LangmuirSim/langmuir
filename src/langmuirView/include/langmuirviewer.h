@@ -15,6 +15,10 @@ class LangmuirViewer : public QGLViewer
 public:
     explicit LangmuirViewer(QWidget *parent = 0);
 
+signals:
+    void showMessage(const QString& message, int timeout=0);
+    void clearMessage();
+
 public slots:
     void toggleCornerAxisIsVisible();
     void load(QString fileName);

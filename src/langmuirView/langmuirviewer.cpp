@@ -40,6 +40,7 @@ QString LangmuirViewer::helpString() const
 void LangmuirViewer::toggleCornerAxisIsVisible()
 {
     m_cornerAxis->toggleVisible();
+    emit showMessage(QString("corner axis=%1").arg(m_cornerAxis->isVisible()));
 }
 
 void LangmuirViewer::load(QString fileName)
