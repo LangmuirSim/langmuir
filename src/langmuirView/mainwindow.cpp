@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "langmuirviewer.h"
 
+#include <QFileDialog>
 #include <QAction>
 #include <QDebug>
 #include <QStyle>
@@ -31,7 +32,9 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_actionOpen_triggered()
 {
-    m_viewer->open();
+    QString fileName = QFileDialog::getOpenFileName(
+        this, tr("Open Input File"), QDir::currentPath());
+    m_viewer->load(fileName);
 }
 
 void MainWindow::on_actionStart_triggered()

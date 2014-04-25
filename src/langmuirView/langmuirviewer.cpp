@@ -42,16 +42,14 @@ void LangmuirViewer::toggleCornerAxisIsVisible()
     m_cornerAxis->toggleVisible();
 }
 
-void LangmuirViewer::open()
+void LangmuirViewer::load(QString fileName)
 {
-    QString fileName = QFileDialog::getOpenFileName(
-        this, tr("Open Input File"), QDir::currentPath());
     if (!fileName.isEmpty()) {
-        load(fileName);
+        return;
     }
 }
 
-void LangmuirViewer::load(QString fileName)
+void LangmuirViewer::unload()
 {
-    qDebug() << fileName;
+
 }
