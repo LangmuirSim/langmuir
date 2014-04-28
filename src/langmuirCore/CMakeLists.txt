@@ -8,6 +8,7 @@ set(SOURCES
         gzipper.cpp
         pbsgpuparser.cpp
         nodefileparser.cpp
+        clparser.cpp
 
         world.cpp
         simulation.cpp
@@ -31,6 +32,7 @@ set(HEADERS
         ./include/gzipper.h
         ./include/pbsgpuparser.h
         ./include/nodefileparser.h
+        ./include/clparser.h
 
         ./include/world.h
         ./include/simulation.h
