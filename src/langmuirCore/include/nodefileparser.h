@@ -107,9 +107,14 @@ public:
      */
     const QStringList& cpus();
 
+    /**
+     * @brief get the hostname of this cpu
+     */
+    const QString& hostName();
+
 private:
     //! list of cpu names
-    QStringList  m_names;
+    QStringList m_names;
 
     //! list of core counts per cpu
     QMap<QString,int> m_cores;
@@ -122,6 +127,9 @@ private:
 
     //! path to GPUFILE
     QString m_gpufile;
+
+    //! hostname of this computer
+    QString m_hostName;
 
     /**
      * @brief parse NODEFILE or GPUFILE

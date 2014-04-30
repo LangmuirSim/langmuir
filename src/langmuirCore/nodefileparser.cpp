@@ -269,4 +269,11 @@ const QStringList& NodeFileParser::cpus()
     return m_names;
 }
 
+const QString& NodeFileParser::hostName()
+{
+    // TODO : get the hostname properly with system functions
+    m_hostName = m_names.at(0);
+    return m_hostName;
+}
+
 }
