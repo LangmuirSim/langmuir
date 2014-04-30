@@ -13,10 +13,11 @@
 #include "keyvalueparser.h"
 #include "checkpointer.h"
 #include "fluxagent.h"
+#include "nodefileparser.h"
 
 namespace Langmuir {
 
-World::World(const QString &fileName, QObject *parent)
+World::World(const QString &fileName, int cores, int gpuID, QObject *parent)
     : QObject(parent),
       m_keyValueParser(0),
       m_checkPointer(0),
@@ -42,7 +43,7 @@ World::World(const QString &fileName, QObject *parent)
       m_maxDefects(0),
       m_maxTraps(0)
 {
-    initialize(fileName);
+    initialize(fileName, cores, gpuID);
 }
 
 World::~World()
@@ -420,7 +421,26 @@ bool World::atMaxCharges()
     return numChargeAgents() >= maxChargeAgents();
 }
 
-void World::initialize(const QString &fileName)
+void World::alterMaxThreads(int cores)
+{
+    QThreadPool& threadPool = *QThreadPool::globalInstance();
+    int maxThreadCount = threadPool.maxThreadCount();
+
+    if (cores < 0) {
+        cores = maxThreadCount;
+    }
+
+    if (cores > maxThreadCount) {
+        qFatal("langmuir: requested %d cores, max cores=%d", cores, maxThreadCount);
+    }
+
+    m_parameters->maxThreads = cores;
+
+    threadPool.setMaxThreadCount(cores);
+    qDebug("langmuir: QThreadPool::maxThreadCount set to %d", threadPool.maxThreadCount());
+}
+
+void World::initialize(const QString &fileName, int cores, int gpuID)
 {
     // Pointers are EVIL
     World &refWorld = *this;
@@ -434,6 +454,26 @@ void World::initialize(const QString &fileName)
 
     // Set the address of the Parameters
     m_parameters = &m_keyValueParser->parameters();
+
+    // Change the number of threads
+    NodeFileParser nfparser;
+    QString hostName = nfparser.hostName();
+
+    // Use nodefile if cores wasn't given
+    if (cores < 0) {
+        cores = nfparser.numProc(hostName);
+    }
+
+    // Use gpufile if gpuID wasn't given
+    if (gpuID < 0) {
+        gpuID = nfparser.GPUid(hostName, 0);
+    }
+
+    qDebug("langmuir: cores=%d", cores);
+    qDebug("langmuir: gpuID=%d", gpuID);
+
+    // Change the number of threads
+    alterMaxThreads(cores);
 
     // Create Random Number Generator using current time
     // Note that checkPointer may either reseed the generator
@@ -523,7 +563,7 @@ void World::initialize(const QString &fileName)
     potential().updateCouplingConstants();
 
     // Initialize OpenCL
-    opencl().initializeOpenCL();
+    opencl().initializeOpenCL(gpuID);
     opencl().toggleOpenCL(parameters().useOpenCL);
 }
 

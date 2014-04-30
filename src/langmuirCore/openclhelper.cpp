@@ -15,7 +15,7 @@ OpenClHelper::OpenClHelper(World &world, QObject *parent):
 {
 }
 
-void OpenClHelper::initializeOpenCL()
+void OpenClHelper::initializeOpenCL(int gpuID)
 {
     //can't use openCL yet
     m_world.parameters().okCL = false;
@@ -33,13 +33,18 @@ void OpenClHelper::initializeOpenCL()
         m_platform.getDevices(CL_DEVICE_TYPE_GPU, &all_devices);
 
         //choose a single device
-        PBSGPUParser parser;
+        if (gpuID < 0) {
+            gpuID = 0;
+        }
+        if (gpuID >= all_devices.size()) {
+            qFatal("langmuir: invalid gpu: %d (max gpus=%d)", gpuID, int(all_devices.size()));
+        }
         std::vector<cl::Device> devices;
-        devices.push_back(all_devices.at(parser.gpu()));
+        devices.push_back(all_devices.at(gpuID));
         m_device = devices.at(0);
 
         //save gpu id used
-        m_world.parameters().openclDeviceID = parser.gpu();
+        m_world.parameters().openclDeviceID = gpuID;
 
         //obtain context
         cl_context_properties contextProperties[3] = {

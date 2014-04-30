@@ -53,7 +53,7 @@ void LangmuirViewer::load(QString fileName)
     }
     emit showMessage(QString("loading file: %1").arg(fileName));
 
-    Langmuir::World *world = new Langmuir::World(fileName, this);
+    Langmuir::World *world = new Langmuir::World(fileName, -1, -1, this);
     Langmuir::Simulation *simulation = new Langmuir::Simulation(*m_world, m_world);
 
     unload();
