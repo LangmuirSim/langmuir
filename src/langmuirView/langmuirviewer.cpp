@@ -11,6 +11,8 @@
 LangmuirViewer::LangmuirViewer(QWidget *parent) :
     QGLViewer(parent)
 {
+    m_simulation = NULL;
+    m_world = NULL;
 }
 
 void LangmuirViewer::init()
@@ -45,12 +47,31 @@ void LangmuirViewer::toggleCornerAxisIsVisible()
 
 void LangmuirViewer::load(QString fileName)
 {
-    if (!fileName.isEmpty()) {
+    if (fileName.isEmpty()) {
+        emit showMessage("no input file selected");
         return;
     }
+    emit showMessage(QString("loading file: %1").arg(fileName));
+
+    Langmuir::World *world = new Langmuir::World(fileName, this);
+    Langmuir::Simulation *simulation = new Langmuir::Simulation(*m_world, m_world);
+
+    unload();
+
+    m_simulation = simulation;
+    m_world = world;
 }
 
 void LangmuirViewer::unload()
 {
+    if (m_simulation != NULL) {
+        m_simulation->deleteLater();
+    }
 
+    if (m_world != NULL) {
+        m_world->deleteLater();
+    }
+
+    m_simulation = NULL;
+    m_world = NULL;
 }

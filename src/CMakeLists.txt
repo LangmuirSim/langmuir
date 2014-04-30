@@ -1,8 +1,6 @@
 project(LangmuirChargeTransport)
 cmake_minimum_required(VERSION 2.8)
 
-set(CMAKE_BUILD_TYPE Debug)
-set(USE_QT4 ON)
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 
 ################################################################################
@@ -163,6 +161,8 @@ endmacro(link_qt)
 add_subdirectory(langmuirCore)
 message("")
 add_subdirectory(langmuir)
+message("")
+add_subdirectory(QGLViewer)
 message("")
 add_subdirectory(langmuirView)
 message("")

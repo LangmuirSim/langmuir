@@ -9,6 +9,7 @@ set(SOURCES
     mainwindow.cpp
     corneraxis.cpp
     axis.cpp
+    box.cpp
 )
 
 set(HEADERS
@@ -17,6 +18,7 @@ set(HEADERS
     ./include/mainwindow.h
     ./include/corneraxis.h
     ./include/axis.h
+    ./include/box.h
 )
 
 set(RESOURCES
@@ -29,35 +31,28 @@ set(FORMS
 
 # must have OpenGL
 find_opengl()
-find_qglviewer()
 
 if(OPENGL_FOUND)
-    if (QGLVIEWER_FOUND)
-        # INCLUDE
-        include_directories(${langmuirCore_SOURCE_DIR}/include)
-        include_directories(${langmuirView_SOURCE_DIR}/include)
+    include_directories(${langmuirCore_SOURCE_DIR}/include)
+    include_directories(${langmuirView_SOURCE_DIR}/include)
+    include_directories(${QGLViewer_SOURCE_DIR}/VRender)
+    include_directories(${QGLViewer_SOURCE_DIR})
 
-        # FIND
-        find_boost()
-        find_opencl()
-        find_qt()
+    # FIND
+    find_opencl()
+    find_boost()
+    find_qt()
 
-        # TARGET
-        add_executable(${PROJECT_NAME} EXCLUDE_FROM_ALL langmuirview.cpp ${SOURCES} ${HEADERS} ${RESOURCES} ${FORMS})
+    # TARGET
+    add_executable(${PROJECT_NAME} EXCLUDE_FROM_ALL langmuirview.cpp ${SOURCES} ${HEADERS} ${RESOURCES} ${FORMS})
 
-        # LINK
-        target_link_libraries(${PROJECT_NAME} langmuirCore)
-        link_qglviewer(${PROJECT_NAME})
-        link_opencl(${PROJECT_NAME})
-        link_opengl(${PROJECT_NAME})
-        link_boost(${PROJECT_NAME})
-        link_qt(${PROJECT_NAME})
-
-        # INSTALL
-        # install(TARGETS ${PROJECT_NAME} DESTINATION ${PROJECT_SOURCE_DIR}/bin)
-    else()
-        message(STATUS "No QGLViewer : langmuirView disabled")
-    endif(QGLVIEWER_FOUND)
+    # LINK
+    target_link_libraries(${PROJECT_NAME} langmuirCore)
+    target_link_libraries(${PROJECT_NAME} QGLViewer)
+    link_opencl(${PROJECT_NAME})
+    link_opengl(${PROJECT_NAME})
+    link_boost(${PROJECT_NAME})
+    link_qt(${PROJECT_NAME})
 else()
     message(STATUS "No OpenGL : langmuirView disabled")
 endif(OPENGL_FOUND)
