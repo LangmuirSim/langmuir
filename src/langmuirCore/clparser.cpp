@@ -3,7 +3,7 @@
 namespace Langmuir {
 
 CommandLineParser::CommandLineParser(QObject *parent) :
-    QObject(parent)
+    QObject(parent), m_numPositional(0), m_numArguments(0)
 {
 }
 
@@ -19,14 +19,22 @@ void CommandLineParser::addBool(QString flag, QString dest, QString help)
     m_values[dest] = "0";
 }
 
+void CommandLineParser::addPositional(QString dest, QString help)
+{
+    add("", dest, help);
+    m_isPositional[dest] = m_numPositional + 1;
+    ++m_numPositional;
+}
+
 void CommandLineParser::add(QString flag, QString dest, QString help)
 {
+    m_isPositional[dest] = 0;
     m_isBool[dest] = false;
     m_values[dest] = "";
     m_flags[dest] = flag;
     m_helps[dest] = help;
+    ++m_numArguments;
 }
-
 
 void CommandLineParser::parse(QStringList &args)
 {
@@ -39,11 +47,33 @@ void CommandLineParser::parse(QStringList &args)
         exit(-1);
     }
 
+    // calculate the total arguments possible
+    int total_possible_args = 1;
+    foreach (QString dest, m_flags.keys()) {
+        if (m_isPositional[dest]) {
+            total_possible_args += 1;
+        }
+        else {
+            if (m_isBool[dest]) {
+                total_possible_args += 1;
+            }
+            else {
+                total_possible_args += 2;
+            }
+        }
+    }
+
+    // check the number of arguments passed
+    if (m_args.size() > total_possible_args) {
+        qDebug() << "langmuir: too many arguments..." <<
+                    m_args.size() << ">" << total_possible_args;
+        exit(-1);
+    }
+
     // check for known flags
     foreach (QString flag, m_args) {
         if (flag.startsWith("--") && !m_flags.values().contains(flag)) {
-            qDebug() << qPrintable(help());
-            qDebug("unknown option: %s", qPrintable(flag));
+            qDebug("langmuir: unknown option... %s", qPrintable(flag));
             exit(-1);
         }
     }
@@ -67,10 +97,31 @@ void CommandLineParser::parse(QStringList &args)
                     m_args.removeAt(i);
                 }
                 else {
-                    qFatal("expected argument after %s", qPrintable(flag));
+                    qDebug() << "langmuir: expected argument after" << qPrintable(flag);
+                    exit(-1);
                 }
             }
         }
+    }
+
+    // parse the positional arguments
+    foreach (QString dest, m_flags.keys()) {
+        int i = m_isPositional[dest];
+        if (i > 0) {
+            if (m_args.size() > i) {
+                if (m_args.at(i).startsWith("--")) {
+                    qDebug() << "langmuir: positional argument starts with --";
+                }
+                m_values[dest] = m_args.at(i);
+                m_args.removeAt(i);
+            }
+        }
+    }
+
+    // check the number of arguments
+    if (m_args.size() != 1) {
+        qDebug() << "langmuir: can not parse remaining arguments" << m_args;
+        exit(-1);
     }
 }
 
@@ -80,8 +131,20 @@ QString CommandLineParser::help()
     if (!m_description.isEmpty()) {
         helpString += QString("%1\n").arg(m_description);
     }
+    if (m_numPositional) {
+        helpString += "positional:\n";
+        foreach (QString dest, m_flags.keys()) {
+            if (m_isPositional[dest]) {
+                helpString += QString("  %1 %2\n").arg(m_isPositional[dest], -15).arg(m_helps[dest]);
+            }
+        }
+        helpString += "\n";
+    }
+    helpString += "arguments:\n";
     foreach (QString dest, m_flags.keys()) {
-        helpString += QString("  %1 %2\n").arg(m_flags[dest], -15).arg(m_helps[dest]);
+        if (m_isPositional[dest] <= 0) {
+            helpString += QString("  %1 %2\n").arg(m_flags[dest], -15).arg(m_helps[dest]);
+        }
     }
     return helpString.remove(helpString.size() - 1, 1);
 }

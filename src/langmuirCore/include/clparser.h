@@ -37,6 +37,13 @@ public:
     void addBool(QString flag, QString dest, QString help);
 
     /**
+     * @brief add an argument that has no flag
+     * @param dest internal key
+     * @param help help message
+     */
+    void addPositional(QString dest, QString help);
+
+    /**
      * @brief add a flag that has an argument
      * @param flag command line flag
      * @param dest internal key
@@ -50,13 +57,6 @@ public:
      * @param default_value default value if key not present
      */
     template <typename T> T get(const QString& dest, T default_value);
-
-    /**
-     * @brief get value by position and convert to type
-     * @param index index in argument list
-     * @param default_value default value if not present
-     */
-    template <typename T> T getPositional(int index, T default_value);
 
     /**
      * @brief parse the command line arguments
@@ -73,6 +73,9 @@ protected:
     //! map dest->boolean
     QMap<QString,bool> m_isBool;
 
+    //! map dest->boolean
+    QMap<QString,int> m_isPositional;
+
     //! map dest->flag
     QMap<QString,QString> m_flags;
 
@@ -88,6 +91,12 @@ protected:
     //! list of *remaining* command line arguments
     QStringList m_args;
 
+    //! total number of positional arguments
+    unsigned int m_numPositional;
+
+    //! total number of arguments
+    unsigned int m_numArguments;
+
     /**
      * @brief convert value to type
      * @param value value as string
@@ -97,21 +106,14 @@ protected:
 
 template <typename T> T CommandLineParser::get(const QString &dest, T default_value)
 {
+    if (!m_values.contains(dest)) {
+        qDebug() << "langmuir: invalid parser key..." << qPrintable(dest);
+        exit(-1);
+    }
     if (m_values[dest].isEmpty()) {
         return default_value;
     }
     return convert<T>(m_values[dest]);
-}
-
-template <typename T> T CommandLineParser::getPositional(int index, T default_value)
-{
-    if (index < 0) {
-        index = m_args.size() + index;
-    }
-    if (index < 0 || index >= m_args.size()) {
-        return default_value;
-    }
-    return convert<T>(m_args.at(index));
 }
 
 }
