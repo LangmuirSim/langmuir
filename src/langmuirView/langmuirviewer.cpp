@@ -76,6 +76,12 @@ void LangmuirViewer::load(QString fileName)
 
 void LangmuirViewer::unload()
 {
+    if (m_simulation == NULL || m_world == NULL) {
+        emit showMessage("nothing to delete");
+    } else {
+        emit showMessage("simulation deleted");
+    }
+
     if (m_simulation != NULL) {
         m_simulation->deleteLater();
     }

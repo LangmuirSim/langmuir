@@ -26,6 +26,7 @@ void MainWindow::init()
     setIcon(ui->actionStop, "media-playback-stop", QStyle::SP_MediaStop);
     setIcon(ui->actionOpen, "document-open", QStyle::SP_DialogOpenButton);
     setIcon(ui->actionShow, "camera-photo", QStyle::SP_ArrowBack);
+    setIcon(ui->actionUnload, "", QStyle::SP_DialogDiscardButton);
 
     connect(m_viewer, SIGNAL(clearMessage()), ui->statusbar, SLOT(clearMessage()));
     connect(m_viewer, SIGNAL(showMessage(QString,int)), ui->statusbar, SLOT(showMessage(QString,int)));

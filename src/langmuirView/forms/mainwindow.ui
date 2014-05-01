@@ -34,6 +34,7 @@
      <string>File</string>
     </property>
     <addaction name="actionOpen"/>
+    <addaction name="actionUnload"/>
     <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuControl">
@@ -69,6 +70,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionOpen"/>
+   <addaction name="actionUnload"/>
    <addaction name="separator"/>
    <addaction name="actionStart"/>
    <addaction name="actionStop"/>
@@ -188,6 +190,11 @@
     <string>Show</string>
    </property>
   </action>
+  <action name="actionUnload">
+   <property name="text">
+    <string>Unload</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -204,6 +211,7 @@
     <slot>updateGL()</slot>
     <slot>toggleCornerAxisIsVisible()</slot>
     <slot>resetCamera()</slot>
+    <slot>unload()</slot>
    </slots>
   </customwidget>
  </customwidgets>
@@ -328,6 +336,22 @@
    <signal>triggered()</signal>
    <receiver>qglwidget</receiver>
    <slot>resetCamera()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>255</x>
+     <y>277</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionUnload</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>qglwidget</receiver>
+   <slot>unload()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
