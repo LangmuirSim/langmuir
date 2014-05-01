@@ -54,6 +54,9 @@ void NodeFileParser::setPaths(const QString &nodefile, const QString &gpufile)
     // clear the records
     clear();
 
+    qDebug("langmuir: PBS_NODEFILE %s", qPrintable(m_nodefile));
+    qDebug("langmuir: PBS_GPUFILE  %s", qPrintable(m_gpufile ));
+
     // we have both files
     if (!m_nodefile.isEmpty() && !m_gpufile.isEmpty())
     {
