@@ -3,12 +3,25 @@
 #include <QRegExp>
 #include <QFile>
 
+#include <boost/asio.hpp>
+
 namespace Langmuir {
 
 NodeFileParser::NodeFileParser(const QString &nodefile, const QString &gpufile, QObject *parent) :
     QObject(parent)
 {
     setPaths(nodefile, gpufile);
+    setHostName();
+}
+
+void NodeFileParser::setHostName() {
+    m_hostName = QString::fromStdString(boost::asio::ip::host_name());
+    qDebug("langmuir: hostname=%s", qPrintable(m_hostName));
+}
+
+void NodeFileParser::setHostName(const QString &hostName) {
+    m_hostName = hostName;
+    qDebug("langmuir: hostname=%s", qPrintable(m_hostName));
 }
 
 void NodeFileParser::setPaths(const QString &nodefile, const QString &gpufile)
@@ -57,9 +70,15 @@ void NodeFileParser::setPaths(const QString &nodefile, const QString &gpufile)
     if (!m_nodefile.isEmpty()) {
         qDebug("langmuir: PBS_NODEFILE %s", qPrintable(m_nodefile));
     }
+    else {
+        qDebug("langmuir: can not aquire PBS_NODEFILE");
+    }
 
     if (!m_gpufile.isEmpty()) {
         qDebug("langmuir: PBS_GPUFILE  %s", qPrintable(m_gpufile ));
+    }
+    else {
+        qDebug("langmuir: can not aquire PBS_GPUFILE");
     }
 
     // we have both files
@@ -146,7 +165,7 @@ bool NodeFileParser::parse(QString& filename, bool ignoreCores, bool ignoreGPUs)
     file.setFileName(filename);
     if (!file.open(QIODevice::ReadOnly))
     {
-        qDebug("nodefile: can not open file: %s", qPrintable(filename));
+        qDebug("langmuir: can not open file: %s", qPrintable(filename));
         return false;
     }
 
@@ -178,7 +197,7 @@ bool NodeFileParser::parse(QString& filename, bool ignoreCores, bool ignoreGPUs)
                 cores = regex1.cap(3).toInt(&ok);
                 if (!ok)
                 {
-                    qFatal("nodefile: can not parse name:(cores) in line: %s",
+                    qFatal("langmuir: can not parse name:(cores) in line: %s",
                            qPrintable(line));
                 }
             }
@@ -188,7 +207,7 @@ bool NodeFileParser::parse(QString& filename, bool ignoreCores, bool ignoreGPUs)
                 cores = regex1.cap(5).toInt(&ok);
                 if (!ok)
                 {
-                    qFatal("nodefile: can not parse slots=(cores) in line: %s",
+                    qFatal("langmuir: can not parse slots=(cores) in line: %s",
                            qPrintable(line));
                 }
             }
@@ -209,7 +228,7 @@ bool NodeFileParser::parse(QString& filename, bool ignoreCores, bool ignoreGPUs)
                     int gpu_id = regex2.cap(1).toInt(&ok);
                     if (!ok)
                     {
-                        qFatal("nodefile: can not parse -?gpus?=(id) in line: %s",
+                        qFatal("langmuir: can not parse -?gpus?=(id) in line: %s",
                                qPrintable(line));
                     }
                     if (!m_gpus[name].contains(gpu_id))
@@ -221,7 +240,7 @@ bool NodeFileParser::parse(QString& filename, bool ignoreCores, bool ignoreGPUs)
         }
         else
         {
-            qFatal("nodefile: can not match line: %s", qPrintable(line));
+            qFatal("langmuir: can not match line: %s", qPrintable(line));
         }
     }
     return true;
@@ -302,9 +321,16 @@ const QStringList& NodeFileParser::cpus()
 
 const QString& NodeFileParser::hostName()
 {
-    // TODO : get the hostname properly with system functions
-    m_hostName = m_names.at(0);
-    return m_hostName;
+    if (m_names.contains(m_hostName)) {
+        return m_hostName;
+    }
+
+    if (m_names.size() > 0) {
+        m_hostName = m_names.at(0);
+        return m_hostName;
+    }
+
+    qFatal("langmuir: invalid hostname!");
 }
 
 }

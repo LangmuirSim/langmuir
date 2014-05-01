@@ -12,7 +12,7 @@
 namespace Langmuir {
 
 /**
- * A class to parse the PBS_NODEFILE
+ * A class to parse the PBS_NODEFILE and PBS_GPUFILE
  */
 class NodeFileParser : public QObject
 {
@@ -35,6 +35,17 @@ public:
      * If both paths remain empty, then setDefault() is used.
      */
     void setPaths(const QString& nodefile="", const QString& gpufile="");
+
+    /**
+     * @brief set the name of this CPU
+     * @param hostName host name string
+     */
+    void setHostName(const QString& hostName);
+
+    /**
+     * @brief set the name of this CPU using boost::asio::ip::hostname()
+     */
+    void setHostName();
 
     /**
      * @brief set the default based on QThreadPool and hostname
@@ -132,7 +143,11 @@ private:
     QString m_hostName;
 
     /**
-     * @brief parse NODEFILE or GPUFILE
+     * parse NODEFILE or GPUFILE
+     * @param filename name of file to parse
+     * @param ignoreCores do not parse core information
+     * @param ignoreGPUs do not parse gpu information
+     * @return true if success
      */
     bool parse(QString &filename, bool ignoreCores = false, bool ignoreGPUs = true);
 };

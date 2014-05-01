@@ -6,7 +6,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 ################################################################################
 # Library : Boost
 macro(find_boost)
-    find_package(Boost REQUIRED)
+    find_package(Boost REQUIRED system)
     include_directories(${Boost_INCLUDE_DIRS})
 endmacro(find_boost)
 
