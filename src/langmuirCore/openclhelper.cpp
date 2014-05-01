@@ -43,6 +43,8 @@ void OpenClHelper::initializeOpenCL(int gpuID)
         devices.push_back(all_devices.at(gpuID));
         m_device = devices.at(0);
 
+        qDebug("langmuir: gpuID=%d", gpuID);
+
         //save gpu id used
         m_world.parameters().openclDeviceID = gpuID;
 

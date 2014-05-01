@@ -455,26 +455,6 @@ void World::initialize(const QString &fileName, int cores, int gpuID)
     // Set the address of the Parameters
     m_parameters = &m_keyValueParser->parameters();
 
-    // Change the number of threads
-    NodeFileParser nfparser;
-    QString hostName = nfparser.hostName();
-
-    // Use nodefile if cores wasn't given
-    if (cores < 0) {
-        cores = nfparser.numProc(hostName);
-    }
-
-    // Use gpufile if gpuID wasn't given
-    if (gpuID < 0) {
-        gpuID = nfparser.GPUid(hostName, 0);
-    }
-
-    qDebug("langmuir: cores=%d", cores);
-    qDebug("langmuir: gpuID=%d", gpuID);
-
-    // Change the number of threads
-    alterMaxThreads(cores);
-
     // Create Random Number Generator using current time
     // Note that checkPointer may either reseed the generator
     // or load a previous RandomState
@@ -494,6 +474,23 @@ void World::initialize(const QString &fileName, int cores, int gpuID)
     // Parse the input file
     m_checkPointer->load(fileName,configInfo);
     checkSimulationParameters(*m_parameters);
+
+    // Change the number of threads
+    NodeFileParser nfparser;
+    QString hostName = nfparser.hostName();
+
+    // Use nodefile if cores wasn't given
+    if (cores < 0) {
+        cores = nfparser.numProc(hostName);
+    }
+
+    // Use gpufile if gpuID wasn't given
+    if (gpuID < 0) {
+        gpuID = nfparser.GPUid(hostName, 0);
+    }
+
+    // Change the number of threads
+    alterMaxThreads(cores);
 
     // Save the seed that has been used
     m_parameters->randomSeed = m_rand->seed();
