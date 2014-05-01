@@ -60,7 +60,7 @@ int main (int argc, char *argv[])
     for (int j = par.currentStep; j < par.iterationsReal; j += par.iterationsPrint)
     {
         // Perform iterations
-        //sim.performIterations (par.iterationsPrint);
+        sim.performIterations (par.iterationsPrint);
     }
 
     // The time this simulation stops
