@@ -9,13 +9,14 @@
 #include <QStyle>
 #include <QIcon>
 
-MainWindow::MainWindow(QWidget *parent) :
+MainWindow::MainWindow(const QString &inputFile, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     m_viewer = ui->qglwidget;
     init();
+    m_viewer->load(inputFile);
 }
 
 void MainWindow::init()

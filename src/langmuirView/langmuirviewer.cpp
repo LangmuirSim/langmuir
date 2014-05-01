@@ -1,4 +1,5 @@
 #include "langmuirviewer.h"
+#include "parameters.h"
 #include "simulation.h"
 #include "world.h"
 
@@ -18,6 +19,8 @@ LangmuirViewer::LangmuirViewer(QWidget *parent) :
 void LangmuirViewer::init()
 {
     m_cornerAxis = new CornerAxis(*this, this);
+    m_cornerAxis->setVisible(false);
+    m_cornerAxis->makeConnections();
 }
 
 void LangmuirViewer::draw()
@@ -55,6 +58,9 @@ void LangmuirViewer::load(QString fileName)
 
     Langmuir::World *world = new Langmuir::World(fileName, -1, -1, this);
     Langmuir::Simulation *simulation = new Langmuir::Simulation(*m_world, m_world);
+
+    world->parameters().outputIsOn = false;
+    world->parameters().iterationsPrint = 1;
 
     unload();
 
