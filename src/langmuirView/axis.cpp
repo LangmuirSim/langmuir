@@ -1,5 +1,7 @@
 #include "langmuirviewer.h"
+#include "color.h"
 #include "axis.h"
+
 #include <QDebug>
 
 Axis::Axis(LangmuirViewer &viewer, QObject *parent) :
@@ -33,7 +35,7 @@ void Axis::draw() {
     glDisable(GL_COLOR_MATERIAL);
 
     // x-axis
-    qColorToFloat4(x_color, color);
+    qColorToArray4(x_color, color);
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, color);
     glPushMatrix();
     glRotatef(0.0, 0.0, 1.0, 0.0);
@@ -41,15 +43,15 @@ void Axis::draw() {
     glPopMatrix();
 
     // y-axis
-    qColorToFloat4(y_color, color);
+    qColorToArray4(y_color, color);
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, color);
     glPushMatrix();
     glRotatef(90.0, 0.0, 1.0, 0.0);
     QGLViewer::drawArrow(alength, aradius);
     glPopMatrix();
 
-    // z-axis
-    qColorToFloat4(z_color, color);
+    // z-axix
+    qColorToArray4(x_color, color);
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, color);
     glPushMatrix();
     glRotatef(-90.0, 1.0, 0.0, 0.0);

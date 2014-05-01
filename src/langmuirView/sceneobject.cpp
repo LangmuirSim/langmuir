@@ -8,19 +8,6 @@ SceneObject::SceneObject(LangmuirViewer &viewer, QObject *parent) :
     init();
 }
 
-void SceneObject::qColorToFloat3(QColor qcolor, float *color)
-{
-    color[0] = qcolor.redF();
-    color[1] = qcolor.greenF();
-    color[2] = qcolor.blueF();
-}
-
-void SceneObject::qColorToFloat4(QColor qcolor, float *color)
-{
-    qColorToFloat3(qcolor, color);
-    color[3] = qcolor.alphaF();
-}
-
 void SceneObject::render()
 {
     if (visible_) {

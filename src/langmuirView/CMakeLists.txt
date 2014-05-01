@@ -8,6 +8,7 @@ set(SOURCES
     sceneobject.cpp
     mainwindow.cpp
     corneraxis.cpp
+    color.cpp
     axis.cpp
     box.cpp
 )
@@ -17,6 +18,7 @@ set(HEADERS
     ./include/sceneobject.h
     ./include/mainwindow.h
     ./include/corneraxis.h
+    ./include/color.h
     ./include/axis.h
     ./include/box.h
 )
