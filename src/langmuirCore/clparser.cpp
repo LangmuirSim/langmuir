@@ -129,7 +129,7 @@ QString CommandLineParser::help()
 {
     QString helpString;
     if (!m_description.isEmpty()) {
-        helpString += QString("%1\n").arg(m_description);
+        helpString += QString("%1\n\n").arg(m_description);
     }
     if (m_numPositional) {
         helpString += "positional:\n";
@@ -138,12 +138,16 @@ QString CommandLineParser::help()
                 helpString += QString("  %1 %2\n").arg(m_isPositional[dest], -15).arg(m_helps[dest]);
             }
         }
-        helpString += "\n";
     }
-    helpString += "arguments:\n";
-    foreach (QString dest, m_flags.keys()) {
-        if (m_isPositional[dest] <= 0) {
-            helpString += QString("  %1 %2\n").arg(m_flags[dest], -15).arg(m_helps[dest]);
+    if (m_numArguments - m_numPositional > 0) {
+        if (m_numPositional > 0) {
+            helpString += '\n';
+        }
+        helpString += "arguments:\n";
+        foreach (QString dest, m_flags.keys()) {
+            if (m_isPositional[dest] <= 0) {
+                helpString += QString("  %1 %2\n").arg(m_flags[dest], -15).arg(m_helps[dest]);
+            }
         }
     }
     return helpString.remove(helpString.size() - 1, 1);
