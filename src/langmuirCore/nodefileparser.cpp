@@ -54,43 +54,64 @@ void NodeFileParser::setPaths(const QString &nodefile, const QString &gpufile)
     // clear the records
     clear();
 
-    qDebug("langmuir: PBS_NODEFILE %s", qPrintable(m_nodefile));
-    qDebug("langmuir: PBS_GPUFILE  %s", qPrintable(m_gpufile ));
+    if (!m_nodefile.isEmpty()) {
+        qDebug("langmuir: PBS_NODEFILE %s", qPrintable(m_nodefile));
+    }
+
+    if (!m_gpufile.isEmpty()) {
+        qDebug("langmuir: PBS_GPUFILE  %s", qPrintable(m_gpufile ));
+    }
 
     // we have both files
     if (!m_nodefile.isEmpty() && !m_gpufile.isEmpty())
     {
-        qDebug("langmuir: parsing nodefile...");
-        parse(m_nodefile, false, true);
+        qDebug("langmuir: parsing nodefile");
+        bool parseN = parse(m_nodefile, false, true);
 
-        qDebug("langmuir: parsing gpufile...");
-        parse(m_gpufile , true, false);
+        qDebug("langmuir: parsing gpufile");
+        bool parseG = parse(m_gpufile , parseN, false);
+
+        if (!parseN && !parseG) {
+            qDebug("langmuir: failed to parse NODEFILE and GPUFILE...");
+            setDefault();
+        }
         return;
     }
 
     // we are missing the GPUFILE
     if (m_gpufile.isEmpty() && !m_nodefile.isEmpty())
     {
-        qDebug("langmuir: parsing nodefile...");
-        parse(m_nodefile, false, false);
+        qDebug("langmuir: parsing NODEFILE");
+        bool parseN = parse(m_nodefile, false, false);
+
+        if (!parseN) {
+            qDebug("langmuir: failed to parse NODEFILE");
+            setDefault();
+        }
         return;
     }
 
     // we are missing the NODEFILE
     if (m_nodefile.isEmpty() && !m_gpufile.isEmpty())
     {
-        qDebug("langmuir: parsing gpufile...");
-        parse(m_gpufile , false, false);
+        qDebug("langmuir: parsing GPUFILE");
+        bool parseG = parse(m_gpufile , false, false);
+
+        if (!parseG) {
+            qDebug("langmuir: failed to parse GPUFILE");
+            setDefault();
+        }
         return;
     }
 
     // we are missing both files
-    qDebug("langmuir: setting defaults...");
     setDefault();
 }
 
 void NodeFileParser::setDefault()
 {
+    qDebug("langmuir: setting core/gpu defaults");
+
     QString name = "node1";
 
     QThreadPool& threadPool = *QThreadPool::globalInstance();
@@ -119,14 +140,14 @@ void NodeFileParser::createNode(const QString &name, int cores, QList<int> gpus)
     }
 }
 
-void NodeFileParser::parse(QString& filename, bool ignoreCores, bool ignoreGPUs)
+bool NodeFileParser::parse(QString& filename, bool ignoreCores, bool ignoreGPUs)
 {
     QFile file;
     file.setFileName(filename);
     if (!file.open(QIODevice::ReadOnly))
     {
         qDebug("nodefile: can not open file: %s", qPrintable(filename));
-        return;
+        return false;
     }
 
     // expression to match name and core count
@@ -203,6 +224,7 @@ void NodeFileParser::parse(QString& filename, bool ignoreCores, bool ignoreGPUs)
             qFatal("nodefile: can not match line: %s", qPrintable(line));
         }
     }
+    return true;
 }
 
 void NodeFileParser::clear()

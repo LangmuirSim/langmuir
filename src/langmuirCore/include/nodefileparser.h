@@ -134,7 +134,7 @@ private:
     /**
      * @brief parse NODEFILE or GPUFILE
      */
-    void parse(QString &filename, bool ignoreCores = false, bool ignoreGPUs = true);
+    bool parse(QString &filename, bool ignoreCores = false, bool ignoreGPUs = true);
 };
 
 }
