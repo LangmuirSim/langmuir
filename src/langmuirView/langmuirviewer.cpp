@@ -37,6 +37,10 @@ void LangmuirViewer::animate()
 {
 }
 
+void LangmuirViewer::help() {
+    emit showMessage("implement help widget!");
+}
+
 QString LangmuirViewer::helpString() const
 {
     return "";

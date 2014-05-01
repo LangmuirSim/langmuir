@@ -29,6 +29,7 @@ protected:
     virtual void draw();
     virtual void postDraw();
     virtual void animate();
+    virtual void help();
     virtual QString helpString() const;
     CornerAxis *m_cornerAxis;
     Langmuir::Simulation *m_simulation;
