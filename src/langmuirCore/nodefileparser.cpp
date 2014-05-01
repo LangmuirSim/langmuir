@@ -60,7 +60,10 @@ void NodeFileParser::setPaths(const QString &nodefile, const QString &gpufile)
     // we have both files
     if (!m_nodefile.isEmpty() && !m_gpufile.isEmpty())
     {
+        qDebug("langmuir: parsing nodefile...");
         parse(m_nodefile, false, true);
+
+        qDebug("langmuir: parsing gpufile...");
         parse(m_gpufile , true, false);
         return;
     }
@@ -68,6 +71,7 @@ void NodeFileParser::setPaths(const QString &nodefile, const QString &gpufile)
     // we are missing the GPUFILE
     if (m_gpufile.isEmpty() && !m_nodefile.isEmpty())
     {
+        qDebug("langmuir: parsing nodefile...");
         parse(m_nodefile, false, false);
         return;
     }
@@ -75,11 +79,13 @@ void NodeFileParser::setPaths(const QString &nodefile, const QString &gpufile)
     // we are missing the NODEFILE
     if (m_nodefile.isEmpty() && !m_gpufile.isEmpty())
     {
+        qDebug("langmuir: parsing gpufile...");
         parse(m_gpufile , false, false);
         return;
     }
 
     // we are missing both files
+    qDebug("langmuir: setting defaults...");
     setDefault();
 }
 
