@@ -119,7 +119,7 @@ void NodeFileParser::parse(QString& filename, bool ignoreCores, bool ignoreGPUs)
     file.setFileName(filename);
     if (!file.open(QIODevice::ReadOnly))
     {
-        qDebug("nodefile: can not open file: %s", qPrintable(m_nodefile));
+        qDebug("nodefile: can not open file: %s", qPrintable(filename));
         return;
     }
 
