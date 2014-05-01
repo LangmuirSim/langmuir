@@ -14,6 +14,7 @@ signals:
 
 public slots:
     void setColor(QColor color);
+    virtual void makeConnections();
 
 protected:
     virtual void init();

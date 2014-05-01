@@ -22,6 +22,7 @@ public slots:
     void setZColor(QColor color);
     void setRadius(double value);
     void setLength(double value);
+    virtual void makeConnections();
 
 protected:
     virtual void init();

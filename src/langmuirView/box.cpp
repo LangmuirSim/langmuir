@@ -20,6 +20,11 @@ void Box::setColor(QColor color)
     if (color != m_color) {
         m_color = color;
         emit colorChanged(m_color);
-        m_viewer.updateGL();
     }
+}
+
+void Box::makeConnections()
+{
+    SceneObject::makeConnections();
+    connect(this, SIGNAL(colorChanged(QColor)), &m_viewer, SLOT(updateGL()));
 }

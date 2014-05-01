@@ -23,6 +23,7 @@ signals:
 public slots:
     void toggleVisible();
     void setVisible(bool draw = true);
+    virtual void makeConnections();
 
 protected:
     virtual void init();

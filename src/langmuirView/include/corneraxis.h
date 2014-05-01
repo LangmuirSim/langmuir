@@ -27,6 +27,7 @@ public slots:
     void setLocation(Location location);
     void setShift(int shift);
     void setSize(int size);
+    virtual void makeConnections();
 
 protected:
     virtual void init();

@@ -77,7 +77,6 @@ void Axis::setXColor(QColor color)
     if (color != x_color) {
         x_color = color;
         emit xColorChanged(x_color);
-        m_viewer.updateGL();
     }
 }
 
@@ -86,7 +85,6 @@ void Axis::setYColor(QColor color)
     if (color != y_color) {
         y_color = color;
         emit yColorChanged(y_color);
-        m_viewer.updateGL();
     }
 }
 
@@ -95,7 +93,6 @@ void Axis::setZColor(QColor color)
     if (color != z_color) {
         z_color = color;
         emit zColorChanged(z_color);
-        m_viewer.updateGL();
     }
 }
 
@@ -104,7 +101,6 @@ void Axis::setRadius(double value)
     if (value != aradius) {
         aradius = value;
         emit radiusChanged(value);
-        m_viewer.updateGL();
     }
 }
 
@@ -113,6 +109,15 @@ void Axis::setLength(double value)
     if (value != alength) {
         alength = value;
         emit lengthChanged(value);
-        m_viewer.updateGL();
     }
+}
+
+void Axis::makeConnections()
+{
+    SceneObject::makeConnections();
+    connect(this, SIGNAL(xColorChanged(QColor)), &m_viewer, SLOT(updateGL()));
+    connect(this, SIGNAL(yColorChanged(QColor)), &m_viewer, SLOT(updateGL()));
+    connect(this, SIGNAL(zColorChanged(QColor)), &m_viewer, SLOT(updateGL()));
+    connect(this, SIGNAL(radiusChanged(double)), &m_viewer, SLOT(updateGL()));
+    connect(this, SIGNAL(lengthChanged(double)), &m_viewer, SLOT(updateGL()));
 }

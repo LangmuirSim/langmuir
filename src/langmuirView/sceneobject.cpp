@@ -46,6 +46,11 @@ void SceneObject::postDraw()
 {
 }
 
+void SceneObject::makeConnections()
+{
+    connect(this, SIGNAL(visibleChanged(bool)), &m_viewer, SLOT(updateGL()));
+}
+
 bool SceneObject::isVisible()
 {
     return visible_;
@@ -55,12 +60,10 @@ void SceneObject::toggleVisible()
 {
     visible_ = ! visible_;
     emit visibleChanged(visible_);
-    m_viewer.updateGL();
 }
 
 void SceneObject::setVisible(bool draw)
 {
     visible_ = draw;
     emit visibleChanged(visible_);
-    m_viewer.updateGL();
 }

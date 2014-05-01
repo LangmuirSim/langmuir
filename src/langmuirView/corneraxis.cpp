@@ -98,7 +98,6 @@ void CornerAxis::setLocation(Location location)
     if (location != m_location) {
         m_location = location;
         emit locationChanged(m_location);
-        m_viewer.updateGL();
     }
 }
 
@@ -107,7 +106,6 @@ void CornerAxis::setShift(int shift)
     if (shift != m_shift) {
         m_shift = shift;
         emit shiftChanged(m_shift);
-        m_viewer.updateGL();
     }
 }
 
@@ -116,6 +114,13 @@ void CornerAxis::setSize(int size)
     if (size != m_size) {
         m_size = size;
         emit sizeChanged(m_size);
-        m_viewer.updateGL();
     }
+}
+
+void CornerAxis::makeConnections()
+{
+    Axis::makeConnections();
+    connect(this, SIGNAL(locationChanged(Location)), &m_viewer, SLOT(updateGL()));
+    connect(this, SIGNAL(shiftChanged(int)), &m_viewer, SLOT(updateGL()));
+    connect(this, SIGNAL(sizeChanged(int)), &m_viewer, SLOT(updateGL()));
 }
