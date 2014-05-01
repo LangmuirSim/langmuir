@@ -9,6 +9,8 @@
 #include <QDebug>
 #include <QDir>
 
+#include "vec.h"
+
 LangmuirViewer::LangmuirViewer(QWidget *parent) :
     QGLViewer(parent)
 {
@@ -84,4 +86,12 @@ void LangmuirViewer::unload()
 
     m_simulation = NULL;
     m_world = NULL;
+}
+
+void LangmuirViewer::resetCamera()
+{
+    camera()->setUpVector(qglviewer::Vec(0, 1, 0));
+    camera()->setViewDirection(qglviewer::Vec(0, 0, -1));
+    camera()->showEntireScene();
+    updateGL();
 }

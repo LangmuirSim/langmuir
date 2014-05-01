@@ -51,6 +51,7 @@
     <addaction name="actionCornerAxis"/>
     <addaction name="actionGrid"/>
     <addaction name="actionFPS"/>
+    <addaction name="actionShow"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuControl"/>
@@ -67,6 +68,8 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionOpen"/>
+   <addaction name="separator"/>
    <addaction name="actionStart"/>
    <addaction name="actionStop"/>
    <addaction name="separator"/>
@@ -74,6 +77,7 @@
    <addaction name="actionCornerAxis"/>
    <addaction name="actionGrid"/>
    <addaction name="actionFPS"/>
+   <addaction name="actionShow"/>
   </widget>
   <action name="actionExit">
    <property name="text">
@@ -179,6 +183,11 @@
     <string>Open</string>
    </property>
   </action>
+  <action name="actionShow">
+   <property name="text">
+    <string>Show</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -194,6 +203,7 @@
     <slot>toggleFPSIsDisplayed()</slot>
     <slot>updateGL()</slot>
     <slot>toggleCornerAxisIsVisible()</slot>
+    <slot>resetCamera()</slot>
    </slots>
   </customwidget>
  </customwidgets>
@@ -302,6 +312,22 @@
    <signal>triggered()</signal>
    <receiver>qglwidget</receiver>
    <slot>toggleCornerAxisIsVisible()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>255</x>
+     <y>277</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionShow</sender>
+   <signal>triggered()</signal>
+   <receiver>qglwidget</receiver>
+   <slot>resetCamera()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>

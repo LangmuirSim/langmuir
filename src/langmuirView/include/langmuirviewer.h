@@ -23,6 +23,7 @@ public slots:
     void toggleCornerAxisIsVisible();
     void load(QString fileName);
     void unload();
+    void resetCamera();
 
 protected:
     virtual void init();
