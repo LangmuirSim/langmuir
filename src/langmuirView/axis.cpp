@@ -32,27 +32,29 @@ void Axis::draw() {
 
     // enable lighting
     glEnable(GL_LIGHTING);
+
+    // color determined by glMaterial
     glDisable(GL_COLOR_MATERIAL);
 
     // x-axis
-    qColorToArray4(x_color, color);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, color);
+    qColorToArray4(x_color, m_float4);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, m_float4);
     glPushMatrix();
     glRotatef(0.0, 0.0, 1.0, 0.0);
     m_viewer.drawArrow(alength, aradius);
     glPopMatrix();
 
     // y-axis
-    qColorToArray4(y_color, color);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, color);
+    qColorToArray4(y_color, m_float4);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, m_float4);
     glPushMatrix();
     glRotatef(90.0, 0.0, 1.0, 0.0);
     QGLViewer::drawArrow(alength, aradius);
     glPopMatrix();
 
     // z-axix
-    qColorToArray4(z_color, color);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, color);
+    qColorToArray4(z_color, m_float4);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, m_float4);
     glPushMatrix();
     glRotatef(-90.0, 1.0, 0.0, 0.0);
     QGLViewer::drawArrow(alength, aradius);

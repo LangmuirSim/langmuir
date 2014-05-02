@@ -32,7 +32,6 @@ protected:
     QColor x_color;
     QColor y_color;
     QColor z_color;
-    float color[4];
 };
 
 #endif // AXIS_H

@@ -29,6 +29,7 @@ protected:
     virtual void preDraw();
     virtual void postDraw();
     LangmuirViewer &m_viewer;
+    static float m_float4[4];
     bool visible_;
 };
 
