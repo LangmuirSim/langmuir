@@ -5,6 +5,7 @@
 #include <QOpenGLBuffer>
 #include <QVector>
 #include <QDebug>
+#include <QImage>
 
 #ifdef Q_OS_MAC
     #include <OpenGL/glu.h>
@@ -18,66 +19,164 @@ Box::Box(LangmuirViewer &viewer, QObject *parent) :
     init();
 }
 
+Box::~Box()
+{
+    glDeleteTextures(1, &m_imageID);
+}
+
 void Box::init() {
-    m_color = QColor::fromRgbF(1.0, 0.0, 0.0, 0.0);
+    m_color   = Qt::red;
+    m_xsize   = 1.0;
+    m_ysize   = 1.0;
+    m_zsize   = 1.0;
+    m_imageID = 0;
+    m_imageOn = false;
+
     emit colorChanged(m_color);
-    m_xsize = 1.0;
-    m_ysize = 1.0;
-    m_zsize = 1.0;
+    emit xSizeChanged(m_xsize);
+    emit ySizeChanged(m_ysize);
+    emit zSizeChanged(m_zsize);
+}
+
+void Box::applyColor(const QColor& color)
+{
+    // set specular & emission
+    qColorToArray4(Qt::white, m_float4);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, m_float4);
+
+    // set ambient and diffuse to white
+    qColorToArray4(color, m_float4);
+    glColor4f(m_float4[0], m_float4[1], m_float4[2], m_float4[3]);
 }
 
 void Box::draw() {
+    GLboolean texture2DOn;
+    glGetBooleanv(GL_TEXTURE_2D, &texture2DOn);
+
     glBegin(GL_QUADS);
 
+    // bind texture
+    glBindTexture(GL_TEXTURE_2D, m_imageID);
+
     // (+Y)
-    glColor3f(0.0f,1.0f,0.0f);
-    glNormal3f( 0.0f, 1.0f, 0.0f);
-    glVertex3f( m_xsize, m_ysize,-m_zsize); // NE
-    glVertex3f(-m_xsize, m_ysize,-m_zsize); // NW
-    glVertex3f(-m_xsize, m_ysize, m_zsize); // SW
-    glVertex3f( m_xsize, m_ysize, m_zsize); // SE
+    if (m_imageOn && m_faces.testFlag(North)) {
+        applyColor(Qt::white);
+        glEnable(GL_TEXTURE_2D);
+        glNormal3f( 0.0f, 1.0f, 0.0f);
+        glTexCoord2f(1.0f, 1.0f); glVertex3f( m_xsize, m_ysize,-m_zsize); // NE
+        glTexCoord2f(0.0f, 1.0f); glVertex3f(-m_xsize, m_ysize,-m_zsize); // NW
+        glTexCoord2f(0.0f, 0.0f); glVertex3f(-m_xsize, m_ysize, m_zsize); // SW
+        glTexCoord2f(1.0f, 0.0f); glVertex3f( m_xsize, m_ysize, m_zsize); // SE
+        glDisable(GL_TEXTURE_2D);
+    } else {
+        applyColor(m_color);
+        glNormal3f( 0.0f, 1.0f, 0.0f);
+        glVertex3f( m_xsize, m_ysize,-m_zsize); // NE
+        glVertex3f(-m_xsize, m_ysize,-m_zsize); // NW
+        glVertex3f(-m_xsize, m_ysize, m_zsize); // SW
+        glVertex3f( m_xsize, m_ysize, m_zsize); // SE
+    }
 
     // (-Y)
-    glColor3f(1.0f,0.5f,0.0f);
-    glNormal3f( 0.0f,-1.0f, 0.0f);
-    glVertex3f( m_xsize,-m_ysize, m_zsize); // NE
-    glVertex3f(-m_xsize,-m_ysize, m_zsize); // NW
-    glVertex3f(-m_xsize,-m_ysize,-m_zsize); // SW
-    glVertex3f( m_xsize,-m_ysize,-m_zsize); // SE
+    if (m_imageOn && m_faces.testFlag(South)) {
+        applyColor(Qt::white);
+        glEnable(GL_TEXTURE_2D);
+        glNormal3f( 0.0f,-1.0f, 0.0f);
+        glTexCoord2f(1.0f, 1.0f); glVertex3f( m_xsize,-m_ysize, m_zsize); // NE
+        glTexCoord2f(0.0f, 1.0f); glVertex3f(-m_xsize,-m_ysize, m_zsize); // NW
+        glTexCoord2f(0.0f, 0.0f); glVertex3f(-m_xsize,-m_ysize,-m_zsize); // SW
+        glTexCoord2f(1.0f, 0.0f); glVertex3f( m_xsize,-m_ysize,-m_zsize); // SE
+        glDisable(GL_TEXTURE_2D);
+    } else {
+        applyColor(m_color);
+        glNormal3f( 0.0f,-1.0f, 0.0f);
+        glVertex3f( m_xsize,-m_ysize, m_zsize); // NE
+        glVertex3f(-m_xsize,-m_ysize, m_zsize); // NW
+        glVertex3f(-m_xsize,-m_ysize,-m_zsize); // SW
+        glVertex3f( m_xsize,-m_ysize,-m_zsize); // SE
+    }
 
     // (+Z)
-    glColor3f(1.0f,0.0f,0.0f);
-    glNormal3f( 0.0f, 0.0f, 1.0f);
-    glVertex3f( m_xsize, m_ysize, m_zsize); // NE
-    glVertex3f(-m_xsize, m_ysize, m_zsize); // NW
-    glVertex3f(-m_xsize,-m_ysize, m_zsize); // SW
-    glVertex3f( m_xsize,-m_ysize, m_zsize); // SE
+    if (m_imageOn && m_faces.testFlag(Front)) {
+        applyColor(Qt::white);
+        glEnable(GL_TEXTURE_2D);
+        glNormal3f( 0.0f, 0.0f,-1.0f);
+        glTexCoord2f(1.0f, 1.0f); glVertex3f( m_xsize,-m_ysize, m_zsize); // SW
+        glTexCoord2f(0.0f, 1.0f); glVertex3f(-m_xsize,-m_ysize, m_zsize); // SE
+        glTexCoord2f(0.0f, 0.0f); glVertex3f(-m_xsize, m_ysize, m_zsize); // NE
+        glTexCoord2f(1.0f, 0.0f); glVertex3f( m_xsize, m_ysize, m_zsize); // NW
+        glDisable(GL_TEXTURE_2D);
+    } else {
+        applyColor(m_color);
+        glNormal3f( 0.0f, 0.0f,-1.0f);
+        glVertex3f( m_xsize,-m_ysize, m_zsize); // SW
+        glVertex3f(-m_xsize,-m_ysize, m_zsize); // SE
+        glVertex3f(-m_xsize, m_ysize, m_zsize); // NE
+        glVertex3f( m_xsize, m_ysize, m_zsize); // NW
+    }
 
     // (-Z)
-    glColor3f(1.0f,1.0f,0.0f);
-    glNormal3f( 0.0f, 0.0f,-1.0f);
-    glVertex3f( m_xsize,-m_ysize,-m_zsize); // SW
-    glVertex3f(-m_xsize,-m_ysize,-m_zsize); // SE
-    glVertex3f(-m_xsize, m_ysize,-m_zsize); // NE
-    glVertex3f( m_xsize, m_ysize,-m_zsize); // NW
+    if (m_imageOn && m_faces.testFlag(Back)) {
+        applyColor(Qt::white);
+        glEnable(GL_TEXTURE_2D);
+        glNormal3f( 0.0f, 0.0f,-1.0f);
+        glTexCoord2f(1.0f, 1.0f); glVertex3f( m_xsize,-m_ysize,-m_zsize); // SW
+        glTexCoord2f(0.0f, 1.0f); glVertex3f(-m_xsize,-m_ysize,-m_zsize); // SE
+        glTexCoord2f(0.0f, 0.0f); glVertex3f(-m_xsize, m_ysize,-m_zsize); // NE
+        glTexCoord2f(1.0f, 0.0f); glVertex3f( m_xsize, m_ysize,-m_zsize); // NW
+        glDisable(GL_TEXTURE_2D);
+    } else {
+        applyColor(m_color);
+        glNormal3f( 0.0f, 0.0f,-1.0f);
+        glVertex3f( m_xsize,-m_ysize,-m_zsize); // SW
+        glVertex3f(-m_xsize,-m_ysize,-m_zsize); // SE
+        glVertex3f(-m_xsize, m_ysize,-m_zsize); // NE
+        glVertex3f( m_xsize, m_ysize,-m_zsize); // NW
+    }
 
     // (+X)
-    glColor3f(1.0f,0.0f,1.0f);
-    glNormal3f( 1.0f, 0.0f, 0.0f);
-    glVertex3f( m_xsize, m_ysize,-m_zsize); // NE
-    glVertex3f( m_xsize, m_ysize, m_zsize); // NW
-    glVertex3f( m_xsize,-m_ysize, m_zsize); // SW
-    glVertex3f( m_xsize,-m_ysize,-m_zsize); // SE
+    if (m_imageOn && m_faces.testFlag(East)) {
+        applyColor(Qt::white);
+        glEnable(GL_TEXTURE_2D);
+        glNormal3f( 1.0f, 0.0f, 0.0f);
+        glTexCoord2f(1.0f, 1.0f); glVertex3f( m_xsize, m_ysize,-m_zsize); // NE
+        glTexCoord2f(0.0f, 1.0f); glVertex3f( m_xsize, m_ysize, m_zsize); // NW
+        glTexCoord2f(0.0f, 0.0f); glVertex3f( m_xsize,-m_ysize, m_zsize); // SW
+        glTexCoord2f(1.0f, 0.0f); glVertex3f( m_xsize,-m_ysize,-m_zsize); // SE
+        glDisable(GL_TEXTURE_2D);
+    } else {
+        applyColor(m_color);
+        glNormal3f( 1.0f, 0.0f, 0.0f);
+        glVertex3f( m_xsize, m_ysize,-m_zsize); // NE
+        glVertex3f( m_xsize, m_ysize, m_zsize); // NW
+        glVertex3f( m_xsize,-m_ysize, m_zsize); // SW
+        glVertex3f( m_xsize,-m_ysize,-m_zsize); // SE
+    }
 
     // (-X)
-    glColor3f(0.0f,0.0f,1.0f);
-    glNormal3f(-1.0f, 0.0f, 0.0f);
-    glVertex3f(-m_xsize, m_ysize, m_zsize); // NE
-    glVertex3f(-m_xsize, m_ysize,-m_zsize); // NW
-    glVertex3f(-m_xsize,-m_ysize,-m_zsize); // SW
-    glVertex3f(-m_xsize,-m_ysize, m_zsize); // SE
+    if (m_imageOn && m_faces.testFlag(West)) {
+        applyColor(Qt::white);
+        glEnable(GL_TEXTURE_2D);
+        glNormal3f(-1.0f, 0.0f, 0.0f);
+        glTexCoord2f(1.0f, 1.0f); glVertex3f(-m_xsize, m_ysize, m_zsize); // NE
+        glTexCoord2f(0.0f, 1.0f); glVertex3f(-m_xsize, m_ysize,-m_zsize); // NW
+        glTexCoord2f(0.0f, 0.0f); glVertex3f(-m_xsize,-m_ysize,-m_zsize); // SW
+        glTexCoord2f(1.0f, 0.0f); glVertex3f(-m_xsize,-m_ysize, m_zsize); // SE
+        glDisable(GL_TEXTURE_2D);
+    } else {
+        applyColor(m_color);
+        glNormal3f(-1.0f, 0.0f, 0.0f);
+        glVertex3f(-m_xsize, m_ysize, m_zsize); // NE
+        glVertex3f(-m_xsize, m_ysize,-m_zsize); // NW
+        glVertex3f(-m_xsize,-m_ysize,-m_zsize); // SW
+        glVertex3f(-m_xsize,-m_ysize, m_zsize); // SE
+    }
 
     glEnd();
+
+    if (texture2DOn) {
+        glEnable(GL_TEXTURE_2D);
+    }
 }
 
 void Box::setColor(QColor color)
@@ -119,4 +218,34 @@ void Box::makeConnections()
     connect(this, SIGNAL(xSizeChanged(double)), &m_viewer, SLOT(updateGL()));
     connect(this, SIGNAL(ySizeChanged(double)), &m_viewer, SLOT(updateGL()));
     connect(this, SIGNAL(zSizeChanged(double)), &m_viewer, SLOT(updateGL()));
+    connect(this, SIGNAL(imageOnChanged(bool)), &m_viewer, SLOT(updateGL()));
+    connect(this, SIGNAL(facesChanged(Faces)) , &m_viewer, SLOT(updateGL()));
+}
+
+void Box::setFaces(Faces faces)
+{
+    m_faces = faces;
+}
+
+void Box::loadImage(const QImage &image)
+{
+    QImage i = m_viewer.convertToGLFormat(image);
+    glDeleteTextures(1, &m_imageID);
+    glGenTextures(1, &m_imageID);
+    glBindTexture(GL_TEXTURE_2D, m_imageID);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, i.width(), i.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, i.bits());
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+}
+
+void Box::showImage(bool on)
+{
+    m_imageOn = on;
+    emit imageOnChanged(m_imageOn);
+}
+
+void Box::toggleImage()
+{
+    m_imageOn = !m_imageOn;
+    emit imageOnChanged(m_imageOn);
 }
