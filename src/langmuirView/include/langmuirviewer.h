@@ -22,6 +22,7 @@ signals:
 public slots:
     void toggleCornerAxisIsVisible();
     void load(QString fileName);
+    void save(QString fileName);
     void unload();
     void resetCamera();
 

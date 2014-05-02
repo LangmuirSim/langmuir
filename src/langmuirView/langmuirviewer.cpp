@@ -1,8 +1,10 @@
 #include "langmuirviewer.h"
+#include "checkpointer.h"
 #include "parameters.h"
 #include "simulation.h"
 #include "world.h"
 
+#include <QMessageBox>
 #include <QFileDialog>
 #include <QString>
 #include <QColor>
@@ -72,6 +74,17 @@ void LangmuirViewer::load(QString fileName)
 
     m_simulation = simulation;
     m_world = world;
+}
+
+void LangmuirViewer::save(QString fileName)
+{
+    if (m_world != NULL || fileName.isEmpty()) {
+        m_world->checkPointer().save(fileName);
+        emit showMessage(qPrintable(QString("saved: %1").arg(fileName)));
+    }
+    else {
+        QMessageBox::warning(this, "Langmuir", "Can not save simulation");
+    }
 }
 
 void LangmuirViewer::unload()

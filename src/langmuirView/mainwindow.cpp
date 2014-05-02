@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "langmuirviewer.h"
 
+#include <QMessageBox>
 #include <QFileDialog>
 #include <QStatusBar>
 #include <QAction>
@@ -27,6 +28,8 @@ void MainWindow::init()
     setIcon(ui->actionOpen, "document-open", QStyle::SP_DialogOpenButton);
     setIcon(ui->actionShow, "camera-photo", QStyle::SP_ArrowBack);
     setIcon(ui->actionUnload, "", QStyle::SP_DialogDiscardButton);
+    setIcon(ui->actionSave, "document-save", QStyle::SP_DialogSaveButton);
+    setIcon(ui->actionScreenshot, "camera-photo", QStyle::SP_DialogSaveButton);
 
     connect(m_viewer, SIGNAL(clearMessage()), ui->statusbar, SLOT(clearMessage()));
     connect(m_viewer, SIGNAL(showMessage(QString,int)), ui->statusbar, SLOT(showMessage(QString,int)));
@@ -60,6 +63,37 @@ void MainWindow::on_actionScreenshot_triggered()
 {
     m_viewer->openSnapshotFormatDialog();
     m_viewer->saveSnapshot(false, false);
+}
+
+void MainWindow::on_actionSave_triggered()
+{
+    QString fileName = QFileDialog::getSaveFileName(this, "Save simulation checkpoint",
+        QDir::currentPath(), "Simulation (*.inp *.chk);; All Files (*)");
+
+    if (!fileName.isEmpty()) {
+
+        QFileInfo info(fileName);
+
+        if (!(info.suffix() == "inp" || info.suffix() == "chk"))
+        {
+            QMessageBox::StandardButton choice = QMessageBox::warning(this, "Langmuir",
+                "Change to extension to .chk?", QMessageBox::Yes|QMessageBox::No, QMessageBox::Yes);
+
+            switch(choice)
+            {
+                case QMessageBox::Yes:
+                {
+                    fileName = info.absoluteDir().absoluteFilePath(info.completeBaseName() + ".chk");
+                    break;
+                }
+                case QMessageBox::No:
+                {
+                    break;
+                }
+            }
+        }
+        m_viewer->save(fileName);
+    }
 }
 
 void MainWindow::setIcon(QAction *action, QString themeIcon, QStyle::StandardPixmap standardPixmap)
