@@ -56,6 +56,12 @@ void MainWindow::on_actionStop_triggered()
     ui->actionStop->setDisabled(true);
 }
 
+void MainWindow::on_actionScreenshot_triggered()
+{
+    m_viewer->openSnapshotFormatDialog();
+    m_viewer->saveSnapshot(false, false);
+}
+
 void MainWindow::setIcon(QAction *action, QString themeIcon, QStyle::StandardPixmap standardPixmap)
 {
     if (action == NULL) {

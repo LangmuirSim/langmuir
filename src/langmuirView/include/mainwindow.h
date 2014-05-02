@@ -24,6 +24,7 @@ public slots:
     void on_actionOpen_triggered();
     void on_actionStart_triggered();
     void on_actionStop_triggered();
+    void on_actionScreenshot_triggered();
 
 private:
     Ui::MainWindow *ui;

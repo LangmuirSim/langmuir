@@ -36,6 +36,8 @@
     <addaction name="actionOpen"/>
     <addaction name="actionUnload"/>
     <addaction name="actionExit"/>
+    <addaction name="actionSave"/>
+    <addaction name="actionScreenshot"/>
    </widget>
    <widget class="QMenu" name="menuControl">
     <property name="title">
@@ -193,6 +195,16 @@
   <action name="actionUnload">
    <property name="text">
     <string>Unload</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="text">
+    <string>Save</string>
+   </property>
+  </action>
+  <action name="actionScreenshot">
+   <property name="text">
+    <string>Screenshot</string>
    </property>
   </action>
  </widget>
