@@ -51,7 +51,7 @@ void Axis::draw() {
     glPopMatrix();
 
     // z-axix
-    qColorToArray4(x_color, color);
+    qColorToArray4(z_color, color);
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, color);
     glPushMatrix();
     glRotatef(-90.0, 1.0, 0.0, 0.0);
