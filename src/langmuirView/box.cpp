@@ -1,4 +1,5 @@
 #include "langmuirviewer.h"
+#include "color.h"
 #include "box.h"
 
 #include <QOpenGLBuffer>
@@ -20,9 +21,63 @@ Box::Box(LangmuirViewer &viewer, QObject *parent) :
 void Box::init() {
     m_color = QColor::fromRgbF(1.0, 0.0, 0.0, 0.0);
     emit colorChanged(m_color);
+    m_xsize = 1.0;
+    m_ysize = 1.0;
+    m_zsize = 1.0;
 }
 
 void Box::draw() {
+    glBegin(GL_QUADS);
+
+    // (+Y)
+    glColor3f(0.0f,1.0f,0.0f);
+    glNormal3f( 0.0f, 1.0f, 0.0f);
+    glVertex3f( m_xsize, m_ysize,-m_zsize); // NE
+    glVertex3f(-m_xsize, m_ysize,-m_zsize); // NW
+    glVertex3f(-m_xsize, m_ysize, m_zsize); // SW
+    glVertex3f( m_xsize, m_ysize, m_zsize); // SE
+
+    // (-Y)
+    glColor3f(1.0f,0.5f,0.0f);
+    glNormal3f( 0.0f,-1.0f, 0.0f);
+    glVertex3f( m_xsize,-m_ysize, m_zsize); // NE
+    glVertex3f(-m_xsize,-m_ysize, m_zsize); // NW
+    glVertex3f(-m_xsize,-m_ysize,-m_zsize); // SW
+    glVertex3f( m_xsize,-m_ysize,-m_zsize); // SE
+
+    // (+Z)
+    glColor3f(1.0f,0.0f,0.0f);
+    glNormal3f( 0.0f, 0.0f, 1.0f);
+    glVertex3f( m_xsize, m_ysize, m_zsize); // NE
+    glVertex3f(-m_xsize, m_ysize, m_zsize); // NW
+    glVertex3f(-m_xsize,-m_ysize, m_zsize); // SW
+    glVertex3f( m_xsize,-m_ysize, m_zsize); // SE
+
+    // (-Z)
+    glColor3f(1.0f,1.0f,0.0f);
+    glNormal3f( 0.0f, 0.0f,-1.0f);
+    glVertex3f( m_xsize,-m_ysize,-m_zsize); // SW
+    glVertex3f(-m_xsize,-m_ysize,-m_zsize); // SE
+    glVertex3f(-m_xsize, m_ysize,-m_zsize); // NE
+    glVertex3f( m_xsize, m_ysize,-m_zsize); // NW
+
+    // (+X)
+    glColor3f(1.0f,0.0f,1.0f);
+    glNormal3f( 1.0f, 0.0f, 0.0f);
+    glVertex3f( m_xsize, m_ysize,-m_zsize); // NE
+    glVertex3f( m_xsize, m_ysize, m_zsize); // NW
+    glVertex3f( m_xsize,-m_ysize, m_zsize); // SW
+    glVertex3f( m_xsize,-m_ysize,-m_zsize); // SE
+
+    // (-X)
+    glColor3f(0.0f,0.0f,1.0f);
+    glNormal3f(-1.0f, 0.0f, 0.0f);
+    glVertex3f(-m_xsize, m_ysize, m_zsize); // NE
+    glVertex3f(-m_xsize, m_ysize,-m_zsize); // NW
+    glVertex3f(-m_xsize,-m_ysize,-m_zsize); // SW
+    glVertex3f(-m_xsize,-m_ysize, m_zsize); // SE
+
+    glEnd();
 }
 
 void Box::setColor(QColor color)
