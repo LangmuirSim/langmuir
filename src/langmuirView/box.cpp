@@ -7,12 +7,6 @@
 #include <QDebug>
 #include <QImage>
 
-#ifdef Q_OS_MAC
-    #include <OpenGL/glu.h>
-#else
-    #include <GL/glu.h>
-#endif
-
 Box::Box(LangmuirViewer &viewer, QObject *parent) :
     SceneObject(viewer, parent)
 {
@@ -36,17 +30,6 @@ void Box::init() {
     emit xSizeChanged(m_xsize);
     emit ySizeChanged(m_ysize);
     emit zSizeChanged(m_zsize);
-}
-
-void Box::applyColor(const QColor& color)
-{
-    // set specular & emission
-    qColorToArray4(Qt::white, m_float4);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, m_float4);
-
-    // set ambient and diffuse to white
-    qColorToArray4(color, m_float4);
-    glColor4f(m_float4[0], m_float4[1], m_float4[2], m_float4[3]);
 }
 
 void Box::draw() {

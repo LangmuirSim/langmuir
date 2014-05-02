@@ -54,9 +54,6 @@ protected:
     GLuint m_imageID;
     bool   m_imageOn;
     Faces  m_faces;
-
-private:
-    void applyColor(const QColor& color);
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(Box::Faces)

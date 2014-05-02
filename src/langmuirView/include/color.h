@@ -46,4 +46,6 @@ template <> inline void qColorToArray4(const QColor& color, int *array)
     array[3] = color.alpha();
 }
 
+void applyColor(const QColor& color, const QColor& se_color=Qt::white);
+
 #endif // COLOR_H
