@@ -28,19 +28,19 @@ void LangmuirViewer::init()
     m_cornerAxis->makeConnections();
 
     // Light setup
-    glDisable(GL_LIGHT0);
-
     glEnable(GL_COLOR_MATERIAL);
     glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT1);
+    glEnable(GL_LIGHT0);
 
-    const GLfloat light_a[4] = {0.5, 0.5, 0.5, 0.5};
-    const GLfloat light_s[4] = {0.0, 0.0, 0.0, 0.0};
-    const GLfloat light_d[4] = {0.5, 0.5, 0.5, 0.5};
+    const GLfloat light_p[4] = {1.0, 1.0, 1.0, 0.0};
+    const GLfloat light_a[4] = {0.0, 0.0, 0.0, 1.0};
+    const GLfloat light_s[4] = {1.0, 1.0, 1.0, 1.0};
+    const GLfloat light_d[4] = {1.0, 1.0, 1.0, 1.0};
 
-    glLightfv(GL_LIGHT1, GL_AMBIENT , light_a);
-    glLightfv(GL_LIGHT1, GL_SPECULAR, light_s);
-    glLightfv(GL_LIGHT1, GL_DIFFUSE , light_d);
+    glLightfv(GL_LIGHT0, GL_POSITION, light_p);
+    glLightfv(GL_LIGHT0, GL_AMBIENT , light_a);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, light_s);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE , light_d);
 
     // Camera setup
     setSceneRadius(5.0);
@@ -51,6 +51,7 @@ void LangmuirViewer::init()
 
     // OpenGL
     glShadeModel(GL_SMOOTH);
+    glEnable(GL_TEXTURE_2D);
 }
 
 void LangmuirViewer::draw()
