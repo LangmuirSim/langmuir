@@ -1,10 +1,20 @@
 #include "langmuirviewer.h"
 #include "box.h"
+
+#include <QOpenGLBuffer>
+#include <QVector>
 #include <QDebug>
+
+#ifdef Q_OS_MAC
+    #include <OpenGL/glu.h>
+#else
+    #include <GL/glu.h>
+#endif
 
 Box::Box(LangmuirViewer &viewer, QObject *parent) :
     SceneObject(viewer, parent)
 {
+    init();
 }
 
 void Box::init() {
@@ -23,8 +33,35 @@ void Box::setColor(QColor color)
     }
 }
 
+void Box::setXSize(double value)
+{
+    if (value != m_xsize) {
+        m_xsize = value;
+        emit xSizeChanged(value);
+    }
+}
+
+void Box::setYSize(double value)
+{
+    if (value != m_ysize) {
+        m_ysize = value;
+        emit ySizeChanged(value);
+    }
+}
+
+void Box::setZSize(double value)
+{
+    if (value != m_zsize) {
+        m_zsize = value;
+        emit zSizeChanged(value);
+    }
+}
+
 void Box::makeConnections()
 {
     SceneObject::makeConnections();
     connect(this, SIGNAL(colorChanged(QColor)), &m_viewer, SLOT(updateGL()));
+    connect(this, SIGNAL(xSizeChanged(double)), &m_viewer, SLOT(updateGL()));
+    connect(this, SIGNAL(ySizeChanged(double)), &m_viewer, SLOT(updateGL()));
+    connect(this, SIGNAL(zSizeChanged(double)), &m_viewer, SLOT(updateGL()));
 }
