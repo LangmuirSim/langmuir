@@ -22,9 +22,35 @@ LangmuirViewer::LangmuirViewer(QWidget *parent) :
 
 void LangmuirViewer::init()
 {
+    // Object setup
     m_cornerAxis = new CornerAxis(*this, this);
     m_cornerAxis->setVisible(false);
     m_cornerAxis->makeConnections();
+
+    // Light setup
+    glDisable(GL_LIGHT0);
+
+    glEnable(GL_COLOR_MATERIAL);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT1);
+
+    const GLfloat light_a[4] = {0.5, 0.5, 0.5, 0.5};
+    const GLfloat light_s[4] = {0.0, 0.0, 0.0, 0.0};
+    const GLfloat light_d[4] = {0.5, 0.5, 0.5, 0.5};
+
+    glLightfv(GL_LIGHT1, GL_AMBIENT , light_a);
+    glLightfv(GL_LIGHT1, GL_SPECULAR, light_s);
+    glLightfv(GL_LIGHT1, GL_DIFFUSE , light_d);
+
+    // Camera setup
+    setSceneRadius(5.0);
+    showEntireScene();
+
+    // Background
+    setBackgroundColor(Qt::black);
+
+    // OpenGL
+    glShadeModel(GL_SMOOTH);
 }
 
 void LangmuirViewer::draw()
