@@ -70,22 +70,53 @@ set(FORMS
     ./VRenderInterface.ui
 )
 
-# INCLUDE
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+find_package(Qt5Core)
+find_package(Qt5Gui)
+find_package(Qt5Xml)
+find_package(Qt5OpenGL)
+find_package(Qt5Widgets)
+find_package(Qt5Concurrent)
+find_package(Qt5PrintSupport)
+find_package(OpenGL)
 
-# must have OpenGL
-find_opengl()
-
-if(OPENGL_FOUND)
+if(Qt5Core_FOUND AND OPENGL_FOUND AND NOT USE_QT4)
     # FIND
-    find_qt()
+    find_boost()
+    find_opencl()
+
+    # INCLUDE
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+    include_directories(${langmuirCore_SOURCE_DIR}/include)
+    include_directories(${CMAKE_CURRENT_BINARY_DIR})
+    include_directories(${OPENGL_INCLUDE_DIRS})
+
+    set(CMAKE_AUTOMOC ON)
+
+    qt5_add_resources(RESOURCES ${RESOURCES})
+    qt5_wrap_ui(FORMS ${FORMS})
+
+    add_definitions(-DLANGMUIR_USING_QT5)
 
     # TARGET
-    add_library(${PROJECT_NAME} SHARED EXCLUDE_FROM_ALL ${SOURCES} ${HEADERS} ${RESOURCES} ${FORMS})
+    add_library(${PROJECT_NAME} SHARED EXCLUDE_FROM_ALL
+        ${SOURCES} ${HEADERS} ${RESOURCES} ${FORMS})
 
     # LINK
-    link_opengl(${PROJECT_NAME})
-    link_qt(${PROJECT_NAME})
+    target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES})
+
+    link_opencl(${PROJECT_NAME})
+    link_boost(${PROJECT_NAME})
+
+    qt5_use_modules(${PROJECT_NAME} Core)
+    qt5_use_modules(${PROJECT_NAME} Gui)
+    qt5_use_modules(${PROJECT_NAME} Xml)
+    qt5_use_modules(${PROJECT_NAME} OpenGL)
+    qt5_use_modules(${PROJECT_NAME} Widgets)
+    qt5_use_modules(${PROJECT_NAME} Concurrent)
+    qt5_use_modules(${PROJECT_NAME} PrintSupport)
 else()
-    message(STATUS "No OpenGL : langmuirView disabled")
-endif(OPENGL_FOUND)
+    message(STATUS "Project: ${PROJECT_NAME} Disabled")
+    if(Qt5Core_FOUND)
+        message(STATUS "qt5 required")
+    endif()
+endif()

@@ -35,28 +35,6 @@ macro(link_opencl TARGET)
 endmacro(link_opencl)
 
 ################################################################################
-# Library : OpenGL
-macro(find_opengl)
-    find_package(OpenGL)
-    include_directories(${OPENGL_INCLUDE_DIRS})
-endmacro(find_opengl)
-
-macro(link_opengl TARGET)
-    target_link_libraries(${TARGET} ${OPENGL_LIBRARIES})
-endmacro(link_opengl)
-
-################################################################################
-# Library : QGLViewer
-macro(find_qglviewer)
-    find_package(QGLViewer)
-    include_directories(${QGLVIEWER_INCLUDE_DIR})
-endmacro(find_qglviewer)
-
-macro(link_qglviewer TARGET)
-    target_link_libraries(${TARGET} ${QGLVIEWER_LIBRARIES})
-endmacro(link_qglviewer)
-
-################################################################################
 # Library: Qt4
 macro(find_qt4)
     message(STATUS "using qt4")
