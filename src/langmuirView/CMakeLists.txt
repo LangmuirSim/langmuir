@@ -6,6 +6,7 @@ message(STATUS "Project: ${PROJECT_NAME}")
 set(SOURCES
     langmuirviewer.cpp
     sceneobject.cpp
+    pointcloud.cpp
     mainwindow.cpp
     corneraxis.cpp
     color.cpp
@@ -16,6 +17,7 @@ set(SOURCES
 set(HEADERS
     ./include/langmuirviewer.h
     ./include/sceneobject.h
+    ./include/pointcloud.h
     ./include/mainwindow.h
     ./include/corneraxis.h
     ./include/color.h
