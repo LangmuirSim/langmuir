@@ -2,7 +2,6 @@
 #include "color.h"
 #include "box.h"
 
-#include <QOpenGLBuffer>
 #include <QVector>
 #include <QDebug>
 #include <QImage>

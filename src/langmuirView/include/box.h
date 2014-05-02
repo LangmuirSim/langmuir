@@ -2,7 +2,6 @@
 #define BOX_H
 
 #include "sceneobject.h"
-#include <QOpenGLBuffer>
 
 class Box : public SceneObject
 {
