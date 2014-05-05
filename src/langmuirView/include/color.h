@@ -1,51 +1,28 @@
 #ifndef COLOR_H
 #define COLOR_H
 
-#include <QObject>
 #include <QColor>
 
-template <class T> void qColorToArray3(const QColor& color, T *array);
-template <class T> void qColorToArray4(const QColor& color, T *array);
+namespace color {
+    /**
+     * @brief Wrapper around glColor3f using QColor
+     */
+    void glColor3f(QColor& color);
 
-template <> inline void qColorToArray3(const QColor& color, float *array)
-{
-    array[0] = color.redF();
-    array[1] = color.greenF();
-    array[2] = color.blueF();
+    /**
+     * @brief Wrapper around glColor4f using QColor
+     */
+    void glColor4f(QColor& color);
+
+    /**
+     * @brief Copy color data to array of size 4
+     */
+    float* qColorToArray4(const QColor &color, float *array);
+
+    /**
+     * @brief Copy color data to array of size 4 (static)
+     */
+    float* qColorToArray4(const QColor &color);
 }
-
-template <> inline void qColorToArray4(const QColor& color, float *array)
-{
-    qColorToArray3<float>(color, array);
-    array[3] = color.alphaF();
-}
-
-template <> inline void qColorToArray3(const QColor& color, double *array)
-{
-    array[0] = color.redF();
-    array[1] = color.greenF();
-    array[2] = color.blueF();
-}
-
-template <> inline void qColorToArray4(const QColor& color, double *array)
-{
-    qColorToArray3<double>(color, array);
-    array[3] = color.alphaF();
-}
-
-template <> inline void qColorToArray3(const QColor& color, int *array)
-{
-    array[0] = color.red();
-    array[1] = color.green();
-    array[2] = color.blue();
-}
-
-template <> inline void qColorToArray4(const QColor& color, int *array)
-{
-    qColorToArray3<int>(color, array);
-    array[3] = color.alpha();
-}
-
-void applyColor(const QColor& color, const QColor& se_color=Qt::white);
 
 #endif // COLOR_H

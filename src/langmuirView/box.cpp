@@ -40,9 +40,16 @@ void Box::draw() {
     // bind texture
     glBindTexture(GL_TEXTURE_2D, m_imageID);
 
+    static float white[4];
+    static float color[4];
+
+    color::qColorToArray4(Qt::white, white);
+    color::qColorToArray4(m_color, color);
+
     // (+Y)
     if (m_imageOn && m_faces.testFlag(North)) {
-        applyColor(Qt::white);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, white);
+        glColor4fv(white);
         glEnable(GL_TEXTURE_2D);
         glNormal3f( 0.0f, 1.0f, 0.0f);
         glTexCoord2f(1.0f, 1.0f); glVertex3f( m_xsize, m_ysize,-m_zsize); // NE
@@ -51,7 +58,8 @@ void Box::draw() {
         glTexCoord2f(1.0f, 0.0f); glVertex3f( m_xsize, m_ysize, m_zsize); // SE
         glDisable(GL_TEXTURE_2D);
     } else {
-        applyColor(m_color);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, color);
+        glColor4fv(white);
         glNormal3f( 0.0f, 1.0f, 0.0f);
         glVertex3f( m_xsize, m_ysize,-m_zsize); // NE
         glVertex3f(-m_xsize, m_ysize,-m_zsize); // NW
@@ -61,7 +69,8 @@ void Box::draw() {
 
     // (-Y)
     if (m_imageOn && m_faces.testFlag(South)) {
-        applyColor(Qt::white);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, white);
+        glColor4fv(white);
         glEnable(GL_TEXTURE_2D);
         glNormal3f( 0.0f,-1.0f, 0.0f);
         glTexCoord2f(1.0f, 1.0f); glVertex3f( m_xsize,-m_ysize, m_zsize); // NE
@@ -70,7 +79,8 @@ void Box::draw() {
         glTexCoord2f(1.0f, 0.0f); glVertex3f( m_xsize,-m_ysize,-m_zsize); // SE
         glDisable(GL_TEXTURE_2D);
     } else {
-        applyColor(m_color);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, color);
+        glColor4fv(white);
         glNormal3f( 0.0f,-1.0f, 0.0f);
         glVertex3f( m_xsize,-m_ysize, m_zsize); // NE
         glVertex3f(-m_xsize,-m_ysize, m_zsize); // NW
@@ -80,7 +90,8 @@ void Box::draw() {
 
     // (+Z)
     if (m_imageOn && m_faces.testFlag(Front)) {
-        applyColor(Qt::white);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, white);
+        glColor4fv(white);
         glEnable(GL_TEXTURE_2D);
         glNormal3f( 0.0f, 0.0f,-1.0f);
         glTexCoord2f(1.0f, 1.0f); glVertex3f( m_xsize,-m_ysize, m_zsize); // SW
@@ -89,7 +100,8 @@ void Box::draw() {
         glTexCoord2f(1.0f, 0.0f); glVertex3f( m_xsize, m_ysize, m_zsize); // NW
         glDisable(GL_TEXTURE_2D);
     } else {
-        applyColor(m_color);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, color);
+        glColor4fv(white);
         glNormal3f( 0.0f, 0.0f,-1.0f);
         glVertex3f( m_xsize,-m_ysize, m_zsize); // SW
         glVertex3f(-m_xsize,-m_ysize, m_zsize); // SE
@@ -99,7 +111,8 @@ void Box::draw() {
 
     // (-Z)
     if (m_imageOn && m_faces.testFlag(Back)) {
-        applyColor(Qt::white);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, white);
+        glColor4fv(white);
         glEnable(GL_TEXTURE_2D);
         glNormal3f( 0.0f, 0.0f,-1.0f);
         glTexCoord2f(1.0f, 1.0f); glVertex3f( m_xsize,-m_ysize,-m_zsize); // SW
@@ -108,7 +121,8 @@ void Box::draw() {
         glTexCoord2f(1.0f, 0.0f); glVertex3f( m_xsize, m_ysize,-m_zsize); // NW
         glDisable(GL_TEXTURE_2D);
     } else {
-        applyColor(m_color);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, color);
+        glColor4fv(white);
         glNormal3f( 0.0f, 0.0f,-1.0f);
         glVertex3f( m_xsize,-m_ysize,-m_zsize); // SW
         glVertex3f(-m_xsize,-m_ysize,-m_zsize); // SE
@@ -118,7 +132,8 @@ void Box::draw() {
 
     // (+X)
     if (m_imageOn && m_faces.testFlag(East)) {
-        applyColor(Qt::white);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, white);
+        glColor4fv(white);
         glEnable(GL_TEXTURE_2D);
         glNormal3f( 1.0f, 0.0f, 0.0f);
         glTexCoord2f(1.0f, 1.0f); glVertex3f( m_xsize, m_ysize,-m_zsize); // NE
@@ -127,7 +142,8 @@ void Box::draw() {
         glTexCoord2f(1.0f, 0.0f); glVertex3f( m_xsize,-m_ysize,-m_zsize); // SE
         glDisable(GL_TEXTURE_2D);
     } else {
-        applyColor(m_color);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, color);
+        glColor4fv(white);
         glNormal3f( 1.0f, 0.0f, 0.0f);
         glVertex3f( m_xsize, m_ysize,-m_zsize); // NE
         glVertex3f( m_xsize, m_ysize, m_zsize); // NW
@@ -137,7 +153,8 @@ void Box::draw() {
 
     // (-X)
     if (m_imageOn && m_faces.testFlag(West)) {
-        applyColor(Qt::white);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, white);
+        glColor4fv(white);
         glEnable(GL_TEXTURE_2D);
         glNormal3f(-1.0f, 0.0f, 0.0f);
         glTexCoord2f(1.0f, 1.0f); glVertex3f(-m_xsize, m_ysize, m_zsize); // NE
@@ -146,7 +163,8 @@ void Box::draw() {
         glTexCoord2f(1.0f, 0.0f); glVertex3f(-m_xsize,-m_ysize, m_zsize); // SE
         glDisable(GL_TEXTURE_2D);
     } else {
-        applyColor(m_color);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, color);
+        glColor4fv(white);
         glNormal3f(-1.0f, 0.0f, 0.0f);
         glVertex3f(-m_xsize, m_ysize, m_zsize); // NE
         glVertex3f(-m_xsize, m_ysize,-m_zsize); // NW

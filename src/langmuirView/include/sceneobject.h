@@ -4,6 +4,7 @@
 #include <QVector>
 #include <QObject>
 #include <QColor>
+#include <QDebug>
 
 #ifdef Q_OS_MAC
     #include <OpenGL/glu.h>
@@ -35,7 +36,6 @@ protected:
     virtual void preDraw();
     virtual void postDraw();
     LangmuirViewer &m_viewer;
-    static float m_float4[4];
     bool visible_;
 };
 

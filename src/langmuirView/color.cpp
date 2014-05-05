@@ -1,20 +1,29 @@
 #include "color.h"
 
-#ifdef Q_OS_MAC
-    #include <OpenGL/glu.h>
-#else
-    #include <GL/glu.h>
-#endif
+namespace color {
+    void glColor3f(QColor& color)
+    {
 
-void applyColor(const QColor& color, const QColor &se_color)
-{
-    static float m_float4[4];
+    }
 
-    // set specular & emission
-    qColorToArray4(se_color, m_float4);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, m_float4);
+    void glColor4f(QColor& color)
+    {
 
-    // set ambient and diffuse to white
-    qColorToArray4(color, m_float4);
-    glColor4f(m_float4[0], m_float4[1], m_float4[2], m_float4[3]);
+    }
+
+    float* qColorToArray4(const QColor &color, float *array)
+    {
+        array[0] = color.redF();
+        array[1] = color.greenF();
+        array[2] = color.blueF();
+        array[3] = color.alphaF();
+        return array;
+    }
+
+    float* qColorToArray4(const QColor &color)
+    {
+        static float array[4];
+        qColorToArray4(color, array);
+        return array;
+    }
 }
