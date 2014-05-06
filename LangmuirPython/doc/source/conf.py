@@ -41,7 +41,7 @@ extensions = [
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
     'matplotlib.sphinxext.plot_directive',
-    'inheritance_diagram',
+#    'inheritance_diagram',
     'sphinxarg.ext'
 ]
 
