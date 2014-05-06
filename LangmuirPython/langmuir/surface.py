@@ -1025,7 +1025,7 @@ class FFT3D(FFT):
         self.k = np.sqrt(self.u**2 + self.v**2 + self.w**2)
 
         if detrend:
-            self.s = signal.detrend(self.s)
+            self.s = self.s - np.average(self.s)
 
         if window:
             self._window()
