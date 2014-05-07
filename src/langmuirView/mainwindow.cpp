@@ -40,33 +40,27 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::on_actionOpen_triggered()
-{
-    QString fileName = QFileDialog::getOpenFileName(
-        this, tr("Open Input File"), QDir::currentPath());
-    m_viewer->load(fileName);
-}
-
-void MainWindow::on_actionStart_triggered()
-{
-    ui->actionStart->setEnabled(false);
-    ui->actionStop->setDisabled(false);
-}
-
-void MainWindow::on_actionStop_triggered()
-{
-    ui->actionStart->setEnabled(true);
-    ui->actionStop->setDisabled(true);
-}
-
 void MainWindow::on_actionScreenshot_triggered()
 {
+    m_viewer->pause();
     m_viewer->openSnapshotFormatDialog();
     m_viewer->saveSnapshot(false, false);
 }
 
+void MainWindow::on_actionOpen_triggered()
+{
+    m_viewer->pause();
+
+    QString fileName = QFileDialog::getOpenFileName(
+        this, tr("Open Input File"), QDir::currentPath());
+
+    m_viewer->load(fileName);
+}
+
 void MainWindow::on_actionSave_triggered()
 {
+    m_viewer->pause();
+
     QString fileName = QFileDialog::getSaveFileName(this, "Save simulation checkpoint",
         QDir::currentPath(), "Simulation (*.inp *.chk);; All Files (*)");
 
@@ -94,6 +88,12 @@ void MainWindow::on_actionSave_triggered()
         }
         m_viewer->save(fileName);
     }
+}
+
+void MainWindow::setStopEnabled(bool enabled)
+{
+    ui->actionStart->setDisabled(enabled);
+    ui->actionStop->setEnabled(enabled);
 }
 
 void MainWindow::setIcon(QAction *action, QString themeIcon, QStyle::StandardPixmap standardPixmap)

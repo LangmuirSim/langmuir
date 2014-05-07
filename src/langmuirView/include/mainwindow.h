@@ -21,11 +21,10 @@ public:
     ~MainWindow();
 
 public slots:
-    void on_actionOpen_triggered();
-    void on_actionStart_triggered();
-    void on_actionStop_triggered();
     void on_actionScreenshot_triggered();
+    void on_actionOpen_triggered();
     void on_actionSave_triggered();
+    void setStopEnabled(bool enabled);
 
 private:
     Ui::MainWindow *ui;
