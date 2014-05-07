@@ -1,7 +1,9 @@
 #include "langmuirviewer.h"
 #include "checkpointer.h"
+#include "chargeagent.h"
 #include "parameters.h"
 #include "simulation.h"
+#include "cubicgrid.h"
 #include "world.h"
 
 #include <QMessageBox>
@@ -59,9 +61,129 @@ Langmuir::Random& LangmuirViewer::random()
     return m_random;
 }
 
+void LangmuirViewer::updateElectronCloud()
+{
+    if (m_electons != NULL && m_world != NULL) {
+
+        if (m_electons->vertices().size() < 3 * m_world->numElectronAgents()) {
+            qFatal("langmuir: electron VBO too small");
+        }
+
+        int j = 0;
+        for (int i = 0; i < m_world->numElectronAgents(); i++) {
+            int s = m_world->electrons().at(i)->getCurrentSite();
+            m_electons->vertices()[j + 0] = m_world->electronGrid().getIndexX(s) - m_gridHalfX;
+            m_electons->vertices()[j + 1] = m_world->electronGrid().getIndexY(s) - m_gridHalfY;
+            m_electons->vertices()[j + 2] = m_world->electronGrid().getIndexZ(s) - m_gridHalfZ;
+            j += 3;
+        }
+        m_electons->setMaxRender(m_world->numElectronAgents());
+        m_electons->updateVBO();
+    }
+}
+
+void LangmuirViewer::updateDefectCloud()
+{
+    if (m_defects != NULL && m_world != NULL) {
+
+        if (m_defects->vertices().size() < 3 * m_world->numDefects()) {
+            qFatal("langmuir: defect VBO too small");
+        }
+
+        int j = 0;
+        for (int i = 0; i < m_world->numDefects(); i++) {
+            int s = m_world->defectSiteIDs().at(i);
+            m_defects->vertices()[j + 0] = m_world->electronGrid().getIndexX(s) - m_gridHalfX;
+            m_defects->vertices()[j + 1] = m_world->electronGrid().getIndexY(s) - m_gridHalfY;
+            m_defects->vertices()[j + 2] = m_world->electronGrid().getIndexZ(s) - m_gridHalfZ;
+            j += 3;
+        }
+        m_defects->setMaxRender(m_world->numDefects());
+        m_defects->updateVBO();
+    }
+}
+
+void LangmuirViewer::updateHoleCloud()
+{
+    if (m_holes != NULL && m_world != NULL) {
+
+        if (m_holes->vertices().size() < 3 * m_world->numHoleAgents()) {
+            qFatal("langmuir: hole VBO too small");
+        }
+
+        int j = 0;
+        for (int i = 0; i < m_world->numHoleAgents(); i++) {
+            int s = m_world->holes().at(i)->getCurrentSite();
+            m_holes->vertices()[j + 0] = m_world->holeGrid().getIndexX(s) - m_gridHalfX;
+            m_holes->vertices()[j + 1] = m_world->holeGrid().getIndexY(s) - m_gridHalfY;
+            m_holes->vertices()[j + 2] = m_world->holeGrid().getIndexZ(s) - m_gridHalfZ;
+            j += 3;
+        }
+        m_holes->setMaxRender(m_world->numHoleAgents());
+        m_holes->updateVBO();
+    }
+}
+
+void LangmuirViewer::initGeometry()
+{
+    unsigned int pointsE = 0;
+    unsigned int pointsH = 0;
+    unsigned int pointsD = 0;
+
+    unsigned int renderE = 0;
+    unsigned int renderH = 0;
+    unsigned int renderD = 0;
+
+    m_gridX = 0;
+    m_gridY = 0;
+    m_gridZ = 0;
+
+    if (m_world != NULL) {
+        pointsE = m_world->maxElectronAgents();
+        pointsH = m_world->maxHoleAgents();
+        pointsD = m_world->maxDefects();
+
+        renderE = m_world->numElectronAgents();
+        renderH = m_world->numHoleAgents();
+        renderD = m_world->numDefects();
+
+        m_gridX = m_world->parameters().gridX;
+        m_gridY = m_world->parameters().gridY;
+        m_gridZ = m_world->parameters().gridZ;
+    }
+    m_gridHalfX = 0.5 * m_gridX;
+    m_gridHalfY = 0.5 * m_gridY;
+    m_gridHalfZ = 0.5 * m_gridZ;
+
+    float sceneRadius = 0.5 * sqrt(m_gridX * m_gridX + m_gridY * m_gridY + m_gridZ * m_gridZ);
+    if (sceneRadius < 5) {
+        sceneRadius = 5;
+    }
+    setSceneRadius(sceneRadius);
+    showEntireScene();
+
+    if (m_electons != NULL) {
+        m_electons->setMaxPoints(pointsE);
+        m_electons->setMaxRender(renderE);
+    }
+    updateElectronCloud();
+
+    if (m_defects != NULL) {
+        m_defects->setMaxPoints(pointsD);
+        m_defects->setMaxRender(renderD);
+    }
+    updateDefectCloud();
+
+    if (m_holes != NULL) {
+        m_holes->setMaxPoints(pointsH);
+        m_holes->setMaxRender(renderH);
+    }
+    updateHoleCloud();
+}
+
 void LangmuirViewer::init()
 {
-    // Corner axis
+    // Corner Axis
     m_cornerAxis = new CornerAxis(*this, this);
     m_cornerAxis->setVisible(false);
     m_cornerAxis->makeConnections();
@@ -84,6 +206,8 @@ void LangmuirViewer::init()
     m_holes->setVisible(true);
     m_holes->makeConnections();
 
+    initGeometry();
+
     // Light setup
     glEnable(GL_COLOR_MATERIAL);
     glEnable(GL_LIGHTING);
@@ -98,10 +222,6 @@ void LangmuirViewer::init()
     glLightfv(GL_LIGHT0, GL_AMBIENT , light_a);
     glLightfv(GL_LIGHT0, GL_SPECULAR, light_s);
     glLightfv(GL_LIGHT0, GL_DIFFUSE , light_d);
-
-    // Camera setup
-    setSceneRadius(25.0);
-    showEntireScene();
 
     // Background
     setBackgroundColor(Qt::black);
@@ -129,6 +249,10 @@ void LangmuirViewer::animate()
     if (m_simulation == NULL || m_world == NULL) {
         pause();
     }
+
+    m_simulation->performIterations(m_world->parameters().iterationsPrint);
+    updateElectronCloud();
+    updateHoleCloud();
 }
 
 void LangmuirViewer::help() {
@@ -159,7 +283,7 @@ void LangmuirViewer::load(QString fileName)
     emit showMessage(QString("loading file: %1").arg(fileName));
 
     Langmuir::World *world = new Langmuir::World(fileName, -1, -1, this);
-    Langmuir::Simulation *simulation = new Langmuir::Simulation(*m_world, m_world);
+    Langmuir::Simulation *simulation = new Langmuir::Simulation(*world, world);
 
     world->parameters().outputIsOn = false;
     world->parameters().iterationsPrint = 1;
@@ -168,6 +292,8 @@ void LangmuirViewer::load(QString fileName)
 
     m_simulation = simulation;
     m_world = world;
+
+    initGeometry();
 }
 
 void LangmuirViewer::save(QString fileName)
@@ -207,6 +333,9 @@ void LangmuirViewer::unload()
 
     m_simulation = NULL;
     m_world = NULL;
+
+    initGeometry();
+    updateGL();
 }
 
 void LangmuirViewer::resetCamera()

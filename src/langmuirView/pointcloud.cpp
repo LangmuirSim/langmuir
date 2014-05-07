@@ -72,20 +72,19 @@ void PointCloud::init() {
     m_mode = Points;
     emit modeChanged(m_mode);
 
-    m_pointSize = 1.0;
+    m_pointSize = 5.0;
     emit pointSizeChanged(m_pointSize);
 
-    m_maxPoints = 1024;
+    m_maxPoints = 0;
     emit maxPointsChanged(m_maxPoints);
 
-    m_maxRender = 1024;
+    m_maxRender = 0;
     emit maxRenderChanged(m_maxRender);
 
     initShaders();
 
-    for (int i = 0; i < 3 * m_maxPoints; i++) {
-        m_vertices.push_back(m_viewer.random().range(-5, 5));
-    }
+    m_vertices.clear();
+    m_vertices.resize(3 * m_maxPoints);
 
     m_verticesVBO = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
     m_verticesVBO->setUsagePattern(QOpenGLBuffer::DynamicDraw);
@@ -96,6 +95,10 @@ void PointCloud::init() {
 }
 
 void PointCloud::draw() {
+
+    if (m_maxRender == 0) {
+        return;
+    }
 
     switch(m_mode)
     {
@@ -148,14 +151,14 @@ void PointCloud::setMaxPoints(unsigned int value)
 {
     if (value != m_maxPoints) {
         m_maxPoints = value;
-        m_maxRender = m_maxPoints;
+        m_maxRender = 0;
 
         m_vertices.clear();
-        m_vertices.resize(m_maxPoints);
+        m_vertices.resize(3 * m_maxPoints);
 
         m_verticesVBO->bind();
-        m_verticesVBO->allocate(sizeof(float) * m_maxPoints);
-        m_verticesVBO->write(0, m_vertices.data(), sizeof(float) * m_maxPoints);
+        m_verticesVBO->allocate(sizeof(float) * 3 * m_maxPoints);
+        m_verticesVBO->write(0, m_vertices.data(), sizeof(float) * 3 * m_maxPoints);
         m_verticesVBO->release();
 
         emit maxPointsChanged(m_maxPoints);
@@ -165,7 +168,10 @@ void PointCloud::setMaxPoints(unsigned int value)
 
 void PointCloud::setMaxRender(unsigned int value)
 {
-    if (value != m_maxRender && m_maxRender <= m_maxPoints) {
+    if (value != m_maxRender) {
+        if (value > m_maxPoints) {
+            qFatal("langmuir: VBO must be resized");
+        }
         m_maxRender = value;
         emit maxRenderChanged(m_maxRender);
     }
@@ -197,12 +203,16 @@ void PointCloud::setMode(Mode mode)
 
 void PointCloud::updateVBO()
 {
-    if (m_vertices.size() > m_maxRender || m_vertices.size() > m_maxPoints) {
-        qFatal("langmuir: VBO is too small");
+    if (m_vertices.size() != 3 * m_maxPoints) {
+        qFatal("langmuir: VBO(%d) != vertices(%d)", 3 * m_maxPoints, m_vertices.size());
+    }
+
+    if (m_maxRender > m_maxPoints) {
+        qFatal("langmuir: maxRender(%d) > maxPoints(%d)", m_maxRender, m_maxPoints);
     }
 
     m_verticesVBO->bind();
-    m_verticesVBO->write(0, m_vertices.data(), sizeof(float) * m_maxRender);
+    m_verticesVBO->write(0, m_vertices.data(), sizeof(float) * 3 * m_maxRender);
     m_verticesVBO->release();
 }
 

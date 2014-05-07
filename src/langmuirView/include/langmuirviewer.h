@@ -36,20 +36,34 @@ public slots:
     void play();
 
 protected:
+    void updateElectronCloud();
+    void updateDefectCloud();
+    void updateHoleCloud();
+    void initGeometry();
+
     virtual void init();
     virtual void draw();
     virtual void postDraw();
     virtual void animate();
     virtual void help();
     virtual QString helpString() const;
+
     CornerAxis *m_cornerAxis;
     PointCloud *m_electons;
     PointCloud *m_defects;
     PointCloud *m_holes;
+
     Langmuir::Simulation *m_simulation;
     Langmuir::Random m_random;
     Langmuir::World *m_world;
+
     QMatrix4x4 m_matrix;
+    float m_gridHalfX;
+    float m_gridHalfY;
+    float m_gridHalfZ;
+    float m_gridX;
+    float m_gridY;
+    float m_gridZ;
 };
 
 #endif // LANGMUIRVIEWER_H
