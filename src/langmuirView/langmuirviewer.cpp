@@ -18,6 +18,45 @@ LangmuirViewer::LangmuirViewer(QWidget *parent) :
 {
     m_simulation = NULL;
     m_world = NULL;
+
+    QGLFormat format;
+    format.setVersion(4, 0);
+    setFormat(format);
+
+    qDebug("langmuir: OpenGL %d.%d", context()->format().majorVersion(), context()->format().minorVersion());
+}
+
+QMatrix4x4& LangmuirViewer::getModelViewProjectionMatrix()
+{
+    static GLdouble matrix[16];
+    camera()->getModelViewProjectionMatrix(matrix);
+
+    m_matrix(0, 0) = matrix[0];
+    m_matrix(1, 0) = matrix[1];
+    m_matrix(2, 0) = matrix[2];
+    m_matrix(3, 0) = matrix[3];
+
+    m_matrix(0, 1) = matrix[4];
+    m_matrix(1, 1) = matrix[5];
+    m_matrix(2, 1) = matrix[6];
+    m_matrix(3, 1) = matrix[7];
+
+    m_matrix(0, 2) = matrix[8];
+    m_matrix(1, 2) = matrix[9];
+    m_matrix(2, 2) = matrix[10];
+    m_matrix(3, 2) = matrix[11];
+
+    m_matrix(0, 3) = matrix[12];
+    m_matrix(1, 3) = matrix[13];
+    m_matrix(2, 3) = matrix[14];
+    m_matrix(3, 3) = matrix[15];
+
+    return m_matrix;
+}
+
+Langmuir::Random& LangmuirViewer::random()
+{
+    return m_random;
 }
 
 void LangmuirViewer::init()
@@ -43,7 +82,7 @@ void LangmuirViewer::init()
     glLightfv(GL_LIGHT0, GL_DIFFUSE , light_d);
 
     // Camera setup
-    setSceneRadius(5.0);
+    setSceneRadius(25.0);
     showEntireScene();
 
     // Background
@@ -66,6 +105,9 @@ void LangmuirViewer::postDraw()
 
 void LangmuirViewer::animate()
 {
+    if (m_simulation == NULL || m_world == NULL) {
+        pause();
+    }
 }
 
 void LangmuirViewer::help() {
@@ -85,6 +127,10 @@ void LangmuirViewer::toggleCornerAxisIsVisible()
 
 void LangmuirViewer::load(QString fileName)
 {
+    if (animationIsStarted()) {
+        pause();
+    }
+
     if (fileName.isEmpty()) {
         emit showMessage("no input file selected");
         return;
@@ -105,6 +151,10 @@ void LangmuirViewer::load(QString fileName)
 
 void LangmuirViewer::save(QString fileName)
 {
+    if (animationIsStarted()) {
+        pause();
+    }
+
     if (m_world != NULL || fileName.isEmpty()) {
         m_world->checkPointer().save(fileName);
         emit showMessage(qPrintable(QString("saved: %1").arg(fileName)));
@@ -116,6 +166,10 @@ void LangmuirViewer::save(QString fileName)
 
 void LangmuirViewer::unload()
 {
+    if (animationIsStarted()) {
+        pause();
+    }
+
     if (m_simulation == NULL || m_world == NULL) {
         emit showMessage("nothing to delete");
     } else {
@@ -140,4 +194,23 @@ void LangmuirViewer::resetCamera()
     camera()->setViewDirection(qglviewer::Vec(0, 0, -1));
     camera()->showEntireScene();
     updateGL();
+}
+
+void LangmuirViewer::pause()
+{
+    if (animationIsStarted()) {
+        stopAnimation();
+        emit showMessage("paused");
+    }
+    emit isAnimated(animationIsStarted());
+}
+
+void LangmuirViewer::play()
+{
+    if (animationIsStarted()) {
+    } else {
+        startAnimation();
+        emit showMessage("playing");
+    }
+    emit isAnimated(animationIsStarted());
 }
