@@ -6,5 +6,6 @@
         <file>axis.png</file>
         <file>fps.png</file>
         <file>grid.png</file>
+        <file>cl.png</file>
     </qresource>
 </RCC>

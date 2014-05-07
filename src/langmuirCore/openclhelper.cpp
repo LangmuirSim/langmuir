@@ -176,21 +176,24 @@ bool OpenClHelper::toggleOpenCL(bool on)
         {
             m_world.parameters().useOpenCL = false;
             qDebug("langmuir: can not use openCL");
+            qDebug("langmuir: openCL is off");
             return false;
         }
         if(!(m_world.parameters().coulombCarriers))
         {
             m_world.parameters().useOpenCL = false;
             qDebug("langmuir: coulomb interactions are off");
-            qDebug("langmuir: disabling openCL");
+            qDebug("langmuir: openCL is off");
             return false;
         }
         m_world.parameters().useOpenCL = true;
+        qDebug("langmuir: openCL is on");
         return true;
     }
     else
     {
         m_world.parameters().useOpenCL = false;
+        qDebug("langmuir: openCL is off");
         return false;
     }
 }

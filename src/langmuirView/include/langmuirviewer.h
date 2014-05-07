@@ -23,10 +23,12 @@ public:
 
 signals:
     void showMessage(const QString& message, int timeout=0);
+    void isUsingOpenCL(bool useOpenCL);
     void isAnimated(bool playing);
     void clearMessage();
 
 public slots:
+    void toggleOpenCL(bool on=true);
     void toggleCornerAxisIsVisible();
     void load(QString fileName);
     void save(QString fileName);

@@ -1,4 +1,5 @@
 #include "langmuirviewer.h"
+#include "openclhelper.h"
 #include "checkpointer.h"
 #include "chargeagent.h"
 #include "parameters.h"
@@ -264,6 +265,17 @@ QString LangmuirViewer::helpString() const
     return "";
 }
 
+void LangmuirViewer::toggleOpenCL(bool on)
+{
+    if (m_world == NULL) {
+        emit showMessage("can not enable OpenCL");
+        return;
+    }
+
+    m_world->opencl().toggleOpenCL(on);
+    emit isUsingOpenCL(m_world->parameters().useOpenCL);
+}
+
 void LangmuirViewer::toggleCornerAxisIsVisible()
 {
     m_cornerAxis->toggleVisible();
@@ -294,6 +306,8 @@ void LangmuirViewer::load(QString fileName)
     m_world = world;
 
     initGeometry();
+
+    emit isUsingOpenCL(m_world->parameters().useOpenCL);
 }
 
 void LangmuirViewer::save(QString fileName)

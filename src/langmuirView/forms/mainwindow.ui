@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>512</width>
-    <height>512</height>
+    <width>640</width>
+    <height>640</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,7 +25,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>512</width>
+     <width>640</width>
      <height>25</height>
     </rect>
    </property>
@@ -45,6 +45,7 @@
     </property>
     <addaction name="actionStart"/>
     <addaction name="actionStop"/>
+    <addaction name="actionOpenCL"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -78,6 +79,7 @@
    <addaction name="separator"/>
    <addaction name="actionStart"/>
    <addaction name="actionStop"/>
+   <addaction name="actionOpenCL"/>
    <addaction name="separator"/>
    <addaction name="actionAxis"/>
    <addaction name="actionCornerAxis"/>
@@ -230,6 +232,21 @@
     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Save screenshot.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </action>
+  <action name="actionOpenCL">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/cl.png</normaloff>:/icons/cl.png</iconset>
+   </property>
+   <property name="text">
+    <string>OpenCL</string>
+   </property>
+   <property name="toolTip">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Toggle OpenCL.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -239,6 +256,7 @@
    <container>1</container>
    <slots>
     <signal>isAnimated(bool)</signal>
+    <signal>isUsingOpenCL(bool)</signal>
     <slot>startAnimation()</slot>
     <slot>stopAnimation()</slot>
     <slot>toggleAxisIsDrawn()</slot>
@@ -250,6 +268,7 @@
     <slot>unload()</slot>
     <slot>pause()</slot>
     <slot>play()</slot>
+    <slot>toggleOpenCL(bool)</slot>
    </slots>
   </customwidget>
  </customwidgets>
@@ -414,6 +433,38 @@
     <hint type="destinationlabel">
      <x>255</x>
      <y>255</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionOpenCL</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>qglwidget</receiver>
+   <slot>toggleOpenCL(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>319</x>
+     <y>341</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>qglwidget</sender>
+   <signal>isUsingOpenCL(bool)</signal>
+   <receiver>actionOpenCL</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>319</x>
+     <y>341</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
     </hint>
    </hints>
   </connection>
