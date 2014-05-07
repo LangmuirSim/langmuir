@@ -1,7 +1,6 @@
 <RCC>
     <qresource prefix="/shaders">
         <file>pcVert.glsl</file>
-        <file>pcGeom.glsl</file>
         <file>pcFrag.glsl</file>
         <file>ccVert.glsl</file>
         <file>ccGeom.glsl</file>

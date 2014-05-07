@@ -30,6 +30,7 @@ public:
 
 signals:
     void maxRenderChanged(unsigned int value);
+    void pointSizeChanged(float value);
     void colorChanged(QColor color);
     void modeChanged(Mode mode);
     void vboChanged();
@@ -37,6 +38,7 @@ signals:
 public slots:
     virtual void makeConnections();
     void setMaxRender(unsigned int value);
+    void setPointSize(float value);
     void setColor(QColor color);
     void setMode(Mode mode);
     void updateVBO();
@@ -53,6 +55,7 @@ protected:
     QVector<float> m_vertices;
     unsigned int m_maxPoints;
     unsigned int m_maxRender;
+    float m_pointSize;
     QColor m_color;
     Mode m_mode;
 };

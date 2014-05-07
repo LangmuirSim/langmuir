@@ -1,9 +1,11 @@
 #version 400
 
-attribute vec4 vertex; // in
-uniform   mat4 matrix;
+uniform float pointSize;
+uniform mat4 matrix;
+in vec4 vertex;
 
 void main(void)
 {
     gl_Position = matrix * vertex;
+    gl_PointSize = pointSize;
 }

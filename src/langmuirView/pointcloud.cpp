@@ -40,33 +40,29 @@ void PointCloud::initShaders()
         qFatal("langmuir: can not compile shader1 vertex shader");
     }
 
-    if (!m_shader1.addShaderFromSourceFile(QOpenGLShader::Geometry, ":shaders/pcGeom.glsl")) {
-        qFatal("langmuir: can not compile shader1 geometry shader");
-    }
-
     if (!m_shader1.addShaderFromSourceFile(QOpenGLShader::Fragment, ":shaders/pcFrag.glsl")) {
         qFatal("langmuir: can not compile shader1 fragment shader");
     }
 
     if (!m_shader1.link()) {
-        qFatal("langmuir: can not link shader");
+        qFatal("langmuir: can not link shader1");
     }
 
     // cube cloud shader
     if (!m_shader2.addShaderFromSourceFile(QOpenGLShader::Vertex, ":shaders/ccVert.glsl")) {
-        qFatal("langmuir: can not compile shader1 vertex shader");
+        qFatal("langmuir: can not compile shader2 vertex shader");
     }
 
     if (!m_shader2.addShaderFromSourceFile(QOpenGLShader::Geometry, ":shaders/ccGeom.glsl")) {
-        qFatal("langmuir: can not compile shader1 geometry shader");
+        qFatal("langmuir: can not compile shader2 geometry shader");
     }
 
     if (!m_shader2.addShaderFromSourceFile(QOpenGLShader::Fragment, ":shaders/ccFrag.glsl")) {
-        qFatal("langmuir: can not compile shader1 fragment shader");
+        qFatal("langmuir: can not compile shader2 fragment shader");
     }
 
     if (!m_shader2.link()) {
-        qFatal("langmuir: can not link shader");
+        qFatal("langmuir: can not link shader2");
     }
 }
 
@@ -77,6 +73,9 @@ void PointCloud::init() {
 
     m_mode = Points;
     emit modeChanged(m_mode);
+
+    m_pointSize = 1.0;
+    emit pointSizeChanged(m_pointSize);
 
     initShaders();
 
@@ -109,6 +108,9 @@ void PointCloud::draw() {
             // shader: pass color
             m_shader1.setUniformValue("color", m_color);
 
+            // shader: pass pointsize
+            m_shader1.setUniformValue("pointSize", m_pointSize);
+
             // shader: pass vertices
             m_verticesVBO->bind();
             m_shader1.enableAttributeArray("vertex");
@@ -122,13 +124,12 @@ void PointCloud::draw() {
             m_verticesVBO->release();
             m_shader1.release();
 
-            glDisable(GL_PROGRAM_POINT_SIZE);
+            //glDisable(GL_PROGRAM_POINT_SIZE);
 
             break;
         }
         case Cubes:
         {
-            qFatal("langmuir: implement cubes!");
             break;
         }
         default:
@@ -144,6 +145,14 @@ void PointCloud::setMaxRender(unsigned int value)
     if (value != m_maxRender && m_maxRender <= m_maxPoints) {
         m_maxRender = value;
         emit maxRenderChanged(m_maxRender);
+    }
+}
+
+void PointCloud::setPointSize(float value)
+{
+    if (value != m_pointSize) {
+        m_pointSize = value;
+        emit pointSizeChanged(m_pointSize);
     }
 }
 
