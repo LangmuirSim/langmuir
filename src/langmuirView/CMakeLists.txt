@@ -27,7 +27,10 @@ set(HEADERS
 
 set(RESOURCES
     ./icons/icons.qrc
+    ./shaders/shaders.qrc
 )
+file(GLOB_RECURSE ICONS   *.png )
+file(GLOB_RECURSE SHADERS *.glsl)
 
 set(FORMS
     ./forms/mainwindow.ui
@@ -65,7 +68,7 @@ if(Qt5Core_FOUND AND OPENGL_FOUND AND NOT USE_QT4)
 
     # TARGET
     add_executable(${PROJECT_NAME} EXCLUDE_FROM_ALL langmuirview.cpp
-        ${SOURCES} ${HEADERS} ${RESOURCES} ${FORMS})
+        ${SOURCES} ${HEADERS} ${RESOURCES} ${FORMS} ${ICONS} ${SHADERS})
 
     # LINK
     target_link_libraries(${PROJECT_NAME} langmuirCore)
