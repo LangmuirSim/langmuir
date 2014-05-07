@@ -29,14 +29,15 @@ public:
     unsigned int getMaxRender();
 
 signals:
+    void maxPointsChanged(unsigned int value);
     void maxRenderChanged(unsigned int value);
     void pointSizeChanged(float value);
     void colorChanged(QColor color);
     void modeChanged(Mode mode);
-    void vboChanged();
 
 public slots:
     virtual void makeConnections();
+    void setMaxPoints(unsigned int value);
     void setMaxRender(unsigned int value);
     void setPointSize(float value);
     void setColor(QColor color);

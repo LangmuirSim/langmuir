@@ -6,8 +6,6 @@
 PointCloud::PointCloud(LangmuirViewer &viewer, QObject *parent) :
     SceneObject(viewer, parent), m_verticesVBO(NULL)
 {
-    m_maxRender = 256;
-    m_maxPoints = 1000;
     init();
 }
 
@@ -77,6 +75,12 @@ void PointCloud::init() {
     m_pointSize = 1.0;
     emit pointSizeChanged(m_pointSize);
 
+    m_maxPoints = 1024;
+    emit maxPointsChanged(m_maxPoints);
+
+    m_maxRender = 1024;
+    emit maxRenderChanged(m_maxRender);
+
     initShaders();
 
     for (int i = 0; i < 3 * m_maxPoints; i++) {
@@ -140,6 +144,25 @@ void PointCloud::draw() {
     }
 }
 
+void PointCloud::setMaxPoints(unsigned int value)
+{
+    if (value != m_maxPoints) {
+        m_maxPoints = value;
+        m_maxRender = m_maxPoints;
+
+        m_vertices.clear();
+        m_vertices.resize(m_maxPoints);
+
+        m_verticesVBO->bind();
+        m_verticesVBO->allocate(sizeof(float) * m_maxPoints);
+        m_verticesVBO->write(0, m_vertices.data(), sizeof(float) * m_maxPoints);
+        m_verticesVBO->release();
+
+        emit maxPointsChanged(m_maxPoints);
+        emit maxRenderChanged(m_maxRender);
+    }
+}
+
 void PointCloud::setMaxRender(unsigned int value)
 {
     if (value != m_maxRender && m_maxRender <= m_maxPoints) {
@@ -174,14 +197,19 @@ void PointCloud::setMode(Mode mode)
 
 void PointCloud::updateVBO()
 {
+    if (m_vertices.size() > m_maxRender || m_vertices.size() > m_maxPoints) {
+        qFatal("langmuir: VBO is too small");
+    }
+
     m_verticesVBO->bind();
     m_verticesVBO->write(0, m_vertices.data(), sizeof(float) * m_maxRender);
     m_verticesVBO->release();
-    emit vboChanged();
 }
 
 void PointCloud::makeConnections()
 {
     SceneObject::makeConnections();
+    connect(this, SIGNAL(pointSizeChanged(float)), &m_viewer, SLOT(updateGL()));
     connect(this, SIGNAL(colorChanged(QColor)), &m_viewer, SLOT(updateGL()));
+    connect(this, SIGNAL(modeChanged(Mode)), &m_viewer, SLOT(updateGL()));
 }
