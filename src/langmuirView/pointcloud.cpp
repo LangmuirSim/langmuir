@@ -71,9 +71,12 @@ void PointCloud::initShaders()
 }
 
 void PointCloud::init() {
-    m_color = Qt::green;
 
+    m_color = Qt::green;
     emit colorChanged(m_color);
+
+    m_mode = Points;
+    emit modeChanged(m_mode);
 
     initShaders();
 
@@ -90,31 +93,50 @@ void PointCloud::init() {
 }
 
 void PointCloud::draw() {
-    glEnable(GL_PROGRAM_POINT_SIZE);
 
-    m_shader1.bind();
+    switch(m_mode)
+    {
+        case Points:
+        {
+            glEnable(GL_PROGRAM_POINT_SIZE);
 
-    // shader: pass matrix
-    QMatrix4x4& MVP = m_viewer.getModelViewProjectionMatrix();
-    m_shader1.setUniformValue("matrix", MVP);
+            m_shader1.bind();
 
-    // shader: pass color
-    m_shader1.setUniformValue("color", m_color);
+            // shader: pass matrix
+            QMatrix4x4& MVP = m_viewer.getModelViewProjectionMatrix();
+            m_shader1.setUniformValue("matrix", MVP);
 
-    // shader: pass vertices
-    m_verticesVBO->bind();
-    m_shader1.enableAttributeArray("vertex");
-    m_shader1.setAttributeBuffer("vertex", GL_FLOAT, 0, 3, 0);
+            // shader: pass color
+            m_shader1.setUniformValue("color", m_color);
 
-    // shader: draw
-    glDrawArrays(GL_POINTS, 0, m_maxRender);
+            // shader: pass vertices
+            m_verticesVBO->bind();
+            m_shader1.enableAttributeArray("vertex");
+            m_shader1.setAttributeBuffer("vertex", GL_FLOAT, 0, 3, 0);
 
-    // release
-    m_shader1.disableAttributeArray("vertex");
-    m_verticesVBO->release();
-    m_shader1.release();
+            // shader: draw
+            glDrawArrays(GL_POINTS, 0, m_maxRender);
 
-    glDisable(GL_PROGRAM_POINT_SIZE);
+            // release
+            m_shader1.disableAttributeArray("vertex");
+            m_verticesVBO->release();
+            m_shader1.release();
+
+            glDisable(GL_PROGRAM_POINT_SIZE);
+
+            break;
+        }
+        case Cubes:
+        {
+            qFatal("langmuir: implement cubes!");
+            break;
+        }
+        default:
+        {
+            qFatal("langmuir: implement default!");
+            break;
+        }
+    }
 }
 
 void PointCloud::setMaxRender(unsigned int value)
@@ -130,6 +152,14 @@ void PointCloud::setColor(QColor color)
     if (color != m_color) {
         m_color = color;
         emit colorChanged(m_color);
+    }
+}
+
+void PointCloud::setMode(Mode mode)
+{
+    if (mode != m_mode) {
+        m_mode = mode;
+        emit modeChanged(m_mode);
     }
 }
 
