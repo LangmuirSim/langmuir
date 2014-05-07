@@ -238,6 +238,7 @@
    <header>langmuirviewer.h</header>
    <container>1</container>
    <slots>
+    <signal>isAnimated(bool)</signal>
     <slot>startAnimation()</slot>
     <slot>stopAnimation()</slot>
     <slot>toggleAxisIsDrawn()</slot>
@@ -247,6 +248,8 @@
     <slot>toggleCornerAxisIsVisible()</slot>
     <slot>resetCamera()</slot>
     <slot>unload()</slot>
+    <slot>pause()</slot>
+    <slot>play()</slot>
    </slots>
   </customwidget>
  </customwidgets>
@@ -267,38 +270,6 @@
     <hint type="destinationlabel">
      <x>255</x>
      <y>255</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionStart</sender>
-   <signal>triggered()</signal>
-   <receiver>qglwidget</receiver>
-   <slot>startAnimation()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>255</x>
-     <y>257</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionStop</sender>
-   <signal>triggered()</signal>
-   <receiver>qglwidget</receiver>
-   <slot>stopAnimation()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>255</x>
-     <y>257</y>
     </hint>
    </hints>
   </connection>
@@ -398,5 +369,56 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionStart</sender>
+   <signal>triggered()</signal>
+   <receiver>qglwidget</receiver>
+   <slot>play()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>255</x>
+     <y>277</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionStop</sender>
+   <signal>triggered()</signal>
+   <receiver>qglwidget</receiver>
+   <slot>pause()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>255</x>
+     <y>277</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>qglwidget</sender>
+   <signal>isAnimated(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>setStopEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>255</x>
+     <y>277</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>255</x>
+     <y>255</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
+ <slots>
+  <slot>setStopEnabled(bool)</slot>
+ </slots>
 </ui>
