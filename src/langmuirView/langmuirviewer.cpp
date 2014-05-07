@@ -61,10 +61,28 @@ Langmuir::Random& LangmuirViewer::random()
 
 void LangmuirViewer::init()
 {
-    // Object setup
+    // Corner axis
     m_cornerAxis = new CornerAxis(*this, this);
     m_cornerAxis->setVisible(false);
     m_cornerAxis->makeConnections();
+
+    // Electrons
+    m_electons = new PointCloud(*this, this);
+    m_electons->setColor(Qt::red);
+    m_electons->setVisible(true);
+    m_electons->makeConnections();
+
+    // Defects
+    m_defects = new PointCloud(*this, this);
+    m_defects->setColor(Qt::white);
+    m_defects->setVisible(true);
+    m_defects->makeConnections();
+
+    // Holes
+    m_holes = new PointCloud(*this, this);
+    m_holes->setColor(Qt::blue);
+    m_holes->setVisible(true);
+    m_holes->makeConnections();
 
     // Light setup
     glEnable(GL_COLOR_MATERIAL);
@@ -95,6 +113,9 @@ void LangmuirViewer::init()
 
 void LangmuirViewer::draw()
 {
+    m_electons->render();
+    m_defects->render();
+    m_holes->render();
 }
 
 void LangmuirViewer::postDraw()

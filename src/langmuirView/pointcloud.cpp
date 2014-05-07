@@ -77,12 +77,8 @@ void PointCloud::init() {
 
     initShaders();
 
-    sleep(1);
-    Langmuir::Random rand;
-    qDebug() << rand.random();
-
     for (int i = 0; i < 3 * m_maxPoints; i++) {
-        m_vertices.push_back(rand.range(-5, 5));
+        m_vertices.push_back(m_viewer.random().range(-5, 5));
     }
 
     m_verticesVBO = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);

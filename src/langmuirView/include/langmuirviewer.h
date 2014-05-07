@@ -5,6 +5,7 @@
 #include <QMatrix4x4>
 
 #include "corneraxis.h"
+#include "pointcloud.h"
 #include "rand.h"
 
 namespace Langmuir {
@@ -42,6 +43,9 @@ protected:
     virtual void help();
     virtual QString helpString() const;
     CornerAxis *m_cornerAxis;
+    PointCloud *m_electons;
+    PointCloud *m_defects;
+    PointCloud *m_holes;
     Langmuir::Simulation *m_simulation;
     Langmuir::Random m_random;
     Langmuir::World *m_world;
