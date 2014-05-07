@@ -139,6 +139,8 @@ void NodeFileParser::setDefault()
     clear();
     createNode("node1");
     m_cores[name] = maxThreadCount;
+
+    m_gpus[name] = QList<int>() << 0;
 }
 
 void NodeFileParser::createNode(const QString &name, int cores, QList<int> gpus)
@@ -301,6 +303,7 @@ int NodeFileParser::numGPUs(const QString& name)
 
 int NodeFileParser::GPUid(const QString &name, int i)
 {
+    qDebug() << m_gpus;
     return m_gpus[name].at(i);
 }
 
