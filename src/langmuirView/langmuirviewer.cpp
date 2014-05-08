@@ -7,6 +7,7 @@
 #include "cubicgrid.h"
 #include "world.h"
 
+#include <QErrorMessage>
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QString>
@@ -305,10 +306,12 @@ void LangmuirViewer::load(QString fileName)
     }
 
     if (fileName.isEmpty()) {
-        emit showMessage("no input file selected");
+        QErrorMessage* error = QErrorMessage::qtHandler();
+        error->showMessage("Can not load the simulation (no file selected)");
+
+        emit showMessage("no file selected");
         return;
     }
-    emit showMessage(QString("loading file: %1").arg(fileName));
 
     Langmuir::World *world = new Langmuir::World(fileName, -1, -1, this);
     Langmuir::Simulation *simulation = new Langmuir::Simulation(*world, world);
@@ -316,12 +319,17 @@ void LangmuirViewer::load(QString fileName)
     world->parameters().outputIsOn = false;
     world->parameters().iterationsPrint = 1;
 
-    unload();
+    if (m_world != NULL || m_simulation != NULL) {
+        unload();
+    }
 
     m_simulation = simulation;
     m_world = world;
 
     initGeometry();
+
+    QFileInfo info(fileName);
+    emit showMessage(QString("loaded file: %1").arg(info.fileName()));
 
     emit isUsingOpenCL(m_world->parameters().useOpenCL);
 }
@@ -337,7 +345,12 @@ void LangmuirViewer::save(QString fileName)
         emit showMessage(qPrintable(QString("saved: %1").arg(fileName)));
     }
     else {
-        QMessageBox::warning(this, "Langmuir", "Can not save simulation");
+        QErrorMessage* error = QErrorMessage::qtHandler();
+        error->showMessage("Can not save the simulation (no simulation loaded)");
+
+        emit showMessage("can not save simulation");
+
+        return;
     }
 }
 
@@ -348,9 +361,13 @@ void LangmuirViewer::unload()
     }
 
     if (m_simulation == NULL || m_world == NULL) {
-        emit showMessage("nothing to delete");
-    } else {
-        emit showMessage("simulation deleted");
+
+        QErrorMessage* error = QErrorMessage::qtHandler();
+        error->showMessage("Can not delete the simulation (no simulation loaded)");
+
+        emit showMessage("can not delete simulation");
+
+        return;
     }
 
     if (m_simulation != NULL) {
@@ -366,6 +383,67 @@ void LangmuirViewer::unload()
 
     initGeometry();
     updateGL();
+
+    emit showMessage("simulation deleted");
+}
+
+void LangmuirViewer::reset() {
+
+    // pause the simulation
+    if (animationIsStarted()) {
+        pause();
+    }
+
+    // check if there is a simulation
+    if (m_world == NULL || m_simulation == NULL) {
+
+        QErrorMessage* error = QErrorMessage::qtHandler();
+        error->showMessage("Can not reset the simulation (no simulation loaded)");
+
+        emit showMessage("can not reset simulation");
+
+        return;
+    }
+
+    // copy the simulation parameters
+    Langmuir::SimulationParameters parameters = m_world->parameters();
+
+    // decide on random seed
+    QMessageBox::StandardButton answer = QMessageBox::question(this, "Random seed",
+        "Use the same random seed?", QMessageBox::Yes|QMessageBox::No, QMessageBox::No);
+
+    switch (answer)
+    {
+        case QMessageBox::Yes:
+        {
+            break;
+        }
+        case QMessageBox::No:
+        {
+            parameters.randomSeed = 0;
+            break;
+        }
+        default:
+        {
+        }
+    }
+
+    parameters.outputIsOn      = false;
+    parameters.iterationsPrint = 1;
+    parameters.currentStep     = 0;
+
+    Langmuir::World *world = new Langmuir::World(parameters, -1, -1, this);
+    Langmuir::Simulation *simulation = new Langmuir::Simulation(*world, world);
+
+    unload();
+
+    m_simulation = simulation;
+    m_world = world;
+
+    initGeometry();
+
+    emit showMessage("reset simulation");
+    emit isUsingOpenCL(m_world->parameters().useOpenCL);
 }
 
 void LangmuirViewer::resetCamera()
@@ -380,7 +458,7 @@ void LangmuirViewer::pause()
 {
     if (animationIsStarted()) {
         stopAnimation();
-        emit showMessage("paused");
+        emit showMessage("simulation is paused");
     }
     emit isAnimated(animationIsStarted());
 }
@@ -390,7 +468,7 @@ void LangmuirViewer::play()
     if (animationIsStarted()) {
     } else {
         startAnimation();
-        emit showMessage("playing");
+        emit showMessage("simulation is playing");
     }
     emit isAnimated(animationIsStarted());
 }

@@ -30,6 +30,7 @@ void MainWindow::init()
     setIcon(ui->actionUnload, "", QStyle::SP_DialogDiscardButton);
     setIcon(ui->actionSave, "document-save", QStyle::SP_DialogSaveButton);
     setIcon(ui->actionScreenshot, "camera-photo", QStyle::SP_DialogSaveButton);
+    setIcon(ui->actionReset, "", QStyle::SP_BrowserReload);
 
     connect(m_viewer, SIGNAL(clearMessage()), ui->statusbar, SLOT(clearMessage()));
     connect(m_viewer, SIGNAL(showMessage(QString,int)), ui->statusbar, SLOT(showMessage(QString,int)));

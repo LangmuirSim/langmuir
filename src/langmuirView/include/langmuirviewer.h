@@ -102,6 +102,11 @@ public slots:
     void unload();
 
     /**
+     * @brief reset the current simulation
+     */
+    void reset();
+
+    /**
      * @brief pause the simulation
      */
     void pause();
