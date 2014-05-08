@@ -2,6 +2,7 @@ project(langmuirCore)
 cmake_minimum_required(VERSION 2.8)
 
 message(STATUS "Project: ${PROJECT_NAME}")
+set(CMAKE_BUILD_TYPE Debug)
 
 set(SOURCES
         rand.cpp

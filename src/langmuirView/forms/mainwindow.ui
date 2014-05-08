@@ -54,6 +54,7 @@
     <addaction name="actionAxis"/>
     <addaction name="actionCornerAxis"/>
     <addaction name="actionGrid"/>
+    <addaction name="actionSimulationGrid"/>
     <addaction name="actionFPS"/>
     <addaction name="actionShow"/>
    </widget>
@@ -84,6 +85,7 @@
    <addaction name="actionAxis"/>
    <addaction name="actionCornerAxis"/>
    <addaction name="actionGrid"/>
+   <addaction name="actionSimulationGrid"/>
    <addaction name="actionFPS"/>
    <addaction name="actionShow"/>
   </widget>
@@ -153,7 +155,7 @@
     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Display grid.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="shortcut">
-    <string>G</string>
+    <string>Shift+G</string>
    </property>
   </action>
   <action name="actionFPS">
@@ -247,6 +249,24 @@
     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Toggle OpenCL.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </action>
+  <action name="actionSimulationGrid">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/grid.png</normaloff>:/icons/grid.png</iconset>
+   </property>
+   <property name="text">
+    <string>Simulation Grid</string>
+   </property>
+   <property name="toolTip">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Display simulation grid.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+   <property name="shortcut">
+    <string>G</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -269,6 +289,7 @@
     <slot>pause()</slot>
     <slot>play()</slot>
     <slot>toggleOpenCL(bool)</slot>
+    <slot>toggleGridIsVisible()</slot>
    </slots>
   </customwidget>
  </customwidgets>
@@ -465,6 +486,22 @@
     <hint type="destinationlabel">
      <x>-1</x>
      <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSimulationGrid</sender>
+   <signal>triggered()</signal>
+   <receiver>qglwidget</receiver>
+   <slot>toggleGridIsVisible()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>319</x>
+     <y>341</y>
     </hint>
    </hints>
   </connection>

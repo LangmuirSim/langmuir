@@ -29,7 +29,7 @@ LangmuirViewer::LangmuirViewer(QWidget *parent) :
     qDebug("langmuir: OpenGL %d.%d", context()->format().majorVersion(), context()->format().minorVersion());
 }
 
-QMatrix4x4& LangmuirViewer::getModelViewProjectionMatrix()
+QMatrix4x4& LangmuirViewer::getMVP()
 {
     static GLdouble matrix[16];
     camera()->getModelViewProjectionMatrix(matrix);
@@ -73,9 +73,9 @@ void LangmuirViewer::updateElectronCloud()
         int j = 0;
         for (int i = 0; i < m_world->numElectronAgents(); i++) {
             int s = m_world->electrons().at(i)->getCurrentSite();
-            m_electons->vertices()[j + 0] = m_world->electronGrid().getIndexX(s) - m_gridHalfX;
-            m_electons->vertices()[j + 1] = m_world->electronGrid().getIndexY(s) - m_gridHalfY;
-            m_electons->vertices()[j + 2] = m_world->electronGrid().getIndexZ(s) - m_gridHalfZ;
+            m_electons->vertices()[j + 0] = m_world->electronGrid().getIndexX(s) - m_gridHalfX + 0.5;
+            m_electons->vertices()[j + 1] = m_world->electronGrid().getIndexY(s) - m_gridHalfY + 0.5;
+            m_electons->vertices()[j + 2] = m_world->electronGrid().getIndexZ(s) - m_gridHalfZ + 0.5;
             j += 3;
         }
         m_electons->setMaxRender(m_world->numElectronAgents());
@@ -94,9 +94,9 @@ void LangmuirViewer::updateDefectCloud()
         int j = 0;
         for (int i = 0; i < m_world->numDefects(); i++) {
             int s = m_world->defectSiteIDs().at(i);
-            m_defects->vertices()[j + 0] = m_world->electronGrid().getIndexX(s) - m_gridHalfX;
-            m_defects->vertices()[j + 1] = m_world->electronGrid().getIndexY(s) - m_gridHalfY;
-            m_defects->vertices()[j + 2] = m_world->electronGrid().getIndexZ(s) - m_gridHalfZ;
+            m_defects->vertices()[j + 0] = m_world->electronGrid().getIndexX(s) - m_gridHalfX + 0.5;
+            m_defects->vertices()[j + 1] = m_world->electronGrid().getIndexY(s) - m_gridHalfY + 0.5;
+            m_defects->vertices()[j + 2] = m_world->electronGrid().getIndexZ(s) - m_gridHalfZ + 0.5;
             j += 3;
         }
         m_defects->setMaxRender(m_world->numDefects());
@@ -115,9 +115,9 @@ void LangmuirViewer::updateHoleCloud()
         int j = 0;
         for (int i = 0; i < m_world->numHoleAgents(); i++) {
             int s = m_world->holes().at(i)->getCurrentSite();
-            m_holes->vertices()[j + 0] = m_world->holeGrid().getIndexX(s) - m_gridHalfX;
-            m_holes->vertices()[j + 1] = m_world->holeGrid().getIndexY(s) - m_gridHalfY;
-            m_holes->vertices()[j + 2] = m_world->holeGrid().getIndexZ(s) - m_gridHalfZ;
+            m_holes->vertices()[j + 0] = m_world->holeGrid().getIndexX(s) - m_gridHalfX + 0.5;
+            m_holes->vertices()[j + 1] = m_world->holeGrid().getIndexY(s) - m_gridHalfY + 0.5;
+            m_holes->vertices()[j + 2] = m_world->holeGrid().getIndexZ(s) - m_gridHalfZ + 0.5;
             j += 3;
         }
         m_holes->setMaxRender(m_world->numHoleAgents());
@@ -163,6 +163,10 @@ void LangmuirViewer::initGeometry()
     setSceneRadius(sceneRadius);
     showEntireScene();
 
+    if (m_grid != NULL) {
+        m_grid->setDimensions(m_gridX, m_gridY, m_gridZ);
+    }
+
     if (m_electons != NULL) {
         m_electons->setMaxPoints(pointsE);
         m_electons->setMaxRender(renderE);
@@ -188,6 +192,11 @@ void LangmuirViewer::init()
     m_cornerAxis = new CornerAxis(*this, this);
     m_cornerAxis->setVisible(false);
     m_cornerAxis->makeConnections();
+
+    // Grid
+    m_grid = new Grid(*this, this);
+    m_grid->setVisible(false);
+    m_grid->makeConnections();
 
     // Electrons
     m_electons = new PointCloud(*this, this);
@@ -237,6 +246,7 @@ void LangmuirViewer::draw()
     m_electons->render();
     m_defects->render();
     m_holes->render();
+    m_grid->render();
 }
 
 void LangmuirViewer::postDraw()
@@ -280,6 +290,12 @@ void LangmuirViewer::toggleCornerAxisIsVisible()
 {
     m_cornerAxis->toggleVisible();
     emit showMessage(QString("corner axis=%1").arg(m_cornerAxis->isVisible()));
+}
+
+void LangmuirViewer::toggleGridIsVisible()
+{
+    m_grid->toggleVisible();
+    emit showMessage(QString("grid=%1").arg(m_cornerAxis->isVisible()));
 }
 
 void LangmuirViewer::load(QString fileName)

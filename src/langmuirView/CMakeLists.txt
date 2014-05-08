@@ -2,6 +2,7 @@ project(langmuirView)
 cmake_minimum_required(VERSION 2.8)
 
 message(STATUS "Project: ${PROJECT_NAME}")
+set(CMAKE_BUILD_TYPE Debug)
 
 set(SOURCES
     langmuirviewer.cpp
@@ -11,6 +12,7 @@ set(SOURCES
     corneraxis.cpp
     color.cpp
     axis.cpp
+    grid.cpp
     box.cpp
 )
 
@@ -22,6 +24,7 @@ set(HEADERS
     ./include/corneraxis.h
     ./include/color.h
     ./include/axis.h
+    ./include/grid.h
     ./include/box.h
 )
 

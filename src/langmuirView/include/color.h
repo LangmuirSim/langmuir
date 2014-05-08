@@ -1,7 +1,10 @@
 #ifndef COLOR_H
 #define COLOR_H
 
+#include <QObject>
 #include <QColor>
+
+class LangmuirViewer;
 
 namespace color {
     /**
