@@ -461,6 +461,7 @@ void LangmuirViewer::reset() {
 
 void LangmuirViewer::resetCamera()
 {
+    camera()->frame()->stopSpinning();
     camera()->setUpVector(qglviewer::Vec(0, 1, 0));
     camera()->setViewDirection(qglviewer::Vec(0, 0, -1));
     camera()->showEntireScene();
