@@ -7,7 +7,6 @@ set(CMAKE_BUILD_TYPE Debug)
 set(SOURCES
         rand.cpp
         gzipper.cpp
-        pbsgpuparser.cpp
         nodefileparser.cpp
         clparser.cpp
 
@@ -31,7 +30,6 @@ set(SOURCES
 set(HEADERS
         ./include/rand.h
         ./include/gzipper.h
-        ./include/pbsgpuparser.h
         ./include/nodefileparser.h
         ./include/clparser.h
 

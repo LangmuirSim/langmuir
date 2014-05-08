@@ -1,5 +1,4 @@
 #include <QTextStream>
-#include "pbsgpuparser.h"
 #include "openclhelper.h"
 #include "chargeagent.h"
 #include "parameters.h"
