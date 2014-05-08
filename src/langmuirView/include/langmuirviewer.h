@@ -2,6 +2,7 @@
 #define LANGMUIRVIEWER_H
 
 #include <QGLViewer/qglviewer.h>
+#include <QErrorMessage>
 #include <QMatrix4x4>
 
 #include "corneraxis.h"
@@ -116,6 +117,11 @@ public slots:
      */
     void play();
 
+    /**
+     * @brief show parameters in a window
+     */
+    void showParameters();
+
 protected:
     /**
      * @brief update the electron point cloud
@@ -211,6 +217,9 @@ protected:
 
     //! grid.z
     float m_gridZ;
+
+    //! error messages
+    QErrorMessage *m_error;
 };
 
 #endif // LANGMUIRVIEWER_H

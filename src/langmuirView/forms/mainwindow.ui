@@ -58,6 +58,7 @@
     <addaction name="actionSimulationGrid"/>
     <addaction name="actionFPS"/>
     <addaction name="actionShow"/>
+    <addaction name="actionParameters"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuControl"/>
@@ -273,6 +274,11 @@
     <string>Reset</string>
    </property>
   </action>
+  <action name="actionParameters">
+   <property name="text">
+    <string>Parameters</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -297,6 +303,7 @@
     <slot>toggleOpenCL(bool)</slot>
     <slot>toggleGridIsVisible()</slot>
     <slot>reset()</slot>
+    <slot>showParameters()</slot>
    </slots>
   </customwidget>
  </customwidgets>
@@ -517,6 +524,22 @@
    <signal>triggered()</signal>
    <receiver>qglwidget</receiver>
    <slot>reset()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>319</x>
+     <y>341</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionParameters</sender>
+   <signal>triggered()</signal>
+   <receiver>qglwidget</receiver>
+   <slot>showParameters()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>

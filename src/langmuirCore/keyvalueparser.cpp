@@ -204,6 +204,16 @@ Variable& KeyValueParser::getVariable(const QString& key)
     return *m_variableMap[key];
 }
 
+const QMap<QString,Variable*>& KeyValueParser::getVariableMap() const
+{
+    return m_variableMap;
+}
+
+const QStringList& KeyValueParser::getOrderedNames() const
+{
+    return m_orderedNames;
+}
+
 std::ostream& operator<<(std::ostream& stream, const KeyValueParser &keyValueParser)
 {
     foreach (QString key, keyValueParser.m_orderedNames)

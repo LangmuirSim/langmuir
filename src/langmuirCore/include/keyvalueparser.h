@@ -64,6 +64,16 @@ public:
     Variable& getVariable(const QString& key);
 
     /**
+     * @brief get the variable map
+     */
+    const QMap<QString,Variable*>& getVariableMap() const;
+
+    /**
+     * @brief get list of ordered keys
+     */
+    const QStringList& getOrderedNames() const;
+
+    /**
      * @brief Write the parameters to a std::ostream in a "key=value" fashion
      */
     friend std::ostream& operator<<(std::ostream &stream, const KeyValueParser &keyValueParser);

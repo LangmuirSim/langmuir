@@ -1,4 +1,5 @@
 #include "langmuirviewer.h"
+#include "keyvalueparser.h"
 #include "openclhelper.h"
 #include "checkpointer.h"
 #include "chargeagent.h"
@@ -6,6 +7,10 @@
 #include "simulation.h"
 #include "cubicgrid.h"
 #include "world.h"
+
+#include <QGridLayout>
+#include <QTextEdit>
+#include <QLabel>
 
 #include <QErrorMessage>
 #include <QMessageBox>
@@ -20,6 +25,10 @@
 LangmuirViewer::LangmuirViewer(QWidget *parent) :
     QGLViewer(parent)
 {
+    m_error = new QErrorMessage(this);
+    m_error->setWindowTitle("Langmuir");
+    m_error->setMinimumSize(640, 512);
+
     m_simulation = NULL;
     m_world = NULL;
 
@@ -306,8 +315,7 @@ void LangmuirViewer::load(QString fileName)
     }
 
     if (fileName.isEmpty()) {
-        QErrorMessage* error = QErrorMessage::qtHandler();
-        error->showMessage("Can not load the simulation (no file selected)");
+        m_error->showMessage("Can not load the simulation (no file selected)");
 
         emit showMessage("no file selected");
         return;
@@ -345,8 +353,7 @@ void LangmuirViewer::save(QString fileName)
         emit showMessage(qPrintable(QString("saved: %1").arg(fileName)));
     }
     else {
-        QErrorMessage* error = QErrorMessage::qtHandler();
-        error->showMessage("Can not save the simulation (no simulation loaded)");
+        m_error->showMessage("Can not save the simulation (no simulation loaded)");
 
         emit showMessage("can not save simulation");
 
@@ -362,8 +369,7 @@ void LangmuirViewer::unload()
 
     if (m_simulation == NULL || m_world == NULL) {
 
-        QErrorMessage* error = QErrorMessage::qtHandler();
-        error->showMessage("Can not delete the simulation (no simulation loaded)");
+        m_error->showMessage("Can not delete the simulation (no simulation loaded)");
 
         emit showMessage("can not delete simulation");
 
@@ -397,8 +403,7 @@ void LangmuirViewer::reset() {
     // check if there is a simulation
     if (m_world == NULL || m_simulation == NULL) {
 
-        QErrorMessage* error = QErrorMessage::qtHandler();
-        error->showMessage("Can not reset the simulation (no simulation loaded)");
+        m_error->showMessage("Can not reset the simulation (no simulation loaded)");
 
         emit showMessage("can not reset simulation");
 
@@ -428,6 +433,7 @@ void LangmuirViewer::reset() {
         }
     }
 
+    parameters.simulationStart = QDateTime::currentDateTime();
     parameters.outputIsOn      = false;
     parameters.iterationsPrint = 1;
     parameters.currentStep     = 0;
@@ -471,4 +477,51 @@ void LangmuirViewer::play()
         emit showMessage("simulation is playing");
     }
     emit isAnimated(animationIsStarted());
+}
+
+void LangmuirViewer::showParameters()
+{
+    // pause the simulation
+    if (animationIsStarted()) {
+        pause();
+    }
+
+    // check if there is a simulation
+    if (m_world == NULL || m_simulation == NULL) {
+
+        m_error->showMessage("Can not show simulation parameters (no simulation loaded)");
+
+        emit showMessage("can not show simulation parameters");
+
+        return;
+    }
+
+    // get variables
+    const QStringList& keys = m_world->keyValueParser().getOrderedNames();
+    const QMap<QString,Langmuir::Variable*>& variableMap = m_world->keyValueParser().getVariableMap();
+
+    // create HTML table
+    QString title = "<td><b><font face=\"courier\" color=\"%1\">%2<font></b></td>";
+    QString label = "<td><b><font face=\"courier\">%1<font></b></td>";
+    QString value = "<td><b><font face=\"courier\">%1<font></b></td>";
+
+    QString parameters = "<table>";
+    parameters += "<tr>";
+    parameters += title.arg("red").arg("KEY");
+    parameters += title.arg("blue").arg("VALUE");
+    parameters += "</tr>";
+
+    foreach(QString key, keys)
+    {
+        Langmuir::Variable *variable = variableMap[key];
+        if (!variable->isConstant()) {
+            parameters += "<tr>";
+            parameters += label.arg(variable->key());
+            parameters += value.arg(variable->value());
+            parameters += "</tr>";
+        }
+    }
+    parameters += "<table/>";
+
+    m_error->showMessage(parameters);
 }
