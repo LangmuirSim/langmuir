@@ -651,6 +651,9 @@ void World::initialize(const QString &fileName, SimulationParameters *pparameter
     // Initialize OpenCL
     opencl().initializeOpenCL(gpuID);
     opencl().toggleOpenCL(parameters().useOpenCL);
+
+    // Output parameters to terminal
+    qDebug() << *m_keyValueParser;
 }
 
 void World::placeDefects(const QList<int>& siteIDs)

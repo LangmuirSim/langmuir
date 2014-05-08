@@ -68,6 +68,16 @@ public:
      */
     friend std::ostream& operator<<(std::ostream &stream, const KeyValueParser &keyValueParser);
 
+    /**
+     * @brief Write the parameters to QDebug in a "key=value" fashion
+     */
+    friend QDebug operator<<(QDebug dbg, KeyValueParser &keyValueParser);
+
+    /**
+     * @brief convert parameters to a QString
+     */
+    QString toQString();
+
 private:
     /**
      * @brief A map between variable names and variables

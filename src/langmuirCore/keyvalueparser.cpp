@@ -223,4 +223,20 @@ SimulationParameters& KeyValueParser::parameters()
     return m_parameters;
 }
 
+QDebug operator<<(QDebug dbg, KeyValueParser &keyValueParser)
+{
+    return dbg << qPrintable(keyValueParser.toQString());
+}
+
+QString KeyValueParser::toQString()
+{
+    QString result = "";
+    foreach (QString key, m_orderedNames)
+    {
+        Variable *variable = m_variableMap[key];
+        result += QString("langmuir: %1\n").arg(variable->keyValue());
+    }
+    return result.trimmed();
+}
+
 }
