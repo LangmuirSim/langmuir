@@ -415,7 +415,7 @@ void LangmuirViewer::reset() {
 
     // decide on random seed
     QMessageBox::StandardButton answer = QMessageBox::question(this, "Random seed",
-        "Use the same random seed?", QMessageBox::Yes|QMessageBox::No, QMessageBox::No);
+        "Use the same random seed?", QMessageBox::Cancel|QMessageBox::Yes|QMessageBox::No, QMessageBox::No);
 
     switch (answer)
     {
@@ -428,8 +428,15 @@ void LangmuirViewer::reset() {
             parameters.randomSeed = 0;
             break;
         }
-        default:
+        case QMessageBox::Cancel: default:
         {
+            m_error->showMessage("Can not reset the simulation (aborted)");
+
+            emit showMessage("aborted simulation reset");
+
+            return;
+
+            break;
         }
     }
 

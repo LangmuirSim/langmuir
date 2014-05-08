@@ -78,6 +78,7 @@
    <addaction name="actionOpen"/>
    <addaction name="actionSave"/>
    <addaction name="actionUnload"/>
+   <addaction name="actionReset"/>
    <addaction name="actionScreenshot"/>
    <addaction name="separator"/>
    <addaction name="actionStart"/>
