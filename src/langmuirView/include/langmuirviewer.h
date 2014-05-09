@@ -187,6 +187,12 @@ protected:
      */
     virtual QString helpString() const;
 
+    /**
+     * @brief draw traps on image
+     * @param image image to draw draws on
+     */
+    void drawTraps(QImage &image, QColor bcolor, QColor fcolor);
+
     //! axis that sits in the corner and doesnt change size
     CornerAxis *m_cornerAxis;
 
@@ -200,6 +206,7 @@ protected:
     PointCloud *m_holes;
 
     //! base
+    Box *m_trapBox;
     Box *m_baseBox;
 
     //! box (left)

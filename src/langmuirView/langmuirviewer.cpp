@@ -204,6 +204,25 @@ void LangmuirViewer::initGeometry()
         m_baseBox->setZSize(m_boxThickness);
     }
 
+    if (m_trapBox != NULL)
+    {
+        if (m_world != NULL)
+        {
+            if (m_world->numTraps() > 0)
+            {
+                QImage image;
+                drawTraps(image, m_baseBox->getColor(), Qt::black);
+
+                m_trapBox->loadImage(image);
+                m_trapBox->showImage(true);
+            }
+        }
+        else
+        {
+            m_trapBox->showImage(false);
+        }
+    }
+
     if (m_leftBox != NULL)
     {
         m_leftBox->setXSize(m_boxThickness);
@@ -250,23 +269,34 @@ void LangmuirViewer::init()
     m_holes->makeConnections();
 
     // Base
+    m_trapBox = new Box(*this, this);
+    m_trapBox->setColor(Qt::blue);
+    m_trapBox->setFaces(Box::Front);
+    m_trapBox->setVisible(true);
+    m_trapBox->makeConnections();
+
     m_baseBox = new Box(*this, this);
     m_baseBox->setColor(Qt::blue);
-    m_baseBox->setFaces(Box::None);
+    m_baseBox->setFaces(Box::Back|Box::North|Box::South|Box::East|Box::West);
     m_baseBox->setVisible(true);
     m_baseBox->makeConnections();
+
+    connect(m_baseBox, SIGNAL(colorChanged(QColor)), m_trapBox, SLOT(setColor(QColor)));
+    connect(m_baseBox, SIGNAL(xSizeChanged(double)), m_trapBox, SLOT(setXSize(double)));
+    connect(m_baseBox, SIGNAL(ySizeChanged(double)), m_trapBox, SLOT(setYSize(double)));
+    connect(m_baseBox, SIGNAL(zSizeChanged(double)), m_trapBox, SLOT(setZSize(double)));
 
     // Left Electrode
     m_leftBox = new Box(*this, this);
     m_leftBox->setColor(Qt::red);
-    m_leftBox->setFaces(Box::None);
+    m_leftBox->setFaces(Box::All);
     m_leftBox->setVisible(true);
     m_leftBox->makeConnections();
 
     // Left Electrode
     m_rightBox = new Box(*this, this);
     m_rightBox->setColor(Qt::red);
-    m_rightBox->setFaces(Box::None);
+    m_rightBox->setFaces(Box::All);
     m_rightBox->setVisible(true);
     m_rightBox->makeConnections();
 
@@ -293,6 +323,7 @@ void LangmuirViewer::init()
     // OpenGL
     glShadeModel(GL_SMOOTH);
     glEnable(GL_TEXTURE_2D);
+    glEnable(GL_POINT_SMOOTH);
 }
 
 void LangmuirViewer::preDraw()
@@ -316,6 +347,7 @@ void LangmuirViewer::draw()
 
         glPushMatrix();
             glTranslatef(0.0, 0.0, -0.05);
+            m_trapBox->render();
             m_baseBox->render();
         glPopMatrix();
 
@@ -611,4 +643,51 @@ void LangmuirViewer::showParameters()
 void LangmuirViewer::drawLightSource(GLenum light, float scale) const
 {
     drawLight(light, scale);
+}
+
+void LangmuirViewer::drawTraps(QImage &image, QColor bcolor, QColor fcolor)
+{
+    if (m_world == NULL || m_simulation == NULL)
+    {
+        return;
+    }
+
+    if (m_world->numTraps() <= 0)
+    {
+        return;
+    }
+
+    int xsize = m_world->parameters().gridX;
+    int ysize = m_world->parameters().gridY;
+
+    image = QImage(xsize, ysize, QImage::Format_ARGB32_Premultiplied);
+    image.fill(1);
+
+    QPainter painter;
+    painter.begin(&image);
+
+    painter.scale(1.0, -1.0);
+    painter.translate(0.0, -ysize);
+    painter.setWindow(0, 0, xsize, ysize);
+
+    painter.fillRect(QRect(0,0,xsize,ysize), bcolor);
+    painter.setPen(fcolor);
+
+    foreach(int s, m_world->trapSiteIDs())
+    {
+        int z = m_world->electronGrid().getIndexZ(s);
+
+        if (z == 0)
+        {
+            int x = m_world->electronGrid().getIndexX(s);
+            int y = m_world->electronGrid().getIndexY(s);
+
+            painter.drawPoint(x, y);
+        }
+    }
+
+    painter.end();
+
+    int scale = 5;
+    image = image.scaled(scale * image.width(), scale * image.height(), Qt::KeepAspectRatioByExpanding);
 }

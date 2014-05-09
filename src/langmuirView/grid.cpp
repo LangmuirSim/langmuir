@@ -33,7 +33,7 @@ void Grid::initShaders()
 
 void Grid::init() {
 
-    m_color = Qt::white;
+    m_color = Qt::black;
     emit colorChanged(m_color);
 
     m_numPoints = 0;

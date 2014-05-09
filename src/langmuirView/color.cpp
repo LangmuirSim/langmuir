@@ -1,15 +1,6 @@
 #include "color.h"
 
 namespace color {
-    void glColor3f(QColor& color)
-    {
-
-    }
-
-    void glColor4f(QColor& color)
-    {
-
-    }
 
     float* qColorToArray4(const QColor &color, float *array)
     {

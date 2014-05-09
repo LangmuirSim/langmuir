@@ -38,6 +38,26 @@ public:
     Q_DECLARE_FLAGS(Faces, Face)
     Q_FLAGS(Faces)
 
+    /**
+     * @brief get color
+     */
+    const QColor& getColor() const;
+
+    /**
+     * @brief get x length
+     */
+    int getXSize() const;
+
+    /**
+     * @brief get y length
+     */
+    int getYSize() const;
+
+    /**
+     * @brief get z length
+     */
+    int getZSize() const;
+
 signals:
     /**
      * @brief signal that the color of has changed

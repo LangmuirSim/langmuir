@@ -7,15 +7,6 @@
 class LangmuirViewer;
 
 namespace color {
-    /**
-     * @brief Wrapper around glColor3f using QColor
-     */
-    void glColor3f(QColor& color);
-
-    /**
-     * @brief Wrapper around glColor4f using QColor
-     */
-    void glColor4f(QColor& color);
 
     /**
      * @brief Copy color data to array of size 4
