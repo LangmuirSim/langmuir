@@ -151,6 +151,15 @@ protected:
     //! z length
     double m_zsize;
 
+    //! half xsize
+    double m_halfXSize;
+
+    //! half ysize
+    double m_halfYSize;
+
+    //! half zsize
+    double m_halfZSize;
+
     //! texture ID
     GLuint m_imageID;
 

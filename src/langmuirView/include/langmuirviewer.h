@@ -10,6 +10,7 @@
 #include "light.h"
 #include "grid.h"
 #include "rand.h"
+#include "box.h"
 
 namespace Langmuir {
     class Simulation;
@@ -157,6 +158,11 @@ protected:
     virtual void init();
 
     /**
+     * @brief draw on the OpenGL widget before the main draw event
+     */
+    virtual void preDraw();
+
+    /**
      * @brief draw on the OpenGL widget
      */
     virtual void draw();
@@ -192,6 +198,18 @@ protected:
 
     //! point cloud representing holes
     PointCloud *m_holes;
+
+    //! base
+    Box *m_baseBox;
+
+    //! box (left)
+    Box *m_leftBox;
+
+    //! box (right)
+    Box *m_rightBox;
+
+    //! box parameter
+    double m_boxThickness;
 
     //! grid that outlines sites
     Grid *m_grid;

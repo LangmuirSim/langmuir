@@ -56,8 +56,7 @@ void Light::init() {
 
 void Light::draw()
 {
-    qDebug() << "light";
-    m_viewer.drawLightSource(m_lightID);
+    m_viewer.drawLightSource(m_lightID, 1.0f);
 }
 
 void Light::setPosition(float x, float y, float z, float w)
@@ -70,7 +69,7 @@ void Light::setPosition(QVector4D value)
     if (value != m_position) {
         m_position = value;
 
-        glLightfv(m_lightID, GL_POSITION, &m_position[0]);
+        updatePosition();
 
         emit positionChanged(m_position);
     }
@@ -81,8 +80,7 @@ void Light::setAColor(QColor color)
     if (color != m_acolor) {
         m_acolor = color;
 
-        float* color = color::qColorToArray4(m_acolor);
-        glLightfv(m_lightID, GL_AMBIENT, color);
+        updateAColor();
 
         emit aColorChanged(m_acolor);
     }
@@ -93,8 +91,7 @@ void Light::setDColor(QColor color)
     if (color != m_dcolor) {
         m_dcolor = color;
 
-        float* color = color::qColorToArray4(m_dcolor);
-        glLightfv(m_lightID, GL_DIFFUSE, color);
+        updateDColor();
 
         emit dColorChanged(m_dcolor);
     }
@@ -105,8 +102,7 @@ void Light::setSColor(QColor color)
     if (color != m_scolor) {
         m_scolor = color;
 
-        float* color = color::qColorToArray4(m_scolor);
-        glLightfv(m_lightID, GL_SPECULAR, color);
+        updateSColor();
 
         emit sColorChanged(m_scolor);
     }
@@ -155,6 +151,32 @@ void Light::setEnabled(bool enabled)
 void Light::toggle()
 {
     setEnabled(!m_enabled);
+}
+
+void Light::updatePosition()
+{
+    glLightfv(m_lightID, GL_POSITION, &m_position[0]);
+}
+
+void Light::updateAColor()
+{
+    static float color[4];
+    color::qColorToArray4(m_acolor, color);
+    glLightfv(m_lightID, GL_AMBIENT, color);
+}
+
+void Light::updateSColor()
+{
+    static float color[4];
+    color::qColorToArray4(m_scolor, color);
+    glLightfv(m_lightID, GL_SPECULAR, color);
+}
+
+void Light::updateDColor()
+{
+    static float color[4];
+    color::qColorToArray4(m_dcolor, color);
+    glLightfv(m_lightID, GL_DIFFUSE, color);
 }
 
 void Light::makeConnections()

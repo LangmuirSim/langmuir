@@ -32,6 +32,8 @@ LangmuirViewer::LangmuirViewer(QWidget *parent) :
     m_simulation = NULL;
     m_world = NULL;
 
+    m_boxThickness = 1.0;
+
     QGLFormat format;
     format.setVersion(4, 0);
     setFormat(format);
@@ -194,6 +196,27 @@ void LangmuirViewer::initGeometry()
         m_holes->setMaxRender(renderH);
     }
     updateHoleCloud();
+
+    if (m_baseBox != NULL)
+    {
+        m_baseBox->setXSize(m_gridX);
+        m_baseBox->setYSize(m_gridY);
+        m_baseBox->setZSize(m_boxThickness);
+    }
+
+    if (m_leftBox != NULL)
+    {
+        m_leftBox->setXSize(m_boxThickness);
+        m_leftBox->setYSize(m_gridY);
+        m_leftBox->setZSize(m_gridZ);
+    }
+
+    if (m_rightBox != NULL)
+    {
+        m_rightBox->setXSize(m_boxThickness);
+        m_rightBox->setYSize(m_gridY);
+        m_rightBox->setZSize(m_gridZ);
+    }
 }
 
 void LangmuirViewer::init()
@@ -226,16 +249,40 @@ void LangmuirViewer::init()
     m_holes->setVisible(true);
     m_holes->makeConnections();
 
+    // Base
+    m_baseBox = new Box(*this, this);
+    m_baseBox->setColor(Qt::blue);
+    m_baseBox->setFaces(Box::None);
+    m_baseBox->setVisible(true);
+    m_baseBox->makeConnections();
+
+    // Left Electrode
+    m_leftBox = new Box(*this, this);
+    m_leftBox->setColor(Qt::red);
+    m_leftBox->setFaces(Box::None);
+    m_leftBox->setVisible(true);
+    m_leftBox->makeConnections();
+
+    // Left Electrode
+    m_rightBox = new Box(*this, this);
+    m_rightBox->setColor(Qt::red);
+    m_rightBox->setFaces(Box::None);
+    m_rightBox->setVisible(true);
+    m_rightBox->makeConnections();
+
     initGeometry();
 
     // Light
-    glEnable(GL_COLOR_MATERIAL);
     glEnable(GL_LIGHTING);
 
+    // makes glColor set ambient and diffuse components of polygon
+    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+    glEnable(GL_COLOR_MATERIAL);
+
     m_light0 = new Light(GL_LIGHT0, *this, this);
-    m_light0->setAColor(QColor(  0,   0,   0, 255));
-    m_light0->setSColor(QColor(255, 255, 255, 255));
-    m_light0->setDColor(QColor(255, 255, 255, 255));
+    m_light0->setAColor(QColor(128, 128, 128, 255));  // white light but weaker
+    m_light0->setSColor(QColor(255, 255, 255, 255));  // white light
+    m_light0->setDColor(QColor(255, 255, 255, 255));  // white light
     m_light0->setPosition(1.0, 1.0, 1.0, 0.0);
     m_light0->setEnabled(true);
     m_light0->makeConnections();
@@ -248,12 +295,41 @@ void LangmuirViewer::init()
     glEnable(GL_TEXTURE_2D);
 }
 
+void LangmuirViewer::preDraw()
+{
+    QGLViewer::preDraw();
+    m_light0->updatePosition();
+}
+
 void LangmuirViewer::draw()
 {
-    m_electons->render();
-    m_defects->render();
-    m_holes->render();
-    m_grid->render();
+    glPushMatrix();
+        glTranslatef(0.0f, 0.0f, +0.05);
+        m_electons->render();
+        m_defects->render();
+        m_holes->render();
+    glPopMatrix();
+
+    glPushMatrix();
+        glTranslatef(0.0f, 0.0f, -0.5 * m_boxThickness);
+        m_grid->render();
+
+        glPushMatrix();
+            glTranslatef(0.0, 0.0, -0.05);
+            m_baseBox->render();
+        glPopMatrix();
+
+        glPushMatrix();
+            glTranslatef(-m_gridHalfX - 0.5 * m_boxThickness, 0.0, 0.0);
+            m_leftBox->render();
+        glPopMatrix();
+
+        glPushMatrix();
+            glTranslatef(+m_gridHalfX + 0.5 * m_boxThickness, 0.0, 0.0);
+            m_leftBox->render();
+        glPopMatrix();
+    glPopMatrix();
+
     m_light0->render();
 }
 

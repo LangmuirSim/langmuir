@@ -133,6 +133,18 @@ public slots:
      */
     void toggle();
 
+    //! use OpenGL commands
+    void updatePosition();
+
+    //! use OpenGL commands
+    void updateAColor();
+
+    //! use OpenGL commands
+    void updateSColor();
+
+    //! use OpenGL commands
+    void updateDColor();
+
 protected:
     /**
      * @brief initialize object

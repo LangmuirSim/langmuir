@@ -55,7 +55,6 @@ void Grid::draw() {
 
     // shader: pass matrix
     QMatrix4x4& MVP = m_viewer.getMVP();
-    MVP.translate(0.0, 0.0, 0.0);
 
     m_shader1.setUniformValue("matrix", MVP);
 

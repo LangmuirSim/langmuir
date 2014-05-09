@@ -18,12 +18,15 @@ Box::~Box()
 }
 
 void Box::init() {
-    m_color   = Qt::red;
-    m_xsize   = 1.0;
-    m_ysize   = 1.0;
-    m_zsize   = 1.0;
-    m_imageID = 0;
-    m_imageOn = false;
+    m_color     = Qt::red;
+    m_xsize     = 1.0;
+    m_ysize     = 1.0;
+    m_zsize     = 1.0;
+    m_halfXSize = 0.5;
+    m_halfYSize = 0.5;
+    m_halfZSize = 0.5;
+    m_imageID   = 0;
+    m_imageOn   = false;
 
     emit colorChanged(m_color);
     emit xSizeChanged(m_xsize);
@@ -32,12 +35,16 @@ void Box::init() {
 }
 
 void Box::draw() {
+
     GLboolean texture2DOn;
     glGetBooleanv(GL_TEXTURE_2D, &texture2DOn);
 
+    GLboolean colorMaterialOn;
+    glGetBooleanv(GL_COLOR_MATERIAL, &colorMaterialOn);
+
     glBegin(GL_QUADS);
 
-    // bind texture
+    //bind texture
     glBindTexture(GL_TEXTURE_2D, m_imageID);
 
     static float white[4];
@@ -48,134 +55,118 @@ void Box::draw() {
 
     // (+Y)
     if (m_imageOn && m_faces.testFlag(North)) {
-        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, white);
         glColor4fv(white);
         glEnable(GL_TEXTURE_2D);
-        glNormal3f( 0.0f, 1.0f, 0.0f);
-        glTexCoord2f(1.0f, 1.0f); glVertex3f( m_xsize, m_ysize,-m_zsize); // NE
-        glTexCoord2f(0.0f, 1.0f); glVertex3f(-m_xsize, m_ysize,-m_zsize); // NW
-        glTexCoord2f(0.0f, 0.0f); glVertex3f(-m_xsize, m_ysize, m_zsize); // SW
-        glTexCoord2f(1.0f, 0.0f); glVertex3f( m_xsize, m_ysize, m_zsize); // SE
+            glTexCoord2f(1.0f, 1.0f); glVertex3f( m_halfXSize, m_halfYSize,-m_halfZSize); glNormal3f( 0.0f, 1.0f, 0.0f); // NE
+            glTexCoord2f(0.0f, 1.0f); glVertex3f(-m_halfXSize, m_halfYSize,-m_halfZSize); glNormal3f( 0.0f, 1.0f, 0.0f); // NW
+            glTexCoord2f(0.0f, 0.0f); glVertex3f(-m_halfXSize, m_halfYSize, m_halfZSize); glNormal3f( 0.0f, 1.0f, 0.0f); // SW
+            glTexCoord2f(1.0f, 0.0f); glVertex3f( m_halfXSize, m_halfYSize, m_halfZSize); glNormal3f( 0.0f, 1.0f, 0.0f); // SE
         glDisable(GL_TEXTURE_2D);
     } else {
-        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, color);
-        glColor4fv(white);
-        glNormal3f( 0.0f, 1.0f, 0.0f);
-        glVertex3f( m_xsize, m_ysize,-m_zsize); // NE
-        glVertex3f(-m_xsize, m_ysize,-m_zsize); // NW
-        glVertex3f(-m_xsize, m_ysize, m_zsize); // SW
-        glVertex3f( m_xsize, m_ysize, m_zsize); // SE
+        glColor4fv(color);
+        glVertex3f( m_halfXSize, m_halfYSize,-m_halfZSize); glNormal3f( 0.0f, 1.0f, 0.0f); // NE
+        glVertex3f(-m_halfXSize, m_halfYSize,-m_halfZSize); glNormal3f( 0.0f, 1.0f, 0.0f); // NW
+        glVertex3f(-m_halfXSize, m_halfYSize, m_halfZSize); glNormal3f( 0.0f, 1.0f, 0.0f); // SW
+        glVertex3f( m_halfXSize, m_halfYSize, m_halfZSize); glNormal3f( 0.0f, 1.0f, 0.0f); // SE
     }
 
     // (-Y)
     if (m_imageOn && m_faces.testFlag(South)) {
-        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, white);
         glColor4fv(white);
         glEnable(GL_TEXTURE_2D);
-        glNormal3f( 0.0f,-1.0f, 0.0f);
-        glTexCoord2f(1.0f, 1.0f); glVertex3f( m_xsize,-m_ysize, m_zsize); // NE
-        glTexCoord2f(0.0f, 1.0f); glVertex3f(-m_xsize,-m_ysize, m_zsize); // NW
-        glTexCoord2f(0.0f, 0.0f); glVertex3f(-m_xsize,-m_ysize,-m_zsize); // SW
-        glTexCoord2f(1.0f, 0.0f); glVertex3f( m_xsize,-m_ysize,-m_zsize); // SE
+            glTexCoord2f(1.0f, 1.0f); glVertex3f( m_halfXSize,-m_halfYSize, m_halfZSize); glNormal3f( 0.0f,-1.0f, 0.0f); // NE
+            glTexCoord2f(0.0f, 1.0f); glVertex3f(-m_halfXSize,-m_halfYSize, m_halfZSize); glNormal3f( 0.0f,-1.0f, 0.0f); // NW
+            glTexCoord2f(0.0f, 0.0f); glVertex3f(-m_halfXSize,-m_halfYSize,-m_halfZSize); glNormal3f( 0.0f,-1.0f, 0.0f); // SW
+            glTexCoord2f(1.0f, 0.0f); glVertex3f( m_halfXSize,-m_halfYSize,-m_halfZSize); glNormal3f( 0.0f,-1.0f, 0.0f); // SE
         glDisable(GL_TEXTURE_2D);
     } else {
-        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, color);
-        glColor4fv(white);
-        glNormal3f( 0.0f,-1.0f, 0.0f);
-        glVertex3f( m_xsize,-m_ysize, m_zsize); // NE
-        glVertex3f(-m_xsize,-m_ysize, m_zsize); // NW
-        glVertex3f(-m_xsize,-m_ysize,-m_zsize); // SW
-        glVertex3f( m_xsize,-m_ysize,-m_zsize); // SE
+        glColor4fv(color);
+        glVertex3f( m_halfXSize,-m_halfYSize, m_halfZSize); glNormal3f( 0.0f,-1.0f, 0.0f); // NE
+        glVertex3f(-m_halfXSize,-m_halfYSize, m_halfZSize); glNormal3f( 0.0f,-1.0f, 0.0f); // NW
+        glVertex3f(-m_halfXSize,-m_halfYSize,-m_halfZSize); glNormal3f( 0.0f,-1.0f, 0.0f); // SW
+        glVertex3f( m_halfXSize,-m_halfYSize,-m_halfZSize); glNormal3f( 0.0f,-1.0f, 0.0f); // SE
     }
 
     // (+Z)
     if (m_imageOn && m_faces.testFlag(Front)) {
-        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, white);
         glColor4fv(white);
         glEnable(GL_TEXTURE_2D);
-        glNormal3f( 0.0f, 0.0f,-1.0f);
-        glTexCoord2f(1.0f, 1.0f); glVertex3f( m_xsize,-m_ysize, m_zsize); // SW
-        glTexCoord2f(0.0f, 1.0f); glVertex3f(-m_xsize,-m_ysize, m_zsize); // SE
-        glTexCoord2f(0.0f, 0.0f); glVertex3f(-m_xsize, m_ysize, m_zsize); // NE
-        glTexCoord2f(1.0f, 0.0f); glVertex3f( m_xsize, m_ysize, m_zsize); // NW
+            glTexCoord2f(1.0f, 1.0f); glVertex3f( m_halfXSize,-m_halfYSize, m_halfZSize); glNormal3f( 0.0f, 0.0f, 1.0f); // SW
+            glTexCoord2f(0.0f, 1.0f); glVertex3f(-m_halfXSize,-m_halfYSize, m_halfZSize); glNormal3f( 0.0f, 0.0f, 1.0f); // SE
+            glTexCoord2f(0.0f, 0.0f); glVertex3f(-m_halfXSize, m_halfYSize, m_halfZSize); glNormal3f( 0.0f, 0.0f, 1.0f); // NE
+            glTexCoord2f(1.0f, 0.0f); glVertex3f( m_halfXSize, m_halfYSize, m_halfZSize); glNormal3f( 0.0f, 0.0f, 1.0f); // NW
         glDisable(GL_TEXTURE_2D);
     } else {
-        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, color);
-        glColor4fv(white);
-        glNormal3f( 0.0f, 0.0f,-1.0f);
-        glVertex3f( m_xsize,-m_ysize, m_zsize); // SW
-        glVertex3f(-m_xsize,-m_ysize, m_zsize); // SE
-        glVertex3f(-m_xsize, m_ysize, m_zsize); // NE
-        glVertex3f( m_xsize, m_ysize, m_zsize); // NW
+        glColor4fv(color);
+        glVertex3f( m_halfXSize,-m_halfYSize, m_halfZSize); glNormal3f( 0.0f, 0.0f, 1.0f); // SW
+        glVertex3f(-m_halfXSize,-m_halfYSize, m_halfZSize); glNormal3f( 0.0f, 0.0f, 1.0f); // SE
+        glVertex3f(-m_halfXSize, m_halfYSize, m_halfZSize); glNormal3f( 0.0f, 0.0f, 1.0f); // NE
+        glVertex3f( m_halfXSize, m_halfYSize, m_halfZSize); glNormal3f( 0.0f, 0.0f, 1.0f); // NW
     }
 
     // (-Z)
     if (m_imageOn && m_faces.testFlag(Back)) {
-        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, white);
         glColor4fv(white);
         glEnable(GL_TEXTURE_2D);
-        glNormal3f( 0.0f, 0.0f,-1.0f);
-        glTexCoord2f(1.0f, 1.0f); glVertex3f( m_xsize,-m_ysize,-m_zsize); // SW
-        glTexCoord2f(0.0f, 1.0f); glVertex3f(-m_xsize,-m_ysize,-m_zsize); // SE
-        glTexCoord2f(0.0f, 0.0f); glVertex3f(-m_xsize, m_ysize,-m_zsize); // NE
-        glTexCoord2f(1.0f, 0.0f); glVertex3f( m_xsize, m_ysize,-m_zsize); // NW
+            glTexCoord2f(1.0f, 1.0f); glVertex3f( m_halfXSize,-m_halfYSize,-m_halfZSize); glNormal3f( 0.0f, 0.0f,-1.0f); // SW
+            glTexCoord2f(0.0f, 1.0f); glVertex3f(-m_halfXSize,-m_halfYSize,-m_halfZSize); glNormal3f( 0.0f, 0.0f,-1.0f); // SE
+            glTexCoord2f(0.0f, 0.0f); glVertex3f(-m_halfXSize, m_halfYSize,-m_halfZSize); glNormal3f( 0.0f, 0.0f,-1.0f); // NE
+            glTexCoord2f(1.0f, 0.0f); glVertex3f( m_halfXSize, m_halfYSize,-m_halfZSize); glNormal3f( 0.0f, 0.0f,-1.0f); // NW
         glDisable(GL_TEXTURE_2D);
     } else {
-        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, color);
-        glColor4fv(white);
-        glNormal3f( 0.0f, 0.0f,-1.0f);
-        glVertex3f( m_xsize,-m_ysize,-m_zsize); // SW
-        glVertex3f(-m_xsize,-m_ysize,-m_zsize); // SE
-        glVertex3f(-m_xsize, m_ysize,-m_zsize); // NE
-        glVertex3f( m_xsize, m_ysize,-m_zsize); // NW
+        glColor4fv(color);
+        glVertex3f( m_halfXSize,-m_halfYSize,-m_halfZSize); glNormal3f( 0.0f, 0.0f,-1.0f); // SW
+        glVertex3f(-m_halfXSize,-m_halfYSize,-m_halfZSize); glNormal3f( 0.0f, 0.0f,-1.0f); // SE
+        glVertex3f(-m_halfXSize, m_halfYSize,-m_halfZSize); glNormal3f( 0.0f, 0.0f,-1.0f); // NE
+        glVertex3f( m_halfXSize, m_halfYSize,-m_halfZSize); glNormal3f( 0.0f, 0.0f,-1.0f); // NW
     }
 
     // (+X)
     if (m_imageOn && m_faces.testFlag(East)) {
-        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, white);
         glColor4fv(white);
         glEnable(GL_TEXTURE_2D);
-        glNormal3f( 1.0f, 0.0f, 0.0f);
-        glTexCoord2f(1.0f, 1.0f); glVertex3f( m_xsize, m_ysize,-m_zsize); // NE
-        glTexCoord2f(0.0f, 1.0f); glVertex3f( m_xsize, m_ysize, m_zsize); // NW
-        glTexCoord2f(0.0f, 0.0f); glVertex3f( m_xsize,-m_ysize, m_zsize); // SW
-        glTexCoord2f(1.0f, 0.0f); glVertex3f( m_xsize,-m_ysize,-m_zsize); // SE
+            glTexCoord2f(1.0f, 1.0f); glVertex3f( m_halfXSize, m_halfYSize,-m_halfZSize); glNormal3f( 1.0f, 0.0f, 0.0f); // NE
+            glTexCoord2f(0.0f, 1.0f); glVertex3f( m_halfXSize, m_halfYSize, m_halfZSize); glNormal3f( 1.0f, 0.0f, 0.0f); // NW
+            glTexCoord2f(0.0f, 0.0f); glVertex3f( m_halfXSize,-m_halfYSize, m_halfZSize); glNormal3f( 1.0f, 0.0f, 0.0f); // SW
+            glTexCoord2f(1.0f, 0.0f); glVertex3f( m_halfXSize,-m_halfYSize,-m_halfZSize); glNormal3f( 1.0f, 0.0f, 0.0f); // SE
         glDisable(GL_TEXTURE_2D);
     } else {
         glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, color);
-        glColor4fv(white);
-        glNormal3f( 1.0f, 0.0f, 0.0f);
-        glVertex3f( m_xsize, m_ysize,-m_zsize); // NE
-        glVertex3f( m_xsize, m_ysize, m_zsize); // NW
-        glVertex3f( m_xsize,-m_ysize, m_zsize); // SW
-        glVertex3f( m_xsize,-m_ysize,-m_zsize); // SE
+        glColor4fv(color);
+        glVertex3f( m_halfXSize, m_halfYSize,-m_halfZSize); glNormal3f( 1.0f, 0.0f, 0.0f); // NE
+        glVertex3f( m_halfXSize, m_halfYSize, m_halfZSize); glNormal3f( 1.0f, 0.0f, 0.0f); // NW
+        glVertex3f( m_halfXSize,-m_halfYSize, m_halfZSize); glNormal3f( 1.0f, 0.0f, 0.0f); // SW
+        glVertex3f( m_halfXSize,-m_halfYSize,-m_halfZSize); glNormal3f( 1.0f, 0.0f, 0.0f); // SE
     }
 
     // (-X)
     if (m_imageOn && m_faces.testFlag(West)) {
-        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, white);
         glColor4fv(white);
         glEnable(GL_TEXTURE_2D);
-        glNormal3f(-1.0f, 0.0f, 0.0f);
-        glTexCoord2f(1.0f, 1.0f); glVertex3f(-m_xsize, m_ysize, m_zsize); // NE
-        glTexCoord2f(0.0f, 1.0f); glVertex3f(-m_xsize, m_ysize,-m_zsize); // NW
-        glTexCoord2f(0.0f, 0.0f); glVertex3f(-m_xsize,-m_ysize,-m_zsize); // SW
-        glTexCoord2f(1.0f, 0.0f); glVertex3f(-m_xsize,-m_ysize, m_zsize); // SE
+            glTexCoord2f(1.0f, 1.0f); glVertex3f(-m_halfXSize, m_halfYSize, m_halfZSize); glNormal3f(-1.0f, 0.0f, 0.0f); // NE
+            glTexCoord2f(0.0f, 1.0f); glVertex3f(-m_halfXSize, m_halfYSize,-m_halfZSize); glNormal3f(-1.0f, 0.0f, 0.0f); // NW
+            glTexCoord2f(0.0f, 0.0f); glVertex3f(-m_halfXSize,-m_halfYSize,-m_halfZSize); glNormal3f(-1.0f, 0.0f, 0.0f); // SW
+            glTexCoord2f(1.0f, 0.0f); glVertex3f(-m_halfXSize,-m_halfYSize, m_halfZSize); glNormal3f(-1.0f, 0.0f, 0.0f); // SE
         glDisable(GL_TEXTURE_2D);
     } else {
-        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, color);
-        glColor4fv(white);
-        glNormal3f(-1.0f, 0.0f, 0.0f);
-        glVertex3f(-m_xsize, m_ysize, m_zsize); // NE
-        glVertex3f(-m_xsize, m_ysize,-m_zsize); // NW
-        glVertex3f(-m_xsize,-m_ysize,-m_zsize); // SW
-        glVertex3f(-m_xsize,-m_ysize, m_zsize); // SE
+        glColor4fv(color);
+        glVertex3f(-m_halfXSize, m_halfYSize, m_halfZSize); glNormal3f(-1.0f, 0.0f, 0.0f); // NE
+        glVertex3f(-m_halfXSize, m_halfYSize,-m_halfZSize); glNormal3f(-1.0f, 0.0f, 0.0f); // NW
+        glVertex3f(-m_halfXSize,-m_halfYSize,-m_halfZSize); glNormal3f(-1.0f, 0.0f, 0.0f); // SW
+        glVertex3f(-m_halfXSize,-m_halfYSize, m_halfZSize); glNormal3f(-1.0f, 0.0f, 0.0f); // SE
     }
 
     glEnd();
 
     if (texture2DOn) {
         glEnable(GL_TEXTURE_2D);
+    }
+
+    if (colorMaterialOn) {
+        glEnable(GL_COLOR_MATERIAL);
+    }
+    else {
+        glDisable(GL_COLOR_MATERIAL);
     }
 }
 
@@ -191,6 +182,7 @@ void Box::setXSize(double value)
 {
     if (value != m_xsize) {
         m_xsize = value;
+        m_halfXSize = 0.5 * m_xsize;
         emit xSizeChanged(value);
     }
 }
@@ -199,6 +191,7 @@ void Box::setYSize(double value)
 {
     if (value != m_ysize) {
         m_ysize = value;
+        m_halfYSize = 0.5 * m_ysize;
         emit ySizeChanged(value);
     }
 }
@@ -207,6 +200,7 @@ void Box::setZSize(double value)
 {
     if (value != m_zsize) {
         m_zsize = value;
+        m_halfZSize = 0.5 * m_zsize;
         emit zSizeChanged(value);
     }
 }
