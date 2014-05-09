@@ -10,6 +10,7 @@ set(SOURCES
     pointcloud.cpp
     mainwindow.cpp
     corneraxis.cpp
+    light.cpp
     color.cpp
     axis.cpp
     grid.cpp
@@ -22,6 +23,7 @@ set(HEADERS
     ./include/pointcloud.h
     ./include/mainwindow.h
     ./include/corneraxis.h
+    ./include/light.h
     ./include/color.h
     ./include/axis.h
     ./include/grid.h

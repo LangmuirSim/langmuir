@@ -7,6 +7,7 @@
 
 #include "corneraxis.h"
 #include "pointcloud.h"
+#include "light.h"
 #include "grid.h"
 #include "rand.h"
 
@@ -122,6 +123,13 @@ public slots:
      */
     void showParameters();
 
+    /**
+     * @brief draw an OpenGL light source
+     * @param light
+     * @param scale
+     */
+    void drawLightSource(GLenum light, float scale = 1.0f) const;
+
 protected:
     /**
      * @brief update the electron point cloud
@@ -187,6 +195,9 @@ protected:
 
     //! grid that outlines sites
     Grid *m_grid;
+
+    //! main light source
+    Light *m_light0;
 
     //! the simulation manipulator
     Langmuir::Simulation *m_simulation;

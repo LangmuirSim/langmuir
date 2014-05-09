@@ -228,23 +228,19 @@ void LangmuirViewer::init()
 
     initGeometry();
 
-    // Light setup
+    // Light
     glEnable(GL_COLOR_MATERIAL);
     glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
 
-    const GLfloat light_p[4] = {1.0, 1.0, 1.0, 0.0};
-    const GLfloat light_a[4] = {0.0, 0.0, 0.0, 1.0};
-    const GLfloat light_s[4] = {1.0, 1.0, 1.0, 1.0};
-    const GLfloat light_d[4] = {1.0, 1.0, 1.0, 1.0};
-
-    glLightfv(GL_LIGHT0, GL_POSITION, light_p);
-    glLightfv(GL_LIGHT0, GL_AMBIENT , light_a);
-    glLightfv(GL_LIGHT0, GL_SPECULAR, light_s);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE , light_d);
+    m_light0 = new Light(GL_LIGHT0, *this, this);
+    m_light0->setAColor(QColor(  0,   0,   0, 255));
+    m_light0->setSColor(QColor(255, 255, 255, 255));
+    m_light0->setDColor(QColor(255, 255, 255, 255));
+    m_light0->setPosition(1.0, 1.0, 1.0, 0.0);
+    m_light0->setEnabled(true);
 
     // Background
-    setBackgroundColor(Qt::black);
+    //setBackgroundColor(Qt::black);
 
     // OpenGL
     glShadeModel(GL_SMOOTH);
@@ -257,6 +253,7 @@ void LangmuirViewer::draw()
     m_defects->render();
     m_holes->render();
     m_grid->render();
+    m_light0->render();
 }
 
 void LangmuirViewer::postDraw()
@@ -532,4 +529,9 @@ void LangmuirViewer::showParameters()
     parameters += "<table/>";
 
     m_error->showMessage(parameters);
+}
+
+void LangmuirViewer::drawLightSource(GLenum light, float scale) const
+{
+    drawLight(light, scale);
 }
