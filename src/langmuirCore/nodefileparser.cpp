@@ -303,7 +303,6 @@ int NodeFileParser::numGPUs(const QString& name)
 
 int NodeFileParser::GPUid(const QString &name, int i)
 {
-    qDebug() << m_gpus;
     return m_gpus[name].at(i);
 }
 
