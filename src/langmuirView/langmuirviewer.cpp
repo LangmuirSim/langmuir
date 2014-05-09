@@ -238,6 +238,7 @@ void LangmuirViewer::init()
     m_light0->setDColor(QColor(255, 255, 255, 255));
     m_light0->setPosition(1.0, 1.0, 1.0, 0.0);
     m_light0->setEnabled(true);
+    m_light0->makeConnections();
 
     // Background
     //setBackgroundColor(Qt::black);

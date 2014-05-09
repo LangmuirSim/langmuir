@@ -164,4 +164,6 @@ void Light::makeConnections()
     connect(this, SIGNAL(aColorChanged(QColor)), &m_viewer, SLOT(updateGL()));
     connect(this, SIGNAL(dColorChanged(QColor)), &m_viewer, SLOT(updateGL()));
     connect(this, SIGNAL(sColorChanged(QColor)), &m_viewer, SLOT(updateGL()));
+    connect(this, SIGNAL(lightIDChanged(GLuint)), &m_viewer, SLOT(updateGL()));
+    connect(this, SIGNAL(enabledChanged(bool)), &m_viewer, SLOT(updateGL()));
 }
