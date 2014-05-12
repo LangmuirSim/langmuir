@@ -255,7 +255,7 @@ void LangmuirViewer::init()
     // Grid
     m_grid = new Grid(*this, this);
     m_grid->setColor(QColor(128,128,128));
-    m_grid->setVisible(false);
+    m_grid->setVisible(true);
     m_grid->makeConnections();
 
     // Electrons

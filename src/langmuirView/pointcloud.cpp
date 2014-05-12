@@ -146,7 +146,7 @@ void PointCloud::draw() {
             m_verticesVBO->release();
             m_shader1.release();
 
-            //glDisable(GL_PROGRAM_POINT_SIZE);
+            glDisable(GL_PROGRAM_POINT_SIZE);
 
             break;
         }
