@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "langmuirviewer.h"
 
+#include <QInputDialog>
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QStatusBar>
@@ -102,6 +103,22 @@ void MainWindow::on_actionLoadSettings_triggered()
         this, tr("Open settings file"), QDir::currentPath(), "Settings (*.ini);; All Files (*)");
 
     m_viewer->loadSettings(fileName);
+}
+
+void MainWindow::on_actionIterations_triggered()
+{
+    m_viewer->pause();
+
+    bool ok   = false;
+    int value = QInputDialog::getInt(this, "Langmuir", "iterations.print", 1, 1, 100, 1, &ok);
+
+    if (ok && value)
+    {
+        m_viewer->setIterationsPrint(value);
+    }
+    else {
+        m_viewer->errorMessage("can not set iterations.print!");
+    }
 }
 
 void MainWindow::on_actionSaveSettings_triggered()

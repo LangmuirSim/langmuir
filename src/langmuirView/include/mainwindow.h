@@ -27,6 +27,7 @@ public slots:
     void on_actionSave_triggered();
     void on_actionLoadSettings_triggered();
     void on_actionSaveSettings_triggered();
+    void on_actionIterations_triggered();
     void setStopEnabled(bool enabled);
     void writeSettings();
     void readSettings();

@@ -66,7 +66,31 @@ signals:
      */
     void isAnimated(bool playing);
 
+    /**
+     * @brief signal if traps are shown
+     * @param shown true if showing traps
+     */
+    void isShowingTraps(bool shown);
+
+    /**
+     * @brief signal that iterations.print changed
+     * @param value value of iterations.print
+     */
+    void iterationsPrintChanged(int value);
+
 public slots:
+    /**
+     * @brief set the value of iterations.print
+     * @param value value to set
+     */
+    void setIterationsPrint(int value);
+
+    /**
+     * @brief turn on the traps texture
+     * @param on true is showing traps
+     */
+    void toggleTrapsShown(bool on=true);
+
     /**
      * @brief turn OpenCL on and off
      * @param on true if turning OpenCL on

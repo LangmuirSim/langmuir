@@ -52,6 +52,7 @@
     <addaction name="actionStart"/>
     <addaction name="actionStop"/>
     <addaction name="actionOpenCL"/>
+    <addaction name="actionIterations"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -63,6 +64,7 @@
     <addaction name="actionFPS"/>
     <addaction name="actionShow"/>
     <addaction name="actionParameters"/>
+    <addaction name="actionTraps"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuControl"/>
@@ -293,6 +295,19 @@
     <string>Load Settings</string>
    </property>
   </action>
+  <action name="actionTraps">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Trap</string>
+   </property>
+  </action>
+  <action name="actionIterations">
+   <property name="text">
+    <string>Iterations</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -318,6 +333,8 @@
     <slot>toggleGridIsVisible()</slot>
     <slot>reset()</slot>
     <slot>showParameters()</slot>
+    <slot>setIterationsPrint(int)</slot>
+    <slot>toggleTrapsShown(bool)</slot>
    </slots>
   </customwidget>
  </customwidgets>
@@ -554,6 +571,22 @@
    <signal>triggered()</signal>
    <receiver>qglwidget</receiver>
    <slot>showParameters()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>319</x>
+     <y>341</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionTraps</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>qglwidget</receiver>
+   <slot>toggleTrapsShown(bool)</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>

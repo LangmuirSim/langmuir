@@ -806,6 +806,26 @@ void LangmuirViewer::errorMessage(QString message)
     m_error->showMessage(message);
 }
 
+void LangmuirViewer::setIterationsPrint(int value)
+{
+    if (m_world != NULL)
+    {
+        m_world->parameters().iterationsPrint = value;
+        emit showMessage(QString("iterations.print=%1").arg(value));
+        emit iterationsPrintChanged(value);
+    }
+}
+
+void LangmuirViewer::toggleTrapsShown(bool on)
+{
+    if (m_trapBox != NULL)
+    {
+        m_trapBox->showImage(on);
+        emit showMessage("traps=%s", on);
+        emit isShowingTraps(on);
+    }
+}
+
 void LangmuirViewer::toggleOpenCL(bool on)
 {
     if (m_world == NULL) {
