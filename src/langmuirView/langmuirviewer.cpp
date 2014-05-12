@@ -254,7 +254,7 @@ void LangmuirViewer::init()
 
     // Grid
     m_grid = new Grid(*this, this);
-    m_grid->setColor(QColor(128,128,128));
+    m_grid->setColor(QColor(64, 64, 64));
     m_grid->setVisible(true);
     m_grid->makeConnections();
 
@@ -296,14 +296,14 @@ void LangmuirViewer::init()
 
     // Left Electrode
     m_leftBox = new Box(*this, this);
-    m_leftBox->setColor(Qt::red);
+    m_leftBox->setColor(Qt::black);
     m_leftBox->setFaces(Box::All);
     m_leftBox->setVisible(true);
     m_leftBox->makeConnections();
 
     // Left Electrode
     m_rightBox = new Box(*this, this);
-    m_rightBox->setColor(Qt::red);
+    m_rightBox->setColor(Qt::black);
     m_rightBox->setFaces(Box::All);
     m_rightBox->setVisible(true);
     m_rightBox->makeConnections();
@@ -737,7 +737,7 @@ void LangmuirViewer::getSettings(QSettings &settings)
 
         // update settings
         m_trapColor = color;
-        m_trapBox->showImage(false);
+        m_trapBox->showImage(visible);
         initTraps();
     }
 
@@ -749,7 +749,7 @@ void LangmuirViewer::getSettings(QSettings &settings)
         bool visible = settings.value("visible", true).toBool();
 
         // color
-        int color_r = settings.value("color_r", 255).toInt();
+        int color_r = settings.value("color_r",   0).toInt();
         int color_g = settings.value("color_g",   0).toInt();
         int color_b = settings.value("color_b",   0).toInt();
         QColor color = QColor::fromRgb(color_r, color_g, color_b);
