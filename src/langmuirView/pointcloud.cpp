@@ -84,7 +84,7 @@ void PointCloud::init() {
     m_color = Qt::green;
     emit colorChanged(m_color);
 
-    m_mode = Points;
+    m_mode = Cubes;
     emit modeChanged(m_mode);
 
     m_pointSize = 256.0;
@@ -152,6 +152,35 @@ void PointCloud::draw() {
         }
         case Cubes:
         {
+            glEnable(GL_PROGRAM_POINT_SIZE);
+
+            m_shader2.bind();
+
+            // shader: pass matrix
+            QMatrix4x4& MVP = m_viewer.getMVP();
+            m_shader2.setUniformValue("matrix", MVP);
+
+            // shader: pass color
+            m_shader2.setUniformValue("color", m_color);
+
+            // shader: pass pointsize
+            m_shader2.setUniformValue("pointSize", m_pointSize);
+
+            // shader: pass vertices
+            m_verticesVBO->bind();
+            m_shader2.enableAttributeArray("vertex");
+            m_shader2.setAttributeBuffer("vertex", GL_FLOAT, 0, 3, 0);
+
+            // shader: draw
+            glDrawArrays(GL_POINTS, 0, m_maxRender);
+
+            // release
+            m_shader2.disableAttributeArray("vertex");
+            m_verticesVBO->release();
+            m_shader2.release();
+
+            glDisable(GL_PROGRAM_POINT_SIZE);
+
             break;
         }
         default:
