@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QCloseEvent>
 #include <QMainWindow>
 #include <QAction>
 #include <QStyle>
@@ -24,7 +25,12 @@ public slots:
     void on_actionScreenshot_triggered();
     void on_actionOpen_triggered();
     void on_actionSave_triggered();
+    void on_actionLoadSettings_triggered();
+    void on_actionSaveSettings_triggered();
     void setStopEnabled(bool enabled);
+    void writeSettings();
+    void readSettings();
+    void closeEvent(QCloseEvent *event);
 
 private:
     Ui::MainWindow *ui;

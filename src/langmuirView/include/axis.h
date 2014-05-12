@@ -17,6 +17,31 @@ public:
      */
     explicit Axis(LangmuirViewer &viewer, QObject *parent = 0);
 
+    /**
+     * @brief get color of x-axis
+     */
+    const QColor& getXColor() const;
+
+    /**
+     * @brief get color of y-axis
+     */
+    const QColor& getYColor() const;
+
+    /**
+     * @brief get color of z-axis
+     */
+    const QColor& getZColor() const;
+
+    /**
+     * @brief get axis length
+     */
+    double getLength() const;
+
+    /**
+     * @brief get axis radius
+     */
+    double getRadius() const;
+
 signals:
     /**
      * @brief signal that the color of x-axis has changed
@@ -96,19 +121,19 @@ protected:
     virtual void draw();
 
     //! axes radius
-    double aradius;
+    double m_radius;
 
     //! axes length
-    double alength;
+    double m_length;
 
     //! color of x-axis
-    QColor x_color;
+    QColor m_xcolor;
 
     //! color of y-axis
-    QColor y_color;
+    QColor m_ycolor;
 
     //! color of z-axis
-    QColor z_color;
+    QColor m_zcolor;
 };
 
 #endif // AXIS_H

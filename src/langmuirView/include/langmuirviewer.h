@@ -4,6 +4,7 @@
 #include <QGLViewer/qglviewer.h>
 #include <QErrorMessage>
 #include <QMatrix4x4>
+#include <QSettings>
 
 #include "corneraxis.h"
 #include "pointcloud.h"
@@ -131,6 +132,36 @@ public slots:
      */
     void drawLightSource(GLenum light, float scale = 1.0f) const;
 
+    /**
+     * @brief load settings from a file
+     * @param fileName name of settings file
+     */
+    void loadSettings(QString fileName);
+
+    /**
+     * @brief save settings to a file
+     * @param fileName name of settings file
+     */
+    void saveSettings(QString fileName);
+
+    /**
+     * @brief show error message window
+     * @param message error message
+     */
+    void errorMessage(QString message);
+
+    /**
+     * @brief set the properties of settings object
+     * @param settings settings object
+     */
+    void setSettings(QSettings &settings);
+
+    /**
+     * @brief get the properties of settings object
+     * @param settings settings object
+     */
+    void getSettings(QSettings &settings);
+
 protected:
     /**
      * @brief update the electron point cloud
@@ -151,6 +182,11 @@ protected:
      * @brief update the geometry using simulation parameters
      */
     void initGeometry();
+
+    /**
+     * @brief init trap geometry
+     */
+    void initTraps();
 
     /**
      * @brief setup OpenGL
@@ -197,7 +233,7 @@ protected:
     CornerAxis *m_cornerAxis;
 
     //! point cloud representing electrons
-    PointCloud *m_electons;
+    PointCloud *m_electrons;
 
     //! point cloud representing defects
     PointCloud *m_defects;
@@ -217,6 +253,9 @@ protected:
 
     //! box parameter
     double m_boxThickness;
+
+    //! box parameter
+    QColor m_trapColor;
 
     //! grid that outlines sites
     Grid *m_grid;

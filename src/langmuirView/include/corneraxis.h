@@ -29,6 +29,21 @@ public:
      */
     explicit CornerAxis(LangmuirViewer &viewer, QObject *parent = 0);
 
+    /**
+     * @brief get the location of the corner axis
+     */
+    Location getLocation() const;
+
+    /**
+     * @brief get the size of the viewport
+     */
+    int getSize() const;
+
+    /**
+     * @brief get the shift of the viewport
+     */
+    int getShift() const;
+
 signals:
     /**
      * @brief signal that the axis location has changed

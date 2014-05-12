@@ -9,6 +9,21 @@ CornerAxis::CornerAxis(LangmuirViewer &viewer, QObject *parent) :
     init();
 }
 
+CornerAxis::Location CornerAxis::getLocation() const
+{
+    return m_location;
+}
+
+int CornerAxis::getSize() const
+{
+    return m_size;
+}
+
+int CornerAxis::getShift() const
+{
+    return m_shift;
+}
+
 void CornerAxis::init()
 {
     m_location = LowerLeft;

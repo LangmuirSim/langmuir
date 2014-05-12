@@ -38,6 +38,21 @@ public:
     Q_DECLARE_FLAGS(Modes, Mode)
     Q_FLAGS(Modes)
 
+    /**
+     * @brief get color
+     */
+    const QColor& getColor() const;
+
+    /**
+     * @brief get x length
+     */
+    float getPointSize() const;
+
+    /**
+     * @brief get render mode
+     */
+    Mode getMode() const;
+
 public:
     /**
      * @brief get the list of vertices (CPU memory)
@@ -178,5 +193,7 @@ protected:
     //! rendering mode
     Mode m_mode;
 };
+
+Q_DECLARE_METATYPE(PointCloud::Mode);
 
 #endif // POINTCLOUD_H

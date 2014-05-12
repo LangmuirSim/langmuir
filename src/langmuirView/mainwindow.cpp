@@ -31,6 +31,8 @@ void MainWindow::init()
     setIcon(ui->actionSave, "document-save", QStyle::SP_DialogSaveButton);
     setIcon(ui->actionScreenshot, "camera-photo", QStyle::SP_DialogSaveButton);
     setIcon(ui->actionReset, "", QStyle::SP_BrowserReload);
+    setIcon(ui->actionSaveSettings, "document-save", QStyle::SP_DialogSaveButton);
+    setIcon(ui->actionLoadSettings, "document-open", QStyle::SP_DialogOpenButton);
 
     connect(m_viewer, SIGNAL(clearMessage()), ui->statusbar, SLOT(clearMessage()));
     connect(m_viewer, SIGNAL(showMessage(QString,int)), ui->statusbar, SLOT(showMessage(QString,int)));
@@ -87,14 +89,85 @@ void MainWindow::on_actionSave_triggered()
                 }
             }
         }
-        m_viewer->save(fileName);
     }
+
+    m_viewer->save(fileName);
+}
+
+void MainWindow::on_actionLoadSettings_triggered()
+{
+    m_viewer->pause();
+
+    QString fileName = QFileDialog::getOpenFileName(
+        this, tr("Open settings file"), QDir::currentPath(), "Settings (*.ini);; All Files (*)");
+
+    m_viewer->loadSettings(fileName);
+}
+
+void MainWindow::on_actionSaveSettings_triggered()
+{
+    m_viewer->pause();
+
+    QString fileName = QFileDialog::getSaveFileName(this, "Save settings file",
+        QDir::currentPath(), "Settings (*.ini);; All Files (*)");
+
+    if (!fileName.isEmpty()) {
+
+        QFileInfo info(fileName);
+
+        if (info.suffix() != "ini")
+        {
+            QMessageBox::StandardButton choice = QMessageBox::warning(this, "Langmuir",
+                "Change to extension to .ini?", QMessageBox::Yes|QMessageBox::No, QMessageBox::Yes);
+
+            switch(choice)
+            {
+                case QMessageBox::Yes:
+                {
+                    fileName = info.absoluteDir().absoluteFilePath(info.completeBaseName() + ".ini");
+                    break;
+                }
+                case QMessageBox::No:
+                {
+                    break;
+                }
+            }
+        }
+    }
+
+    m_viewer->saveSettings(fileName);
 }
 
 void MainWindow::setStopEnabled(bool enabled)
 {
     ui->actionStart->setDisabled(enabled);
     ui->actionStop->setEnabled(enabled);
+}
+
+void MainWindow::writeSettings()
+{
+    QSettings settings("Langmuir", "LangmuirView");
+    m_viewer->setSettings(settings);
+}
+
+void MainWindow::readSettings()
+{
+    QSettings settings("Langmuir", "LangmuirView");
+    m_viewer->getSettings(settings);
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+//    QMessageBox::StandardButton choice = QMessageBox::warning(this, "Langmuir",
+//        "Do you really want to quit?", QMessageBox::Yes|QMessageBox::No, QMessageBox::Yes);
+
+//    if (choice == QMessageBox::Yes) {
+//        writeSettings();
+//        event->accept();
+//    } else {
+//        event->ignore();
+//    }
+    event->accept();
 }
 
 void MainWindow::setIcon(QAction *action, QString themeIcon, QStyle::StandardPixmap standardPixmap)

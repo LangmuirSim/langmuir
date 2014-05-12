@@ -28,6 +28,11 @@ public:
       */
     ~Grid();
 
+    /**
+     * @brief get color
+     */
+    const QColor& getColor() const;
+
 signals:
     /**
      * @brief signal that the color of has changed

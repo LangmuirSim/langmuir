@@ -16,6 +16,21 @@ PointCloud::~PointCloud()
     }
 }
 
+const QColor& PointCloud::getColor() const
+{
+    return m_color;
+}
+
+float PointCloud::getPointSize() const
+{
+    return m_pointSize;
+}
+
+PointCloud::Mode PointCloud::getMode() const
+{
+    return m_mode;
+}
+
 QVector<float>& PointCloud::vertices()
 {
     return m_vertices;

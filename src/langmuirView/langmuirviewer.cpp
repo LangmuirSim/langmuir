@@ -15,6 +15,7 @@
 #include <QErrorMessage>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QSettings>
 #include <QString>
 #include <QColor>
 #include <QDebug>
@@ -33,6 +34,7 @@ LangmuirViewer::LangmuirViewer(QWidget *parent) :
     m_world = NULL;
 
     m_boxThickness = 1.0;
+    m_trapColor = Qt::black;
 
     QGLFormat format;
     format.setVersion(4, 0);
@@ -76,22 +78,22 @@ Langmuir::Random& LangmuirViewer::random()
 
 void LangmuirViewer::updateElectronCloud()
 {
-    if (m_electons != NULL && m_world != NULL) {
+    if (m_electrons != NULL && m_world != NULL) {
 
-        if (m_electons->vertices().size() < 3 * m_world->numElectronAgents()) {
+        if (m_electrons->vertices().size() < 3 * m_world->numElectronAgents()) {
             qFatal("langmuir: electron VBO too small");
         }
 
         int j = 0;
         for (int i = 0; i < m_world->numElectronAgents(); i++) {
             int s = m_world->electrons().at(i)->getCurrentSite();
-            m_electons->vertices()[j + 0] = m_world->electronGrid().getIndexX(s) - m_gridHalfX + 0.5;
-            m_electons->vertices()[j + 1] = m_world->electronGrid().getIndexY(s) - m_gridHalfY + 0.5;
-            m_electons->vertices()[j + 2] = m_world->electronGrid().getIndexZ(s) - m_gridHalfZ + 0.5;
+            m_electrons->vertices()[j + 0] = m_world->electronGrid().getIndexX(s) - m_gridHalfX + 0.5;
+            m_electrons->vertices()[j + 1] = m_world->electronGrid().getIndexY(s) - m_gridHalfY + 0.5;
+            m_electrons->vertices()[j + 2] = m_world->electronGrid().getIndexZ(s) - m_gridHalfZ + 0.5;
             j += 3;
         }
-        m_electons->setMaxRender(m_world->numElectronAgents());
-        m_electons->updateVBO();
+        m_electrons->setMaxRender(m_world->numElectronAgents());
+        m_electrons->updateVBO();
     }
 }
 
@@ -179,9 +181,9 @@ void LangmuirViewer::initGeometry()
         m_grid->setDimensions(m_gridX, m_gridY, m_gridZ);
     }
 
-    if (m_electons != NULL) {
-        m_electons->setMaxPoints(pointsE);
-        m_electons->setMaxRender(renderE);
+    if (m_electrons != NULL) {
+        m_electrons->setMaxPoints(pointsE);
+        m_electrons->setMaxRender(renderE);
     }
     updateElectronCloud();
 
@@ -204,24 +206,7 @@ void LangmuirViewer::initGeometry()
         m_baseBox->setZSize(m_boxThickness);
     }
 
-    if (m_trapBox != NULL)
-    {
-        if (m_world != NULL)
-        {
-            if (m_world->numTraps() > 0)
-            {
-                QImage image;
-                drawTraps(image, m_baseBox->getColor(), Qt::black);
-
-                m_trapBox->loadImage(image);
-                m_trapBox->showImage(true);
-            }
-        }
-        else
-        {
-            m_trapBox->showImage(false);
-        }
-    }
+    initTraps();
 
     if (m_leftBox != NULL)
     {
@@ -238,6 +223,28 @@ void LangmuirViewer::initGeometry()
     }
 }
 
+void LangmuirViewer::initTraps()
+{
+    if (m_trapBox != NULL && m_baseBox != NULL)
+    {
+        if (m_world != NULL)
+        {
+            if (m_world->numTraps() > 0)
+            {
+                QImage image;
+                drawTraps(image, m_baseBox->getColor(), m_trapColor);
+
+                m_trapBox->loadImage(image);
+                m_trapBox->showImage(true);
+            }
+        }
+        else
+        {
+            m_trapBox->showImage(false);
+        }
+    }
+}
+
 void LangmuirViewer::init()
 {
     // Corner Axis
@@ -247,14 +254,15 @@ void LangmuirViewer::init()
 
     // Grid
     m_grid = new Grid(*this, this);
+    m_grid->setColor(QColor(128,128,128));
     m_grid->setVisible(false);
     m_grid->makeConnections();
 
     // Electrons
-    m_electons = new PointCloud(*this, this);
-    m_electons->setColor(Qt::red);
-    m_electons->setVisible(true);
-    m_electons->makeConnections();
+    m_electrons = new PointCloud(*this, this);
+    m_electrons->setColor(Qt::red);
+    m_electrons->setVisible(true);
+    m_electrons->makeConnections();
 
     // Defects
     m_defects = new PointCloud(*this, this);
@@ -270,13 +278,13 @@ void LangmuirViewer::init()
 
     // Base
     m_trapBox = new Box(*this, this);
-    m_trapBox->setColor(Qt::blue);
+    m_trapBox->setColor(Qt::gray);
     m_trapBox->setFaces(Box::Front);
     m_trapBox->setVisible(true);
     m_trapBox->makeConnections();
 
     m_baseBox = new Box(*this, this);
-    m_baseBox->setColor(Qt::blue);
+    m_baseBox->setColor(Qt::gray);
     m_baseBox->setFaces(Box::Back|Box::North|Box::South|Box::East|Box::West);
     m_baseBox->setVisible(true);
     m_baseBox->makeConnections();
@@ -336,7 +344,7 @@ void LangmuirViewer::draw()
 {
     glPushMatrix();
         glTranslatef(0.0f, 0.0f, +0.05);
-        m_electons->render();
+        m_electrons->render();
         m_defects->render();
         m_holes->render();
     glPopMatrix();
@@ -389,6 +397,413 @@ void LangmuirViewer::help() {
 QString LangmuirViewer::helpString() const
 {
     return "";
+}
+
+void LangmuirViewer::loadSettings(QString fileName)
+{
+    if (animationIsStarted()) {
+        pause();
+    }
+
+    if (fileName.isEmpty()) {
+        m_error->showMessage("Can not load settings (no file selected)");
+
+        emit showMessage("no file selected");
+        return;
+    }
+
+    QSettings settings(fileName, QSettings::NativeFormat);
+    getSettings(settings);
+
+    emit showMessage("loaded settings");
+}
+
+void LangmuirViewer::saveSettings(QString fileName)
+{
+    if (animationIsStarted()) {
+        pause();
+    }
+
+    if (fileName.isEmpty()) {
+        m_error->showMessage("Can not save settings (no file selected)");
+
+        emit showMessage("no file selected");
+        return;
+    }
+
+    QSettings settings(fileName, QSettings::NativeFormat);
+    setSettings(settings);
+    settings.sync();
+
+    emit showMessage("saved settings");
+}
+
+void LangmuirViewer::setSettings(QSettings &settings)
+{
+    if (animationIsStarted()) {
+        pause();
+    }
+
+    // electrons
+    {
+        settings.beginGroup("electrons");
+        settings.setValue("mode"     , (int   )m_electrons->getMode());
+        settings.setValue("visible"  , (bool  )m_electrons->isVisible());
+        settings.setValue("color_r"  , (int   )m_electrons->getColor().red());
+        settings.setValue("color_g"  , (int   )m_electrons->getColor().green());
+        settings.setValue("color_b"  , (int   )m_electrons->getColor().blue());
+        settings.setValue("pointsize", (double)m_electrons->getPointSize());
+        settings.endGroup();
+    }
+
+    // holes
+    {
+        settings.beginGroup("holes");
+        settings.setValue("mode"     , (int   )m_holes->getMode());
+        settings.setValue("visible"  , (bool  )m_holes->isVisible());
+        settings.setValue("color_r"  , (int   )m_holes->getColor().red());
+        settings.setValue("color_g"  , (int   )m_holes->getColor().green());
+        settings.setValue("color_b"  , (int   )m_holes->getColor().blue());
+        settings.setValue("pointsize", (double)m_holes->getPointSize());
+        settings.endGroup();
+    }
+
+    // defects
+    {
+        settings.beginGroup("defects");
+        settings.setValue("mode"     , (int   )m_defects->getMode());
+        settings.setValue("visible"  , (bool  )m_defects->isVisible());
+        settings.setValue("color_r"  , (int   )m_defects->getColor().red());
+        settings.setValue("color_g"  , (int   )m_defects->getColor().green());
+        settings.setValue("color_b"  , (int   )m_defects->getColor().blue());
+        settings.setValue("pointsize", (double)m_defects->getPointSize());
+        settings.endGroup();
+    }
+
+    // corner axis
+    {
+        settings.beginGroup("corneraxis");
+        settings.setValue("xcolor_r"  , (int   )m_cornerAxis->getXColor().red());
+        settings.setValue("xcolor_g"  , (int   )m_cornerAxis->getXColor().green());
+        settings.setValue("xcolor_b"  , (int   )m_cornerAxis->getXColor().blue());
+        settings.setValue("ycolor_r"  , (int   )m_cornerAxis->getYColor().red());
+        settings.setValue("ycolor_g"  , (int   )m_cornerAxis->getYColor().green());
+        settings.setValue("ycolor_b"  , (int   )m_cornerAxis->getYColor().blue());
+        settings.setValue("zcolor_r"  , (int   )m_cornerAxis->getZColor().red());
+        settings.setValue("zcolor_g"  , (int   )m_cornerAxis->getZColor().green());
+        settings.setValue("zcolor_b"  , (int   )m_cornerAxis->getZColor().blue());
+        settings.setValue("length"    , (double)m_cornerAxis->getLength());
+        settings.setValue("radius"    , (double)m_cornerAxis->getRadius());
+        settings.setValue("shift"     , (int   )m_cornerAxis->getShift());
+        settings.setValue("size"      , (int   )m_cornerAxis->getSize());
+        settings.setValue("location"  , (int   )m_cornerAxis->getLocation());
+        settings.setValue("visible"   , (bool  )m_cornerAxis->isVisible());
+        settings.endGroup();
+    }
+
+
+    // base
+    {
+        settings.beginGroup("base");
+        settings.setValue("color_r"  , (int   )m_baseBox->getColor().red());
+        settings.setValue("color_g"  , (int   )m_baseBox->getColor().green());
+        settings.setValue("color_b"  , (int   )m_baseBox->getColor().blue());
+        settings.setValue("visible"  , (bool  )m_baseBox->isVisible());
+        settings.endGroup();
+    }
+
+    // traps
+    {
+        settings.beginGroup("traps");
+        settings.setValue("color_r"  , (int   )m_trapColor.red());
+        settings.setValue("color_g"  , (int   )m_trapColor.green());
+        settings.setValue("color_b"  , (int   )m_trapColor.blue());
+        settings.setValue("visible"  , (bool  )m_trapBox->isVisible());
+        settings.endGroup();
+    }
+
+    // electrodes
+    {
+        settings.beginGroup("electrodes");
+        settings.setValue("color_r"  , (int   )m_leftBox->getColor().red());
+        settings.setValue("color_g"  , (int   )m_leftBox->getColor().green());
+        settings.setValue("color_b"  , (int   )m_leftBox->getColor().blue());
+        settings.setValue("visible"  , (bool  )m_leftBox->isVisible());
+        settings.endGroup();
+    }
+
+    // grid
+    {
+        settings.beginGroup("grid");
+        settings.setValue("color_r"  , (int   )m_grid->getColor().red());
+        settings.setValue("color_g"  , (int   )m_grid->getColor().green());
+        settings.setValue("color_b"  , (int   )m_grid->getColor().blue());
+        settings.setValue("visible"  , (bool  )m_grid->isVisible());
+        settings.endGroup();
+    }
+
+    // background
+    {
+        QColor color = backgroundColor();
+        settings.beginGroup("background");
+        settings.setValue("color_r"  , (int   )color.red());
+        settings.setValue("color_g"  , (int   )color.green());
+        settings.setValue("color_b"  , (int   )color.blue());
+        settings.endGroup();
+    }
+}
+
+void LangmuirViewer::getSettings(QSettings &settings)
+{
+    if (animationIsStarted()) {
+        pause();
+    }
+
+    // electrons
+    {
+        settings.beginGroup("electrons");
+
+        // mode
+        PointCloud::Mode mode = PointCloud::Mode(settings.value("mode", PointCloud::Cubes).toInt());
+
+        // visible
+        bool visible = settings.value("visible", true).toBool();
+
+        // color
+        int color_r = settings.value("color_r", 255).toInt();
+        int color_g = settings.value("color_g",   0).toInt();
+        int color_b = settings.value("color_b",   0).toInt();
+        QColor color = QColor::fromRgb(color_r, color_g, color_b);
+
+        // pointsize
+        double pointsize = settings.value("pointsize", 5.0).toDouble();
+
+        settings.endGroup();
+
+        // update settings
+        m_electrons->setMode(mode);
+        m_electrons->setVisible(visible);
+        m_electrons->setColor(color);
+        m_electrons->setPointSize(pointsize);
+    }
+
+    // holes
+    {
+        settings.beginGroup("holes");
+
+        // mode
+        PointCloud::Mode mode = PointCloud::Mode(settings.value("mode", PointCloud::Cubes).toInt());
+
+        // visible
+        bool visible = settings.value("visible", true).toBool();
+
+        // color
+        int color_r = settings.value("color_r",   0).toInt();
+        int color_g = settings.value("color_g", 255).toInt();
+        int color_b = settings.value("color_b",   0).toInt();
+        QColor color = QColor::fromRgb(color_r, color_g, color_b);
+
+        // pointsize
+        double pointsize = settings.value("pointsize", 5.0).toDouble();
+
+        settings.endGroup();
+
+        // update settings
+        m_holes->setMode(mode);
+        m_holes->setVisible(visible);
+        m_holes->setColor(color);
+        m_holes->setPointSize(pointsize);
+    }
+
+    // defects
+    {
+        settings.beginGroup("defects");
+
+        // mode
+        PointCloud::Mode mode = PointCloud::Mode(settings.value("mode", PointCloud::Cubes).toInt());
+
+        // visible
+        bool visible = settings.value("visible", true).toBool();
+
+        // color
+        int color_r = settings.value("color_r", 255).toInt();
+        int color_g = settings.value("color_g", 255).toInt();
+        int color_b = settings.value("color_b", 255).toInt();
+        QColor color = QColor::fromRgb(color_r, color_g, color_b);
+
+        // pointsize
+        double pointsize = settings.value("pointsize", 5.0).toDouble();
+
+        settings.endGroup();
+
+        // update settings
+        m_defects->setMode(mode);
+        m_defects->setVisible(visible);
+        m_defects->setColor(color);
+        m_defects->setPointSize(pointsize);
+    }
+
+    // corner axis
+    {
+        settings.beginGroup("corneraxis");
+
+        // location
+        CornerAxis::Location location = CornerAxis::Location(settings.value("location", CornerAxis::LowerLeft).toInt());
+
+        // visible
+        bool visible = settings.value("visible", true).toBool();
+
+        // xcolor
+        int xcolor_r = settings.value("xcolor_r", 255).toInt();
+        int xcolor_g = settings.value("xcolor_g",   0).toInt();
+        int xcolor_b = settings.value("xcolor_b",   0).toInt();
+        QColor xcolor = QColor::fromRgb(xcolor_r, xcolor_g, xcolor_b);
+
+        // ycolor
+        int ycolor_r = settings.value("ycolor_r",   0).toInt();
+        int ycolor_g = settings.value("ycolor_g", 255).toInt();
+        int ycolor_b = settings.value("ycolor_b",   0).toInt();
+        QColor ycolor = QColor::fromRgb(ycolor_r, ycolor_g, ycolor_b);
+
+        // zcolor
+        int zcolor_r = settings.value("zcolor_r",   0).toInt();
+        int zcolor_g = settings.value("zcolor_g",   0).toInt();
+        int zcolor_b = settings.value("zcolor_b", 255).toInt();
+        QColor zcolor = QColor::fromRgb(zcolor_r, zcolor_g, zcolor_b);
+
+        // length
+        double length = settings.value("length", 1.00).toDouble();
+
+        // radius
+        double radius = settings.value("radius", 0.01).toDouble();
+
+        // shift
+        int shift = settings.value("shift", 10).toInt();
+
+        // size
+        int size = settings.value("size", 150).toInt();
+
+        settings.endGroup();
+
+        // update settings
+        m_cornerAxis->setLocation(location);
+        m_cornerAxis->setVisible(visible);
+        m_cornerAxis->setXColor(xcolor);
+        m_cornerAxis->setYColor(ycolor);
+        m_cornerAxis->setZColor(zcolor);
+        m_cornerAxis->setLength(length);
+        m_cornerAxis->setRadius(radius);
+        m_cornerAxis->setShift(shift);
+        m_cornerAxis->setSize(size);
+    }
+
+    // base
+    {
+        settings.beginGroup("base");
+
+        // visible
+        bool visible = settings.value("visible", true).toBool();
+
+        // color
+        int color_r = settings.value("color_r", 64).toInt();
+        int color_g = settings.value("color_g", 64).toInt();
+        int color_b = settings.value("color_b", 64).toInt();
+        QColor color = QColor::fromRgb(color_r, color_g, color_b);
+
+        settings.endGroup();
+
+        // update settings
+        m_baseBox->setVisible(visible);
+        m_baseBox->setColor(color);
+
+        m_trapBox->setVisible(visible);
+        m_trapBox->setColor(color);
+    }
+
+    // traps
+    {
+        settings.beginGroup("traps");
+
+        // visible
+        bool visible = settings.value("visible", false).toBool();
+
+        // trap color
+        int color_r = settings.value("color_r",   0).toInt();
+        int color_g = settings.value("color_g",   0).toInt();
+        int color_b = settings.value("color_b",   0).toInt();
+        QColor color = QColor::fromRgb(color_r, color_g, color_b);
+
+        settings.endGroup();
+
+        // update settings
+        m_trapColor = color;
+        m_trapBox->showImage(false);
+        initTraps();
+    }
+
+    // electrodes
+    {
+        settings.beginGroup("electrodes");
+
+        // visible
+        bool visible = settings.value("visible", true).toBool();
+
+        // color
+        int color_r = settings.value("color_r", 255).toInt();
+        int color_g = settings.value("color_g",   0).toInt();
+        int color_b = settings.value("color_b",   0).toInt();
+        QColor color = QColor::fromRgb(color_r, color_g, color_b);
+
+        settings.endGroup();
+
+        // update settings
+        m_leftBox->setVisible(visible);
+        m_leftBox->setColor(color);
+
+        m_rightBox->setVisible(visible);
+        m_rightBox->setColor(color);
+    }
+
+    // grid
+    {
+        settings.beginGroup("grid");
+
+        // visible
+        bool visible = settings.value("visible", false).toBool();
+
+        // color
+        int color_r = settings.value("color_r", 255).toInt();
+        int color_g = settings.value("color_g", 255).toInt();
+        int color_b = settings.value("color_b", 255).toInt();
+        QColor color = QColor::fromRgb(color_r, color_g, color_b);
+
+        settings.endGroup();
+
+        // update settings
+        m_grid->setVisible(visible);
+        m_grid->setColor(color);
+    }
+
+    // background
+    {
+        settings.beginGroup("background");
+
+        // color
+        int color_r = settings.value("color_r", 51).toInt();
+        int color_g = settings.value("color_g", 51).toInt();
+        int color_b = settings.value("color_b", 51).toInt();
+        QColor color = QColor::fromRgb(color_r, color_g, color_b);
+
+        settings.endGroup();
+
+        // update settings
+        setBackgroundColor(color);
+    }
+}
+
+void LangmuirViewer::errorMessage(QString message)
+{
+    m_error->showMessage(message);
 }
 
 void LangmuirViewer::toggleOpenCL(bool on)

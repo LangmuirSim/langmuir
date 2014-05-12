@@ -15,6 +15,11 @@ Grid::~Grid()
     }
 }
 
+const QColor& Grid::getColor() const
+{
+    return m_color;
+}
+
 void Grid::initShaders()
 {
     // lines shader
