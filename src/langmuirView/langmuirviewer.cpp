@@ -343,7 +343,7 @@ void LangmuirViewer::preDraw()
 void LangmuirViewer::draw()
 {
     glPushMatrix();
-        glTranslatef(0.0f, 0.0f, +0.05);
+        glTranslatef(0.0f, 0.0f, +0.5);
         m_electrons->render();
         m_defects->render();
         m_holes->render();
@@ -576,7 +576,7 @@ void LangmuirViewer::getSettings(QSettings &settings)
         QColor color = QColor::fromRgb(color_r, color_g, color_b);
 
         // pointsize
-        double pointsize = settings.value("pointsize", 5.0).toDouble();
+        double pointsize = settings.value("pointsize", 256.0).toDouble();
 
         settings.endGroup();
 
@@ -604,7 +604,7 @@ void LangmuirViewer::getSettings(QSettings &settings)
         QColor color = QColor::fromRgb(color_r, color_g, color_b);
 
         // pointsize
-        double pointsize = settings.value("pointsize", 5.0).toDouble();
+        double pointsize = settings.value("pointsize", 256.0).toDouble();
 
         settings.endGroup();
 
@@ -632,7 +632,7 @@ void LangmuirViewer::getSettings(QSettings &settings)
         QColor color = QColor::fromRgb(color_r, color_g, color_b);
 
         // pointsize
-        double pointsize = settings.value("pointsize", 5.0).toDouble();
+        double pointsize = settings.value("pointsize", 256.0).toDouble();
 
         settings.endGroup();
 

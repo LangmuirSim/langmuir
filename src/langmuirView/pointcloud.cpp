@@ -87,7 +87,7 @@ void PointCloud::init() {
     m_mode = Points;
     emit modeChanged(m_mode);
 
-    m_pointSize = 5.0;
+    m_pointSize = 256.0;
     emit pointSizeChanged(m_pointSize);
 
     m_maxPoints = 0;

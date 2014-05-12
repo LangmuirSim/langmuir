@@ -7,5 +7,5 @@ in vec4 vertex;
 void main(void)
 {
     gl_Position = matrix * vertex;
-    gl_PointSize = pointSize;
+    gl_PointSize = pointSize/gl_Position.w;
 }
