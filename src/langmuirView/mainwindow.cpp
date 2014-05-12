@@ -121,6 +121,12 @@ void MainWindow::on_actionIterations_triggered()
     }
 }
 
+void MainWindow::on_actionPoints_triggered()
+{
+    m_viewer->pause();
+    m_viewer->errorMessage("no implemented yet");
+}
+
 void MainWindow::on_actionSaveSettings_triggered()
 {
     m_viewer->pause();

@@ -80,6 +80,26 @@ signals:
 
 public slots:
     /**
+     * @brief set the render mode for points
+     */
+    void setElectronPointMode(PointCloud::Mode mode);
+
+    /**
+     * @brief set the render mode for points
+     */
+    void setDefectPointMode(PointCloud::Mode mode);
+
+    /**
+     * @brief set the render mode for points
+     */
+    void setHolePointMode(PointCloud::Mode mode);
+
+    /**
+     * @brief set the render mode for points
+     */
+    void setPointMode(PointCloud::Mode mode);
+
+    /**
      * @brief set the value of iterations.print
      * @param value value to set
      */

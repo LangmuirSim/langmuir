@@ -65,6 +65,7 @@
     <addaction name="actionShow"/>
     <addaction name="actionParameters"/>
     <addaction name="actionTraps"/>
+    <addaction name="actionPoints"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuControl"/>
@@ -309,6 +310,11 @@
   <action name="actionIterations">
    <property name="text">
     <string>Iterations</string>
+   </property>
+  </action>
+  <action name="actionPoints">
+   <property name="text">
+    <string>Points</string>
    </property>
   </action>
  </widget>

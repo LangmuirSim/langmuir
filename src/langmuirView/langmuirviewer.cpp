@@ -806,6 +806,37 @@ void LangmuirViewer::errorMessage(QString message)
     m_error->showMessage(message);
 }
 
+void LangmuirViewer::setElectronPointMode(PointCloud::Mode mode)
+{
+    if (m_electrons != NULL)
+    {
+        m_electrons->setMode(mode);
+    }
+}
+
+void LangmuirViewer::setDefectPointMode(PointCloud::Mode mode)
+{
+    if (m_defects != NULL)
+    {
+        m_defects->setMode(mode);
+    }
+}
+
+void LangmuirViewer::setHolePointMode(PointCloud::Mode mode)
+{
+    if (m_holes != NULL)
+    {
+        m_holes->setMode(mode);
+    }
+}
+
+void LangmuirViewer::setPointMode(PointCloud::Mode mode)
+{
+    setElectronPointMode(mode);
+    setDefectPointMode(mode);
+    setHolePointMode(mode);
+}
+
 void LangmuirViewer::setIterationsPrint(int value)
 {
     if (m_world != NULL)
