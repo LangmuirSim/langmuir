@@ -124,8 +124,9 @@ void PointCloud::draw() {
             m_shader1.bind();
 
             // shader: pass matrix
-            QMatrix4x4& MVP = m_viewer.getMVP();
-            m_shader1.setUniformValue("matrix", MVP);
+            QMatrix4x4& MV = m_viewer.getOpenGLModelViewMatrix();
+            QMatrix4x4& P = m_viewer.getOpenGLProjectionMatrix();
+            m_shader1.setUniformValue("matrix", P * MV);
 
             // shader: pass color
             m_shader1.setUniformValue("color", m_color);
@@ -157,8 +158,9 @@ void PointCloud::draw() {
             m_shader2.bind();
 
             // shader: pass matrix
-            QMatrix4x4& MVP = m_viewer.getMVP();
-            m_shader2.setUniformValue("matrix", MVP);
+            QMatrix4x4& MV = m_viewer.getOpenGLModelViewMatrix();
+            QMatrix4x4& P = m_viewer.getOpenGLProjectionMatrix();
+            m_shader2.setUniformValue("matrix", P * MV);
 
             // shader: pass color
             m_shader2.setUniformValue("color", m_color);

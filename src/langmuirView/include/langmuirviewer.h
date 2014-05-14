@@ -32,9 +32,17 @@ public:
     explicit LangmuirViewer(QWidget *parent = 0);
 
     /**
-     * @brief obtain the model-view-projection matrix
+     * @brief obtain the model-view-projection matrix (QGLViewer)
      */
-    QMatrix4x4& getMVP();
+    QMatrix4x4& getModelViewProjectionMatrix();
+
+    /**
+     * @brief obtain the model-view matrix (QGLViewer)
+     */
+    QMatrix4x4& getProjectionMatrix();
+
+    QMatrix4x4& getOpenGLModelViewMatrix();
+    QMatrix4x4& getOpenGLProjectionMatrix();
 
     /**
      * @brief get the random number generator
@@ -315,9 +323,6 @@ protected:
 
     //! the simulation data
     Langmuir::World *m_world;
-
-    //! storage for the MVP matrix
-    QMatrix4x4 m_matrix;
 
     //! half of grid.x
     float m_gridHalfX;

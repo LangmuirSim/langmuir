@@ -43,32 +43,124 @@ LangmuirViewer::LangmuirViewer(QWidget *parent) :
     qDebug("langmuir: OpenGL %d.%d", context()->format().majorVersion(), context()->format().minorVersion());
 }
 
-QMatrix4x4& LangmuirViewer::getMVP()
+QMatrix4x4& LangmuirViewer::getModelViewProjectionMatrix()
 {
     static GLdouble matrix[16];
     camera()->getModelViewProjectionMatrix(matrix);
 
-    m_matrix(0, 0) = matrix[0];
-    m_matrix(1, 0) = matrix[1];
-    m_matrix(2, 0) = matrix[2];
-    m_matrix(3, 0) = matrix[3];
+    static QMatrix4x4 qmatrix;
 
-    m_matrix(0, 1) = matrix[4];
-    m_matrix(1, 1) = matrix[5];
-    m_matrix(2, 1) = matrix[6];
-    m_matrix(3, 1) = matrix[7];
+    qmatrix(0, 0) = matrix[0];
+    qmatrix(1, 0) = matrix[1];
+    qmatrix(2, 0) = matrix[2];
+    qmatrix(3, 0) = matrix[3];
 
-    m_matrix(0, 2) = matrix[8];
-    m_matrix(1, 2) = matrix[9];
-    m_matrix(2, 2) = matrix[10];
-    m_matrix(3, 2) = matrix[11];
+    qmatrix(0, 1) = matrix[4];
+    qmatrix(1, 1) = matrix[5];
+    qmatrix(2, 1) = matrix[6];
+    qmatrix(3, 1) = matrix[7];
 
-    m_matrix(0, 3) = matrix[12];
-    m_matrix(1, 3) = matrix[13];
-    m_matrix(2, 3) = matrix[14];
-    m_matrix(3, 3) = matrix[15];
+    qmatrix(0, 2) = matrix[8];
+    qmatrix(1, 2) = matrix[9];
+    qmatrix(2, 2) = matrix[10];
+    qmatrix(3, 2) = matrix[11];
 
-    return m_matrix;
+    qmatrix(0, 3) = matrix[12];
+    qmatrix(1, 3) = matrix[13];
+    qmatrix(2, 3) = matrix[14];
+    qmatrix(3, 3) = matrix[15];
+
+    return qmatrix;
+}
+
+QMatrix4x4& LangmuirViewer::getProjectionMatrix()
+{
+    static GLdouble matrix[16];
+    camera()->getProjectionMatrix(matrix);
+
+    static QMatrix4x4 qmatrix;
+
+    qmatrix(0, 0) = matrix[0];
+    qmatrix(1, 0) = matrix[1];
+    qmatrix(2, 0) = matrix[2];
+    qmatrix(3, 0) = matrix[3];
+
+    qmatrix(0, 1) = matrix[4];
+    qmatrix(1, 1) = matrix[5];
+    qmatrix(2, 1) = matrix[6];
+    qmatrix(3, 1) = matrix[7];
+
+    qmatrix(0, 2) = matrix[8];
+    qmatrix(1, 2) = matrix[9];
+    qmatrix(2, 2) = matrix[10];
+    qmatrix(3, 2) = matrix[11];
+
+    qmatrix(0, 3) = matrix[12];
+    qmatrix(1, 3) = matrix[13];
+    qmatrix(2, 3) = matrix[14];
+    qmatrix(3, 3) = matrix[15];
+
+    return qmatrix;
+}
+
+QMatrix4x4& LangmuirViewer::getOpenGLModelViewMatrix()
+{
+    static GLfloat matrix[16];
+    glGetFloatv(GL_MODELVIEW_MATRIX, matrix);
+
+    static QMatrix4x4 qmatrix;
+
+    qmatrix(0, 0) = matrix[0];
+    qmatrix(1, 0) = matrix[1];
+    qmatrix(2, 0) = matrix[2];
+    qmatrix(3, 0) = matrix[3];
+
+    qmatrix(0, 1) = matrix[4];
+    qmatrix(1, 1) = matrix[5];
+    qmatrix(2, 1) = matrix[6];
+    qmatrix(3, 1) = matrix[7];
+
+    qmatrix(0, 2) = matrix[8];
+    qmatrix(1, 2) = matrix[9];
+    qmatrix(2, 2) = matrix[10];
+    qmatrix(3, 2) = matrix[11];
+
+    qmatrix(0, 3) = matrix[12];
+    qmatrix(1, 3) = matrix[13];
+    qmatrix(2, 3) = matrix[14];
+    qmatrix(3, 3) = matrix[15];
+
+    return qmatrix;
+}
+
+QMatrix4x4& LangmuirViewer::getOpenGLProjectionMatrix()
+{
+    static GLfloat matrix[16];
+    glGetFloatv(GL_PROJECTION_MATRIX, matrix);
+
+    static QMatrix4x4 qmatrix;
+
+    qmatrix(0, 0) = matrix[0];
+    qmatrix(1, 0) = matrix[1];
+    qmatrix(2, 0) = matrix[2];
+    qmatrix(3, 0) = matrix[3];
+
+    qmatrix(0, 1) = matrix[4];
+    qmatrix(1, 1) = matrix[5];
+    qmatrix(2, 1) = matrix[6];
+    qmatrix(3, 1) = matrix[7];
+
+    qmatrix(0, 2) = matrix[8];
+    qmatrix(1, 2) = matrix[9];
+    qmatrix(2, 2) = matrix[10];
+    qmatrix(3, 2) = matrix[11];
+
+    qmatrix(0, 3) = matrix[12];
+    qmatrix(1, 3) = matrix[13];
+    qmatrix(2, 3) = matrix[14];
+    qmatrix(3, 3) = matrix[15];
+
+    return qmatrix;
 }
 
 Langmuir::Random& LangmuirViewer::random()
@@ -343,31 +435,30 @@ void LangmuirViewer::preDraw()
 void LangmuirViewer::draw()
 {
     glPushMatrix();
-        glTranslatef(0.0f, 0.0f, +0.5);
+        glTranslatef(0.0, 0.0, 0.5 * m_boxThickness + 0.1);
         m_electrons->render();
         m_defects->render();
         m_holes->render();
     glPopMatrix();
 
     glPushMatrix();
-        glTranslatef(0.0f, 0.0f, -0.5 * m_boxThickness);
-        m_grid->render();
-
+        glTranslatef(0.0, 0.0, -m_gridHalfZ + 0.5 * m_boxThickness);
         glPushMatrix();
-            glTranslatef(0.0, 0.0, -0.05);
-            m_trapBox->render();
-            m_baseBox->render();
+            glTranslatef(0.0f, 0.0f, 0.5 * m_boxThickness + 0.1);
+            m_grid->render();
         glPopMatrix();
+        m_trapBox->render();
+        m_baseBox->render();
+    glPopMatrix();
 
-        glPushMatrix();
-            glTranslatef(-m_gridHalfX - 0.5 * m_boxThickness, 0.0, 0.0);
-            m_leftBox->render();
-        glPopMatrix();
+    glPushMatrix();
+        glTranslatef(-m_gridHalfX - 0.5 * m_boxThickness, 0.0, 0.0);
+        m_leftBox->render();
+    glPopMatrix();
 
-        glPushMatrix();
-            glTranslatef(+m_gridHalfX + 0.5 * m_boxThickness, 0.0, 0.0);
-            m_leftBox->render();
-        glPopMatrix();
+    glPushMatrix();
+        glTranslatef(+m_gridHalfX + 0.5 * m_boxThickness, 0.0, 0.0);
+        m_rightBox->render();
     glPopMatrix();
 
     m_light0->render();
