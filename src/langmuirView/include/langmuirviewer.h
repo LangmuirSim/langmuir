@@ -3,6 +3,7 @@
 
 #include <QGLViewer/qglviewer.h>
 #include <QErrorMessage>
+#include <QColorDialog>
 #include <QMatrix4x4>
 #include <QSettings>
 
@@ -32,22 +33,89 @@ public:
     explicit LangmuirViewer(QWidget *parent = 0);
 
     /**
-     * @brief obtain the model-view-projection matrix (QGLViewer)
+      * @brief destroy the LangmuirViewer
+      */
+    ~LangmuirViewer();
+
+    /**
+     * @brief obtain the model-view-projection matrix (QGLViewer camera)
      */
     QMatrix4x4& getModelViewProjectionMatrix();
 
     /**
-     * @brief obtain the model-view matrix (QGLViewer)
+     * @brief obtain the projection matrix (QGLViewer camera)
      */
     QMatrix4x4& getProjectionMatrix();
 
+    /**
+     * @brief obtain the model-view matrix (OpenGL matrix stack)
+     */
     QMatrix4x4& getOpenGLModelViewMatrix();
+
+    /**
+     * @brief obtain the projection matrix (OpenGL matrix stack)
+     */
     QMatrix4x4& getOpenGLProjectionMatrix();
 
     /**
      * @brief get the random number generator
      */
     Langmuir::Random& random();
+
+    /**
+     * @brief get the trap color
+     */
+    const QColor& trapColor() const { return m_trapColor; }
+
+    /**
+     * @brief get corner axis object
+     */
+    CornerAxis & cornerAxis() { return *m_cornerAxis; }
+
+    /**
+     * @brief get electrons object
+     */
+    PointCloud & electrons() { return *m_electrons; }
+
+    /**
+     * @brief get defects object
+     */
+    PointCloud & defects() { return *m_defects; }
+
+    /**
+     * @brief get holes object
+     */
+    PointCloud & holes() { return *m_holes; }
+
+    /**
+     * @brief get right box object
+     */
+    Box & rightBox() { return *m_rBox; }
+
+    /**
+     * @brief get left box object
+     */
+    Box & leftBox() { return *m_lBox; }
+
+    /**
+     * @brief get base box object
+     */
+    Box & baseBox() { return *m_baseBox; }
+
+    /**
+     * @brief get trap box object
+     */
+    Box & trapBox() { return *m_trapBox; }
+
+    /**
+     * @brief get light object
+     */
+    Light & light() { return *m_light0; }
+
+    /**
+     * @brief get grid object
+     */
+    Grid & grid() { return *m_grid; }
 
 signals:
     /**
@@ -69,6 +137,12 @@ signals:
     void isUsingOpenCL(bool useOpenCL);
 
     /**
+     * @brief signal if Coulomb is being used
+     * @param useCoulomb true if using Coulomb
+     */
+    void isUsingCoulomb(bool useCoulomb);
+
+    /**
      * @brief signal if simulation is playing
      * @param playing true if playing
      */
@@ -85,6 +159,21 @@ signals:
      * @param value value of iterations.print
      */
     void iterationsPrintChanged(int value);
+
+    /**
+     * @brief signal that OpenGL has been initialized
+     */
+    void openGLInitFinished();
+
+    /**
+     * @brief signal that the trap color changed
+     */
+    void trapColorChanged(QColor color);
+
+    /**
+     * @brief signal that the background color changed
+     */
+    void backgroundColorChanged(QColor color);
 
 public slots:
     /**
@@ -124,6 +213,12 @@ public slots:
      * @param on true if turning OpenCL on
      */
     void toggleOpenCL(bool on=true);
+
+    /**
+     * @brief turn Coulomb on and off
+     * @param on true if turning Coulomb on
+     */
+    void toggleCoulomb(bool on=true);
 
     /**
      * @brief show/hide the corner axis
@@ -214,6 +309,28 @@ public slots:
      */
     void getSettings(QSettings &settings);
 
+    /**
+     * @brief Change the trap color
+     * @param color color to set
+     */
+    void setTrapColor(QColor color);
+
+    /**
+     * @brief set background color
+     * @param color color to set
+     */
+    void setBackgroundColor(QColor color);
+
+    /**
+     * @brief init trap geometry
+     */
+    void initTraps();
+
+    /**
+     * @brief set default colors
+     */
+    void resetSettings();
+
 protected:
     /**
      * @brief update the electron point cloud
@@ -234,11 +351,6 @@ protected:
      * @brief update the geometry using simulation parameters
      */
     void initGeometry();
-
-    /**
-     * @brief init trap geometry
-     */
-    void initTraps();
 
     /**
      * @brief setup OpenGL
@@ -293,15 +405,17 @@ protected:
     //! point cloud representing holes
     PointCloud *m_holes;
 
-    //! base
+    //! trap box
     Box *m_trapBox;
+
+    //! base box
     Box *m_baseBox;
 
     //! box (left)
-    Box *m_leftBox;
+    Box *m_lBox;
 
     //! box (right)
-    Box *m_rightBox;
+    Box *m_rBox;
 
     //! box parameter
     double m_boxThickness;

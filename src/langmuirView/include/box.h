@@ -58,6 +58,11 @@ public:
      */
     int getZSize() const;
 
+    /**
+     * @brief true if texture is showing
+     */
+    bool imageIsOn() const;
+
 signals:
     /**
      * @brief signal that the color of has changed

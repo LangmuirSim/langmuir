@@ -6,6 +6,7 @@ set(CMAKE_BUILD_TYPE Debug)
 
 set(SOURCES
     langmuirviewer.cpp
+    colorbutton.cpp
     sceneobject.cpp
     pointcloud.cpp
     mainwindow.cpp
@@ -19,6 +20,7 @@ set(SOURCES
 
 set(HEADERS
     ./include/langmuirviewer.h
+    ./include/colorbutton.h
     ./include/sceneobject.h
     ./include/pointcloud.h
     ./include/mainwindow.h

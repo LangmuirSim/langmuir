@@ -37,6 +37,11 @@ int Box::getZSize() const
     return m_zsize;
 }
 
+bool Box::imageIsOn() const
+{
+    return m_imageOn;
+}
+
 void Box::init() {
     m_color     = Qt::red;
     m_xsize     = 1.0;

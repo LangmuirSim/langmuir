@@ -43,6 +43,10 @@ LangmuirViewer::LangmuirViewer(QWidget *parent) :
     qDebug("langmuir: OpenGL %d.%d", context()->format().majorVersion(), context()->format().minorVersion());
 }
 
+LangmuirViewer::~LangmuirViewer()
+{
+}
+
 QMatrix4x4& LangmuirViewer::getModelViewProjectionMatrix()
 {
     static GLdouble matrix[16];
@@ -300,18 +304,18 @@ void LangmuirViewer::initGeometry()
 
     initTraps();
 
-    if (m_leftBox != NULL)
+    if (m_lBox != NULL)
     {
-        m_leftBox->setXSize(m_boxThickness);
-        m_leftBox->setYSize(m_gridY);
-        m_leftBox->setZSize(m_gridZ);
+        m_lBox->setXSize(m_boxThickness);
+        m_lBox->setYSize(m_gridY);
+        m_lBox->setZSize(m_gridZ);
     }
 
-    if (m_rightBox != NULL)
+    if (m_rBox != NULL)
     {
-        m_rightBox->setXSize(m_boxThickness);
-        m_rightBox->setYSize(m_gridY);
-        m_rightBox->setZSize(m_gridZ);
+        m_rBox->setXSize(m_boxThickness);
+        m_rBox->setYSize(m_gridY);
+        m_rBox->setZSize(m_gridZ);
     }
 }
 
@@ -335,6 +339,28 @@ void LangmuirViewer::initTraps()
             m_trapBox->showImage(false);
         }
     }
+}
+
+void LangmuirViewer::resetSettings()
+{
+    QFileInfo info(QDir::current().absoluteFilePath("config.ini"));
+    if (info.exists()) {
+        loadSettings(info.absoluteFilePath());
+        return;
+    }
+
+    m_trapBox->setColor(Qt::gray);
+    m_baseBox->setColor(Qt::gray);
+    setTrapColor(Qt::black);
+
+    m_lBox->setColor(Qt::black);
+    m_rBox->setColor(Qt::black);
+
+    m_electrons->setColor(Qt::red);
+    m_defects->setColor(Qt::white);
+    m_holes->setColor(Qt::blue);
+
+    m_grid->setColor(QColor(64, 64, 64));
 }
 
 void LangmuirViewer::init()
@@ -387,18 +413,18 @@ void LangmuirViewer::init()
     connect(m_baseBox, SIGNAL(zSizeChanged(double)), m_trapBox, SLOT(setZSize(double)));
 
     // Left Electrode
-    m_leftBox = new Box(*this, this);
-    m_leftBox->setColor(Qt::black);
-    m_leftBox->setFaces(Box::All);
-    m_leftBox->setVisible(true);
-    m_leftBox->makeConnections();
+    m_lBox = new Box(*this, this);
+    m_lBox->setColor(Qt::black);
+    m_lBox->setFaces(Box::All);
+    m_lBox->setVisible(true);
+    m_lBox->makeConnections();
 
     // Left Electrode
-    m_rightBox = new Box(*this, this);
-    m_rightBox->setColor(Qt::black);
-    m_rightBox->setFaces(Box::All);
-    m_rightBox->setVisible(true);
-    m_rightBox->makeConnections();
+    m_rBox = new Box(*this, this);
+    m_rBox->setColor(Qt::black);
+    m_rBox->setFaces(Box::All);
+    m_rBox->setVisible(true);
+    m_rBox->makeConnections();
 
     initGeometry();
 
@@ -418,12 +444,15 @@ void LangmuirViewer::init()
     m_light0->makeConnections();
 
     // Background
-    //setBackgroundColor(Qt::black);
+    setBackgroundColor(QColor(32, 32, 32));
 
     // OpenGL
     glShadeModel(GL_SMOOTH);
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_POINT_SMOOTH);
+
+    // OpenGL is done
+    emit openGLInitFinished();
 }
 
 void LangmuirViewer::preDraw()
@@ -453,12 +482,12 @@ void LangmuirViewer::draw()
 
     glPushMatrix();
         glTranslatef(-m_gridHalfX - 0.5 * m_boxThickness, 0.0, 0.0);
-        m_leftBox->render();
+        m_lBox->render();
     glPopMatrix();
 
     glPushMatrix();
         glTranslatef(+m_gridHalfX + 0.5 * m_boxThickness, 0.0, 0.0);
-        m_rightBox->render();
+        m_rBox->render();
     glPopMatrix();
 
     m_light0->render();
@@ -503,7 +532,7 @@ void LangmuirViewer::loadSettings(QString fileName)
         return;
     }
 
-    QSettings settings(fileName, QSettings::NativeFormat);
+    QSettings settings(fileName, QSettings::IniFormat);
     getSettings(settings);
 
     emit showMessage("loaded settings");
@@ -522,7 +551,7 @@ void LangmuirViewer::saveSettings(QString fileName)
         return;
     }
 
-    QSettings settings(fileName, QSettings::NativeFormat);
+    QSettings settings(fileName, QSettings::IniFormat);
     setSettings(settings);
     settings.sync();
 
@@ -609,17 +638,17 @@ void LangmuirViewer::setSettings(QSettings &settings)
         settings.setValue("color_r"  , (int   )m_trapColor.red());
         settings.setValue("color_g"  , (int   )m_trapColor.green());
         settings.setValue("color_b"  , (int   )m_trapColor.blue());
-        settings.setValue("visible"  , (bool  )m_trapBox->isVisible());
+        settings.setValue("visible"  , (bool  )m_trapBox->imageIsOn());
         settings.endGroup();
     }
 
     // electrodes
     {
         settings.beginGroup("electrodes");
-        settings.setValue("color_r"  , (int   )m_leftBox->getColor().red());
-        settings.setValue("color_g"  , (int   )m_leftBox->getColor().green());
-        settings.setValue("color_b"  , (int   )m_leftBox->getColor().blue());
-        settings.setValue("visible"  , (bool  )m_leftBox->isVisible());
+        settings.setValue("color_r"  , (int   )m_lBox->getColor().red());
+        settings.setValue("color_g"  , (int   )m_lBox->getColor().green());
+        settings.setValue("color_b"  , (int   )m_lBox->getColor().blue());
+        settings.setValue("visible"  , (bool  )m_lBox->isVisible());
         settings.endGroup();
     }
 
@@ -848,11 +877,11 @@ void LangmuirViewer::getSettings(QSettings &settings)
         settings.endGroup();
 
         // update settings
-        m_leftBox->setVisible(visible);
-        m_leftBox->setColor(color);
+        m_lBox->setVisible(visible);
+        m_lBox->setColor(color);
 
-        m_rightBox->setVisible(visible);
-        m_rightBox->setColor(color);
+        m_rBox->setVisible(visible);
+        m_rBox->setColor(color);
     }
 
     // grid
@@ -890,6 +919,21 @@ void LangmuirViewer::getSettings(QSettings &settings)
         // update settings
         setBackgroundColor(color);
     }
+}
+
+void LangmuirViewer::setTrapColor(QColor color)
+{
+    if (color != m_trapColor) {
+        m_trapColor = color;
+        initTraps();
+        emit trapColorChanged(m_trapColor);
+    }
+}
+
+void LangmuirViewer::setBackgroundColor(QColor color)
+{
+    QGLViewer::setBackgroundColor(color);
+    emit backgroundColorChanged(color);
 }
 
 void LangmuirViewer::errorMessage(QString message)
@@ -959,6 +1003,25 @@ void LangmuirViewer::toggleOpenCL(bool on)
     emit isUsingOpenCL(m_world->parameters().useOpenCL);
 }
 
+void LangmuirViewer::toggleCoulomb(bool on)
+{
+    if (m_world == NULL) {
+        emit showMessage("can not change Coulomb");
+        return;
+    }
+
+    m_world->parameters().coulombCarriers = on;
+
+    emit isUsingCoulomb(m_world->parameters().coulombCarriers);
+
+    if (on) {
+        toggleOpenCL(true);
+    }
+    else {
+        toggleOpenCL(false);
+    }
+}
+
 void LangmuirViewer::toggleCornerAxisIsVisible()
 {
     m_cornerAxis->toggleVisible();
@@ -1003,6 +1066,7 @@ void LangmuirViewer::load(QString fileName)
     emit showMessage(QString("loaded file: %1").arg(info.fileName()));
 
     emit isUsingOpenCL(m_world->parameters().useOpenCL);
+    emit isUsingCoulomb(m_world->parameters().coulombCarriers);
 }
 
 void LangmuirViewer::save(QString fileName)
@@ -1120,6 +1184,7 @@ void LangmuirViewer::reset() {
 
     emit showMessage("reset simulation");
     emit isUsingOpenCL(m_world->parameters().useOpenCL);
+    emit isUsingCoulomb(m_world->parameters().coulombCarriers);
 }
 
 void LangmuirViewer::resetCamera()

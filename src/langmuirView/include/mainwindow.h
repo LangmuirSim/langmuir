@@ -29,10 +29,12 @@ public slots:
     void on_actionSaveSettings_triggered();
     void on_actionIterations_triggered();
     void on_actionPoints_triggered();
+    void on_resetButton_clicked();
     void setStopEnabled(bool enabled);
     void writeSettings();
     void readSettings();
     void closeEvent(QCloseEvent *event);
+    void initAfter();
 
 private:
     Ui::MainWindow *ui;

@@ -37,6 +37,53 @@ void MainWindow::init()
 
     connect(m_viewer, SIGNAL(clearMessage()), ui->statusbar, SLOT(clearMessage()));
     connect(m_viewer, SIGNAL(showMessage(QString,int)), ui->statusbar, SLOT(showMessage(QString,int)));
+
+    connect(m_viewer, SIGNAL(openGLInitFinished()), this, SLOT(initAfter()));
+}
+
+void MainWindow::initAfter()
+{
+    connect(ui->colorButtonDefects, SIGNAL(selectedColor(QColor)), &m_viewer->defects(), SLOT(setColor(QColor)));
+    connect(&m_viewer->defects(), SIGNAL(colorChanged(QColor)), ui->colorButtonDefects, SLOT(setButtonColor(QColor)));
+    ui->colorButtonDefects->setButtonColor(m_viewer->defects().getColor());
+
+    connect(ui->colorButtonElectrons, SIGNAL(selectedColor(QColor)), &m_viewer->electrons(), SLOT(setColor(QColor)));
+    connect(&m_viewer->electrons(), SIGNAL(colorChanged(QColor)), ui->colorButtonElectrons, SLOT(setButtonColor(QColor)));
+    ui->colorButtonElectrons->setButtonColor(m_viewer->electrons().getColor());
+
+    connect(ui->colorButtonHoles, SIGNAL(selectedColor(QColor)), &m_viewer->holes(), SLOT(setColor(QColor)));
+    connect(&m_viewer->holes(), SIGNAL(colorChanged(QColor)), ui->colorButtonHoles, SLOT(setButtonColor(QColor)));
+    ui->colorButtonHoles->setButtonColor(m_viewer->holes().getColor());
+
+    connect(ui->colorButtonGrid, SIGNAL(selectedColor(QColor)), &m_viewer->grid(), SLOT(setColor(QColor)));
+    connect(&m_viewer->grid(), SIGNAL(colorChanged(QColor)), ui->colorButtonGrid, SLOT(setButtonColor(QColor)));
+    ui->colorButtonGrid->setButtonColor(m_viewer->grid().getColor());
+
+    connect(ui->colorButtonTraps, SIGNAL(selectedColor(QColor)), m_viewer, SLOT(setTrapColor(QColor)));
+    connect(m_viewer, SIGNAL(trapColorChanged(QColor)), ui->colorButtonTraps, SLOT(setButtonColor(QColor)));
+    ui->colorButtonTraps->setButtonColor(m_viewer->trapColor());
+
+    connect(ui->colorButtonBackground, SIGNAL(selectedColor(QColor)), m_viewer, SLOT(setBackgroundColor(QColor)));
+    connect(m_viewer, SIGNAL(backgroundColorChanged(QColor)), ui->colorButtonBackground, SLOT(setButtonColor(QColor)));
+    ui->colorButtonBackground->setButtonColor(m_viewer->backgroundColor());
+
+    connect(ui->colorButtonBase, SIGNAL(selectedColor(QColor)), &m_viewer->baseBox(), SLOT(setColor(QColor)));
+    connect(ui->colorButtonBase, SIGNAL(selectedColor(QColor)), &m_viewer->trapBox(), SLOT(setColor(QColor)));
+    connect(&m_viewer->baseBox(), SIGNAL(colorChanged(QColor)), ui->colorButtonBase, SLOT(setButtonColor(QColor)));
+    connect(&m_viewer->trapBox(), SIGNAL(colorChanged(QColor)), ui->colorButtonBase, SLOT(setButtonColor(QColor)));
+    connect(&m_viewer->baseBox(), SIGNAL(colorChanged(QColor)), m_viewer, SLOT(initTraps()));
+    ui->colorButtonBase->setButtonColor(m_viewer->baseBox().getColor());
+
+    connect(ui->colorButtonElectrodes, SIGNAL(selectedColor(QColor)), &m_viewer->leftBox() , SLOT(setColor(QColor)));
+    connect(ui->colorButtonElectrodes, SIGNAL(selectedColor(QColor)), &m_viewer->rightBox(), SLOT(setColor(QColor)));
+    connect(&m_viewer->leftBox() , SIGNAL(colorChanged(QColor)), ui->colorButtonElectrodes, SLOT(setButtonColor(QColor)));
+    connect(&m_viewer->rightBox(), SIGNAL(colorChanged(QColor)), ui->colorButtonElectrodes, SLOT(setButtonColor(QColor)));
+    ui->colorButtonElectrodes->setButtonColor(m_viewer->leftBox().getColor());
+
+    connect(&m_viewer->trapBox(), SIGNAL(imageOnChanged(bool)), ui->actionTraps, SLOT(setChecked(bool)));
+    ui->actionTraps->setChecked(m_viewer->trapBox().imageIsOn());
+
+    m_viewer->resetSettings();
 }
 
 MainWindow::~MainWindow()
@@ -125,6 +172,11 @@ void MainWindow::on_actionPoints_triggered()
 {
     m_viewer->pause();
     m_viewer->errorMessage("no implemented yet");
+}
+
+void MainWindow::on_resetButton_clicked()
+{
+    m_viewer->reset();
 }
 
 void MainWindow::on_actionSaveSettings_triggered()
