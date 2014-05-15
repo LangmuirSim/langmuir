@@ -176,7 +176,8 @@ void MainWindow::on_actionPoints_triggered()
 
 void MainWindow::on_resetButton_clicked()
 {
-    m_viewer->reset();
+    m_viewer->resetSettings();
+    m_viewer->showMessage("reset parameters!");
 }
 
 void MainWindow::on_actionSaveSettings_triggered()

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>640</width>
+    <width>798</width>
     <height>640</height>
    </rect>
   </property>
@@ -319,7 +319,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>640</width>
+     <width>798</width>
      <height>25</height>
     </rect>
    </property>
@@ -385,8 +385,12 @@
    <addaction name="separator"/>
    <addaction name="actionStart"/>
    <addaction name="actionStop"/>
+   <addaction name="actionIterations"/>
    <addaction name="actionOpenCL"/>
+   <addaction name="actionCoulomb"/>
    <addaction name="separator"/>
+   <addaction name="actionTraps"/>
+   <addaction name="actionPoints"/>
    <addaction name="actionAxis"/>
    <addaction name="actionCornerAxis"/>
    <addaction name="actionSimulationGrid"/>
@@ -583,6 +587,10 @@
    </property>
   </action>
   <action name="actionParameters">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/p.png</normaloff>:/icons/p.png</iconset>
+   </property>
    <property name="text">
     <string>Parameters</string>
    </property>
@@ -610,6 +618,10 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/t.png</normaloff>:/icons/t.png</iconset>
+   </property>
    <property name="text">
     <string>Trap</string>
    </property>
@@ -618,6 +630,10 @@
    </property>
   </action>
   <action name="actionIterations">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/i.png</normaloff>:/icons/i.png</iconset>
+   </property>
    <property name="text">
     <string>Iterations</string>
    </property>
@@ -626,6 +642,10 @@
    </property>
   </action>
   <action name="actionPoints">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/p.png</normaloff>:/icons/p.png</iconset>
+   </property>
    <property name="text">
     <string>Points</string>
    </property>
@@ -636,6 +656,10 @@
   <action name="actionCoulomb">
    <property name="checkable">
     <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/c.png</normaloff>:/icons/c.png</iconset>
    </property>
    <property name="text">
     <string>Coulomb</string>

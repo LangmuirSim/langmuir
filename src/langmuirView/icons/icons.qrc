@@ -7,5 +7,11 @@
         <file>fps.png</file>
         <file>grid.png</file>
         <file>cl.png</file>
+        <file>e.png</file>
+        <file>g.png</file>
+        <file>i.png</file>
+        <file>p.png</file>
+        <file>t.png</file>
+        <file>c.png</file>
     </qresource>
 </RCC>
