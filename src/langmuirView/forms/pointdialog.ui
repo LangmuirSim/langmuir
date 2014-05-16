@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>269</width>
+    <width>285</width>
     <height>339</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Langmuir</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="7" column="0" colspan="2">
@@ -231,6 +231,13 @@
      </property>
      <property name="value">
       <double>256.000000000000000</double>
+     </property>
+    </widget>
+   </item>
+   <item row="13" column="0">
+    <widget class="QPushButton" name="pushButtonReset">
+     <property name="text">
+      <string>Reset</string>
      </property>
     </widget>
    </item>

@@ -182,6 +182,7 @@ void MainWindow::on_actionPoints_triggered()
         m_pointdialog = new PointDialog(*m_viewer, NULL);
     }
 
+    m_pointdialog->remember();
     m_pointdialog->show();
     m_pointdialog->raise();
 }

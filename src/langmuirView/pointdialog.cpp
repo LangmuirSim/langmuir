@@ -21,6 +21,8 @@ PointDialog::~PointDialog()
 void PointDialog::init()
 {
     update();
+    remember();
+
     connect(&m_viewer.electrons(), SIGNAL(modeChanged(PointCloud::Mode)), this, SLOT(updateComboBoxElectrons(PointCloud::Mode)));
     connect(&m_viewer.defects(), SIGNAL(modeChanged(PointCloud::Mode)), this, SLOT(updateComboBoxDefects(PointCloud::Mode)));
     connect(&m_viewer.holes(), SIGNAL(modeChanged(PointCloud::Mode)), this, SLOT(updateComboBoxHoles(PointCloud::Mode)));
@@ -105,4 +107,36 @@ void PointDialog::on_spinBoxDefects_valueChanged(double d)
 void PointDialog::on_spinBoxHoles_valueChanged(double d)
 {
     m_viewer.holes().setPointSize(d);
+}
+
+void PointDialog::on_pushButtonReset_clicked()
+{
+    reset();
+}
+
+void PointDialog::on_buttonBox_rejected()
+{
+    reset();
+}
+
+void PointDialog::remember()
+{
+    e_pointSize_old = m_viewer.electrons().getPointSize();
+    d_pointSize_old = m_viewer.defects().getPointSize();
+    h_pointSize_old = m_viewer.holes().getPointSize();
+
+    e_mode_old = m_viewer.electrons().getMode();
+    d_mode_old = m_viewer.defects().getMode();
+    h_mode_old = m_viewer.holes().getMode();
+}
+
+void PointDialog::reset()
+{
+    m_viewer.electrons().setPointSize(e_pointSize_old);
+    m_viewer.defects().setPointSize(d_pointSize_old);
+    m_viewer.holes().setPointSize(h_pointSize_old);
+
+    m_viewer.electrons().setMode(e_mode_old);
+    m_viewer.defects().setMode(d_mode_old);
+    m_viewer.holes().setMode(h_mode_old);
 }

@@ -22,6 +22,8 @@ public:
 public slots:
     void init();
     void update();
+    void remember();
+    void reset();
 
     void updateComboBoxElectrons(PointCloud::Mode mode);
     void updateComboBoxDefects(PointCloud::Mode mode);
@@ -39,9 +41,20 @@ public slots:
     void on_spinBoxDefects_valueChanged(double d);
     void on_spinBoxHoles_valueChanged(double d);
 
+    void on_pushButtonReset_clicked();
+    void on_buttonBox_rejected();
+
 private:
     Ui::PointDialog *ui;
     LangmuirViewer& m_viewer;
+
+    float e_pointSize_old;
+    float d_pointSize_old;
+    float h_pointSize_old;
+
+    PointCloud::Mode e_mode_old;
+    PointCloud::Mode d_mode_old;
+    PointCloud::Mode h_mode_old;
 };
 
 #endif // POINTDIALOG_H
