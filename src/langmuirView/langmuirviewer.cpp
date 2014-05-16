@@ -852,7 +852,7 @@ void LangmuirViewer::getSettings(QSettings &settings)
         settings.endGroup();
 
         // update settings
-        m_trapColor = color;
+        setTrapColor(color);
         m_trapBox->showImage(visible);
         initTraps();
     }
