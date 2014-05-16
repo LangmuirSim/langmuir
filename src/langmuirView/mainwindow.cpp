@@ -97,6 +97,7 @@ MainWindow::~MainWindow()
     delete ui;
 
     if (m_pointdialog != NULL) {
+        m_pointdialog->close();
         m_pointdialog->deleteLater();
         m_pointdialog = NULL;
     }

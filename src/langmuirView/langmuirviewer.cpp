@@ -333,7 +333,7 @@ void LangmuirViewer::initTraps()
             if (m_world->numTraps() > 0)
             {
                 QImage image;
-                drawTraps(image, Qt::transparent, m_trapColor);
+                drawTraps(image, m_baseBox->getColor(), m_trapColor);
 
                 m_trapBox->loadImage(image);
                 m_trapBox->showImage(true);
@@ -687,8 +687,8 @@ void LangmuirViewer::getSettings(QSettings &settings)
 
         // color
         int color_r = settings.value("color_r", 255).toInt();
-        int color_g = settings.value("color_g",   0).toInt();
-        int color_b = settings.value("color_b",   0).toInt();
+        int color_g = settings.value("color_g", 255).toInt();
+        int color_b = settings.value("color_b", 255).toInt();
         QColor color = QColor::fromRgb(color_r, color_g, color_b);
 
         // pointsize
@@ -716,7 +716,7 @@ void LangmuirViewer::getSettings(QSettings &settings)
         // color
         int color_r = settings.value("color_r",   0).toInt();
         int color_g = settings.value("color_g",   0).toInt();
-        int color_b = settings.value("color_b", 255).toInt();
+        int color_b = settings.value("color_b",   0).toInt();
         QColor color = QColor::fromRgb(color_r, color_g, color_b);
 
         // pointsize
@@ -742,9 +742,9 @@ void LangmuirViewer::getSettings(QSettings &settings)
         bool visible = settings.value("visible", true).toBool();
 
         // color
-        int color_r = settings.value("color_r", 255).toInt();
+        int color_r = settings.value("color_r",   0).toInt();
         int color_g = settings.value("color_g", 255).toInt();
-        int color_b = settings.value("color_b", 255).toInt();
+        int color_b = settings.value("color_b",   0).toInt();
         QColor color = QColor::fromRgb(color_r, color_g, color_b);
 
         // pointsize
@@ -821,9 +821,9 @@ void LangmuirViewer::getSettings(QSettings &settings)
         bool visible = settings.value("visible", true).toBool();
 
         // color
-        int color_r = settings.value("color_r", 128).toInt();
-        int color_g = settings.value("color_g", 128).toInt();
-        int color_b = settings.value("color_b", 128).toInt();
+        int color_r = settings.value("color_r", 255).toInt();
+        int color_g = settings.value("color_g", 0).toInt();
+        int color_b = settings.value("color_b", 0).toInt();
         QColor color = QColor::fromRgb(color_r, color_g, color_b);
 
         settings.endGroup();
@@ -844,8 +844,8 @@ void LangmuirViewer::getSettings(QSettings &settings)
         bool visible = settings.value("visible", false).toBool();
 
         // trap color
-        int color_r = settings.value("color_r",   0).toInt();
-        int color_g = settings.value("color_g",   0).toInt();
+        int color_r = settings.value("color_r", 255).toInt();
+        int color_g = settings.value("color_g", 255).toInt();
         int color_b = settings.value("color_b",   0).toInt();
         QColor color = QColor::fromRgb(color_r, color_g, color_b);
 
@@ -888,9 +888,9 @@ void LangmuirViewer::getSettings(QSettings &settings)
         bool visible = settings.value("visible", true).toBool();
 
         // color
-        int color_r = settings.value("color_r", 64).toInt();
-        int color_g = settings.value("color_g", 64).toInt();
-        int color_b = settings.value("color_b", 64).toInt();
+        int color_r = settings.value("color_r", 0).toInt();
+        int color_g = settings.value("color_g", 0).toInt();
+        int color_b = settings.value("color_b", 0).toInt();
         QColor color = QColor::fromRgb(color_r, color_g, color_b);
 
         settings.endGroup();
@@ -905,9 +905,9 @@ void LangmuirViewer::getSettings(QSettings &settings)
         settings.beginGroup("background");
 
         // color
-        int color_r = settings.value("color_r", 51).toInt();
-        int color_g = settings.value("color_g", 51).toInt();
-        int color_b = settings.value("color_b", 51).toInt();
+        int color_r = settings.value("color_r",   0).toInt();
+        int color_g = settings.value("color_g", 200).toInt();
+        int color_b = settings.value("color_b", 200).toInt();
         QColor color = QColor::fromRgb(color_r, color_g, color_b);
 
         settings.endGroup();
