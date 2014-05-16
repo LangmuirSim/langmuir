@@ -1283,8 +1283,6 @@ void LangmuirViewer::drawTraps(QImage &image, QColor bcolor, QColor fcolor)
     QPainter painter;
     painter.begin(&image);
 
-    painter.scale(1.0, -1.0);
-    painter.translate(0.0, -ysize);
     painter.setWindow(0, 0, xsize, ysize);
 
     painter.fillRect(QRect(0,0,xsize,ysize), bcolor);
