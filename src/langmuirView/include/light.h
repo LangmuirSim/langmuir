@@ -40,6 +40,11 @@ public:
      */
     bool isEnabled() const;
 
+    /**
+     * @brief get position of light
+     */
+    QVector4D getPosition();
+
 signals:
     /**
      * @brief signal that the position changed

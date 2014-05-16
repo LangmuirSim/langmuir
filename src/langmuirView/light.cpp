@@ -37,6 +37,11 @@ bool Light::isEnabled() const
     return m_enabled;
 }
 
+QVector4D Light::getPosition()
+{
+    return m_position;
+}
+
 void Light::init() {
 
     m_position = QVector4D(-1, -1, -1, -1);
