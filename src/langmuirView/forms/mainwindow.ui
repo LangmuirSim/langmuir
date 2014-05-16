@@ -285,19 +285,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="resetButton">
-        <property name="maximumSize">
-         <size>
-          <width>64</width>
-          <height>32</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>reset</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <spacer name="spacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -336,6 +323,7 @@
     <addaction name="separator"/>
     <addaction name="actionSaveSettings"/>
     <addaction name="actionLoadSettings"/>
+    <addaction name="actionResetSettings"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
@@ -666,6 +654,11 @@
    </property>
    <property name="toolTip">
     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Toggle Coulomb interations.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+  </action>
+  <action name="actionResetSettings">
+   <property name="text">
+    <string>Reset Settings</string>
    </property>
   </action>
  </widget>

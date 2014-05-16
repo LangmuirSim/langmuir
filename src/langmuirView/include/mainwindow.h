@@ -26,11 +26,11 @@ public slots:
     void on_actionScreenshot_triggered();
     void on_actionOpen_triggered();
     void on_actionSave_triggered();
+    void on_action_ResetSettings_triggered();
     void on_actionLoadSettings_triggered();
     void on_actionSaveSettings_triggered();
     void on_actionIterations_triggered();
     void on_actionPoints_triggered();
-    void on_resetButton_clicked();
     void setStopEnabled(bool enabled);
     void writeSettings();
     void readSettings();

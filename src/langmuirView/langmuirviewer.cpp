@@ -352,20 +352,10 @@ void LangmuirViewer::resetSettings()
     if (info.exists()) {
         loadSettings(info.absoluteFilePath());
         return;
+    } else {
+        QSettings settings;
+        getSettings(settings);
     }
-
-    m_trapBox->setColor(Qt::gray);
-    m_baseBox->setColor(Qt::gray);
-    setTrapColor(Qt::black);
-
-    m_lBox->setColor(Qt::black);
-    m_rBox->setColor(Qt::black);
-
-    m_electrons->setColor(Qt::red);
-    m_defects->setColor(Qt::white);
-    m_holes->setColor(Qt::blue);
-
-    m_grid->setColor(QColor(64, 64, 64));
 }
 
 void LangmuirViewer::init()
@@ -468,12 +458,6 @@ void LangmuirViewer::preDraw()
 
 void LangmuirViewer::draw()
 {
-    glBegin(GL_LINES);
-    glColor3f(1.0,0.0,0.0);
-    glVertex3f(m_light0->getPosition().x(), m_light0->getPosition().y(), m_light0->getPosition().z());
-    glVertex3f(0,0,0);
-    glEnd();
-
     glPushMatrix();
         glTranslatef(0.0, 0.0, 0.5 * m_boxThickness + 0.1);
         m_electrons->render();
@@ -707,7 +691,7 @@ void LangmuirViewer::getSettings(QSettings &settings)
         QColor color = QColor::fromRgb(color_r, color_g, color_b);
 
         // pointsize
-        double pointsize = settings.value("pointsize", 256.0).toDouble();
+        double pointsize = settings.value("pointsize", 230.0).toDouble();
 
         settings.endGroup();
 
@@ -730,12 +714,12 @@ void LangmuirViewer::getSettings(QSettings &settings)
 
         // color
         int color_r = settings.value("color_r",   0).toInt();
-        int color_g = settings.value("color_g", 255).toInt();
-        int color_b = settings.value("color_b",   0).toInt();
+        int color_g = settings.value("color_g",   0).toInt();
+        int color_b = settings.value("color_b", 255).toInt();
         QColor color = QColor::fromRgb(color_r, color_g, color_b);
 
         // pointsize
-        double pointsize = settings.value("pointsize", 256.0).toDouble();
+        double pointsize = settings.value("pointsize", 230.0).toDouble();
 
         settings.endGroup();
 
@@ -763,7 +747,7 @@ void LangmuirViewer::getSettings(QSettings &settings)
         QColor color = QColor::fromRgb(color_r, color_g, color_b);
 
         // pointsize
-        double pointsize = settings.value("pointsize", 256.0).toDouble();
+        double pointsize = settings.value("pointsize", 230.0).toDouble();
 
         settings.endGroup();
 
@@ -782,7 +766,7 @@ void LangmuirViewer::getSettings(QSettings &settings)
         CornerAxis::Location location = CornerAxis::Location(settings.value("location", CornerAxis::LowerLeft).toInt());
 
         // visible
-        bool visible = settings.value("visible", true).toBool();
+        bool visible = settings.value("visible", false).toBool();
 
         // xcolor
         int xcolor_r = settings.value("xcolor_r", 255).toInt();
@@ -836,9 +820,9 @@ void LangmuirViewer::getSettings(QSettings &settings)
         bool visible = settings.value("visible", true).toBool();
 
         // color
-        int color_r = settings.value("color_r", 64).toInt();
-        int color_g = settings.value("color_g", 64).toInt();
-        int color_b = settings.value("color_b", 64).toInt();
+        int color_r = settings.value("color_r", 128).toInt();
+        int color_g = settings.value("color_g", 128).toInt();
+        int color_b = settings.value("color_b", 128).toInt();
         QColor color = QColor::fromRgb(color_r, color_g, color_b);
 
         settings.endGroup();
@@ -900,12 +884,12 @@ void LangmuirViewer::getSettings(QSettings &settings)
         settings.beginGroup("grid");
 
         // visible
-        bool visible = settings.value("visible", false).toBool();
+        bool visible = settings.value("visible", true).toBool();
 
         // color
-        int color_r = settings.value("color_r", 255).toInt();
-        int color_g = settings.value("color_g", 255).toInt();
-        int color_b = settings.value("color_b", 255).toInt();
+        int color_r = settings.value("color_r", 64).toInt();
+        int color_g = settings.value("color_g", 64).toInt();
+        int color_b = settings.value("color_b", 64).toInt();
         QColor color = QColor::fromRgb(color_r, color_g, color_b);
 
         settings.endGroup();
