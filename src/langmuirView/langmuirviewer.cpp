@@ -333,7 +333,7 @@ void LangmuirViewer::initTraps()
             if (m_world->numTraps() > 0)
             {
                 QImage image;
-                drawTraps(image, m_baseBox->getColor(), m_trapColor);
+                drawTraps(image, Qt::transparent, m_trapColor);
 
                 m_trapBox->loadImage(image);
                 m_trapBox->showImage(true);
@@ -445,6 +445,7 @@ void LangmuirViewer::init()
     glShadeModel(GL_SMOOTH);
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_POINT_SMOOTH);
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
 
     // OpenGL is done
     emit openGLInitFinished();
