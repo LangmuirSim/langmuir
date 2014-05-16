@@ -37,7 +37,7 @@ bool Light::isEnabled() const
     return m_enabled;
 }
 
-QVector4D Light::getPosition()
+const QVector4D& Light::getPosition() const
 {
     return m_position;
 }

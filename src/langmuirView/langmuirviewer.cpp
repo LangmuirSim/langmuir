@@ -317,6 +317,11 @@ void LangmuirViewer::initGeometry()
         m_rBox->setYSize(m_gridY);
         m_rBox->setZSize(m_gridZ);
     }
+
+    if (m_light0 != NULL)
+    {
+        m_light0->setPosition(0, 0, 1.25 * m_gridZ, 1.0);
+    }
 }
 
 void LangmuirViewer::initTraps()
@@ -426,8 +431,6 @@ void LangmuirViewer::init()
     m_rBox->setVisible(true);
     m_rBox->makeConnections();
 
-    initGeometry();
-
     // Light
     glEnable(GL_LIGHTING);
 
@@ -442,6 +445,8 @@ void LangmuirViewer::init()
     m_light0->setPosition(1.0, 1.0, 1.0, 0.0);
     m_light0->setEnabled(true);
     m_light0->makeConnections();
+
+    initGeometry();
 
     // Background
     setBackgroundColor(QColor(32, 32, 32));
@@ -463,6 +468,12 @@ void LangmuirViewer::preDraw()
 
 void LangmuirViewer::draw()
 {
+    glBegin(GL_LINES);
+    glColor3f(1.0,0.0,0.0);
+    glVertex3f(m_light0->getPosition().x(), m_light0->getPosition().y(), m_light0->getPosition().z());
+    glVertex3f(0,0,0);
+    glEnd();
+
     glPushMatrix();
         glTranslatef(0.0, 0.0, 0.5 * m_boxThickness + 0.1);
         m_electrons->render();

@@ -43,7 +43,7 @@ public:
     /**
      * @brief get position of light
      */
-    QVector4D getPosition();
+    const QVector4D& getPosition() const;
 
 signals:
     /**
