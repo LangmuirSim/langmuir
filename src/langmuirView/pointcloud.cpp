@@ -63,16 +63,16 @@ void PointCloud::initShaders()
         qFatal("langmuir: can not link shader1");
     }
 
-    // cube cloud shader
-    if (!m_shader2.addShaderFromSourceFile(QOpenGLShader::Vertex, ":shaders/ccVert.glsl")) {
+    // square cloud shader
+    if (!m_shader2.addShaderFromSourceFile(QOpenGLShader::Vertex, ":shaders/scVert.glsl")) {
         qFatal("langmuir: can not compile shader2 vertex shader");
     }
 
-    if (!m_shader2.addShaderFromSourceFile(QOpenGLShader::Geometry, ":shaders/ccGeom.glsl")) {
+    if (!m_shader2.addShaderFromSourceFile(QOpenGLShader::Geometry, ":shaders/scGeom.glsl")) {
         qFatal("langmuir: can not compile shader2 geometry shader");
     }
 
-    if (!m_shader2.addShaderFromSourceFile(QOpenGLShader::Fragment, ":shaders/ccFrag.glsl")) {
+    if (!m_shader2.addShaderFromSourceFile(QOpenGLShader::Fragment, ":shaders/scFrag.glsl")) {
         qFatal("langmuir: can not compile shader2 fragment shader");
     }
 

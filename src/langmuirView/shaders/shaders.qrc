@@ -2,8 +2,8 @@
     <qresource prefix="/shaders">
         <file>pcVert.glsl</file>
         <file>pcFrag.glsl</file>
-        <file>ccVert.glsl</file>
-        <file>ccGeom.glsl</file>
-        <file>ccFrag.glsl</file>
+        <file>scVert.glsl</file>
+        <file>scGeom.glsl</file>
+        <file>scFrag.glsl</file>
     </qresource>
 </RCC>
