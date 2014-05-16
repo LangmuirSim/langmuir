@@ -684,7 +684,7 @@ void LangmuirViewer::getSettings(QSettings &settings)
         settings.beginGroup("electrons");
 
         // mode
-        PointCloud::Mode mode = PointCloud::Mode(settings.value("mode", PointCloud::Cubes).toInt());
+        PointCloud::Mode mode = PointCloud::Mode(settings.value("mode", PointCloud::Squares).toInt());
 
         // visible
         bool visible = settings.value("visible", true).toBool();
@@ -712,7 +712,7 @@ void LangmuirViewer::getSettings(QSettings &settings)
         settings.beginGroup("holes");
 
         // mode
-        PointCloud::Mode mode = PointCloud::Mode(settings.value("mode", PointCloud::Cubes).toInt());
+        PointCloud::Mode mode = PointCloud::Mode(settings.value("mode", PointCloud::Squares).toInt());
 
         // visible
         bool visible = settings.value("visible", true).toBool();
@@ -740,7 +740,7 @@ void LangmuirViewer::getSettings(QSettings &settings)
         settings.beginGroup("defects");
 
         // mode
-        PointCloud::Mode mode = PointCloud::Mode(settings.value("mode", PointCloud::Cubes).toInt());
+        PointCloud::Mode mode = PointCloud::Mode(settings.value("mode", PointCloud::Squares).toInt());
 
         // visible
         bool visible = settings.value("visible", true).toBool();

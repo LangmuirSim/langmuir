@@ -3,6 +3,8 @@
 #include "color.h"
 #include "rand.h"
 
+#include <QMetaEnum>
+
 PointCloud::PointCloud(LangmuirViewer &viewer, QObject *parent) :
     SceneObject(viewer, parent), m_verticesVBO(NULL)
 {
@@ -79,15 +81,32 @@ void PointCloud::initShaders()
     }
 }
 
+QString PointCloud::modeToQString(Mode mode)
+{
+    QMetaEnum metaEnum = PointCloud::staticMetaObject.enumerator(0);
+    return QString(staticMetaObject.enumerator(0).valueToKey(mode));
+}
+
+PointCloud::Mode PointCloud::QStringToMode(QString string)
+{
+    bool ok = false;
+    QMetaEnum metaEnum = PointCloud::staticMetaObject.enumerator(0);
+    Mode mode = Mode(metaEnum.keysToValue(string.toLatin1(), &ok));
+    if (!ok) {
+        qFatal("langmuir: can not convert string %s to PointCloud::Mode", qPrintable(string));
+    }
+    return mode;
+}
+
 void PointCloud::init() {
 
     m_color = Qt::green;
     emit colorChanged(m_color);
 
-    m_mode = Cubes;
+    m_mode = Squares;
     emit modeChanged(m_mode);
 
-    m_pointSize = 256.0;
+    m_pointSize = 230.0;
     emit pointSizeChanged(m_pointSize);
 
     m_maxPoints = 0;
@@ -151,7 +170,7 @@ void PointCloud::draw() {
 
             break;
         }
-        case Cubes:
+        case Squares:
         {
             glEnable(GL_PROGRAM_POINT_SIZE);
 
@@ -267,5 +286,5 @@ void PointCloud::makeConnections()
     SceneObject::makeConnections();
     connect(this, SIGNAL(pointSizeChanged(float)), &m_viewer, SLOT(updateGL()));
     connect(this, SIGNAL(colorChanged(QColor)), &m_viewer, SLOT(updateGL()));
-    connect(this, SIGNAL(modeChanged(Mode)), &m_viewer, SLOT(updateGL()));
+    connect(this, SIGNAL(modeChanged(PointCloud::Mode)), &m_viewer, SLOT(updateGL()));
 }

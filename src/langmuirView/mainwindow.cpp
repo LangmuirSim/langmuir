@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "langmuirviewer.h"
+#include "pointdialog.h"
 
 #include <QMetaEnum>
 #include <QInputDialog>
@@ -14,7 +15,8 @@
 
 MainWindow::MainWindow(const QString &inputFile, QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    m_pointdialog(NULL)
 {
     ui->setupUi(this);
     m_viewer = ui->qglwidget;
@@ -90,6 +92,11 @@ void MainWindow::initAfter()
 MainWindow::~MainWindow()
 {
     delete ui;
+
+    if (m_pointdialog != NULL) {
+        m_pointdialog->deleteLater();
+        m_pointdialog = NULL;
+    }
 }
 
 void MainWindow::on_actionScreenshot_triggered()
@@ -171,27 +178,12 @@ void MainWindow::on_actionIterations_triggered()
 
 void MainWindow::on_actionPoints_triggered()
 {
-    m_viewer->pause();
-
-    QMetaEnum metaEnum = PointCloud::staticMetaObject.enumerator(0);
-
-    QStringList keys;
-
-    for (int i = 0; i < metaEnum.keyCount(); i++) {
-        keys.push_back(QString(metaEnum.key(i)));
+    if (m_pointdialog == NULL) {
+        m_pointdialog = new PointDialog(*m_viewer, NULL);
     }
 
-    QString current = metaEnum.valueToKey(m_viewer->electrons().getMode());
-    int currentIndex = keys.indexOf(current);
-
-    QString selected = QInputDialog::getItem(this, "Langmuir", "Render mode:", keys, currentIndex, false);
-    PointCloud::Mode mode = PointCloud::Mode(metaEnum.keyToValue(selected.toLatin1()));
-
-    m_viewer->electrons().setMode(mode);
-    m_viewer->defects().setMode(mode);
-    m_viewer->holes().setMode(mode);
-
-    m_viewer->showMessage(QString("changed to %1").arg(selected));
+    m_pointdialog->show();
+    m_pointdialog->raise();
 }
 
 void MainWindow::on_resetButton_clicked()

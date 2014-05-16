@@ -12,6 +12,7 @@ class MainWindow;
 }
 
 class LangmuirViewer;
+class PointDialog;
 
 class MainWindow : public QMainWindow
 {
@@ -39,6 +40,7 @@ public slots:
 private:
     Ui::MainWindow *ui;
     LangmuirViewer *m_viewer;
+    PointDialog *m_pointdialog;
 
     void setIcon(QAction *action, QString themeIcon, QStyle::StandardPixmap standardPixmap);
     void init();

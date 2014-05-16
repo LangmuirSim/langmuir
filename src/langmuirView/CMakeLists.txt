@@ -6,6 +6,7 @@ set(CMAKE_BUILD_TYPE Debug)
 
 set(SOURCES
     langmuirviewer.cpp
+    pointdialog.cpp
     colorbutton.cpp
     sceneobject.cpp
     pointcloud.cpp
@@ -20,6 +21,7 @@ set(SOURCES
 
 set(HEADERS
     ./include/langmuirviewer.h
+    ./include/pointdialog.h
     ./include/colorbutton.h
     ./include/sceneobject.h
     ./include/pointcloud.h
@@ -40,6 +42,7 @@ file(GLOB_RECURSE ICONS   *.png )
 file(GLOB_RECURSE SHADERS *.glsl)
 
 set(FORMS
+    ./forms/pointdialog.ui
     ./forms/mainwindow.ui
 )
 

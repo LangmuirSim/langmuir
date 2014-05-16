@@ -32,8 +32,8 @@ public:
      * @brief The rendering mode for the cloud
      */
     enum Mode {
-        Points =  1, //! render points as OpenGL points
-        Cubes  =  2, //! render points as cubes
+        Points  =  1, //! render points as OpenGL points
+        Squares =  2, //! render points as squares
     };
     Q_DECLARE_FLAGS(Modes, Mode)
     Q_FLAGS(Modes)
@@ -100,7 +100,13 @@ signals:
      * @brief signal that the render mode has changed
      * @param mode value of rendering mode
      */
-    void modeChanged(Mode mode);
+    void modeChanged(PointCloud::Mode mode);
+
+    /**
+     * @brief signal that the render mode has changed
+     * @param mode value of rendering mode
+     */
+    void modeChanged(QString mode);
 
 public slots:
     /**
@@ -149,6 +155,18 @@ public slots:
      * First alter the CPU vertices, set the max render, then update the VBO.
      */
     void updateVBO();
+
+    /**
+     * @brief convert Mode to string
+     * @param mode mode enum
+     */
+    static QString modeToQString(Mode mode);
+
+    /**
+     * @brief convert string to Mode enum
+     * @param string mode string
+     */
+    static Mode QStringToMode(QString string);
 
 protected:
     /**
