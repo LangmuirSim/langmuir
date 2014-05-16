@@ -5,5 +5,8 @@
         <file>scVert.glsl</file>
         <file>scGeom.glsl</file>
         <file>scFrag.glsl</file>
+        <file>ccVert.glsl</file>
+        <file>ccGeom.glsl</file>
+        <file>ccFrag.glsl</file>
     </qresource>
 </RCC>

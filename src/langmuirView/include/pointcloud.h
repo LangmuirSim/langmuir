@@ -34,6 +34,7 @@ public:
     enum Mode {
         Points  =  1, //! render points as OpenGL points
         Squares =  2, //! render points as squares
+        Cubes   =  3, //! render points as cubes
     };
     Q_DECLARE_FLAGS(Modes, Mode)
     Q_FLAGS(Modes)
@@ -187,8 +188,11 @@ protected:
     //! OpenGL shading pipeline for points
     QOpenGLShaderProgram m_shader1;
 
-    //! OpenGL shading pipeline for cubes
+    //! OpenGL shading pipeline for squares
     QOpenGLShaderProgram m_shader2;
+
+    //! OpenGL shading pipeline for cubes
+    QOpenGLShaderProgram m_shader3;
 
     //! vertices buffer (GPU)
     QOpenGLBuffer *m_verticesVBO;

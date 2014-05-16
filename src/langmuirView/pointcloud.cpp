@@ -79,6 +79,23 @@ void PointCloud::initShaders()
     if (!m_shader2.link()) {
         qFatal("langmuir: can not link shader2");
     }
+
+    // square cloud shader
+    if (!m_shader3.addShaderFromSourceFile(QOpenGLShader::Vertex, ":shaders/ccVert.glsl")) {
+        qFatal("langmuir: can not compile shader3 vertex shader");
+    }
+
+    if (!m_shader3.addShaderFromSourceFile(QOpenGLShader::Geometry, ":shaders/ccGeom.glsl")) {
+        qFatal("langmuir: can not compile shader3 geometry shader");
+    }
+
+    if (!m_shader3.addShaderFromSourceFile(QOpenGLShader::Fragment, ":shaders/ccFrag.glsl")) {
+        qFatal("langmuir: can not compile shader3 fragment shader");
+    }
+
+    if (!m_shader3.link()) {
+        qFatal("langmuir: can not link shader3");
+    }
 }
 
 QString PointCloud::modeToQString(Mode mode)
@@ -199,6 +216,40 @@ void PointCloud::draw() {
             m_shader2.disableAttributeArray("vertex");
             m_verticesVBO->release();
             m_shader2.release();
+
+            glDisable(GL_PROGRAM_POINT_SIZE);
+
+            break;
+        }
+        case Cubes:
+        {
+            glEnable(GL_PROGRAM_POINT_SIZE);
+
+            m_shader3.bind();
+
+            // shader: pass matrix
+            QMatrix4x4& MV = m_viewer.getOpenGLModelViewMatrix();
+            QMatrix4x4& P = m_viewer.getOpenGLProjectionMatrix();
+            m_shader3.setUniformValue("matrix", P * MV);
+
+            // shader: pass color
+            m_shader3.setUniformValue("color", m_color);
+
+            // shader: pass pointsize
+            m_shader3.setUniformValue("pointSize", m_pointSize);
+
+            // shader: pass vertices
+            m_verticesVBO->bind();
+            m_shader3.enableAttributeArray("vertex");
+            m_shader3.setAttributeBuffer("vertex", GL_FLOAT, 0, 3, 0);
+
+            // shader: draw
+            glDrawArrays(GL_POINTS, 0, m_maxRender);
+
+            // release
+            m_shader3.disableAttributeArray("vertex");
+            m_verticesVBO->release();
+            m_shader3.release();
 
             glDisable(GL_PROGRAM_POINT_SIZE);
 

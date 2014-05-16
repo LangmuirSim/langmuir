@@ -54,12 +54,17 @@
      </property>
      <item>
       <property name="text">
+       <string>Points</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
        <string>Squares</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>Points</string>
+       <string>Cubes</string>
       </property>
      </item>
     </widget>
@@ -91,12 +96,17 @@
      </property>
      <item>
       <property name="text">
+       <string>Points</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
        <string>Squares</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>Points</string>
+       <string>Cubes</string>
       </property>
      </item>
     </widget>
@@ -199,12 +209,17 @@
      </property>
      <item>
       <property name="text">
+       <string>Points</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
        <string>Squares</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>Points</string>
+       <string>Cubes</string>
       </property>
      </item>
     </widget>
