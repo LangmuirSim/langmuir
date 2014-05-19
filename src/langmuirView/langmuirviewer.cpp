@@ -306,16 +306,16 @@ void LangmuirViewer::initGeometry()
 
     if (m_lBox != NULL)
     {
-        m_lBox->setXSize(m_boxThickness);
+        m_lBox->setXSize(2 * m_boxThickness);
         m_lBox->setYSize(m_gridY);
-        m_lBox->setZSize(m_gridZ);
+        m_lBox->setZSize(m_gridZ + m_boxThickness);
     }
 
     if (m_rBox != NULL)
     {
-        m_rBox->setXSize(m_boxThickness);
+        m_rBox->setXSize(2 * m_boxThickness);
         m_rBox->setYSize(m_gridY);
-        m_rBox->setZSize(m_gridZ);
+        m_rBox->setZSize(m_gridZ + m_boxThickness);
     }
 
     if (m_light0 != NULL)
@@ -477,12 +477,12 @@ void LangmuirViewer::draw()
     glPopMatrix();
 
     glPushMatrix();
-        glTranslatef(-m_gridHalfX - 0.5 * m_boxThickness, 0.0, 0.0);
+        glTranslatef(-m_gridHalfX - m_boxThickness, 0.0, 0.0);
         m_lBox->render();
     glPopMatrix();
 
     glPushMatrix();
-        glTranslatef(+m_gridHalfX + 0.5 * m_boxThickness, 0.0, 0.0);
+        glTranslatef(+m_gridHalfX + m_boxThickness, 0.0, 0.0);
         m_rBox->render();
     glPopMatrix();
 
