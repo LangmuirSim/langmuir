@@ -12,6 +12,7 @@
 #include "light.h"
 #include "grid.h"
 #include "rand.h"
+#include "mesh.h"
 #include "box.h"
 
 namespace Langmuir {
@@ -431,6 +432,9 @@ protected:
 
     //! grid that outlines sites
     Grid *m_grid;
+
+    //! trap mesh
+    Mesh *m_trapMesh;
 
     //! main light source
     Light *m_light0;

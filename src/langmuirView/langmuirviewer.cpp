@@ -421,6 +421,13 @@ void LangmuirViewer::init()
     m_rBox->setVisible(true);
     m_rBox->makeConnections();
 
+    // Mesh
+    m_trapMesh = new Mesh(*this, this);
+    m_trapMesh->setColorA(Qt::red);
+    m_trapMesh->setColorB(Qt::yellow);
+    m_trapMesh->setVisible(true);
+    m_trapMesh->makeConnections();
+
     // Light
     glEnable(GL_LIGHTING);
 
@@ -486,7 +493,7 @@ void LangmuirViewer::draw()
         m_rBox->render();
     glPopMatrix();
 
-    m_light0->render();
+    m_trapMesh->render();
 }
 
 void LangmuirViewer::postDraw()

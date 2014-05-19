@@ -16,6 +16,7 @@ set(SOURCES
     color.cpp
     axis.cpp
     grid.cpp
+    mesh.cpp
     box.cpp
 )
 
@@ -31,6 +32,7 @@ set(HEADERS
     ./include/color.h
     ./include/axis.h
     ./include/grid.h
+    ./include/mesh.h
     ./include/box.h
 )
 
