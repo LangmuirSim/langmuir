@@ -504,6 +504,8 @@ void LangmuirViewer::animate()
     m_simulation->performIterations(m_world->parameters().iterationsPrint);
     updateElectronCloud();
     updateHoleCloud();
+
+    emit currentStepChanged(m_world->parameters().currentStep);
 }
 
 void LangmuirViewer::help() {
@@ -1063,6 +1065,7 @@ void LangmuirViewer::load(QString fileName)
 
     emit isUsingOpenCL(m_world->parameters().useOpenCL);
     emit isUsingCoulomb(m_world->parameters().coulombCarriers);
+    emit currentStepChanged(m_world->parameters().currentStep);
 }
 
 void LangmuirViewer::save(QString fileName)
@@ -1114,6 +1117,7 @@ void LangmuirViewer::unload()
     updateGL();
 
     emit showMessage("simulation deleted");
+    emit currentStepChanged(0);
 }
 
 void LangmuirViewer::reset() {
@@ -1181,6 +1185,7 @@ void LangmuirViewer::reset() {
     emit showMessage("reset simulation");
     emit isUsingOpenCL(m_world->parameters().useOpenCL);
     emit isUsingCoulomb(m_world->parameters().coulombCarriers);
+    emit currentStepChanged(m_world->parameters().currentStep);
 }
 
 void LangmuirViewer::resetCamera()

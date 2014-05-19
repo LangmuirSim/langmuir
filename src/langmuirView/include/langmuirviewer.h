@@ -161,6 +161,12 @@ signals:
     void iterationsPrintChanged(int value);
 
     /**
+     * @brief signal that current.step changed
+     * @param value value of current.step
+     */
+    void currentStepChanged(int value);
+
+    /**
      * @brief signal that OpenGL has been initialized
      */
     void openGLInitFinished();
