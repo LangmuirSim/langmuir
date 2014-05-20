@@ -7,6 +7,7 @@
 #include <QMatrix4x4>
 #include <QSettings>
 
+#include "isosurface.h"
 #include "corneraxis.h"
 #include "pointcloud.h"
 #include "light.h"
@@ -14,6 +15,23 @@
 #include "rand.h"
 #include "mesh.h"
 #include "box.h"
+
+#define BOOST_DISABLE_ASSERTS
+
+#ifndef Q_MOC_RUN
+
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)
+#pragma GCC diagnostic push
+#pragma GCC system_header
+#endif
+
+#include "boost/multi_array.hpp"
+
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)
+#pragma GCC diagnostic pop
+#endif
+
+#endif
 
 namespace Langmuir {
     class Simulation;
@@ -334,6 +352,12 @@ public slots:
     void initTraps();
 
     /**
+     * @brief generate isosurface
+     */
+    void generateIsoSurface();
+    void updateTrapMesh();
+
+    /**
      * @brief set default colors
      */
     void resetSettings();
@@ -435,6 +459,9 @@ protected:
 
     //! trap mesh
     Mesh *m_trapMesh;
+
+    //! isosurface
+    MarchingCubes::Isosurface *m_isoSurface;
 
     //! main light source
     Light *m_light0;

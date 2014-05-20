@@ -370,6 +370,7 @@
     <addaction name="actionOpenCL"/>
     <addaction name="actionIterations"/>
     <addaction name="actionCoulomb"/>
+    <addaction name="actionIsoSurface"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -693,6 +694,11 @@
   <action name="actionResetSettings">
    <property name="text">
     <string>Reset Settings</string>
+   </property>
+  </action>
+  <action name="actionIsoSurface">
+   <property name="text">
+    <string>IsoSurface</string>
    </property>
   </action>
  </widget>

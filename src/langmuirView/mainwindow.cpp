@@ -191,7 +191,12 @@ void MainWindow::on_actionPoints_triggered()
     m_pointdialog->raise();
 }
 
-void MainWindow::on_action_ResetSettings_triggered()
+void MainWindow::on_actionIsoSurface_triggered()
+{
+    m_viewer->generateIsoSurface();
+}
+
+void MainWindow::on_actionResetSettings_triggered()
 {
     m_viewer->resetSettings();
     m_viewer->showMessage("reset parameters!");

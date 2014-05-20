@@ -21,6 +21,9 @@
 #include <QDebug>
 #include <QDir>
 
+#include <QtConcurrent>
+#include <QFuture>
+
 #include "vec.h"
 
 LangmuirViewer::LangmuirViewer(QWidget *parent) :
@@ -35,6 +38,7 @@ LangmuirViewer::LangmuirViewer(QWidget *parent) :
 
     m_boxThickness = 1.0;
     m_trapColor = Qt::black;
+    m_isoSurface = NULL;
 
     QGLFormat format;
     format.setVersion(4, 0);
@@ -346,6 +350,52 @@ void LangmuirViewer::initTraps()
     }
 }
 
+void LangmuirViewer::generateIsoSurface()
+{
+    int xsize = m_world->parameters().gridX;
+    int ysize = m_world->parameters().gridY;
+    int zsize = m_world->parameters().gridZ;
+
+    if (m_isoSurface == NULL)
+    {
+        m_isoSurface = new MarchingCubes::Isosurface(this);
+        connect(m_isoSurface, SIGNAL(done()), this, SLOT(updateTrapMesh()));
+    }
+
+    MarchingCubes::scalar_field& scalar = m_isoSurface->createScalarField(xsize, ysize, zsize, 1.0);
+    m_isoSurface->setIsoValue(0.0);
+
+    foreach (int site, m_world->trapSiteIDs())
+    {
+        int x = m_world->electronGrid().getIndexX(site);
+        int y = m_world->electronGrid().getIndexY(site);
+        int z = m_world->electronGrid().getIndexZ(site);
+        scalar[x][y][z] = 1.0;
+    }
+
+    QtConcurrent::run(m_isoSurface, &MarchingCubes::Isosurface::generate);
+
+    emit showMessage("calculating isosurface");
+}
+
+void LangmuirViewer::updateTrapMesh()
+{
+    if (m_isoSurface == NULL)
+    {
+        return;
+    }
+
+    emit showMessage("isosurface done!");
+
+    m_trapMesh->setMesh(m_isoSurface->vertices(), m_isoSurface->normals(), m_isoSurface->indices());
+
+    qDebug("langmuir: %d vertices", m_isoSurface->vertices().size());
+    qDebug("langmuir: %d normals", m_isoSurface->normals().size());
+    qDebug("langmuir: %d indices", m_isoSurface->indices().size());
+
+    m_isoSurface->clear();
+}
+
 void LangmuirViewer::resetSettings()
 {
     QFileInfo info(QDir::current().absoluteFilePath("config.ini"));
@@ -493,7 +543,10 @@ void LangmuirViewer::draw()
         m_rBox->render();
     glPopMatrix();
 
-    m_trapMesh->render();
+    glPushMatrix();
+        glTranslatef(-m_gridHalfX, -m_gridHalfY, -m_gridHalfZ);
+        m_trapMesh->render();
+    glPopMatrix();
 }
 
 void LangmuirViewer::postDraw()

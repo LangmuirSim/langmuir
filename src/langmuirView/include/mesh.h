@@ -80,7 +80,7 @@ public slots:
      * @param normals normal buffer
      * @param indices index buffer
      */
-    void setMesh(QVector<GLfloat> &vertices, QVector<GLfloat>& normals, QVector<GLuint> &indices);
+    void setMesh(const QVector<float> &vertices, const QVector<float>& normals, const QVector<unsigned int> &indices);
 
 protected:
     /**

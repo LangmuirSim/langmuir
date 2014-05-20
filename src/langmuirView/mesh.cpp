@@ -58,8 +58,6 @@ void Mesh::draw() {
     }
 
     static float color[4];
-    setColorA(Qt::green);
-    setColorB(Qt::blue);
 
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
@@ -117,7 +115,7 @@ void Mesh::setColorB(QColor color)
     }
 }
 
-void Mesh::setMesh(QVector<GLfloat>& vertices, QVector<GLfloat> &normals, QVector<GLuint>& indices)
+void Mesh::setMesh(const QVector<float> &vertices, const QVector<float> &normals, const QVector<unsigned int> &indices)
 {
     if (vertices.size() != normals.size()) {
         qFatal("langmuir: vertex and normal buffers must be the same size");
@@ -134,15 +132,15 @@ void Mesh::setMesh(QVector<GLfloat>& vertices, QVector<GLfloat> &normals, QVecto
     }
 
     m_verticesVBO->bind();
-    m_verticesVBO->allocate(vertices.data(), sizeof(GLfloat) * vertices.size());
+    m_verticesVBO->allocate(vertices.data(), sizeof(float) * vertices.size());
     m_verticesVBO->release();
 
     m_normalsVBO->bind();
-    m_normalsVBO->allocate(normals.data(), sizeof(GLfloat) * normals.size());
+    m_normalsVBO->allocate(normals.data(), sizeof(float) * normals.size());
     m_normalsVBO->release();
 
     m_indexVBO->bind();
-    m_indexVBO->allocate(indices.data(), sizeof(GLuint) * indices.size());
+    m_indexVBO->allocate(indices.data(), sizeof(unsigned int) * indices.size());
     m_indexVBO->release();
 
     m_numVertices = vertices.size();
