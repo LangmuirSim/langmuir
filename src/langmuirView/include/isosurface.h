@@ -445,6 +445,11 @@ namespace MarchingCubes
          */
         void done();
 
+        /**
+         * @brief signal progress
+         */
+        void progress(int);
+
     private:
         //! list of triangles
         QList<Triangle*> m_triangles;

@@ -82,6 +82,11 @@ public slots:
      */
     void setMesh(const QVector<float> &vertices, const QVector<float>& normals, const QVector<unsigned int> &indices);
 
+    /**
+     * @brief clear GPU buffers
+     */
+    void clear();
+
 protected:
     /**
      * @brief initialize object

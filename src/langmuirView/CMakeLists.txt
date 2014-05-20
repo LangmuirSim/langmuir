@@ -5,6 +5,7 @@ message(STATUS "Project: ${PROJECT_NAME}")
 set(CMAKE_BUILD_TYPE Debug)
 
 set(SOURCES
+    isosurfacedialog.cpp
     langmuirviewer.cpp
     pointdialog.cpp
     colorbutton.cpp
@@ -22,6 +23,7 @@ set(SOURCES
 )
 
 set(HEADERS
+    ./include/isosurfacedialog.h
     ./include/langmuirviewer.h
     ./include/pointdialog.h
     ./include/colorbutton.h
@@ -46,6 +48,7 @@ file(GLOB_RECURSE ICONS   *.png )
 file(GLOB_RECURSE SHADERS *.glsl)
 
 set(FORMS
+    ./forms/isosurfacedialog.ui
     ./forms/pointdialog.ui
     ./forms/mainwindow.ui
 )

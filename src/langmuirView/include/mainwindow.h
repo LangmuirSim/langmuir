@@ -13,6 +13,7 @@ class MainWindow;
 
 class LangmuirViewer;
 class PointDialog;
+class IsoSurfaceDialog;
 
 class MainWindow : public QMainWindow
 {
@@ -42,6 +43,7 @@ private:
     Ui::MainWindow *ui;
     LangmuirViewer *m_viewer;
     PointDialog *m_pointdialog;
+    IsoSurfaceDialog *m_isosurfacedialog;
 
     void setIcon(QAction *action, QString themeIcon, QStyle::StandardPixmap standardPixmap);
     void init();

@@ -107,6 +107,11 @@ namespace MarchingCubes
             qFatal("langmuir: must set scalar field");
         }
 
+        emit progress(0);
+
+        int count = 0;
+        float vol = m_xsize * m_ysize * m_zsize;
+
         for (int i = 0; i < m_xsize - 1; i++)
         {
             for (int j = 0; j < m_ysize - 1; j++)
@@ -114,9 +119,13 @@ namespace MarchingCubes
                 for (int k = 0; k < m_zsize - 1; k++)
                 {
                     marchingCubes(i, j, k);
+                    count += 1;
+                    emit progress(int(100.0 * count / vol));
                 }
             }
         }
+
+        emit progress(100);
 
         simplify();
 
@@ -250,61 +259,55 @@ namespace MarchingCubes
 
     void Isosurface::simplify()
     {
-        QList<QVector3D> v;
-        QList<QVector3D> n;
-
-        m_indices.clear();
-        m_indices.reserve(3 * m_triangles.size());
-
-        foreach(Triangle *triangle, m_triangles)
-        {
-            int i0 = v.indexOf(triangle->v0);
-            int i1 = v.indexOf(triangle->v1);
-            int i2 = v.indexOf(triangle->v2);
-
-            if (i0 >= 0) {
-                m_indices.push_back(i0);
-            } else {
-                v.push_back(triangle->v0);
-                n.push_back(triangle->n0);
-                m_indices.push_back(v.size() - 1);
-            }
-
-            if (i1 >= 0) {
-                m_indices.push_back(i1);
-            } else {
-                v.push_back(triangle->v1);
-                n.push_back(triangle->n1);
-                m_indices.push_back(v.size() - 1);
-            }
-
-            if (i2 >= 0) {
-                m_indices.push_back(i2);
-            } else {
-                v.push_back(triangle->v2);
-                n.push_back(triangle->n2);
-                m_indices.push_back(v.size() - 1);
-            }
-        }
+        emit progress(0);
 
         m_vertices.clear();
-        m_vertices.reserve(3 * v.size());
-
+        m_indices.clear();
         m_normals.clear();
-        m_normals.reserve(3 * n.size());
 
-        foreach(QVector3D vector, v)
-        {
-            m_vertices.push_back(vector.x());
-            m_vertices.push_back(vector.y());
-            m_vertices.push_back(vector.z());
-        }
+        m_vertices.reserve(9 * m_triangles.size());
+        m_normals.reserve(9 * m_triangles.size());
+        m_indices.reserve(3 * m_triangles.size());
 
-        foreach(QVector3D normal, n)
+        int index = 0;
+        int count = 0;
+        foreach(Triangle *triangle, m_triangles)
         {
-            m_normals.push_back(normal.x());
-            m_normals.push_back(normal.y());
-            m_normals.push_back(normal.z());
+            m_vertices.push_back(triangle->v0.x());
+            m_vertices.push_back(triangle->v0.y());
+            m_vertices.push_back(triangle->v0.z());
+
+            m_normals.push_back(triangle->n0.x());
+            m_normals.push_back(triangle->n0.y());
+            m_normals.push_back(triangle->n0.z());
+
+            m_indices.push_back(index);
+            index += 1;
+
+            m_vertices.push_back(triangle->v1.x());
+            m_vertices.push_back(triangle->v1.y());
+            m_vertices.push_back(triangle->v1.z());
+
+            m_normals.push_back(triangle->n1.x());
+            m_normals.push_back(triangle->n1.y());
+            m_normals.push_back(triangle->n1.z());
+
+            m_indices.push_back(index);
+            index += 1;
+
+            m_vertices.push_back(triangle->v2.x());
+            m_vertices.push_back(triangle->v2.y());
+            m_vertices.push_back(triangle->v2.z());
+
+            m_normals.push_back(triangle->n2.x());
+            m_normals.push_back(triangle->n2.y());
+            m_normals.push_back(triangle->n2.z());
+
+            m_indices.push_back(index);
+            index += 1;
+
+            count += 1;
+            emit progress(int(count/float(m_triangles.size())));
         }
 
         foreach(Triangle * triangle, m_triangles)
@@ -312,5 +315,80 @@ namespace MarchingCubes
             triangle->deleteLater();
         }
         m_triangles.clear();
+
+        emit progress(100);
+//        QList<QVector3D> v;
+//        QList<QVector3D> n;
+
+//        emit progress(0);
+
+//        m_indices.clear();
+//        m_indices.reserve(3 * m_triangles.size());
+
+//        int count = 0;
+//        foreach(Triangle *triangle, m_triangles)
+//        {
+//            int i0 = v.indexOf(triangle->v0);
+//            int i1 = v.indexOf(triangle->v1);
+//            int i2 = v.indexOf(triangle->v2);
+
+//            if (i0 >= 0) {
+//                m_indices.push_back(i0);
+//            } else {
+//                v.push_back(triangle->v0);
+//                n.push_back(triangle->n0);
+//                m_indices.push_back(v.size() - 1);
+//            }
+
+//            if (i1 >= 0) {
+//                m_indices.push_back(i1);
+//            } else {
+//                v.push_back(triangle->v1);
+//                n.push_back(triangle->n1);
+//                m_indices.push_back(v.size() - 1);
+//            }
+
+//            if (i2 >= 0) {
+//                m_indices.push_back(i2);
+//            } else {
+//                v.push_back(triangle->v2);
+//                n.push_back(triangle->n2);
+//                m_indices.push_back(v.size() - 1);
+//            }
+//            count += 1;
+//            emit progress(int(100.0 * count/float(m_triangles.size())));
+//        }
+
+//        m_vertices.clear();
+//        m_vertices.reserve(3 * v.size());
+
+//        m_normals.clear();
+//        m_normals.reserve(3 * n.size());
+
+//        count = 0;
+//        foreach(QVector3D vector, v)
+//        {
+//            m_vertices.push_back(vector.x());
+//            m_vertices.push_back(vector.y());
+//            m_vertices.push_back(vector.z());
+//            emit progress(int(100.0 * count/float(v.size())));
+//        }
+
+//        count = 0;
+//        foreach(QVector3D normal, n)
+//        {
+//            m_normals.push_back(normal.x());
+//            m_normals.push_back(normal.y());
+//            m_normals.push_back(normal.z());
+//            emit progress(int(100.0 * count/float(v.size())));
+//        }
+
+//        foreach(Triangle * triangle, m_triangles)
+//        {
+//            triangle->deleteLater();
+//        }
+//        m_triangles.clear();
+
+//        emit progress(100);
     }
 }

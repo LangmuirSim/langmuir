@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "langmuirviewer.h"
 #include "pointdialog.h"
+#include "isosurfacedialog.h"
 
 #include <QMetaEnum>
 #include <QInputDialog>
@@ -16,7 +17,8 @@
 MainWindow::MainWindow(const QString &inputFile, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    m_pointdialog(NULL)
+    m_pointdialog(NULL),
+    m_isosurfacedialog(NULL)
 {
     ui->setupUi(this);
     m_viewer = ui->qglwidget;
@@ -109,6 +111,12 @@ MainWindow::~MainWindow()
         m_pointdialog->deleteLater();
         m_pointdialog = NULL;
     }
+
+    if (m_isosurfacedialog != NULL) {
+        m_isosurfacedialog->close();
+        m_isosurfacedialog->deleteLater();
+        m_isosurfacedialog = NULL;
+    }
 }
 
 void MainWindow::on_actionScreenshot_triggered()
@@ -185,7 +193,13 @@ void MainWindow::on_actionPoints_triggered()
 
 void MainWindow::on_actionIsoSurface_triggered()
 {
-    m_viewer->generateIsoSurface();
+    if (m_isosurfacedialog == NULL) {
+        m_isosurfacedialog = new IsoSurfaceDialog(*m_viewer, NULL);
+    }
+
+    m_isosurfacedialog->update();
+    m_isosurfacedialog->show();
+    m_isosurfacedialog->raise();
 }
 
 void MainWindow::on_actionResetSettings_triggered()

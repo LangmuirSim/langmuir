@@ -149,6 +149,14 @@ void Mesh::setMesh(const QVector<float> &vertices, const QVector<float> &normals
     emit meshChanged();
 }
 
+void Mesh::clear()
+{
+    QVector<float> v;
+    QVector<float> n;
+    QVector<unsigned int> i;
+    setMesh(v, n, i);
+}
+
 void Mesh::makeConnections()
 {
     SceneObject::makeConnections();

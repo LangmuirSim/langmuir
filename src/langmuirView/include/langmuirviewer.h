@@ -82,6 +82,11 @@ public:
     Langmuir::Random& random();
 
     /**
+     * @brief its ok when not already calculating
+     */
+    bool okToCalculateIsoSurface() { return m_canCalculateIsoSurface; }
+
+    /**
      * @brief get the trap color
      */
     const QColor& trapColor() const { return m_trapColor; }
@@ -125,6 +130,11 @@ public:
      * @brief get trap box object
      */
     Box & trapBox() { return *m_trapBox; }
+
+    /**
+     * @brief get trap mesh object
+     */
+    Mesh & trapMesh() { return *m_trapMesh; }
 
     /**
      * @brief get light object
@@ -199,6 +209,16 @@ signals:
      * @brief signal that the background color changed
      */
     void backgroundColorChanged(QColor color);
+
+    /**
+     * @brief signal that the isosurface can by calculated again
+     */
+    void canCalculateIsoSurface(bool able);
+
+    /**
+     * @brief show calculation progress
+     */
+    void isoSurfaceProgress(int);
 
 public slots:
     /**
@@ -354,13 +374,22 @@ public slots:
     /**
      * @brief generate isosurface
      */
-    void generateIsoSurface();
+    void generateIsoSurface(float value);
+
+    /**
+     * @brief update trap mesh
+     */
     void updateTrapMesh();
 
     /**
      * @brief set default colors
      */
     void resetSettings();
+
+    /**
+     * @brief set can calculate isosurface
+     */
+    void setCanCalculateIsoSurface(bool enabled);
 
 protected:
     /**
@@ -495,6 +524,9 @@ protected:
 
     //! error messages
     QErrorMessage *m_error;
+
+    //! can calculate isosurface
+    bool m_canCalculateIsoSurface;
 };
 
 #endif // LANGMUIRVIEWER_H

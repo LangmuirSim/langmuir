@@ -40,6 +40,8 @@ LangmuirViewer::LangmuirViewer(QWidget *parent) :
     m_trapColor = Qt::black;
     m_isoSurface = NULL;
 
+    m_canCalculateIsoSurface = false;
+
     QGLFormat format;
     format.setVersion(4, 0);
     setFormat(format);
@@ -326,6 +328,18 @@ void LangmuirViewer::initGeometry()
     {
         m_light0->setPosition(0, 0, 1.25 * m_gridZ, 1.0);
     }
+
+    if (m_trapMesh != NULL)
+    {
+        m_trapMesh->clear();
+        m_trapMesh->setVisible(false);
+    }
+
+    if (m_gridZ > 1) {
+        setCanCalculateIsoSurface(true);
+    } else {
+        setCanCalculateIsoSurface(false);
+    }
 }
 
 void LangmuirViewer::initTraps()
@@ -350,8 +364,15 @@ void LangmuirViewer::initTraps()
     }
 }
 
-void LangmuirViewer::generateIsoSurface()
+void LangmuirViewer::generateIsoSurface(float value)
 {
+    if (!m_canCalculateIsoSurface) {
+        emit showMessage("can not calculate isosurface!");
+        return;
+    }
+
+    emit canCalculateIsoSurface(false);
+
     int xsize = m_world->parameters().gridX;
     int ysize = m_world->parameters().gridY;
     int zsize = m_world->parameters().gridZ;
@@ -360,10 +381,11 @@ void LangmuirViewer::generateIsoSurface()
     {
         m_isoSurface = new MarchingCubes::Isosurface(this);
         connect(m_isoSurface, SIGNAL(done()), this, SLOT(updateTrapMesh()));
+        connect(m_isoSurface, SIGNAL(progress(int)), this, SIGNAL(isoSurfaceProgress(int)));
     }
 
     MarchingCubes::scalar_field& scalar = m_isoSurface->createScalarField(xsize, ysize, zsize, 1.0);
-    m_isoSurface->setIsoValue(0.0);
+    m_isoSurface->setIsoValue(value);
 
     foreach (int site, m_world->trapSiteIDs())
     {
@@ -382,6 +404,7 @@ void LangmuirViewer::updateTrapMesh()
 {
     if (m_isoSurface == NULL)
     {
+        emit showMessage("can not update trap mesh!");
         return;
     }
 
@@ -394,6 +417,10 @@ void LangmuirViewer::updateTrapMesh()
     qDebug("langmuir: %d indices", m_isoSurface->indices().size());
 
     m_isoSurface->clear();
+
+    m_trapMesh->setVisible(true);
+
+    emit canCalculateIsoSurface(true);
 }
 
 void LangmuirViewer::resetSettings()
@@ -405,6 +432,15 @@ void LangmuirViewer::resetSettings()
     } else {
         QSettings settings;
         getSettings(settings);
+    }
+}
+
+void LangmuirViewer::setCanCalculateIsoSurface(bool enabled)
+{
+    if (enabled != m_canCalculateIsoSurface)
+    {
+        m_canCalculateIsoSurface = enabled;
+        emit canCalculateIsoSurface(enabled);
     }
 }
 
@@ -475,7 +511,7 @@ void LangmuirViewer::init()
     m_trapMesh = new Mesh(*this, this);
     m_trapMesh->setColorA(Qt::red);
     m_trapMesh->setColorB(Qt::yellow);
-    m_trapMesh->setVisible(true);
+    m_trapMesh->setVisible(false);
     m_trapMesh->makeConnections();
 
     // Light
