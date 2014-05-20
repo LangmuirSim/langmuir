@@ -89,7 +89,15 @@ void MainWindow::initAfter()
     connect(&m_viewer->grid(), SIGNAL(visibleChanged(bool)), ui->actionGrid, SLOT(setChecked(bool)));
     connect(&m_viewer->cornerAxis(), SIGNAL(visibleChanged(bool)), ui->actionCornerAxis, SLOT(setChecked(bool)));
 
+    connect(m_viewer, SIGNAL(iterationsPrintChanged(int)), this, SLOT(updateSpinBox(int)));
+    connect(ui->spinBox, SIGNAL(valueChanged(int)), m_viewer, SLOT(setIterationsPrint(int)));
+
     m_viewer->resetSettings();
+}
+
+void MainWindow::updateSpinBox(int value)
+{
+    ui->spinBox->setValue(value);
 }
 
 MainWindow::~MainWindow()
@@ -162,22 +170,6 @@ void MainWindow::on_actionLoadSettings_triggered()
         this, tr("Open settings file"), QDir::currentPath(), "Settings (*.ini);; All Files (*)");
 
     m_viewer->loadSettings(fileName);
-}
-
-void MainWindow::on_actionIterations_triggered()
-{
-    m_viewer->pause();
-
-    bool ok   = false;
-    int value = QInputDialog::getInt(this, "Langmuir", "iterations.print", 1, 1, 100, 1, &ok);
-
-    if (ok && value)
-    {
-        m_viewer->setIterationsPrint(value);
-    }
-    else {
-        m_viewer->errorMessage("can not set iterations.print!");
-    }
 }
 
 void MainWindow::on_actionPoints_triggered()

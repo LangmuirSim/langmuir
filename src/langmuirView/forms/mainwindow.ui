@@ -298,6 +298,41 @@
        </spacer>
       </item>
       <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>iterations.print</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="spinBox">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>64</width>
+          <height>32</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>64</width>
+          <height>32</height>
+         </size>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>1000</number>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QLCDNumber" name="lcdCurrentStep">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -368,7 +403,6 @@
     <addaction name="actionStart"/>
     <addaction name="actionStop"/>
     <addaction name="actionOpenCL"/>
-    <addaction name="actionIterations"/>
     <addaction name="actionCoulomb"/>
     <addaction name="actionIsoSurface"/>
    </widget>
@@ -408,7 +442,6 @@
    <addaction name="separator"/>
    <addaction name="actionStart"/>
    <addaction name="actionStop"/>
-   <addaction name="actionIterations"/>
    <addaction name="actionOpenCL"/>
    <addaction name="actionCoulomb"/>
    <addaction name="separator"/>
@@ -652,18 +685,6 @@
     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Show traps texture.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </action>
-  <action name="actionIterations">
-   <property name="icon">
-    <iconset resource="../icons/icons.qrc">
-     <normaloff>:/icons/i.png</normaloff>:/icons/i.png</iconset>
-   </property>
-   <property name="text">
-    <string>Iterations</string>
-   </property>
-   <property name="toolTip">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Change print iterations.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-   </property>
-  </action>
   <action name="actionPoints">
    <property name="icon">
     <iconset resource="../icons/icons.qrc">
@@ -697,6 +718,10 @@
    </property>
   </action>
   <action name="actionIsoSurface">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/i.png</normaloff>:/icons/i.png</iconset>
+   </property>
    <property name="text">
     <string>IsoSurface</string>
    </property>
