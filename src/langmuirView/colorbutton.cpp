@@ -10,6 +10,7 @@ ColorButton::ColorButton(QWidget *parent) :
     }
 
     connect(this, SIGNAL(clicked()), this, SLOT(getColor()));
+    m_color = Qt::white;
 }
 
 ColorButton::~ColorButton()
@@ -22,6 +23,8 @@ ColorButton::~ColorButton()
 
 void ColorButton::setButtonColor(QColor color)
 {
+    m_color = color;
+
     QString style = QString(
         "QPushButton {"
         "    background-color: rgb(%1, %2, %3)"
@@ -33,7 +36,7 @@ void ColorButton::setButtonColor(QColor color)
 
 void ColorButton::getColor()
 {
-    QColor color = m_colordialog->getColor();
+    QColor color = m_colordialog->getColor(m_color, 0, "Langmuir", QColorDialog::ShowAlphaChannel);
     if (color.isValid()) {
         setButtonColor(color);
         emit selectedColor(color);

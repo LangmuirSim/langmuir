@@ -3,6 +3,7 @@
 
 #include <QColorDialog>
 #include <QPushButton>
+#include <QColor>
 #include <QDebug>
 
 class ColorButton : public QPushButton
@@ -21,6 +22,7 @@ public slots:
 
 protected:
     static QColorDialog *m_colordialog;
+    QColor m_color;
 };
 
 #endif // COLORBUTTON_H
