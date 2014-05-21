@@ -29,6 +29,18 @@ public:
     ~Mesh();
 
     /**
+     * @brief The rendering mode for the cloud
+     */
+    enum Mode {
+        Single      =  1, //! render mesh using single color
+        SingleAlpha =  2, //! render mesh using single color with alpha blending
+        Double      =  3, //! render mesh using two colors
+        DoubleAlpha =  4, //! render mesh using two colors with alpha blending
+    };
+    Q_DECLARE_FLAGS(Modes, Mode)
+    Q_FLAGS(Modes)
+
+    /**
      * @brief get color A
      */
     const QColor& getColorA() const;
@@ -37,6 +49,11 @@ public:
      * @brief get color B
      */
     const QColor& getColorB() const;
+
+    /**
+     * @brief get render mode
+     */
+    Mode getMode() const;
 
 signals:
     /**
@@ -55,6 +72,18 @@ signals:
      * @brief signal that the mesh has changed
      */
     void meshChanged();
+
+    /**
+     * @brief signal that the render mode has changed
+     * @param mode value of rendering mode
+     */
+    void modeChanged(Mesh::Mode mode);
+
+    /**
+     * @brief signal that the render mode has changed
+     * @param mode value of rendering mode
+     */
+    void modeChanged(QString mode);
 
 public slots:
     /**
@@ -83,9 +112,27 @@ public slots:
     void setMesh(const QVector<float> &vertices, const QVector<float>& normals, const QVector<unsigned int> &indices);
 
     /**
+     * @brief set the mode
+     * @param mode mode to set
+     */
+    void setMode(Mesh::Mode mode);
+
+    /**
      * @brief clear GPU buffers
      */
     void clear();
+
+    /**
+     * @brief convert Mode to string
+     * @param mode mode enum
+     */
+    static QString modeToQString(Mode mode);
+
+    /**
+     * @brief convert string to Mode enum
+     * @param string mode string
+     */
+    static Mode QStringToMode(QString string);
 
 protected:
     /**
@@ -118,6 +165,11 @@ protected:
 
     //! index count
     unsigned int m_numIndices;
+
+    //! rendering mode
+    Mode m_mode;
 };
+
+Q_DECLARE_METATYPE(Mesh::Mode);
 
 #endif // MESH_H

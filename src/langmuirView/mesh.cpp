@@ -30,6 +30,28 @@ const QColor& Mesh::getColorB() const
     return m_colorB;
 }
 
+Mesh::Mode Mesh::getMode() const
+{
+    return m_mode;
+}
+
+QString Mesh::modeToQString(Mesh::Mode mode)
+{
+    QMetaEnum metaEnum = Mesh::staticMetaObject.enumerator(0);
+    return QString(metaEnum.valueToKey(mode));
+}
+
+Mesh::Mode Mesh::QStringToMode(QString string)
+{
+    bool ok = false;
+    QMetaEnum metaEnum = Mesh::staticMetaObject.enumerator(0);
+    Mode mode = Mode(metaEnum.keysToValue(string.toLatin1(), &ok));
+    if (!ok) {
+        qFatal("langmuir: can not convert string %s to Mesh::Mode", qPrintable(string));
+    }
+    return mode;
+}
+
 void Mesh::init() {
 
     m_colorA = Qt::red;
@@ -37,6 +59,9 @@ void Mesh::init() {
 
     m_colorB = Qt::yellow;
     emit colorBChanged(m_colorB);
+
+    m_mode = DoubleAlpha;
+    emit modeChanged(m_mode);
 
     m_verticesVBO = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
     m_verticesVBO->setUsagePattern(QOpenGLBuffer::StaticDraw);
@@ -57,7 +82,11 @@ void Mesh::draw() {
         return;
     }
 
-    static float color[4];
+    static float colorA[4];
+    static float colorB[4];
+
+    color::qColorToArray4(m_colorA, colorA);
+    color::qColorToArray4(m_colorB, colorB);
 
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
@@ -76,17 +105,61 @@ void Mesh::draw() {
 
     m_indexVBO->bind();
 
-    // front face
-    color::qColorToArray4(m_colorA, color);
-    glCullFace(GL_BACK);
-    glColor4fv(color);
-    glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, 0);
+    switch (m_mode)
+    {
+        case Single: default:
+        {
+            // front face
+            glCullFace(GL_BACK);
+            glColor4fv(colorA);
+            glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, 0);
+            break;
+        }
+        case Double:
+        {
+            // front face
+            glCullFace(GL_BACK);
+            glColor4fv(colorA);
+            glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, 0);
 
-    // back face
-    color::qColorToArray4(m_colorB, color);
-    glCullFace(GL_FRONT);
-    glColor4fv(color);
-    glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, 0);
+            // back face
+            glCullFace(GL_FRONT);
+            glColor4fv(colorB);
+            glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, 0);
+            break;
+        }
+        case SingleAlpha:
+        {
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+            // front face
+            glCullFace(GL_BACK);
+            glColor4fv(colorA);
+            glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, 0);
+
+            glDisable(GL_BLEND);
+            break;
+        }
+        case DoubleAlpha:
+        {
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+            // front face
+            glCullFace(GL_BACK);
+            glColor4fv(colorA);
+            glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, 0);
+
+            // back face
+            glCullFace(GL_FRONT);
+            glColor4fv(colorB);
+            glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, 0);
+
+            glDisable(GL_BLEND);
+            break;
+        }
+    }
 
     m_indexVBO->release();
 
@@ -149,6 +222,14 @@ void Mesh::setMesh(const QVector<float> &vertices, const QVector<float> &normals
     emit meshChanged();
 }
 
+void Mesh::setMode(Mode mode)
+{
+    if (mode != m_mode) {
+        m_mode = mode;
+        emit modeChanged(m_mode);
+    }
+}
+
 void Mesh::clear()
 {
     QVector<float> v;
@@ -163,4 +244,5 @@ void Mesh::makeConnections()
     connect(this, SIGNAL(colorAChanged(QColor)), &m_viewer, SLOT(updateGL()));
     connect(this, SIGNAL(colorBChanged(QColor)), &m_viewer, SLOT(updateGL()));
     connect(this, SIGNAL(meshChanged()), &m_viewer, SLOT(updateGL()));
+    connect(this, SIGNAL(modeChanged(Mesh::Mode)), &m_viewer, SLOT(updateGL()));
 }
