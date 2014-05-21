@@ -1108,7 +1108,7 @@ void LangmuirViewer::toggleTrapsShown(bool on)
     if (m_trapBox != NULL)
     {
         m_trapBox->showImage(on);
-        emit showMessage("traps=%s", on);
+        emit showMessage("traps=%d", on);
         emit isShowingTraps(on);
     }
 }

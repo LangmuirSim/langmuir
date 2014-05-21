@@ -79,11 +79,13 @@ void MainWindow::initAfter()
     connect(&m_viewer->baseBox(), SIGNAL(colorChanged(QColor)), m_viewer, SLOT(initTraps()));
     ui->colorButtonBase->setButtonColor(m_viewer->baseBox().getColor());
 
-    connect(ui->colorButtonElectrodes, SIGNAL(selectedColor(QColor)), &m_viewer->leftBox() , SLOT(setColor(QColor)));
-    connect(ui->colorButtonElectrodes, SIGNAL(selectedColor(QColor)), &m_viewer->rightBox(), SLOT(setColor(QColor)));
-    connect(&m_viewer->leftBox() , SIGNAL(colorChanged(QColor)), ui->colorButtonElectrodes, SLOT(setButtonColor(QColor)));
-    connect(&m_viewer->rightBox(), SIGNAL(colorChanged(QColor)), ui->colorButtonElectrodes, SLOT(setButtonColor(QColor)));
-    ui->colorButtonElectrodes->setButtonColor(m_viewer->leftBox().getColor());
+    connect(ui->colorButtonLeft, SIGNAL(selectedColor(QColor)), &m_viewer->leftBox(), SLOT(setColor(QColor)));
+    connect(&m_viewer->leftBox(), SIGNAL(colorChanged(QColor)), ui->colorButtonLeft, SLOT(setButtonColor(QColor)));
+    ui->colorButtonLeft->setButtonColor(m_viewer->leftBox().getColor());
+
+    connect(ui->colorButtonRight, SIGNAL(selectedColor(QColor)), &m_viewer->rightBox(), SLOT(setColor(QColor)));
+    connect(&m_viewer->rightBox(), SIGNAL(colorChanged(QColor)), ui->colorButtonRight, SLOT(setButtonColor(QColor)));
+    ui->colorButtonRight->setButtonColor(m_viewer->rightBox().getColor());
 
     connect(&m_viewer->trapBox(), SIGNAL(imageOnChanged(bool)), ui->actionTraps, SLOT(setChecked(bool)));
     ui->actionTraps->setChecked(m_viewer->trapBox().imageIsOn());
@@ -93,6 +95,31 @@ void MainWindow::initAfter()
 
     connect(m_viewer, SIGNAL(iterationsPrintChanged(int)), this, SLOT(updateSpinBox(int)));
     connect(ui->spinBox, SIGNAL(valueChanged(int)), m_viewer, SLOT(setIterationsPrint(int)));
+
+    connect(ui->pushButtonElectrons, SIGNAL(clicked(bool)), &m_viewer->electrons(), SLOT(setVisible(bool)));
+    ui->pushButtonElectrons->setChecked(m_viewer->electrons().isVisible());
+
+    connect(ui->pushButtonDefects, SIGNAL(clicked(bool)), &m_viewer->defects(), SLOT(setVisible(bool)));
+    ui->pushButtonDefects->setChecked(m_viewer->defects().isVisible());
+
+    connect(ui->pushButtonHoles, SIGNAL(clicked(bool)), &m_viewer->holes(), SLOT(setVisible(bool)));
+    ui->pushButtonHoles->setChecked(m_viewer->holes().isVisible());
+
+    connect(ui->pushButtonBase, SIGNAL(clicked(bool)), &m_viewer->baseBox(), SLOT(setVisible(bool)));
+    connect(ui->pushButtonBase, SIGNAL(clicked(bool)), &m_viewer->trapBox(), SLOT(setVisible(bool)));
+    ui->pushButtonBase->setChecked(m_viewer->baseBox().isVisible());
+
+    connect(ui->pushButtonLeft, SIGNAL(clicked(bool)), &m_viewer->leftBox(), SLOT(setVisible(bool)));
+    ui->pushButtonLeft->setChecked(m_viewer->leftBox().isVisible());
+
+    connect(ui->pushButtonRight, SIGNAL(clicked(bool)), &m_viewer->rightBox(), SLOT(setVisible(bool)));
+    ui->pushButtonRight->setChecked(m_viewer->rightBox().isVisible());
+
+    connect(ui->pushButtonGrid, SIGNAL(clicked(bool)), &m_viewer->grid(), SLOT(setVisible(bool)));
+    ui->pushButtonGrid->setChecked(m_viewer->grid().isVisible());
+
+    connect(ui->pushButtonTraps, SIGNAL(clicked(bool)), &m_viewer->trapBox(), SLOT(showImage(bool)));
+    ui->pushButtonTraps->setChecked(m_viewer->trapBox().imageIsOn());
 
     m_viewer->resetSettings();
 }
