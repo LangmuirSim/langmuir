@@ -90,7 +90,6 @@ void MainWindow::initAfter()
     connect(&m_viewer->trapBox(), SIGNAL(imageOnChanged(bool)), ui->actionTraps, SLOT(setChecked(bool)));
     ui->actionTraps->setChecked(m_viewer->trapBox().imageIsOn());
 
-    connect(&m_viewer->grid(), SIGNAL(visibleChanged(bool)), ui->actionGrid, SLOT(setChecked(bool)));
     connect(&m_viewer->cornerAxis(), SIGNAL(visibleChanged(bool)), ui->actionCornerAxis, SLOT(setChecked(bool)));
 
     connect(m_viewer, SIGNAL(iterationsPrintChanged(int)), this, SLOT(updateSpinBox(int)));

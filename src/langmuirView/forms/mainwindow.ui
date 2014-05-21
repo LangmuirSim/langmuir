@@ -636,7 +636,6 @@
     </property>
     <addaction name="actionAxis"/>
     <addaction name="actionCornerAxis"/>
-    <addaction name="actionSimulationGrid"/>
     <addaction name="actionFPS"/>
     <addaction name="actionShow"/>
     <addaction name="actionParameters"/>
@@ -673,7 +672,6 @@
    <addaction name="actionIsoSurface"/>
    <addaction name="actionAxis"/>
    <addaction name="actionCornerAxis"/>
-   <addaction name="actionSimulationGrid"/>
    <addaction name="actionFPS"/>
    <addaction name="actionShow"/>
   </widget>
@@ -726,24 +724,6 @@
    </property>
    <property name="shortcut">
     <string>A</string>
-   </property>
-  </action>
-  <action name="actionGrid">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="../icons/icons.qrc">
-     <normaloff>:/icons/grid.png</normaloff>:/icons/grid.png</iconset>
-   </property>
-   <property name="text">
-    <string>Grid</string>
-   </property>
-   <property name="toolTip">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Display grid.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-   </property>
-   <property name="shortcut">
-    <string>Shift+G</string>
    </property>
   </action>
   <action name="actionFPS">
@@ -835,27 +815,6 @@
    </property>
    <property name="toolTip">
     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Toggle OpenCL.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-   </property>
-  </action>
-  <action name="actionSimulationGrid">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="../icons/icons.qrc">
-     <normaloff>:/icons/grid.png</normaloff>:/icons/grid.png</iconset>
-   </property>
-   <property name="text">
-    <string>Simulation Grid</string>
-   </property>
-   <property name="toolTip">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Display simulation grid.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-   </property>
-   <property name="shortcut">
-    <string>G</string>
    </property>
   </action>
   <action name="actionReset">
@@ -1025,22 +984,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionGrid</sender>
-   <signal>triggered()</signal>
-   <receiver>qglwidget</receiver>
-   <slot>toggleGridIsDrawn()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>255</x>
-     <y>277</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>actionFPS</sender>
    <signal>triggered()</signal>
    <receiver>qglwidget</receiver>
@@ -1181,22 +1124,6 @@
     <hint type="destinationlabel">
      <x>-1</x>
      <y>-1</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionSimulationGrid</sender>
-   <signal>triggered()</signal>
-   <receiver>qglwidget</receiver>
-   <slot>toggleGridIsVisible()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>319</x>
-     <y>341</y>
     </hint>
    </hints>
   </connection>
