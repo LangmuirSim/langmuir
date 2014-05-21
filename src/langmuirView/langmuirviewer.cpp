@@ -448,44 +448,31 @@ void LangmuirViewer::init()
 {
     // Corner Axis
     m_cornerAxis = new CornerAxis(*this, this);
-    m_cornerAxis->setVisible(false);
     m_cornerAxis->makeConnections();
 
     // Grid
     m_grid = new Grid(*this, this);
-    m_grid->setColor(QColor(64, 64, 64));
-    m_grid->setVisible(true);
     m_grid->makeConnections();
 
     // Electrons
     m_electrons = new PointCloud(*this, this);
-    m_electrons->setColor(Qt::red);
-    m_electrons->setVisible(true);
     m_electrons->makeConnections();
 
     // Defects
     m_defects = new PointCloud(*this, this);
-    m_defects->setColor(Qt::white);
-    m_defects->setVisible(true);
     m_defects->makeConnections();
 
     // Holes
     m_holes = new PointCloud(*this, this);
-    m_holes->setColor(Qt::blue);
-    m_holes->setVisible(true);
     m_holes->makeConnections();
 
     // Base
     m_trapBox = new Box(*this, this);
-    m_trapBox->setColor(Qt::gray);
     m_trapBox->setFaces(Box::Front);
-    m_trapBox->setVisible(true);
     m_trapBox->makeConnections();
 
     m_baseBox = new Box(*this, this);
-    m_baseBox->setColor(Qt::gray);
     m_baseBox->setFaces(Box::Back|Box::North|Box::South|Box::East|Box::West);
-    m_baseBox->setVisible(true);
     m_baseBox->makeConnections();
 
     connect(m_baseBox, SIGNAL(colorChanged(QColor)), m_trapBox, SLOT(setColor(QColor)));
@@ -495,23 +482,16 @@ void LangmuirViewer::init()
 
     // Left Electrode
     m_lBox = new Box(*this, this);
-    m_lBox->setColor(Qt::black);
     m_lBox->setFaces(Box::All);
-    m_lBox->setVisible(true);
     m_lBox->makeConnections();
 
     // Left Electrode
     m_rBox = new Box(*this, this);
-    m_rBox->setColor(Qt::black);
     m_rBox->setFaces(Box::All);
-    m_rBox->setVisible(true);
     m_rBox->makeConnections();
 
     // Mesh
     m_trapMesh = new Mesh(*this, this);
-    m_trapMesh->setColorA(Qt::red);
-    m_trapMesh->setColorB(Qt::yellow);
-    m_trapMesh->setVisible(false);
     m_trapMesh->makeConnections();
 
     // Light
