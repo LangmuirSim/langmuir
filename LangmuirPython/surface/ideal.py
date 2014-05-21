@@ -67,7 +67,7 @@ def create_parser():
     parser.add_argument('--tvalue', type=float, default=0.0, help='threshold value')
 
     parser.add_argument('--ext', default='pkl', type=str, metavar='str',
-        choices=['pkl', 'npy', 'dat', 'txt', 'csv'], help='output file type')
+        choices=['chk', 'pkl', 'npy', 'dat', 'txt', 'csv'], help='output file type')
 
     return parser
 
