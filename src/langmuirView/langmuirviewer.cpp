@@ -715,7 +715,6 @@ void LangmuirViewer::setSettings(QSettings &settings)
         settings.endGroup();
     }
 
-
     // base
     {
         settings.beginGroup("base");
@@ -733,6 +732,22 @@ void LangmuirViewer::setSettings(QSettings &settings)
         settings.setValue("color_g"  , (int   )m_trapColor.green());
         settings.setValue("color_b"  , (int   )m_trapColor.blue());
         settings.setValue("visible"  , (bool  )m_trapBox->imageIsOn());
+        settings.endGroup();
+    }
+
+    // mesh
+    {
+        settings.beginGroup("mesh");
+        settings.setValue("mode"    , (int   )m_trapMesh->getMode());
+        settings.setValue("acolor_r", (int   )m_trapMesh->getColorA().red());
+        settings.setValue("acolor_g", (int   )m_trapMesh->getColorA().green());
+        settings.setValue("acolor_b", (int   )m_trapMesh->getColorA().blue());
+        settings.setValue("acolor_a", (int   )m_trapMesh->getColorA().alpha());
+        settings.setValue("bcolor_r", (int   )m_trapMesh->getColorB().red());
+        settings.setValue("bcolor_g", (int   )m_trapMesh->getColorB().green());
+        settings.setValue("bcolor_b", (int   )m_trapMesh->getColorB().blue());
+        settings.setValue("bcolor_a", (int   )m_trapMesh->getColorB().alpha());
+        settings.setValue("visible" , (bool  )m_trapMesh->isVisible());
         settings.endGroup();
     }
 
@@ -953,6 +968,38 @@ void LangmuirViewer::getSettings(QSettings &settings)
         setTrapColor(color);
         m_trapBox->showImage(visible);
         initTraps();
+    }
+
+    // mesh
+    {
+        settings.beginGroup("mesh");
+
+        // mode
+        Mesh::Mode mode = Mesh::Mode(settings.value("mode", Mesh::Double).toInt());
+
+        // visible
+        bool visible = settings.value("visible", false).toBool();
+
+        // trap color
+        int acolor_r = settings.value("acolor_r", 255).toInt();
+        int acolor_g = settings.value("acolor_g",   0).toInt();
+        int acolor_b = settings.value("acolor_b",   0).toInt();
+        int acolor_a = settings.value("acolor_a", 255).toInt();
+        QColor acolor = QColor::fromRgb(acolor_r, acolor_g, acolor_b, acolor_a);
+
+        int bcolor_r = settings.value("bcolor_r", 255).toInt();
+        int bcolor_g = settings.value("bcolor_g", 255).toInt();
+        int bcolor_b = settings.value("bcolor_b",   0).toInt();
+        int bcolor_a = settings.value("bcolor_a", 255).toInt();
+        QColor bcolor = QColor::fromRgb(bcolor_r, bcolor_g, bcolor_b, bcolor_a);
+
+        settings.endGroup();
+
+        // update settings
+        m_trapMesh->setVisible(visible);
+        m_trapMesh->setColorA(acolor);
+        m_trapMesh->setColorB(bcolor);
+        m_trapMesh->setMode(mode);
     }
 
     // electrodes
