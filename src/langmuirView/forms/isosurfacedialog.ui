@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>274</width>
-    <height>202</height>
+    <height>259</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,28 +24,45 @@
      </property>
     </widget>
    </item>
-   <item row="0" column="0">
-    <widget class="QLabel" name="labelIsoValue">
-     <property name="text">
-      <string>isovalue</string>
+   <item row="0" column="1">
+    <widget class="QDoubleSpinBox" name="doubleSpinBoxIsoValue">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>24</height>
+      </size>
      </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>24</height>
+      </size>
      </property>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="QLabel" name="labelColorA">
-     <property name="text">
-      <string>colorA</string>
+     <property name="minimum">
+      <double>-100.000000000000000</double>
      </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     <property name="maximum">
+      <double>100.000000000000000</double>
+     </property>
+     <property name="singleStep">
+      <double>0.100000000000000</double>
      </property>
     </widget>
    </item>
    <item row="1" column="1">
     <widget class="ColorButton" name="colorButtonA">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>24</height>
+      </size>
+     </property>
      <property name="text">
       <string/>
      </property>
@@ -61,21 +78,45 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="1">
-    <widget class="ColorButton" name="colorButtonB">
-     <property name="text">
-      <string/>
-     </property>
-    </widget>
-   </item>
    <item row="3" column="1">
     <widget class="QCheckBox" name="checkBoxVisible">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>24</height>
+      </size>
+     </property>
      <property name="text">
       <string/>
      </property>
     </widget>
    </item>
-   <item row="4" column="0" colspan="2">
+   <item row="2" column="1">
+    <widget class="ColorButton" name="colorButtonB">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="0" colspan="2">
     <widget class="QProgressBar" name="calculateProgress">
      <property name="minimumSize">
       <size>
@@ -94,7 +135,17 @@
      </property>
     </widget>
    </item>
-   <item row="5" column="0" colspan="2">
+   <item row="0" column="0">
+    <widget class="QLabel" name="labelIsoValue">
+     <property name="text">
+      <string>isovalue</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="0" colspan="2">
     <widget class="QPushButton" name="calculateButton">
      <property name="minimumSize">
       <size>
@@ -113,17 +164,80 @@
      </property>
     </widget>
    </item>
-   <item row="0" column="1">
-    <widget class="QDoubleSpinBox" name="doubleSpinBoxIsoValue">
-     <property name="minimum">
-      <double>-100.000000000000000</double>
+   <item row="1" column="0">
+    <widget class="QLabel" name="labelColorA">
+     <property name="text">
+      <string>colorA</string>
      </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <widget class="QLabel" name="labelMode">
+     <property name="text">
+      <string>Mode</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="0">
+    <widget class="QLabel" name="labelAlpha">
+     <property name="text">
+      <string>Alpha</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="1">
+    <widget class="QSpinBox" name="spinBoxAlpha">
      <property name="maximum">
-      <double>100.000000000000000</double>
+      <number>255</number>
      </property>
-     <property name="singleStep">
-      <double>0.100000000000000</double>
+     <property name="value">
+      <number>255</number>
      </property>
+    </widget>
+   </item>
+   <item row="4" column="1">
+    <widget class="QComboBox" name="comboBoxMode">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>24</height>
+      </size>
+     </property>
+     <item>
+      <property name="text">
+       <string>Single</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>SingleAlpha</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Double</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>DoubleAlpha</string>
+      </property>
+     </item>
     </widget>
    </item>
   </layout>

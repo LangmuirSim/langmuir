@@ -447,6 +447,7 @@
    <addaction name="separator"/>
    <addaction name="actionTraps"/>
    <addaction name="actionPoints"/>
+   <addaction name="actionIsoSurface"/>
    <addaction name="actionAxis"/>
    <addaction name="actionCornerAxis"/>
    <addaction name="actionSimulationGrid"/>
@@ -729,6 +730,11 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>ColorButton</class>
+   <extends>QPushButton</extends>
+   <header location="global">colorbutton.h</header>
+  </customwidget>
+  <customwidget>
    <class>LangmuirViewer</class>
    <extends>QWidget</extends>
    <header>langmuirviewer.h</header>
@@ -757,11 +763,6 @@
     <slot>toggleTrapsShown(bool)</slot>
     <slot>toggleCoulomb(bool)</slot>
    </slots>
-  </customwidget>
-  <customwidget>
-   <class>ColorButton</class>
-   <extends>QPushButton</extends>
-   <header location="global">colorbutton.h</header>
   </customwidget>
  </customwidgets>
  <resources>

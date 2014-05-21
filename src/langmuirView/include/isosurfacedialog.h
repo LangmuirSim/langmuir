@@ -1,6 +1,8 @@
 #ifndef ISOSURFACEDIALOG_H
 #define ISOSURFACEDIALOG_H
 
+#include "mesh.h"
+
 #include <QDialog>
 
 namespace Ui {
@@ -24,6 +26,17 @@ public slots:
     void setCalculateEnabled(bool enabled);
     void setProgressRange(int low, int high);
     void setProgress(int value);
+
+    void updateComboBoxMode(Mesh::Mode mode);
+    void updateSpinBoxAlpha(int value);
+
+    void on_comboBoxMode_currentTextChanged(const QString & text);
+    void on_spinBoxAlpha_valueChanged(int value);
+
+    void extractAlpha(QColor color);
+
+signals:
+    void sendAlpha(int value);
 
 private:
     Ui::IsoSurfaceDialog *ui;
