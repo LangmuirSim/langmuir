@@ -36,6 +36,7 @@ public:
         SingleAlpha =  2, //! render mesh using single color with alpha blending
         Double      =  3, //! render mesh using two colors
         DoubleAlpha =  4, //! render mesh using two colors with alpha blending
+        Shader1     =  5, //! render mesh with tesselation shader
     };
     Q_DECLARE_FLAGS(Modes, Mode)
     Q_FLAGS(Modes)
@@ -144,6 +145,20 @@ protected:
      * @brief perform OpenGL drawing operations
      */
     virtual void draw();
+
+    /**
+     * @brief load the shaders
+     */
+    void initShaders();
+
+    void drawSingle();
+    void drawSingleAlpha();
+    void drawDouble();
+    void drawDoubleAlpha();
+    void drawShader1();
+
+    //! tesselation shader
+    QOpenGLShaderProgram m_shader1;
 
     //! vertices buffer
     QOpenGLBuffer *m_verticesVBO;

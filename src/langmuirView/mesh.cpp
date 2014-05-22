@@ -63,6 +63,8 @@ void Mesh::init() {
     m_mode = DoubleAlpha;
     emit modeChanged(m_mode);
 
+    initShaders();
+
     m_verticesVBO = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
     m_verticesVBO->setUsagePattern(QOpenGLBuffer::StaticDraw);
     m_verticesVBO->create();
@@ -82,15 +84,170 @@ void Mesh::draw() {
         return;
     }
 
+    switch (m_mode)
+    {
+        case Single: default:
+        {
+            drawSingle();
+            break;
+        }
+        case Double:
+        {
+            drawDouble();
+            break;
+        }
+        case SingleAlpha:
+        {
+            drawSingleAlpha();
+            break;
+        }
+        case DoubleAlpha:
+        {
+            drawDoubleAlpha();
+            break;
+        }
+        case Shader1:
+        {
+            drawShader1();
+            break;
+        }
+    }
+}
+
+void Mesh::initShaders()
+{
+    // point cloud shader
+    if (!m_shader1.addShaderFromSourceFile(QOpenGLShader::Vertex, ":shaders/msVert.glsl")) {
+        qFatal("langmuir: can not compile shader1 vertex shader");
+    }
+
+//    if (!m_shader1.addShaderFromSourceFile(QOpenGLShader::TessellationControl, ":shaders/msTesC.glsl")) {
+//        qFatal("langmuir: can not compile shader1 tesselation control shader");
+//    }
+
+//    if (!m_shader1.addShaderFromSourceFile(QOpenGLShader::TessellationEvaluation, ":shaders/msTesE.glsl")) {
+//        qFatal("langmuir: can not compile shader1 tesselation evaluation shader");
+//    }
+
+    if (!m_shader1.addShaderFromSourceFile(QOpenGLShader::Fragment, ":shaders/msFrag.glsl")) {
+        qFatal("langmuir: can not compile shader1 fragment shader");
+    }
+
+    if (!m_shader1.link()) {
+        qFatal("langmuir: can not link shader1");
+    }
+}
+
+void Mesh::drawSingle()
+{
+    static float colorA[4];
+    color::qColorToArray4(m_colorA, colorA);
+
     GLboolean texture2DIsOn;
     glGetBooleanv(GL_TEXTURE_2D, &texture2DIsOn);
     glDisable(GL_TEXTURE_2D);
 
-    static float colorA[4];
-    static float colorB[4];
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_NORMAL_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
 
+    //glEnable(GL_CULL_FACE);
+    glDisable(GL_CULL_FACE);
+
+    m_verticesVBO->bind();
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, 0, 0);
+
+    m_normalsVBO->bind();
+    glEnableClientState(GL_NORMAL_ARRAY);
+    glNormalPointer(GL_FLOAT, 0, 0);
+
+    m_indexVBO->bind();
+
+    // front face
+    //glCullFace(GL_BACK);
+    glColor4fv(colorA);
+    glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, 0);
+
+    m_indexVBO->release();
+
+    m_normalsVBO->release();
+    glDisableClientState(GL_NORMAL_ARRAY);
+
+    m_verticesVBO->release();
+    glDisableClientState(GL_VERTEX_ARRAY);
+
+    //glDisable(GL_CULL_FACE);
+
+    if (texture2DIsOn) {
+        glEnable(GL_TEXTURE_2D);
+    }
+}
+
+void Mesh::drawSingleAlpha()
+{
+    static float colorA[4];
     color::qColorToArray4(m_colorA, colorA);
+
+    GLboolean texture2DIsOn;
+    glGetBooleanv(GL_TEXTURE_2D, &texture2DIsOn);
+    glDisable(GL_TEXTURE_2D);
+
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_NORMAL_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
+
+    //glEnable(GL_CULL_FACE);
+    glDisable(GL_CULL_FACE);
+
+    m_verticesVBO->bind();
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, 0, 0);
+
+    m_normalsVBO->bind();
+    glEnableClientState(GL_NORMAL_ARRAY);
+    glNormalPointer(GL_FLOAT, 0, 0);
+
+    m_indexVBO->bind();
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // front face
+    //glCullFace(GL_BACK);
+    glColor4fv(colorA);
+    glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, 0);
+
+    glDisable(GL_BLEND);
+
+    m_indexVBO->release();
+
+    m_normalsVBO->release();
+    glDisableClientState(GL_NORMAL_ARRAY);
+
+    m_verticesVBO->release();
+    glDisableClientState(GL_VERTEX_ARRAY);
+
+    //glDisable(GL_CULL_FACE);
+
+    if (texture2DIsOn) {
+        glEnable(GL_TEXTURE_2D);
+    }
+}
+
+void Mesh::drawDouble()
+{
+    static float colorA[4];
+    color::qColorToArray4(m_colorA, colorA);
+
+    static float colorB[4];
     color::qColorToArray4(m_colorB, colorB);
+
+    GLboolean texture2DIsOn;
+    glGetBooleanv(GL_TEXTURE_2D, &texture2DIsOn);
+    glDisable(GL_TEXTURE_2D);
 
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
@@ -109,61 +266,15 @@ void Mesh::draw() {
 
     m_indexVBO->bind();
 
-    switch (m_mode)
-    {
-        case Single: default:
-        {
-            // front face
-            glCullFace(GL_BACK);
-            glColor4fv(colorA);
-            glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, 0);
-            break;
-        }
-        case Double:
-        {
-            // front face
-            glCullFace(GL_BACK);
-            glColor4fv(colorA);
-            glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, 0);
+    // front face
+    glCullFace(GL_BACK);
+    glColor4fv(colorA);
+    glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, 0);
 
-            // back face
-            glCullFace(GL_FRONT);
-            glColor4fv(colorB);
-            glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, 0);
-            break;
-        }
-        case SingleAlpha:
-        {
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-            // front face
-            glCullFace(GL_BACK);
-            glColor4fv(colorA);
-            glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, 0);
-
-            glDisable(GL_BLEND);
-            break;
-        }
-        case DoubleAlpha:
-        {
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-            // front face
-            glCullFace(GL_BACK);
-            glColor4fv(colorA);
-            glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, 0);
-
-            // back face
-            glCullFace(GL_FRONT);
-            glColor4fv(colorB);
-            glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, 0);
-
-            glDisable(GL_BLEND);
-            break;
-        }
-    }
+    // back face
+    glCullFace(GL_FRONT);
+    glColor4fv(colorB);
+    glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, 0);
 
     m_indexVBO->release();
 
@@ -178,6 +289,116 @@ void Mesh::draw() {
     if (texture2DIsOn) {
         glEnable(GL_TEXTURE_2D);
     }
+}
+
+void Mesh::drawDoubleAlpha()
+{
+    static float colorA[4];
+    color::qColorToArray4(m_colorA, colorA);
+
+    static float colorB[4];
+    color::qColorToArray4(m_colorB, colorB);
+
+    GLboolean texture2DIsOn;
+    glGetBooleanv(GL_TEXTURE_2D, &texture2DIsOn);
+    glDisable(GL_TEXTURE_2D);
+
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_NORMAL_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
+
+    glEnable(GL_CULL_FACE);
+
+    m_verticesVBO->bind();
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, 0, 0);
+
+    m_normalsVBO->bind();
+    glEnableClientState(GL_NORMAL_ARRAY);
+    glNormalPointer(GL_FLOAT, 0, 0);
+
+    m_indexVBO->bind();
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // front face
+    glCullFace(GL_BACK);
+    glColor4fv(colorA);
+    glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, 0);
+
+    // back face
+    glCullFace(GL_FRONT);
+    glColor4fv(colorB);
+    glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, 0);
+
+    glDisable(GL_BLEND);
+
+    m_indexVBO->release();
+
+    m_normalsVBO->release();
+    glDisableClientState(GL_NORMAL_ARRAY);
+
+    m_verticesVBO->release();
+    glDisableClientState(GL_VERTEX_ARRAY);
+
+    glDisable(GL_CULL_FACE);
+
+    if (texture2DIsOn) {
+        glEnable(GL_TEXTURE_2D);
+    }
+}
+
+void Mesh::drawShader1()
+{
+    // bind shader
+    m_shader1.bind();
+
+    // shader: pass matrix
+    QMatrix4x4& MV = m_viewer.getOpenGLModelViewMatrix();
+    QMatrix4x4& P = m_viewer.getOpenGLProjectionMatrix();
+    m_shader1.setUniformValue("MV", MV);
+    m_shader1.setUniformValue("MVP", P * MV);
+
+    // shader: pass light
+    m_shader1.setUniformValue("light_colorA", m_viewer.light().getAColor());
+    m_shader1.setUniformValue("light_colorS", m_viewer.light().getSColor());
+    m_shader1.setUniformValue("light_colorD", m_viewer.light().getDColor());
+    m_shader1.setUniformValue("light_vertex", m_viewer.light().getPosition());
+
+    // shader: pass vertices
+    m_verticesVBO->bind();
+    m_shader1.enableAttributeArray("vertex");
+    m_shader1.setAttributeBuffer("vertex", GL_FLOAT, 0, 3, 0);
+
+    // shader: pass normals
+    m_normalsVBO->bind();
+    m_shader1.enableAttributeArray("normal");
+    m_shader1.setAttributeBuffer("normal", GL_FLOAT, 0, 3, 0);
+
+    // shader: pass color
+    m_shader1.setUniformValue("colorA", m_colorA);
+    m_shader1.setUniformValue("colorB", m_colorB);
+
+    // draw
+    //glDrawArrays(GL_TRIANGLES, 0, m_numVertices);
+
+    // bind index
+    m_indexVBO->bind();
+    glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, 0);
+    m_indexVBO->release();
+
+    // disable vertex
+    m_shader1.disableAttributeArray("vertex");
+    m_verticesVBO->release();
+
+    // disable normal
+    m_shader1.disableAttributeArray("normal");
+    m_normalsVBO->release();
+
+    // release shader
+    m_shader1.release();
 }
 
 void Mesh::setColorA(QColor color)

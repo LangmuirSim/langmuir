@@ -8,5 +8,9 @@
         <file>ccVert.glsl</file>
         <file>ccGeom.glsl</file>
         <file>ccFrag.glsl</file>
+        <file>msVert.glsl</file>
+        <file>msFrag.glsl</file>
+        <file>msTesC.glsl</file>
+        <file>msTesE.glsl</file>
     </qresource>
 </RCC>
