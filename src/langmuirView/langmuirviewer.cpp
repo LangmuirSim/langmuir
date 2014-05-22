@@ -303,25 +303,24 @@ void LangmuirViewer::initGeometry()
 
     if (m_baseBox != NULL)
     {
-        m_baseBox->setXSize(m_gridX);
-        m_baseBox->setYSize(m_gridY);
-        m_baseBox->setZSize(m_boxThickness);
+        m_baseBox->setSize(m_gridX, m_gridY, m_boxThickness, 16, 16, 2);
+    }
+
+    if (m_trapBox != NULL)
+    {
+        m_trapBox->setSize(m_gridX, m_gridY, m_boxThickness, 16, 16, 2);
     }
 
     initTraps();
 
     if (m_lBox != NULL)
     {
-        m_lBox->setXSize(2 * m_boxThickness);
-        m_lBox->setYSize(m_gridY);
-        m_lBox->setZSize(m_gridZ + m_boxThickness);
+        m_lBox->setSize(2 * m_boxThickness, m_gridY, m_gridZ + m_boxThickness, 4, 16, 16);
     }
 
     if (m_rBox != NULL)
     {
-        m_rBox->setXSize(2 * m_boxThickness);
-        m_rBox->setYSize(m_gridY);
-        m_rBox->setZSize(m_gridZ + m_boxThickness);
+        m_rBox->setSize(2 * m_boxThickness, m_gridY, m_gridZ + m_boxThickness, 4, 16, 16);
     }
 
     if (m_light0 != NULL)
@@ -476,9 +475,6 @@ void LangmuirViewer::init()
     m_baseBox->makeConnections();
 
     connect(m_baseBox, SIGNAL(colorChanged(QColor)), m_trapBox, SLOT(setColor(QColor)));
-    connect(m_baseBox, SIGNAL(xSizeChanged(double)), m_trapBox, SLOT(setXSize(double)));
-    connect(m_baseBox, SIGNAL(ySizeChanged(double)), m_trapBox, SLOT(setYSize(double)));
-    connect(m_baseBox, SIGNAL(zSizeChanged(double)), m_trapBox, SLOT(setZSize(double)));
 
     // Left Electrode
     m_lBox = new Box(*this, this);
@@ -734,10 +730,14 @@ void LangmuirViewer::setSettings(QSettings &settings)
     // electrodes
     {
         settings.beginGroup("electrodes");
-        settings.setValue("color_r"  , (int   )m_lBox->getColor().red());
-        settings.setValue("color_g"  , (int   )m_lBox->getColor().green());
-        settings.setValue("color_b"  , (int   )m_lBox->getColor().blue());
-        settings.setValue("visible"  , (bool  )m_lBox->isVisible());
+        settings.setValue("lcolor_r" , (int   )m_lBox->getColor().red());
+        settings.setValue("lcolor_g" , (int   )m_lBox->getColor().green());
+        settings.setValue("lcolor_b" , (int   )m_lBox->getColor().blue());
+        settings.setValue("rcolor_r" , (int   )m_rBox->getColor().red());
+        settings.setValue("rcolor_g" , (int   )m_rBox->getColor().green());
+        settings.setValue("rcolor_b" , (int   )m_rBox->getColor().blue());
+        settings.setValue("lvisible" , (bool  )m_lBox->isVisible());
+        settings.setValue("rvisible" , (bool  )m_lBox->isVisible());
         settings.endGroup();
     }
 
@@ -987,22 +987,29 @@ void LangmuirViewer::getSettings(QSettings &settings)
         settings.beginGroup("electrodes");
 
         // visible
-        bool visible = settings.value("visible", true).toBool();
+        bool lvisible = settings.value("lvisible", true).toBool();
+        bool rvisible = settings.value("rvisible", true).toBool();
 
-        // color
-        int color_r = settings.value("color_r",   0).toInt();
-        int color_g = settings.value("color_g",   0).toInt();
-        int color_b = settings.value("color_b",   0).toInt();
-        QColor color = QColor::fromRgb(color_r, color_g, color_b);
+        // lcolor
+        int lcolor_r = settings.value("lcolor_r",   0).toInt();
+        int lcolor_g = settings.value("lcolor_g",  80).toInt();
+        int lcolor_b = settings.value("lcolor_b", 255).toInt();
+        QColor lcolor = QColor::fromRgb(lcolor_r, lcolor_g, lcolor_b);
+
+        // lcolor
+        int rcolor_r = settings.value("rcolor_r", 255).toInt();
+        int rcolor_g = settings.value("rcolor_g", 170).toInt();
+        int rcolor_b = settings.value("rcolor_b",   0).toInt();
+        QColor rcolor = QColor::fromRgb(rcolor_r, rcolor_g, rcolor_b);
 
         settings.endGroup();
 
         // update settings
-        m_lBox->setVisible(visible);
-        m_lBox->setColor(color);
+        m_lBox->setVisible(lvisible);
+        m_lBox->setColor(lcolor);
 
-        m_rBox->setVisible(visible);
-        m_rBox->setColor(color);
+        m_rBox->setVisible(rvisible);
+        m_rBox->setColor(rcolor);
     }
 
     // grid
@@ -1431,6 +1438,8 @@ void LangmuirViewer::drawTraps(QImage &image, QColor bcolor, QColor fcolor)
     }
 
     painter.end();
+
+    image = image.mirrored(false, true);
 
     int scale = 5;
     image = image.scaled(scale * image.width(), scale * image.height(), Qt::KeepAspectRatioByExpanding);

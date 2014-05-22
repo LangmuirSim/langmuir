@@ -82,6 +82,10 @@ void Mesh::draw() {
         return;
     }
 
+    GLboolean texture2DIsOn;
+    glGetBooleanv(GL_TEXTURE_2D, &texture2DIsOn);
+    glDisable(GL_TEXTURE_2D);
+
     static float colorA[4];
     static float colorB[4];
 
@@ -170,6 +174,10 @@ void Mesh::draw() {
     glDisableClientState(GL_VERTEX_ARRAY);
 
     glDisable(GL_CULL_FACE);
+
+    if (texture2DIsOn) {
+        glEnable(GL_TEXTURE_2D);
+    }
 }
 
 void Mesh::setColorA(QColor color)

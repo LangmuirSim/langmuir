@@ -3,6 +3,8 @@
 
 #include "sceneobject.h"
 
+#include <QOpenGLBuffer>
+
 /**
  * @brief A class to represent a textured box
  */
@@ -71,22 +73,12 @@ signals:
     void colorChanged(QColor color);
 
     /**
-     * @brief signal that the x length has changed
-     * @param value value of length
+     * @brief signal that the box size has changed
+     * @param xvalue value of length
+     * @param yvalue value of width
+     * @param zvalue value of height
      */
-    void xSizeChanged(double value);
-
-    /**
-     * @brief signal that the y length has changed
-     * @param value value of length
-     */
-    void ySizeChanged(double value);
-
-    /**
-     * @brief signal that the z length has changed
-     * @param value value of length
-     */
-    void zSizeChanged(double value);
+    void sizeChanged(double xvalue, double yvalue, double zvalue);
 
     /**
      * @brief signal that the texture is drawn changed
@@ -113,22 +105,13 @@ public slots:
     void setColor(QColor color);
 
     /**
-     * @brief set the x length
-     * @param value value to set
+     * @brief set the box size
+     * @param xvalue length
+     * @param yvalue width
+     * @param zvalue height
      */
-    void setXSize(double value);
-
-    /**
-     * @brief set the y length
-     * @param value value to set
-     */
-    void setYSize(double value);
-
-    /**
-     * @brief set the z length
-     * @param value value to set
-     */
-    void setZSize(double value);
+    void setSize(double xvalue, double yvalue, double zvalue, unsigned int tesselate_x = 10,
+                 unsigned int tesselate_y = 10, unsigned int tesselate_z = 10);
 
     /**
      * @brief set the list of faces to show texture on
@@ -158,6 +141,11 @@ protected:
      * @brief initialize object
      */
     virtual void init();
+
+    /**
+     * @brief build cube geometry
+     */
+    virtual void buildGeometry(unsigned int tesselate_x, unsigned int tesselate_y, unsigned int tesselate_z);
 
     /**
      * @brief perform OpenGL drawing operations
@@ -193,6 +181,24 @@ protected:
 
     //! texture faces
     Faces  m_faces;
+
+    //! vertices buffer
+    QOpenGLBuffer *m_verticesVBO;
+
+    //! normals buffer
+    QOpenGLBuffer *m_normalsVBO;
+
+    //! texture buffer
+    QOpenGLBuffer *m_texturesVBO;
+
+    //! index buffer CW
+    QOpenGLBuffer *m_indexVBO;
+
+    //! number of vertices (3 * number of points)
+    unsigned int m_numVertices;
+
+    //! index count
+    unsigned int m_numIndices;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(Box::Faces)
