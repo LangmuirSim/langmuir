@@ -138,19 +138,19 @@ void Mesh::initShaders()
     m_shader2OK = true;
 
     // shader 2
-    if (!m_shader2.addShaderFromSourceFile(QOpenGLShader::Vertex, ":shaders/msVert.glsl")) {
+    if (!m_shader2.addShaderFromSourceFile(QOpenGLShader::Vertex, ":shaders/mtVert.glsl")) {
         m_shader2OK = false;
     }
 
-    if (!m_shader2.addShaderFromSourceFile(QOpenGLShader::TessellationControl, ":shaders/msTesC.glsl")) {
+    if (!m_shader2.addShaderFromSourceFile(QOpenGLShader::TessellationControl, ":shaders/mtTesC.glsl")) {
         m_shader2OK = false;
     }
 
-    if (!m_shader2.addShaderFromSourceFile(QOpenGLShader::TessellationEvaluation, ":shaders/msTesE.glsl")) {
+    if (!m_shader2.addShaderFromSourceFile(QOpenGLShader::TessellationEvaluation, ":shaders/mtTesE.glsl")) {
         m_shader2OK = false;
     }
 
-    if (!m_shader2.addShaderFromSourceFile(QOpenGLShader::Fragment, ":shaders/msFrag.glsl")) {
+    if (!m_shader2.addShaderFromSourceFile(QOpenGLShader::Fragment, ":shaders/mtFrag.glsl")) {
         m_shader2OK = false;
     }
 
