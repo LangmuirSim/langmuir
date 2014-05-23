@@ -133,13 +133,11 @@ MainWindow::~MainWindow()
     delete ui;
 
     if (m_pointdialog != NULL) {
-        m_pointdialog->close();
         m_pointdialog->deleteLater();
         m_pointdialog = NULL;
     }
 
     if (m_isosurfacedialog != NULL) {
-        m_isosurfacedialog->close();
         m_isosurfacedialog->deleteLater();
         m_isosurfacedialog = NULL;
     }
@@ -274,30 +272,24 @@ void MainWindow::setStopEnabled(bool enabled)
     ui->actionStop->setEnabled(enabled);
 }
 
-void MainWindow::writeSettings()
-{
-    QSettings settings("Langmuir", "LangmuirView");
-    m_viewer->setSettings(settings);
-}
-
-void MainWindow::readSettings()
-{
-    QSettings settings("Langmuir", "LangmuirView");
-    m_viewer->getSettings(settings);
-}
-
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-//    QMessageBox::StandardButton choice = QMessageBox::warning(this, "Langmuir",
-//        "Do you really want to quit?", QMessageBox::Yes|QMessageBox::No, QMessageBox::Yes);
+    m_viewer->pause();
 
-//    if (choice == QMessageBox::Yes) {
-//        writeSettings();
-//        event->accept();
-//    } else {
-//        event->ignore();
-//    }
-    event->accept();
+    QMessageBox::StandardButton choice = QMessageBox::warning(this, "Langmuir",
+        "Do you really want to quit?", QMessageBox::Yes|QMessageBox::No, QMessageBox::Yes);
+
+    if (choice == QMessageBox::Yes) {
+        if (m_isosurfacedialog != NULL) {
+            m_isosurfacedialog->close();
+        }
+        if (m_pointdialog != NULL) {
+            m_pointdialog->close();
+        }
+        event->accept();
+    } else {
+        event->ignore();
+    }
 }
 
 void MainWindow::setIcon(QAction *action, QString themeIcon, QStyle::StandardPixmap standardPixmap)
