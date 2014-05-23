@@ -157,7 +157,7 @@ void MainWindow::on_actionOpen_triggered()
     m_viewer->pause();
 
     QString fileName = QFileDialog::getOpenFileName(
-        this, tr("Open Input File"), QDir::currentPath(), "Simulation (*.inp *.chk);; All Files (*)");
+        this, tr("Open Input File"), QDir::currentPath(), "Simulation (*.inp* *.chk*);; All Files (*)");
 
     m_viewer->load(fileName);
 }
