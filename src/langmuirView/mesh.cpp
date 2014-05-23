@@ -352,6 +352,8 @@ void Mesh::drawDoubleAlpha()
 
 void Mesh::drawShader1()
 {
+    glEnable(GL_CULL_FACE);
+
     // bind shader
     m_shader1.bind();
 
@@ -377,16 +379,17 @@ void Mesh::drawShader1()
     m_shader1.enableAttributeArray("normal");
     m_shader1.setAttributeBuffer("normal", GL_FLOAT, 0, 3, 0);
 
-    // shader: pass color
-    m_shader1.setUniformValue("colorA", m_colorA);
-    m_shader1.setUniformValue("colorB", m_colorB);
-
-    // draw
-    //glDrawArrays(GL_TRIANGLES, 0, m_numVertices);
-
     // bind index
     m_indexVBO->bind();
+
+    glCullFace(GL_BACK);
+    m_shader1.setUniformValue("color", m_colorA);
     glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, 0);
+
+    glCullFace(GL_FRONT);
+    m_shader1.setUniformValue("color", m_colorB);
+    glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, 0);
+
     m_indexVBO->release();
 
     // disable vertex
@@ -399,6 +402,8 @@ void Mesh::drawShader1()
 
     // release shader
     m_shader1.release();
+
+    glDisable(GL_CULL_FACE);
 }
 
 void Mesh::setColorA(QColor color)
