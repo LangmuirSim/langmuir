@@ -28,6 +28,7 @@ script = os.path.join(script_dir, script)
 command = 'python {script} --left {left} --right {right} {png} {output}'
 
 pngs = lm.find.pngs(work, r=True)
+pngs = [p for p in pngs if os.path.dirname(p) == work]
 
 out_path = os.path.join(work,
     'blocked_L{L}_R{R}'.format(L=opts.left, R=opts.right))
