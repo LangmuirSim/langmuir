@@ -8,6 +8,7 @@
 Mesh::Mesh(LangmuirViewer &viewer, QObject *parent) :
     SceneObject(viewer, parent), m_verticesVBO(NULL)
 {
+    m_shader2OK = false;
     m_numVertices = 0;
     m_numIndices = 0;
     init();
@@ -111,23 +112,20 @@ void Mesh::draw() {
             drawShader1();
             break;
         }
+        case Shader2:
+        {
+            drawShader2();
+            break;
+        }
     }
 }
 
 void Mesh::initShaders()
 {
-    // point cloud shader
+    // shader 1
     if (!m_shader1.addShaderFromSourceFile(QOpenGLShader::Vertex, ":shaders/msVert.glsl")) {
         qFatal("langmuir: can not compile shader1 vertex shader");
     }
-
-//    if (!m_shader1.addShaderFromSourceFile(QOpenGLShader::TessellationControl, ":shaders/msTesC.glsl")) {
-//        qFatal("langmuir: can not compile shader1 tesselation control shader");
-//    }
-
-//    if (!m_shader1.addShaderFromSourceFile(QOpenGLShader::TessellationEvaluation, ":shaders/msTesE.glsl")) {
-//        qFatal("langmuir: can not compile shader1 tesselation evaluation shader");
-//    }
 
     if (!m_shader1.addShaderFromSourceFile(QOpenGLShader::Fragment, ":shaders/msFrag.glsl")) {
         qFatal("langmuir: can not compile shader1 fragment shader");
@@ -135,6 +133,33 @@ void Mesh::initShaders()
 
     if (!m_shader1.link()) {
         qFatal("langmuir: can not link shader1");
+    }
+
+    m_shader2OK = true;
+
+    // shader 2
+    if (!m_shader2.addShaderFromSourceFile(QOpenGLShader::Vertex, ":shaders/msVert.glsl")) {
+        m_shader2OK = false;
+    }
+
+    if (!m_shader2.addShaderFromSourceFile(QOpenGLShader::TessellationControl, ":shaders/msTesC.glsl")) {
+        m_shader2OK = false;
+    }
+
+    if (!m_shader2.addShaderFromSourceFile(QOpenGLShader::TessellationEvaluation, ":shaders/msTesE.glsl")) {
+        m_shader2OK = false;
+    }
+
+    if (!m_shader2.addShaderFromSourceFile(QOpenGLShader::Fragment, ":shaders/msFrag.glsl")) {
+        m_shader2OK = false;
+    }
+
+    if (!m_shader2.link()) {
+        m_shader2OK = false;
+    }
+
+    if (!m_shader2OK) {
+        qDebug("langmuir: shader2 disabled!");
     }
 }
 
@@ -402,6 +427,66 @@ void Mesh::drawShader1()
 
     // release shader
     m_shader1.release();
+
+    glDisable(GL_CULL_FACE);
+}
+
+void Mesh::drawShader2()
+{
+    if (!m_shader2OK) {
+        return;
+    }
+
+    glEnable(GL_CULL_FACE);
+
+    // bind shader
+    m_shader2.bind();
+
+    // shader: pass matrix
+    QMatrix4x4& MV = m_viewer.getOpenGLModelViewMatrix();
+    QMatrix4x4& P = m_viewer.getOpenGLProjectionMatrix();
+    m_shader2.setUniformValue("MV", MV);
+    m_shader2.setUniformValue("MVP", P * MV);
+
+    // shader: pass light
+    m_shader2.setUniformValue("light_colorA", m_viewer.light().getAColor());
+    m_shader2.setUniformValue("light_colorS", m_viewer.light().getSColor());
+    m_shader2.setUniformValue("light_colorD", m_viewer.light().getDColor());
+    m_shader2.setUniformValue("light_vertex", m_viewer.light().getPosition());
+
+    // shader: pass vertices
+    m_verticesVBO->bind();
+    m_shader2.enableAttributeArray("vertex");
+    m_shader2.setAttributeBuffer("vertex", GL_FLOAT, 0, 3, 0);
+
+    // shader: pass normals
+    m_normalsVBO->bind();
+    m_shader2.enableAttributeArray("normal");
+    m_shader2.setAttributeBuffer("normal", GL_FLOAT, 0, 3, 0);
+
+    // bind index
+    m_indexVBO->bind();
+
+    glCullFace(GL_BACK);
+    m_shader2.setUniformValue("color", m_colorA);
+    glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, 0);
+
+    //glCullFace(GL_FRONT);
+    //m_shader2.setUniformValue("color", m_colorB);
+    //glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, 0);
+
+    m_indexVBO->release();
+
+    // disable vertex
+    m_shader2.disableAttributeArray("vertex");
+    m_verticesVBO->release();
+
+    // disable normal
+    m_shader2.disableAttributeArray("normal");
+    m_normalsVBO->release();
+
+    // release shader
+    m_shader2.release();
 
     glDisable(GL_CULL_FACE);
 }

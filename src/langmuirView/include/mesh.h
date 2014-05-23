@@ -36,7 +36,8 @@ public:
         SingleAlpha =  2, //! render mesh using single color with alpha blending
         Double      =  3, //! render mesh using two colors
         DoubleAlpha =  4, //! render mesh using two colors with alpha blending
-        Shader1     =  5, //! render mesh with tesselation shader
+        Shader1     =  5, //! render mesh with shader1
+        Shader2     =  6, //! render mesh with shader2
     };
     Q_DECLARE_FLAGS(Modes, Mode)
     Q_FLAGS(Modes)
@@ -151,14 +152,29 @@ protected:
      */
     void initShaders();
 
+    //! render function
     void drawSingle();
+
+    //! render function
     void drawSingleAlpha();
+
+    //! render function
     void drawDouble();
+
+    //! render function
     void drawDoubleAlpha();
+
+    //! render function
     void drawShader1();
+
+    //! render function
+    void drawShader2();
 
     //! tesselation shader
     QOpenGLShaderProgram m_shader1;
+
+    //! tesselation shader
+    QOpenGLShaderProgram m_shader2;
 
     //! vertices buffer
     QOpenGLBuffer *m_verticesVBO;
@@ -183,6 +199,9 @@ protected:
 
     //! rendering mode
     Mode m_mode;
+
+    //! shader2 ok to use
+    bool m_shader2OK;
 };
 
 Q_DECLARE_METATYPE(Mesh::Mode);

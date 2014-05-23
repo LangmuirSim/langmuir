@@ -243,6 +243,11 @@
        <string>Shader1</string>
       </property>
      </item>
+     <item>
+      <property name="text">
+       <string>Shader2</string>
+      </property>
+     </item>
     </widget>
    </item>
   </layout>
