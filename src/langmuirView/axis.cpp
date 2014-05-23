@@ -51,8 +51,9 @@ void Axis::init() {
 
 void Axis::draw() {
     // lighting and color saved
-    GLboolean lighting, colorMaterial;
+    GLboolean lighting, colorMaterial, texture2DIsOn;
     glGetBooleanv(GL_LIGHTING, &lighting);
+    glGetBooleanv(GL_TEXTURE_2D, &texture2DIsOn);
     glGetBooleanv(GL_COLOR_MATERIAL, &colorMaterial);
 
     // enable lighting
@@ -60,6 +61,9 @@ void Axis::draw() {
 
     // color determined by glMaterial
     glDisable(GL_COLOR_MATERIAL);
+
+    // turn off textures
+    glDisable(GL_TEXTURE_2D);
 
     static float color[4];
 
@@ -100,6 +104,10 @@ void Axis::draw() {
     }
     else {
         glDisable(GL_LIGHTING);
+    }
+
+    if (texture2DIsOn) {
+        glEnable(GL_TEXTURE_2D);
     }
 }
 
