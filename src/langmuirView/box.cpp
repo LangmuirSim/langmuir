@@ -9,6 +9,7 @@
 Box::Box(LangmuirViewer &viewer, QObject *parent) :
     SceneObject(viewer, parent)
 {
+    m_imageID = 0;
     m_numVertices = 0;
     m_numIndices = 0;
     init();
@@ -16,7 +17,6 @@ Box::Box(LangmuirViewer &viewer, QObject *parent) :
 
 Box::~Box()
 {
-    glDeleteTextures(1, &m_imageID);
 }
 
 const QColor& Box::getColor() const
@@ -566,11 +566,14 @@ void Box::draw() {
     GLboolean texture2DIsOn;
     glGetBooleanv(GL_TEXTURE_2D, &texture2DIsOn);
 
-    if (m_imageOn) {
+    if (m_imageOn && m_imageID > 0) {
         glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, m_imageID);
         glColor3f(1.0, 1.0, 1.0);
     }
     else {
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, m_imageID);
         glDisable(GL_TEXTURE_2D);
         glColor3f(m_color.redF(), m_color.greenF(), m_color.blueF());
     }
@@ -645,22 +648,12 @@ void Box::makeConnections()
     connect(this, SIGNAL(sizeChanged(double,double,double)), &m_viewer, SLOT(updateGL()));
     connect(this, SIGNAL(imageOnChanged(bool)), &m_viewer, SLOT(updateGL()));
     connect(this, SIGNAL(facesChanged(Faces)) , &m_viewer, SLOT(updateGL()));
+    connect(this, SIGNAL(textureChanged(GLuint)), &m_viewer, SLOT(updateGL()));
 }
 
 void Box::setFaces(Faces faces)
 {
     m_faces = faces;
-}
-
-void Box::loadImage(const QImage &image)
-{
-    QImage i = m_viewer.convertToGLFormat(image);
-    glDeleteTextures(1, &m_imageID);
-    glGenTextures(1, &m_imageID);
-    glBindTexture(GL_TEXTURE_2D, m_imageID);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, i.width(), i.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, i.bits());
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
 void Box::showImage(bool on)
@@ -673,4 +666,10 @@ void Box::toggleImage()
 {
     m_imageOn = !m_imageOn;
     emit imageOnChanged(m_imageOn);
+}
+
+void Box::setTexture(GLuint imageID)
+{
+    m_imageID = imageID;
+    emit textureChanged(m_imageID);
 }

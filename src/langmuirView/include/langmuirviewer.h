@@ -92,6 +92,11 @@ public:
     const QColor& trapColor() const { return m_trapColor; }
 
     /**
+     * @brief get the stage color
+     */
+    const QColor& stageColor2() const { return m_stageColor2; }
+
+    /**
      * @brief get corner axis object
      */
     CornerAxis & cornerAxis() { return *m_cornerAxis; }
@@ -130,6 +135,11 @@ public:
      * @brief get trap box object
      */
     Box & trapBox() { return *m_trapBox; }
+
+    /**
+     * @brief get stage box object
+     */
+    Box & stageBox() { return *m_stageBox; }
 
     /**
      * @brief get trap mesh object
@@ -204,6 +214,11 @@ signals:
      * @brief signal that the trap color changed
      */
     void trapColorChanged(QColor color);
+
+    /**
+     * @brief signal that the stage color2 changed
+     */
+    void stageColor2Changed(QColor color);
 
     /**
      * @brief signal that the background color changed
@@ -361,15 +376,26 @@ public slots:
     void setTrapColor(QColor color);
 
     /**
+     * @brief Change the stage color2
+     * @param color color to set
+     */
+    void setStageColor2(QColor color);
+
+    /**
      * @brief set background color
      * @param color color to set
      */
     void setBackgroundColor(QColor color);
 
     /**
-     * @brief init trap geometry
+     * @brief init trap texture
      */
     void initTraps();
+
+    /**
+     * @brief init stage texture
+     */
+    void initStage();
 
     /**
      * @brief generate isosurface
@@ -453,6 +479,21 @@ protected:
      */
     void drawTraps(QImage &image, QColor bcolor, QColor fcolor);
 
+    /**
+     * @brief draw checker pattern on stage
+     * @param image image to draw on
+     */
+    void drawChecker(QImage &image, QColor color1, QColor color2);
+
+    /**
+     * @brief load texture to gpu memory
+     * @param image texture
+     */
+    void loadTexture(GLuint imageID, QImage &image);
+
+    //! texture ids
+    GLuint m_textures[2];
+
     //! axis that sits in the corner and doesnt change size
     CornerAxis *m_cornerAxis;
 
@@ -477,11 +518,17 @@ protected:
     //! box (right)
     Box *m_rBox;
 
+    //! box (stage)
+    Box *m_stageBox;
+
     //! box parameter
     double m_boxThickness;
 
     //! box parameter
     QColor m_trapColor;
+
+    //! stage color
+    QColor m_stageColor2;
 
     //! grid that outlines sites
     Grid *m_grid;
@@ -527,6 +574,12 @@ protected:
 
     //! can calculate isosurface
     bool m_canCalculateIsoSurface;
+
+    //! size of scene
+    float m_sceneRadius;
+
+    //! stage size
+    float m_stageExtend;
 };
 
 #endif // LANGMUIRVIEWER_H

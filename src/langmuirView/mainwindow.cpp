@@ -87,8 +87,20 @@ void MainWindow::initAfter()
     connect(&m_viewer->rightBox(), SIGNAL(colorChanged(QColor)), ui->colorButtonRight, SLOT(setButtonColor(QColor)));
     ui->colorButtonRight->setButtonColor(m_viewer->rightBox().getColor());
 
+    connect(ui->colorButtonStage, SIGNAL(selectedColor(QColor)), &m_viewer->stageBox(), SLOT(setColor(QColor)));
+    connect(&m_viewer->stageBox(), SIGNAL(colorChanged(QColor)), ui->colorButtonStage, SLOT(setButtonColor(QColor)));
+    connect(&m_viewer->stageBox(), SIGNAL(colorChanged(QColor)), m_viewer, SLOT(initStage()));
+    ui->colorButtonStage->setButtonColor(m_viewer->stageBox().getColor());
+
+    connect(ui->colorButtonStageTexture, SIGNAL(selectedColor(QColor)), m_viewer, SLOT(setStageColor2(QColor)));
+    connect(m_viewer, SIGNAL(stageColor2Changed(QColor)), ui->colorButtonStageTexture, SLOT(setButtonColor(QColor)));
+    ui->colorButtonStageTexture->setButtonColor(m_viewer->stageColor2());
+
     connect(&m_viewer->trapBox(), SIGNAL(imageOnChanged(bool)), ui->actionTraps, SLOT(setChecked(bool)));
     ui->actionTraps->setChecked(m_viewer->trapBox().imageIsOn());
+
+    connect(&m_viewer->stageBox(), SIGNAL(imageOnChanged(bool)), ui->pushButtonStageTexture, SLOT(setChecked(bool)));
+    ui->pushButtonStageTexture->setChecked(m_viewer->stageBox().imageIsOn());
 
     connect(&m_viewer->cornerAxis(), SIGNAL(visibleChanged(bool)), ui->actionCornerAxis, SLOT(setChecked(bool)));
 
@@ -114,8 +126,14 @@ void MainWindow::initAfter()
     connect(ui->pushButtonRight, SIGNAL(clicked(bool)), &m_viewer->rightBox(), SLOT(setVisible(bool)));
     ui->pushButtonRight->setChecked(m_viewer->rightBox().isVisible());
 
+    connect(ui->pushButtonStage, SIGNAL(clicked(bool)), &m_viewer->stageBox(), SLOT(setVisible(bool)));
+    ui->pushButtonStage->setChecked(m_viewer->stageBox().isVisible());
+
     connect(ui->pushButtonGrid, SIGNAL(clicked(bool)), &m_viewer->grid(), SLOT(setVisible(bool)));
     ui->pushButtonGrid->setChecked(m_viewer->grid().isVisible());
+
+    connect(ui->pushButtonStageTexture, SIGNAL(clicked(bool)), &m_viewer->stageBox(), SLOT(showImage(bool)));
+    ui->pushButtonStageTexture->setChecked(m_viewer->stageBox().imageIsOn());
 
     connect(ui->pushButtonTraps, SIGNAL(clicked(bool)), &m_viewer->trapBox(), SLOT(showImage(bool)));
     ui->pushButtonTraps->setChecked(m_viewer->trapBox().imageIsOn());

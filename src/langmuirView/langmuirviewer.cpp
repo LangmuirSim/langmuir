@@ -38,6 +38,7 @@ LangmuirViewer::LangmuirViewer(QWidget *parent) :
 
     m_boxThickness = 1.0;
     m_trapColor = Qt::black;
+    m_stageColor2 = Qt::black;
     m_isoSurface = NULL;
 
     m_canCalculateIsoSurface = false;
@@ -243,6 +244,8 @@ void LangmuirViewer::updateHoleCloud()
 
 void LangmuirViewer::initGeometry()
 {
+    m_stageExtend = 256.0;
+
     unsigned int pointsE = 0;
     unsigned int pointsH = 0;
     unsigned int pointsD = 0;
@@ -272,12 +275,12 @@ void LangmuirViewer::initGeometry()
     m_gridHalfY = 0.5 * m_gridY;
     m_gridHalfZ = 0.5 * m_gridZ;
 
-    float sceneRadius = 0.5 * sqrt(m_gridX * m_gridX + m_gridY * m_gridY + m_gridZ * m_gridZ);
-    if (sceneRadius < 5) {
-        sceneRadius = 5;
+    m_sceneRadius = 0.5 * sqrt(m_gridX * m_gridX + m_gridY * m_gridY + m_gridZ * m_gridZ);
+    if (m_sceneRadius < 5) {
+        m_sceneRadius = 5;
     }
-    setSceneRadius(sceneRadius);
-    showEntireScene();
+    setSceneRadius(m_sceneRadius + m_stageExtend);
+    camera()->fitSphere(qglviewer::Vec(0,0,0), m_sceneRadius);
 
     if (m_grid != NULL) {
         m_grid->setDimensions(m_gridX, m_gridY, m_gridZ);
@@ -323,10 +326,12 @@ void LangmuirViewer::initGeometry()
         m_rBox->setSize(2 * m_boxThickness, m_gridY, m_gridZ + m_boxThickness, 4, 16, 16);
     }
 
-    if (m_light0 != NULL)
+    if (m_stageBox != NULL)
     {
-        m_light0->setPosition(0, 0, 1.25 * m_gridZ, 1.0);
+        m_stageBox->setSize(m_gridX + m_stageExtend, m_gridY + m_stageExtend, m_boxThickness, 16, 16, 16);
     }
+
+    initStage();
 
     if (m_trapMesh != NULL)
     {
@@ -352,13 +357,30 @@ void LangmuirViewer::initTraps()
                 QImage image;
                 drawTraps(image, m_baseBox->getColor(), m_trapColor);
 
-                m_trapBox->loadImage(image);
+                loadTexture(m_textures[0], image);
+                m_trapBox->setTexture(m_textures[0]);
                 m_trapBox->showImage(true);
             }
         }
         else
         {
             m_trapBox->showImage(false);
+        }
+    }
+}
+
+void LangmuirViewer::initStage()
+{
+    if (m_stageBox != NULL)
+    {
+        if (m_world != NULL)
+        {
+            QImage image;
+            drawChecker(image, m_stageBox->getColor(), m_stageColor2);
+
+            loadTexture(m_textures[1], image);
+            m_stageBox->setTexture(m_textures[1]);
+            m_stageBox->showImage(true);
         }
     }
 }
@@ -445,6 +467,18 @@ void LangmuirViewer::setCanCalculateIsoSurface(bool enabled)
 
 void LangmuirViewer::init()
 {
+    // Background
+    setBackgroundColor(QColor(32, 32, 32));
+
+    // Points
+    glShadeModel(GL_SMOOTH);
+    glEnable(GL_POINT_SMOOTH);
+
+    // Textures
+    glEnable(GL_TEXTURE_2D);
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+    glGenTextures(2, m_textures);
+
     // Corner Axis
     m_cornerAxis = new CornerAxis(*this, this);
     m_cornerAxis->makeConnections();
@@ -486,6 +520,11 @@ void LangmuirViewer::init()
     m_rBox->setFaces(Box::All);
     m_rBox->makeConnections();
 
+    // Stage
+    m_stageBox = new Box(*this, this);
+    m_stageBox->setFaces(Box::All);
+    m_stageBox->makeConnections();
+
     // Mesh
     m_trapMesh = new Mesh(*this, this);
     m_trapMesh->makeConnections();
@@ -501,20 +540,11 @@ void LangmuirViewer::init()
     m_light0->setAColor(QColor(128, 128, 128, 255));  // white light but weaker
     m_light0->setSColor(QColor(255, 255, 255, 255));  // white light
     m_light0->setDColor(QColor(255, 255, 255, 255));  // white light
-    m_light0->setPosition(1.0, 1.0, 1.0, 0.0);
+    m_light0->setPosition(0.0, 0.0, 1.0, 1.0);  // positional  (w=1)
     m_light0->setEnabled(true);
     m_light0->makeConnections();
 
     initGeometry();
-
-    // Background
-    setBackgroundColor(QColor(32, 32, 32));
-
-    // OpenGL
-    glShadeModel(GL_SMOOTH);
-    glEnable(GL_TEXTURE_2D);
-    glEnable(GL_POINT_SMOOTH);
-    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
 
     // OpenGL is done
     emit openGLInitFinished();
@@ -540,6 +570,10 @@ void LangmuirViewer::draw()
         glPushMatrix();
             glTranslatef(0.0f, 0.0f, 0.5 * m_boxThickness + 0.1);
             m_grid->render();
+        glPopMatrix();
+        glPushMatrix();
+            glTranslatef(0.0f, 0.0f, -2.0*m_boxThickness);
+            m_stageBox->render();
         glPopMatrix();
         m_trapBox->render();
         m_baseBox->render();
@@ -698,6 +732,20 @@ void LangmuirViewer::setSettings(QSettings &settings)
         settings.setValue("color_g"  , (int   )m_baseBox->getColor().green());
         settings.setValue("color_b"  , (int   )m_baseBox->getColor().blue());
         settings.setValue("visible"  , (bool  )m_baseBox->isVisible());
+        settings.endGroup();
+    }
+
+    // stage
+    {
+        settings.beginGroup("stage");
+        settings.setValue("color1_r"  , (int   )m_stageBox->getColor().red());
+        settings.setValue("color1_g"  , (int   )m_stageBox->getColor().green());
+        settings.setValue("color1_b"  , (int   )m_stageBox->getColor().blue());
+        settings.setValue("color2_r"  , (int   )m_stageColor2.red());
+        settings.setValue("color2_g"  , (int   )m_stageColor2.green());
+        settings.setValue("color2_b"  , (int   )m_stageColor2.blue());
+        settings.setValue("visible"   , (bool  )m_stageBox->isVisible());
+        settings.setValue("texture"   , (bool  )m_stageBox->imageIsOn());
         settings.endGroup();
     }
 
@@ -929,6 +977,35 @@ void LangmuirViewer::getSettings(QSettings &settings)
         m_trapBox->setColor(color);
     }
 
+    // stage
+    {
+        settings.beginGroup("stage");
+
+        // visible
+        bool visible = settings.value("visible", true).toBool();
+        bool texture = settings.value("texture", true).toBool();
+
+        // color
+        int color1_r = settings.value("color1_r", 255).toInt();
+        int color1_g = settings.value("color1_g", 255).toInt();
+        int color1_b = settings.value("color1_b", 255).toInt();
+        QColor color1 = QColor::fromRgb(color1_r, color1_g, color1_b);
+
+        int color2_r = settings.value("color2_r",   0).toInt();
+        int color2_g = settings.value("color2_g",   0).toInt();
+        int color2_b = settings.value("color2_b",   0).toInt();
+        QColor color2 = QColor::fromRgb(color2_r, color2_g, color2_b);
+
+        settings.endGroup();
+
+        // update settings
+        m_stageBox->setVisible(visible);
+        m_stageBox->showImage(texture);
+        m_stageBox->setColor(color1);
+        setStageColor2(color2);
+        initStage();
+    }
+
     // traps
     {
         settings.beginGroup("traps");
@@ -1055,6 +1132,15 @@ void LangmuirViewer::setTrapColor(QColor color)
         m_trapColor = color;
         initTraps();
         emit trapColorChanged(m_trapColor);
+    }
+}
+
+void LangmuirViewer::setStageColor2(QColor color)
+{
+    if (color != m_stageColor2) {
+        m_stageColor2 = color;
+        initStage();
+        emit stageColor2Changed(m_stageColor2);
     }
 }
 
@@ -1323,7 +1409,7 @@ void LangmuirViewer::resetCamera()
     camera()->frame()->stopSpinning();
     camera()->setUpVector(qglviewer::Vec(0, 1, 0));
     camera()->setViewDirection(qglviewer::Vec(0, 0, -1));
-    camera()->showEntireScene();
+    camera()->fitSphere(qglviewer::Vec(0,0,0), m_sceneRadius);
     updateGL();
 }
 
@@ -1443,4 +1529,56 @@ void LangmuirViewer::drawTraps(QImage &image, QColor bcolor, QColor fcolor)
 
     int scale = 5;
     image = image.scaled(scale * image.width(), scale * image.height(), Qt::KeepAspectRatioByExpanding);
+}
+
+void LangmuirViewer::drawChecker(QImage &image, QColor color1, QColor color2)
+{
+    if (m_world == NULL || m_simulation == NULL)
+    {
+        return;
+    }
+
+    int xsize = m_world->parameters().gridX + m_stageExtend;
+    int ysize = m_world->parameters().gridY + m_stageExtend;
+
+    image = QImage(xsize, ysize, QImage::Format_ARGB32_Premultiplied);
+    image.fill(1);
+
+    QPainter painter;
+    painter.begin(&image);
+
+    painter.setWindow(0, 0, xsize, ysize);
+
+    painter.fillRect(QRect(0,0,xsize,ysize), color1);
+    painter.setPen(color2);
+
+    double k = 8 * atan(1) / (32.0);
+
+    for (int i = 0; i < xsize; i++) {
+        for (int j = 0; j < ysize; j++) {
+            double v = sin(k * i) * sin(k * j);
+            if (v >= 0) {
+                painter.setPen(color1);
+            } else {
+                painter.setPen(color2);
+            }
+            painter.drawPoint(i, j);
+        }
+    }
+
+    painter.end();
+
+    image = image.mirrored(false, true);
+
+    int scale = 5;
+    image = image.scaled(scale * image.width(), scale * image.height(), Qt::KeepAspectRatioByExpanding);
+}
+
+void LangmuirViewer::loadTexture(GLuint imageID, QImage &image)
+{
+    QImage i = convertToGLFormat(image);
+    glBindTexture(GL_TEXTURE_2D, imageID);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, i.width(), i.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, i.bits());
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }

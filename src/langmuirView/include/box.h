@@ -92,6 +92,12 @@ signals:
      */
     void facesChanged(Faces faces);
 
+    /**
+     * @brief signal that the texture has changed
+     * @param imageID texture ID
+     */
+    void textureChanged(GLuint imageID);
+
 public slots:
     /**
      * @brief make signal/slot connections
@@ -120,12 +126,6 @@ public slots:
     void setFaces(Faces faces);
 
     /**
-     * @brief load the texture
-     * @param image image to use for texture
-     */
-    void loadImage(const QImage &image);
-
-    /**
      * @brief show the texture
      * @param on true if texture is to be shown
      */
@@ -135,6 +135,11 @@ public slots:
      * @brief toggle if texture is shown
      */
     void toggleImage();
+
+    /**
+     * @brief set texture
+     */
+    void setTexture(GLuint imageID);
 
 protected:
     /**
