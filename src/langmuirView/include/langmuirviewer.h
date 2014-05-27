@@ -240,6 +240,11 @@ signals:
      */
     void isoSurfaceProgress(int);
 
+    /**
+     * @brief signal that the checker size changed
+     */
+    void checkerSizeChanged(float);
+
 public slots:
     /**
      * @brief set the render mode for points
@@ -422,6 +427,11 @@ public slots:
      */
     void setCanCalculateIsoSurface(bool enabled);
 
+    /**
+     * @brief set size of checkers on stage
+     */
+    void setCheckerSize(float size);
+
 protected:
     /**
      * @brief update the electron point cloud
@@ -593,6 +603,9 @@ protected:
 
     //! stage size
     float m_stageExtend;
+
+    //! size of checkers on stage
+    float m_checkerSize;
 };
 
 #endif // LANGMUIRVIEWER_H

@@ -36,6 +36,7 @@ LangmuirViewer::LangmuirViewer(QWidget *parent) :
     m_simulation = NULL;
     m_world = NULL;
 
+    m_checkerSize = 32.0;
     m_boxThickness = 1.0;
     m_trapColor = Qt::black;
     m_stageColor2 = Qt::black;
@@ -496,6 +497,14 @@ void LangmuirViewer::setCanCalculateIsoSurface(bool enabled)
     }
 }
 
+void LangmuirViewer::setCheckerSize(float size)
+{
+    if (m_checkerSize != size) {
+        m_checkerSize = size;
+        emit checkerSizeChanged(size);
+    }
+}
+
 void LangmuirViewer::init()
 {
     // Background
@@ -559,6 +568,8 @@ void LangmuirViewer::init()
     m_stageBox = new Box(*this, this);
     m_stageBox->setFaces(Box::All);
     m_stageBox->makeConnections();
+
+    connect(this, SIGNAL(checkerSizeChanged(float)), this, SLOT(initStage()));
 
     // Mesh
     m_trapMesh = new Mesh(*this, this);
@@ -1065,7 +1076,7 @@ void LangmuirViewer::getSettings(QSettings &settings)
         QColor color = QColor::fromRgb(color_r, color_g, color_b);
 
         // pointsize
-        double pointsize = settings.value("pointsize", 230.0).toDouble();
+        double pointsize = settings.value("pointsize", 229.0).toDouble();
 
         settings.endGroup();
 
@@ -1605,7 +1616,7 @@ void LangmuirViewer::drawChecker(QImage &image, QColor color1, QColor color2)
     painter.fillRect(QRect(0,0,xsize,ysize), color1);
     painter.setPen(color2);
 
-    double k = 8 * atan(1) / (32.0);
+    double k = 8 * atan(1) / (m_checkerSize);
 
     for (int i = 0; i < xsize; i++) {
         for (int j = 0; j < ysize; j++) {

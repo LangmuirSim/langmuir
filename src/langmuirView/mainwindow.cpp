@@ -245,6 +245,15 @@ void MainWindow::on_actionIsoSurface_triggered()
     m_isosurfacedialog->raise();
 }
 
+void MainWindow::on_actionChecker_triggered()
+{
+    bool ok = false;
+    double size = QInputDialog::getDouble(this, "Langmuir", "size", 32.0, 1.0, 256.0, 0, &ok);
+    if (ok) {
+        m_viewer->setCheckerSize(size);
+    }
+}
+
 void MainWindow::on_actionResetSettings_triggered()
 {
     m_viewer->resetSettings();

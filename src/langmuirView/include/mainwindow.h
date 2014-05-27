@@ -51,6 +51,9 @@ public slots:
     //! open isosurface dialog
     void on_actionIsoSurface_triggered();
 
+    //! open checker dialog
+    void on_actionChecker_triggered();
+
     //! enabled or disable stop and play buttons
     void setStopEnabled(bool enabled);
 

@@ -765,6 +765,7 @@
     <addaction name="actionOpenCL"/>
     <addaction name="actionCoulomb"/>
     <addaction name="actionIsoSurface"/>
+    <addaction name="actionChecker"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -1043,6 +1044,11 @@
    </property>
    <property name="text">
     <string>IsoSurface</string>
+   </property>
+  </action>
+  <action name="actionChecker">
+   <property name="text">
+    <string>Checker</string>
    </property>
   </action>
  </widget>
