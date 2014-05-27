@@ -221,6 +221,27 @@ void LangmuirViewer::updateDefectCloud()
     }
 }
 
+void LangmuirViewer::updateTrapCloud()
+{
+    if (m_traps != NULL && m_world != NULL) {
+
+        if (m_traps->vertices().size() < 3 * m_world->numTraps()) {
+            qFatal("langmuir: defect VBO too small");
+        }
+
+        int j = 0;
+        for (int i = 0; i < m_world->numTraps(); i++) {
+            int s = m_world->trapSiteIDs().at(i);
+            m_traps->vertices()[j + 0] = m_world->electronGrid().getIndexX(s) - m_gridHalfX + 0.5;
+            m_traps->vertices()[j + 1] = m_world->electronGrid().getIndexY(s) - m_gridHalfY + 0.5;
+            m_traps->vertices()[j + 2] = m_world->electronGrid().getIndexZ(s) - m_gridHalfZ + 0.5;
+            j += 3;
+        }
+        m_traps->setMaxRender(m_world->numTraps());
+        m_traps->updateVBO();
+    }
+}
+
 void LangmuirViewer::updateHoleCloud()
 {
     if (m_holes != NULL && m_world != NULL) {
@@ -249,10 +270,12 @@ void LangmuirViewer::initGeometry()
     unsigned int pointsE = 0;
     unsigned int pointsH = 0;
     unsigned int pointsD = 0;
+    unsigned int pointsT = 0;
 
     unsigned int renderE = 0;
     unsigned int renderH = 0;
     unsigned int renderD = 0;
+    unsigned int renderT = 0;
 
     m_gridX = 0;
     m_gridY = 0;
@@ -262,10 +285,12 @@ void LangmuirViewer::initGeometry()
         pointsE = m_world->maxElectronAgents();
         pointsH = m_world->maxHoleAgents();
         pointsD = m_world->maxDefects();
+        pointsT = m_world->maxTraps();
 
         renderE = m_world->numElectronAgents();
         renderH = m_world->numHoleAgents();
         renderD = m_world->numDefects();
+        renderT = m_world->numTraps();
 
         m_gridX = m_world->parameters().gridX;
         m_gridY = m_world->parameters().gridY;
@@ -297,6 +322,12 @@ void LangmuirViewer::initGeometry()
         m_defects->setMaxRender(renderD);
     }
     updateDefectCloud();
+
+    if (m_traps != NULL) {
+        m_traps->setMaxPoints(pointsT);
+        m_traps->setMaxRender(renderT);
+    }
+    updateTrapCloud();
 
     if (m_holes != NULL) {
         m_holes->setMaxPoints(pointsH);
@@ -499,6 +530,10 @@ void LangmuirViewer::init()
     m_holes = new PointCloud(*this, this);
     m_holes->makeConnections();
 
+    // Traps
+    m_traps = new PointCloud(*this, this);
+    m_traps->makeConnections();
+
     // Base
     m_trapBox = new Box(*this, this);
     m_trapBox->setFaces(Box::Front);
@@ -563,6 +598,7 @@ void LangmuirViewer::draw()
         m_electrons->render();
         m_defects->render();
         m_holes->render();
+        m_traps->render();
     glPopMatrix();
 
     glPushMatrix();
@@ -755,7 +791,10 @@ void LangmuirViewer::setSettings(QSettings &settings)
         settings.setValue("color_r"  , (int   )m_trapColor.red());
         settings.setValue("color_g"  , (int   )m_trapColor.green());
         settings.setValue("color_b"  , (int   )m_trapColor.blue());
-        settings.setValue("visible"  , (bool  )m_trapBox->imageIsOn());
+        settings.setValue("texture"  , (bool  )m_trapBox->imageIsOn());
+        settings.setValue("mode"     , (int   )m_traps->getMode());
+        settings.setValue("visible"  , (bool  )m_traps->isVisible());
+        settings.setValue("pointsize", (double)m_traps->getPointSize());
         settings.endGroup();
     }
 
@@ -1010,8 +1049,14 @@ void LangmuirViewer::getSettings(QSettings &settings)
     {
         settings.beginGroup("traps");
 
+        // mode
+        PointCloud::Mode mode = PointCloud::Mode(settings.value("mode", PointCloud::Cubes).toInt());
+
         // visible
         bool visible = settings.value("visible", false).toBool();
+
+        // visible
+        bool texture = settings.value("texture", false).toBool();
 
         // trap color
         int color_r = settings.value("color_r", 255).toInt();
@@ -1019,12 +1064,20 @@ void LangmuirViewer::getSettings(QSettings &settings)
         int color_b = settings.value("color_b",   0).toInt();
         QColor color = QColor::fromRgb(color_r, color_g, color_b);
 
+        // pointsize
+        double pointsize = settings.value("pointsize", 230.0).toDouble();
+
         settings.endGroup();
 
         // update settings
         setTrapColor(color);
-        m_trapBox->showImage(visible);
+        m_trapBox->showImage(texture);
         initTraps();
+
+        m_traps->setMode(mode);
+        m_traps->setVisible(visible);
+        m_traps->setColor(color);
+        m_traps->setPointSize(pointsize);
     }
 
     // mesh

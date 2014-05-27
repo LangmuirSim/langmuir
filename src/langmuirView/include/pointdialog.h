@@ -28,26 +28,32 @@ public slots:
     void updateComboBoxElectrons(PointCloud::Mode mode);
     void updateComboBoxDefects(PointCloud::Mode mode);
     void updateComboBoxHoles(PointCloud::Mode mode);
+    void updateComboBoxTraps(PointCloud::Mode mode);
 
     void updateSpinBoxElectrons(float d);
     void updateSpinBoxDefects(float d);
     void updateSpinBoxHoles(float d);
+    void updateSpinBoxTraps(float d);
 
     void updateCheckBoxElectrons(bool checked);
     void updateCheckBoxDefects(bool checked);
     void updateCheckBoxHoles(bool checked);
+    void updateCheckBoxTraps(bool checked);
 
     void on_comboBoxElectrons_currentTextChanged(const QString & text);
     void on_comboBoxDefects_currentTextChanged(const QString & text);
     void on_comboBoxHoles_currentTextChanged(const QString & text);
+    void on_comboBoxTraps_currentTextChanged(const QString & text);
 
     void on_spinBoxElectrons_valueChanged(double d);
     void on_spinBoxDefects_valueChanged(double d);
     void on_spinBoxHoles_valueChanged(double d);
+    void on_spinBoxTraps_valueChanged(double d);
 
     void on_checkBoxElectrons_stateChanged(int state);
     void on_checkBoxDefects_stateChanged(int state);
     void on_checkBoxHoles_stateChanged(int state);
+    void on_checkBoxTraps_stateChanged(int state);
 
     void on_pushButtonReset_clicked();
     void on_buttonBox_rejected();
@@ -59,14 +65,17 @@ private:
     float e_pointSize_old;
     float d_pointSize_old;
     float h_pointSize_old;
+    float t_pointSize_old;
 
     PointCloud::Mode e_mode_old;
     PointCloud::Mode d_mode_old;
     PointCloud::Mode h_mode_old;
+    PointCloud::Mode t_mode_old;
 
     bool e_visible;
     bool d_visible;
     bool h_visible;
+    bool t_visible;
 };
 
 #endif // POINTDIALOG_H

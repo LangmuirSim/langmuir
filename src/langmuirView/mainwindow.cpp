@@ -65,6 +65,7 @@ void MainWindow::initAfter()
     ui->colorButtonGrid->setButtonColor(m_viewer->grid().getColor());
 
     connect(ui->colorButtonTraps, SIGNAL(selectedColor(QColor)), m_viewer, SLOT(setTrapColor(QColor)));
+    connect(ui->colorButtonTraps, SIGNAL(selectedColor(QColor)), &m_viewer->traps(), SLOT(setColor(QColor)));
     connect(m_viewer, SIGNAL(trapColorChanged(QColor)), ui->colorButtonTraps, SLOT(setButtonColor(QColor)));
     ui->colorButtonTraps->setButtonColor(m_viewer->trapColor());
 

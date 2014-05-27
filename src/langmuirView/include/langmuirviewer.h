@@ -117,6 +117,11 @@ public:
     PointCloud & holes() { return *m_holes; }
 
     /**
+     * @brief get traps object
+     */
+    PointCloud & traps() { return *m_traps; }
+
+    /**
      * @brief get right box object
      */
     Box & rightBox() { return *m_rBox; }
@@ -429,6 +434,11 @@ protected:
     void updateDefectCloud();
 
     /**
+     * @brief update the defect point cloud
+     */
+    void updateTrapCloud();
+
+    /**
      * @brief update the hole point cloud
      */
     void updateHoleCloud();
@@ -505,6 +515,9 @@ protected:
 
     //! point cloud representing holes
     PointCloud *m_holes;
+
+    //! point cloud representing traps
+    PointCloud *m_traps;
 
     //! trap box
     Box *m_trapBox;
