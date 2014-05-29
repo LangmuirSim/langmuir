@@ -6,6 +6,7 @@
 #include <QAction>
 #include <QStyle>
 #include <QIcon>
+#include <QDir>
 
 namespace Ui {
 class MainWindow;
@@ -78,6 +79,9 @@ private:
 
     //! dialog to create isosurface
     IsoSurfaceDialog *m_isosurfacedialog;
+
+    //! current directory for open/save actions
+    QDir m_currentDir;
 
     //! set user interface icon
     void setIcon(QAction *action, QString themeIcon, QStyle::StandardPixmap standardPixmap);

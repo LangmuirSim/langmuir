@@ -24,6 +24,7 @@ MainWindow::MainWindow(const QString &inputFile, QWidget *parent) :
     m_viewer = ui->qglwidget;
     init();
     m_viewer->load(inputFile);
+    m_currentDir = QDir::current();
 }
 
 void MainWindow::init()
@@ -174,7 +175,14 @@ void MainWindow::on_actionOpen_triggered()
     m_viewer->pause();
 
     QString fileName = QFileDialog::getOpenFileName(
-        this, tr("Open Input File"), QDir::currentPath(), "Simulation (*.inp* *.chk*);; All Files (*)");
+        this, tr("Open Input File"), m_currentDir.absolutePath(), "Simulation (*.inp* *.chk*);; All Files (*)");
+
+    if (!fileName.isEmpty()) {
+        QFileInfo info(fileName);
+        if (info.absoluteDir().exists()) {
+            m_currentDir = info.absoluteDir();
+        }
+    }
 
     m_viewer->load(fileName);
 }
@@ -184,11 +192,15 @@ void MainWindow::on_actionSave_triggered()
     m_viewer->pause();
 
     QString fileName = QFileDialog::getSaveFileName(this, "Save simulation checkpoint",
-        QDir::currentPath(), "Simulation (*.inp *.chk);; All Files (*)");
+        m_currentDir.absolutePath(), "Simulation (*.inp *.chk);; All Files (*)");
 
     if (!fileName.isEmpty()) {
 
         QFileInfo info(fileName);
+
+        if (info.absoluteDir().exists()) {
+            m_currentDir = info.absoluteDir();
+        }
 
         if (!(info.suffix() == "inp" || info.suffix() == "chk"))
         {
@@ -218,7 +230,14 @@ void MainWindow::on_actionLoadSettings_triggered()
     m_viewer->pause();
 
     QString fileName = QFileDialog::getOpenFileName(
-        this, tr("Open settings file"), QDir::currentPath(), "Settings (*.ini);; All Files (*)");
+        this, tr("Open settings file"), m_currentDir.absolutePath(), "Settings (*.ini);; All Files (*)");
+
+    if (!fileName.isEmpty()) {
+        QFileInfo info(fileName);
+        if (info.absoluteDir().exists()) {
+            m_currentDir = info.absoluteDir();
+        }
+    }
 
     m_viewer->loadSettings(fileName);
 }
@@ -265,11 +284,15 @@ void MainWindow::on_actionSaveSettings_triggered()
     m_viewer->pause();
 
     QString fileName = QFileDialog::getSaveFileName(this, "Save settings file",
-        QDir::currentPath(), "Settings (*.ini);; All Files (*)");
+        m_currentDir.absolutePath(), "Settings (*.ini);; All Files (*)");
 
     if (!fileName.isEmpty()) {
 
         QFileInfo info(fileName);
+
+        if (info.absoluteDir().exists()) {
+            m_currentDir = info.absoluteDir();
+        }
 
         if (info.suffix() != "ini")
         {
