@@ -586,7 +586,7 @@ void LangmuirViewer::init()
     m_light0->setAColor(QColor(128, 128, 128, 255));  // white light but weaker
     m_light0->setSColor(QColor(255, 255, 255, 255));  // white light
     m_light0->setDColor(QColor(255, 255, 255, 255));  // white light
-    m_light0->setPosition(0.0, 0.0, 1.0, 1.0);  // positional  (w=1)
+    m_light0->setPosition(0.0, 0.0, 1.0, 0.0);  // positional  (w=1)
     m_light0->setEnabled(true);
     m_light0->makeConnections();
 
