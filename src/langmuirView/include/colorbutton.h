@@ -11,6 +11,7 @@ class ColorButton : public QPushButton
     Q_OBJECT
 public:
     explicit ColorButton(QWidget *parent = 0);
+    QColorDialog& colorDialog();
     ~ColorButton();
 
 signals:

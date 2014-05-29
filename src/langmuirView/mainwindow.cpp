@@ -45,6 +45,31 @@ void MainWindow::init()
     connect(m_viewer, SIGNAL(showMessage(QString,int)), ui->statusbar, SLOT(showMessage(QString,int)));
 
     connect(m_viewer, SIGNAL(openGLInitFinished()), this, SLOT(initAfter()));
+
+    ui->colorButtonElectrons->colorDialog().setCustomColor( 0, QColor(  0, 43, 94)); //! PittBlue
+    ui->colorButtonElectrons->colorDialog().setCustomColor( 2, QColor(197,168,118)); //! PittGold
+
+    ui->colorButtonElectrons->colorDialog().setCustomColor( 4, QColor("#FE2712"));   //! R1
+    //ui->colorButtonElectrons->colorDialog().setCustomColor( 4, QColor("#EC3424")); //! HR
+    ui->colorButtonElectrons->colorDialog().setCustomColor( 6, QColor("#FD5308"));   //! R2
+
+    ui->colorButtonElectrons->colorDialog().setCustomColor( 8, QColor("#FB9902"));   //! O1
+    //ui->colorButtonElectrons->colorDialog().setCustomColor(10, QColor("#FF9200")); //! HO
+    ui->colorButtonElectrons->colorDialog().setCustomColor(10, QColor("#FABC02"));   //! O2
+
+    ui->colorButtonElectrons->colorDialog().setCustomColor(12, QColor("#FEFE33"));   //! Y1
+
+    ui->colorButtonElectrons->colorDialog().setCustomColor(14, QColor("#D0EA2B"));   //! G1
+    ui->colorButtonElectrons->colorDialog().setCustomColor( 1, QColor("#66B032"));   //! G2
+    ui->colorButtonElectrons->colorDialog().setCustomColor( 3, QColor("#5BB95C"));   //! HG
+
+    ui->colorButtonElectrons->colorDialog().setCustomColor( 5, QColor("#0392CE"));   //! B1
+    ui->colorButtonElectrons->colorDialog().setCustomColor( 7, QColor("#0247FE"));   //! B2
+    ui->colorButtonElectrons->colorDialog().setCustomColor( 9, QColor("#4492C5"));   //! HB
+
+    ui->colorButtonElectrons->colorDialog().setCustomColor(11, QColor("#3D01A4"));   //! P1
+    ui->colorButtonElectrons->colorDialog().setCustomColor(13, QColor("#8601AF"));   //! P2
+    ui->colorButtonElectrons->colorDialog().setCustomColor(15, QColor("#A7194B"));   //! P3
 }
 
 void MainWindow::initAfter()

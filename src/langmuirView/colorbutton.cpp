@@ -13,6 +13,11 @@ ColorButton::ColorButton(QWidget *parent) :
     m_color = Qt::white;
 }
 
+QColorDialog& ColorButton::colorDialog()
+{
+    return *m_colordialog;
+}
+
 ColorButton::~ColorButton()
 {
     if (m_colordialog != NULL) {
