@@ -10,6 +10,9 @@
     <height>697</height>
    </rect>
   </property>
+  <property name="focusPolicy">
+   <enum>Qt::StrongFocus</enum>
+  </property>
   <property name="windowTitle">
    <string>Langmuir</string>
   </property>
@@ -28,6 +31,9 @@
         <width>512</width>
         <height>512</height>
        </size>
+      </property>
+      <property name="focusPolicy">
+       <enum>Qt::StrongFocus</enum>
       </property>
      </widget>
     </item>
