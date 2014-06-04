@@ -82,6 +82,16 @@ def get_arguments(args=None):
         print >> sys.stderr, ''
         print >> sys.stderr, 'lambda must be a multiple of grid size'
         sys.exit(-1)
+    
+    if opts.ext in ['chk', 'inp']:
+        if not opts.threshold:
+            opts.threshold = True
+            message = '\n%s: using %s with %s = %s\n'
+            print >> sys.stderr, message % (lm.common.ccodes.red('warning'),
+                lm.common.ccodes.yellow('--threshold'),
+                lm.common.ccodes.yellow('--tvalue'),
+                lm.common.ccodes.cyan('%.1f' % opts.tvalue))
+            lm.common.ccodes.blue
 
     return opts
 
