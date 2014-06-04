@@ -34,6 +34,91 @@ def get_arguments(args=None):
     opts = parser.parse_args(args)
     return opts
 
+def as_ndarray_3D(obj):
+    """
+    Makes sure object is an ndarray with len(shape) = 3
+
+    :param obj: arbitrary python object
+    :return: :py:class:`numpy.ndarray`
+    """
+    array = np.asanyarray(obj, dtype=np.float64)
+
+    ndims = len(array.shape)
+    if ndims >= 3:
+        return array
+
+    if ndims == 2:
+        return np.expand_dims(array, 2)
+
+    if ndims == 1:
+        return np.expand_dims(np.expand_dims(array, 1), 1)
+
+    return array
+
+def as_ndarray_2D(obj):
+    """
+    Makes sure object is an ndarray with len(shape) = 2
+
+    :param obj: arbitrary python object
+    :return: :py:class:`numpy.ndarray`
+    """
+    array = np.asanyarray(obj, dtype=np.float64)
+
+    ndims = len(array.shape)
+
+    if ndims > 3:
+        raise RuntimeError('object has too many dimensions (%d)' % ndims)
+
+    if ndims == 3:
+        if 1 in array.shape:
+            index = array.shape.index(1)
+            array = np.rollaxis(array, index, 0)
+            return array[0,:,:]
+
+        raise RuntimeError('can not collapse dimensions, shape=(%d, %d, %d)' % array.shape)
+
+    if ndims == 2:
+        return array
+
+    return np.expand_dims(array, 1)
+
+def load_image(filename, make3D=False):
+    """
+    Loads data from image file (png, jpg, etc).
+
+    :param filename: name of file
+    :param make3D: forces object to be ndarray with len(shape)=3
+
+    :type filename: str
+    :type make3D: bool
+
+    :return: :py:class:`numpy.ndarray`
+    """
+    pil_img = Image.open(filename)
+    image = misc.fromimage(pil_img.convert("L"))
+
+    if make3D:
+        return as_ndarray_3D(image)
+    return as_ndarray_2D(image)
+
+def load_npy(filename, make3D=False):
+    """
+    Loads data from numpy file (npy).
+
+    :param filename: name of file
+    :param make3D: forces object to be ndarray with len(shape)=3
+
+    :type filename: str
+    :type make3D: bool
+
+    :return: :py:class:`numpy.ndarray`
+    """
+    image = np.load(filename)
+
+    if make3D:
+        return as_ndarray_3D(image)
+    return as_ndarray_2D(image)
+
 # from http://scipy-lectures.github.io/advanced/image_processing/
 def disk_structure(n):
     """
@@ -349,18 +434,39 @@ def analyze(filename):
     blur = modify.ublur_and_threshold(image, 3)
     x = np.logical_xor(image, blur)
     nzBlur = np.count_nonzero(x)
-    #               ads1  std1   ads2  std2 i  td1  con1   td2   con2  phase bcd   er dil clos blur
-    formatted = "%s %8.4f %8.4f %8.4f %8.4f %d %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %d %d %d %d %d %d %d %d"
-    return formatted % (filename, ads1, std1, ads2, std2, isize, td1, connect1, td2, connect2, fraction, bcd, \
-        b41, b21, b42, b22, erosion_spots, dilation_spots, closure_spots, nzBlur)
+
+    results = {k : v for k, v in locals().iteritems() if k in keys}
+    return ' '.join(['{%s:%s}' % (k, f) for k, f in zip(keys, fmts)]).format(**results)
+
+columns = [
+    ('Filename', 'filename', '>8'),
+    ('AvgDomainSize1', 'ads1', '>8.4f'),
+    ('StdDevDom1', 'std1', '>8.4f'),
+    ('AvgDomainSize2', 'ads2', '>8.4f'),
+    ('StdDevDom2', 'std1', '>8.4f'),
+    ('InterfaceSize', 'isize', '>8d'),
+    ('AvgTransDist1', 'td1', '>8.4f'),
+    ('Connect1', 'connect1', '>8.4f'),
+    ('AvgTransDist2', 'td2', '>8.4f'),
+    ('Connect2', 'connect2', '>8.4f'),
+    ('PhaseRatio', 'fraction', '>8.4f'),
+    ('BoxCDim', 'bcd', '>8.4f'),
+    ('Bottle4-1', 'b41', '>8d'),
+    ('Bottle2-1', 'b21', '>8d'),
+    ('Bottle4-2', 'b42', '>8d'),
+    ('Bottle2-2', 'b22', '>8d'),
+    ('Erosion', 'erosion_spots', '>8d'),
+    ('Dilation', 'dilation_spots', '>8d'),
+    ('Closure', 'closure_spots', '>8d'),
+    ('Blur3', 'nzBlur', '>8d'),
+]
+titles, keys, fmts = zip(*columns)
 
 if __name__ == '__main__':
     # create a thread pool
     pool = Pool()
 
-    print "Filename AvgDomainSize1 StdDevDom1 AvgDomainSize2 StdDevDom2 InterfaceSize AvgTransDist1 " \
-        "Connect1 AvgTransDist2 Connect2 PhaseRatio BoxCDim " \
-        "Bottle4-1 Bottle2-1 Bottle4-2 Bottle2-2 Erosion Dilation Closure Blur3"
+    print ' '.join(['%8s' % t for t in titles])
 
     if pool is None:
         output = map(analyze, sys.argv[1:])
