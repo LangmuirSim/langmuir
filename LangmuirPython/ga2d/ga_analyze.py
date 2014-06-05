@@ -170,6 +170,14 @@ def interface_size(image):
                         continue
                     if image[xn,yn] > 0:
                         interface += 1
+            elif image[x,y] == 255:
+                for nbr in range(nbrs):
+                    xn = x + nx[nbr]
+                    yn = y + ny[nbr]
+                    if xn < 0 or yn < 0:
+                        continue
+                    if image[xn,yn] == 0:
+                        interface += 1
 
     return interface
 
