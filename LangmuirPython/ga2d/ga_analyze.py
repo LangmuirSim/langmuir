@@ -236,35 +236,72 @@ def interface_size(image):
     :return total length of interface (in pixels)
     :rtype int
     """
-    # loop through the image to count the number of interfaces
-    interface = 0
+    ndims = len(image.shape)
 
-    # we only need to count sites to the left or above the current site
-    nx = [-1,  0]
-    ny = [ 0, -1]
-    nbrs = len(nx)
+    if ndims == 2:
+        # loop through the image to count the number of interfaces
+        interface = 0
 
-    width, height = image.shape
-    for x in range(width):
-        for y in range(height):
-            if image[x,y] == 0:
-                for nbr in range(nbrs):
-                    xn = x + nx[nbr]
-                    yn = y + ny[nbr]
-                    if xn < 0 or yn < 0:
-                        continue
-                    if image[xn,yn] > 0:
-                        interface += 1
-            elif image[x,y] == 255:
-                for nbr in range(nbrs):
-                    xn = x + nx[nbr]
-                    yn = y + ny[nbr]
-                    if xn < 0 or yn < 0:
-                        continue
-                    if image[xn,yn] == 0:
-                        interface += 1
+        # we only need to count sites to the left or above the current site
+        nx = [-1,  0]
+        ny = [ 0, -1]
+        nbrs = len(nx)
 
-    return interface
+        width, height = image.shape
+        for x in range(width):
+            for y in range(height):
+                if image[x,y] == 0:
+                    for nbr in range(nbrs):
+                        xn = x + nx[nbr]
+                        yn = y + ny[nbr]
+                        if xn < 0 or yn < 0:
+                            continue
+                        if image[xn,yn] > 0:
+                            interface += 1
+                else:
+                    for nbr in range(nbrs):
+                        xn = x + nx[nbr]
+                        yn = y + ny[nbr]
+                        if xn < 0 or yn < 0:
+                            continue
+                        if image[xn,yn] == 0:
+                            interface += 1
+
+        return interface
+
+    elif ndims == 3:
+        interface = 0
+
+        nx = [-1, 0, 0]
+        ny = [ 0,-1, 0]
+        nz = [ 0, 0,-1]
+        nbrs = len(nx)
+
+        width, height, depth = image.shape
+        for x in range(width):
+            for y in range(height):
+                for z in range(depth):
+                    if image[x,y,z] == 0:
+                        for nbr in range(nbrs):
+                            xn = x + nx[nbr]
+                            yn = y + ny[nbr]
+                            zn = z + nz[nbr]
+                            if xn < 0 or yn < 0 or zn < 0:
+                                continue
+                            if image[xn,yn,zn] > 0:
+                                interface += 1
+                    else:
+                        for nbr in range(nbrs):
+                            xn = x + nx[nbr]
+                            yn = y + ny[nbr]
+                            zn = z + nz[nbr]
+                            if xn < 0 or yn < 0 or zn < 0:
+                                continue
+                            if image[xn,yn,zn] == 0:
+                                interface += 1
+        return interface
+
+    raise RuntimeError('interface_size: invalid dimension!')
 
 def transfer_distance(original):
     """
