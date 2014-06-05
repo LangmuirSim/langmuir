@@ -34,6 +34,9 @@ def create_parser():
 
     parser.add_argument('--window', action='store_true',
         help='multiply signal by hamming window')
+    
+    parser.add_argument('--lmap', action='store_true',
+        help='map values to 0,1')
 
     return parser
 
@@ -47,6 +50,10 @@ if __name__ == '__main__':
     opts = get_arguments()
 
     image = lm.surface.load(opts.ifile)
+
+    if opts.lmap:
+        image = lm.surface.linear_mapping(image, 0, 1)
+
     xsize = image.shape[0]
     ysize = image.shape[1]
     zsize = image.shape[2]

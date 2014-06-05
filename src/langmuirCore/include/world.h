@@ -43,6 +43,7 @@ class ElectronSourceAgent;
 class CheckPointer;
 class OpenClHelper;
 struct SimulationParameters;
+struct ConfigurationInfo;
 
 /**
  * @brief A class to hold all objects in a simulation
@@ -61,7 +62,9 @@ public:
      *
      * Calls the initialize() function.
      */
-    World(const QString& fileName, QObject *parent = 0);
+    World(const QString& fileName, int cores=-1, int gpuID=-1, QObject *parent = 0);
+    World(SimulationParameters &parameters, int cores=-1, int gpuID=-1, QObject *parent = 0);
+    World(SimulationParameters &parameters, ConfigurationInfo &configInfo, int cores=-1, int gpuID=-1, QObject *parent = 0);
 
     /**
      * @brief destroys the entire World, and everything in it...including you.
@@ -653,6 +656,12 @@ private:
     void setFluxInfo(const QList<quint64> &fluxInfo);
 
     /**
+     * @brief Change the number of cores used
+     * @param cores the number of cores
+     */
+    void alterMaxThreads(int cores = -1);
+
+    /**
      * @brief initialize all objects
      * @param fileName input file name
      *
@@ -660,7 +669,8 @@ private:
      * all the simulation objects.  Best to read through it in the source
      * code.
      */
-    void initialize(const QString& fileName = "");
+    void initialize(const QString& fileName = "", SimulationParameters *pparameters = NULL, ConfigurationInfo *pconfigInfo = NULL,
+        int cores = -1, int gpuID = -1);
 };
 
 }

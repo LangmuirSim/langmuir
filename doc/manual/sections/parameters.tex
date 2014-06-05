@@ -423,18 +423,17 @@
     OpenCL will be slower than the CPU for small numbers of charges.
 }
 \parameter{opencl.device.id}{int}{0}{%
-    The id of the GPU to use when more than one is present.  Currently
-    this parameter is ignored.  The GPU chosen defaults to 0, unless
-    a PBS\_GPUFILE is found, in which case the GPU used is chosen by PBS.
-    The id of the GPU chosen is saved to this variable.
+    The id of the GPU.  This parameter is ignored.
+    A file specified by the environment variable PBS\_GPUFILE will determine
+        the gpu unless the command line option --gpu is present.
+    The gpu id will be saved to this parameter.
 }
 \parameter{max.threads}{int}{-1}{%
-    The max number of CPU threads allowed.
-    If $<$ 0, then use the number of threads recommended by QtConcurrent.
-    However, if $<0$ and a PBS\_NODEFILE is found, then the number of threads
-        is chosen by PBS.
-    \LangmuirView currently ignores this parameter and uses the number
-        of threads recommended by QtConcurrent.
+    The max number of CPU threads allowed.  This parameter is ignored.
+    A file specified by the environment variable PBS\_NODEFILE will determine
+        the number of threads unless the command line option -n is present.
+    As a last resort, the number of threads will be determined by QtConcurrent.
+    The number of threads is saved to this parameter.
 }
 \tabucline[1pt]{-}
 \end{tabu}

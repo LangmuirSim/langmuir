@@ -2,12 +2,13 @@ project(langmuirCore)
 cmake_minimum_required(VERSION 2.8)
 
 message(STATUS "Project: ${PROJECT_NAME}")
+set(CMAKE_BUILD_TYPE Debug)
 
 set(SOURCES
         rand.cpp
         gzipper.cpp
-        pbsgpuparser.cpp
         nodefileparser.cpp
+        clparser.cpp
 
         world.cpp
         simulation.cpp
@@ -29,8 +30,8 @@ set(SOURCES
 set(HEADERS
         ./include/rand.h
         ./include/gzipper.h
-        ./include/pbsgpuparser.h
         ./include/nodefileparser.h
+        ./include/clparser.h
 
         ./include/world.h
         ./include/simulation.h

@@ -6,7 +6,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 ################################################################################
 # Library : Boost
 macro(find_boost)
-    find_package(Boost REQUIRED)
+    find_package(Boost REQUIRED system)
     include_directories(${Boost_INCLUDE_DIRS})
 endmacro(find_boost)
 
@@ -35,17 +35,6 @@ macro(link_opencl TARGET)
 endmacro(link_opencl)
 
 ################################################################################
-# Library : OpenGL
-macro(find_opengl)
-    find_package(OpenGL)
-    include_directories(${OPENGL_INCLUDE_DIRS})
-endmacro(find_opengl)
-
-macro(link_opengl TARGET)
-    target_link_libraries(${TARGET} ${OPENGL_LIBRARIES})
-endmacro(link_opengl)
-
-################################################################################
 # Library: Qt4
 macro(find_qt4)
     message(STATUS "using qt4")
@@ -55,6 +44,8 @@ macro(find_qt4)
     if(OPENGL_FOUND)
         set(QT_USE_QTOPENGL TRUE)
     endif(OPENGL_FOUND)
+
+    set(QT_USE_QTXML TRUE)
 
     find_package(Qt REQUIRED)
 
@@ -84,6 +75,7 @@ macro(find_qt5)
 
     find_package(Qt5Core REQUIRED)
     find_package(Qt5Gui REQUIRED)
+    find_package(Qt5Xml REQUIRED)
     find_package(Qt5Widgets REQUIRED)
     find_package(Qt5Concurrent REQUIRED)
     find_package(Qt5PrintSupport REQUIRED)
@@ -107,6 +99,7 @@ macro(link_qt5 TARGET)
 
     qt5_use_modules(${TARGET} Core)
     qt5_use_modules(${TARGET} Gui)
+    qt5_use_modules(${TARGET} Xml)
     qt5_use_modules(${TARGET} Widgets)
     qt5_use_modules(${TARGET} Concurrent)
     qt5_use_modules(${TARGET} PrintSupport)
@@ -144,6 +137,14 @@ endmacro(link_qt)
 ################################################################################
 # projects
 add_subdirectory(langmuirCore)
+message("")
 add_subdirectory(langmuir)
-add_subdirectory(langmuirView)
+message("")
+if(NOT USE_QT4)
+    add_subdirectory(QGLViewer)
+    message("")
+    add_subdirectory(langmuirView)
+    message("")
+endif()
 add_subdirectory(test)
+message("")

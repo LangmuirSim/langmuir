@@ -18,6 +18,7 @@ xsede: clean
 	-DQt5Widgets_DIR=/nics/d/home/ghutchis/src/qt5/qtbase/lib/cmake/Qt5Widgets/ \
 	-DQt5Concurrent_DIR=/nics/d/home/ghutchis/src/qt5/qtbase/lib/cmake/Qt5Concurrent/ \
 	-DQt5PrintSupport_DIR=/nics/d/home/ghutchis/src/qt5/qtbase/lib/cmake/Qt5PrintSupport/ \
+	-DQt5Xml_DIR=/nics/d/home/ghutchis/src/qt5/qtbase/lib/cmake/Qt5Xml/ \
 	-DBOOST_INCLUDEDIR=/sw/kfs/boost/1.44.0/centos6.2_gnu4.4.6/include/ \
 	../
 	$(MAKE) -C ./build langmuir

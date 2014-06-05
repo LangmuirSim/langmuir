@@ -35,8 +35,15 @@ quint64 Random::seed()
 
 void Random::seed(quint64 seed)
 {
-    twister->seed(seed);
-    m_seed = seed;
+    if(seed == 0)
+    {
+        m_seed = static_cast < unsigned int >(time(0));
+    }
+    else
+    {
+        m_seed = static_cast < unsigned int >(seed);
+    }
+    twister->seed(m_seed);
 }
 
 double Random::random()

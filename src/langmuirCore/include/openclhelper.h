@@ -36,7 +36,7 @@ public:
     /**
      * @brief Perform the tedious boilerplate code to initialize OpenCL
      */
-    void initializeOpenCL();
+    void initializeOpenCL(int gpuID = -1);
 
     /**
      * @brief Kernel1 calculates the coulomb potential at \b every site.

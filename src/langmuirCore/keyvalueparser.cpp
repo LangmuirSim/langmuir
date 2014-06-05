@@ -204,6 +204,16 @@ Variable& KeyValueParser::getVariable(const QString& key)
     return *m_variableMap[key];
 }
 
+const QMap<QString,Variable*>& KeyValueParser::getVariableMap() const
+{
+    return m_variableMap;
+}
+
+const QStringList& KeyValueParser::getOrderedNames() const
+{
+    return m_orderedNames;
+}
+
 std::ostream& operator<<(std::ostream& stream, const KeyValueParser &keyValueParser)
 {
     foreach (QString key, keyValueParser.m_orderedNames)
@@ -221,6 +231,22 @@ SimulationParameters& KeyValueParser::parameters()
 {
     checkSimulationParameters(m_parameters);
     return m_parameters;
+}
+
+QDebug operator<<(QDebug dbg, KeyValueParser &keyValueParser)
+{
+    return dbg << qPrintable(keyValueParser.toQString());
+}
+
+QString KeyValueParser::toQString()
+{
+    QString result = "";
+    foreach (QString key, m_orderedNames)
+    {
+        Variable *variable = m_variableMap[key];
+        result += QString("langmuir: %1\n").arg(variable->keyValue());
+    }
+    return result.trimmed();
 }
 
 }

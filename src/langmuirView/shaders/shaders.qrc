@@ -1,0 +1,18 @@
+<RCC>
+    <qresource prefix="/shaders">
+        <file>pcVert.glsl</file>
+        <file>pcFrag.glsl</file>
+        <file>scVert.glsl</file>
+        <file>scGeom.glsl</file>
+        <file>scFrag.glsl</file>
+        <file>ccVert.glsl</file>
+        <file>ccGeom.glsl</file>
+        <file>ccFrag.glsl</file>
+        <file>msVert.glsl</file>
+        <file>msFrag.glsl</file>
+        <file>mtVert.glsl</file>
+        <file>mtFrag.glsl</file>
+        <file>mtTesC.glsl</file>
+        <file>mtTesE.glsl</file>
+    </qresource>
+</RCC>

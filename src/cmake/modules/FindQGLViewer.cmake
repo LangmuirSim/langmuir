@@ -1,0 +1,59 @@
+# - Try to find QGLViewer
+# Once done this will define
+#
+#  QGLVIEWER_FOUND       - system has QGLViewer
+#  QGLVIEWER_INCLUDE_DIR - the QGLViewer include directory
+#  QGLVIEWER_LIBRARIES   - link these to use QGLViewer
+#  QGLVIEWER_DEFINITIONS - compiler switches required for using QGLViewer
+#
+
+FIND_PATH(QGLVIEWER_INCLUDE_DIR 
+    NAMES QGLViewer/qglviewer.h
+    PATHS /usr/include
+          /usr/local/include
+          ENV QGLVIEWERROOT
+    )
+
+FIND_LIBRARY(QGLVIEWER_LIBRARY_RELEASE 
+    NAMES qglviewer-qt4 qglviewer QGLViewer QGLViewer2
+    PATHS /usr/lib
+          /usr/local/lib
+          ENV QGLVIEWERROOT
+          ENV LD_LIBRARY_PATH
+          ENV LIBRARY_PATH
+          PATH_SUFFIXES QGLViewer QGLViewer/release
+    )
+
+FIND_LIBRARY(QGLVIEWER_LIBRARY_DEBUG
+    NAMES dqglviewer dQGLViewer dQGLViewer2
+    PATHS /usr/lib
+          /usr/local/lib
+          ENV QGLVIEWERROOT
+          ENV LD_LIBRARY_PATH
+          ENV LIBRARY_PATH
+          PATH_SUFFIXES QGLViewer QGLViewer/debug
+    )
+
+IF(QGLVIEWER_LIBRARY_RELEASE)
+    IF(QGLVIEWER_LIBRARY_DEBUG)
+        SET(QGLVIEWER_LIBRARIES_ optimized ${QGLVIEWER_LIBRARY_RELEASE} debug ${QGLVIEWER_LIBRARY_DEBUG})
+    ELSE()
+        SET(QGLVIEWER_LIBRARIES_ ${QGLVIEWER_LIBRARY_RELEASE})
+    ENDIF()
+        SET(QGLVIEWER_LIBRARIES ${QGLVIEWER_LIBRARIES_} CACHE FILEPATH "The QGLViewer library")
+ENDIF()
+
+IF(QGLVIEWER_INCLUDE_DIR AND QGLVIEWER_LIBRARIES)
+    SET(QGLVIEWER_FOUND TRUE)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DQGLVIEWER_FOUND")
+ENDIF(QGLVIEWER_INCLUDE_DIR AND QGLVIEWER_LIBRARIES)
+
+IF(QGLVIEWER_FOUND)
+    IF(NOT QGLViewer_FIND_QUIETLY)
+        MESSAGE(STATUS "Found QGLViewer: ${QGLVIEWER_LIBRARIES}")
+    ENDIF(NOT QGLViewer_FIND_QUIETLY)
+ELSE(QGLVIEWER_FOUND)
+    IF(QGLViewer_FIND_REQUIRED)
+        MESSAGE(FATAL_ERROR "Could not find QGLViewer")
+    ENDIF(QGLViewer_FIND_REQUIRED)
+ENDIF(QGLVIEWER_FOUND)

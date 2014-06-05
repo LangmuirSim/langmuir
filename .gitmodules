@@ -1,0 +1,3 @@
+[submodule "src/QGLViewer"]
+	path = src/QGLViewer
+	url = git@github.com:GillesDebunne/libQGLViewer.git

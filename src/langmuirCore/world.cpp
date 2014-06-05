@@ -13,36 +13,95 @@
 #include "keyvalueparser.h"
 #include "checkpointer.h"
 #include "fluxagent.h"
+#include "nodefileparser.h"
 
 namespace Langmuir {
 
-World::World(const QString &fileName, QObject *parent)
+World::World(const QString &fileName, int cores, int gpuID, QObject *parent)
     : QObject(parent),
-      m_keyValueParser(0),
-      m_checkPointer(0),
-      m_electronSourceAgentRight(0),
-      m_electronSourceAgentLeft(0),
-      m_holeSourceAgentRight(0),
-      m_holeSourceAgentLeft(0),
-      m_excitonSourceAgent(0),
-      m_electronDrainAgentRight(0),
-      m_electronDrainAgentLeft(0),
-      m_holeDrainAgentRight(0),
-      m_holeDrainAgentLeft(0),
-      m_recombinationAgent(0),
-      m_electronGrid(0),
-      m_holeGrid(0),
-      m_rand(0),
-      m_potential(0),
-      m_parameters(0),
-      m_logger(0),
-      m_ocl(0),
+      m_keyValueParser(NULL),
+      m_checkPointer(NULL),
+      m_electronSourceAgentRight(NULL),
+      m_electronSourceAgentLeft(NULL),
+      m_holeSourceAgentRight(NULL),
+      m_holeSourceAgentLeft(NULL),
+      m_excitonSourceAgent(NULL),
+      m_electronDrainAgentRight(NULL),
+      m_electronDrainAgentLeft(NULL),
+      m_holeDrainAgentRight(NULL),
+      m_holeDrainAgentLeft(NULL),
+      m_recombinationAgent(NULL),
+      m_electronGrid(NULL),
+      m_holeGrid(NULL),
+      m_rand(NULL),
+      m_potential(NULL),
+      m_parameters(NULL),
+      m_logger(NULL),
+      m_ocl(NULL),
       m_maxElectrons(0),
       m_maxHoles(0),
       m_maxDefects(0),
       m_maxTraps(0)
 {
-    initialize(fileName);
+    initialize(fileName, NULL, NULL, cores, gpuID);
+}
+
+World::World(SimulationParameters &parameters, int cores, int gpuID, QObject *parent)
+    : QObject(parent),
+      m_keyValueParser(NULL),
+      m_checkPointer(NULL),
+      m_electronSourceAgentRight(NULL),
+      m_electronSourceAgentLeft(NULL),
+      m_holeSourceAgentRight(NULL),
+      m_holeSourceAgentLeft(NULL),
+      m_excitonSourceAgent(NULL),
+      m_electronDrainAgentRight(NULL),
+      m_electronDrainAgentLeft(NULL),
+      m_holeDrainAgentRight(NULL),
+      m_holeDrainAgentLeft(NULL),
+      m_recombinationAgent(NULL),
+      m_electronGrid(NULL),
+      m_holeGrid(NULL),
+      m_rand(NULL),
+      m_potential(NULL),
+      m_parameters(NULL),
+      m_logger(NULL),
+      m_ocl(NULL),
+      m_maxElectrons(0),
+      m_maxHoles(0),
+      m_maxDefects(0),
+      m_maxTraps(0)
+{
+    initialize("", &parameters, NULL, cores, gpuID);
+}
+
+World::World(SimulationParameters &parameters, ConfigurationInfo &configInfo, int cores, int gpuID, QObject *parent)
+    : QObject(parent),
+      m_keyValueParser(NULL),
+      m_checkPointer(NULL),
+      m_electronSourceAgentRight(NULL),
+      m_electronSourceAgentLeft(NULL),
+      m_holeSourceAgentRight(NULL),
+      m_holeSourceAgentLeft(NULL),
+      m_excitonSourceAgent(NULL),
+      m_electronDrainAgentRight(NULL),
+      m_electronDrainAgentLeft(NULL),
+      m_holeDrainAgentRight(NULL),
+      m_holeDrainAgentLeft(NULL),
+      m_recombinationAgent(NULL),
+      m_electronGrid(NULL),
+      m_holeGrid(NULL),
+      m_rand(NULL),
+      m_potential(NULL),
+      m_parameters(NULL),
+      m_logger(NULL),
+      m_ocl(NULL),
+      m_maxElectrons(0),
+      m_maxHoles(0),
+      m_maxDefects(0),
+      m_maxTraps(0)
+{
+    initialize("", &parameters, &configInfo, cores, gpuID);
 }
 
 World::~World()
@@ -420,8 +479,38 @@ bool World::atMaxCharges()
     return numChargeAgents() >= maxChargeAgents();
 }
 
-void World::initialize(const QString &fileName)
+void World::alterMaxThreads(int cores)
 {
+    QThreadPool& threadPool = *QThreadPool::globalInstance();
+    int maxThreadCount = threadPool.maxThreadCount();
+
+    if (cores < 0) {
+        cores = maxThreadCount;
+    }
+
+    if (cores > maxThreadCount) {
+        qFatal("langmuir: requested %d cores, max cores=%d", cores, maxThreadCount);
+    }
+
+    m_parameters->maxThreads = cores;
+
+    threadPool.setMaxThreadCount(cores);
+    qDebug("langmuir: QThreadPool::maxThreadCount set to %d", threadPool.maxThreadCount());
+}
+
+void World::initialize(const QString &fileName, SimulationParameters *pparameters, ConfigurationInfo *pconfigInfo, int cores, int gpuID)
+{
+    // check function arguments
+    if (fileName.isEmpty()) {
+        if (pparameters == NULL) {
+            qFatal("langmuir: no simulation parameters passed to World");
+        }
+    } else {
+        if (pparameters != NULL) {
+            qFatal("langmuir: both input file and simulation parameters passed to World");
+        }
+    }
+
     // Pointers are EVIL
     World &refWorld = *this;
 
@@ -431,6 +520,12 @@ void World::initialize(const QString &fileName)
     // It is also the global location of the simulationParameters struct,
     // that a lot of objects carry around references to
     m_keyValueParser = new KeyValueParser(refWorld,this);
+
+    // Copy passed parameters
+    if (pparameters != NULL) {
+        qDebug("langmuir: copying passed parameters");
+        m_keyValueParser->parameters() = *pparameters;
+    }
 
     // Set the address of the Parameters
     m_parameters = &m_keyValueParser->parameters();
@@ -444,16 +539,47 @@ void World::initialize(const QString &fileName)
     // In retrospect, checkPointer is an amazingly terrible name.
     // It has nothing to do with "pointers".
     // checkPointer handles the checkpoint files (simulation input)
-    m_checkPointer = new CheckPointer(refWorld,this);
+    m_checkPointer = new CheckPointer(refWorld, this);
 
     // Create Site info
     // This is temporary storage for info (like electron locations)
     // loaded in the simulation input file
     ConfigurationInfo configInfo;
 
+    // Copy passed config info
+    if (pconfigInfo != NULL) {
+        qDebug("langmuir: copying passed configuration info");
+        configInfo = *pconfigInfo;
+    }
+
     // Parse the input file
-    m_checkPointer->load(fileName,configInfo);
+    if (!fileName.isEmpty()) {
+        m_checkPointer->load(fileName, configInfo);
+    }
+    else {
+        qDebug("langmuir: skipping input file");
+        qDebug("langmuir: seeding random number generator with random.seed = %d",
+               (unsigned int)m_parameters->randomSeed);
+        m_rand->seed(m_parameters->randomSeed);
+    }
     checkSimulationParameters(*m_parameters);
+
+    // Change the number of threads
+    NodeFileParser nfparser;
+    QString hostName = nfparser.hostName();
+
+    // Use nodefile if cores wasn't given
+    if (cores < 0) {
+        cores = nfparser.numProc(hostName);
+    }
+
+    // Use gpufile if gpuID wasn't given
+    if (gpuID < 0) {
+        gpuID = nfparser.GPUid(hostName, 0);
+    }
+
+    // Change the number of threads
+    alterMaxThreads(cores);
 
     // Save the seed that has been used
     m_parameters->randomSeed = m_rand->seed();
@@ -523,8 +649,11 @@ void World::initialize(const QString &fileName)
     potential().updateCouplingConstants();
 
     // Initialize OpenCL
-    opencl().initializeOpenCL();
+    opencl().initializeOpenCL(gpuID);
     opencl().toggleOpenCL(parameters().useOpenCL);
+
+    // Output parameters to terminal
+    qDebug() << *m_keyValueParser;
 }
 
 void World::placeDefects(const QList<int>& siteIDs)
