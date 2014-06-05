@@ -8,8 +8,6 @@ modify.py
     :func: create_parser
     :prog: modify.py
 
-.. todo:: add argument flags to allow command-line access to all image mutations
-
 .. moduleauthor:: Geoff Hutchison <geoffh@pitt.edu>
 """
 import argparse
@@ -23,7 +21,15 @@ import numpy as np
 from PIL import Image
 
 desc = """
-Mix two images and re-threshold or perform other mutations.
+Modify one or two images with various "mutation" options.
+- Blend and re-threshold two images
+- Gaussian Blur
+- Uniform Blur (preserves edges)
+- Shrink and tile
+- Enlarge and tile
+- Add pepper to a particular phase
+- Roughen edges
+- Grow one phase using diffusion-limited growth (fractal noise)
 """
 
 def threshold(image):
@@ -39,7 +45,7 @@ def threshold(image):
     """
     return image > image.mean()
 
-def blend_and_threshold(image1, image2, ratio=0.5, radius=1):
+def blend_and_threshold(image1, image2, ratio=0.5, radius=2):
     """
     Mix two images, blur and threshold
 
@@ -60,7 +66,7 @@ def blend_and_threshold(image1, image2, ratio=0.5, radius=1):
     image = ndimage.uniform_filter(mixed, size=radius)
     return image > image.mean()
 
-def gblur_and_threshold(image, radius=1):
+def gblur_and_threshold(image, radius=2):
     """
     Blur an image with a Gaussian kernel of supplied radius
 
@@ -76,7 +82,7 @@ def gblur_and_threshold(image, radius=1):
     output = ndimage.gaussian_filter(image, sigma=radius)
     return image > image.mean()
 
-def ublur_and_threshold(image, radius = 1):
+def ublur_and_threshold(image, radius=2):
     """
     Blur an image with a Uniform blur kernel of supplied radius
     (the uniform filter better preserves edges/boundaries
@@ -261,21 +267,6 @@ def pepper(image, phase=0, count=0, percent=None, brush='point', overlap=False, 
 
     return image
 
-def imshow(image):
-    """
-    Show image using matplotlib.
-
-    :param image: data
-
-    :type image: :py:class:`numpy.ndarray`
-    """
-    import matplotlib.pyplot as plt
-    plt.autumn()
-    plt.imshow(image)
-    plt.tick_params(label1On=False, tick1On=False, tick2On=False)
-    plt.tight_layout()
-    plt.show()
-
 def roughen(image, fraction=0.5, dilation=0, struct=None):
     """
     Roughen the edges of the two phases. Use a binary-closing and dilation
@@ -318,6 +309,110 @@ def roughen(image, fraction=0.5, dilation=0, struct=None):
             count += 1
     return np.logical_xor( image, edge )
 
+def grow_ndimage(image, phase=-1, pixToAdd=-1):
+    """
+    Grow points into a minority phase using diffusion-limited fractal growth.
+    The result will ensure 50:50 mixtures and by default will determine the
+    minority phase automatically, but both could be specified.
+
+    :param image: data
+    :param phase: grey level to grow into (i.e., default 0 = add white into black regions)
+    :param pixToAdd: number of points to grow, -1 for automatic detection of 50:50 mix
+
+    :type image: :py:class:`numpy.ndarray`
+    :type phase: int
+    :type pixToAdd: int
+
+    :return: modified image data
+    :rtype: :py:class:`numpy.ndarray`
+    """
+    if phase == -1:
+        nonzero = np.count_nonzero(image)
+        phase = 0
+        if nonzero > image.size / 2:
+            phase = 255
+
+    # switch the phases for now, we'll switch them back later
+    if phase != 0:
+        inverted = (image < image.mean())
+        image = inverted
+
+    # neighbor pixel directions
+    nx = [-1, 1,  0, 0]
+    ny = [ 0, 0, -1, 1]
+    nbrs = len(nx)
+
+    width, height = image.shape
+    if pixToAdd == -1:
+        pixToAdd = width * height / 2
+
+    # how many are currently set
+    pix = np.count_nonzero(image)
+
+    while pix < pixToAdd:
+        # pick a spot and see if it can be added
+        x = random.randrange(width)
+        y = random.randrange(height)
+        if image[x,y] != phase:
+            for i in range(nbrs):
+                # x, y is set, so try to find an empty neighbor
+                k = random.randrange(nbrs)
+                xn = x + nx[k]
+                yn = y + ny[k]
+                if xn < 0 or xn > width - 1 or yn < 0 or yn > height - 1:
+                    continue
+                if image[xn,yn] == phase:
+                    image[xn,yn] = 255
+                    pix += 1
+                    break
+
+    if phase != 0:
+        # re-invert to get the original phases
+        inverted = (image < image.mean())
+        image = inverted
+
+    return image
+
+def invert(image):
+    """
+    Invert the phases (i.e., black -> white, white->black)
+
+    :param image: data
+
+    :type image: :py:class:`numpy.ndarray`
+
+    :return: modified image data
+    :rtype: :py:class:`numpy.ndarray`
+    """
+
+    return (image < image.mean())
+
+def add_noise(image):
+    """
+    :param image: data
+    :type image: :py:class:`numpy.ndarray`
+
+    :return: modified image data
+    :rtype: :py:class:`numpy.ndarray`
+    """
+    noise = np.random.random( image.shape )
+    return modify.blend_and_threshold(image, noise)
+
+def imshow(image):
+    """
+    Show image using matplotlib.
+
+    :param image: data
+
+    :type image: :py:class:`numpy.ndarray`
+    """
+    import matplotlib.pyplot as plt
+    plt.autumn()
+    plt.imshow(image)
+    plt.tick_params(label1On=False, tick1On=False, tick2On=False)
+    plt.tight_layout()
+    plt.show()
+
 def create_parser():
     parser = argparse.ArgumentParser()
     parser.description = desc
@@ -328,6 +423,12 @@ def create_parser():
     parser.add_argument(dest='ifile2', default=None, type=str,
                         metavar='input2', nargs='?',
                         help='input file #2')
+
+    parser.add_argument('--type', default=None, type=str, metavar='type',
+        choices=['blend', 'gblur', 'ublur', 'shrink', 'enlarge', 'invert',
+                 'pepper', 'roughen', 'fracgrow', 'noise'],
+        help='mutation type')
+
     return parser
 
 def get_arguments(args=None):
@@ -339,6 +440,15 @@ def get_arguments(args=None):
         print >> sys.stderr, '\nfile does not exist: %s' % opts.ifile1
         sys.exit(-1)
 
+    if opts.ifile2 != None and not os.path.exists(opts.ifile2):
+        parser.print_help()
+        print >> sys.stderr, '\nfile does not exist: %s' % opts.ifile2
+        sys.exit(-1)
+
+    if opts.type == None or opts.type == "blend" and opts.ifile2 == None:
+        parser.print_help()
+        print >> sys.stderr, "\nYou must supply two valid filenames to blend"
+
     return opts
 
 if __name__ == '__main__':
@@ -348,34 +458,37 @@ if __name__ == '__main__':
     image = Image.open(opts.ifile1)
     image1 = misc.fromimage(image.convert("L"))
 
-    if not opts.ifile2 is None:
-        image2 = misc.imread(opts.ifile2)
+    if opts.type == 'blend':
+        image = Image.open(opts.ifile2)
+        image2 = misc.fromimage(image.convert("L"))
         output = blend_and_threshold(image1, image2)
         misc.imsave("Blend.png", output)
-    else:
-#        output = ublur_and_threshold(image1, 3)
-#        output = ndimage.binary_closing(image1.astype(np.uint8), structure=ndimage.morphology.generate_binary_structure(2, 1) )
-        output = morphology.skeletonize( (image1 > image1.mean()) )
-        misc.imsave("skel.png", output)
-        # get the distances
-        dists = ndimage.distance_transform_edt(image1)
-        # ok for all the nonzero in the skeleton, we get the distances
-        x_nz, y_nz = output.nonzero() # get all the nonzero indices
-        channels = []
-        for i in range(len(x_nz)):
-            x = x_nz[i]
-            y = y_nz[i]
-            channels.append(dists[x,y])
+    elif opts.type == 'gblur':
+        output = gblur_and_threshold(image1)
+        misc.imsave(opts.ifile1, output)
+    elif opts.type == 'ublur':
+        output = ublur_and_threshold(image1)
+        misc.imsave(opts.ifile1, output)
+    elif opts.type == 'shrink':
+        output = shrink(image1)
+        misc.imsave(opts.ifile1, output)
+    elif opts.type == 'enlarge':
+        output = enlarge(image1)
+        misc.imsave(opts.ifile1, output)
+    elif opts.type == 'invert':
+        output = invert(image1)
+        misc.imsave(opts.ifile1, output)
+    elif opts.type == 'pepper':
+        output = pepper(image1)
+        misc.imsave(opts.ifile1, output)
+    elif opts.type == 'roughen':
+        output = roughen(image1)
+        misc.imsave(opts.ifile1, output)
+    elif opts.type == 'noise':
+        output = noise(image1)
+        misc.imsave(opts.ifile1, output)
+    elif opts.type == 'fracgrow':
+        output = grow(image1)
+        misc.imsave(opts.ifile1, output)
 
-        width4 = 0
-        width2 = 0
-        for i in channels:
-            if i <= 4:
-                width4 += 1
-            if i <= 2:
-                width2 += 1
 
-        print width4, width2
-
-#        x = np.logical_xor(image1, output)
-#        misc.imsave("xor.png", x)
