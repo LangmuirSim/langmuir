@@ -28,7 +28,6 @@ import numpy as np
 # our code
 import ga_analyze as analyze
 import modify
-import grow
 
 desc = """
 Genetic algorithm design of 2D morphologies.
@@ -287,7 +286,7 @@ if __name__ == '__main__':
                 phase = 0
                 if nonzero > image.size / 2:
                     phase = 255
-                child = grow.grow_ndimage(image, phase)
+                child = modify.grow_ndimage(image, phase)
                 image = child
             # shift? - not useful
             # swap slices? - not sure if this is useful
