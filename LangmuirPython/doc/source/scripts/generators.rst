@@ -1,3 +1,6 @@
+.. automodule:: block
+    :members:
+
 .. automodule:: tristripe
     :members:
 
