@@ -183,7 +183,7 @@ def average_domain_size(image):
     :param image: data
     :type image: :py:class:`numpy.ndarray`
 
-    :return mean and standard deviation of domain sizes
+    :return: mean and standard deviation of domain sizes
     :rtype: tuple(int)
     """
     # get the average size of domains (i.e., distance from center of domain to other phase)
@@ -207,7 +207,7 @@ def box_counting_dimension(image):
     :param image: data
     :type image: :py:class:`numpy.ndarray`
 
-    :return slope of best-fit line of the log-log plot
+    :return: slope of best-fit line of the log-log plot
     :rtype: int
 
     .. seealso:: `Wikipedia <http://en.wikipedia.org/wiki/Minkowski–Bouligand_dimension>`_
@@ -237,8 +237,8 @@ def interface_size(image, periodic=False):
     :type image: :py:class:`numpy.ndarray`
     :type periodic: bool
 
-    :return total length of interface (in pixels)
-    :rtype int
+    :return: total length of interface (in pixels)
+    :rtype: int
 
     ..seealso: :py:func:`test_interface_size`, :py:func:`interface_size_old`
     """
@@ -269,8 +269,8 @@ def interface_size_old(image):
     :param image: data
     :type image: :py:class:`numpy.ndarray`
 
-    :return total length of interface (in pixels)
-    :rtype int
+    :return: total length of interface (in pixels)
+    :rtype: int
     """
     ndims = len(image.shape)
 
@@ -341,6 +341,7 @@ def interface_size_old(image):
 
 def test_interface_size():
     """
+    Function to compare interface_size_old and interface_size
     1.  timing (old version, size=32x32x32) 4.78119206429 seconds
     2.  timing (new version, size=32x32x32) 0.32835388187 seconds
     """
@@ -383,8 +384,8 @@ def transfer_distance(original):
     :param original: data
     :type original: :py:class:`numpy.ndarray`
 
-    :return average transfer distance and connectivity fraction (phase 1 and then phase 2)
-    :rtype tuple(float)
+    :return: average transfer distance and connectivity fraction (phase 1 and then phase 2)
+    :rtype: tuple(float)
     """
 
     # the image will come in with row-major order (i.e., numpy)
@@ -486,8 +487,8 @@ def bottleneck_distribution(image):
     :param image: data (binary)
     :type image: :py:class:`numpy.ndarray`
 
-    :return count of bottlenecks of size 4 and size 2
-    :rtype tuple(int)
+    :return: count of bottlenecks of size 4 and size 2
+    :rtype: tuple(int)
     """
     skel = morphology.skeletonize(image)
     # get the distances
