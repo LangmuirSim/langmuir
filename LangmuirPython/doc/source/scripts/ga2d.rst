@@ -4,9 +4,5 @@
 .. automodule:: modify
     :members:
 
-.. automodule:: grow
-    :members:
-
 .. automodule:: ga
     :members:
-
