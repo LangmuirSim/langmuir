@@ -226,7 +226,43 @@ def box_counting_dimension(image):
 
     return np.polyfit(np.log(sizes), np.log(grains), 1)
 
-def interface_size(image):
+def interface_size(image, periodic=False):
+    """
+    Calculate the interfacial area (length for 2D images) between the phases.
+    Faster version of :py:func:`interface_size_old` that works on any dimension.  Tested for 1D, 2D, and 3D.
+
+    :param image: data
+    :param periodic: use periodic boundary conditions
+
+    :type image: :py:class:`numpy.ndarray`
+    :type periodic: bool
+
+    :return total length of interface (in pixels)
+    :rtype int
+
+    ..seealso: :py:func:`test_interface_size`, :py:func:`interface_size_old`
+    """
+    interface = 0
+
+    # works by shifting all elements in the array by +1 and -1 (for each dimension)
+    # the shifted array is compared to the original to determine if and interface exists
+    # removing the slicing means periodic boundary conditions are used
+
+    if periodic:
+        for dim in range(image.ndim):
+            interface += np.sum(np.where((np.roll(image, shift=+1, axis=dim) - image) > 0, 1, 0))
+            interface += np.sum(np.where((np.roll(image, shift=-1, axis=dim) - image) > 0, 1, 0))
+    else:
+        for dim in range(image.ndim):
+            s = [Ellipsis] * dim + [slice(+1, None)] + [Ellipsis] * (image.ndim - dim - 1)
+            interface += np.sum(np.where((np.roll(image, shift=+1, axis=dim) - image) > 0, 1, 0)[s])
+
+            s = [Ellipsis] * dim + [slice(None, -1)] + [Ellipsis] * (image.ndim - dim - 1)
+            interface += np.sum(np.where((np.roll(image, shift=-1, axis=dim) - image) > 0, 1, 0)[s])
+
+    return interface
+
+def interface_size_old(image):
     """
     Calculate the interfacial area (length for 2D images) between the phases.
 
@@ -302,6 +338,38 @@ def interface_size(image):
         return interface
 
     raise RuntimeError('interface_size: invalid dimension!')
+
+def test_interface_size():
+    """
+    1.  timing (old version, size=32x32x32) 4.78119206429 seconds
+    2.  timing (new version, size=32x32x32) 0.32835388187 seconds
+    """
+    import timeit
+
+    xdim = np.random.randint(16, 32)
+    ydim = np.random.randint(16, 32)
+    zdim = np.random.randint( 1, 16)
+
+    global image
+    image = np.random.random((xdim, ydim, zdim))
+    image = (image > image.mean()).astype(int)
+    image[image == 1] = 255
+
+    t1 = timeit.timeit('interface_size_old(image)', setup='from __main__ import interface_size_old, image', number=32)
+    t2 = timeit.timeit('interface_size(image)', setup='from __main__ import interface_size, image', number=32)
+
+    isize1 = interface_size(image)
+    isize2 = interface_size_old(image)
+
+    print 'xdim', xdim
+    print 'ydim', ydim
+    print 'zdim', zdim
+
+    print 'iterface_size_1', isize1, t1
+    print 'iterface_size_2', isize2, t2
+    print 'speedup:', t1/t2
+
+    assert isize1 == isize2
 
 def transfer_distance(original):
     """
