@@ -281,7 +281,7 @@ def transfer_distance(original, axis=0, rot90=1):
     # the image will come in with row-major order (i.e., numpy)
     # but we're thinking of this as a graphic, with column, row
     if rot90 != 0:
-        image = np.rot90(original, 1)
+        image = np.rot90(original, rot90)
     else:
         image = original
 
