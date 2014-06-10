@@ -100,8 +100,8 @@ def score(filename):
 
 #    spots = np.logical_xor( image, ndimage.binary_erosion(image, structure=np.ones((2,2))) )
 #    erosion = np.count_nonzero(spots)
-#    spots = np.logical_xor( image, ndimage.binary_dilation(image, structure=np.ones((2,2))) )
-#    dilation = np.count_nonzero(spots)
+    spots = np.logical_xor( image, ndimage.binary_dilation(image, structure=np.ones((2,2))) )
+    dilation = np.count_nonzero(spots)
 
     # fraction of phase one
     nonzero = np.count_nonzero(image)
@@ -109,11 +109,12 @@ def score(filename):
     # scores zero at 0, 1 and maximum at 0.5
     ps = fraction*(1.0-fraction)
 
-    # from initial simulations with multivariate nonlinear regression
-    return (-1096.6) + (-2539.26)*math.pow(ads, -2) + (-1215.72)*math.pow(ads,0.2) + \
-           2026.68*math.tanh(3*(connect1 - 0.45)) + 804.779*math.tanh(3*(connect2 - 0.45)) \
-           + (-1332.77)*connect1*connect2 \
-           + (-9.05167)*td1 + (-4.00668)*td2 + 3.97801e8*ps**8
+    # from simulations with multivariate nonlinear regression
+    return (-1.96343e8) + (-1309.58)*math.pow(ads, -1) + (-788.089)*math.pow(ads,0.25) + \
+           2.34295e7*math.tanh(14.5*(connect1 + 0.4)) + 1.72915e8*math.tanh(14.5*(connect2 + 0.4)) \
+           + 2187.24*connect1*connect2 \
+           + (-4.73541)*td1 + (-5.14289)*td2 + 5.01303e7*ps**8 \
+           + 0.104485*dilation
 
 def score_filenames(filenames, pool=None):
     """

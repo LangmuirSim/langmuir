@@ -1,59 +1,77 @@
- 765.216 iso/iso-rough/tf3-r1.png
--532.866 iso/iso-rough/tf3-r2.png
--1332.156 iso/iso-rough/tf3-r3.png
-1553.077 iso/iso-rough/tf5-r1.png
-1046.566 iso/iso-rough/tf5-r2.png
- 618.358 iso/iso-rough/tf5-r3.png
-2030.701 iso/iso-rough/tf7-r1.png
-1623.076 iso/iso-rough/tf7-r2.png
- 773.903 iso/iso-rough/tf7-r3.png
-2432.090 iso/iso-rough/tf9-r1.png
-2226.859 iso/iso-rough/tf9-r2.png
-1861.314 iso/iso-rough/tf9-r3.png
-1071.008 iso/newiso/iso-s1023-10.png
- 739.831 iso/newiso/iso-s1023-12.png
- 799.476 iso/newiso/iso-s1023-14.png
- 967.690 iso/newiso/iso-s1023-2.png
-1226.766 iso/newiso/iso-s1023-4.png
-1589.811 iso/newiso/iso-s1023-6.png
-1683.153 iso/newiso/iso-s1023-8.png
- 595.978 iso/newiso/iso-s2013-10.png
- 380.614 iso/newiso/iso-s2013-12.png
-1164.661 iso/newiso/iso-s2013-14.png
- 299.046 iso/newiso/iso-s2013-2.png
- 959.960 iso/newiso/iso-s2013-4.png
- 808.956 iso/newiso/iso-s2013-8.png
-2006.237 iso/newiso/iso-s3021-10.png
-1440.805 iso/newiso/iso-s3021-3.png
-1701.681 iso/newiso/iso-s3021-4.png
-2203.813 iso/newiso/iso-s3021-5.png
-2152.325 iso/newiso/iso-s3021-6.png
-1952.829 iso/newiso/iso-s3021-8.png
-2977.658 iso/newiso/iso-s31359-10.png
-2331.226 iso/newiso/iso-s31359-3.png
-2831.979 iso/newiso/iso-s31359-4.png
-2911.155 iso/newiso/iso-s31359-5.png
-2869.501 iso/newiso/iso-s31359-6.png
-2934.778 iso/newiso/iso-s31359-8.png
-2507.128 iso/newiso/iso-s6848-10.png
-1820.100 iso/newiso/iso-s6848-3.png
-2088.404 iso/newiso/iso-s6848-4.png
-2092.535 iso/newiso/iso-s6848-5.png
-2305.120 iso/newiso/iso-s6848-6.png
-2190.870 iso/newiso/iso-s6848-8.png
-1676.288 iso/old/tf3.png
-1659.833 iso/old/tf5.png
-2081.397 iso/old/tf7.png
-2377.537 iso/old/tf9.png
-1436.367 iso/pepper/tf3p.png
-1499.107 iso/pepper/tf3p4.png
- 735.738 iso/pepper/tf3pp.png
- 905.847 iso/pepper/tf3pp4.png
-1332.999 iso/pepper/tf5p.png
- 589.622 iso/pepper/tf5pp.png
-2049.879 iso/pepper/tf7p.png
-1425.619 iso/pepper/tf7pp.png
-2647.556 iso/pepper/tf9p.png
-2595.564 iso/pepper/tf9p4.png
-1862.936 iso/pepper/tf9pp.png
-2007.959 iso/pepper/tf9pp4.png
+ 585.368 iso/iso-rough/tf3-r1.png
+ 248.329 iso/iso-rough/tf3-r2.png
+ 474.536 iso/iso-rough/tf3-r3.png
+ 290.512 iso/iso-rough/tf5-r1.png
+ 264.758 iso/iso-rough/tf5-r2.png
+ 426.374 iso/iso-rough/tf5-r3.png
+ 679.807 iso/iso-rough/tf7-r1.png
+ 675.341 iso/iso-rough/tf7-r2.png
+ 372.373 iso/iso-rough/tf7-r3.png
+ 942.221 iso/iso-rough/tf9-r1.png
+ 958.759 iso/iso-rough/tf9-r2.png
+ 937.854 iso/iso-rough/tf9-r3.png
+  12.489 iso/newiso/iso-s1023-10.png
+-258.317 iso/newiso/iso-s1023-12.png
+-310.247 iso/newiso/iso-s1023-14.png
+ 296.203 iso/newiso/iso-s1023-2.png
+ -94.277 iso/newiso/iso-s1023-4.png
+ 172.950 iso/newiso/iso-s1023-6.png
+ 224.386 iso/newiso/iso-s1023-8.png
+-356.596 iso/newiso/iso-s2013-10.png
+   9.675 iso/newiso/iso-s2013-12.png
+-273.632 iso/newiso/iso-s2013-14.png
+   6.343 iso/newiso/iso-s2013-2.png
+ 123.971 iso/newiso/iso-s2013-4.png
+-130.299 iso/newiso/iso-s2013-8.png
+ 863.438 iso/newiso/iso-s3021-10.png
+ 908.712 iso/newiso/iso-s3021-11.png
+ 744.457 iso/newiso/iso-s3021-12.png
+ 211.963 iso/newiso/iso-s3021-13.png
+ 212.906 iso/newiso/iso-s3021-14.png
+ 325.073 iso/newiso/iso-s3021-3.png
+ 535.966 iso/newiso/iso-s3021-4.png
+ 875.135 iso/newiso/iso-s3021-5.png
+ 800.211 iso/newiso/iso-s3021-6.png
+ 721.005 iso/newiso/iso-s3021-7.png
+ 222.602 iso/newiso/iso-s3021-8.png
+ 266.852 iso/newiso/iso-s3021-9.png
+1097.580 iso/newiso/iso-s31359-10.png
+1062.091 iso/newiso/iso-s31359-11.png
+1086.427 iso/newiso/iso-s31359-12.png
+ 934.238 iso/newiso/iso-s31359-13.png
+ 927.760 iso/newiso/iso-s31359-14.png
+ 703.817 iso/newiso/iso-s31359-3.png
+1182.861 iso/newiso/iso-s31359-4.png
+1237.142 iso/newiso/iso-s31359-5.png
+1192.148 iso/newiso/iso-s31359-6.png
+1117.469 iso/newiso/iso-s31359-7.png
+1119.015 iso/newiso/iso-s31359-8.png
+1045.019 iso/newiso/iso-s31359-9.png
+1033.001 iso/newiso/iso-s6848-10.png
+1116.221 iso/newiso/iso-s6848-11.png
+1151.448 iso/newiso/iso-s6848-12.png
+1112.842 iso/newiso/iso-s6848-13.png
+1247.683 iso/newiso/iso-s6848-14.png
+ 489.521 iso/newiso/iso-s6848-3.png
+ 571.880 iso/newiso/iso-s6848-4.png
+ 558.396 iso/newiso/iso-s6848-5.png
+ 748.141 iso/newiso/iso-s6848-6.png
+ 781.901 iso/newiso/iso-s6848-7.png
+ 691.401 iso/newiso/iso-s6848-8.png
+ 881.520 iso/newiso/iso-s6848-9.png
+ 502.005 iso/old/tf3.png
+ 278.580 iso/old/tf5.png
+ 586.393 iso/old/tf7.png
+ 797.863 iso/old/tf9.png
+ 483.742 iso/pepper/tf3p.png
+ 534.863 iso/pepper/tf3p4.png
+ 419.922 iso/pepper/tf3pp.png
+ 560.240 iso/pepper/tf3pp4.png
+ 292.780 iso/pepper/tf5p.png
+ 223.632 iso/pepper/tf5pp.png
+ 694.941 iso/pepper/tf7p.png
+ 629.798 iso/pepper/tf7pp.png
+1071.529 iso/pepper/tf9p.png
+1064.587 iso/pepper/tf9p4.png
+ 918.064 iso/pepper/tf9pp.png
+1060.247 iso/pepper/tf9pp4.png
