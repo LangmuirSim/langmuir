@@ -117,9 +117,9 @@ def shrink(image, scale_x=0.0, scale_y=0.0):
     """
     width, height = image.shape
     if scale_x <= 0.0 or scale_x > 1.0:
-        scale_x = random.uniform(0.25, 1.0)
+        scale_x = random.uniform(0.2, 1.0)
     if scale_y <= 0.0 or scale_y > 1.0:
-        scale_y = random.uniform(0.25, 1.0)
+        scale_y = random.uniform(0.2, 1.0)
     resized = misc.imresize(image, (int(scale_x * width), int(scale_y * height)) )
     # now we need to tile this thing, so work out how many repeats are needed
     mult_x = math.ceil(1.0 / scale_x)
@@ -154,9 +154,9 @@ def enlarge(image, zoom_x=0.0, zoom_y=0.0):
     """
     width, height = image.shape
     if zoom_x < 1.0:
-        zoom_x = random.random() + 1.0
+        zoom_x = 2.0*random.random() + 1.0
     if zoom_y < 1.0:
-        zoom_y = random.random() + 1.0
+        zoom_y = 2.0*random.random() + 1.0
     child = ndimage.interpolation.zoom(image, (zoom_x, zoom_y) )
 
     # now take a slice of width and height out of this thing
