@@ -14,7 +14,8 @@ from scipy import ndimage, misc
 from skimage import morphology
 import numpy as np
 from PIL import Image
-
+import itertools
+import time
 
 # our code
 import modify
@@ -96,10 +97,7 @@ def load_image(filename, make3D=False):
     """
     pil_img = Image.open(filename)
     image = misc.fromimage(pil_img.convert("L"))
-
-    if make3D:
-        return as_ndarray_3D(image)
-    return as_ndarray_2D(image)
+    return image
 
 def load_npy(filename, make3D=False):
     """
@@ -114,10 +112,7 @@ def load_npy(filename, make3D=False):
     :return: :py:class:`numpy.ndarray`
     """
     image = np.load(filename)
-
-    if make3D:
-        return as_ndarray_3D(image)
-    return as_ndarray_2D(image)
+    return image
 
 # from http://scipy-lectures.github.io/advanced/image_processing/
 def disk_structure(n):
@@ -254,125 +249,15 @@ def interface_size(image, periodic=False):
             interface += np.sum(np.where((np.roll(image, shift=-1, axis=dim) - image) > 0, 1, 0))
     else:
         for dim in range(image.ndim):
-            s = [Ellipsis] * dim + [slice(+1, None)] + [Ellipsis] * (image.ndim - dim - 1)
+            s = [slice(+1, None) if i == dim else Ellipsis for i in range(image.ndim)]
             interface += np.sum(np.where((np.roll(image, shift=+1, axis=dim) - image) > 0, 1, 0)[s])
 
-            s = [Ellipsis] * dim + [slice(None, -1)] + [Ellipsis] * (image.ndim - dim - 1)
+            s = [slice(None, -1) if i == dim else Ellipsis for i in range(image.ndim)]
             interface += np.sum(np.where((np.roll(image, shift=-1, axis=dim) - image) > 0, 1, 0)[s])
 
     return interface
 
-def interface_size_old(image):
-    """
-    Calculate the interfacial area (length for 2D images) between the phases.
-
-    :param image: data
-    :type image: :py:class:`numpy.ndarray`
-
-    :return: total length of interface (in pixels)
-    :rtype: int
-    """
-    ndims = len(image.shape)
-
-    if ndims == 2:
-        # loop through the image to count the number of interfaces
-        interface = 0
-
-        # we only need to count sites to the left or above the current site
-        nx = [-1,  0]
-        ny = [ 0, -1]
-        nbrs = len(nx)
-
-        width, height = image.shape
-        for x in range(width):
-            for y in range(height):
-                if image[x,y] == 0:
-                    for nbr in range(nbrs):
-                        xn = x + nx[nbr]
-                        yn = y + ny[nbr]
-                        if xn < 0 or yn < 0:
-                            continue
-                        if image[xn,yn] > 0:
-                            interface += 1
-                else:
-                    for nbr in range(nbrs):
-                        xn = x + nx[nbr]
-                        yn = y + ny[nbr]
-                        if xn < 0 or yn < 0:
-                            continue
-                        if image[xn,yn] == 0:
-                            interface += 1
-
-        return interface
-
-    elif ndims == 3:
-        interface = 0
-
-        nx = [-1, 0, 0]
-        ny = [ 0,-1, 0]
-        nz = [ 0, 0,-1]
-        nbrs = len(nx)
-
-        width, height, depth = image.shape
-        for x in range(width):
-            for y in range(height):
-                for z in range(depth):
-                    if image[x,y,z] == 0:
-                        for nbr in range(nbrs):
-                            xn = x + nx[nbr]
-                            yn = y + ny[nbr]
-                            zn = z + nz[nbr]
-                            if xn < 0 or yn < 0 or zn < 0:
-                                continue
-                            if image[xn,yn,zn] > 0:
-                                interface += 1
-                    else:
-                        for nbr in range(nbrs):
-                            xn = x + nx[nbr]
-                            yn = y + ny[nbr]
-                            zn = z + nz[nbr]
-                            if xn < 0 or yn < 0 or zn < 0:
-                                continue
-                            if image[xn,yn,zn] == 0:
-                                interface += 1
-        return interface
-
-    raise RuntimeError('interface_size: invalid dimension!')
-
-def test_interface_size():
-    """
-    Function to compare interface_size_old and interface_size
-    1.  timing (old version, size=32x32x32) 4.78119206429 seconds
-    2.  timing (new version, size=32x32x32) 0.32835388187 seconds
-    """
-    import timeit
-
-    xdim = np.random.randint(16, 32)
-    ydim = np.random.randint(16, 32)
-    zdim = np.random.randint( 1, 16)
-
-    global image
-    image = np.random.random((xdim, ydim, zdim))
-    image = (image > image.mean()).astype(int)
-    image[image == 1] = 255
-
-    t1 = timeit.timeit('interface_size_old(image)', setup='from __main__ import interface_size_old, image', number=32)
-    t2 = timeit.timeit('interface_size(image)', setup='from __main__ import interface_size, image', number=32)
-
-    isize1 = interface_size(image)
-    isize2 = interface_size_old(image)
-
-    print 'xdim', xdim
-    print 'ydim', ydim
-    print 'zdim', zdim
-
-    print 'iterface_size_1', isize1, t1
-    print 'iterface_size_2', isize2, t2
-    print 'speedup:', t1/t2
-
-    assert isize1 == isize2
-
-def transfer_distance(original):
+def transfer_distance(original, axis=0, rot90=1):
     """
     Calculate the connectivity of the two phases to the side electrodes and
     the average "transfer distance" (i.e., the shortest distance a charge carrier
@@ -384,101 +269,105 @@ def transfer_distance(original):
     :param original: data
     :type original: :py:class:`numpy.ndarray`
 
+    :param axis: transfer axis (x=0, y=1, z=2)
+    :type axis: int
+
+    :param rot90: rotate image
+    :type rot90: int
+
     :return: average transfer distance and connectivity fraction (phase 1 and then phase 2)
     :rtype: tuple(float)
     """
-
     # the image will come in with row-major order (i.e., numpy)
     # but we're thinking of this as a graphic, with column, row
-    image = np.rot90(original)
-    width, height = image.shape
+    if rot90 != 0:
+        image = np.rot90(original, 1)
+    else:
+        image = original
 
     # initialize the distance matrix
     # In NumPy 1.8 (not used)   distances.full( (width, height), -1.0)
-    distances = np.empty(width*height)
+    distances = np.empty_like(image, dtype=np.float64)
     distances.fill(-1.0)
-    distances.shape = (width, height)
 
     # ok, so it's a deque not a queue..
     # .. it still works for our purposes and Python doesn't have a queue
     work = deque()
-    nx = [-1, 1,  0, 0]
-    ny = [ 0, 0, -1, 1]
-    nbrs = len(nx)
 
-    # we make two passes.
-    # first, from the top left for the white (>0) phase
-    for y in range(height):
-        if image[0,y] > 0:
-            # set the distance and add to the work queue
-            distances[0,y] = 0
-            work.append( (0, y, 255) )
+    # begin index magic
+    L_index = [+0 if i == axis else slice(None) for i in range(image.ndim)] # slice along "left" edge of image
+    R_index = [-1 if i == axis else slice(None) for i in range(image.ndim)] # slice along "right" edge of image
 
-    # now from the bottom right for the black phase
-    for y in range(height - 1, 0, -1):
-        if image[width - 1, y] == 0:
-            # set the distance and add to the work queue
-            distances[width - 1, y] = 0
-            # push x,y, phase onto the queue
-            work.append( (width - 1, y, 0) )
+    L_white_index = np.where(image[L_index] != 0) # sites that are white along "left" edge
+    R_black_index = np.where(image[R_index] == 0) # sites that are black along "right" edge
 
-    # go through the work queue
+    # alter slicing index so we can set the correct distances to zero
+    j = 0
+    for i in range(image.ndim):
+        if i == axis:
+            pass
+        else:
+            L_index[i] = L_white_index[j]
+            R_index[i] = R_black_index[j]
+            j += 1
+
+    distances[L_index] = 0
+    distances[R_index] = 0
+
+    # alter slicing index so we can update the work queue
+    for i in range(image.ndim):
+        if i == axis:
+            L_index[i] = itertools.repeat(0)
+            R_index[i] = itertools.repeat(image.shape[i] - 1)
+        else:
+            pass
+    L_index.append(itertools.repeat(255))
+    R_index.append(itertools.repeat(0))
+
+    # update work queue
+    work.extend(zip(*L_index))
+    work.extend(zip(*R_index))
+
+    # neighbor list
+    neighbors = np.zeros((2 * image.ndim, image.ndim), dtype=np.int32)
+    for i in range(image.ndim):
+        neighbors[2 * i + 0, i] = +1
+        neighbors[2 * i + 1, i] = -1
+
+    # compute distance matrix
     while work:
-        x, y, phase = work.popleft()
-        currentDist = distances[x, y]
-        # check neighbors
-        for nbr in range(nbrs):
-            xn = x + nx[nbr]
-            yn = y + ny[nbr]
-            if xn < 0 or xn > width -1 or yn < 0 or yn > height - 1:
-                continue
-            # check the phase of this neighbor
-            if image[xn, yn] == phase:
-                if distances[xn,yn] == - 1:
+        work_item = work.popleft()
+        pixel = work_item[:-1]
+        phase = work_item[-1]
+        currentDist = distances[pixel]
+
+        shift = pixel + neighbors
+        for i in range(image.ndim):
+            shift = shift[(shift[:,i] >= 0) & (shift[:,i] < image.shape[i])]
+
+        for indx in shift:
+            indx = tuple(indx)
+
+            if image[indx] == phase:
+                if distances[indx] == -1:
                     # first visit
-                    distances[xn,yn] = currentDist + 1
-                    work.append( (xn, yn, phase) )
-                elif distances[xn,yn] > (currentDist + 1):
+                    distances[indx] = currentDist + 1
+                    work.append(indx + (phase,))
+
+                elif distances[indx] > (currentDist + 1):
                     # somehow found a shorter path
-                    distances[xn,yn] = currentDist + 1
+                    distances[indx] = currentDist + 1
 
-    # compute the average distances for each phase
-    avgDistance1 = 0.0
-    avgDistance2 = 0.0
-    count1 = 0
-    count2 = 0
-    unconnectedCount1 = 0
-    unconnectedCount2 = 0
-    for x in range(width):
-        for y in range(height):
-            if image[x,y] != 0:
-                # white phase
-                if distances[x,y] >= 0.0:
-                    avgDistance1 += distances[x,y]
-                    count1 += 1
-                else:
-                    unconnectedCount1 += 1
-            else:
-                if distances[x,y] >= 0.0:
-                    avgDistance2 += distances[x,y]
-                    count2 += 1
-                else:
-                    unconnectedCount2 += 1
+    avg1 = np.average(distances[(image != 0) & (distances >= 0)])
+    avg2 = np.average(distances[(image == 0) & (distances >= 0)])
 
-    if count1 != 0:
-        avgDistance1 = avgDistance1 / float(count1)
-    else:
-        avgDistance1 = 0
-    phase1 = np.count_nonzero(image)
-    connectivity1 = 1.0 - float(unconnectedCount1) / float(phase1)
+    #std1 = np.std(distances[(image != 0) & (distances >= 0)])
+    #std2 = np.std(distances[(image == 0) & (distances >= 0)])
 
-    if count2 != 0:
-        avgDistance2 = avgDistance2 / float(count2)
-    else:
-        avgDistance2 = 0
-    connectivity2 = 1.0 - float(unconnectedCount2) / float(width * height - phase1)
+    con1 = np.average(distances[image != 0] >= 0)
+    con2 = np.average(distances[image == 0] >= 0)
 
-    return avgDistance1, connectivity1, avgDistance2, connectivity2
+    return avg1, con1, avg2, con2
 
 def bottleneck_distribution(image):
     """
