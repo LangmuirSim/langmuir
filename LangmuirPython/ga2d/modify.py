@@ -131,9 +131,14 @@ def shrink(image, scale_x=0.0, scale_y=0.0):
     start_x = 0
     if tiled_width > width:
         start_x = random.randrange(tiled_width - width)
+        if start_x < 0:
+            start_x = 0
+
     start_y = 0
     if tiled_height > height:
         start_y = random.randrange(tiled_height - height)
+        if start_y < 0:
+            start_y = 0
     return tiled[ start_x:start_x+256, start_y:start_y+256 ]
 
 def enlarge(image, zoom_x=0.0, zoom_y=0.0):
@@ -164,9 +169,14 @@ def enlarge(image, zoom_x=0.0, zoom_y=0.0):
     start_x = 0
     if child_width > width:
         start_x = random.randrange(child_width - width)
+        if start_x < 0:
+            start_x = 0
+            
     start_y = 0
     if child_height > height:
         start_y = random.randrange(child_height - height)
+        if start_y < 0:
+            start_y = 0
     return child[ start_x:start_x+256, start_y:start_y+256 ]
 
 def pepper(image, phase=0, count=0, percent=None, brush='point', overlap=False, maxTries=1e9):
