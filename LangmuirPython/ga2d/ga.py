@@ -342,6 +342,10 @@ if __name__ == '__main__':
                     phase = 255
                 child = modify.grow_ndimage(image, phase)
                 image = child
+            if image.shape != (256, 256):
+                print "Shape error: ", handle, mutation
+                # don't save this mutation, or we'll die later
+                continue
             # shift? - not useful
             # swap slices? - not sure if this is useful
             misc.imsave(handle, image)
