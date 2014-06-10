@@ -53,6 +53,8 @@ def create_parser():
     parser.add_argument(dest='diversity', default=0.02, type=float, nargs='?',
         metavar='diversity', help='% of pixels that need to differ')
 
+    parser.add_argument('--rescore', action='store_true', help='rescore initial files')
+
     return parser
 
 def get_arguments(args=None):
@@ -98,8 +100,8 @@ def score(filename):
     # connectivity
     td1, connect1, td2, connect2 = analyze.transfer_distance(image)
 
-#    spots = np.logical_xor( image, ndimage.binary_erosion(image, structure=np.ones((2,2))) )
-#    erosion = np.count_nonzero(spots)
+    spots = np.logical_xor( image, ndimage.binary_erosion(image, structure=np.ones((2,2))) )
+    erosion = np.count_nonzero(spots)
     spots = np.logical_xor( image, ndimage.binary_dilation(image, structure=np.ones((2,2))) )
     dilation = np.count_nonzero(spots)
 
@@ -110,11 +112,12 @@ def score(filename):
     ps = fraction*(1.0-fraction)
 
     # from simulations with multivariate nonlinear regression
-    return (-1.96343e8) + (-1309.58)*math.pow(ads, -1) + (-788.089)*math.pow(ads,0.25) + \
-           2.34295e7*math.tanh(14.5*(connect1 + 0.4)) + 1.72915e8*math.tanh(14.5*(connect2 + 0.4)) \
-           + 2187.24*connect1*connect2 \
-           + (-4.73541)*td1 + (-5.14289)*td2 + 5.01303e7*ps**8 \
-           + 0.104485*dilation
+    return (-1.98566e8) + (-1650.14)/ads + (-680.92)*math.pow(ads,0.25) + \
+           1.56236e7*math.tanh(14.5*(connect1 + 0.4)) + 1.82945e8*math.tanh(14.5*(connect2 + 0.4)) \
+           + 2231.32*connect1*connect2 \
+           + (-4.72813)*td1 + (-4.86025)*td2 \
+           + 3.79109e7*ps**8 \
+           + 0.0540293*dilation + 0.0700451*erosion
 
 def score_filenames(filenames, pool=None):
     """
@@ -181,7 +184,7 @@ if __name__ == '__main__':
                 scores.append( (float(fileScore), filename) )
 
     # if needed, score the initial population
-    if len(filenames) != len(scores):
+    if opts.rescore or len(filenames) != len(scores):
         print "Re-scoring Initial Files"
         scores = score_filenames(filenames, pool)
         print "Caching initial scores"
