@@ -343,7 +343,7 @@ def test_interface_size():
     """
     Function to compare interface_size_old and interface_size
     1.  timing (old version, size=32x32x32) 4.78119206429 seconds
-    2.  timing (new version, size=32x32x32) 0.32835388187 seconds
+    2.  timing (new version, size=32x32x32) 0.32835388187 seconds (~15x speedup)
     """
     import timeit
 
