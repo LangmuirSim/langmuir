@@ -15,6 +15,18 @@ macro(link_boost TARGET)
 endmacro(link_boost)
 
 ################################################################################
+# Library : QGLViewer
+macro(find_qglviewer)
+    find_package(QGLViewer)
+    include_directories(${QGLViewer_INCLUDE_DIR})
+endmacro(find_qglviewer)
+
+macro(link_qglviewer TARGET)
+    target_link_libraries(${TARGET} ${QGLViewer_LIBRARIES})
+    add_definitions(${QGLViewer_DEFINITIONS})
+endmacro(link_qglviewer)
+
+################################################################################
 # Library : OpenCL
 macro(find_opencl)
     set(OPENCL_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/langmuirCore/include
