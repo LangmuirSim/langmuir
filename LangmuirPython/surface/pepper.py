@@ -136,7 +136,10 @@ if __name__ == '__main__':
     stub, ext = lm.common.splitext(opts.ofile)
     handle = lm.common.format_output(stub=stub, name='', ext=ext)
     print 'saved: %s' % handle
-    lm.surface.save(handle, image)
+    if ext in ['.png', '.jpg', '.jpeg']:        
+        lm.surface.save(handle, np.rot90(image, 1))
+    else:
+        lm.surface.save(handle, image)
 
     if opts.show:
         grid = lm.grid.Grid(*image.shape)
