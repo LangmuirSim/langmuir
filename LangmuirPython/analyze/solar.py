@@ -39,6 +39,9 @@ def create_parser():
 
     parser.add_argument('--shift', type=float, default=1.5, metavar='float',
         help='voltage shift')
+    
+    parser.add_argument('--guess', type=float, default=None, metavar='float',
+        help='v_oc guess')
 
     parser.add_argument('--recycle', action='store_true', default=False,
         help='recycle current-opt paramters as initial guess for power fit')
@@ -79,6 +82,7 @@ def get_arguments(args=None):
     print fmt % ('--pkls'   , len(opts.pkls))
     print fmt % ('--mode'   , opts.mode)
     print fmt % ('--shift'  , opts.shift)
+    print fmt % ('--guess'  , opts.guess)
     print fmt % ('--order'  , opts.order)
     print fmt % ('--kind'   , opts.kind)
     print fmt % ('--recycle', opts.recycle)
@@ -104,7 +108,7 @@ if __name__ == '__main__':
 
     iv = lm.ivcurve.IVCurveSolar.load_pkls(opts.pkls)
     iv.calculate(mode=opts.mode, recycle=opts.recycle, order=opts.order,
-        kind=opts.kind, k=opts.order)
+        kind=opts.kind, k=opts.order, guess=opts.guess)
     print iv
 
     handle = lm.common.format_output(ext='pkl', name='solar', stub=opts.stub)
