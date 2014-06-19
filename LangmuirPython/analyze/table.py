@@ -27,6 +27,8 @@ def create_parser():
 
 def get_arguments(args=None):
     parser = create_parser()
+    parser.add_argument('--convert', action='store_true',
+        help='convert mA/cm**2 to |A/m**2|, mW/cm**2 to |W/m**2|')
     opts = parser.parse_args(args)
     return opts
 
@@ -53,6 +55,12 @@ columns = [
     'r_mp',
     'fill',
 ]
+
+compute = {}
+compute['j_sc'] = lambda x : -10.0 * x
+compute['r_th'] = lambda x : -10.0 * x
+compute['j_mp'] = lambda x : -10.0 * x
+compute['r_mp'] = lambda x : -10.0 * x
 
 def sort_table(table):
     table = table.set_index('system')
@@ -95,5 +103,9 @@ if __name__ == '__main__':
 
     table = pd.DataFrame(table)
     table = sort_table(table)
+    
+    if opts.convert:
+        for c in compute.keys():
+            table[c] = table[c].apply(compute[c])
 
     table.to_csv('table.csv', index=False)
