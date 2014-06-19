@@ -15,6 +15,7 @@ import pandas as pd
 import collections
 import argparse
 import os
+import re
 
 desc = """
 Gather output from pkl files into table.
@@ -33,7 +34,7 @@ def get_arguments(args=None):
     return opts
 
 def extract_system(pkl, data):
-    return os.path.relpath(pkl, work)
+    return re.sub('/?run\.\d+.*$', '', os.path.relpath(pkl, work))
     return os.path.relpath(lm.find.slice_system(pkl), work)
 
 extract = {}
