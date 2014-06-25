@@ -16,6 +16,7 @@ import numpy as np
 from PIL import Image
 import itertools
 import time
+import os
 
 # our code
 import modify
@@ -23,17 +24,6 @@ import modify
 desc = """
 Image analysis for various "descriptors" of morphology performance. Allows rapid GA evolution of morphology images.
 """
-
-def create_parser():
-    parser = argparse.ArgumentParser()
-    parser.description = desc
-
-    return parser
-
-def get_arguments(args=None):
-    parser = create_parser()
-    opts = parser.parse_args(args)
-    return opts
 
 def as_ndarray_3D(obj):
     """
@@ -465,16 +455,73 @@ columns = [
 ]
 titles, keys, fmts = zip(*columns)
 
+def create_parser():
+    parser = argparse.ArgumentParser()
+    parser.description = desc
+
+    parser.add_argument(dest='images', nargs='*', metavar='image.png',
+        help='png files to analyze')
+
+    parser.add_argument('--output', default=None, help='output file name')
+
+    parser.add_argument('-r', action='store_true',
+        help='search for images recursivly')
+
+    return parser
+
+def get_arguments(args=None):
+    parser = create_parser()
+    opts = parser.parse_args(args)
+
+    if not opts.images:
+        possible_ext = ['.png', '.PNG']
+
+        work = os.getcwd()
+        if opts.r:
+            for root, dirs, files in os.walk(work):
+                for f in files:
+                    stub, ext = os.path.splitext(f)
+                    if ext in possible_ext:
+                        opts.images.append(os.path.join(root, f))
+        else:
+            root, dirs, files = os.walk(work).next()
+            for f in files:
+                stub, ext = os.path.splitext(f)
+                if ext in possible_ext:
+                    opts.images.append(os.path.join(root, f))
+
+    if not opts.images:
+        print >> sys.stderr, 'could not find any png files! (use -r ???)'
+        sys.exit(-1)
+    else:
+        for img in opts.images:
+            if not os.path.exists(img):
+                print >> sys.stderr, 'file does not exist:\n\t%s' % img
+                sys.exit(-1)
+        opts.images = [os.path.relpath(i) for i in opts.images]
+
+    return opts
+
 if __name__ == '__main__':
+    work = os.getcwd()
+    opts = get_arguments()
+
+    titles = ' '.join(['%8s' % t for t in titles])
+
     # create a thread pool
     pool = Pool()
 
-    print ' '.join(['%8s' % t for t in titles])
-
     if pool is None:
-        output = map(analyze, sys.argv[1:])
+        output = map(analyze, opts.images)
     else:
-        output = pool.map(analyze, sys.argv[1:])
+        output = pool.map(analyze, opts.images)
 
-    for line in output:
-        print line
+    if opts.output is None:
+        print titles
+        for line in output:
+            print line
+    else:
+        with open(opts.output, 'w') as handle:
+            print >> handle, titles
+            for line in output:
+                print >> handle, line
