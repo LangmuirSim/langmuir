@@ -31,6 +31,12 @@ def create_parser():
 
     parser.add_argument('-r', action='store_true',
         help='search for files recursivly')
+    
+    parser.add_argument('--ycol', default='drain:current', type=str,
+                        help='ycolumn to plot')    
+    
+    parser.add_argument('--legend', action='store_true', help='show legend')
+    parser.add_argument('--zoom', default=0.05, type=float, help='zoom factor')
 
     parser.add_argument('--show', action='store_true', help='show plot')
     parser.add_argument('--save', action='store_true', help='save plot')
@@ -64,13 +70,14 @@ if __name__ == '__main__':
     work = os.getcwd()
     opts = get_arguments()
 
-    y_col = 'drain:current'
+    y_col = opts.ycol
 
     cmap = mpl.cm.get_cmap('spectral')
     colors = [cmap(val) for val in np.linspace(0, 1, len(opts.pkls))]
 
     fig, ax1 = lm.plot.subplots(1, 1, b=0.75, l=1.5, r=1.5)
     xmax = 1
+    ymax = 0
 
     handles, labels = [], []
     for i, pkl in enumerate(opts.pkls):
@@ -83,17 +90,22 @@ if __name__ == '__main__':
         handles.append(plt.Rectangle((0, 0), 1, 1, fc=colors[i], lw=0))
         labels.append('sim%d' % (i + 1))
         xmax = max(xmax, data.index[-1])
+        ymax = max(ymax, data.ix[int(data.index.size * 0.10):, y_col].max())
+    ymax = abs(ymax)
 
-    plt.legend(handles, labels, prop=dict(size='xx-small'), loc='upper left',
-        bbox_transform=ax1.transAxes, bbox_to_anchor=(1, 1))
+    if opts.legend:
+        plt.legend(handles, labels, prop=dict(size='xx-small'),
+                   loc='upper left', bbox_transform=ax1.transAxes,
+                   bbox_to_anchor=(1, 1))
 
-    plt.ylim(-0.5, 0.5)
+    plt.ylim(-ymax, ymax)
     plt.xlim(0, xmax)
+    lm.plot.zoom(l=0, r=0, factor=opts.zoom)
     plt.ticklabel_format(scilimits=(-4, 4))
     plt.tick_params(labelsize='small')
     lm.plot.maxn_locator(x=5, y=5)
     plt.xlabel('time (ps)', size='small')
-    plt.ylabel('nA', size='small')
+    plt.ylabel(y_col, size='small')
 
     if opts.save:
         handle = lm.common.format_output(stub=opts.stub, name='rdf',
