@@ -80,7 +80,7 @@ def gblur_and_threshold(image, radius=2):
     :rtype: :py:class:`numpy.ndarray`
     """
     output = ndimage.gaussian_filter(image, sigma=radius)
-    return image > image.mean()
+    return output > output.mean()
 
 def ublur_and_threshold(image, radius=2):
     """
@@ -410,7 +410,7 @@ def add_noise(image):
     :rtype: :py:class:`numpy.ndarray`
     """
     noise = np.random.random( image.shape )
-    return modify.blend_and_threshold(image, noise)
+    return blend_and_threshold(image, noise)
 
 def imshow(image):
     """
@@ -499,10 +499,10 @@ if __name__ == '__main__':
         output = roughen(image1)
         misc.imsave(opts.ifile1, output)
     elif opts.type == 'noise':
-        output = noise(image1)
+        output = add_noise(image1)
         misc.imsave(opts.ifile1, output)
     elif opts.type == 'fracgrow':
-        output = grow(image1)
+        output = grow_ndimage(image1)
         misc.imsave(opts.ifile1, output)
 
 
