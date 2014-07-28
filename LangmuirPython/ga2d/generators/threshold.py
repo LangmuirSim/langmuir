@@ -21,6 +21,10 @@ desc = """
 Threshold an image.
 """
 
+txt_exts = ['.txt']
+img_exts = ['.png', '.jpg', '.jpeg']
+all_exts = txt_exts + img_exts
+
 def find_inputs(work, exts):
     """
     Search for input files.
@@ -135,12 +139,57 @@ def imshow(image, **kwargs):
     plt.tight_layout()
     plt.show()
 
+def load_ascii(handle, shape=None, astype=np.float64, **kwargs):
+    """
+    Load data from txt file.
+    """
+    # load the data
+    image = np.loadtxt(handle, **kwargs)
+
+    # reshape the data as if NxN
+    if shape is None and not len(image.shape) == 2:
+        try:
+            size = int(np.sqrt(image.size))
+            image = np.reshape(image, (size, size))
+        except ValueError:
+            raise RuntimeError, 'can not reshape data'
+    else:
+        image = np.reshape(image, shape)
+
+    return image.astype(astype)
+
+def load_image(handle, shape=None, astype=np.float64):
+    """
+    Load data from image file.
+    """
+    pil_img = Image.open(handle)
+    image = misc.fromimage(pil_img.convert("L"))
+
+    if not shape is None:
+        image = np.reshape(image, shape)
+
+    return image.astype(astype)
+
+def load(handle, astype=np.float64):
+    """
+    Load data from file based on ext.
+    """
+    stub, ext = os.path.splitext(handle)
+
+    if ext in img_exts:
+        return load_image(handle, astype=astype)
+
+    if ext in txt_exts:
+        return load_ascii(handle, astype=astype)
+
+    raise RuntimeError('unknown file format: %s' % ext)
+
 if __name__ == '__main__':
     work = os.getcwd()
     opts = get_arguments()
 
     for fname in opts.images:
-        image = misc.fromimage(Image.open(fname).convert("L"))
+        image = load(fname)
         
         if opts.lmap:
             image = linear_mapping(image, 0.0, 1.0)
@@ -158,10 +207,11 @@ if __name__ == '__main__':
         stub, ext = os.path.splitext(fname)
         
         if opts.mean:
-            oname = '{stub}_mean{ext}'.format(stub=stub, ext=ext)
+            oname = '{stub}_mean.png'.format(stub=stub)
         
         if opts.percentile:
-            oname = '{stub}_percentile_{value:.0f}{ext}'.format(stub=stub,
-                ext=ext, value=opts.percentile * 100)
+            oname = '{stub}_percentile_{value:.0f}.png'.format(stub=stub,
+                value=opts.percentile * 100)
         
-        misc.imsave(oname, image)
+	if not opts.show: 
+            misc.imsave(oname, image)
