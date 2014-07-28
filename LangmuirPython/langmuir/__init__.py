@@ -71,3 +71,5 @@ if not plt is None:
 
 if not vtk is None:
     import vtkutils
+
+import qaverage
