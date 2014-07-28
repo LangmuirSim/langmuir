@@ -409,7 +409,7 @@ def add_noise(image):
     :return: modified image data
     :rtype: :py:class:`numpy.ndarray`
     """
-    noise = np.random.random( image.shape )
+    noise = np.random.random(image.shape) * 255
     return blend_and_threshold(image, noise)
 
 def imshow(image):
