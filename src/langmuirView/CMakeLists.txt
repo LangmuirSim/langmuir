@@ -71,6 +71,7 @@ if(Qt5Core_FOUND AND OPENGL_FOUND AND NOT USE_QT4)
     include_directories(${langmuirView_SOURCE_DIR}/include)
     include_directories(${QGLViewer_SOURCE_DIR}/QGLViewerVRender)
     include_directories(${QGLViewer_SOURCE_DIR}/QGLViewer)
+    include_directories(${QGLViewer_SOURCE_DIR})
 
     include_directories(${OPENGL_INCLUDE_DIRS})
     include_directories(${CMAKE_CURRENT_BINARY_DIR})

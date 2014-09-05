@@ -2,6 +2,7 @@
 #define LANGMUIRVIEWER_H
 
 #include <QGLViewer/qglviewer.h>
+#include <QGLViewer/manipulatedCameraFrame.h>
 #include <QErrorMessage>
 #include <QColorDialog>
 #include <QMatrix4x4>
