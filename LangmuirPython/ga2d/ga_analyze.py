@@ -161,7 +161,7 @@ def granulometry(image, sizes=None, structure=disk_structure):
                structure=structure(n)).sum() for n in sizes]
     return granulo
 
-def average_domain_size(image):
+def average_domain_size(image, full=False):
     """
     Calculate the average domain size for the image (for the "true" phase)
 
@@ -183,7 +183,11 @@ def average_domain_size(image):
     imax = ndimage.measurements.maximum(dists, labels,
         index=np.arange(1, nb_labels + 1))
     # return the mean of the max array
-    return np.mean(imax), np.std(imax)
+    
+    if full:
+        return np.mean(imax), np.std(imax), labels, nb_labels, dists, imax
+    else:
+        return np.mean(imax), np.std(imax)
 
 def box_counting_dimension(image):
     """
