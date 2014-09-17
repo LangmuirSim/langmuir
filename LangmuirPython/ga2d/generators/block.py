@@ -139,7 +139,7 @@ def get_arguments(args=None):
 
     return opts
 
-def block(image, left=None, right=None, size=16, lyi=None, lyf=None, ryi=None, ryf=None):
+def makeBlock(image, left=None, right=None, size=16, lyi=None, lyf=None, ryi=None, ryf=None):
     """
     Paint blocking layer(s) over image on left and right side.
 
@@ -199,7 +199,7 @@ if __name__ == '__main__':
     image[image <= 127.5] = 0
 
     # apply blocking
-    image = block(image, left=opts.left, right=opts.right, size=opts.size,
+    image = makeBlock(image, left=opts.left, right=opts.right, size=opts.size,
         lyi=opts.lyi, lyf=opts.lyf, ryi=opts.ryi, ryf=opts.ryf)
 
     # show image
