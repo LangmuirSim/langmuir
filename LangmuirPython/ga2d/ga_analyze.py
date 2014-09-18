@@ -163,10 +163,20 @@ def granulometry(image, sizes=None, structure=disk_structure):
 
 def average_domain_size(image, full=False):
     """
-    Calculate the average domain size for the image (for the "true" phase)
+    Calculate the average domain size for the image (for the "true" phase).
+    Really, it returns the avg/std (over labeled regions) of the distance
+    to a boundary.  The distance average is over the "max of mins".  This
+    means, first a minimum distance is calculated to the boundary for each
+    region.  Then the max of *those* distances is found for each region.
+    Finally, the average of those max's is taken.  Full output returns
+    the avg, the std, a labeled version of the image, the number of unique
+    regions, the min-distance matrix, and the max-distance list.
 
     :param image: data
     :type image: :py:class:`numpy.ndarray`
+    
+    :param full: returns more output
+    :type full: bool
 
     :return: mean and standard deviation of domain sizes
     :rtype: tuple(int)
@@ -251,7 +261,7 @@ def interface_size(image, periodic=False):
 
     return interface
 
-def transfer_distance(original, axis=0, rot90=1):
+def transfer_distance(original, axis=0, rot90=1, full=False):
     """
     Calculate the connectivity of the two phases to the side electrodes and
     the average "transfer distance" (i.e., the shortest distance a charge carrier
@@ -268,6 +278,9 @@ def transfer_distance(original, axis=0, rot90=1):
 
     :param rot90: rotate image
     :type rot90: int
+    
+    :param full: return more output
+    :type full: bool
 
     :return: average transfer distance and connectivity fraction (phase 1 and then phase 2)
     :rtype: tuple(float)
@@ -355,13 +368,15 @@ def transfer_distance(original, axis=0, rot90=1):
     avg1 = np.average(distances[(image != 0) & (distances >= 0)])
     avg2 = np.average(distances[(image == 0) & (distances >= 0)])
 
-    #std1 = np.std(distances[(image != 0) & (distances >= 0)])
-    #std2 = np.std(distances[(image == 0) & (distances >= 0)])
-
     con1 = np.average(distances[image != 0] >= 0)
     con2 = np.average(distances[image == 0] >= 0)
 
-    return avg1, con1, avg2, con2
+    if full:
+        std1 = np.std(distances[(image != 0) & (distances >= 0)])
+        std2 = np.std(distances[(image == 0) & (distances >= 0)])
+        return avg1, std1, con1, avg2, std2, con2, distances
+    else:
+        return avg1, con1, avg2, con2
 
 def bottleneck_distribution(image):
     """
