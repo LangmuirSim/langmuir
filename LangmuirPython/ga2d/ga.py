@@ -70,7 +70,7 @@ def score(filename):
     etc. The scoring function should be based on multivariate fits from a database
     of existing simulations. To ensure good results, use robust regression techniques
     and cross-validate the best-fit.
-    
+
     :param filename: image file name
     :type filename: str
 
@@ -122,7 +122,7 @@ def score(filename):
 def score_filenames(filenames, pool=None):
     """
     Score a list of files in parallel using the supplied processing pool
-    
+
     :param filenames: image file names
     :param pool: multiprocessing thread pool
 
@@ -131,7 +131,7 @@ def score_filenames(filenames, pool=None):
 
     :return: list of tuples (score, filename)
     :rtype: list of tuple
-    """    
+    """
     # analyze all these files and push into a list of (score, filename) tuples
     start = time.time()
 
