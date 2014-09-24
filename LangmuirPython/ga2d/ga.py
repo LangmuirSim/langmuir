@@ -51,7 +51,7 @@ def create_parser():
         metavar='mutability', help='# of items to mutate each generation')
 
     parser.add_argument(dest='diversity', default=0.02, type=float, nargs='?',
-        metavar='diversity', help='% of pixels that need to differ')
+        metavar='diversity', help='percent of pixels that need to differ')
 
     parser.add_argument('--rescore', action='store_true', help='rescore initial files')
 
