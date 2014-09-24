@@ -14,8 +14,10 @@ import argparse
 import heapq
 import random
 import glob
+import sys
 import os
 from multiprocessing import Pool
+import warnings
 import time
 import math
 
@@ -26,6 +28,18 @@ import numpy as np
 # our code
 import ga_analyze as analyze
 import modify
+
+# logging
+import logging
+logging.basicConfig(level=logging.DEBUG,
+    format='[%(asctime)s][proc=%(process)5d][%(levelname)-5s]: %(message)s')
+logging.captureWarnings(True)
+
+def error(msg, *args, **kwargs):
+    logging.error(msg.format(*args, **kwargs))
+
+def debug(msg, *args, **kwargs):
+    logging.debug(msg.format(*args, **kwargs))
 
 desc = """
 Genetic algorithm design of 2D morphologies.
@@ -53,7 +67,11 @@ def create_parser():
     parser.add_argument(dest='diversity', default=0.02, type=float, nargs='?',
         metavar='diversity', help='percent of pixels that need to differ')
 
-    parser.add_argument('--rescore', action='store_true', help='rescore initial files')
+    parser.add_argument('--rescore', action='store_true',
+            help='rescore initial files')
+
+    parser.add_argument('--silent', action='store_true',
+            help='set logging level to ERROR only')
 
     return parser
 
@@ -100,9 +118,12 @@ def score(filename):
     # connectivity
     td1, connect1, td2, connect2 = analyze.transfer_distance(image)
 
-    spots = np.logical_xor( image, ndimage.binary_erosion(image, structure=np.ones((2,2))) )
+    spots = np.logical_xor(image,
+        ndimage.binary_erosion(image, structure=np.ones((2,2))))
     erosion = np.count_nonzero(spots)
-    spots = np.logical_xor( image, ndimage.binary_dilation(image, structure=np.ones((2,2))) )
+
+    spots = np.logical_xor(image,
+        ndimage.binary_dilation(image, structure=np.ones((2,2))))
     dilation = np.count_nonzero(spots)
 
     # fraction of phase one
@@ -139,7 +160,8 @@ def score_filenames(filenames, pool=None):
         scores = map(score, filenames)
     else:
         scores = pool.map(score, filenames)
-    print "Scoring time required: ", time.time() - start
+
+    debug('scoring time required: {:3f}', time.time() - start)
     return zip(scores, filenames)
 
 def diversity_check(image1, image2):
@@ -157,45 +179,69 @@ def diversity_check(image1, image2):
     # .. so this counts number of different sites / number of sites
     return float(np.count_nonzero( np.logical_xor(image1, image2) )) / float(image1.size)
 
+def summarize_scores(scores):
+    s, p = zip(*scores)
+    n  = len(s)
+    n2 = n / 2
+
+    savg = np.average(s)
+    sstd = np.std(s)
+    smin, pmin = s[+0], p[+0]
+    smax, pmax = s[-1], p[-1]
+    smed, pmed = s[n2], p[n2]
+    srng = abs(smax - smin)
+
+    debug('score: (avg) {:8.3f}', savg)
+    debug('score: (std) {:8.3f}', sstd)
+    debug('score: (rng) {:8.3f}', srng)
+    debug('score: (max) {:8.3f} path={}', smax, pmax)
+    debug('score: (min) {:8.3f} path={}', smin, pmin)
+    debug('score: (med) {:8.3f} path={}', smed, pmed)
 
 if __name__ == '__main__':
     work = os.getcwd()
     opts = get_arguments()
     pool = Pool()
 
-    if opts.dir[-1] != '/':
-        opts.dir += '/'
+    if opts.silent:
+        logging.getLogger().setLevel(logging.ERROR)
 
     # glob through the directories for PNG files
+    debug('searching for pngs (depth=2)')
     filenames = []
-    for handle in glob.iglob(opts.dir + "/*.png"):
+    for handle in glob.iglob(os.path.join(opts.dir, '*.png')):
         filenames.append(handle)
-    for handle in glob.iglob(opts.dir + "*/*.png"):
+    for handle in glob.iglob(os.path.join(opts.dir, '*', '*.png')):
         filenames.append(handle)
-
-    print "Initial Filenames: ", len(filenames)
+    debug('found {} pngs!', len(filenames))
 
     # check for a cache
     scores = []
     if os.path.exists('score.cache'):
+        debug('found score.cache')
         with open('score.cache') as cache:
             for line in cache:
                 fileScore, filename = line.split()
                 scores.append( (float(fileScore), filename) )
+        debug('loaded {} scores', len(scores))
 
     # if needed, score the initial population
     if opts.rescore or len(filenames) != len(scores):
-        print "Re-scoring Initial Files"
+        debug('rescoring initial files')
         scores = score_filenames(filenames, pool)
-        print "Caching initial scores"
+
+        debug('caching initial scores')
         with open('score.cache', 'w') as cache:
             for fileScore, handle in scores:
                 cache.write("%8.3f %s\n" % (fileScore, handle))
+    else:
+        debug('no rescore needed')
 
     # ok, sort the list
     scores.sort(reverse=True)
-    print "Top Score: ", scores[0]
+
     # We need to prune out non-diverse files
+    debug('diversity check')
     i = 0
     while i < len(scores):
         (score1, name1) = scores[i]
@@ -208,7 +254,7 @@ if __name__ == '__main__':
             image2 = misc.fromimage(pil_img.convert("L"))
             difference = diversity_check(image1, image2)
             if difference < opts.diversity:
-                print "Removing ", (score2, name2), " with low diversity", difference
+                debug('score: (val) {:8.3f} path={} diversity={} (removing)', score2, name2, difference)
                 scores.pop(j)
             else:
                 j += 1
@@ -216,15 +262,14 @@ if __name__ == '__main__':
     # it's now filtered by diversity and sorted by score, so remove the worst scores
     while len(scores) > opts.population:
         scores.pop()
-    print "Median Score: ", scores[len(scores)/2]
-    print "Worst Score: ", scores[-1]
+    summarize_scores(scores)
 
     # Finally, got the initial population and we can get to work
     # Here's the real GA code
     for generation in range(opts.generations):
-        print "Starting Generation ", generation
+        debug('starting gen={}', generation)
         # create the directory for this new generation
-        path = opts.dir + "gen-%d" % generation
+        path = os.path.join(opts.dir, "gen-%d" % generation)
         try:
             os.mkdir(path)
         except OSError:
@@ -243,7 +288,8 @@ if __name__ == '__main__':
 
         population = 0
         filenames = []
-        print "Creating Children"
+
+        debug('creating children')
         uniqueParents = []
         for i in range(opts.children):
             # blend and threshold the images
@@ -268,6 +314,7 @@ if __name__ == '__main__':
             filenames.append(childName)
             population += 1
             misc.imsave(childName, child)
+            debug('created {}', childName)
 
         # make a copy of the files to be re-scored
         rescore_list = list(filenames)
@@ -289,7 +336,7 @@ if __name__ == '__main__':
             population += 1
             misc.imsave(newName, image)
 
-        print "Mutating"
+        debug('mutating')
         for i in range(opts.mutability):
             handle = random.choice(filenames)
 
@@ -309,6 +356,8 @@ if __name__ == '__main__':
             image = misc.fromimage(pil.convert("L"))
 
             mutation = random.randrange(7)
+            debug('mutation={} path={}', mutation, handle)
+
             if mutation == 0:
                 # gaussian blur
                 image = modify.gblur_and_threshold(image, random.choice([2,3,4,5]))
@@ -329,7 +378,9 @@ if __name__ == '__main__':
                 image = modify.roughen(image)
             elif mutation == 5:
                 # rescale larger
-                image = modify.enlarge(image)
+                with warnings.catch_warnings(record=True) as warns:
+                    warnings.simplefilter('ignore', UserWarning)
+                    image = modify.enlarge(image)
             elif mutation == 6:
                 # rescale smaller
                 image = modify.shrink(image)
@@ -343,7 +394,7 @@ if __name__ == '__main__':
                 child = modify.grow_ndimage(image, phase)
                 image = child
             if image.shape != (256, 256):
-                print "Shape error: ", handle, mutation
+                error('shape invalid! {} {}', handle, mutation)
                 # don't save this mutation, or we'll die later
                 continue
             # shift? - not useful
@@ -351,18 +402,18 @@ if __name__ == '__main__':
             misc.imsave(handle, image)
 
         # create a new batch of scores
-        print "Scoring Generation ", generation
+        debug('scoring gen={}', generation)
         scores = score_filenames(rescore_list, pool)
         for i in range(len(oldFiles)):
             scores.append( (oldScores[i], oldFiles[i]) )
 
         scores.sort(reverse=True)
-        print "Top Score: ", scores[0]
-        print "Median Score: ", scores[len(scores)/2]
-        print "Worst Score: ", scores[-1]
+        summarize_scores(scores)
+
         # We need to prune out non-diverse files
         # In this case, rather than  removing them entirely, we'll set the score to negative :-)
         i = 0
+        debug('diversity check')
         while i < len(scores):
             (score1, name1) = scores[i]
             pil_img = Image.open(name1)
@@ -376,7 +427,8 @@ if __name__ == '__main__':
                 if difference < opts.diversity:
                     score2 = -1.0 * math.fabs(score2)
                     scores[j] = (score2, name2)
-                    # print " Inverting score: ", scores[j]
+                    debug('score: (val) {:8.3f} path={} diversity={} (inverted)',
+                        score2, name2, difference)
                 j += 1
             i += 1
         scores.sort(reverse=True)
