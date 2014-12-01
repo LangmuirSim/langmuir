@@ -30,6 +30,11 @@ class colors:
     p2 = '#8601af'
     p3 = '#a7194b'
 
+    DGB = '#98A9EA'
+    DGG = '#5BB95C'
+    DGR = '#EC3424'
+    DGO = '#FF9200'
+
 def convert(ifile, ofile, density=300):
     """
     Convert a file.
@@ -59,16 +64,35 @@ def save(name, border=10, **kwargs):
     plt.savefig(name, **kwargs)
     crop(name, border)
 
-def subplots(nrows=1, ncols=1, w=6, h=6, l=1.5, r=0.5, t=0.5, b=1.5,
-             ws=0.0, hs=0.0, **kwargs):
+def subplots(nrows=1, ncols=1, w=6, h=6, l=1.0, r=1.0, t=1.0, b=1.0, ws=1.0, hs=1.0, units='in', **kwargs):
     """
-    Wrapper around pyplot.subplots that uses absolute numbers for widths, etc.
+    Wrapper around :py:func:`matplotlib.pyplot.subplots` that uses absolute (instead of relative) lengths.
+
+    :param nrows: number of rows
+    :param ncols: number of cols
+    :param w: width of each subplot
+    :param h: height of each subplot
+    :param l: left margin
+    :param r: right margin
+    :param t: top margin
+    :param b: bottom margin
+    :param ws: horizontal space between subplots
+    :param hs: vertical space between subplots
+    :param units: units of length (default=in, cm)
     """
-    fw = float(l + ncols*w + (ncols-1)*ws + r)
-    fh = float(b + nrows*h + (nrows-1)*hs + t)
+    factor = 1.0
+
+    if units.lower() == 'in':
+        factor = 1.0
+
+    if units.lower() == 'cm':
+        factor = 1.0/2.54
+
+    fw = float(l + ncols * w + (ncols - 1) * ws + r)
+    fh = float(b + nrows * h + (nrows - 1) * hs + t)
     ws = float(ws) / w
     hs = float(hs) / h
-    _kwargs = dict(figsize=(fw, fh))
+    _kwargs = dict(figsize=(fw * factor, fh * factor))
     _kwargs.update(**kwargs)
     fig, axes = plt.subplots(nrows, ncols, **_kwargs)
     _kwargs = dict(left=l/fw, right=(fw-r)/fw, bottom=b/fh, top=(fh-t)/fh)

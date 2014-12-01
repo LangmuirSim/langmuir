@@ -413,15 +413,17 @@ class IVCurveSolar(IVCurve):
         results.update(fill=self.fill)
         return results
 
-    def calculate(self, mode='interp1d', recycle=False, **kwargs):
+    def calculate(self, mode='interp1d', recycle=False, guess=None, **kwargs):
         """
         Calculate fill factor.  kwargs are passed to fitting functions.
 
         :param mode: fitting mode (tanh, power, interp1d, spline, erf)
         :param recycle: recycle fit parameters when guessing
+        :param guess: guess for v_oc (default=shift)
 
         :type mode: str
         :type recycle: bool
+        :type guess: float
 
         ============ ============
         Mode         Option
@@ -455,8 +457,11 @@ class IVCurveSolar(IVCurve):
         else:
             raise NotImplementedError('unknown fit mode: %s' % mode)
 
+        if guess is None:
+            guess = self.v_shift
+
         ### >>> units on
-        self.v_oc = self.ifit.solve(x0=self.v_shift) * self.units.v
+        self.v_oc = self.ifit.solve(x0=guess) * self.units.v
         self.i_sc = self.ifit(0) * self.units.i
         self.p_th =(self.v_oc * self.i_sc).to(self.units.p)
 

@@ -16,7 +16,8 @@ import sys
 import random
 import math
 
-from scipy import misc, ndimage
+from skimage import morphology
+from scipy import misc, ndimage, fftpack, signal
 import numpy as np
 from PIL import Image
 
@@ -80,7 +81,7 @@ def gblur_and_threshold(image, radius=2):
     :rtype: :py:class:`numpy.ndarray`
     """
     output = ndimage.gaussian_filter(image, sigma=radius)
-    return image > image.mean()
+    return output > output.mean()
 
 def ublur_and_threshold(image, radius=2):
     """
@@ -409,23 +410,293 @@ def add_noise(image):
     :return: modified image data
     :rtype: :py:class:`numpy.ndarray`
     """
-    noise = np.random.random( image.shape )
-    return modify.blend_and_threshold(image, noise)
+    noise = np.random.random(image.shape) * 255
+    return blend_and_threshold(image, noise)
 
-def imshow(image):
+def flip_random_sites(image, n=64):
     """
-    Show image using matplotlib.
+    What random noise should be doing?
 
     :param image: data
-
     :type image: :py:class:`numpy.ndarray`
+
+    :param n: number of sites to flip
+    :type n: int
+
+    :return: modified image data
+    :rtype: :py:class:`numpy.ndarray`
     """
-    import matplotlib.pyplot as plt
-    plt.autumn()
-    plt.imshow(image)
-    plt.tick_params(label1On=False, tick1On=False, tick2On=False)
-    plt.tight_layout()
-    plt.show()
+    image = (image > image.mean())
+    x_ids = np.random.choice(image.shape[0], size=n)
+    y_ids = np.random.choice(image.shape[1], size=n)
+    iflip = np.copy(image)
+    iflip[x_ids, y_ids] = np.logical_not(image[x_ids, y_ids])
+    return iflip > iflip.mean()
+
+def dialate(image, struct=None):
+    """
+    Grow edges of white phase.
+
+    :param image: data
+    :type image: :py:class:`numpy.ndarray`
+
+    :type struct: :py:class:`numpy.ndarray`
+    :type struct: :py:class:`numpy.ndarray`
+
+    :return: modified image data
+    :rtype: :py:class:`numpy.ndarray`
+    """
+    if not struct:
+        struct = morphology.disk(1)
+
+    i = morphology.binary_dilation(image, struct)
+
+    return i > i.mean()
+
+def erode(image, struct=None):
+    """
+    Erode edges of white phase.
+
+    :param image: data
+    :type image: :py:class:`numpy.ndarray`
+
+    :type struct: :py:class:`numpy.ndarray`
+    :type struct: :py:class:`numpy.ndarray`
+
+    :return: modified image data
+    :rtype: :py:class:`numpy.ndarray`
+    """
+    if not struct:
+        struct = morphology.disk(1)
+
+    i = morphology.binary_erosion(image, struct)
+
+    return i > i.mean()
+
+def opening(image, struct=None):
+    """
+    Open up white phase so that struct fits without overlapping black phase.
+
+    :param image: data
+    :type image: :py:class:`numpy.ndarray`
+
+    :type struct: :py:class:`numpy.ndarray`
+    :type struct: :py:class:`numpy.ndarray`
+
+    :return: modified image data
+    :rtype: :py:class:`numpy.ndarray`
+    """
+    if not struct:
+        struct = morphology.disk(1)
+
+    i = morphology.binary_opening(image, struct)
+
+    return i > i.mean()
+
+def closing(image, struct=None):
+    """
+    Open up black phase so that struct fits without overlapping white phase.
+
+    :param image: data
+    :type image: :py:class:`numpy.ndarray`
+
+    :type struct: :py:class:`numpy.ndarray`
+    :type struct: :py:class:`numpy.ndarray`
+
+    :return: modified image data
+    :rtype: :py:class:`numpy.ndarray`
+    """
+    if not struct:
+        struct = morphology.disk(1)
+
+    i = morphology.binary_opening(image, struct)
+
+    return i > i.mean()
+
+def skeletonize_and_reconstruct(image, dfunc=None, sfunc=None):
+    """
+    Deconstruct image into skeleton and distance mask.  Alter the skeleton
+    and/or distance mask and then reconstruct a new morphology.  With no
+    altering functions passed, this function will not modify the image.
+
+    :param image: data
+    :type image: :py:class:`numpy.ndarray`
+
+    :param dfunc: function that alters distance mask
+    :type dfunc: :py:type:`func`
+
+    :param sfunc: function that alters skeleton
+    :type sfunc: :py:type:`func`
+
+    :return: modified image data
+    :rtype: :py:class:`numpy.ndarray`
+    """
+    image = (image > image.mean())
+    # compute skeleton
+    s0 = morphology.skeletonize(image)
+
+    # compute mask
+    d0 = ndimage.distance_transform_edt(image)
+
+    # alter the mask
+    if not dfunc is None:
+        d0 = dfunc(image, s0, d0)
+
+    # alter the skeleton
+    if not sfunc is None:
+        s0 = dfunc(image, s0, d0)
+
+    # fix d-matrix
+    d0[d0 <= s0] = s0[d0 <= s0]
+
+    # recomute morphology
+    r0 = morphology.reconstruction(s0, d0)
+
+    # threshold
+    return r0 > r0.mean()
+
+def fourier_transform_and_reconstruct(image, detrend=False, window=False,
+                                      ffunc=None):
+    """
+    Take fourier transform, alter it, and reconstruct image.  For some
+    reason this is shifting the origin by 1 pixel after reconstruction, which
+    should not happen.
+
+    :param image: data
+    :type image: :py:class:`numpy.ndarray`
+
+    :param ffunc: function that alters FFT matrix
+    :type ffunc: :py:type:`func`
+
+    :return: modified image data
+    :rtype: :py:class:`numpy.ndarray`
+    """
+    if window:
+        w = signal.hamming(image.shape)
+    else:
+        w = np.ones_like(image)
+
+    if detrend:
+        f = fftpack.fft(w * signal.detrend(image))
+    else:
+        f = fftpack.fft(w * image)
+
+    # alter the fft
+    if not ffunc is None:
+        f = ffunc(f)
+
+    result = np.fliplr(fftpack.fft(f))
+
+    return result > result.mean()
+
+def randf(a, b, size=None):
+    """
+    Random float in range.
+
+    :param a: lower bound
+    :param b: upper bound
+    :type size: number of samples to generate
+
+    :type a: float
+    :type b: float
+    :type size: int
+
+    :return: values
+    :rtype: float
+    """
+    return np.random.random(size=size) * (b - a) + a
+
+def gauss1D(x, s=1.0, m=0.0):
+    """
+    1D Gaussian.
+
+    :param x: x-value
+    :param s: sigma
+    :param m: mean
+
+    :return: values
+    :rtype: float
+    """
+    g = np.exp(-(x - m)**2 / (2.0 * s**2))
+    return g
+
+def gauss2D(x, y, sx=1.0, sy=1.0, mx=0.0, my=0.0):
+    """
+    2D Gaussian.
+
+    :param x: x-value
+    :param y: y-value
+    :param sx: x-sigma
+    :param mx: x-mean
+    :param sy: y-sigma
+    :param my: y-mean
+
+    :return: values
+    :rtype: float
+    """
+    return gauss1D(x, sx, mx) * gauss1D(y, sy, my)
+
+def create_random_distance_transform_on_skeleton(i0, s0, d0):
+    """
+    Draw a bunch of Gaussians of random sigma along skeleton of image.
+
+    :param i0: data
+    :type i0: :py:class:`numpy.ndarray`
+
+    :param s0: data
+    :type s0: :py:class:`numpy.ndarray`
+
+    :param d0: data
+    :type d0: :py:class:`numpy.ndarray`
+    """
+    # create kernel matrix
+    kx_size = 8
+    ky_size = 8
+    kx, ky = np.mgrid[-kx_size:1.01*kx_size:1.0,
+                      -ky_size:1.01*ky_size:1.0]
+
+    # image size
+    nx, ny = i0.shape
+
+    # skeleton x,y values
+    sx, sy = np.argwhere(s0).T
+
+    # create padded distance array
+    d1 = np.zeros_like(d0)
+    dp = np.pad(d1, (kx_size, ky_size), 'constant', constant_values=[0])
+
+    # run along skeleton
+    for i, (x_id, y_id) in enumerate(zip(sx, sy)):
+
+        # jitter the skeleton
+        x_id = (x_id + np.random.randint(-2, 3)) % nx
+        y_id = (y_id + np.random.randint(-2, 3)) % ny
+
+        # random sigma
+        sigma_x = randf(0.1, 2.0)
+        sigma_y = randf(0.1, 2.0)
+
+        x_id_pad = x_id + kx_size
+        y_id_pad = y_id + ky_size
+
+        x0 = x_id_pad - kx_size
+        x1 = x_id_pad + ky_size + 1
+
+        y0 = y_id_pad - ky_size
+        y1 = y_id_pad + ky_size + 1
+
+        dp[x0:x1,y0:y1] += gauss2D(kx, ky, sigma_x, sigma_y)
+
+    # remove padding
+    d1 = dp[kx_size:-kx_size, ky_size:-ky_size]
+
+    # blur edges
+    d1 = ndimage.gaussian_filter(d1, sigma=1)
+
+    # fix for reconstruction
+    d1[d1 <= s0] = s0[d1 <= s0]
+
+    return d1
 
 def create_parser():
     parser = argparse.ArgumentParser()
@@ -440,7 +711,8 @@ def create_parser():
 
     parser.add_argument('--type', default=None, type=str, metavar='type',
         choices=['blend', 'gblur', 'ublur', 'shrink', 'enlarge', 'invert',
-                 'pepper', 'roughen', 'fracgrow', 'noise'],
+                 'pepper', 'roughen', 'fracgrow', 'noise', 'flip', 'erode',
+                 'dialate', 'opening', 'closing', 'random_dist'],
         help='mutation type')
 
     return parser
@@ -499,10 +771,27 @@ if __name__ == '__main__':
         output = roughen(image1)
         misc.imsave(opts.ifile1, output)
     elif opts.type == 'noise':
-        output = noise(image1)
+        output = add_noise(image1)
+        misc.imsave(opts.ifile1, output)
+    elif opts.type == 'flip':
+        output = flip_random_sites(image1)
         misc.imsave(opts.ifile1, output)
     elif opts.type == 'fracgrow':
-        output = grow(image1)
+        output = grow_ndimage(image1)
         misc.imsave(opts.ifile1, output)
-
-
+    elif opts.type == 'erode':
+        output = erode(image1)
+        misc.imsave(opts.ifile1, output)
+    elif opts.type == 'dialate':
+        output = dialate(image1)
+        misc.imsave(opts.ifile1, output)
+    elif opts.type == 'opening':
+        output = opening(image1)
+        misc.imsave(opts.ifile1, output)
+    elif opts.type == 'closing':
+        output = closing(image1)
+        misc.imsave(opts.ifile1, output)
+    elif opts.type == 'random_dist':
+        dfunc = create_random_distance_transform_on_skeleton
+        output = skeletonize_and_reconstruct(image1, dfunc=dfunc)
+        misc.imsave(opts.ifile1, output)

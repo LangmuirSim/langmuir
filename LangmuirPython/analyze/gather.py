@@ -76,9 +76,10 @@ if __name__ == '__main__':
     if opts.g:
         combined = lm.find.pkls(work, stub='combined*', r=True,
             at_least_one=True)
+        combined.sort(key=lambda x : os.path.dirname(os.path.dirname(x)))          
         combined = itertools.groupby(combined,
             lambda x : os.path.dirname(os.path.dirname(x)))
-        combined = [c for c, b in combined]
+        combined = [c for c, b in combined]       
         for c in combined:
             gather(c)
     else:
