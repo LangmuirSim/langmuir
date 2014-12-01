@@ -1,8 +1,0 @@
-#!/bin/bash
-echo "ORIGIN"
-echo "======"
-git pull origin master
-echo ""
-echo "BITBUCKET"
-echo "========="
-git pull bitbucket master
