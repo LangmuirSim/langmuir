@@ -15,36 +15,52 @@
 
 ## BUILD INSTRUCTIONS ##
 1. In order to build the Langmuir engine the following dependencies are required:
+
  * Qt4
  * Boost
  * CMake
+
 2. The following are optional:
+
  * OpenCL 1.1
  * OpenGL
  * Qt5
+
 3. QtCreator build:
+
  * open ./src/CMakeLists.txt in QtCreator
+
 4. Langmuir build:
+
  * cd ./src
  * mkdir build
  * cd build
  * cmake ../
  * make
  * exe is ./build/langmuir/langmuir
+
 5. LangmuirView build:
+
  * need Qt5
  * make langmuirView
  * exe is ./build/langmuirView/langmuirView
+
 6. Clang scan-build:
+
  * mkdir build
  * cd build
  * scan-build -v cmake ..
  * scan-build -v -k -analyze-headers -stats -o . make -j 4
  * scan-view scan-build-output-dir
+
 ## Notes ##
+
 1. On a MAC, you may need to declare the arch:
+
  *  cmake -DCMAKE_OSX_ARCHITECTURES=x86_64 ../
+
 2. On a cluster with modules, may have to set things up first:
+
  * module purge
  * module load cmake
  * module load gcc
@@ -57,13 +73,18 @@
 
 ## Documentation ##
 1. To make the cxx documentation:
+
  * cd ./doc
  * make html
  * make latex
+
 2. To make the manual:
+
  * cd ./doc/manual
  * make
+
 3.  To make the python docs:
+
  * cd ./LangmuirPython/doc
  * export PYTHONPATH=$PYTHONPATH:/path/to/LangmuirPython
  * make html
