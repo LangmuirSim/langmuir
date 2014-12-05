@@ -81,6 +81,12 @@ protected:
      */
     void initShaders();
 
+    //! render function
+    void drawFallback();
+
+    //! render function
+    void drawGrid();
+
     //! OpenGL shading pipeline
     QOpenGLShaderProgram m_shader1; // lines pipeline
 
@@ -92,6 +98,9 @@ protected:
 
     //! color of grid
     QColor m_color;
+
+    //! shader1 ok to use
+    bool m_shader1OK;
 };
 
 #endif // GRID_H
