@@ -185,6 +185,18 @@ protected:
      */
     void initShaders();
 
+    //! render function
+    void drawFallback();
+
+    //! render function
+    void drawPoints();
+
+    //! render function
+    void drawSquares();
+
+    //! render function
+    void drawCubes();
+
     //! OpenGL shading pipeline for points
     QOpenGLShaderProgram m_shader1;
 
@@ -214,6 +226,15 @@ protected:
 
     //! rendering mode
     Mode m_mode;
+
+    //! shader1 ok to use
+    bool m_shader1OK;
+
+    //! shader2 ok to use
+    bool m_shader2OK;
+
+    //! shader3 ok to use
+    bool m_shader3OK;
 };
 
 Q_DECLARE_METATYPE(PointCloud::Mode);

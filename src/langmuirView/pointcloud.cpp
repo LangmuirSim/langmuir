@@ -8,6 +8,9 @@
 PointCloud::PointCloud(LangmuirViewer &viewer, QObject *parent) :
     SceneObject(viewer, parent), m_verticesVBO(NULL)
 {
+    m_shader1OK = false;
+    m_shader2OK = false;
+    m_shader3OK = false;
     init();
 }
 
@@ -50,51 +53,80 @@ unsigned int PointCloud::getMaxRender()
 
 void PointCloud::initShaders()
 {
+    m_shader1OK = true;
+
     // point cloud shader
     if (!m_shader1.addShaderFromSourceFile(QOpenGLShader::Vertex, ":shaders/pcVert.glsl")) {
-        qFatal("langmuir: can not compile shader1 vertex shader");
+        qDebug("langmuir: (pointcloud) can not compile shader1 vertex shader");
+        m_shader1OK = false;
     }
 
     if (!m_shader1.addShaderFromSourceFile(QOpenGLShader::Fragment, ":shaders/pcFrag.glsl")) {
-        qFatal("langmuir: can not compile shader1 fragment shader");
+        qDebug("langmuir: (pointcloud) can not compile shader1 fragment shader");
+        m_shader1OK = false;
     }
 
     if (!m_shader1.link()) {
-        qFatal("langmuir: can not link shader1");
+        qDebug("langmuir: (pointcloud) can not link shader1");
+        m_shader1OK = false;
     }
+
+    m_shader2OK = true;
 
     // square cloud shader
     if (!m_shader2.addShaderFromSourceFile(QOpenGLShader::Vertex, ":shaders/scVert.glsl")) {
-        qFatal("langmuir: can not compile shader2 vertex shader");
+        qDebug("langmuir: (pointcloud) can not compile shader2 vertex shader");
+        m_shader2OK = false;
     }
 
     if (!m_shader2.addShaderFromSourceFile(QOpenGLShader::Geometry, ":shaders/scGeom.glsl")) {
-        qFatal("langmuir: can not compile shader2 geometry shader");
+        qDebug("langmuir: (pointcloud) can not compile shader2 geometry shader");
+        m_shader2OK = false;
     }
 
     if (!m_shader2.addShaderFromSourceFile(QOpenGLShader::Fragment, ":shaders/scFrag.glsl")) {
-        qFatal("langmuir: can not compile shader2 fragment shader");
+        qDebug("langmuir: (pointcloud) can not compile shader2 fragment shader");
+        m_shader2OK = false;
     }
 
     if (!m_shader2.link()) {
-        qFatal("langmuir: can not link shader2");
+        qDebug("langmuir: (pointcloud) can not link shader2");
+        m_shader2OK = false;
     }
+
+    m_shader3OK = true;
 
     // square cloud shader
     if (!m_shader3.addShaderFromSourceFile(QOpenGLShader::Vertex, ":shaders/ccVert.glsl")) {
-        qFatal("langmuir: can not compile shader3 vertex shader");
+        qDebug("langmuir: (pointcloud) can not compile shader3 vertex shader");
+        m_shader3OK = false;
     }
 
     if (!m_shader3.addShaderFromSourceFile(QOpenGLShader::Geometry, ":shaders/ccGeom.glsl")) {
-        qFatal("langmuir: can not compile shader3 geometry shader");
+        qDebug("langmuir: (pointcloud) can not compile shader3 geometry shader");
+        m_shader3OK = false;
     }
 
     if (!m_shader3.addShaderFromSourceFile(QOpenGLShader::Fragment, ":shaders/ccFrag.glsl")) {
-        qFatal("langmuir: can not compile shader3 fragment shader");
+        qDebug("langmuir: (pointcloud) can not compile shader3 fragment shader");
+        m_shader3OK = false;
     }
 
     if (!m_shader3.link()) {
-        qFatal("langmuir: can not link shader3");
+        qDebug("langmuir: (pointcloud) can not link shader3");
+        m_shader3OK = false;
+    }
+
+    if (!m_shader1OK) {
+        qDebug("langmuir: (pointcloud) shader1 disabled!");
+    }
+
+    if (!m_shader2OK) {
+        qDebug("langmuir: (pointcloud) shader2 disabled!");
+    }
+
+    if (!m_shader3OK) {
+        qDebug("langmuir: (pointcloud) shader3 disabled!");
     }
 }
 
@@ -155,104 +187,17 @@ void PointCloud::draw() {
     {
         case Points:
         {
-            glEnable(GL_PROGRAM_POINT_SIZE);
-
-            m_shader1.bind();
-
-            // shader: pass matrix
-            QMatrix4x4& MV = m_viewer.getOpenGLModelViewMatrix();
-            QMatrix4x4& P = m_viewer.getOpenGLProjectionMatrix();
-            m_shader1.setUniformValue("matrix", P * MV);
-
-            // shader: pass color
-            m_shader1.setUniformValue("color", m_color);
-
-            // shader: pass pointsize
-            m_shader1.setUniformValue("pointSize", m_pointSize);
-
-            // shader: pass vertices
-            m_verticesVBO->bind();
-            m_shader1.enableAttributeArray("vertex");
-            m_shader1.setAttributeBuffer("vertex", GL_FLOAT, 0, 3, 0);
-
-            // shader: draw
-            glDrawArrays(GL_POINTS, 0, m_maxRender);
-
-            // release
-            m_shader1.disableAttributeArray("vertex");
-            m_verticesVBO->release();
-            m_shader1.release();
-
-            glDisable(GL_PROGRAM_POINT_SIZE);
-
+            drawPoints();
             break;
         }
         case Squares:
         {
-            glEnable(GL_PROGRAM_POINT_SIZE);
-
-            m_shader2.bind();
-
-            // shader: pass matrix
-            QMatrix4x4& MV = m_viewer.getOpenGLModelViewMatrix();
-            QMatrix4x4& P = m_viewer.getOpenGLProjectionMatrix();
-            m_shader2.setUniformValue("matrix", P * MV);
-
-            // shader: pass color
-            m_shader2.setUniformValue("color", m_color);
-
-            // shader: pass pointsize
-            m_shader2.setUniformValue("pointSize", m_pointSize);
-
-            // shader: pass vertices
-            m_verticesVBO->bind();
-            m_shader2.enableAttributeArray("vertex");
-            m_shader2.setAttributeBuffer("vertex", GL_FLOAT, 0, 3, 0);
-
-            // shader: draw
-            glDrawArrays(GL_POINTS, 0, m_maxRender);
-
-            // release
-            m_shader2.disableAttributeArray("vertex");
-            m_verticesVBO->release();
-            m_shader2.release();
-
-            glDisable(GL_PROGRAM_POINT_SIZE);
-
+            drawSquares();
             break;
         }
         case Cubes:
         {
-            glEnable(GL_PROGRAM_POINT_SIZE);
-
-            m_shader3.bind();
-
-            // shader: pass matrix
-            QMatrix4x4& MV = m_viewer.getOpenGLModelViewMatrix();
-            QMatrix4x4& P = m_viewer.getOpenGLProjectionMatrix();
-            m_shader3.setUniformValue("matrix", P * MV);
-
-            // shader: pass color
-            m_shader3.setUniformValue("color", m_color);
-
-            // shader: pass pointsize
-            m_shader3.setUniformValue("pointSize", m_pointSize);
-
-            // shader: pass vertices
-            m_verticesVBO->bind();
-            m_shader3.enableAttributeArray("vertex");
-            m_shader3.setAttributeBuffer("vertex", GL_FLOAT, 0, 3, 0);
-
-            // shader: draw
-            glDrawArrays(GL_POINTS, 0, m_maxRender);
-
-            // release
-            m_shader3.disableAttributeArray("vertex");
-            m_verticesVBO->release();
-            m_shader3.release();
-
-            glDisable(GL_PROGRAM_POINT_SIZE);
-
+            drawCubes();
             break;
         }
         default:
@@ -261,6 +206,147 @@ void PointCloud::draw() {
             break;
         }
     }
+}
+
+void PointCloud::drawFallback()
+{
+    glEnable(GL_PROGRAM_POINT_SIZE);
+    glEnable(GL_POINT_SMOOTH);
+
+    // shader: pass color
+    glColor3f(m_color.redF(), m_color.greenF(), m_color.blueF());
+
+    // shader: pass pointsize
+    glPointSize(m_pointSize/32.0);
+
+    // shader: pass vertices
+    m_verticesVBO->bind();
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, 0, 0);
+
+    // shader: draw
+    glDrawArrays(GL_POINTS, 0, m_maxRender);
+
+    // release
+    m_verticesVBO->release();
+    glDisableClientState(GL_VERTEX_ARRAY);
+
+    glDisable(GL_POINT_SMOOTH);
+    glDisable(GL_PROGRAM_POINT_SIZE);
+}
+
+void PointCloud::drawPoints()
+{
+    if (!m_shader1OK) {
+        drawFallback();
+        return;
+    }
+
+    glEnable(GL_PROGRAM_POINT_SIZE);
+
+    m_shader1.bind();
+
+    // shader: pass matrix
+    QMatrix4x4& MV = m_viewer.getOpenGLModelViewMatrix();
+    QMatrix4x4& P = m_viewer.getOpenGLProjectionMatrix();
+    m_shader1.setUniformValue("matrix", P * MV);
+
+    // shader: pass color
+    m_shader1.setUniformValue("color", m_color);
+
+    // shader: pass pointsize
+    m_shader1.setUniformValue("pointSize", m_pointSize);
+
+    // shader: pass vertices
+    m_verticesVBO->bind();
+    m_shader1.enableAttributeArray("vertex");
+    m_shader1.setAttributeBuffer("vertex", GL_FLOAT, 0, 3, 0);
+
+    // shader: draw
+    glDrawArrays(GL_POINTS, 0, m_maxRender);
+
+    // release
+    m_shader1.disableAttributeArray("vertex");
+    m_verticesVBO->release();
+    m_shader1.release();
+
+    glDisable(GL_PROGRAM_POINT_SIZE);
+}
+
+void PointCloud::drawSquares()
+{
+    if (!m_shader2OK) {
+        drawFallback();
+        return;
+    }
+
+    glEnable(GL_PROGRAM_POINT_SIZE);
+
+    m_shader2.bind();
+
+    // shader: pass matrix
+    QMatrix4x4& MV = m_viewer.getOpenGLModelViewMatrix();
+    QMatrix4x4& P = m_viewer.getOpenGLProjectionMatrix();
+    m_shader2.setUniformValue("matrix", P * MV);
+
+    // shader: pass color
+    m_shader2.setUniformValue("color", m_color);
+
+    // shader: pass pointsize
+    m_shader2.setUniformValue("pointSize", m_pointSize);
+
+    // shader: pass vertices
+    m_verticesVBO->bind();
+    m_shader2.enableAttributeArray("vertex");
+    m_shader2.setAttributeBuffer("vertex", GL_FLOAT, 0, 3, 0);
+
+    // shader: draw
+    glDrawArrays(GL_POINTS, 0, m_maxRender);
+
+    // release
+    m_shader2.disableAttributeArray("vertex");
+    m_verticesVBO->release();
+    m_shader2.release();
+
+    glDisable(GL_PROGRAM_POINT_SIZE);
+}
+
+void PointCloud::drawCubes()
+{
+    if (!m_shader3OK) {
+        drawFallback();
+        return;
+    }
+
+    glEnable(GL_PROGRAM_POINT_SIZE);
+
+    m_shader3.bind();
+
+    // shader: pass matrix
+    QMatrix4x4& MV = m_viewer.getOpenGLModelViewMatrix();
+    QMatrix4x4& P = m_viewer.getOpenGLProjectionMatrix();
+    m_shader3.setUniformValue("matrix", P * MV);
+
+    // shader: pass color
+    m_shader3.setUniformValue("color", m_color);
+
+    // shader: pass pointsize
+    m_shader3.setUniformValue("pointSize", m_pointSize);
+
+    // shader: pass vertices
+    m_verticesVBO->bind();
+    m_shader3.enableAttributeArray("vertex");
+    m_shader3.setAttributeBuffer("vertex", GL_FLOAT, 0, 3, 0);
+
+    // shader: draw
+    glDrawArrays(GL_POINTS, 0, m_maxRender);
+
+    // release
+    m_shader3.disableAttributeArray("vertex");
+    m_verticesVBO->release();
+    m_shader3.release();
+
+    glDisable(GL_PROGRAM_POINT_SIZE);
 }
 
 void PointCloud::setMaxPoints(unsigned int value)
