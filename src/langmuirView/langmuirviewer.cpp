@@ -44,11 +44,11 @@ LangmuirViewer::LangmuirViewer(QWidget *parent) :
 
     m_canCalculateIsoSurface = false;
 
-    QGLFormat format;
-    format.setVersion(4, 0);
-    setFormat(format);
+    //QGLFormat format;
+    //format.setVersion(4, 0);
+    //setFormat(format);
 
-    qDebug("langmuir: OpenGL %d.%d", context()->format().majorVersion(), context()->format().minorVersion());
+    //qDebug("langmuir: OpenGL %d.%d", context()->format().majorVersion(), context()->format().minorVersion());
 }
 
 LangmuirViewer::~LangmuirViewer()
