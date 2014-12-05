@@ -8,6 +8,7 @@
 Mesh::Mesh(LangmuirViewer &viewer, QObject *parent) :
     SceneObject(viewer, parent), m_verticesVBO(NULL)
 {
+    m_shader1OK = false;
     m_shader2OK = false;
     m_numVertices = 0;
     m_numIndices = 0;
@@ -122,44 +123,48 @@ void Mesh::draw() {
 
 void Mesh::initShaders()
 {
+    m_shader1OK = true;
+
     // shader 1
     if (!m_shader1.addShaderFromSourceFile(QOpenGLShader::Vertex, ":shaders/msVert.glsl")) {
-        qFatal("langmuir: can not compile shader1 vertex shader");
+        qDebug("langmuir: (mesh) can not compile shader1 vertex shader");
+        m_shader1OK = false;
     }
 
     if (!m_shader1.addShaderFromSourceFile(QOpenGLShader::Fragment, ":shaders/msFrag.glsl")) {
-        qFatal("langmuir: can not compile shader1 fragment shader");
+        qDebug("langmuir: (mesh) can not compile shader1 fragment shader");
+        m_shader1OK = false;
     }
 
     if (!m_shader1.link()) {
-        qFatal("langmuir: can not link shader1");
+        qDebug("langmuir: (mesh) can not link shader1");
+        m_shader1OK = false;
     }
 
     m_shader2OK = true;
 
     // shader 2
     if (!m_shader2.addShaderFromSourceFile(QOpenGLShader::Vertex, ":shaders/mtVert.glsl")) {
+        qDebug("langmuir: (mesh) can not compile shader2 vertex shader");
         m_shader2OK = false;
     }
 
-//    if (!m_shader2.addShaderFromSourceFile(QOpenGLShader::TessellationControl, ":shaders/mtTesC.glsl")) {
-//        m_shader2OK = false;
-//    }
-
-//    if (!m_shader2.addShaderFromSourceFile(QOpenGLShader::TessellationEvaluation, ":shaders/mtTesE.glsl")) {
-//        m_shader2OK = false;
-//    }
-
     if (!m_shader2.addShaderFromSourceFile(QOpenGLShader::Fragment, ":shaders/mtFrag.glsl")) {
+        qDebug("langmuir: (mesh) can not compile shader2 fragment shader");
         m_shader2OK = false;
     }
 
     if (!m_shader2.link()) {
+        qDebug("langmuir: (mesh) can not link shader2");
         m_shader2OK = false;
     }
 
+    if (!m_shader1OK) {
+        qDebug("langmuir: (mesh) shader1 disabled!");
+    }
+
     if (!m_shader2OK) {
-        qDebug("langmuir: shader2 disabled!");
+        qDebug("langmuir: (mesh) shader2 disabled!");
     }
 }
 
@@ -377,6 +382,10 @@ void Mesh::drawDoubleAlpha()
 
 void Mesh::drawShader1()
 {
+    if (!m_shader1OK) {
+        return;
+    }
+
     glEnable(GL_CULL_FACE);
 
     // bind shader

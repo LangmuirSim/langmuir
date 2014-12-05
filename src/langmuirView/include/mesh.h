@@ -200,6 +200,9 @@ protected:
     //! rendering mode
     Mode m_mode;
 
+    //! shader1 ok to use
+    bool m_shader1OK;
+
     //! shader2 ok to use
     bool m_shader2OK;
 };
