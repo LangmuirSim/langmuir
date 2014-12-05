@@ -523,10 +523,10 @@ def skeletonize_and_reconstruct(image, dfunc=None, sfunc=None):
     :type image: :py:class:`numpy.ndarray`
 
     :param dfunc: function that alters distance mask
-    :type dfunc: :py:type:`func`
+    :type dfunc: func
 
     :param sfunc: function that alters skeleton
-    :type sfunc: :py:type:`func`
+    :type sfunc: func
 
     :return: modified image data
     :rtype: :py:class:`numpy.ndarray`
@@ -566,7 +566,7 @@ def fourier_transform_and_reconstruct(image, detrend=False, window=False,
     :type image: :py:class:`numpy.ndarray`
 
     :param ffunc: function that alters FFT matrix
-    :type ffunc: :py:type:`func`
+    :type ffunc: func
 
     :return: modified image data
     :rtype: :py:class:`numpy.ndarray`
