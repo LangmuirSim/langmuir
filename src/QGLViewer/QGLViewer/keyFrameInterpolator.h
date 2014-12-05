@@ -1,8 +1,8 @@
 /****************************************************************************
 
- Copyright (C) 2002-2013 Gilles Debunne. All rights reserved.
+ Copyright (C) 2002-2014 Gilles Debunne. All rights reserved.
 
- This file is part of the QGLViewer library version 2.5.2.
+ This file is part of the QGLViewer library version 2.6.0.
 
  http://www.libqglviewer.com - contact@libqglviewer.com
 
@@ -114,8 +114,8 @@ class Frame;
   KeyFrameInterpolator kfi( new Frame() );
   // calls to kfi.addKeyFrame() to define the path.
 
-  const float deltaTime = 0.04; // output a position every deltaTime seconds
-  for (float time=kfi.firstTime(); time<=kfi.lastTime(); time += deltaTime)
+  const qreal deltaTime = 0.04; // output a position every deltaTime seconds
+  for (qreal time=kfi.firstTime(); time<=kfi.lastTime(); time += deltaTime)
   {
 	kfi.interpolateAtTime(time);
 	cout << "t=" << time << "\tpos=" << kfi.frame()->position() << endl;
@@ -160,10 +160,10 @@ Q_SIGNALS:
 	//@{
 public Q_SLOTS:
 	void addKeyFrame(const Frame& frame);
-	void addKeyFrame(const Frame& frame, float time);
+	void addKeyFrame(const Frame& frame, qreal time);
 
 	void addKeyFrame(const Frame* const frame);
-	void addKeyFrame(const Frame* const frame, float time);
+	void addKeyFrame(const Frame* const frame, qreal time);
 
 	void deletePath();
 	//@}
@@ -187,12 +187,12 @@ public Q_SLOTS:
 	//@{
 public:
 	Frame keyFrame(int index) const;
-	float keyFrameTime(int index) const;
+	qreal keyFrameTime(int index) const;
 	/*! Returns the number of keyFrames used by the interpolation. Use addKeyFrame() to add new keyFrames. */
 	int numberOfKeyFrames() const { return keyFrame_.count(); }
-	float duration() const;
-	float firstTime() const;
-	float lastTime() const;
+	qreal duration() const;
+	qreal firstTime() const;
+	qreal lastTime() const;
 	//@}
 
 	/*! @name Interpolation parameters */
@@ -202,7 +202,7 @@ public:
 
 	This time is regularly updated when interpolationIsStarted(). Can be set directly with
 	setInterpolationTime() or interpolateAtTime(). */
-	float interpolationTime() const { return interpolationTime_; }
+	qreal interpolationTime() const { return interpolationTime_; }
 	/*! Returns the current interpolation speed.
 
 	Default value is 1.0, which means keyFrameTime() will be matched during the interpolation
@@ -210,7 +210,7 @@ public:
 
 	A negative value will result in a reverse interpolation of the keyFrames. See also
 	interpolationPeriod(). */
-	float interpolationSpeed() const { return interpolationSpeed_; }
+	qreal interpolationSpeed() const { return interpolationSpeed_; }
 	/*! Returns the current interpolation period, expressed in milliseconds.
 
 	The update of the frame() state will be done by a timer at this period when
@@ -244,9 +244,9 @@ public Q_SLOTS:
 	\attention The frame() state is not affected by this method. Use this function to define the
 	starting time of a future interpolation (see startInterpolation()). Use interpolateAtTime() to
 	actually interpolate at a given time. */
-	void setInterpolationTime(float time) { interpolationTime_ = time; }
+	void setInterpolationTime(qreal time) { interpolationTime_ = time; }
 	/*! Sets the interpolationSpeed(). Negative or null values are allowed. */
-	void setInterpolationSpeed(float speed) { interpolationSpeed_ = speed; }
+	void setInterpolationSpeed(qreal speed) { interpolationSpeed_ = speed; }
 	/*! Sets the interpolationPeriod(). */
 	void setInterpolationPeriod(int period) { period_ = period; }
 	/*! Sets the loopInterpolation() value. */
@@ -270,13 +270,13 @@ public Q_SLOTS:
 	void resetInterpolation();
 	/*! Calls startInterpolation() or stopInterpolation(), depending on interpolationIsStarted(). */
 	void toggleInterpolation() { if (interpolationIsStarted()) stopInterpolation(); else startInterpolation(); }
-	virtual void interpolateAtTime(float time);
+	virtual void interpolateAtTime(qreal time);
 	//@}
 
 	/*! @name Path drawing */
 	//@{
 public:
-	virtual void drawPath(int mask=1, int nbFrames=6, float scale=1.0f);
+	virtual void drawPath(int mask=1, int nbFrames=6, qreal scale=1.0);
 	//@}
 
 	/*! @name XML representation */
@@ -296,7 +296,7 @@ private:
 	// KeyFrameInterpolator(const KeyFrameInterpolator& kfi);
 	// KeyFrameInterpolator& operator=(const KeyFrameInterpolator& kfi);
 
-	void updateCurrentKeyFrameForTime(float time);
+	void updateCurrentKeyFrameForTime(qreal time);
 	void updateModifiedFrameValues();
 	void updateSplineCache();
 
@@ -305,14 +305,14 @@ private:
 	class KeyFrame
 	{
 	public:
-		KeyFrame(const Frame& fr, float t);
-		KeyFrame(const Frame* fr, float t);
+		KeyFrame(const Frame& fr, qreal t);
+		KeyFrame(const Frame* fr, qreal t);
 
 		Vec position() const { return p_; }
 		Quaternion orientation() const { return q_; }
 		Vec tgP() const { return tgP_; }
 		Quaternion tgQ() const { return tgQ_; }
-		float time() const { return time_; }
+		qreal time() const { return time_; }
 		const Frame* frame() const { return frame_; }
 		void updateValuesFromPointer();
 		void flipOrientationIfNeeded(const Quaternion& prev);
@@ -320,7 +320,7 @@ private:
 	private:
 		Vec p_, tgP_;
 		Quaternion q_, tgQ_;
-		float time_;
+		qreal time_;
 		const Frame* const frame_;
 	};
 #endif
@@ -336,8 +336,8 @@ private:
 	// R h y t h m
 	QTimer timer_;
 	int period_;
-	float interpolationTime_;
-	float interpolationSpeed_;
+	qreal interpolationTime_;
+	qreal interpolationSpeed_;
 	bool interpolationStarted_;
 
 	// M i s c

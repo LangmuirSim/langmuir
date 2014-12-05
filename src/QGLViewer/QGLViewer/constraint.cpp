@@ -1,8 +1,8 @@
 /****************************************************************************
 
- Copyright (C) 2002-2013 Gilles Debunne. All rights reserved.
+ Copyright (C) 2002-2014 Gilles Debunne. All rights reserved.
 
- This file is part of the QGLViewer library version 2.5.2.
+ This file is part of the QGLViewer library version 2.6.0.
 
  http://www.libqglviewer.com - contact@libqglviewer.com
 
@@ -54,7 +54,7 @@ void AxisPlaneConstraint::setTranslationConstraintDirection(const Vec& direction
 {
 	if ((translationConstraintType()!=AxisPlaneConstraint::FREE) && (translationConstraintType()!=AxisPlaneConstraint::FORBIDDEN))
 	{
-		const float norm = direction.norm();
+		const qreal norm = direction.norm();
 		if (norm < 1E-8)
 		{
 			qWarning("AxisPlaneConstraint::setTranslationConstraintDir: null vector for translation constraint");
@@ -77,7 +77,7 @@ void AxisPlaneConstraint::setRotationConstraintDirection(const Vec& direction)
 {
 	if ((rotationConstraintType()!=AxisPlaneConstraint::FREE) && (rotationConstraintType()!=AxisPlaneConstraint::FORBIDDEN))
 	{
-		float norm = direction.norm();
+		const qreal norm = direction.norm();
 		if (norm < 1E-8)
 		{
 			qWarning("AxisPlaneConstraint::setRotationConstraintDir: null vector for rotation constraint");

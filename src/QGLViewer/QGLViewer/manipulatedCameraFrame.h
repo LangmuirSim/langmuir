@@ -1,8 +1,8 @@
 /****************************************************************************
 
- Copyright (C) 2002-2013 Gilles Debunne. All rights reserved.
+ Copyright (C) 2002-2014 Gilles Debunne. All rights reserved.
 
- This file is part of the QGLViewer library version 2.5.2.
+ This file is part of the QGLViewer library version 2.6.0.
 
  http://www.libqglviewer.com - contact@libqglviewer.com
 
@@ -125,7 +125,7 @@ public:
 
 private:
 #ifndef DOXYGEN
-	void zoom(float delta, const Camera * const camera);
+	void zoom(qreal delta, const Camera * const camera);
 #endif
 	//@}
 
@@ -136,7 +136,7 @@ public Q_SLOTS:
 
 	Default value is 0.0, but it is modified according to the QGLViewer::sceneRadius() when the
 	ManipulatedCameraFrame is set as the Camera::frame(). */
-	void setFlySpeed(float speed) { flySpeed_ = speed; }
+	void setFlySpeed(qreal speed) { flySpeed_ = speed; }
 
 	/*! Sets the sceneUpVector(), defined in the world coordinate system.
 
@@ -153,7 +153,7 @@ public:
 
 	\attention When the ManipulatedCameraFrame is set as the Camera::frame(), this value is set
 	according to the QGLViewer::sceneRadius() by QGLViewer::setSceneRadius(). */
-	float flySpeed() const { return flySpeed_; }
+	qreal flySpeed() const { return flySpeed_; }
 
 	/*! Returns the up vector of the scene, expressed in the world coordinate system.
 
@@ -213,8 +213,8 @@ private:
 
 private:
 	// Fly mode data
-	float flySpeed_;
-	float driveSpeed_;
+	qreal flySpeed_;
+	qreal driveSpeed_;
 	Vec sceneUpVector_;
 	QTimer flyTimer_;
 

@@ -1,8 +1,8 @@
 /****************************************************************************
 
- Copyright (C) 2002-2013 Gilles Debunne. All rights reserved.
+ Copyright (C) 2002-2014 Gilles Debunne. All rights reserved.
 
- This file is part of the QGLViewer library version 2.5.2.
+ This file is part of the QGLViewer library version 2.6.0.
 
  http://www.libqglviewer.com - contact@libqglviewer.com
 
@@ -74,12 +74,12 @@ class QGLVIEWER_EXPORT Vec
 public:
 	/*! The internal data representation is public. One can use v.x, v.y, v.z. See also operator[](). */
 #if defined (DOXYGEN) || defined (QGLVIEWER_UNION_NOT_SUPPORTED)
-	double x, y, z;
+	qreal x, y, z;
 #else
 	union
 	{
-		struct { double x, y, z; };
-		double v_[3];
+		struct { qreal x, y, z; };
+		qreal v_[3];
 	};
 #endif
 
@@ -89,7 +89,7 @@ public:
 	Vec() : x(0.0), y(0.0), z(0.0) {}
 
 	/*! Standard constructor with the x, y and z values. */
-	Vec(double X, double Y, double Z) : x(X), y(Y), z(Z) {}
+	Vec(qreal X, qreal Y, qreal Z) : x(X), y(Y), z(Z) {}
 
 	/*! Universal explicit converter from any class to Vec. You can use your own vector class everywhere
   a \c const \c Vec& parameter is required, as long as it implements the \c operator[ ]:
@@ -98,15 +98,15 @@ public:
   class MyVec
   {
 	// ...
-	double operator[](int i) const { returns x, y or z when i=0, 1 or 2; }
+	qreal operator[](int i) const { returns x, y or z when i=0, 1 or 2; }
   }
 
   MyVec v(...);
   camera()->setPosition(v);
   \endcode
 
-  Note that standard vector types (STL, \c double[3], ...) implement this operator and can hence
-  be used in place of Vec. See also operator const double*() .*/
+  Note that standard vector types (STL, \c qreal[3], ...) implement this operator and can hence
+  be used in place of Vec. See also operator const qreal*() .*/
 	template <class C>
 	explicit Vec(const C& c) : x(c[0]), y(c[1]), z(c[2]) {}
 	// Should NOT be explicit to prevent conflicts with operator<<.
@@ -122,7 +122,7 @@ public:
 	}
 
 	/*! Set the current value. May be faster than using operator=() with a temporary Vec(x,y,z). */
-	void setValue(double X, double Y, double Z)
+	void setValue(qreal X, qreal Y, qreal Z)
 	{ x=X; y=Y; z=Z; }
 
 	// Universal equal operator which allows the use of any type in place of Vec,
@@ -138,7 +138,7 @@ public:
 	/*! @name Accessing the value */
 	//@{
 	/*! Bracket operator, with a constant return value. \p i must range in [0..2]. */
-	double operator[](int i) const {
+	qreal operator[](int i) const {
 #ifdef QGLVIEWER_UNION_NOT_SUPPORTED
 		return (&x)[i];
 #else
@@ -147,7 +147,7 @@ public:
 	}
 
 	/*! Bracket operator returning an l-value. \p i must range in [0..2]. */
-	double& operator[](int i) {
+	qreal& operator[](int i) {
 #ifdef QGLVIEWER_UNION_NOT_SUPPORTED
 		return (&x)[i];
 #else
@@ -162,7 +162,7 @@ public:
 
 	/*! Conversion operator returning the memory address of the vector.
 
-  Very convenient to pass a Vec pointer as a parameter to OpenGL functions:
+  Very convenient to pass a Vec pointer as a parameter to \c GLdouble OpenGL functions:
   \code
   Vec pos, normal;
   glNormal3dv(normal);
@@ -189,7 +189,7 @@ public:
 
 	/*! Conversion operator returning the memory address of the vector.
 
-  Very convenient to pass a Vec pointer as a parameter to OpenGL functions:
+  Very convenient to pass a Vec pointer as a \c float parameter to OpenGL functions:
   \code
   Vec pos, normal;
   glNormal3fv(normal);
@@ -226,13 +226,13 @@ public:
 	}
 
 	/*! Returns the product of the vector with a scalar. */
-	friend Vec operator*(const Vec &a, double k)
+	friend Vec operator*(const Vec &a, qreal k)
 	{
 		return Vec(a.x*k, a.y*k, a.z*k);
 	}
 
 	/*! Returns the product of a scalar with the vector. */
-	friend Vec operator*(double k, const Vec &a)
+	friend Vec operator*(qreal k, const Vec &a)
 	{
 		return a*k;
 	}
@@ -241,7 +241,7 @@ public:
 
   Too small \p k values are \e not tested (unless the library was compiled with the "debug" Qt \c
   CONFIG flag) and may result in \c NaN values. */
-	friend Vec operator/(const Vec &a, double k)
+	friend Vec operator/(const Vec &a, qreal k)
 	{
 #ifndef QT_NO_DEBUG
 		if (fabs(k) < 1.0E-10)
@@ -259,7 +259,7 @@ public:
 	/*! Returns \c true when the squaredNorm() of the difference vector is lower than 1E-10. */
 	friend bool operator==(const Vec &a, const Vec &b)
 	{
-		const double epsilon = 1.0E-10f;
+		const qreal epsilon = 1.0E-10;
 		return (a-b).squaredNorm() < epsilon;
 	}
 
@@ -278,7 +278,7 @@ public:
 	}
 
 	/*! Multiply the vector by a scalar \p k. */
-	Vec& operator*=(double k)
+	Vec& operator*=(qreal k)
 	{
 		x *= k; y *= k; z *= k;
 		return *this;
@@ -288,7 +288,7 @@ public:
 
   An absolute \p k value lower than 1E-10 will print a warning if the library was compiled with the
   "debug" Qt \c CONFIG flag. Otherwise, no test is performed for efficiency reasons. */
-	Vec& operator/=(double k)
+	Vec& operator/=(qreal k)
 	{
 #ifndef QT_NO_DEBUG
 		if (fabs(k)<1.0E-10)
@@ -299,7 +299,7 @@ public:
 	}
 
 	/*! Dot product of the two Vec. */
-	friend double operator*(const Vec &a, const Vec &b)
+	friend qreal operator*(const Vec &a, const Vec &b)
 	{
 		return a.x*b.x + a.y*b.y + a.z*b.z;
 	}
@@ -325,21 +325,21 @@ public:
 	//@{
 #ifndef DOXYGEN
 	/*! This method is deprecated since version 2.0. Use squaredNorm() instead. */
-	double sqNorm() const { return x*x + y*y + z*z; }
+	qreal sqNorm() const { return x*x + y*y + z*z; }
 #endif
 
 	/*! Returns the \e squared norm of the Vec. */
-	double squaredNorm() const { return x*x + y*y + z*z; }
+	qreal squaredNorm() const { return x*x + y*y + z*z; }
 
 	/*! Returns the norm of the vector. */
-	double norm() const { return sqrt(x*x + y*y + z*z); }
+	qreal norm() const { return sqrt(x*x + y*y + z*z); }
 
 	/*! Normalizes the Vec and returns its original norm.
 
   Normalizing a null vector will result in \c NaN values. */
-	double normalize()
+	qreal normalize()
 	{
-		const double n = norm();
+		const qreal n = norm();
 #ifndef QT_NO_DEBUG
 		if (n < 1.0E-10)
 			qWarning("Vec::normalize: normalizing a null vector (norm=%f)", n);

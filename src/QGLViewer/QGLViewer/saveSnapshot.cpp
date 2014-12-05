@@ -1,8 +1,8 @@
 /****************************************************************************
 
- Copyright (C) 2002-2013 Gilles Debunne. All rights reserved.
+ Copyright (C) 2002-2014 Gilles Debunne. All rights reserved.
 
- This file is part of the QGLViewer library version 2.5.2.
+ This file is part of the QGLViewer library version 2.6.0.
 
  http://www.libqglviewer.com - contact@libqglviewer.com
 
@@ -334,16 +334,16 @@ bool QGLViewer::saveImageSnapshot(const QString& fileName)
 
 	QSize finalSize(imageInterface->imgWidth->value(), imageInterface->imgHeight->value());
 
-	double oversampling = imageInterface->oversampling->value();
+	qreal oversampling = imageInterface->oversampling->value();
 	QSize subSize(int(this->width()/oversampling), int(this->height()/oversampling));
 
-	double aspectRatio = width() / static_cast<double>(height());
-	double newAspectRatio = finalSize.width() / static_cast<double>(finalSize.height());
+	qreal aspectRatio = width() / static_cast<qreal>(height());
+	qreal newAspectRatio = finalSize.width() / static_cast<qreal>(finalSize.height());
 
-	double zNear = camera()->zNear();
-	double zFar = camera()->zFar();
+	qreal zNear = camera()->zNear();
+	qreal zFar = camera()->zFar();
 
-	double xMin, yMin;
+	qreal xMin, yMin;
 	bool expand = imageInterface->expandFrustum->isChecked();
 	if (camera()->type() == qglviewer::Camera::PERSPECTIVE)
 		if ((expand && (newAspectRatio>aspectRatio)) || (!expand && (newAspectRatio<aspectRatio)))
@@ -378,11 +378,11 @@ bool QGLViewer::saveImageSnapshot(const QString& fileName)
 	// ProgressDialog disabled since it interfers with the screen grabing mecanism on some platforms. Too bad.
 	// ProgressDialog::showProgressDialog(this);
 
-	double scaleX = subSize.width() / static_cast<double>(finalSize.width());
-	double scaleY = subSize.height() / static_cast<double>(finalSize.height());
+	qreal scaleX = subSize.width() / static_cast<qreal>(finalSize.width());
+	qreal scaleY = subSize.height() / static_cast<qreal>(finalSize.height());
 
-	double deltaX = 2.0 * xMin * scaleX;
-	double deltaY = 2.0 * yMin * scaleY;
+	qreal deltaX = 2.0 * xMin * scaleX;
+	qreal deltaY = 2.0 * yMin * scaleY;
 
 	int nbX = finalSize.width() / subSize.width();
 	int nbY = finalSize.height() / subSize.height();
@@ -398,10 +398,10 @@ bool QGLViewer::saveImageSnapshot(const QString& fileName)
 	// tileRegion_ is used by startScreenCoordinatesSystem to appropriately set the local
 	// coordinate system when tiling
 	tileRegion_ = new TileRegion();
-	double tileXMin, tileWidth, tileYMin, tileHeight;
+	qreal tileXMin, tileWidth, tileYMin, tileHeight;
 	if ((expand && (newAspectRatio>aspectRatio)) || (!expand && (newAspectRatio<aspectRatio)))
 	{
-		double tileTotalWidth = newAspectRatio * height();
+		qreal tileTotalWidth = newAspectRatio * height();
 		tileXMin = (width() - tileTotalWidth) / 2.0;
 		tileWidth = tileTotalWidth * scaleX;
 		tileYMin = 0.0;
@@ -410,7 +410,7 @@ bool QGLViewer::saveImageSnapshot(const QString& fileName)
 	}
 	else
 	{
-		double tileTotalHeight = width() / newAspectRatio;
+		qreal tileTotalHeight = width() / newAspectRatio;
 		tileYMin = (height() - tileTotalHeight) / 2.0;
 		tileHeight = tileTotalHeight * scaleY;
 		tileXMin = 0.0;
@@ -447,7 +447,7 @@ bool QGLViewer::saveImageSnapshot(const QString& fileName)
 			QImage snapshot = grabFrameBuffer(true);
 
 			// ProgressDialog::showProgressDialog(this);
-			// ProgressDialog::updateProgress(count / (float)(nbX*nbY),
+			// ProgressDialog::updateProgress(count / (qreal)(nbX*nbY),
 			// "Generating image ["+QString::number(count)+"/"+QString::number(nbX*nbY)+"]");
 			// qApp->processEvents();
 
@@ -542,7 +542,7 @@ void QGLViewer::saveSnapshot(bool automatic, bool overwrite)
 		QString fileName;
 		QString selectedFormat = FDFormatString[snapshotFormat()];
 		fileName = QFileDialog::getSaveFileName(this, "Choose a file name to save under", snapshotFileName(), formats, &selectedFormat,
-												overwrite?QFileDialog::DontConfirmOverwrite:QFlag(0));
+												overwrite?QFileDialog::DontConfirmOverwrite:QFlags<QFileDialog::Option>(0));
 		setSnapshotFormat(Qtformat[selectedFormat]);
 
 		if (checkFileName(fileName, this, snapshotFormat()))

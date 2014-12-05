@@ -1,8 +1,8 @@
 /****************************************************************************
 
- Copyright (C) 2002-2013 Gilles Debunne. All rights reserved.
+ Copyright (C) 2002-2014 Gilles Debunne. All rights reserved.
 
- This file is part of the QGLViewer library version 2.5.2.
+ This file is part of the QGLViewer library version 2.6.0.
 
  http://www.libqglviewer.com - contact@libqglviewer.com
 
@@ -81,9 +81,9 @@ Vec::Vec(const QDomElement& element)
 	attribute << "x" << "y" << "z";
 	for (int i=0; i<attribute.size(); ++i)
 #ifdef QGLVIEWER_UNION_NOT_SUPPORTED
-		this->operator[](i) = DomUtils::doubleFromDom(element, attribute[i], 0.0);
+		this->operator[](i) = DomUtils::qrealFromDom(element, attribute[i], 0.0);
 #else
-		v_[i] = DomUtils::doubleFromDom(element, attribute[i], 0.0);
+		v_[i] = DomUtils::qrealFromDom(element, attribute[i], 0.0);
 #endif
 }
 
