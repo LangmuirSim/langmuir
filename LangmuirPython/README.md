@@ -1,4 +1,6 @@
 ## LangmuirPython ##
+This is a set of python scripts for working with Langmuir input and output.
+There is also a genetic algorithm for optimizing morphologies in solar cells.
 
 # Install #
 
