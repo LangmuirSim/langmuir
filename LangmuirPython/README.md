@@ -1,13 +1,18 @@
-LangmuirPython
-==============
+## LangmuirPython ##
 
-Install
-=======
-1.  Add LangmuirPython to your path.
-        PYTHONPATH=$PYTHONPATH:/path/to/LangmuirPython
+# Install #
 
-Bin
-===
-1.  make bin
-2.  Add the bin directory to your path or copy the scripts somewhere else
-        PATH=$PATH:/path/to/LangmuirPython/bin
+```bash
+# Add LangmuirPython to your path.
+PYTHONPATH=$PYTHONPATH:/path/to/LangmuirPython
+```
+
+# Bin #
+
+```bash
+# create bin scripts
+make bin
+
+# Add the bin directory to your path
+PATH=$PATH:/path/to/LangmuirPython/bin
+```
