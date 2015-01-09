@@ -2,6 +2,10 @@
 Langmuir Python
 ===============
 
+* `Website <http://langmuirsim.github.io/>`_
+* `Project <https://github.com/LangmuirSim>`_
+* `Code <https://github.com/LangmuirSim/langmuir>`_
+
 Getting Started
 ~~~~~~~~~~~~~~~
 

@@ -42,7 +42,8 @@ extensions = [
     'sphinx.ext.viewcode',
     'matplotlib.sphinxext.plot_directive',
 #    'inheritance_diagram',
-    'sphinxarg.ext'
+    'sphinxarg.ext',
+    'sphinxtogithub',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -274,3 +275,7 @@ autodoc_member_order = 'bysource'
 autoclass_content = 'both'
 show_authors = True
 todo_include_todos = True
+
+sphinx_to_github = False
+sphinx_to_github_verbose = True
+sphinx_to_github_encoding = "utf-8"
