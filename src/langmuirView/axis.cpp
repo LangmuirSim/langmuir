@@ -4,6 +4,8 @@
 
 #include <QDebug>
 
+namespace LangmuirView {
+
 Axis::Axis(LangmuirViewer &viewer, QObject *parent) :
     SceneObject(viewer, parent)
 {
@@ -159,4 +161,6 @@ void Axis::makeConnections()
     connect(this, SIGNAL(zColorChanged(QColor)), &m_viewer, SLOT(updateGL()));
     connect(this, SIGNAL(radiusChanged(double)), &m_viewer, SLOT(updateGL()));
     connect(this, SIGNAL(lengthChanged(double)), &m_viewer, SLOT(updateGL()));
+}
+
 }

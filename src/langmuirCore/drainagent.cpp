@@ -5,7 +5,7 @@
 #include "world.h"
 #include "rand.h"
 
-namespace Langmuir
+namespace LangmuirCore
 {
 
 DrainAgent::DrainAgent(World &world, Grid &grid, QObject *parent)

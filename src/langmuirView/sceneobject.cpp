@@ -1,6 +1,8 @@
 #include "sceneobject.h"
 #include "langmuirviewer.h"
 
+namespace LangmuirView {
+
 SceneObject::SceneObject(LangmuirViewer &viewer, QObject *parent) :
     QObject(parent), m_viewer(viewer), visible_(true)
 {
@@ -52,4 +54,6 @@ void SceneObject::setVisible(bool draw)
 {
     visible_ = draw;
     emit visibleChanged(visible_);
+}
+
 }

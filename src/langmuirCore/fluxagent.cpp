@@ -3,7 +3,7 @@
 #include "world.h"
 #include "rand.h"
 
-namespace Langmuir
+namespace LangmuirCore
 {
 
 FluxAgent::FluxAgent(Agent::Type type, World &world, Grid &grid, QObject *parent)

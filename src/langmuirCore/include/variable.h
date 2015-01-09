@@ -8,7 +8,7 @@
 #include <limits>
 #include <ostream>
 
-namespace Langmuir
+namespace LangmuirCore
 {
 
 // output QDateTime as qint64 mSecsSinceEpoch

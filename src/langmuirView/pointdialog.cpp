@@ -5,6 +5,8 @@
 
 #include <QDebug>
 
+namespace LangmuirView {
+
 PointDialog::PointDialog(LangmuirViewer &viewer, QWidget *parent) :
     QDialog(parent), m_viewer(viewer),
     ui(new Ui::PointDialog)
@@ -293,4 +295,6 @@ void PointDialog::reset()
     m_viewer.defects().setVisible(d_visible);
     m_viewer.holes().setVisible(h_visible);
     m_viewer.traps().setVisible(t_visible);
+}
+
 }

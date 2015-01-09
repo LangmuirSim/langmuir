@@ -5,7 +5,7 @@
 #include "world.h"
 #include "rand.h"
 
-namespace Langmuir
+namespace LangmuirCore
 {
 
 SourceAgent::SourceAgent(World &world, Grid& grid, QObject *parent)

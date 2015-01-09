@@ -14,6 +14,8 @@
 #include <QStyle>
 #include <QIcon>
 
+namespace LangmuirView {
+
 MainWindow::MainWindow(const QString &inputFile, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -379,4 +381,6 @@ void MainWindow::setIcon(QAction *action, QString themeIcon, QStyle::StandardPix
     else {
         action->setIcon(this->style()->standardIcon(standardPixmap));
     }
+}
+
 }

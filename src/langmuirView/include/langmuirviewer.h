@@ -34,10 +34,12 @@
 
 #endif
 
-namespace Langmuir {
+namespace LangmuirCore {
     class Simulation;
     class World;
 }
+
+namespace LangmuirView {
 
 /**
  * @brief Widget to view Langmuir Simulation in real time.
@@ -80,7 +82,7 @@ public:
     /**
      * @brief get the random number generator
      */
-    Langmuir::Random& random();
+    LangmuirCore::Random& random();
 
     /**
      * @brief its ok when not already calculating
@@ -497,17 +499,23 @@ protected:
     /**
      * @brief draw traps on image
      * @param image image to draw draws on
+     * @param bcolor background color
+     * @param fcolor foreground color
+     * @param fcolor foreground color
      */
     void drawTraps(QImage &image, QColor bcolor, QColor fcolor);
 
     /**
      * @brief draw checker pattern on stage
      * @param image image to draw on
+     * @param color1 first color
+     * @param color2 second color
      */
     void drawChecker(QImage &image, QColor color1, QColor color2);
 
     /**
      * @brief load texture to gpu memory
+     * @param imageID OpenGL texture ID
      * @param image texture
      */
     void loadTexture(GLuint imageID, QImage &image);
@@ -567,13 +575,13 @@ protected:
     Light *m_light0;
 
     //! the simulation manipulator
-    Langmuir::Simulation *m_simulation;
+    LangmuirCore::Simulation *m_simulation;
 
     //! a random number generator instance
-    Langmuir::Random m_random;
+    LangmuirCore::Random m_random;
 
     //! the simulation data
-    Langmuir::World *m_world;
+    LangmuirCore::World *m_world;
 
     //! half of grid.x
     float m_gridHalfX;
@@ -608,5 +616,7 @@ protected:
     //! size of checkers on stage
     float m_checkerSize;
 };
+
+}
 
 #endif // LANGMUIRVIEWER_H

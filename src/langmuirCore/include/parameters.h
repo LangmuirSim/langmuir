@@ -7,7 +7,7 @@
 #include <cmath>
 #include <QDir>
 
-namespace Langmuir
+namespace LangmuirCore
 {
 
 //! A struct to temporarily store site IDs
@@ -34,6 +34,7 @@ struct ConfigurationInfo
 
 /**
   * @brief A struct to store all simulation options
+  *
   * To add new variables, follow these steps:
   *   - declare the new variable in the SimulationParameters struct (parameters.h)
   *   - assign the default value of the new variable in the SimulationParameters constructor (parameters.h)
@@ -44,7 +45,7 @@ struct ConfigurationInfo
   */
 struct SimulationParameters
 {
-    //! tells Langmuir how to set up the Sources and Drains: (\b\c "transistor", \b\c "solarcell")
+    //! tells Langmuir how to set up the sources and drains
     QString simulationType;
 
     //! seed the random number generator, if negative, uses the current time (making seperate runs random)

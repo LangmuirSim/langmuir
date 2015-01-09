@@ -3,7 +3,7 @@
 
 #include "fluxagent.h"
 
-namespace Langmuir
+namespace LangmuirCore
 {
 
 /**

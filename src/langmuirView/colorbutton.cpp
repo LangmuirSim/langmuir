@@ -1,5 +1,7 @@
 #include "colorbutton.h"
 
+namespace LangmuirView {
+
 QColorDialog * ColorButton::m_colordialog = NULL;
 
 ColorButton::ColorButton(QWidget *parent) :
@@ -46,4 +48,6 @@ void ColorButton::getColor()
         setButtonColor(color);
         emit selectedColor(color);
     }
+}
+
 }

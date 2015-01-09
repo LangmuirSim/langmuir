@@ -2,6 +2,8 @@
 #include "light.h"
 #include "color.h"
 
+namespace LangmuirView {
+
 Light::Light(GLenum lightID, LangmuirViewer &viewer, QObject *parent) :
     SceneObject(viewer, parent), m_lightID(lightID), m_enabled(false)
 {
@@ -193,4 +195,6 @@ void Light::makeConnections()
     connect(this, SIGNAL(sColorChanged(QColor)), &m_viewer, SLOT(updateGL()));
     connect(this, SIGNAL(lightIDChanged(GLuint)), &m_viewer, SLOT(updateGL()));
     connect(this, SIGNAL(enabledChanged(bool)), &m_viewer, SLOT(updateGL()));
+}
+
 }

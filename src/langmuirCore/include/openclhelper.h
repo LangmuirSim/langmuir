@@ -9,14 +9,14 @@
 #include <QObject>
 #include <QVector>
 
-namespace Langmuir
+namespace LangmuirCore
 {
 
 class World;
 class ChargeAgent;
 
 /**
- * @brief A Class to run OpenCL calculations
+ * @brief A class to run OpenCL calculations
  */
 class OpenClHelper : public QObject
 {

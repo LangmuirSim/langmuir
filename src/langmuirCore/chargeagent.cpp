@@ -8,7 +8,7 @@
 #include "world.h"
 #include "rand.h"
 
-namespace Langmuir
+namespace LangmuirCore
 {
 ChargeAgent::ChargeAgent(Agent::Type type, World &world, Grid &grid, int site,QObject *parent)
     : Agent(type, world, site, parent), m_grid(grid)

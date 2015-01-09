@@ -5,6 +5,8 @@
 
 #include <QOpenGLBuffer>
 
+namespace LangmuirView {
+
 /**
  * @brief A class to represent a textured box
  */
@@ -115,6 +117,9 @@ public slots:
      * @param xvalue length
      * @param yvalue width
      * @param zvalue height
+     * @param tesselate_x number of divisions
+     * @param tesselate_y number of divisions
+     * @param tesselate_z number of divisions
      */
     void setSize(double xvalue, double yvalue, double zvalue, unsigned int tesselate_x = 10,
                  unsigned int tesselate_y = 10, unsigned int tesselate_z = 10);
@@ -207,5 +212,7 @@ protected:
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(Box::Faces)
+
+}
 
 #endif // BOX_H

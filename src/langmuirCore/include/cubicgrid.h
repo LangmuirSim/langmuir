@@ -9,7 +9,7 @@
 #include <QObject>
 #include <QDebug>
 
-namespace Langmuir
+namespace LangmuirCore
 {
 
 class World;

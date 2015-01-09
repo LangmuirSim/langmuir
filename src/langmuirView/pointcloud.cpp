@@ -5,6 +5,8 @@
 
 #include <QMetaEnum>
 
+namespace LangmuirView {
+
 PointCloud::PointCloud(LangmuirViewer &viewer, QObject *parent) :
     SceneObject(viewer, parent), m_verticesVBO(NULL)
 {
@@ -424,4 +426,6 @@ void PointCloud::makeConnections()
     connect(this, SIGNAL(pointSizeChanged(float)), &m_viewer, SLOT(updateGL()));
     connect(this, SIGNAL(colorChanged(QColor)), &m_viewer, SLOT(updateGL()));
     connect(this, SIGNAL(modeChanged(PointCloud::Mode)), &m_viewer, SLOT(updateGL()));
+}
+
 }

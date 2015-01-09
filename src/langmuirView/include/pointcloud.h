@@ -9,6 +9,8 @@
 #include <QMatrix4x4>
 #include <QVector>
 
+namespace LangmuirView {
+
 /**
  * @brief A class to represent a point cloud
  */
@@ -237,6 +239,8 @@ protected:
     bool m_shader3OK;
 };
 
-Q_DECLARE_METATYPE(PointCloud::Mode);
+}
+
+Q_DECLARE_METATYPE(LangmuirView::PointCloud::Mode);
 
 #endif // POINTCLOUD_H

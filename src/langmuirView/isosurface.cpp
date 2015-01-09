@@ -3,6 +3,8 @@
 
 #include <QDebug>
 
+namespace LangmuirView {
+
 namespace MarchingCubes
 {
     Triangle::Triangle(QObject *parent) :
@@ -391,4 +393,6 @@ namespace MarchingCubes
 
 //        emit progress(100);
     }
+}
+
 }

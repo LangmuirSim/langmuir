@@ -6,7 +6,7 @@
 
 #include "parameters.h"
 
-namespace Langmuir
+namespace LangmuirCore
 {
 
 class World;

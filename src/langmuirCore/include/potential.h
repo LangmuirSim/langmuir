@@ -19,7 +19,7 @@
 
 #endif
 
-namespace Langmuir
+namespace LangmuirCore
 {
 
 class World;
@@ -79,37 +79,37 @@ public:
 
     /**
      * @brief calculates Coulomb potential from electrons at specific grid site
-     * @param site the site of interest
+     * @param site_i the site of interest
      */
     double coulombE(int site_i);
 
     /**
      * @brief calculates Coulomb image-potential from electrons at specific grid site
-     * @param site the site of interest
+     * @param site_i the site of interest
      */
     double coulombImageE(int site_i);
 
     /**
      * @brief calculates Coulomb potential from electrons at specific grid site, assuming gaussians
-     * @param site the site of interest
+     * @param site_i the site of interest
      */
     double gaussE(int site_i);
 
     /**
      * @brief calculates Coulomb image-potential from electrons at specific grid site, assuming gaussians
-     * @param site the site of interest
+     * @param site_i the site of interest
      */
     double gaussImageE(int site_i);
 
     /**
      * @brief calculates Coulomb potential from holes at specific grid site
-     * @param site the site of interest
+     * @param site_i the site of interest
      */
     double coulombH(int site_i);
 
     /**
      * @brief calculates Coulomb image-potential from holes at specific grid site
-     * @param site the site of interest
+     * @param site_i the site of interest
      */
     double coulombImageH(int site_i);
 
@@ -127,25 +127,25 @@ public:
 
     /**
      * @brief calculates Coulomb potential from charged defects at specific grid site
-     * @param site the site of interest
+     * @param site_i the site of interest
      */
     double coulombD(int site_i);
 
     /**
      * @brief calculates Coulomb image-potential from charged defects at specific grid site
-     * @param site the site of interest
+     * @param site_i the site of interest
      */
     double coulombImageD(int site_i);
 
     /**
      * @brief calculates Coulomb potential from charged defects at specific grid site, assuming gaussians
-     * @param site the site of interest
+     * @param site_i the site of interest
      */
     double gaussD(int site_i);
 
     /**
      * @brief calculates Coulomb image-potential from charged defects at specific grid site, assuming gaussians
-     * @param site the site of interest
+     * @param site_i the site of interest
      */
     double gaussImageD(int site_i);
 

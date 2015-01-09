@@ -4,7 +4,7 @@
 #include "parameters.h"
 #include "drainagent.h"
 
-namespace Langmuir
+namespace LangmuirCore
 {
 Grid::Grid(World &world, QObject *parent)
     : QObject(parent), m_world(world)

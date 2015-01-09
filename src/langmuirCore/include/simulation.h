@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-namespace Langmuir
+namespace LangmuirCore
 {
 
 class World;

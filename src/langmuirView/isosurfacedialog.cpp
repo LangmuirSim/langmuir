@@ -3,6 +3,8 @@
 #include "langmuirviewer.h"
 #include "mesh.h"
 
+namespace LangmuirView {
+
 IsoSurfaceDialog::IsoSurfaceDialog(LangmuirViewer &viewer, QWidget *parent) :
     QDialog(parent), m_viewer(viewer),
     ui(new Ui::IsoSurfaceDialog)
@@ -106,4 +108,6 @@ void IsoSurfaceDialog::on_spinBoxAlpha_valueChanged(int value)
 void IsoSurfaceDialog::extractAlpha(QColor color)
 {
     emit sendAlpha(color.alpha());
+}
+
 }

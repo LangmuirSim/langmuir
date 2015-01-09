@@ -4,7 +4,7 @@
 #include "agent.h"
 #include "cubicgrid.h"
 
-namespace Langmuir
+namespace LangmuirCore
 {
 
 struct SimulationParameters;
@@ -44,13 +44,13 @@ public:
 
     /**
      * @brief set the FluxAgent's rate
-     * @param potential the value of the rate
+     * @param rate the value of the rate
      */
     void setRate(double rate);
 
     /**
      * @brief set the FluxAgent's rate
-     * @param potential the value of the rate
+     * @param rate the value of the rate
      * @param dflt the default value to set the rate to
      *
      * If rate is negative, uses the default rate instead
@@ -64,7 +64,7 @@ public:
 
     /**
      * @brief set the FluxAgent's attempt counter
-     * @param potential the value of the attempt counter
+     * @param value the value of the attempt counter
      * @warning also calls storeLast()
      */
     void setAttempts(unsigned long int value);
@@ -76,7 +76,7 @@ public:
 
     /**
      * @brief set the FluxAgent's success counter
-     * @param potential the value of the counter
+     * @param value the value of the counter
      * @warning also calls storeLast()
      */
     void setSuccesses(unsigned long int value);

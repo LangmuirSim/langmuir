@@ -3,6 +3,8 @@
 
 #include "axis.h"
 
+namespace LangmuirView {
+
 /**
  * @brief A class to represent an xyz axis that doesnt change size/position
  */
@@ -116,5 +118,7 @@ private:
     //! size of altered viewport
     int m_size;
 };
+
+}
 
 #endif // CORNERAXIS_H

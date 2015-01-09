@@ -6,6 +6,8 @@
 #include <QDebug>
 #include <QImage>
 
+namespace LangmuirView {
+
 Box::Box(LangmuirViewer &viewer, QObject *parent) :
     SceneObject(viewer, parent)
 {
@@ -672,4 +674,6 @@ void Box::setTexture(GLuint imageID)
 {
     m_imageID = imageID;
     emit textureChanged(m_imageID);
+}
+
 }

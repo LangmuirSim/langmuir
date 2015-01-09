@@ -9,6 +9,8 @@
 #include <QMatrix4x4>
 #include <QVector>
 
+namespace LangmuirView {
+
 /**
  * @brief A class to represent a mesh
  */
@@ -207,6 +209,8 @@ protected:
     bool m_shader2OK;
 };
 
-Q_DECLARE_METATYPE(Mesh::Mode);
+}
+
+Q_DECLARE_METATYPE(LangmuirView::Mesh::Mode);
 
 #endif // MESH_H

@@ -3,6 +3,8 @@
 
 #include "sceneobject.h"
 
+namespace LangmuirView {
+
 /**
  * @brief A class to represent an xyz axis
  */
@@ -135,5 +137,7 @@ protected:
     //! color of z-axis
     QColor m_zcolor;
 };
+
+}
 
 #endif // AXIS_H

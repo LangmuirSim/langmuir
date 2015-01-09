@@ -12,6 +12,8 @@ namespace Ui {
 class MainWindow;
 }
 
+namespace LangmuirView {
+
 class LangmuirViewer;
 class PointDialog;
 class IsoSurfaceDialog;
@@ -89,5 +91,7 @@ private:
     //! setup
     void init();
 };
+
+}
 
 #endif // MAINWINDOW_H

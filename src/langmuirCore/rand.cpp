@@ -2,7 +2,7 @@
 #include <fstream>
 #include <sstream>
 
-namespace Langmuir
+namespace LangmuirCore
 {
 
 Random::Random(quint64 seed, QObject *parent) : QObject(parent)

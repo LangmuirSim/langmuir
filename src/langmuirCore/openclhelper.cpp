@@ -6,7 +6,7 @@
 #include "potential.h"
 #include "world.h"
 
-namespace Langmuir
+namespace LangmuirCore
 {
 
 OpenClHelper::OpenClHelper(World &world, QObject *parent):

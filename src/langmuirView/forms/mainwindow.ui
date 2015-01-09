@@ -19,7 +19,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
-     <widget class="LangmuirViewer" name="qglwidget" native="true">
+     <widget class="LangmuirView::LangmuirViewer" name="qglwidget" native="true">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
         <horstretch>0</horstretch>
@@ -49,7 +49,7 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="ColorButton" name="colorButtonElectrons">
+       <widget class="LangmuirView::ColorButton" name="colorButtonElectrons">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -80,7 +80,7 @@
        </widget>
       </item>
       <item>
-       <widget class="ColorButton" name="colorButtonHoles">
+       <widget class="LangmuirView::ColorButton" name="colorButtonHoles">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -111,7 +111,7 @@
        </widget>
       </item>
       <item>
-       <widget class="ColorButton" name="colorButtonDefects">
+       <widget class="LangmuirView::ColorButton" name="colorButtonDefects">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -142,7 +142,7 @@
        </widget>
       </item>
       <item>
-       <widget class="ColorButton" name="colorButtonBase">
+       <widget class="LangmuirView::ColorButton" name="colorButtonBase">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -173,7 +173,7 @@
        </widget>
       </item>
       <item>
-       <widget class="ColorButton" name="colorButtonLeft">
+       <widget class="LangmuirView::ColorButton" name="colorButtonLeft">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -204,7 +204,7 @@
        </widget>
       </item>
       <item>
-       <widget class="ColorButton" name="colorButtonRight">
+       <widget class="LangmuirView::ColorButton" name="colorButtonRight">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -229,7 +229,7 @@
        </widget>
       </item>
       <item>
-       <widget class="ColorButton" name="colorButtonTraps">
+       <widget class="LangmuirView::ColorButton" name="colorButtonTraps">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -260,7 +260,7 @@
        </widget>
       </item>
       <item>
-       <widget class="ColorButton" name="colorButtonGrid">
+       <widget class="LangmuirView::ColorButton" name="colorButtonGrid">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -291,7 +291,7 @@
        </widget>
       </item>
       <item>
-       <widget class="ColorButton" name="colorButtonStage">
+       <widget class="LangmuirView::ColorButton" name="colorButtonStage">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -319,7 +319,7 @@
        </widget>
       </item>
       <item>
-       <widget class="ColorButton" name="colorButtonStageTexture">
+       <widget class="LangmuirView::ColorButton" name="colorButtonStageTexture">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -344,7 +344,7 @@
        </widget>
       </item>
       <item>
-       <widget class="ColorButton" name="colorButtonBackground">
+       <widget class="LangmuirView::ColorButton" name="colorButtonBackground">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -1060,39 +1060,15 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ColorButton</class>
+   <class>LangmuirView::ColorButton</class>
    <extends>QPushButton</extends>
    <header location="global">colorbutton.h</header>
   </customwidget>
   <customwidget>
-   <class>LangmuirViewer</class>
+   <class>LangmuirView::LangmuirViewer</class>
    <extends>QWidget</extends>
-   <header>langmuirviewer.h</header>
+   <header location="global">langmuirviewer.h</header>
    <container>1</container>
-   <slots>
-    <signal>isAnimated(bool)</signal>
-    <signal>isUsingOpenCL(bool)</signal>
-    <signal>isUsingCoulomb(bool)</signal>
-    <signal>currentStepChanged(int)</signal>
-    <slot>startAnimation()</slot>
-    <slot>stopAnimation()</slot>
-    <slot>toggleAxisIsDrawn()</slot>
-    <slot>toggleGridIsDrawn()</slot>
-    <slot>toggleFPSIsDisplayed()</slot>
-    <slot>updateGL()</slot>
-    <slot>toggleCornerAxisIsVisible()</slot>
-    <slot>resetCamera()</slot>
-    <slot>unload()</slot>
-    <slot>pause()</slot>
-    <slot>play()</slot>
-    <slot>toggleOpenCL(bool)</slot>
-    <slot>toggleGridIsVisible()</slot>
-    <slot>reset()</slot>
-    <slot>showParameters()</slot>
-    <slot>setIterationsPrint(int)</slot>
-    <slot>toggleTrapsShown(bool)</slot>
-    <slot>toggleCoulomb(bool)</slot>
-   </slots>
   </customwidget>
  </customwidgets>
  <resources>

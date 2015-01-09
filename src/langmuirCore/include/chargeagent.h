@@ -3,7 +3,7 @@
 
 #include "agent.h"
 
-namespace Langmuir
+namespace LangmuirCore
 {
 
 class Grid;

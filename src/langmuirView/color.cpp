@@ -1,5 +1,7 @@
 #include "color.h"
 
+namespace LangmuirView {
+
 namespace color {
 
     float* qColorToArray4(const QColor &color, float *array)
@@ -17,4 +19,6 @@ namespace color {
         qColorToArray4(color, array);
         return array;
     }
+}
+
 }
