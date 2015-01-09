@@ -7,7 +7,7 @@
 #include <QDebug>
 #include <QMap>
 
-namespace Langmuir {
+namespace LangmuirCore {
 
 /**
  * @brief A class to parse command line arguments.

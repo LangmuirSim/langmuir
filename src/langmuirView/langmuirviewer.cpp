@@ -177,7 +177,7 @@ QMatrix4x4& LangmuirViewer::getOpenGLProjectionMatrix()
     return qmatrix;
 }
 
-Langmuir::Random& LangmuirViewer::random()
+LangmuirCore::Random& LangmuirViewer::random()
 {
     return m_random;
 }
@@ -1327,8 +1327,8 @@ void LangmuirViewer::load(QString fileName)
         return;
     }
 
-    Langmuir::World *world = new Langmuir::World(fileName, -1, -1, this);
-    Langmuir::Simulation *simulation = new Langmuir::Simulation(*world, world);
+    LangmuirCore::World *world = new LangmuirCore::World(fileName, -1, -1, this);
+    LangmuirCore::Simulation *simulation = new LangmuirCore::Simulation(*world, world);
 
     world->parameters().outputIsOn = false;
     world->parameters().iterationsPrint = 1;
@@ -1420,7 +1420,7 @@ void LangmuirViewer::reset() {
     }
 
     // copy the simulation parameters
-    Langmuir::SimulationParameters parameters = m_world->parameters();
+    LangmuirCore::SimulationParameters parameters = m_world->parameters();
 
     // decide on random seed
     QMessageBox::StandardButton answer = QMessageBox::question(this, "Random seed",
@@ -1454,8 +1454,8 @@ void LangmuirViewer::reset() {
     parameters.iterationsPrint = 1;
     parameters.currentStep     = 0;
 
-    Langmuir::World *world = new Langmuir::World(parameters, -1, -1, this);
-    Langmuir::Simulation *simulation = new Langmuir::Simulation(*world, world);
+    LangmuirCore::World *world = new LangmuirCore::World(parameters, -1, -1, this);
+    LangmuirCore::Simulation *simulation = new LangmuirCore::Simulation(*world, world);
 
     unload();
 
@@ -1517,7 +1517,7 @@ void LangmuirViewer::showParameters()
 
     // get variables
     const QStringList& keys = m_world->keyValueParser().getOrderedNames();
-    const QMap<QString,Langmuir::Variable*>& variableMap = m_world->keyValueParser().getVariableMap();
+    const QMap<QString,LangmuirCore::Variable*>& variableMap = m_world->keyValueParser().getVariableMap();
 
     // create HTML table
     QString title = "<td><b><font face=\"courier\" color=\"%1\">%2<font></b></td>";
@@ -1532,7 +1532,7 @@ void LangmuirViewer::showParameters()
 
     foreach(QString key, keys)
     {
-        Langmuir::Variable *variable = variableMap[key];
+        LangmuirCore::Variable *variable = variableMap[key];
         if (!variable->isConstant()) {
             parameters += "<tr>";
             parameters += label.arg(variable->key());

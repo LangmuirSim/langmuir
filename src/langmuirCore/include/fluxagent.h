@@ -4,7 +4,7 @@
 #include "agent.h"
 #include "cubicgrid.h"
 
-namespace Langmuir
+namespace LangmuirCore
 {
 
 struct SimulationParameters;

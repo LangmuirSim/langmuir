@@ -15,7 +15,7 @@
 #include <QtConcurrent/QtConcurrent>
 #endif
 
-namespace Langmuir
+namespace LangmuirCore
 {
 
 Simulation::Simulation(World &world, QObject *parent):  QObject(parent), m_world(world)

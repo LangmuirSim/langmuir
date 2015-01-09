@@ -6,7 +6,7 @@
 #include "rand.h"
 #include <cmath>
 
-namespace Langmuir
+namespace LangmuirCore
 {
 
 Potential::Potential(World &world, QObject *parent)

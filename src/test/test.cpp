@@ -2,7 +2,7 @@
 #include <QDebug>
 
 #include "nodefileparser.h"
-using namespace Langmuir;
+using namespace LangmuirCore;
 
 int main (int argc, char *argv[])
 {

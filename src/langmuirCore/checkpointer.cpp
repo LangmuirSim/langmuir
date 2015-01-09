@@ -11,7 +11,7 @@
 #include <limits>
 #include <iomanip>
 
-namespace Langmuir
+namespace LangmuirCore
 {
 
 CheckPointer::CheckPointer(World &world, QObject *parent) :

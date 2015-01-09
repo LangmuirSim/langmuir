@@ -7,7 +7,7 @@ int main(int argc, char **argv)
     QApplication app(argc, argv);
 
     QStringList args = app.arguments();
-    Langmuir::CommandLineParser clparser;
+    LangmuirCore::CommandLineParser clparser;
     clparser.setDescription("View charge transport simulation.");
     clparser.addPositional("input", "input file name");
     clparser.parse(args);

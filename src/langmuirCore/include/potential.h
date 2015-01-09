@@ -19,7 +19,7 @@
 
 #endif
 
-namespace Langmuir
+namespace LangmuirCore
 {
 
 class World;

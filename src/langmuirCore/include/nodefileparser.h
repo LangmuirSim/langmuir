@@ -9,7 +9,7 @@
 #include <QList>
 #include <QMap>
 
-namespace Langmuir {
+namespace LangmuirCore {
 
 /**
  * @brief A class to parse the PBS_NODEFILE and PBS_GPUFILE

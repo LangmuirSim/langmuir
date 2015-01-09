@@ -20,7 +20,7 @@ QTextStream & newline(QTextStream& s);
  */
 QTextStream & space(QTextStream& s);
 
-namespace Langmuir
+namespace LangmuirCore
 {
 
 /**

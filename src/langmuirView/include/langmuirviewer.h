@@ -34,7 +34,7 @@
 
 #endif
 
-namespace Langmuir {
+namespace LangmuirCore {
     class Simulation;
     class World;
 }
@@ -82,7 +82,7 @@ public:
     /**
      * @brief get the random number generator
      */
-    Langmuir::Random& random();
+    LangmuirCore::Random& random();
 
     /**
      * @brief its ok when not already calculating
@@ -575,13 +575,13 @@ protected:
     Light *m_light0;
 
     //! the simulation manipulator
-    Langmuir::Simulation *m_simulation;
+    LangmuirCore::Simulation *m_simulation;
 
     //! a random number generator instance
-    Langmuir::Random m_random;
+    LangmuirCore::Random m_random;
 
     //! the simulation data
-    Langmuir::World *m_world;
+    LangmuirCore::World *m_world;
 
     //! half of grid.x
     float m_gridHalfX;

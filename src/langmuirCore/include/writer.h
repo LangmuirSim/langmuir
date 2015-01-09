@@ -8,7 +8,7 @@
 
 #include "output.h"
 
-namespace Langmuir
+namespace LangmuirCore
 {
 
 class ChargeAgent;

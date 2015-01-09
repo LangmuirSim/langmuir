@@ -9,7 +9,7 @@
 
 #include <QApplication>
 
-using namespace Langmuir;
+using namespace LangmuirCore;
 
 int main (int argc, char *argv[])
 {

@@ -6,7 +6,7 @@
 #include "fluxagent.h"
 #include "openclhelper.h"
 
-namespace Langmuir
+namespace LangmuirCore
 {
 
 XYZWriter::XYZWriter(World &world, const QString &name, QObject *parent)

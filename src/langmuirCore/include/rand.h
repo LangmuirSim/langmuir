@@ -22,7 +22,7 @@
 
 #include <ctime>
 
-namespace Langmuir
+namespace LangmuirCore
 {
 
 /**

@@ -9,7 +9,7 @@
 #include <QObject>
 #include <QVector>
 
-namespace Langmuir
+namespace LangmuirCore
 {
 
 class World;

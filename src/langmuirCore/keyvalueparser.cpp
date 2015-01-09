@@ -6,7 +6,7 @@
 #include "output.h"
 #include <ostream>
 
-namespace Langmuir
+namespace LangmuirCore
 {
 
 KeyValueParser::KeyValueParser(World &world, QObject *parent) :

@@ -15,7 +15,7 @@
 #include "fluxagent.h"
 #include "nodefileparser.h"
 
-namespace Langmuir {
+namespace LangmuirCore {
 
 World::World(const QString &fileName, int cores, int gpuID, QObject *parent)
     : QObject(parent),

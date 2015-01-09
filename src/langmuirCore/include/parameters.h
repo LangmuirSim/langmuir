@@ -7,7 +7,7 @@
 #include <cmath>
 #include <QDir>
 
-namespace Langmuir
+namespace LangmuirCore
 {
 
 //! A struct to temporarily store site IDs

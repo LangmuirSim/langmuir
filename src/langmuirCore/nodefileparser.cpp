@@ -5,7 +5,7 @@
 
 #include <boost/asio.hpp>
 
-namespace Langmuir {
+namespace LangmuirCore {
 
 NodeFileParser::NodeFileParser(const QString &nodefile, const QString &gpufile, QObject *parent) :
     QObject(parent)

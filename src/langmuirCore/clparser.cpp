@@ -1,6 +1,6 @@
 #include "clparser.h"
 
-namespace Langmuir {
+namespace LangmuirCore {
 
 CommandLineParser::CommandLineParser(QObject *parent) :
     QObject(parent), m_numPositional(0), m_numArguments(0)

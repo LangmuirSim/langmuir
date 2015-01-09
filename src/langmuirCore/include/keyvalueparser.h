@@ -7,7 +7,7 @@
 #include "parameters.h"
 #include "world.h"
 
-namespace Langmuir
+namespace LangmuirCore
 {
 
 /**

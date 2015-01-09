@@ -4,7 +4,7 @@
 #include <QFileInfo>
 #include <QDir>
 
-namespace Langmuir
+namespace LangmuirCore
 {
 
 OutputInfo::OutputInfo(const QString &name, const SimulationParameters *par)
