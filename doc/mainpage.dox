@@ -1,0 +1,28 @@
+/**
+@mainpage C++ Documentation
+
+# Welcome to Langmuir's documentation!
+
+Langmuir is a Monte Carlo charge transport simulation framework designed to
+    simulate organic semiconductor devices.
+
+### Code
+
+The code is divided into various parts.
+
+Part             | Description
+:--------------- | :-----------------------------------------
+LangmuirCore     | core code
+LangmuirView     | visualization code
+langmuir.cpp     | main langmuir executable
+langmuirview.cpp | visualization executable
+
+### Links
+
+For more information:
+
+ - [Project Page](https://github.com/LangmuirSim)
+ - [Code](https://github.com/LangmuirSim/langmuir)
+ - [Website](http://langmuirsim.github.io/)
+
+*/
