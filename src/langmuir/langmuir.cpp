@@ -1,3 +1,9 @@
+/**
+  * @file langmuir.cpp
+  * @brief # The main langmuir executable.
+  *
+  * Here we find the main Langmuir function, meant to run simulations in a terminal or on a cluster.
+  */
 #include "simulation.h"
 #include "keyvalueparser.h"
 #include "writer.h"
@@ -11,6 +17,11 @@
 
 using namespace LangmuirCore;
 
+/**
+ * @brief main function.
+ * @param argc number of command line arguments
+ * @param argv vector of command line arguments
+ */
 int main (int argc, char *argv[])
 {
     // Get the current time
