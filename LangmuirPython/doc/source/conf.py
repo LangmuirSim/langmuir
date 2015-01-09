@@ -276,6 +276,6 @@ autoclass_content = 'both'
 show_authors = True
 todo_include_todos = True
 
-sphinx_to_github = True
+sphinx_to_github = False
 sphinx_to_github_verbose = True
 sphinx_to_github_encoding = "utf-8"
