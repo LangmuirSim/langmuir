@@ -59,7 +59,7 @@ public:
 
     /**
      * @brief Get a reference to a variable by name
-     * @param name the name of the variable
+     * @param key the name of the variable
      */
     Variable& getVariable(const QString& key);
 

@@ -12,7 +12,7 @@
 namespace Langmuir {
 
 /**
- * A class to parse the PBS_NODEFILE and PBS_GPUFILE
+ * @brief A class to parse the PBS_NODEFILE and PBS_GPUFILE
  */
 class NodeFileParser : public QObject
 {
@@ -22,6 +22,7 @@ public:
      * @brief create NodeFileParser
      * @param nodefile path to NODEFILE
      * @param gpufile path to GPUFILE
+     * @param parent QObject this belongs to
      */
     explicit NodeFileParser(const QString& nodefile="", const QString& gpufile="", QObject *parent = 0);
 
@@ -55,6 +56,8 @@ public:
     /**
      * @brief add cpu to records
      * @param name name of cpu
+     * @param cores number of cores
+     * @param gpus list of GPU ids
      */
     void createNode(const QString &name, int cores=0, QList<int> gpus = QList<int>());
 

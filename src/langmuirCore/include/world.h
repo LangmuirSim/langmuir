@@ -58,6 +58,8 @@ public:
     /**
      * @brief create a world to simulate in
      * @param fileName the input file name
+     * @param cores number of CPU cores
+     * @param gpuID OpenCL GPU id
      * @param parent QObject this belongs to
      *
      * Calls the initialize() function.
@@ -664,6 +666,10 @@ private:
     /**
      * @brief initialize all objects
      * @param fileName input file name
+     * @param pparameters pointer to a parameters object
+     * @param pconfigInfo pointer to a configuration info object
+     * @param cores number of CPU cores
+     * @param gpuID OpenCL GPU id
      *
      * A very long, though not all that complicated function that creates
      * all the simulation objects.  Best to read through it in the source

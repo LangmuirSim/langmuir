@@ -6,7 +6,7 @@
 /**
  * @brief gunzip a file using QProcess
  * @param fileName name of file to gunzip
- * @param msecs timeout time
+ * @param wasZipped set to true if file was zipped
  * @return altered file name
  */
 QString gunzip(QString fileName, bool *wasZipped = NULL);
@@ -14,7 +14,6 @@ QString gunzip(QString fileName, bool *wasZipped = NULL);
 /**
  * @brief gzip a file using QProcess
  * @param fileName name of file to gzip
- * @param msecs timeout time
  * @return altered file name
  */
 QString gzip (QString fileName);

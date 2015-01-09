@@ -499,17 +499,23 @@ protected:
     /**
      * @brief draw traps on image
      * @param image image to draw draws on
+     * @param bcolor background color
+     * @param fcolor foreground color
+     * @param fcolor foreground color
      */
     void drawTraps(QImage &image, QColor bcolor, QColor fcolor);
 
     /**
      * @brief draw checker pattern on stage
      * @param image image to draw on
+     * @param color1 first color
+     * @param color2 second color
      */
     void drawChecker(QImage &image, QColor color1, QColor color2);
 
     /**
      * @brief load texture to gpu memory
+     * @param imageID OpenGL texture ID
      * @param image texture
      */
     void loadTexture(GLuint imageID, QImage &image);

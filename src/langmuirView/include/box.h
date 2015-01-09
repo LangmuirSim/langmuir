@@ -117,6 +117,9 @@ public slots:
      * @param xvalue length
      * @param yvalue width
      * @param zvalue height
+     * @param tesselate_x number of divisions
+     * @param tesselate_y number of divisions
+     * @param tesselate_z number of divisions
      */
     void setSize(double xvalue, double yvalue, double zvalue, unsigned int tesselate_x = 10,
                  unsigned int tesselate_y = 10, unsigned int tesselate_z = 10);
