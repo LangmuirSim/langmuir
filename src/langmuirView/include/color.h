@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QColor>
 
-class LangmuirViewer;
+namespace LangmuirView {
 
 namespace color {
 
@@ -17,6 +17,8 @@ namespace color {
      * @brief Copy color data to array of size 4 (static)
      */
     float* qColorToArray4(const QColor &color);
+}
+
 }
 
 #endif // COLOR_H

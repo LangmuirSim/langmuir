@@ -5,6 +5,8 @@
 
 #include <QOpenGLBuffer>
 
+namespace LangmuirView {
+
 /**
  * @brief A class to represent a textured box
  */
@@ -207,5 +209,7 @@ protected:
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(Box::Faces)
+
+}
 
 #endif // BOX_H

@@ -5,6 +5,8 @@
 
 #include <QMetaEnum>
 
+namespace LangmuirView {
+
 Mesh::Mesh(LangmuirViewer &viewer, QObject *parent) :
     SceneObject(viewer, parent), m_verticesVBO(NULL)
 {
@@ -573,4 +575,6 @@ void Mesh::makeConnections()
     connect(this, SIGNAL(colorBChanged(QColor)), &m_viewer, SLOT(updateGL()));
     connect(this, SIGNAL(meshChanged()), &m_viewer, SLOT(updateGL()));
     connect(this, SIGNAL(modeChanged(Mesh::Mode)), &m_viewer, SLOT(updateGL()));
+}
+
 }

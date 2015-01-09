@@ -21,6 +21,8 @@
 
 #endif
 
+namespace LangmuirView {
+
 namespace MarchingCubes
 {
     //a2fVertexOffset lists the positions, relative to vertex0, of each of the 8 vertices of a cube
@@ -491,5 +493,8 @@ namespace MarchingCubes
         void simplify();
     };
 }
+
+}
+
 #endif // ISOSURFACE_H
 

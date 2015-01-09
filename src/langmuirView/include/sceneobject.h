@@ -12,6 +12,8 @@
     #include <GL/glu.h>
 #endif
 
+namespace LangmuirView {
+
 class LangmuirViewer;
 
 /**
@@ -93,5 +95,7 @@ protected:
     //! visibility
     bool visible_;
 };
+
+}
 
 #endif // SCENEOBJECT_H

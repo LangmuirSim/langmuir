@@ -9,6 +9,8 @@ namespace Ui {
 class PointDialog;
 }
 
+namespace LangmuirView {
+
 class LangmuirViewer;
 
 class PointDialog : public QDialog
@@ -77,5 +79,7 @@ private:
     bool h_visible;
     bool t_visible;
 };
+
+}
 
 #endif // POINTDIALOG_H

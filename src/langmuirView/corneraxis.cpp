@@ -3,6 +3,8 @@
 
 #include <QDebug>
 
+namespace LangmuirView {
+
 CornerAxis::CornerAxis(LangmuirViewer &viewer, QObject *parent) :
     Axis(viewer, parent)
 {
@@ -138,4 +140,6 @@ void CornerAxis::makeConnections()
     connect(this, SIGNAL(locationChanged(Location)), &m_viewer, SLOT(updateGL()));
     connect(this, SIGNAL(shiftChanged(int)), &m_viewer, SLOT(updateGL()));
     connect(this, SIGNAL(sizeChanged(int)), &m_viewer, SLOT(updateGL()));
+}
+
 }

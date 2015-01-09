@@ -5,6 +5,8 @@
 
 #include <QVector4D>
 
+namespace LangmuirView {
+
 /**
  * @brief A class to represent a light source
  */
@@ -179,5 +181,7 @@ protected:
     //! true if light is on
     bool m_enabled;
 };
+
+}
 
 #endif // LIGHT_H

@@ -9,6 +9,8 @@
 #include <QMatrix4x4>
 #include <QVector>
 
+namespace LangmuirView {
+
 /**
  * @brief A class to represent simulation grid
  */
@@ -102,5 +104,7 @@ protected:
     //! shader1 ok to use
     bool m_shader1OK;
 };
+
+}
 
 #endif // GRID_H

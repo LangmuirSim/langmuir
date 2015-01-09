@@ -6,6 +6,8 @@
 #include <QColor>
 #include <QDebug>
 
+namespace LangmuirView {
+
 class ColorButton : public QPushButton
 {
     Q_OBJECT
@@ -25,5 +27,7 @@ protected:
     static QColorDialog *m_colordialog;
     QColor m_color;
 };
+
+}
 
 #endif // COLORBUTTON_H

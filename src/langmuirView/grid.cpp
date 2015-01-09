@@ -2,6 +2,8 @@
 #include "color.h"
 #include "grid.h"
 
+namespace LangmuirView {
+
 Grid::Grid(LangmuirViewer &viewer, QObject *parent) :
     SceneObject(viewer, parent), m_verticesVBO(NULL)
 {
@@ -158,4 +160,6 @@ void Grid::makeConnections()
     SceneObject::makeConnections();
     connect(this, SIGNAL(colorChanged(QColor)), &m_viewer, SLOT(updateGL()));
     connect(this, SIGNAL(gridChanged()), &m_viewer, SLOT(updateGL()));
+}
+
 }

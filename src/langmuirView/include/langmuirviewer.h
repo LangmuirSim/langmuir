@@ -39,6 +39,8 @@ namespace Langmuir {
     class World;
 }
 
+namespace LangmuirView {
+
 /**
  * @brief Widget to view Langmuir Simulation in real time.
  */
@@ -608,5 +610,7 @@ protected:
     //! size of checkers on stage
     float m_checkerSize;
 };
+
+}
 
 #endif // LANGMUIRVIEWER_H

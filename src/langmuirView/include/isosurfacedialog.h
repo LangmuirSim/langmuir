@@ -9,6 +9,8 @@ namespace Ui {
 class IsoSurfaceDialog;
 }
 
+namespace LangmuirView {
+
 class LangmuirViewer;
 
 class IsoSurfaceDialog : public QDialog
@@ -42,5 +44,7 @@ private:
     Ui::IsoSurfaceDialog *ui;
     LangmuirViewer& m_viewer;
 };
+
+}
 
 #endif // ISOSURFACEDIALOG_H

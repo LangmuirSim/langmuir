@@ -13,7 +13,7 @@ int main(int argc, char **argv)
     clparser.parse(args);
 
     QString inputFile = clparser.get<QString>("input", "");
-    MainWindow window(inputFile);
+    LangmuirView::MainWindow window(inputFile);
     window.show();
 
     return app.exec();
