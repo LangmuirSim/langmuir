@@ -53,11 +53,10 @@ void OpenClHelper::initializeOpenCL(int gpuID)
         }
 
         //choose a single device
-        if (gpuID < 0) {
+        if (gpuID < 0 || gpuID >= all_devices.size()) {
             gpuID = 0;
-        }
-        if (gpuID >= all_devices.size()) {
-            qFatal("langmuir: invalid gpu: %d (max gpus=%d)", gpuID, int(all_devices.size()));
+            qDebug("langmuir: invalid gpu: %d (max gpus=%d)", gpuID, int(all_devices.size()));
+            qDebug("langmuir: setting gpuID to 0");
         }
         std::vector<cl::Device> devices;
         devices.push_back(all_devices.at(gpuID));
