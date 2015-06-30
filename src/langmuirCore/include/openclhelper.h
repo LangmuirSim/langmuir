@@ -8,6 +8,7 @@
 
 #include <QObject>
 #include <QVector>
+#include <QVariant>
 
 namespace LangmuirCore
 {
@@ -191,9 +192,66 @@ private:
      * Then, the output for future sites starts at \b offset and runs up to \b 2 \b offset.
      */
     int m_offset;
+
+    /**
+     * @brief Convert object to QVariant.
+     */
+    template <typename T> QVariant toQVariant(T& value)
+    {
+        return QVariant(value);
+    }
+
+    /**
+     * Call getInfo on OpenCL object.
+     */
+    template <typename CLType, typename ReturnType, typename ParamType>
+        QVariant getInfo(CLType& openCLObject, ParamType paramName)
+    {
+        ReturnType rvalue;
+        try
+        {
+            openCLObject.getInfo(paramName, &rvalue);
+        }
+        catch(cl::Error& error)
+        {
+        }
+        return toQVariant<ReturnType>(rvalue);
+    }
+
+    /**
+     * @brief Call cl::Platform::getInfo and print result
+     */
+    template <typename T> void showPlatformInfo(cl::Platform &platform, cl_platform_info paramName, const char * name)
+    {
+        QVariant value = getInfo<cl::Platform, T, cl_platform_info>(platform, paramName);
+        qDebug("langmuir: %-30s=  %s", name, qPrintable(value.toString()));
+    }
+
+    /**
+     * @brief Call cl::Device::getInfo and print result
+     */
+    template <typename T> void showDeviceInfo(cl::Device &device, cl_device_info paramName, const char * name)
+    {
+        QVariant value = getInfo<cl::Device, T, cl_device_info>(device, paramName);
+        qDebug("langmuir: %-30s=  %s", name, qPrintable(value.toString()));
+    }
+
 #endif // LANGMUIR_OPEN_CL
 
 };
+
+#ifdef LANGMUIR_OPEN_CL
+
+/**
+ * Convert std::string to QVariant
+ */
+template <> inline QVariant OpenClHelper::toQVariant<std::string>(std::string &value)
+{
+    return QVariant(QString::fromStdString(value));
 }
+
+}
+
+#endif // LANGMUIR_OPEN_CL
 
 #endif // OPENCLHELPER_H
