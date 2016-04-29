@@ -250,8 +250,8 @@ template <> inline QVariant OpenClHelper::toQVariant<std::string>(std::string &v
     return QVariant(QString::fromStdString(value));
 }
 
-}
-
 #endif // LANGMUIR_OPEN_CL
+
+}
 
 #endif // OPENCLHELPER_H
